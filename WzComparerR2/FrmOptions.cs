@@ -83,7 +83,7 @@ namespace WzComparerR2
                 new ComboItem("MyMemory"){ Value = 4 },
                 new ComboItem("Yandex"){ Value = 5 },
                 new ComboItem("Naver Papago (非Mozhi)"){ Value = 6 },
-                new ComboItem("OpenAI互換"){ Value = 9 },
+                new ComboItem("OpenAI相容"){ Value = 9 },
             });
 
             cmbPreferredLayout.Items.AddRange(new[]
@@ -96,7 +96,7 @@ namespace WzComparerR2
 
             cmbDetectCurrency.Items.AddRange(new[]
             {
-                new ComboItem("自動検出"){ Value = "auto" },
+                new ComboItem("自動檢測"){ Value = "auto" },
                 new ComboItem("美金 (USD)"){ Value = "usd" },
                 new ComboItem("台幣 (NTD)"){ Value = "twd" },
                 new ComboItem("韓幣 (KRW)"){ Value = "krw" },
