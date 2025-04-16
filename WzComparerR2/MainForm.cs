@@ -3672,7 +3672,7 @@ namespace WzComparerR2
 
                         while (true)
                         {
-                            string txt = string.Format("WZファイル:\r\n\r\n  新しいバージョン: {0} (V{1})\r\n  古いバージョン: {2} (V{3})\r\n\r\n「Yes」をクリックして比較を開始します。 古いバージョンと新しいバージョンを交換するには、「No」をクリックします。",
+                            string txt = string.Format("WZ 檔案:\r\n\r\n 較新版本：{0} (V{1})\r\n 較舊版本：{2} (V{3})\r\n\r\n點選「Yes」開始比較。點選「No」交換版本。",
                                 fileNew.Header.FileName,
                                 fileNew.GetMergedVersion(),
                                 fileOld.Header.FileName,
@@ -3716,17 +3716,17 @@ namespace WzComparerR2
                     }
                     catch (ThreadAbortException)
                     {
-                        MessageBoxEx.Show(this, "比較は一時停止されました。", LocalizedString_JP.COMMON_ERROR);
+                        MessageBoxEx.Show(this, "比較已中斷。", LocalizedString_JP.COMMON_ERROR);
                     }
                     catch (Exception ex)
                     {
-                        MessageBoxEx.Show(this, "比較は一時停止されました。" + ex.ToString(), LocalizedString_JP.COMMON_ERROR);
+                        MessageBoxEx.Show(this, "比較已中斷。" + ex.ToString(), LocalizedString_JP.COMMON_ERROR);
                     }
                     finally
                     {
                         sw.Stop();
                         compareThread = null;
-                        labelXComp1.Text = "比較が完了しました。 時間が経過した：" + sw.Elapsed.ToString();
+                        labelXComp1.Text = "比較已完成。時間經過：" + sw.Elapsed.ToString();
                         labelXComp2.Text = "";
                         btnEasyCompare.Enabled = true;
                         cmbComparePng.Enabled = true;

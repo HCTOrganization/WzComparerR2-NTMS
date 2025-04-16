@@ -31,7 +31,7 @@ namespace WzComparerR2
 
             cmbWzEncoding.Items.AddRange(new[]
             {
-                new ComboItem("ｼｽﾃﾑｴﾝｺｰﾃﾞｨﾝｸﾞ"){ Value = 0 },
+                new ComboItem("系統編碼"){ Value = 0 },
                 new ComboItem("Shift-JIS (JMS)"){ Value = 932 },
                 new ComboItem("GB 2312 (CMS)"){ Value = 936 },
                 new ComboItem("EUC-KR (KMS)"){ Value = 949 },
@@ -42,18 +42,18 @@ namespace WzComparerR2
 
             cmbWzVersionVerifyMode.Items.AddRange(new[]
             {
-                new ComboItem("高速な方法"){ Value = WzLib.WzVersionVerifyMode.Fast },
-                new ComboItem("従来の方法"){ Value = WzLib.WzVersionVerifyMode.Default },
+                new ComboItem("快速"){ Value = WzLib.WzVersionVerifyMode.Fast },
+                new ComboItem("傳統"){ Value = WzLib.WzVersionVerifyMode.Default },
             });
 
             cmbDesiredLanguage.Items.AddRange(new[]
             {
-                new ComboItem("英語 (GMS/MSEA)"){ Value = "en" },
-                new ComboItem("韓国語 (KMS)"){ Value = "ko" },
-                new ComboItem("広東語 (HKMS)"){ Value = "yue" },
-                new ComboItem("簡体字中国語 (CMS)"){ Value = "zh-CN" },
-                new ComboItem("日本語 (JMS)"){ Value = "ja" },
-                new ComboItem("繁体字中国語 (TMS)"){ Value = "zh-TW" },
+                new ComboItem("繁體中文 (TMS)"){ Value = "zh-TW" },
+                new ComboItem("韓文 (KMS)"){ Value = "ko" },
+                new ComboItem("簡體中文 (CMS)"){ Value = "zh-CN" },
+                new ComboItem("日文 (JMS)"){ Value = "ja" },
+                new ComboItem("英文 (GMS/MSEA)"){ Value = "en" },
+                new ComboItem("粵文 (HKMS)"){ Value = "yue" },
             });
 
             cmbMozhiBackend.Items.AddRange(new[]
@@ -88,43 +88,43 @@ namespace WzComparerR2
 
             cmbPreferredLayout.Items.AddRange(new[]
             {
-                new ComboItem("翻訳なし"){ Value = 0 },
-                new ComboItem("最初に訳文、次に原文"){ Value = 1 },
-                new ComboItem("最初に原文、次に訳文"){ Value = 2 },
-                new ComboItem("翻訳のみ"){ Value = 3 },
+                new ComboItem("不翻譯"){ Value = 0 },
+                new ComboItem("先譯文后原文"){ Value = 1 },
+                new ComboItem("先原文后譯文"){ Value = 2 },
+                new ComboItem("僅顯示譯文"){ Value = 3 },
             });
 
             cmbDetectCurrency.Items.AddRange(new[]
             {
                 new ComboItem("自動検出"){ Value = "auto" },
-                new ComboItem("韓国ウォン (KRW)"){ Value = "krw" },
-                new ComboItem("シンガポールドル (SGD)"){ Value = "sgd" },
-                new ComboItem("台湾ドル (NTD)"){ Value = "twd" },
-                new ComboItem("中国元 (CNY)"){ Value = "cny" },
-                new ComboItem("日本円 (JPY)"){ Value = "jpy" },
-                new ComboItem("米ドル (USD)"){ Value = "usd" },
+                new ComboItem("美金 (USD)"){ Value = "usd" },
+                new ComboItem("台幣 (NTD)"){ Value = "twd" },
+                new ComboItem("韓幣 (KRW)"){ Value = "krw" },
+                new ComboItem("新幣 (SGD)"){ Value = "sgd" },
+                new ComboItem("日圓 (JPY)"){ Value = "jpy" },
+                new ComboItem("人民幣 (CNY)"){ Value = "cny" },
             });
 
             cmbDesiredCurrency.Items.AddRange(new[]
             {
-                new ComboItem("変換しない"){ Value = "none" },
-                new ComboItem("カナダドル (CAD)"){ Value = "cad" },
-                new ComboItem("オーストラリアドル (AUD)"){ Value = "aud" },
-                new ComboItem("韓国ウォン (KRW)"){ Value = "krw" },
-                new ComboItem("シンガポールドル (SGD)"){ Value = "sgd" },
-                new ComboItem("台湾ドル (NTD)"){ Value = "twd" },
-                new ComboItem("中国元 (CNY)"){ Value = "cny" },
-                new ComboItem("日本円 (JPY)"){ Value = "jpy" },
-                new ComboItem("米ドル (USD)"){ Value = "usd" },
-                new ComboItem("香港ドル (HKD)"){ Value = "hkd" },
-                new ComboItem("マカオパタカ (MOP)"){ Value = "mop" },
-                new ComboItem("ﾏﾚｰｼｱﾘﾝｷﾞｯﾄ (MYR)"){ Value = "myr" },
-                new ComboItem("ユーロ (EUR)"){ Value = "eur" },
+                new ComboItem("不變換"){ Value = "none" },
+                new ComboItem("馬來林吉特 (MYR)"){ Value = "myr" },
+                new ComboItem("美金 (USD)"){ Value = "usd" },
+                new ComboItem("台幣 (NTD)"){ Value = "twd" },
+                new ComboItem("港幣 (HKD)"){ Value = "hkd" },
+                new ComboItem("韓幣 (KRW)"){ Value = "krw" },
+                new ComboItem("加幣 (CAD)"){ Value = "cad" },
+                new ComboItem("新幣 (SGD)"){ Value = "sgd" },
+                new ComboItem("日圓 (JPY)"){ Value = "jpy" },
+                new ComboItem("人民幣 (CNY)"){ Value = "cny" },
+                new ComboItem("澳門幣 (MOP)"){ Value = "mop" },
+                new ComboItem("澳洲幣 (AUD)"){ Value = "aud" },
+                new ComboItem("歐元 (EUR)"){ Value = "eur" },
             });
 
             cmbLanguageModel.Items.AddRange(new[]
             {
-                new ComboItem("そのままにしておく"){ Value = "none" },
+                new ComboItem("保持現有"){ Value = "none" },
             });
         }
 
@@ -398,7 +398,7 @@ namespace WzComparerR2
                     }
                     catch
                     {
-                        respText = "APIが有効になっていません。";
+                        respText = "此API無效。";
                     }
                     break;
                 default:
@@ -409,20 +409,20 @@ namespace WzComparerR2
                         string respJson = new StreamReader(req.GetResponse().GetResponseStream(), Encoding.UTF8).ReadToEnd();
                         if (respJson.Contains("All Engines"))
                         {
-                            respText = "このMozhiサーバーは有効です。";
+                            respText = "此Mozhi伺服器有效。";
                         }
                         else
                         {
-                            respText = "このMozhiサーバーは無効です。";
+                            respText = "此Mozhi伺服器無效。";
                         }
                     }
                     catch (WebException ex)
                     {
-                        respText = "このMozhiサーバーは無効です。";
+                        respText = "此Mozhi伺服器無效。";
                     }
                     catch (Exception ex)
                     {
-                        respText = "不明なエラーが発生しました：" + ex;
+                        respText = "發生不明錯誤: " + ex;
                     }
                     break;
             }
@@ -436,11 +436,11 @@ namespace WzComparerR2
             try
             {
                 testJObject = JObject.Parse(txtSecretkey.Text);
-                respText = "有効なJSONのようです。";
+                respText = "JSON 有效。";
             }
             catch
             {
-                respText = "有効なJSONではないようです。";
+                respText = "JSON 無效。";
             }
             MessageBoxEx.Show(respText);
         }

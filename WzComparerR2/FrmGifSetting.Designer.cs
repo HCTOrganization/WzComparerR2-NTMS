@@ -125,7 +125,7 @@
             this.btnDiscordPreset.Size = new System.Drawing.Size(104, 23);
             this.btnDiscordPreset.Name = "btnDiscordPreset";
             this.btnDiscordPreset.TabIndex = 4;
-            this.btnDiscordPreset.Text = "Discordプリセット";
+            this.btnDiscordPreset.Text = "Discord預設";
             this.btnDiscordPreset.Click += btnDiscordPreset_Click;
             // 
             // checkBoxX1
@@ -140,7 +140,7 @@
             this.checkBoxX1.Size = new System.Drawing.Size(163, 16);
             this.checkBoxX1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX1.TabIndex = 2;
-            this.checkBoxX1.Text = "透明な背景(&T)";
+            this.checkBoxX1.Text = "透明背景(&T)";
             // 
             // labelX2
             // 
@@ -154,7 +154,7 @@
             this.labelX2.Name = "labelX2";
             this.labelX2.Size = new System.Drawing.Size(56, 16);
             this.labelX2.TabIndex = 5;
-            this.labelX2.Text = "ファイル名";
+            this.labelX2.Text = "檔案名";
             // 
             // comboBoxEx1
             // 
@@ -177,23 +177,23 @@
             // 
             // comboItem1
             // 
-            this.comboItem1.Text = "内蔵";
+            this.comboItem1.Text = "内建";
             // 
             // comboItem2
             // 
-            this.comboItem2.Text = "インデックスGIFエンコーダ";
+            this.comboItem2.Text = "序列GIF編碼器";
             // 
             // comboItem6
             // 
-            this.comboItem6.Text = "APNGエンコーダ";
+            this.comboItem6.Text = "APNG編碼器";
             // 
             // comboItem7
             // 
-            this.comboItem7.Text = "FFmpegエンコーダ";
+            this.comboItem7.Text = "FFmpeg編碼器";
             // 
             // comboItem8
             // 
-            this.comboItem8.Text = "従来のGIFエンコーダ";
+            this.comboItem8.Text = "以前的GIF編碼器";
             // 
             // labelX3
             // 
@@ -206,7 +206,7 @@
             this.labelX3.Name = "labelX3";
             this.labelX3.Size = new System.Drawing.Size(87, 16);
             this.labelX3.TabIndex = 3;
-            this.labelX3.Text = "最小限の混合ｱﾙﾌｧ";
+            this.labelX3.Text = "最小不透明度";
             // 
             // slider1
             // 
@@ -253,9 +253,9 @@
             this.rdoMosaic.Name = "rdoMosaic";
             this.rdoMosaic.Size = new System.Drawing.Size(64, 16);
             this.rdoMosaic.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.superTooltip1.SetSuperTooltip(this.rdoMosaic, new DevComponents.DotNetBar.SuperTooltipInfo("", "", "GIF にモザイク背景を追加します。", null, null, DevComponents.DotNetBar.eTooltipColor.System));
+            this.superTooltip1.SetSuperTooltip(this.rdoMosaic, new DevComponents.DotNetBar.SuperTooltipInfo("", "", "為GIF加入馬賽克背景。", null, null, DevComponents.DotNetBar.eTooltipColor.System));
             this.rdoMosaic.TabIndex = 3;
-            this.rdoMosaic.Text = "ﾓｻﾞｲｸ";
+            this.rdoMosaic.Text = "馬賽克";
             this.rdoMosaic.CheckedChanged += new System.EventHandler(this.rdoMosaic_CheckedChanged);
             // 
             // panelExMosaic
@@ -293,7 +293,7 @@
             this.labelX7.Name = "labelX7";
             this.labelX7.Size = new System.Drawing.Size(62, 16);
             this.labelX7.TabIndex = 4;
-            this.labelX7.Text = "ブロックサイズ";
+            this.labelX7.Text = "方塊尺寸";
             // 
             // labelX6
             // 
@@ -403,7 +403,7 @@
             this.rdoColor.Name = "rdoColor";
             this.rdoColor.Size = new System.Drawing.Size(57, 16);
             this.rdoColor.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.superTooltip1.SetSuperTooltip(this.rdoColor, new DevComponents.DotNetBar.SuperTooltipInfo("", "", "透明または単色の背景を持つアニメーション Gif を生成します。", null, null, DevComponents.DotNetBar.eTooltipColor.System));
+            this.superTooltip1.SetSuperTooltip(this.rdoColor, new DevComponents.DotNetBar.SuperTooltipInfo("", "", "不透明動畫的背景色。", null, null, DevComponents.DotNetBar.eTooltipColor.System));
             this.rdoColor.TabIndex = 1;
             this.rdoColor.Text = "色";
             this.rdoColor.CheckedChanged += new System.EventHandler(this.rdoColor_CheckedChanged);
@@ -425,7 +425,7 @@
             this.checkBoxX2.Size = new System.Drawing.Size(144, 16);
             this.checkBoxX2.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX2.TabIndex = 8;
-            this.checkBoxX2.Text = "各フレームをPNGとして保存";
+            this.checkBoxX2.Text = "單獨保存每幀為PNG";
             // 
             // labelX8
             // 
@@ -439,7 +439,7 @@
             this.labelX8.Name = "labelX8";
             this.labelX8.Size = new System.Drawing.Size(37, 16);
             this.labelX8.TabIndex = 8;
-            this.labelX8.Text = "ディレイ";
+            this.labelX8.Text = "延遲";
             // 
             // integerInput1
             // 
@@ -471,7 +471,7 @@
             this.labelX9.Name = "labelX9";
             this.labelX9.Size = new System.Drawing.Size(50, 16);
             this.labelX9.TabIndex = 16;
-            this.labelX9.Text = "ｴﾝｺｰﾀﾞ";
+            this.labelX9.Text = "編碼器";
             // 
             // comboBoxEx2
             // 
@@ -492,15 +492,15 @@
             // 
             // comboItem3
             // 
-            this.comboItem3.Text = "デフォルト";
+            this.comboItem3.Text = "預設";
             // 
             // comboItem4
             // 
-            this.comboItem4.Text = "IMGパス";
+            this.comboItem4.Text = "IMG路徑";
             // 
             // comboItem5
             // 
-            this.comboItem5.Text = "WZパス";
+            this.comboItem5.Text = "WZ路徑";
             // 
             // superTabControl1
             // 
@@ -526,11 +526,11 @@
             this.superTabControl1.Location = new System.Drawing.Point(0, 0);
             this.superTabControl1.Name = "superTabControl1";
             this.superTabControl1.ReorderTabsEnabled = true;
-            this.superTabControl1.SelectedTabFont = new System.Drawing.Font("MS PGothic", 9F, System.Drawing.FontStyle.Bold);
+            this.superTabControl1.SelectedTabFont = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Bold);
             this.superTabControl1.SelectedTabIndex = 0;
             this.superTabControl1.Size = new System.Drawing.Size(454, 311);
             this.superTabControl1.TabAlignment = DevComponents.DotNetBar.eTabStripAlignment.Left;
-            this.superTabControl1.TabFont = new System.Drawing.Font("MS PGothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.superTabControl1.TabFont = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.superTabControl1.TabIndex = 30;
             this.superTabControl1.Tabs.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.superTabItem1,
@@ -564,7 +564,7 @@
             this.superTabItem1.AttachedControl = this.superTabControlPanel1;
             this.superTabItem1.GlobalItem = false;
             this.superTabItem1.Name = "superTabItem1";
-            this.superTabItem1.Text = "一般";
+            this.superTabItem1.Text = "常規";
             // 
             // superTabControlPanel3
             // 
@@ -626,7 +626,7 @@
             this.labelX11.Name = "labelX11";
             this.labelX11.Size = new System.Drawing.Size(93, 16);
             this.labelX11.TabIndex = 13;
-            this.labelX11.Text = "引数";
+            this.labelX11.Text = "參數";
             // 
             // textBoxX1
             // 
@@ -655,14 +655,14 @@
             this.labelX10.Name = "labelX10";
             this.labelX10.Size = new System.Drawing.Size(87, 16);
             this.labelX10.TabIndex = 10;
-            this.labelX10.Text = "プログラムのパス";
+            this.labelX10.Text = "程式路徑";
             // 
             // superTabItem3
             // 
             this.superTabItem3.AttachedControl = this.superTabControlPanel3;
             this.superTabItem3.GlobalItem = false;
             this.superTabItem3.Name = "superTabItem3";
-            this.superTabItem3.Text = "FFmpegｴﾝｺｰﾀﾞ";
+            this.superTabItem3.Text = "FFmpeg編碼器";
             // 
             // superTabControlPanel2
             // 
@@ -687,14 +687,14 @@
             this.checkBoxX3.Size = new System.Drawing.Size(255, 16);
             this.checkBoxX3.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX3.TabIndex = 24;
-            this.checkBoxX3.Text = "ファイルサイズの最適化 (8b Palette PNG)";
+            this.checkBoxX3.Text = "優化檔案大小 (8b Palette PNG)";
             // 
             // superTabItem2
             // 
             this.superTabItem2.AttachedControl = this.superTabControlPanel2;
             this.superTabItem2.GlobalItem = false;
             this.superTabItem2.Name = "superTabItem2";
-            this.superTabItem2.Text = "APngｴﾝｺｰﾀﾞ";
+            this.superTabItem2.Text = "APng編碼器";
             // 
             // panelEx1
             // 
@@ -727,7 +727,7 @@
             this.buttonX2.Size = new System.Drawing.Size(80, 23);
             this.buttonX2.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonX2.TabIndex = 1;
-            this.buttonX2.Text = "キャンセル";
+            this.buttonX2.Text = "取消";
             // 
             // buttonX1
             // 
@@ -740,7 +740,7 @@
             this.buttonX1.Size = new System.Drawing.Size(80, 23);
             this.buttonX1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonX1.TabIndex = 0;
-            this.buttonX1.Text = "OK";
+            this.buttonX1.Text = "確認";
             // 
             // labelX12
             // 
@@ -754,7 +754,7 @@
             this.labelX12.Name = "labelX12";
             this.labelX12.Size = new System.Drawing.Size(87, 16);
             this.labelX12.TabIndex = 16;
-            this.labelX12.Text = "出力ﾌｧｲﾙ拡張子";
+            this.labelX12.Text = "輸出檔案格式";
             // 
             // textBoxX3
             // 
@@ -784,8 +784,8 @@
             this.labelX13.Name = "labelX13";
             this.labelX13.Size = new System.Drawing.Size(126, 86);
             this.labelX13.TabIndex = 18;
-            this.labelX13.Text = "パラメータのワイルドカード:<br/>\r\n &nbsp;%i 入力ファイル名<br/>\r\n &nbsp;%o 出力ファイル名<br/>\r\n &nbsp;%w 入力画像の幅(px)<br/" +
-    ">\r\n &nbsp;%h 入力画像の高さ(px)<br/>\r\n &nbsp;%t フレーム間隔(ms)";
+            this.labelX13.Text = "參數通配符：<br/>\r\n &nbsp;%i 輸入檔名<br/>\r\n &nbsp;%o 輸出檔名<br/>\r\n &nbsp;%w 輸入圖片寬度(px)<br/" +
+">\r\n &nbsp;%h 輸入影像高度 (px)<br/>\r\n &nbsp;%t 幀間隔 (ms)";
             // 
             // FrmGifSetting
             // 
@@ -799,7 +799,7 @@
             this.MinimizeBox = false;
             this.Name = "FrmGifSetting";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "アニメーション設定";
+            this.Text = "動畫輸出設定";
             this.panelExMosaic.ResumeLayout(false);
             this.panelExMosaic.PerformLayout();
             this.panelExColor.ResumeLayout(false);

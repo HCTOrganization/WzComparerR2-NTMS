@@ -54,18 +54,18 @@ namespace WzComparerR2.CharaSim
 
         private static Dictionary<string, string> dictCurrencyName = new Dictionary<string, string>()
         {
-            { "jpy", "円" },
-            { "krw", "ウォン" },
-            { "cny", "元" },
-            { "usd", "ドル" },
-            { "twd", "台湾ドル" },
-            { "hkd", "香港ドル" },
-            { "mop", "マカオパタカ" },
-            { "sgd", "シンガポールドル" },
-            { "eur", "ユーロ" },
-            { "cad", "カナダドル" },
-            { "aud", "オーストラリアドル" },
-            { "myr", "マレーシアリンギット" },
+            { "jpy", "日圓" },
+            { "krw", "韓幣" },
+            { "cny", "人民幣" },
+            { "usd", "美金" },
+            { "twd", "台幣" },
+            { "hkd", "港幣" },
+            { "mop", "澳門幣" },
+            { "sgd", "新幣" },
+            { "eur", "歐元" },
+            { "cad", "加幣" },
+            { "aud", "澳洲幣" },
+            { "myr", "馬來林吉特" },
         };
 
         private static string GTranslateBaseURL = "https://translate.googleapis.com/translate_a/t";
@@ -650,7 +650,7 @@ namespace WzComparerR2.CharaSim
                     }
                     catch
                     {
-                        MessageBoxEx.Show("続行する前に、Glossary.csvを編集しているプログラムを閉じてください。\r\n閉じたことを確認したら、「OK」をクリックします。", "注意");
+                        MessageBoxEx.Show("請關閉Glossary.csv編輯。\r\n確認關閉後，請點OK。", "注意");
                     }
                 }
                 fs.Close();

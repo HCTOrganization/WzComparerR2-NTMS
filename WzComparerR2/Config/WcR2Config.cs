@@ -20,7 +20,7 @@ namespace WzComparerR2.Config
             this.NoPatcherPrompt = false;
             this.WzVersionVerifyMode = WzLib.WzVersionVerifyMode.Fast;
             this.PreferredLayout = 0;
-            this.DesiredLanguage = "ja";
+            this.DesiredLanguage = "zh-TW";
             this.MozhiBackend = "https://mozhi.aryak.me";
             this.DetectCurrency = "auto";
             this.DesiredCurrency = "none";

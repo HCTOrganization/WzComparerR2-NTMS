@@ -2668,9 +2668,9 @@ namespace WzComparerR2
             this.chkOutputRemovedImg.Name = "chkOutputRemovedImg";
             this.chkOutputRemovedImg.Size = new System.Drawing.Size(135, 23);
             this.chkOutputRemovedImg.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.superTooltip1.SetSuperTooltip(this.chkOutputRemovedImg, new DevComponents.DotNetBar.SuperTooltipInfo("削除済みファイル", "", "削除されたファイルを表示します。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 60)));
+            this.superTooltip1.SetSuperTooltip(this.chkOutputRemovedImg, new DevComponents.DotNetBar.SuperTooltipInfo("已刪除的檔案", "", "查看已刪除的檔案。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 60)));
             this.chkOutputRemovedImg.TabIndex = 8;
-            this.chkOutputRemovedImg.Text = "削除済みファイル";
+            this.chkOutputRemovedImg.Text = "已刪除的檔案";
             // 
             // chkOutputAddedImg
             // 
@@ -2682,9 +2682,9 @@ namespace WzComparerR2
             this.chkOutputAddedImg.Name = "chkOutputAddedImg";
             this.chkOutputAddedImg.Size = new System.Drawing.Size(135, 23);
             this.chkOutputAddedImg.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.superTooltip1.SetSuperTooltip(this.chkOutputAddedImg, new DevComponents.DotNetBar.SuperTooltipInfo("追加ファイル", "", "追加されたファイルを表示します。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 60)));
+            this.superTooltip1.SetSuperTooltip(this.chkOutputAddedImg, new DevComponents.DotNetBar.SuperTooltipInfo("新增的檔案", "", "查看已新增的檔案。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 60)));
             this.chkOutputAddedImg.TabIndex = 7;
-            this.chkOutputAddedImg.Text = "追加ファイル";
+            this.chkOutputAddedImg.Text = "新增的檔案";
             // 
             // labelX1
             // 
@@ -2712,9 +2712,9 @@ namespace WzComparerR2
             this.chkOutputPng.Name = "chkOutputPng";
             this.chkOutputPng.Size = new System.Drawing.Size(107, 23);
             this.chkOutputPng.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.superTooltip1.SetSuperTooltip(this.chkOutputPng, new DevComponents.DotNetBar.SuperTooltipInfo("PNGと音声", "", "PNGファイルと音声ファイルを表示します。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 60)));
+            this.superTooltip1.SetSuperTooltip(this.chkOutputPng, new DevComponents.DotNetBar.SuperTooltipInfo("PNG和音訊", "", "顯示 PNG 和音訊檔案。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 60)));
             this.chkOutputPng.TabIndex = 5;
-            this.chkOutputPng.Text = "PNGと音声";
+            this.chkOutputPng.Text = "PNG和音訊";
             // 
             // cmbComparePng
             // 
@@ -2727,8 +2727,8 @@ namespace WzComparerR2
             this.cmbComparePng.Name = "cmbComparePng";
             this.cmbComparePng.Size = new System.Drawing.Size(140, 21);
             this.cmbComparePng.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.superTooltip1.SetSuperTooltip(this.cmbComparePng, new DevComponents.DotNetBar.SuperTooltipInfo("PNG比較", "", "画像の比較に関する情報。\r\nSizeOnly - ファイルサイズを比較して、トリミングまたはスキップされたファイルがあるかどうかを確認します。\r\nSizeAndDataLength - 画像を同時に圧縮する場合のサイズと時間を比較してください。" +
-            "\r\nPixel - ピクセル精度の画像比較。比較プロセスを注意深くチェックします。これには時間がかかる場合がありますが、画像のサイズが同じであることが確認されます。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, true, new System.Drawing.Size(300, 170)));
+            this.superTooltip1.SetSuperTooltip(this.cmbComparePng, new DevComponents.DotNetBar.SuperTooltipInfo("PNG比較", "", "有關比較影像的資訊。 \r\nSizeOnly - 比較檔案大小以查看是否有任何檔案被修剪或跳過。 \r\nSizeAndDataLength - 同時壓縮影像時比較大小和時間。 " +
+"\r\n像素 - 像素精確的影像比較。我們仔細檢查比較過程。這可能需要一些時間，但它將確保影像的大小相同。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, true, new System.Drawing.Size(300, 170)));
             this.cmbComparePng.TabIndex = 4;
             // 
             // labelXComp2

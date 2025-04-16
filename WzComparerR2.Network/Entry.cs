@@ -84,7 +84,7 @@ namespace WzComparerR2.Network
             this.Client.OnPackReceived += Client_OnPackReceived;
             var task = this.Client.Connect();
 
-            if (config.ShowActivityOnDiscord) EnableDiscordActivity("遊ぶ", "現在秘密を発見中");
+            if (config.ShowActivityOnDiscord) EnableDiscordActivity("遊玩中", "正在發掘秘密");
         }
 
         private void CheckConfig()

@@ -18,14 +18,14 @@ namespace WzComparerR2.CharaSimControl
         public AfrmTooltip()
         {
             this.menu = new ContextMenuStrip();
-            this.menu.Items.Add(new ToolStripMenuItem("クリップボードにコピー", null, tsmiCopy_Click));
-            this.menu.Items.Add(new ToolStripMenuItem("PNGに保存", null, tsmiSave_Click));
-            this.menu.Items.Add(new ToolStripMenuItem("アバターの保存", null, tsmiAvatarSave_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("複製到剪貼簿", null, tsmiCopy_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("保存PNG", null, tsmiSave_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("保存紙娃娃", null, tsmiAvatarSave_Click));
             this.menu.Items.Add(new ToolStripSeparator());
-            this.menu.Items.Add(new ToolStripMenuItem("文字列をコピー", null, tsmiCopyText_Click));
-            this.menu.Items.Add(new ToolStripMenuItem("翻訳してコピーしてみる", null, tsmiCopyTranslate_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("複製文字", null, tsmiCopyText_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("複製譯文", null, tsmiCopyTranslate_Click));
             this.menu.Items.Add(new ToolStripSeparator());
-            this.menu.Items.Add(new ToolStripMenuItem("閉じる (Esc)", null, tsmiClose_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("關閉 (Esc)", null, tsmiClose_Click));
             this.ContextMenuStrip = this.menu;
 
             this.Size = new Size(1, 1);
@@ -226,7 +226,7 @@ namespace WzComparerR2.CharaSimControl
             if (Translator.IsTranslateEnabled)
             {
                 Translator.WaitingForGlossaryTableRelease();
-                WaitingForm.UpdateMessage("翻訳中...");
+                WaitingForm.UpdateMessage("翻譯中...");
                 WaitingForm.Show();
                 await Task.Run(() =>
                 {
@@ -368,7 +368,7 @@ namespace WzComparerR2.CharaSimControl
             if (!String.IsNullOrEmpty(this.DescLeftAlign)) sb.AppendLine("<descleftalign>" + this.DescLeftAlign + "</descleftalign>");
             string translatedResult = "";
             Translator.WaitingForGlossaryTableRelease();
-            WaitingForm.UpdateMessage("翻訳中...");
+            WaitingForm.UpdateMessage("翻譯中...");
             try
             {
                 WaitingForm.Show();
