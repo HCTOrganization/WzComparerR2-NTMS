@@ -1,4 +1,4 @@
 [submodule "CharaSimResource"]
 	path = CharaSimResource
-	url = https://github.com/HikariCalyx/CharaSimResource-JMS.git
+	url = https://github.com/HCTOrganization/CharaSimResource-NTMS.git
 	branch = v5.7.0
