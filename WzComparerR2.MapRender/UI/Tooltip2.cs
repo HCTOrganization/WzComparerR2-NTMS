@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Content;
 
 using WzComparerR2.WzLib;
 using WzComparerR2.Common;
+using WzComparerR2.Config;
 using WzComparerR2.Rendering;
 using WzComparerR2.Animation;
 using WzComparerR2.MapRender.Patches2;
@@ -67,15 +68,30 @@ namespace WzComparerR2.MapRender.UI
         private void LoadContent(ContentManager content)
         {
             var res = new NineFormResource();
-            res.N = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_n));
-            res.NE = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_ne));
-            res.E = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_e));
-            res.SE = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_se));
-            res.S = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_s));
-            res.SW = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_sw));
-            res.W = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_w));
-            res.NW = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_nw));
-            res.C = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_c));
+            if (CharaSimConfig.Default.Enable22AniStyle)
+            {
+                res.N = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_n));
+                res.NE = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_ne));
+                res.E = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_e));
+                res.SE = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_se));
+                res.S = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_s));
+                res.SW = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_sw));
+                res.W = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_w));
+                res.NW = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_nw));
+                res.C = content.Load<Texture2D>(nameof(Res.UIToolTipNew_img_Item_Common_frame_flexible_c));
+            }
+            else
+            {
+                res.N = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_n));
+                res.NE = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_ne));
+                res.E = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_e));
+                res.SE = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_se));
+                res.S = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_s));
+                res.SW = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_sw));
+                res.W = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_w));
+                res.NW = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_nw));
+                res.C = content.Load<Texture2D>(nameof(Res.UIToolTip_img_Item_Frame2_c));
+            }
             this.Resource = res;
         }
 
@@ -760,16 +776,19 @@ namespace WzComparerR2.MapRender.UI
                 }
             }
 
-            var cover = Res.UIToolTip_img_Item_Frame2_cover.ToTexture(env.GraphicsDevice);
-            var coverRect = new Rectangle((int)position.X + 3,
-                (int)position.Y + 3,
-                Math.Min((int)preferSize.X - 6, cover.Width),
-                Math.Min((int)preferSize.Y - 6, cover.Height));
-            var sourceRect = new Rectangle(0,
-                0,
-                Math.Min((int)preferSize.X - 6, cover.Width),
-                Math.Min((int)preferSize.Y - 6, cover.Height));
-            env.Sprite.Draw(cover, coverRect, sourceRect, Color.White);
+            if (!CharaSimConfig.Default.Enable22AniStyle)
+            {
+                var cover = Res.UIToolTip_img_Item_Frame2_cover.ToTexture(env.GraphicsDevice);
+                var coverRect = new Rectangle((int)position.X + 3,
+                    (int)position.Y + 3,
+                    Math.Min((int)preferSize.X - 6, cover.Width),
+                    Math.Min((int)preferSize.Y - 6, cover.Height));
+                var sourceRect = new Rectangle(0,
+                    0,
+                    Math.Min((int)preferSize.X - 6, cover.Width),
+                    Math.Min((int)preferSize.Y - 6, cover.Height));
+                env.Sprite.Draw(cover, coverRect, sourceRect, Color.White);
+            }
 
             if (content.textures != null)
             {
