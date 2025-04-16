@@ -100,9 +100,9 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incPQEXPr: return "组隊任務經驗值增加" + value + "%";
                 case GearPropType.incEXPr: return "經驗值增加" + value + "%";
                 case GearPropType.incBDR:
-                case GearPropType.bdR: return "BOSS攻擊時傷害+" + value + "%";
+                case GearPropType.bdR: return "BOSS攻擊時傷害 +" + value + "%";
                 case GearPropType.incIMDR:
-                case GearPropType.imdR: return "怪物防禦力無視：+" + value + "%";
+                case GearPropType.imdR: return "無視怪物防禦率+" + value + "%";
                 case GearPropType.limitBreak: return "傷害上限突破至 " + ToCJKNumberExpr(value);
                 case GearPropType.reduceReq: return "裝備等级降低：- " + value;
                 case GearPropType.nbdR: return "攻擊一般怪物時傷害+" + value + "%";
