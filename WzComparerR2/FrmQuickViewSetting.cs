@@ -21,16 +21,16 @@ namespace WzComparerR2
             InitializeComponent();
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("MS PGothic"), 9f);
+            this.Font = new Font(new FontFamily("SimSun"), 9f);
 #endif
             this.comboBoxEx1.SelectedIndex = 0;
             this.comboBoxEx2.SelectedIndex = 0;
 
             cmbPreferredStringCopyMethod.Items.AddRange(new[]
                 {
-                new ComboItem("元の文字列") { Value = 0 },
-                new ComboItem("プレーン文字列") { Value = 1 },
-                new ComboItem("ﾒｲﾌﾟﾙWiki最適化文字列") { Value = 2 },
+                new ComboItem("原始文本") { Value = 0 },
+                new ComboItem("未格式化文本") { Value = 1 },
+                new ComboItem("楓之谷Wiki優化文本") { Value = 2 },
             });
 
             this.comboBoxEx3.Items.AddRange((new[] { "黒", "赤", "橙", "黄", "緑", "青", "紫", "茶" }).Select(color =>

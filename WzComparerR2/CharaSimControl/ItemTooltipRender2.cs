@@ -497,11 +497,11 @@ namespace WzComparerR2.CharaSimControl
                 DateTime time = DateTime.Now.AddDays(7d);
                 if (!item.Cash)
                 {
-                    expireTime = time.ToString(@"yyyy年 M月 d日 HH時 mm分") + "まで使用可能";
+                    expireTime = "到" + time.ToString(@"yyyy年 M月 d日 HH時 mm分") + "可以用";
                 }
                 else
                 {
-                    expireTime = time.ToString(@"yyyy年 M月 d日 HH時 mm分") + "まで使用可能";
+                    expireTime = time.ToString(@"yyyy年 M月 d日 HH時 mm分") + "可以用";
                 }
             }
             else if (item.ConsumableFrom != null || item.EndUseDate != null)
@@ -509,11 +509,11 @@ namespace WzComparerR2.CharaSimControl
                 expireTime = "";
                 if (item.ConsumableFrom != null)
                 {
-                    expireTime += string.Format("{0}年 {1}月 {2}日 {3:D2}時 {4:D2}分使用可能", Convert.ToInt32(item.ConsumableFrom.Substring(0, 4)), Convert.ToInt32(item.ConsumableFrom.Substring(4, 2)), Convert.ToInt32(item.ConsumableFrom.Substring(6, 2)), Convert.ToInt32(item.ConsumableFrom.Substring(8, 2)), Convert.ToInt32(item.ConsumableFrom.Substring(10, 2)));
+                    expireTime += "到" + string.Format("{0}年 {1}月 {2}日 {3:D2}時 {4:D2}分可以用", Convert.ToInt32(item.ConsumableFrom.Substring(0, 4)), Convert.ToInt32(item.ConsumableFrom.Substring(4, 2)), Convert.ToInt32(item.ConsumableFrom.Substring(6, 2)), Convert.ToInt32(item.ConsumableFrom.Substring(8, 2)), Convert.ToInt32(item.ConsumableFrom.Substring(10, 2)));
                 }
                 if (item.EndUseDate != null)
                 {
-                    expireTime += string.Format("{0}年 {1}月 {2}日 {3:D2}時 {4:D2}分まで使用可能", Convert.ToInt32(item.EndUseDate.Substring(0, 4)), Convert.ToInt32(item.EndUseDate.Substring(4, 2)), Convert.ToInt32(item.EndUseDate.Substring(6, 2)), Convert.ToInt32(item.EndUseDate.Substring(8, 2)), Convert.ToInt32(item.EndUseDate.Substring(10, 2)));
+                    expireTime += "到" + string.Format("{0}年 {1}月 {2}日 {3:D2}時 {4:D2}分可以用", Convert.ToInt32(item.EndUseDate.Substring(0, 4)), Convert.ToInt32(item.EndUseDate.Substring(4, 2)), Convert.ToInt32(item.EndUseDate.Substring(6, 2)), Convert.ToInt32(item.EndUseDate.Substring(8, 2)), Convert.ToInt32(item.EndUseDate.Substring(10, 2)));
                 }
             }
             else if ((item.Props.TryGetValue(ItemPropType.permanent, out value) && value != 0) || (item.ItemID / 10000 == 500 && item.Props.TryGetValue(ItemPropType.life, out value) && value == 0))
@@ -528,13 +528,13 @@ namespace WzComparerR2.CharaSimControl
             else if (item.ItemID / 10000 == 500 && item.Props.TryGetValue(ItemPropType.limitedLife, out value) && value > 0)
             {
                 picH -= 3;
-                expireTime = string.Format("魔法の時間: {0}時間 {1}分", value / 3600, (value % 3600) / 60);
+                expireTime = string.Format("魔法時間: {0}時間 {1}分", value / 3600, (value % 3600) / 60);
             }
             else if (item.ItemID / 10000 == 500 && item.Props.TryGetValue(ItemPropType.life, out value) && value > 0)
             {
                 picH -= 3;
                 DateTime time = DateTime.Now.AddDays(value);
-                expireTime = "魔法の効力期限：" + time.ToString(@"yyyy年M月d日HH時mm分まで");
+                expireTime = "魔法の効力期限：" + time.ToString(@"yyyy年M月d日HH時mm分");
             }
             if (!string.IsNullOrEmpty(expireTime))
             {
@@ -693,7 +693,7 @@ namespace WzComparerR2.CharaSimControl
                         }
                     }
                 }
-                desc += "\n#cスキル：メル収集";
+                desc += "\n#cスキル：楓幣収集";
                 if (item.Props.TryGetValue(ItemPropType.pickupItem, out value) && value > 0)
                 {
                     desc += ", アイテム収集";
@@ -708,7 +708,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 if (item.Props.TryGetValue(ItemPropType.pickupAll, out value) && value > 0)
                 {
-                    desc += ", 所有権のないアイテム収集やメルの収集";
+                    desc += ", 所有権のないアイテム収集や楓幣の収集";
                 }
                 if (item.Props.TryGetValue(ItemPropType.consumeHP, out value) && value > 0)
                 {
@@ -815,7 +815,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 else if (item.Props.TryGetValue(ItemPropType.onlyCash, out value) && value > 0)
                 {
-                    GearGraphics.DrawString(g, "\n#cNEXONポイントでのみ購入可能#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                    GearGraphics.DrawString(g, "\n#cNEXON點でのみ購入可能#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                 }
                 else if ((!item.Props.TryGetValue(ItemPropType.tradeBlock, out value) || value == 0) && item.ItemID / 10000 != 501 && item.ItemID / 10000 != 502 && item.ItemID / 10000 != 516)
                 {
@@ -1156,13 +1156,13 @@ namespace WzComparerR2.CharaSimControl
             if (!item.GetBooleanValue(ItemPropType.quest) && !item.GetBooleanValue(ItemPropType.notSale) && (item.Props.TryGetValue(ItemPropType.price, out value) && value > 0) && ShowSoldPrice)
             {
                 picH += 16;
-                GearGraphics.DrawString(g, "\r\n · 販売価額：" + value + "メル", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "\r\n · 出售價格：" + value + "楓幣", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
             }
 
             if (item.GetBooleanValue(ItemPropType.autoPrice) && ShowSoldPrice)
             {
                 picH += 16;
-                GearGraphics.DrawString(g, "\r\n · 販売価額：" + (item.Level * 2) + "メル", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "\r\n · 出售價格：" + (item.Level * 2) + "楓幣", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
             }
 
             if (item.Cash && ShowCashPurchasePrice)
@@ -1174,7 +1174,7 @@ namespace WzComparerR2.CharaSimControl
                     if (commodityPackage.Price > 0)
                     {
                         picH += 16;
-                        GearGraphics.DrawString(g, "\r\n · 購入価額：" + commodityPackage.Price + "ポイント", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                        GearGraphics.DrawString(g, "\r\n · 購買價格：" + commodityPackage.Price + "點", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
                         if (Translator.DefaultDesiredCurrency != "none")
                         {
                             string exchangedPrice = Translator.GetConvertedCurrency(commodityPackage.Price, titleLanguage);
