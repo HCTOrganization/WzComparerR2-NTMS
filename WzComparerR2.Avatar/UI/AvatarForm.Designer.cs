@@ -684,7 +684,7 @@ namespace WzComparerR2.Avatar.UI
             this.bar3.AccessibleName = "DotNetBar Bar";
             this.bar3.AccessibleRole = System.Windows.Forms.AccessibleRole.ToolBar;
             this.bar3.DockSide = DevComponents.DotNetBar.eDockSide.Top;
-            this.bar3.Font = new System.Drawing.Font("Yu Gothic UI", 9F);
+            this.bar3.Font = new System.Drawing.Font("Microsoft Jhenghei", 9F);
             this.bar3.GrabHandleStyle = DevComponents.DotNetBar.eGrabHandleStyle.Office2003;
             this.bar3.IsMaximized = false;
             this.bar3.Items.AddRange(new DevComponents.DotNetBar.BaseItem[] {
@@ -1032,7 +1032,7 @@ namespace WzComparerR2.Avatar.UI
             this.Controls.Add(this.dockSite8);
             this.DoubleBuffered = true;
             this.Name = "AvatarForm";
-            this.Text = "アバター";
+            this.Text = "紙娃娃";
             this.dockSite2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.bar1)).EndInit();
             this.bar1.ResumeLayout(false);

@@ -45,7 +45,7 @@ namespace WzComparerR2
             this.Shown += new EventHandler(MainForm_Shown);
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("MS Gothic"), 9f);
+            this.Font = new Font(new FontFamily("SimSun"), 9f);
 #endif
             Form.CheckForIllegalCrossThreadCalls = false;
             this.MinimumSize = new Size(600, 450);
@@ -3342,7 +3342,7 @@ namespace WzComparerR2
 
             if (item != null)
             {
-                GearGraphics.SetFontFamily("MS Gothic");
+                GearGraphics.SetFontFamily("SimSun");
                 ConfigManager.Reload();
                 CharaSimConfig.Default.SelectedFontIndex = comboBoxItemLanguage.SelectedIndex;
                 ConfigManager.Save();
@@ -3889,7 +3889,7 @@ namespace WzComparerR2
                 {
                     form.Show();
                     form.BringToFront();
-                    MessageBoxEx.Show(this, "終了する前にゲームパッチャーを閉じてください。", "注意", MessageBoxButtons.OK);
+                    MessageBoxEx.Show(this, "退出前請先關閉更新程式。", "注意", MessageBoxButtons.OK);
                     e.Cancel = true;
                     return;
                 }
@@ -3910,7 +3910,7 @@ namespace WzComparerR2
                     return;
                 }
             }
-            DialogResult result = MessageBoxEx.Show(this, "終了しますか?", "確認", MessageBoxButtons.YesNo);
+            DialogResult result = MessageBoxEx.Show(this, "是否要退出？", "確認", MessageBoxButtons.YesNo);
             if (result == DialogResult.Yes)
             {
                 e.Cancel = false;  //点击OK

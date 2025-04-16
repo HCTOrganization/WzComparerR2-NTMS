@@ -37,7 +37,7 @@ namespace WzComparerR2
             // LabelWaiting
             // 
             this.LabelWaiting.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.LabelWaiting.Font = new System.Drawing.Font("MS PGothic", 11F);
+            this.LabelWaiting.Font = new System.Drawing.Font("SimSun", 11F);
             this.LabelWaiting.Location = new System.Drawing.Point(0, 0);
             this.LabelWaiting.Name = "LabelWaiting";
             this.LabelWaiting.Size = new System.Drawing.Size(200, 100);
@@ -56,7 +56,7 @@ namespace WzComparerR2
             this.MinimizeBox = false;
             this.Name = "FrmWaiting";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "WzComparerR2-JMS";
+            this.Text = "WzComparerR2-NTMS";
             this.TopMost = true;
             this.ResumeLayout(false);
 

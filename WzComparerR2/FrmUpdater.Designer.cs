@@ -53,7 +53,7 @@
             this.labelX1.Name = "labelX1";
             this.labelX1.Size = new System.Drawing.Size(56, 16);
             this.labelX1.TabIndex = 0;
-            this.labelX1.Text = "現在バージョン:";
+            this.labelX1.Text = "當前版本:";
             // 
             // labelX2
             // 
@@ -66,7 +66,7 @@
             this.labelX2.Name = "labelX2";
             this.labelX2.Size = new System.Drawing.Size(81, 16);
             this.labelX2.TabIndex = 1;
-            this.labelX2.Text = "最新バージョン:";
+            this.labelX2.Text = "最新版本:";
             // 
             // labelX3
             // 
@@ -79,7 +79,7 @@
             this.labelX3.Name = "labelX3";
             this.labelX3.Size = new System.Drawing.Size(50, 16);
             this.labelX3.TabIndex = 2;
-            this.labelX3.Text = "バージョン情報:";
+            this.labelX3.Text = "版本信息:";
             // 
             // lblCurrentVer
             // 
@@ -175,7 +175,7 @@
             this.chkEnableAutoUpdate.Size = new System.Drawing.Size(170, 23);
             this.chkEnableAutoUpdate.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkEnableAutoUpdate.TabIndex = 10;
-            this.chkEnableAutoUpdate.Text = "自動更新ﾁｪｯｸ";
+            this.chkEnableAutoUpdate.Text = "自動檢查更新";
             this.chkEnableAutoUpdate.CheckedChanged += new System.EventHandler(this.chkEnableAutoUpdate_CheckedChanged);
             // 
             // elementStyle1
