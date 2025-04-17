@@ -1126,6 +1126,7 @@ namespace WzComparerR2
             this.buttonItemInstallGame.Name = "buttonItemInstallGame";
             this.buttonItemInstallGame.SubItemsExpandWidth = 16;
             this.buttonItemInstallGame.Text = "下載遊戲";
+            this.buttonItemInstallGame.Enabled = false;
             this.buttonItemInstallGame.Click += new System.EventHandler(this.buttonInstallGame_Click);
             // 
             // buttonItemGameStart
@@ -1133,6 +1134,7 @@ namespace WzComparerR2
             this.buttonItemGameStart.Name = "buttonItemGameStart";
             this.buttonItemGameStart.SubItemsExpandWidth = 16;
             this.buttonItemGameStart.Text = "啟動遊戲";
+            this.buttonItemGameStart.Enabled = false;
             this.buttonItemGameStart.Click += new System.EventHandler(this.buttonGameStart_Click);
             // 
             // ribbonBar4

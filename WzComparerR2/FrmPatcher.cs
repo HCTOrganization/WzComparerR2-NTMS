@@ -182,7 +182,7 @@ namespace WzComparerR2
                 item.GetFileLength();
                 if (item.FileLength > 0)
                 {
-                    switch (MessageBoxEx.Show(string.Format("サイズ: {0:N0} バイト\r\n最終更新日: {1:yyyy年M月d日 HH:mm:ss}\r\nダウンロードしますか？\r\n\r\nYes - ダウンロード\r\nNo - パッチファイルのURLをクリップボードにコピー\r\nCancel - ダウンロードしないこと", item.FileLength, item.LastModified), "確認", MessageBoxButtons.YesNoCancel))
+                    switch (MessageBoxEx.Show(string.Format("大小：{0:N0} 位元組\r\n上次更新時間：{1:yyyy/M/d/HH:mm:ss}\r\n是否要下載？ \r\n\r\n是 - 下載\r\n否 - 將更新檔案 URL 複製到剪貼簿\r\n取消 - 不下載", item.FileLength, item.LastModified), "確認", MessageBoxButtons.YesNoCancel))
                     {
                         case DialogResult.Yes:
 #if NET6_0_OR_GREATER
@@ -206,12 +206,12 @@ namespace WzComparerR2
                 }
                 else
                 {
-                    MessageBoxEx.Show("このファイルは存在しません。");
+                    MessageBoxEx.Show("この檔案は存在しません。");
                 }
             }
             catch (Exception ex)
             {
-                MessageBoxEx.Show("エラー：" + ex.Message);
+                MessageBoxEx.Show("錯誤：" + ex.Message);
             }
         }
 
@@ -241,8 +241,8 @@ namespace WzComparerR2
         private void buttonXOpen1_Click(object sender, EventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
-            dlg.Title = "パッチファイルの選択";
-            dlg.Filter = "パッチファイル (*.patch;*.exe)|*.patch;*.exe";
+            dlg.Title = "選擇更新檔案";
+            dlg.Filter = "更新檔案 (*.patch;*.exe)|*.patch;*.exe";
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
                 txtPatchFile.Text = dlg.FileName;
@@ -252,7 +252,7 @@ namespace WzComparerR2
         private void buttonXOpen2_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog dlg = new FolderBrowserDialog();
-            dlg.Description = "メイプルストーリーのインストール ディレクトリを選択してください。";
+            dlg.Description = "選擇您的新楓之谷安裝資料夾。";
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
                 txtMSFolder.Text = dlg.SelectedPath;
@@ -263,7 +263,7 @@ namespace WzComparerR2
         {
             if (!File.Exists(txtMSFolder.Text + "//MapleStory.exe") && !File.Exists(txtMSFolder.Text + "//MapleStoryT.exe"))
             {
-                DialogResult PatcherPromptResult = MessageBoxEx.Show("選択したフォルダは有効なメイプルフォルダではないようです。\r\nそれでも続行しますか?", "警告", MessageBoxButtons.YesNo);
+                DialogResult PatcherPromptResult = MessageBoxEx.Show("所選資料夾似乎不是有效的新楓之谷安裝資料夾。 \r\n您還想繼續嗎？", "警告", MessageBoxButtons.YesNo);
                 if (PatcherPromptResult == System.Windows.Forms.DialogResult.No)
                 {
                     return;
@@ -278,7 +278,7 @@ namespace WzComparerR2
                 }
                 else if (!this.patcherSession.PatchExecTask.IsCompleted)
                 {
-                    MessageBoxEx.Show("パッチはすでに進行中です。");
+                    MessageBoxEx.Show("更新已在進行中。");
                     return;
                 }
             }
@@ -333,8 +333,8 @@ namespace WzComparerR2
                 patcher = new WzPatcher(session.PatchFile);
                 patcher.NoticeEncoding = this.PatcherNoticeEncoding ?? Encoding.Default;
                 patcher.PatchingStateChanged += (o, e) => this.patcher_PatchingStateChanged(o, e, session, AppendStateText);
-                AppendStateText($"パッチファイル名: {session.PatchFile}\r\n");
-                AppendStateText("パッチを分析中...");
+                AppendStateText($"更新檔案名稱: {session.PatchFile}\r\n");
+                AppendStateText("更新檔案分析中...");
                 long patchedAllFileSize = 0;
                 long decompressedSize = patcher.PrePatch(cancellationToken);
                 availableDiskSpace = RemainingDiskSpace(session.MSFolder);
@@ -399,39 +399,39 @@ namespace WzComparerR2
                     switch (key)
                     {
                         case "ZOther":
-                            diskSpaceMessage.AppendLine(string.Format("他のファイルに必要なスペース: {0}", GetBothByteAndGBValue(patchedFileSizes[key])));
+                            diskSpaceMessage.AppendLine(string.Format("其他檔案所需的空間: {0}", GetBothByteAndGBValue(patchedFileSizes[key])));
                             break;
                         default:
-                            diskSpaceMessage.AppendLine(string.Format("「{0}」に必要なスペース: {1}", key, GetBothByteAndGBValue(patchedFileSizes[key])));
+                            diskSpaceMessage.AppendLine(string.Format("“{0}”所需空間: {1}", key, GetBothByteAndGBValue(patchedFileSizes[key])));
                             break;
                     }
                 }
                 patchedFileIndex.Sort();
-                diskSpaceMessage.AppendLine(string.Format("必要な合計スペース: {0}", GetBothByteAndGBValue(patchedAllFileSize)));
-                diskSpaceMessage.AppendLine(string.Format("使用可能なディスク容量: {0}", GetBothByteAndGBValue(availableDiskSpace)));
+                diskSpaceMessage.AppendLine(string.Format("所需總空間: {0}", GetBothByteAndGBValue(patchedAllFileSize)));
+                diskSpaceMessage.AppendLine(string.Format("可用磁碟空間: {0}", GetBothByteAndGBValue(availableDiskSpace)));
                 AppendStateText(diskSpaceMessage.ToString());
                 AppendStateText("完了\r\n");
                 if (patchedAllFileSize > availableDiskSpace)
                 {
-                    DialogResult PatcherPromptResult = MessageBoxEx.Show(this, diskSpaceMessage.ToString() + "\r\nパッチを適用するにはディスク容量が足りない可能性があります。\r\nそれでも続行しますか?", "警告", MessageBoxButtons.YesNo);
+                    DialogResult PatcherPromptResult = MessageBoxEx.Show(this, diskSpaceMessage.ToString() + "\r\n可能沒有足夠的磁碟空間來完成更新。 \r\n您還想繼續嗎？", "警告", MessageBoxButtons.YesNo);
                     if (PatcherPromptResult == DialogResult.No)
                     {
-                        throw new OperationCanceledException("パッチは中止されました。");
+                        throw new OperationCanceledException("更新已中止。");
                     }
                 }
                 if (session.PrePatch)
                 {
-                    AppendStateText("パッチを準備中...\r\n");
+                    AppendStateText("更新準備中...\r\n");
                     if (patcher.IsKMST1125Format.Value)
                     {
-                        AppendStateText("パッチのタイプ: KMST1125\r\n");
+                        AppendStateText("更新類別: KMST1125\r\n");
                         if (patcher.OldFileHash != null)
                         {
-                            AppendStateText($"パッチ前のチェックサムをチェックするファイルの数: {patcher.OldFileHash.Count}\r\n");
+                            AppendStateText($"更新前需要檢查校驗和的檔案數量: {patcher.OldFileHash.Count}\r\n");
                         }
                     }
-                    AppendStateText(string.Format("パッチサイズ: {0:N0} バイト\r\n", decompressedSize));
-                    AppendStateText(string.Format("パッチを適用するファイルの数: {0}\r\n", patcher.PatchParts.Count));
+                    AppendStateText(string.Format("更新大小: {0:N0} 位元組\r\n", decompressedSize));
+                    AppendStateText(string.Format("需要更新的文件數量: {0}\r\n", patcher.PatchParts.Count));
 
                     this.Invoke(() =>
                     {
@@ -440,7 +440,7 @@ namespace WzComparerR2
                         this.advTreePatchFiles.EndUpdate();
                     });
 
-                    AppendStateText("パッチを適用するファイルの順序を調整したら、「パッチ」ボタンをクリックして開始します。\r\n");
+                    AppendStateText("一旦您安排好更新檔案的順序，請點選「更新」按鈕開始。\r\n");
                     session.State = PatcherTaskState.WaitForContinue;
                     await session.WaitForContinueAsync();
                     this.Invoke(() =>
@@ -459,22 +459,22 @@ namespace WzComparerR2
                 }
                 if (patcher.IsKMST1125Format.Value && session.DeadPatch)
                 {
-                    AppendStateText("即時パッチ実行プラン\r\n");
+                    AppendStateText("立即補丁執行計劃\r\n");
                     session.deadPatchExecutionPlan = new();
                     session.deadPatchExecutionPlan.Build(patcher.PatchParts);
                     foreach (var part in patcher.PatchParts)
                     {
                         if (session.deadPatchExecutionPlan.Check(part.FileName, out var filesCanInstantUpdate))
                         {
-                            AppendStateText($"+ ファイル[{part.FileName}]実行\r\n");
+                            AppendStateText($"+ 檔案[{part.FileName}]実行\r\n");
                             foreach (var fileName in filesCanInstantUpdate)
                             {
-                                AppendStateText($"  - ファイル[{fileName}]適用\r\n");
+                                AppendStateText($"  - 檔案[{fileName}]適用\r\n");
                             }
                         }
                         else
                         {
-                            AppendStateText($"- ファイル[{part.FileName}]を実行しますが、適用は延期されます\r\n");
+                            AppendStateText($"- 檔案[{part.FileName}]を実行しますが、適用は延期されます\r\n");
                         }
                     }
                     // disable force validation
@@ -538,7 +538,7 @@ namespace WzComparerR2
                     logFunc("  完了\r\n");
                     break;
                 case PatchingState.TempFileCreated:
-                    logFunc("  一時ファイルの作成中...\r\n");
+                    logFunc("  一時檔案の作成中...\r\n");
                     progressBarX1.Maximum = e.Part.NewFileLength;
                     session.TemporaryFileMapping.Add(e.Part.FileName, e.Part.TempFilePath);
                     break;
@@ -547,7 +547,7 @@ namespace WzComparerR2
                     progressBarX1.Text = string.Format("{0:N0}/{1:N0}", e.CurrentFileLength, e.Part.NewFileLength);
                     break;
                 case PatchingState.TempFileClosed:
-                    logFunc("  一時ファイルが作成されました。\r\n");
+                    logFunc("  一時檔案が作成されました。\r\n");
                     progressBarX1.Value = 0;
                     progressBarX1.Maximum = 0;
                     progressBarX1.Text = string.Empty;
@@ -561,7 +561,7 @@ namespace WzComparerR2
                         Wz_Structure wzold = new Wz_Structure();
                         try
                         {
-                            logFunc("  ファイルを比較中...\r\n");
+                            logFunc("  檔案を比較中...\r\n");
                             EasyComparer comparer = new EasyComparer();
                             comparer.OutputPng = chkOutputPng.Checked;
                             comparer.OutputAddedImg = chkOutputAddedImg.Checked;
@@ -597,19 +597,19 @@ namespace WzComparerR2
                                 {
                                     if (session.TemporaryFileMapping.TryGetValue(fileName, out var temporaryFileName))
                                     {
-                                        logFunc($"  (即時パッチ)ファイル[{fileName}]を適用中...\r\n");
+                                        logFunc($"  (即時パッチ)檔案[{fileName}]を適用中...\r\n");
                                         patcher.SafeMove(temporaryFileName, Path.Combine(session.MSFolder, fileName));
                                     }
                                 }
                             }
                             else
                             {
-                                logFunc("  (即時パッチ)ファイル適用の延期...\r\n");
+                                logFunc("  (即時パッチ)檔案適用の延期...\r\n");
                             }
                         }
                         else
                         {
-                            logFunc("  (即時パッチ)ファイルを適用しています...\r\n");
+                            logFunc("  (即時パッチ)檔案を適用しています...\r\n");
                             patcher.SafeMove(e.Part.TempFilePath, e.Part.OldFilePath);
                         }
                     }
@@ -628,10 +628,10 @@ namespace WzComparerR2
                     }
                     break;
                 case PatchingState.ApplyFile:
-                    logFunc($"ファイルの適用: {e.Part.FileName}\r\n");
+                    logFunc($"檔案の適用: {e.Part.FileName}\r\n");
                     break;
                 case PatchingState.FileSkipped:
-                    logFunc("  スキップされたファイル: " + e.Part.FileName + "\r\n");
+                    logFunc("  スキップされた檔案: " + e.Part.FileName + "\r\n");
                     break;
             }
         }
@@ -664,8 +664,8 @@ namespace WzComparerR2
         private void buttonXOpen3_Click(object sender, EventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
-            dlg.Title = "パッチファイルの選択";
-            dlg.Filter = "パッチファイル (*.patch;*.exe)|*.patch;*.exe";
+            dlg.Title = "パッチ檔案の選択";
+            dlg.Filter = "パッチ檔案 (*.patch;*.exe)|*.patch;*.exe";
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
                 txtPatchFile2.Text = dlg.FileName;
@@ -685,14 +685,14 @@ namespace WzComparerR2
         private void buttonXCreate_Click(object sender, EventArgs e)
         {
             MessageBoxEx.Show(@"> この機能は不完全なため、さらなるテストが必要です...
-> まだ不完全なのでパッチファイルのみ選択してください。 .exe パッチは現在サポートされていません。
+> まだ不完全なのでパッチ檔案のみ選択してください。 .exe パッチは現在サポートされていません。
 > クライアントのバージョンは確認されませんので、開始する前に自分で確認してください。
-> ファイル ブロック フィルタリングまたはファイル欠落プロンプトは、当面は利用できません。
-> 最適化がないため、大きなファイルが生成されます。 ただし、ファイルが完全であることは保証されています。", "通知");
+> 檔案 ブロック フィルタリングまたは檔案欠落プロンプトは、当面は利用できません。
+> 最適化がないため、大きな檔案が生成されます。 ただし、檔案が完全であることは保証されています。", "通知");
 
             SaveFileDialog dlg = new SaveFileDialog();
-            dlg.Filter = "パッチファイル (*.patch)|*.patch";
-            dlg.Title = "パッチファイルを保存";
+            dlg.Filter = "パッチ檔案 (*.patch)|*.patch";
+            dlg.Title = "パッチ檔案を保存";
             dlg.CheckFileExists = false;
             dlg.InitialDirectory = Path.GetDirectoryName(txtPatchFile2.Text);
             dlg.FileName = Path.GetFileNameWithoutExtension(txtPatchFile2.Text) + "_reverse.patch";
@@ -717,7 +717,7 @@ namespace WzComparerR2
         {
             if (this.patcherSession != null && this.patcherSession.State != PatcherTaskState.NotStarted && this.patcherSession.State != PatcherTaskState.Complete)
             {
-                DialogResult result = MessageBoxEx.Show(this, "ゲームはパッチ適用中なので、パッチャー終了するとゲームデータが破損する可能性があります。\r\n\r\nそれでも終了しますか?", "確認", MessageBoxButtons.YesNo);
+                DialogResult result = MessageBoxEx.Show(this, "遊戲目前正在更新，關閉更新程式可能會損壞您的遊戲資料。 \r\n\r\n您仍要退出嗎？", "確認", MessageBoxButtons.YesNo);
                 if (result == DialogResult.Yes)
                 {
                     e.Cancel = false;
@@ -757,11 +757,11 @@ namespace WzComparerR2
 
             if (size <= 1024)
             {
-                return $"{size:N0} バイト";
+                return $"{size:N0} 位元組";
             }
             else
             {
-                return $"{size:N0} バイト ({targetbytes:0.##} {sizes[order]})";
+                return $"{size:N0} 位元組 ({targetbytes:0.##} {sizes[order]})";
             }
         }
 

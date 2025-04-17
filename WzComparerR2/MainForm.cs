@@ -2503,7 +2503,7 @@ namespace WzComparerR2
             Wz_File etcWzFile = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Etc").GetNodeWzFile();
             if (stringWzFile == null || itemWzFile == null || etcWzFile == null)
             {
-                MessageBoxEx.Show("Base.wzを選択します。", LocalizedString_JP.COMMON_ERROR);
+                MessageBoxEx.Show("請選擇 Base.wz。", LocalizedString_JP.COMMON_ERROR);
                 return;
             }
             QueryPerformance.Start();
@@ -2512,18 +2512,18 @@ namespace WzComparerR2
             if (r)
             {
                 double ms = (Math.Round(QueryPerformance.GetLastInterval(), 4) * 1000);
-                labelItemStatus.Text = "文字列テーブル的リンクがリセットされました。 時間が経過した：" + ms + "毫秒";
+                labelItemStatus.Text = "字串表連結已被重置。時間經過：" + ms + "毫秒";
             }
             else
             {
-                MessageBoxEx.Show("文字列テーブル的リンクをリセットできません。", LocalizedString_JP.COMMON_ERROR);
+                MessageBoxEx.Show("字串表連結已被重置。", LocalizedString_JP.COMMON_ERROR);
             }
         }
 
         private void buttonItemClearStringWz_Click(object sender, EventArgs e)
         {
             stringLinker.Clear();
-            labelItemStatus.Text = "文字列テーブル的リンクがリセットされました。";
+            labelItemStatus.Text = "字串表連結已被重置。";
         }
 
         private void buttonItemPatcher_Click(object sender, EventArgs e)
@@ -2535,21 +2535,6 @@ namespace WzComparerR2
                     form.Show();
                     form.BringToFront();
                     return;
-                }
-            }
-            if (!WcR2Config.Default.NoPatcherPrompt)
-            {
-                DialogResult PatcherPromptResult = MessageBoxEx.Show("こ的ゲームパッチャーは、JMS的V427アップデート以降は動作しません。\r\n" +
-                "JMSを更新するには、「ゲームをダウンロード」をクリックして、\r\n" +
-                "プロンプトが表示されたらゲームをインストールした場所を選択し、\r\n" +
-                "「ゲームスタート」ボタンをクリックしてゲームを更新してプレイしてください。\r\n" +
-                "JMS以外的公式キノコゲームクライアントにパッチを適用する場合は、こ的通知を無視しても問題ありません。\r\n\r\n" +
-                "「OK」をクリックすると、こ的通知は再度表示されなくなります。", "注意", MessageBoxButtons.OKCancel);
-                if (PatcherPromptResult == System.Windows.Forms.DialogResult.OK)
-                {
-                    ConfigManager.Reload();
-                    WcR2Config.Default.NoPatcherPrompt = true;
-                    ConfigManager.Save();
                 }
             }
             FrmPatcher patcher = new FrmPatcher();
@@ -2621,7 +2606,7 @@ namespace WzComparerR2
 
         private void ngmInstallPrompt()
         {
-            DialogResult ngmresult = MessageBoxEx.Show("ゲームをダウンロードまたは起動するには Nexon Game Manager が必要ですが、\r\nインストールされていないようです。\r\n\r\nダウンロードしてインストールしますか?", "確認", MessageBoxButtons.YesNo);
+            DialogResult ngmresult = MessageBoxEx.Show("下載或啟動遊戲需要 Nexon Game Manager，但它似乎尚未安裝。 \r\n\r\n是否要下載並安裝？", "確認", MessageBoxButtons.YesNo);
             if (ngmresult == DialogResult.Yes)
             {
 #if NET6_0_OR_GREATER

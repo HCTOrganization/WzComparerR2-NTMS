@@ -170,7 +170,7 @@ namespace WzComparerR2
             this.buttonXPatch.Size = new System.Drawing.Size(40, 25);
             this.buttonXPatch.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonXPatch.TabIndex = 8;
-            this.buttonXPatch.Text = "パッチ";
+            this.buttonXPatch.Text = "更新";
             this.buttonXPatch.Click += new System.EventHandler(this.buttonXPatch_Click);
             // 
             // chkDeadPatch
@@ -185,15 +185,15 @@ namespace WzComparerR2
             this.chkDeadPatch.Name = "chkDeadPatch";
             this.chkDeadPatch.Size = new System.Drawing.Size(88, 18);
             this.chkDeadPatch.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo2.BodyText = "起動後、各ファイルを更新した後、一時ファイルは元のファイルで上書きされます。\r\nこれを行うと、ファイルに必要なスペースが減りますが、問題が発生する可能性があります" +
-    "。\r\n即時パッチを有効にすると、ディスク容量の確認が強制されます。";
+            superTooltipInfo2.BodyText = "啟動後，每次檔案更新後，臨時檔案都會被原始檔案覆蓋。 \r\n這樣做會減少檔案所需的空間，但可能會導致問題。" +
+    "啟用即時更新將強制檢查磁碟空間。";
             superTooltipInfo2.Color = DevComponents.DotNetBar.eTooltipColor.System;
             superTooltipInfo2.CustomSize = new System.Drawing.Size(180, 230);
             superTooltipInfo2.FooterVisible = false;
-            superTooltipInfo2.HeaderText = "即時パッチ";
+            superTooltipInfo2.HeaderText = "即時更新";
             this.superTooltip1.SetSuperTooltip(this.chkDeadPatch, superTooltipInfo2);
             this.chkDeadPatch.TabIndex = 7;
-            this.chkDeadPatch.Text = "即時パッチ";
+            this.chkDeadPatch.Text = "即時更新";
             // 
             // chkPrePatch
             // 
@@ -207,15 +207,14 @@ namespace WzComparerR2
             this.chkPrePatch.Name = "chkPrePatch";
             this.chkPrePatch.Size = new System.Drawing.Size(125, 18);
             this.chkPrePatch.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo3.BodyText = "プリロードはランチャーを開く前とパッチ適用前に開始されます。 プリロードが完了したら、必要なファイルを自由に選択して更新したり、パッチが必要なファイルの順序を変更" +
-    "したりできます。 選択が完了したら、「パッチ」ボタンをクリックしてパッチ適用プロセスを開始してください。";
+            superTooltipInfo3.BodyText = "預先載入將在您更新之前開始。預先載入完成後，您可以自由選擇更新所需的檔案，或更改需要更新的檔案的順序。完成選擇後，按一下「更新」按鈕開始更新過程。";
             superTooltipInfo3.Color = DevComponents.DotNetBar.eTooltipColor.Default;
             superTooltipInfo3.CustomSize = new System.Drawing.Size(180, 140);
             superTooltipInfo3.FooterVisible = false;
-            superTooltipInfo3.HeaderText = "プリロードパッチ";
+            superTooltipInfo3.HeaderText = "預先載入";
             this.superTooltip1.SetSuperTooltip(this.chkPrePatch, superTooltipInfo3);
             this.chkPrePatch.TabIndex = 6;
-            this.chkPrePatch.Text = "プリロードパッチ";
+            this.chkPrePatch.Text = "預先載入";
             // 
             // buttonXOpen2
             // 
@@ -227,7 +226,7 @@ namespace WzComparerR2
             this.buttonXOpen2.Size = new System.Drawing.Size(33, 21);
             this.buttonXOpen2.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonXOpen2.TabIndex = 4;
-            this.buttonXOpen2.Text = "開く";
+            this.buttonXOpen2.Text = "打開";
             this.buttonXOpen2.Click += new System.EventHandler(this.buttonXOpen2_Click);
             // 
             // txtMSFolder
@@ -256,7 +255,7 @@ namespace WzComparerR2
             this.labelX2.Name = "labelX2";
             this.labelX2.Size = new System.Drawing.Size(105, 18);
             this.labelX2.TabIndex = 5;
-            this.labelX2.Text = "メイプルフォルダ";
+            this.labelX2.Text = "遊戲資料夾";
             // 
             // buttonXOpen1
             // 
@@ -268,7 +267,7 @@ namespace WzComparerR2
             this.buttonXOpen1.Size = new System.Drawing.Size(33, 21);
             this.buttonXOpen1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonXOpen1.TabIndex = 1;
-            this.buttonXOpen1.Text = "開く";
+            this.buttonXOpen1.Text = "打開";
             this.buttonXOpen1.Click += new System.EventHandler(this.buttonXOpen1_Click);
             // 
             // txtPatchFile
@@ -297,7 +296,7 @@ namespace WzComparerR2
             this.labelX1.Name = "labelX1";
             this.labelX1.Size = new System.Drawing.Size(93, 18);
             this.labelX1.TabIndex = 2;
-            this.labelX1.Text = "パッチファイル";
+            this.labelX1.Text = "更新檔案";
             // 
             // expandablePanel1
             // 
@@ -328,7 +327,7 @@ namespace WzComparerR2
             this.expandablePanel1.TitleStyle.BorderColor.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelBorder;
             this.expandablePanel1.TitleStyle.ForeColor.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelText;
             this.expandablePanel1.TitleStyle.GradientAngle = 90;
-            this.expandablePanel1.TitleText = "パッチファイルのダウンロード";
+            this.expandablePanel1.TitleText = "下載更新檔案";
             // 
             // flowLayoutPanel1
             // 
@@ -352,7 +351,7 @@ namespace WzComparerR2
             this.buttonXCheck.Size = new System.Drawing.Size(55, 23);
             this.buttonXCheck.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonXCheck.TabIndex = 4;
-            this.buttonXCheck.Text = "検査する";
+            this.buttonXCheck.Text = "檢查";
             this.buttonXCheck.Click += new System.EventHandler(this.buttonXCheck_Click);
             // 
             // expandablePanel2
@@ -397,7 +396,7 @@ namespace WzComparerR2
             this.expandablePanel2.TitleStyle.BorderColor.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelBorder;
             this.expandablePanel2.TitleStyle.ForeColor.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelText;
             this.expandablePanel2.TitleStyle.GradientAngle = 90;
-            this.expandablePanel2.TitleText = "手動パッチャー";
+            this.expandablePanel2.TitleText = "手動更新程式";
             // 
             // chkResolvePngLink
             // 
@@ -538,7 +537,7 @@ namespace WzComparerR2
             this.chkCompare.Name = "chkCompare";
             this.chkCompare.Size = new System.Drawing.Size(67, 16);
             this.chkCompare.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo11.BodyText = "2つの異なるパッチバージョンを比較します。\r\nこの機能はパッチファイルには影響しません。";
+            superTooltipInfo11.BodyText = "2つの異なる更新バージョンを比較します。\r\nこの機能は更新ファイルには影響しません。";
             superTooltipInfo11.Color = DevComponents.DotNetBar.eTooltipColor.System;
             superTooltipInfo11.CustomSize = new System.Drawing.Size(238, 230);
             superTooltipInfo11.FooterVisible = false;
@@ -593,11 +592,11 @@ namespace WzComparerR2
             this.superTabControl1.Location = new System.Drawing.Point(0, 0);
             this.superTabControl1.Name = "superTabControl1";
             this.superTabControl1.ReorderTabsEnabled = true;
-            this.superTabControl1.SelectedTabFont = new System.Drawing.Font("MS PGothic", 9F, System.Drawing.FontStyle.Bold);
+            this.superTabControl1.SelectedTabFont = new System.Drawing.Font("PMingLiU", 9F, System.Drawing.FontStyle.Bold);
             this.superTabControl1.SelectedTabIndex = 2;
             this.superTabControl1.Size = new System.Drawing.Size(360, 180);
             this.superTabControl1.TabAlignment = DevComponents.DotNetBar.eTabStripAlignment.Left;
-            this.superTabControl1.TabFont = new System.Drawing.Font("MS PGothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.superTabControl1.TabFont = new System.Drawing.Font("PMingLiU", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.superTabControl1.TabIndex = 2;
             this.superTabControl1.Tabs.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.superTabItem1,
@@ -653,40 +652,40 @@ namespace WzComparerR2
             // columnHeader1
             // 
             this.columnHeader1.Name = "columnHeader1";
-            this.columnHeader1.Text = "ファイル名";
+            this.columnHeader1.Text = "檔案名";
             this.columnHeader1.Width.Absolute = 100;
             // 
             // columnHeader2
             // 
             this.columnHeader2.Editable = false;
             this.columnHeader2.Name = "columnHeader2";
-            this.columnHeader2.Text = "ﾊﾟｯﾁの種類";
+            this.columnHeader2.Text = "更新種類";
             this.columnHeader2.Width.Absolute = 70;
             // 
             // columnHeader3
             // 
             this.columnHeader3.Editable = false;
             this.columnHeader3.Name = "columnHeader3";
-            this.columnHeader3.Text = "ﾌｧｲﾙｻｲｽﾞ";
+            this.columnHeader3.Text = "檔案大小";
             this.columnHeader3.Width.Absolute = 70;
             // 
             // columnHeader4
             // 
             this.columnHeader4.Editable = false;
             this.columnHeader4.Name = "columnHeader4";
-            this.columnHeader4.Text = "ﾁｪｯｸｻﾑ";
+            this.columnHeader4.Text = "校驗和";
             this.columnHeader4.Width.Absolute = 70;
             // 
             // columnHeader5
             // 
             this.columnHeader5.Name = "columnHeader5";
-            this.columnHeader5.Text = "旧ﾁｪｯｸｻﾑ";
+            this.columnHeader5.Text = "旧校驗和";
             this.columnHeader5.Width.Absolute = 70;
             // 
             // columnHeader6
             // 
             this.columnHeader6.Name = "columnHeader6";
-            this.columnHeader6.Text = "ﾊﾟｯﾁ動作";
+            this.columnHeader6.Text = "更新動作";
             this.columnHeader6.Width.Absolute = 150;
             // 
             // nodeConnector1
@@ -704,7 +703,7 @@ namespace WzComparerR2
             this.superTabItem2.AttachedControl = this.superTabControlPanel2;
             this.superTabItem2.GlobalItem = false;
             this.superTabItem2.Name = "superTabItem2";
-            this.superTabItem2.Text = "ファイル";
+            this.superTabItem2.Text = "檔案";
             // 
             // superTabControlPanel1
             // 
@@ -767,7 +766,7 @@ namespace WzComparerR2
             this.txtPatchState.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.txtPatchState.Size = new System.Drawing.Size(257, 162);
             this.txtPatchState.TabIndex = 1;
-            this.txtPatchState.Text = "このパッチャーは次のタイプのパッチファイルをサポートします:\r\n\r\n1. 手動パッチャー (MaplePatchXXXtoYYY.exe)\r\n2. 自動パッチファイル (XXXXXtoYYYYY.patch、MaplePatchXXXtoYYY.patch)\r\n\r\nMapleStory.exe または MapleStoryT.exe が配置されている有効なメイプルストーリーインストールフォルダを選択する必要があります。\r\n\r\nディスク容量が不足している場合は、「即時パッチ」を有効にすることをお勧めします。";
+            this.txtPatchState.Text = "本更新程式支援以下類型的更新檔案:\r\n\r\n1.手動更新程式（MaplePatchXXXtoYYY.exe）\r\n2.自動更新檔案（XXXXXtoYYYYY.patch、MaplePatchXXXtoYYY.patch）\r\n\r\n. \r\n\r\n如果您的磁碟空間不足，建議您啟用「即時更新」。";
             // 
             // progressBarX1
             // 
@@ -843,7 +842,7 @@ namespace WzComparerR2
             this.expandablePanel3.TitleStyle.BorderColor.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelBorder;
             this.expandablePanel3.TitleStyle.ForeColor.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelText;
             this.expandablePanel3.TitleStyle.GradientAngle = 90;
-            this.expandablePanel3.TitleText = "逆パッチャー";
+            this.expandablePanel3.TitleText = "逆更新ャー";
             // 
             // buttonXCreate
             // 
@@ -882,7 +881,7 @@ namespace WzComparerR2
             this.buttonXOpen4.Size = new System.Drawing.Size(33, 21);
             this.buttonXOpen4.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonXOpen4.TabIndex = 10;
-            this.buttonXOpen4.Text = "開く";
+            this.buttonXOpen4.Text = "打開";
             this.buttonXOpen4.Click += new System.EventHandler(this.buttonXOpen4_Click);
             // 
             // buttonXOpen3
@@ -895,7 +894,7 @@ namespace WzComparerR2
             this.buttonXOpen3.Size = new System.Drawing.Size(33, 21);
             this.buttonXOpen3.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonXOpen3.TabIndex = 7;
-            this.buttonXOpen3.Text = "開く";
+            this.buttonXOpen3.Text = "打開";
             this.buttonXOpen3.Click += new System.EventHandler(this.buttonXOpen3_Click);
             // 
             // txtMSFolder2
@@ -924,7 +923,7 @@ namespace WzComparerR2
             this.labelX4.Name = "labelX4";
             this.labelX4.Size = new System.Drawing.Size(105, 18);
             this.labelX4.TabIndex = 11;
-            this.labelX4.Text = "メイプルフォルダ";
+            this.labelX4.Text = "遊戲資料夾";
             // 
             // labelX5
             // 
@@ -938,7 +937,7 @@ namespace WzComparerR2
             this.labelX5.Name = "labelX5";
             this.labelX5.Size = new System.Drawing.Size(93, 18);
             this.labelX5.TabIndex = 8;
-            this.labelX5.Text = "パッチファイル";
+            this.labelX5.Text = "更新檔案";
             // 
             // labelX3
             // 
@@ -963,11 +962,11 @@ namespace WzComparerR2
             this.ClientSize = new System.Drawing.Size(384, 444);
             this.Controls.Add(this.panelEx1);
             this.DoubleBuffered = true;
-            this.Font = new System.Drawing.Font("MS PGothic", 9F);
+            this.Font = new System.Drawing.Font("PMingLiU", 9F);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "FrmPatcher";
-            this.Text = "ゲームパッチャー";
+            this.Text = "遊戲更新程式";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FrmPatcher_FormClosed);
             ((System.ComponentModel.ISupportInitialize)(this.integerInput1)).EndInit();
             this.expandablePanel1.ResumeLayout(false);
