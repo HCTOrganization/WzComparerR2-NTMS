@@ -411,7 +411,7 @@ namespace WzComparerR2.Network
 
         private void EnableDiscordActivity(string detail="", string state="")
         {
-            DiscordClient = new DiscordRpcClient("1350422354798579844");
+            DiscordClient = new DiscordRpcClient("1362447503164834102");
             DiscordClient.Initialize();
             DiscordClient.SetPresence(new RichPresence()
             {
