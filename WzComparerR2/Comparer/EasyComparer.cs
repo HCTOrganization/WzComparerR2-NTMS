@@ -614,7 +614,7 @@ namespace WzComparerR2.Comparer
             }
         }
 
-        // 變更されたスキルツールチップ出力
+        // 變更された技能ツールチップ出力
         private void SaveSkillTooltip(string skillTooltipPath)
         {
             SkillTooltipRender2[] skillRenderNewOld = new SkillTooltipRender2[2];
@@ -641,7 +641,7 @@ namespace WzComparerR2.Comparer
 
             foreach (var skillID in OutputSkillTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} スキル: {2}", ++count, allCount, skillID);
+                StateInfo = string.Format("{0}/{1} 技能: {2}", ++count, allCount, skillID);
                 StateDetail = "Skill 對比中...";
 
                 string skillType = "";
@@ -743,7 +743,7 @@ namespace WzComparerR2.Comparer
                     Directory.CreateDirectory(Path.Combine(skillTooltipPath, categoryPath));
                 }
 
-                string imageName = Path.Combine(skillTooltipPath, categoryPath, "スキル_" + skillID + "_" + skillName + "_" + skillType + ".png");
+                string imageName = Path.Combine(skillTooltipPath, categoryPath, "技能_" + skillID + "_" + skillName + "_" + skillType + ".png");
                 if (!File.Exists(imageName))
                 {
                     resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
@@ -794,7 +794,7 @@ namespace WzComparerR2.Comparer
             }
         }
 
-        // 變更されたアイテムツールチップ出力
+        // 變更された道具ツールチップ出力
         private void SaveItemTooltip(string itemTooltipPath)
         {
             ItemTooltipRender2[] itemRenderNewOld = new ItemTooltipRender2[2];
@@ -819,7 +819,7 @@ namespace WzComparerR2.Comparer
 
             foreach (var itemID in OutputItemTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} アイテム: {2}", ++count, allCount, itemID);
+                StateInfo = string.Format("{0}/{1} 道具: {2}", ++count, allCount, itemID);
                 StateDetail = "Item 對比中...";
                 string itemType = "";
                 string itemNodePath = null;
@@ -954,7 +954,7 @@ namespace WzComparerR2.Comparer
                 int picH = 13;
                 if (ShowChangeType) GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
 
-                string imageName = Path.Combine(itemTooltipPath, categoryPath, "アイテム_" + itemID + "_" + ItemName + "_" + itemType + ".png");
+                string imageName = Path.Combine(itemTooltipPath, categoryPath, "道具_" + itemID + "_" + ItemName + "_" + itemType + ".png");
                 if (!File.Exists(imageName))
                 {
                     resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
@@ -1852,7 +1852,7 @@ namespace WzComparerR2.Comparer
                     GetCashID(diff.NodeOld);
                 }
             }
-            StateDetail = "ファイルを出力中";
+            StateDetail = "匯出檔案中";
             bool noChange = diffList.Count <= 0;
             sw.WriteLine("<table class=\"img{0}\">", noChange ? " noChange" : "");
             sw.WriteLine("<tr><th colspan=\"3\"><a name=\"{1}\">{0}</a>: 變更: {2}; 新增: {3}; 刪除: {4}</th></tr>",
@@ -1867,7 +1867,7 @@ namespace WzComparerR2.Comparer
 
         private void OutputImg(Wz_Image img, DifferenceType diffType, string imgName, string anchorName, string menuAnchorName, string outputDir, StreamWriter sw)
         {
-            StateDetail = "IMGを抽出中";
+            StateDetail = "IMG匯出中";
             if (!img.TryExtract())
                 return;
 

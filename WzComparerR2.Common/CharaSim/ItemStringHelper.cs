@@ -139,10 +139,10 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.blockGoldHammer: return value == 0 ? null : "無法使用黄金鐵鎚";
                 case GearPropType.cantRepair: return value == 0 ? null : "修理不可";
                 case GearPropType.colorvar: return value == 0 ? null : "#c此裝備可以通過染色顏料進行染色。#";
-                case GearPropType.noLookChange: return value == 0 ? null : "神秘のカナトコ使用不可";
+                case GearPropType.noLookChange: return value == 0 ? null : "無法使用神秘鐵砧";
 
-                case GearPropType.incAllStat_incMHP25: return "Allｽﾃｰﾀｽ：" + sign + value + ", 最大HP : " + sign + (value * 25);// check once Lv 250 set comes out in GMS
-                case GearPropType.incAllStat_incMHP50_incMMP50: return "Allｽﾃｰﾀｽ：" + sign + value + ", 最大HP / 最大MP : " + sign + (value * 50);
+                case GearPropType.incAllStat_incMHP25: return "全部屬性：" + sign + value + ", 最大HP : " + sign + (value * 25);// check once Lv 250 set comes out in GMS
+                case GearPropType.incAllStat_incMHP50_incMMP50: return "全部屬性：" + sign + value + ", 最大HP / 最大MP : " + sign + (value * 50);
                 case GearPropType.incMHP_incMMP: return "最大HP / 最大MP : " + sign + value;
                 case GearPropType.incMHPr_incMMPr: return "最大HP / 最大MP : " + sign + value + "%";
                 case GearPropType.incPAD_incMAD:
@@ -153,8 +153,8 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incARC: return "ARC : " + sign + value;
                 case GearPropType.incAUT: return "AUT : " + sign + value;
 
-                case GearPropType.Etuc: return "エクセプショナル強化かできます。 (最大\n\r: " + value + "回)";
-                case GearPropType.CuttableCount: return "はさみ使用可能回数：" + value + "回";
+                case GearPropType.Etuc: return "可進行卓越強化。 (最大\n\r: " + value + "次)";
+                case GearPropType.CuttableCount: return "可使用剪刀次数：" + value + "次";
                 default: return null;
             }
         }
@@ -607,9 +607,9 @@ namespace WzComparerR2.CharaSim
                 case 152: return "可裝備伊利恩";
                 case 155: return "亞克可以套用";
                 case 162: return "可裝備菈菈";
-                case 164: return "可裝備虎影職業群";
-                case 172: return "琳恩着用可能";
-                case 175: return "墨玄着用可能";
+                case 164: return "可裝備虎影";
+                case 172: return "可裝備琳恩";
+                case 175: return "可裝備墨玄";
 
                 default: return null;
             }
@@ -619,14 +619,14 @@ namespace WzComparerR2.CharaSim
         {
             switch (specJob)
             {
-                case 1: return "ﾋｰﾛｰ､ﾊﾟﾗﾃﾞｨﾝ､";
-                case 2: return "ｱｰｸﾒｲｼﾞ(氷･雷)､ｱｰｸﾒｲｼﾞ(火･毒)､ﾋﾞｼｮｯﾌﾟ\r\n";
-                case 4: return "シャドー､";
-                case 11: return "ｿｳﾙﾏｽﾀｰ､";
-                case 12: return "ﾌﾚｲﾑｳｨｻﾞｰﾄﾞ､";
-                case 22: return "ｴｳﾞｧﾝ､";
-                case 32: return "ﾊﾞﾄﾙﾒｲｼﾞ､";
-                case 172: return "ﾘﾝ､";
+                case 1: return "英雄、聖騎士、";
+                case 2: return "大魔導士、主教、";
+                case 4: return "暗影神偷、";
+                case 11: return "聖魂騎士\r\n";
+                case 12: return "烈焰巫師";
+                case 22: return "龍魔導士、";
+                case 32: return "煉獄巫師、";
+                case 172: return "琳恩";
 
                 default: return null;
             }
@@ -639,14 +639,14 @@ namespace WzComparerR2.CharaSim
             {
                 switch (specJob)
                 {
-                    case 1: extraJobNames.AddRange(new[] { "ﾋｰﾛｰ", "ﾊﾟﾗﾃﾞｨﾝ" }); break;
-                    case 2: extraJobNames.AddRange(new[] { "ｱｰｸﾒｲｼﾞ(氷･雷)", "ｱｰｸﾒｲｼﾞ(火･毒)", "ﾋﾞｼｮｯﾌﾟ" }); break;
-                    case 4: extraJobNames.Add("シャドー"); break;
-                    case 11: extraJobNames.Add("ｿｳﾙﾏｽﾀｰ"); break;
-                    case 12: extraJobNames.Add("ﾌﾚｲﾑｳｨｻﾞｰﾄﾞ"); break;
-                    case 22: extraJobNames.Add("ｴｳﾞｧﾝ"); break;
-                    case 32: extraJobNames.Add("ﾊﾞﾄﾙﾒｲｼﾞ"); break;
-                    case 172: extraJobNames.Add("ﾘﾝ"); break;
+                    case 1: extraJobNames.AddRange(new[] { "英雄", "聖騎士" }); break;
+                    case 2: extraJobNames.AddRange(new[] { "大魔導士", "主教" }); break;
+                    case 4: extraJobNames.Add("暗影神偷"); break;
+                    case 11: extraJobNames.Add("聖魂騎士"); break;
+                    case 12: extraJobNames.Add("烈焰巫師"); break;
+                    case 22: extraJobNames.Add("龍魔導士"); break;
+                    case 32: extraJobNames.Add("煉獄巫師"); break;
+                    case 172: extraJobNames.Add("琳恩"); break;
                     default: extraJobNames.Add(specJob.ToString()); break;
                 }
             }
@@ -758,28 +758,28 @@ namespace WzComparerR2.CharaSim
             switch (jobCode)
             {
                 case 0: return "初心者";
-                case 100: return "ファイター";
-                case 110: return "ソードマン";
-                case 111: return "ナイト";
-                case 112: return "ヒーロー";
-                case 114: return "ヒーロー(6轉)";
-                case 120: return "ページ";
-                case 121: return "クルセイダー";
-                case 122: return "パラディン";
-                case 124: return "パラディン(6轉)";
-                case 130: return "スピアマン";
-                case 131: return "バーサーカー";
-                case 132: return "ダークナイト";
-                case 134: return "ダークナイト(6轉)";
-                case 200: return "マジシャン";
-                case 210: return "ウィザード(火・毒)";
-                case 211: return "メイジ(火・毒)";
-                case 212: return "亞克メイジ(火・毒)";
-                case 214: return "亞克メイジ(火・毒)(6轉)";
-                case 220: return "ウィザード(氷・雷)";
-                case 221: return "メイジ(氷・雷)";
-                case 222: return "亞克メイジ(氷・雷)";
-                case 224: return "亞克メイジ(氷・雷)(6轉)";
+                case 100: return "劍士";
+                case 110: return "狂戰士";
+                case 111: return "十字軍";
+                case 112: return "英雄";
+                case 114: return "英雄(6轉)";
+                case 120: return "見習騎士";
+                case 121: return "騎士";
+                case 122: return "聖騎士";
+                case 124: return "聖騎士(6轉)";
+                case 130: return "槍騎兵";
+                case 131: return "嗜血狂騎";
+                case 132: return "黑騎士";
+                case 134: return "黑騎士(6轉)";
+                case 200: return "法師";
+                case 210: return "巫師（火，毒）";
+                case 211: return "魔導士（火，毒）";
+                case 212: return "大魔導士（火，毒）";
+                case 214: return "大魔導士（火，毒）(6轉)";
+                case 220: return "巫師（冰，雷）";
+                case 221: return "魔導士（冰，雷）";
+                case 222: return "大魔導士（冰，雷）";
+                case 224: return "大魔導士（冰，雷）(6轉)";
                 case 230: return "クレリック";
                 case 231: return "プリースト";
                 case 232: return "ビショップ";
@@ -821,7 +821,7 @@ namespace WzComparerR2.CharaSim
                 case 511: return "バッカニア";
                 case 512: return "バイパー";
                 case 514: return "バイパー(6轉)";
-                case 520: return "ガンス琳恩ガー";
+                case 520: return "ガンスリンガー";
                 case 521: return "ヴァイキング";
                 case 522: return "キャプテン";
                 case 524: return "キャプテン(6轉)";

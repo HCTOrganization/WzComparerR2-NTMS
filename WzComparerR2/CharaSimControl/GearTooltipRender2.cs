@@ -2019,7 +2019,7 @@ namespace WzComparerR2.CharaSimControl
                     extraReq = extraReq + ItemStringHelper.GetReqSpecJobMultipleString(jobCode);
                 }
                 char[] NewLine = { '\r', '\n' };
-                extraReq = extraReq.TrimEnd('､').TrimEnd(NewLine) + "着用可能";
+                extraReq = "可裝備" + extraReq.TrimEnd('､').TrimEnd(NewLine);
             }
             else if (Gear.type == GearType.fan)
             {
