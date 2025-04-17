@@ -182,7 +182,7 @@ namespace WzComparerR2
                 item.GetFileLength();
                 if (item.FileLength > 0)
                 {
-                    switch (MessageBoxEx.Show(string.Format("大小：{0:N0} 位元組\r\n上次更新時間：{1:yyyy/M/d/HH:mm:ss}\r\n是否要下載？ \r\n\r\n是 - 下載\r\n否 - 將更新檔案 URL 複製到剪貼簿\r\n取消 - 不下載", item.FileLength, item.LastModified), "確認", MessageBoxButtons.YesNoCancel))
+                    switch (MessageBoxEx.Show(string.Format("大小：{0:N0} 位元組\r\n上次更新時間：{1:yyyy/M/d/HH:mm:ss}\r\n是否要下載？ \r\n\r\nYes - 下載\r\nNo - 將更新檔案 URL 複製到剪貼簿\r\nCancel - 不下載", item.FileLength, item.LastModified), "確認", MessageBoxButtons.YesNoCancel))
                     {
                         case DialogResult.Yes:
 #if NET6_0_OR_GREATER
