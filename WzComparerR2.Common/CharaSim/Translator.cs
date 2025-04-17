@@ -595,7 +595,7 @@ namespace WzComparerR2.CharaSim
             Dictionary<string, string> preTranslateDict = ConvAfrmTooltipPreTextToDict(orgText);
             StringBuilder postTranslateContent = new StringBuilder();
             StringBuilder untranslatedContent = new StringBuilder();
-            foreach (string tag in preTranslateDict.Keys)
+            foreach (string tag in preTranslateDict.Keys.ToList())
             {
                 string startTag = "<" + tag + ">";
                 string endTag = "</" + tag + ">";
@@ -608,7 +608,7 @@ namespace WzComparerR2.CharaSim
             }
             if (preTranslateDict.Count > 1)
             {
-                foreach (string tag in preTranslateDict.Keys)
+                foreach (string tag in preTranslateDict.Keys.ToList())
                 {
                     string startTag = "<" + tag + ">";
                     string endTag = "</" + tag + ">";
