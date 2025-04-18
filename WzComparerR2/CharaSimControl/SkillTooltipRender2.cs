@@ -232,9 +232,9 @@ namespace WzComparerR2.CharaSimControl
             //绘制desc
             picH = 35;
             if (Skill.HyperStat)
-                GearGraphics.DrawString(g, "[等級上限：" + Skill.MaxLevel + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                GearGraphics.DrawString(g, "[等級上限 : " + Skill.MaxLevel + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
             else if (!Skill.PreBBSkill)
-                GearGraphics.DrawString(g, "[精通等級：" + Skill.MaxLevel + "]", GearGraphics.ItemDetailFont, region.SkillDescLeft, region.TextRight, ref picH, 16);
+                GearGraphics.DrawString(g, "[等級上限 : " + Skill.MaxLevel + "]", GearGraphics.ItemDetailFont, region.SkillDescLeft, region.TextRight, ref picH, 16);
 
             if (sr.Desc != null)
             {
@@ -345,10 +345,10 @@ namespace WzComparerR2.CharaSimControl
                 }
                 string hStr = SummaryParser.GetSkillSummary(Skill, Skill.Level, sr, SummaryParams.Default, skillSummaryOptions, doHighlight, skillIDstr, this.DiffSkillTags);
 
-                GearGraphics.DrawString(g, "[現在等級" + Skill.Level + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                GearGraphics.DrawString(g, "[現在等級 " + Skill.Level + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
                 if (Skill.SkillID / 10000 / 1000 == 10 && Skill.Level == 1 && Skill.ReqLevel > 0)
                 {
-                    GearGraphics.DrawPlainText(g, "[必要等級: " + Skill.ReqLevel.ToString() + "等級以上]", GearGraphics.ItemDetailFont, GearGraphics.skillYellowColor, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                    GearGraphics.DrawPlainText(g, "[必要技能 : " + Skill.ReqLevel.ToString() + "等級以上]", GearGraphics.ItemDetailFont, GearGraphics.skillYellowColor, region.LevelDescLeft, region.TextRight, ref picH, 16);
                 }
                 if (hStr != null)
                 {
@@ -388,10 +388,10 @@ namespace WzComparerR2.CharaSimControl
                     ConvertPerM = this.DisplayPermyriadAsPercent,
                     IgnoreEvalError = this.IgnoreEvalError,
                 });
-                GearGraphics.DrawString(g, "[下次等級" + (Skill.Level + 1) + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                GearGraphics.DrawString(g, "[下次等級 " + (Skill.Level + 1) + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
                 if (Skill.SkillID / 10000 / 1000 == 10 && (Skill.Level + 1) == 1 && Skill.ReqLevel > 0)
                 {
-                    GearGraphics.DrawPlainText(g, "[所需等級: " + Skill.ReqLevel.ToString() + "等級以上]", GearGraphics.ItemDetailFont, GearGraphics.skillYellowColor, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                    GearGraphics.DrawPlainText(g, "[必要技能 : " + Skill.ReqLevel.ToString() + "等級以上]", GearGraphics.ItemDetailFont, GearGraphics.skillYellowColor, region.LevelDescLeft, region.TextRight, ref picH, 16);
                 }
                 if (hStr != null)
                 {
