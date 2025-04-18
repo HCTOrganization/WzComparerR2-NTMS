@@ -57,75 +57,75 @@ namespace WzComparerR2.CharaSimControl
             StringBuilder sbExt = new StringBuilder();
             if (MobInfo.Boss && MobInfo.PartyBonusMob)
             {
-                sbExt.Append("[ミニボス] ");
+                sbExt.Append("MiniBoss ");
             }
             if (MobInfo.Boss && !MobInfo.PartyBonusMob)
             {
-                sbExt.Append("[ボス] ");
+                sbExt.Append("Boss ");
             }
             if (MobInfo.Undead)
             {
-                sbExt.Append("[アンデッド] ");
+                sbExt.Append("不死系 ");
             }
             if (MobInfo.FirstAttack)
             {
-                sbExt.Append("[自動攻撃] ");
+                sbExt.Append("主動攻擊 ");
             }
             if (!MobInfo.BodyAttack)
             {
-                sbExt.Append("[接触ダメージなし] ");
+                sbExt.Append("無觸触傷害 ");
             }
             if (MobInfo.DamagedByMob)
             {
-                sbExt.Append("[モンスターに弱い] ");
+                sbExt.Append("弱小怪物 ");
             }
             if (MobInfo.ChangeableMob)
             {
-                sbExt.Append("[レベルスケール] ");
+                sbExt.Append("只受怪物傷害 ");
             }
             if (MobInfo.AllyMob)
             {
-                sbExt.Append("[同盟モンスター] ");
+                sbExt.Append("同盟怪物 ");
             }
             if (MobInfo.Invincible)
             {
-                sbExt.Append("[無敵] ");
+                sbExt.Append("無敵 ");
             }
             if (MobInfo.NotAttack)
             {
-                sbExt.Append("[非攻撃] ");//Monster can not attack or damage you. But you can damage it.
+                sbExt.Append("無法攻擊 ");
             }
             if (MobInfo.FixedDamage > 0)
             {
-                sbExt.Append("[固定ダメージ: " + ToCJKNumberExpr(MobInfo.FixedDamage) + "] ");
+                sbExt.Append("固定傷害 " + ToCJKNumberExpr(MobInfo.FixedDamage) + " ");
             }
             if (MobInfo.FixedBodyAttackDamageR > 0)
             {
-                sbExt.Append("[固定接触ダメージ: " + MobInfo.FixedBodyAttackDamageR + "%] ");
+                sbExt.Append("固定接触傷害: " + MobInfo.FixedBodyAttackDamageR + "% ");
             }
             if (MobInfo.IgnoreDamage)
             {
-                sbExt.Append("[ダメージを無視] ");
+                sbExt.Append("無視傷害 ");
             }
             if (MobInfo.IgnoreMoveImpact)
             {
-                sbExt.Append("[ラッシュへの免疫] ");
+                sbExt.Append("無視眩暈 ");
             }
             if (MobInfo.IgnoreMovable)
             {
-                sbExt.Append("[気絶/拘束への免疫] ");
+                sbExt.Append("無視束縛 ");
             }
             if (MobInfo.NoDebuff)
             {
-                sbExt.Append("[デバフへの免疫] ");
+                sbExt.Append("無視減益 ");
             }
             if (MobInfo.OnlyNormalAttack)
             {
-                sbExt.Append("[基本攻撃のみでダメージを受ける] ");
+                sbExt.Append("只能承受一般攻擊 ");
             }
             if (MobInfo.OnlyHittedByCommonAttack)
             {
-                sbExt.Append("[基本攻撃のみでヒットする] ");
+                sbExt.Append("只能承受一般攻擊 ");
             }
 
             if (sbExt.Length > 1)
@@ -137,7 +137,7 @@ namespace WzComparerR2.CharaSimControl
 
             if (MobInfo.RemoveAfter > 0)
             {
-                propBlocks.Add(PrepareText(g, "[" + MobInfo.RemoveAfter + "秒後に消える]", GearGraphics.ItemDetailFont, Brushes.GreenYellow, 0, picY));
+                propBlocks.Add(PrepareText(g, "[" + MobInfo.RemoveAfter + "秒後自動消失]", GearGraphics.ItemDetailFont, Brushes.GreenYellow, 0, picY));
                 picY += 16;
             }
 
@@ -146,13 +146,13 @@ namespace WzComparerR2.CharaSimControl
             string mpNum = !string.IsNullOrEmpty(MobInfo.FinalMaxMP) ? ToCJKNumberExpr(long.Parse(MobInfo.FinalMaxMP)) : ToCJKNumberExpr(MobInfo.MaxMP);
             if (MobInfo.ChangeableMob)
             {
-                propBlocks.Add(PrepareText(g, "レベル: 不定値", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-                propBlocks.Add(PrepareText(g, "HP: 不定値", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-                propBlocks.Add(PrepareText(g, "MP: 不定値", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                propBlocks.Add(PrepareText(g, "等級: 不定", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                propBlocks.Add(PrepareText(g, "HP: 不定", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                propBlocks.Add(PrepareText(g, "MP: 不定", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
             }
             else
             {
-                propBlocks.Add(PrepareText(g, "レベル: " + MobInfo.Level, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                propBlocks.Add(PrepareText(g, "等級: " + MobInfo.Level, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
                 propBlocks.Add(PrepareText(g, "HP: " + hpNum, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
                 propBlocks.Add(PrepareText(g, "MP: " + mpNum, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
             }
@@ -164,15 +164,15 @@ namespace WzComparerR2.CharaSimControl
             {
                 propBlocks.Add(PrepareText(g, "MP回復: " + ToCJKNumberExpr(MobInfo.MPRecovery), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
             }
-            propBlocks.Add(PrepareText(g, "物理ダメージ: " + ToCJKNumberExpr(MobInfo.PADamage), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            propBlocks.Add(PrepareText(g, "魔法ダメージ: " + ToCJKNumberExpr(MobInfo.MADamage), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+            propBlocks.Add(PrepareText(g, "物理傷害: " + ToCJKNumberExpr(MobInfo.PADamage), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+            propBlocks.Add(PrepareText(g, "魔法傷害: " + ToCJKNumberExpr(MobInfo.MADamage), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
             propBlocks.Add(PrepareText(g, "物理防御率: " + MobInfo.PDRate + "%", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
             propBlocks.Add(PrepareText(g, "魔法防御率: " + MobInfo.MDRate + "%", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            propBlocks.Add(PrepareText(g, "ノックバック: " + ToCJKNumberExpr(MobInfo.Pushed), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            propBlocks.Add(PrepareText(g, "経験値: " + ToCJKNumberExpr(MobInfo.Exp), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+            propBlocks.Add(PrepareText(g, "擊退率: " + ToCJKNumberExpr(MobInfo.Pushed), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+            propBlocks.Add(PrepareText(g, "經驗值: " + ToCJKNumberExpr(MobInfo.Exp), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
             if (MobInfo.CharismaEXP > 0)
             {
-                propBlocks.Add(PrepareText(g, "カリスマ: +" + MobInfo.CharismaEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                propBlocks.Add(PrepareText(g, "領導力: +" + MobInfo.CharismaEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
             }
             if (MobInfo.SenseEXP > 0)
             {
@@ -188,7 +188,7 @@ namespace WzComparerR2.CharaSimControl
             }
             if (MobInfo.CraftEXP > 0)
             {
-                propBlocks.Add(PrepareText(g, "器用さ: +" + MobInfo.CraftEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                propBlocks.Add(PrepareText(g, "手藝: +" + MobInfo.CraftEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
             }
             if (MobInfo.CharmEXP > 0)
             {
@@ -218,7 +218,7 @@ namespace WzComparerR2.CharaSimControl
 
                 StringBuilder sb = new StringBuilder();
                 //sb.Append("Summons after death: ");
-                sb.Append("復活する姿: ");
+                sb.Append("死亡后召喚: ");
                 int rowCount = 0;
                 foreach (var kv in reviveCounts)
                 {
@@ -354,7 +354,7 @@ namespace WzComparerR2.CharaSimControl
             StringBuilder sb1 = new StringBuilder(),
                 sb2 = new StringBuilder();
 
-            sb1.Append("氷雷火毒聖闇物");
+            sb1.Append("冰雷火毒聖暗物");
             sb2.Append(GetElemAttrResistString(elemAttr.I));
             sb2.Append(GetElemAttrResistString(elemAttr.L));
             sb2.Append(GetElemAttrResistString(elemAttr.F));
@@ -386,12 +386,12 @@ namespace WzComparerR2.CharaSimControl
                 case 1: return "動物型";
                 case 2: return "植物型";
                 case 3: return "魚類型";
-                case 4: return "爬虫類型";
-                case 5: return "精霊型";
-                case 6: return "悪魔型";
+                case 4: return "爬蟲類型";
+                case 5: return "精靈型";
+                case 6: return "惡魔型";
                 case 7: return "不死型";
-                case 8: return "付呪型";
-                default: return "無";
+                case 8: return "無機物型";
+                default: return "無形态";
             }
         }
 
@@ -442,7 +442,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 long part = value / 1_0000;
                 sb.Append(firstPart ? null : " ");
-                sb.AppendFormat("{0}万", part); // Korean: 만, TradChinese: 萬, SimpChinese+Japanese: 万
+                sb.AppendFormat("{0}萬", part); // Korean: 만, TradChinese: 萬, SimpChinese+Japanese: 万
                 value -= part * 1_0000;
                 firstPart = false;
             }
