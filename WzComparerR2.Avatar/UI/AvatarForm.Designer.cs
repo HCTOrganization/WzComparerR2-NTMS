@@ -93,6 +93,8 @@ namespace WzComparerR2.Avatar.UI
             this.btnHayato = new DevComponents.DotNetBar.ButtonItem();
             this.btnKanna = new DevComponents.DotNetBar.ButtonItem();
             this.btnAngelicBuster = new DevComponents.DotNetBar.ButtonItem();
+            this.btnOldBokugen = new DevComponents.DotNetBar.ButtonItem();
+            this.btnNewBokugen = new DevComponents.DotNetBar.ButtonItem();
             this.btnPopuko = new DevComponents.DotNetBar.ButtonItem();
             this.btnPipimi = new DevComponents.DotNetBar.ButtonItem();
             this.btnMegumin = new DevComponents.DotNetBar.ButtonItem();
@@ -197,7 +199,7 @@ namespace WzComparerR2.Avatar.UI
             this.bar1.AutoSyncBarCaption = true;
             this.bar1.CloseSingleTab = true;
             this.bar1.Controls.Add(this.panelDockContainer1);
-            this.bar1.Font = new System.Drawing.Font("MS Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.bar1.Font = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.bar1.GrabHandleStyle = DevComponents.DotNetBar.eGrabHandleStyle.Caption;
             this.bar1.IsMaximized = false;
             this.bar1.Items.AddRange(new DevComponents.DotNetBar.BaseItem[] {
@@ -261,7 +263,7 @@ namespace WzComparerR2.Avatar.UI
             this.bar2.AutoSyncBarCaption = true;
             this.bar2.CloseSingleTab = true;
             this.bar2.Controls.Add(this.panelDockContainer2);
-            this.bar2.Font = new System.Drawing.Font("MS Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.bar2.Font = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.bar2.GrabHandleStyle = DevComponents.DotNetBar.eGrabHandleStyle.Caption;
             this.bar2.IsMaximized = false;
             this.bar2.Items.AddRange(new DevComponents.DotNetBar.BaseItem[] {
@@ -735,6 +737,8 @@ namespace WzComparerR2.Avatar.UI
             this.btnDskytian,
             this.Separator2,
             this.btnAngelicBuster,
+            this.btnOldBokugen,
+            this.btnNewBokugen,
             this.btnKanna,
             this.btnZero,
             this.btnPathfinder,
@@ -752,18 +756,18 @@ namespace WzComparerR2.Avatar.UI
             this.btnNezukoKamado,
             this.btnZenitsuAgatsuma,
             this.btnInosukeHashibira});
-            this.btnCharac.Tooltip = "初期化";
+            this.btnCharac.Tooltip = "初始化";
             // 
             // btnMale
             // 
             this.btnMale.Name = "btnMale";
-            this.btnMale.Text = "男性キャラ";
+            this.btnMale.Text = "男性角色";
             this.btnMale.Click += new System.EventHandler(this.btnMale_Click);
             // 
             // btnFemale
             // 
             this.btnFemale.Name = "btnFemale";
-            this.btnFemale.Text = "女性キャラ";
+            this.btnFemale.Text = "女性角色";
             this.btnFemale.Click += new System.EventHandler(this.btnFemale_Click);
             // 
             // 
@@ -784,89 +788,105 @@ namespace WzComparerR2.Avatar.UI
             // btnHayato
             // 
             this.btnHayato.Name = "btnHayato";
-            this.btnHayato.Text = "ハヤト";
+            this.btnHayato.Text = "劍豪";
             this.btnHayato.Click += new System.EventHandler(this.btnHayato_Click);
             // 
             // 
             // btnKanna
             // 
             this.btnKanna.Name = "btnKanna";
-            this.btnKanna.Text = "カンナ";
+            this.btnKanna.Text = "陰陽師";
             this.btnKanna.Click += new System.EventHandler(this.btnKanna_Click);
+            // 
             // 
             // btnZero
             // 
             this.btnZero.Name = "btnZero";
-            this.btnZero.Text = "ゼロ";
+            this.btnZero.Text = "神之子";
             this.btnZero.Click += new System.EventHandler(this.btnZero_Click);
             // 
             // 
             // btnBeastTamer
             // 
             this.btnBeastTamer.Name = "btnBeastTamer";
-            this.btnBeastTamer.Text = "ビーストテーマー";
+            this.btnBeastTamer.Text = "幻獸師";
             this.btnBeastTamer.Click += new System.EventHandler(this.btnBeastTamer_Click);
+            // 
             // 
             // btnPathfinder
             // 
             this.btnPathfinder.Name = "btnPathfinder";
-            this.btnPathfinder.Text = "パスファインダー";
+            this.btnPathfinder.Text = "天使破壞者";
             this.btnPathfinder.Click += new System.EventHandler(this.btnPathfinder_Click);
             // 
             // 
             // btnLara
             // 
             this.btnLara.Name = "btnLara";
-            this.btnLara.Text = "ララ";
+            this.btnLara.Text = "菈菈";
             this.btnLara.Click += new System.EventHandler(this.btnLara_Click);
             // 
             // 
             // btnLynn
             // 
             this.btnLynn.Name = "btnLynn";
-            this.btnLynn.Text = "リン";
+            this.btnLynn.Text = "琳恩";
             this.btnLynn.Click += new System.EventHandler(this.btnLynn_Click);
             // 
             // 
             // btnAngelicBuster
             // 
             this.btnAngelicBuster.Name = "btnAngelicBuster";
-            this.btnAngelicBuster.Text = "エンジェリックバスター";
+            this.btnAngelicBuster.Text = "天使破壞者";
             this.btnAngelicBuster.Click += new System.EventHandler(this.btnAngelicBuster_Click);
+            // 
+            // 
+            // btnOldBokugen
+            // 
+            this.btnOldBokugen.Name = "btnOldBokugen";
+            this.btnOldBokugen.Text = "墨玄(舊)";
+            this.btnOldBokugen.Click += new System.EventHandler(this.btnOldBokugen_Click);
+            // 
+            // 
+            // btnNewBokugen
+            // 
+            this.btnNewBokugen.Name = "btnNewBokugen";
+            this.btnNewBokugen.Text = "墨玄(新)";
+            this.btnNewBokugen.Click += new System.EventHandler(this.btnNewBokugen_Click);
             // 
             // 
             // btnPopuko
             // 
             this.btnPopuko.Name = "btnPopuko";
-            this.btnPopuko.Text = "ポプ子";
+            this.btnPopuko.Text = "pop子";
             this.btnPopuko.Click += new System.EventHandler(this.btnPopuko_Click);
             // 
             // 
             // btnPipimi
             // 
             this.btnPipimi.Name = "btnPipimi";
-            this.btnPipimi.Text = "ピピ美";
+            this.btnPipimi.Text = "pipi美";
             this.btnPipimi.Click += new System.EventHandler(this.btnPipimi_Click);
             // 
             // 
             // btnMegumin
             // 
             this.btnMegumin.Name = "btnMegumin";
-            this.btnMegumin.Text = "めぐみん";
+            this.btnMegumin.Text = "慧慧";
             this.btnMegumin.Click += new System.EventHandler(this.btnMegumin_Click);
             // 
             // 
             // btnAqua
             // 
             this.btnAqua.Name = "btnAqua";
-            this.btnAqua.Text = "アクア";
+            this.btnAqua.Text = "阿克婭";
             this.btnAqua.Click += new System.EventHandler(this.btnAqua_Click);
             // 
             // 
             // btnDarkness
             // 
             this.btnDarkness.Name = "btnDarkness";
-            this.btnDarkness.Text = "ダクネス";
+            this.btnDarkness.Text = "達克尼斯";
             this.btnDarkness.Click += new System.EventHandler(this.btnDarkness_Click);
             // 
             // 
@@ -901,7 +921,7 @@ namespace WzComparerR2.Avatar.UI
             // 
             this.btnReset.Image = global::WzComparerR2.Avatar.Properties.Resources.arrow_in;
             this.btnReset.Name = "btnReset";
-            this.btnReset.Tooltip = "最初の位置に";
+            this.btnReset.Tooltip = "初始位置";
             this.btnReset.Click += new System.EventHandler(this.btnReset_Click);
             // 
             // btnLock
@@ -909,7 +929,7 @@ namespace WzComparerR2.Avatar.UI
             this.btnLock.AutoCheckOnClick = true;
             this.btnLock.Image = global::WzComparerR2.Avatar.Properties.Resources._lock;
             this.btnLock.Name = "btnLock";
-            this.btnLock.Tooltip = "ロック";
+            this.btnLock.Tooltip = "鎖定";
             // 
             // btnSaveAsGif
             // 
@@ -926,19 +946,19 @@ namespace WzComparerR2.Avatar.UI
             this.btnSaveOptions.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.btnEnableAutosave,
             this.btnSpecifySavePath});
-            this.btnSaveOptions.Tooltip = "自動保存オプション";
+            this.btnSaveOptions.Tooltip = "自動保存設定";
             // 
             // btnEnableAutosave
             // 
             this.btnEnableAutosave.AutoCheckOnClick = true;
             this.btnEnableAutosave.Name = "btnEnableAutosave";
-            this.btnEnableAutosave.Text = "自動保存の有効化";
+            this.btnEnableAutosave.Text = "啟動自動保存";
             this.btnEnableAutosave.Click += new System.EventHandler(this.btnEnableAutosave_Click);
             // 
             // btnSpecifySavePath
             // 
             this.btnSpecifySavePath.Name = "btnSpecifySavePath";
-            this.btnSpecifySavePath.Text = "保存フォルダーを指定...";
+            this.btnSpecifySavePath.Text = "指定保存資料夾...";
             this.btnSpecifySavePath.Enabled = this.btnEnableAutosave.Checked;
             this.btnSpecifySavePath.Click += new System.EventHandler(this.btnSpecifySavePath_Click);
             // dockSite3
@@ -1100,6 +1120,8 @@ namespace WzComparerR2.Avatar.UI
         private DevComponents.DotNetBar.ButtonItem btnLara;
         private DevComponents.DotNetBar.ButtonItem btnLynn;
         private DevComponents.DotNetBar.ButtonItem btnAngelicBuster;
+        private DevComponents.DotNetBar.ButtonItem btnOldBokugen;
+        private DevComponents.DotNetBar.ButtonItem btnNewBokugen;
         private DevComponents.DotNetBar.ButtonItem btnPopuko;
         private DevComponents.DotNetBar.ButtonItem btnPipimi;
         private DevComponents.DotNetBar.ButtonItem btnMegumin;

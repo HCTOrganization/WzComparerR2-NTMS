@@ -1669,7 +1669,7 @@ namespace WzComparerR2.Avatar.UI
         private void btnMale_Click(object sender, EventArgs e)
         {
             if (this.avatar.Parts.All(part => part == null)
-                || MessageBoxEx.Show("基本男キャラを呼びますか？", "確認") == DialogResult.OK)
+                || MessageBoxEx.Show("要呼出男角色的紙娃娃預設嗎？", "確認") == DialogResult.OK)
             {
                 LoadCode("2000,12000,20000,30000,1040036,1060026", 0);
             }
@@ -1678,7 +1678,7 @@ namespace WzComparerR2.Avatar.UI
         private void btnFemale_Click(object sender, EventArgs e)
         {
             if (this.avatar.Parts.All(part => part == null)
-                || MessageBoxEx.Show("基本女キャラを呼びますか？", "確認") == DialogResult.OK)
+                || MessageBoxEx.Show("要呼出女角色的紙娃娃預設嗎？", "確認") == DialogResult.OK)
             {
                 LoadCode("2000,12000,21000,31000,1041046,1061039", 0);
             }
@@ -1687,7 +1687,7 @@ namespace WzComparerR2.Avatar.UI
 
         private void btnLara_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("基本ララを呼びますか？\r\n\r\nYes - 女\r\nNo - 男", "確認", MessageBoxButtons.YesNoCancel))
+            switch (MessageBoxEx.Show("要呼出菈菈的紙娃娃預設嗎？\r\n\r\nYes - 女\r\nNo - 男", "確認", MessageBoxButtons.YesNoCancel))
             {
                 case DialogResult.Yes:
                     LoadCode("2003,12003,51484,61183,1051667,1073551,1372243", 0);
@@ -1704,7 +1704,7 @@ namespace WzComparerR2.Avatar.UI
         }
         private void btnPopuko_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("ポプ子を呼びますか？", "確認", MessageBoxButtons.YesNo))
+            switch (MessageBoxEx.Show("要呼出pop子的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,21000,1005031,1053233,1073245", 0);
@@ -1717,7 +1717,7 @@ namespace WzComparerR2.Avatar.UI
         }
         private void btnPipimi_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("ピピ美を呼びますか？", "確認", MessageBoxButtons.YesNo))
+            switch (MessageBoxEx.Show("要呼出pipi美的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,21000,1005028,1053233,1073245", 0);
@@ -1730,7 +1730,7 @@ namespace WzComparerR2.Avatar.UI
         }
         private void btnMegumin_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("めぐみんを呼びますか？", "確認", MessageBoxButtons.YesNo))
+            switch (MessageBoxEx.Show("要呼出慧慧的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,56037,1006342,1054041,1073789,1703397,1012701", 0);
@@ -1743,7 +1743,7 @@ namespace WzComparerR2.Avatar.UI
         }
         private void btnAqua_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("アクアを呼びますか？", "確認", MessageBoxButtons.YesNo))
+            switch (MessageBoxEx.Show("要呼出阿克婭的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,56036,32750,1054040,1073788,1012804", 0);
@@ -1756,7 +1756,7 @@ namespace WzComparerR2.Avatar.UI
         }
         private void btnDarkness_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("ダクネスを呼びますか？", "確認", MessageBoxButtons.YesNo))
+            switch (MessageBoxEx.Show("要呼出達克尼斯的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,56038,42240,1054042,1073790", 0);
@@ -1769,7 +1769,7 @@ namespace WzComparerR2.Avatar.UI
         }
         private void btnTanjiroKamado_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("竈門炭治郎を呼びますか？", "確認", MessageBoxButtons.YesNo))
+            switch (MessageBoxEx.Show("要呼出竈門炭治郎的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,55074,63820,1054199,1073962,1703528,1022344", 0);
@@ -1782,7 +1782,7 @@ namespace WzComparerR2.Avatar.UI
         }
         private void btnNezukoKamado_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("竈門禰豆子を呼びますか？", "確認", MessageBoxButtons.YesNo))
+            switch (MessageBoxEx.Show("要呼出竈門禰豆子的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,56095,67490,1054200,1073963,1012832", 0);
@@ -1795,7 +1795,7 @@ namespace WzComparerR2.Avatar.UI
         }
         private void btnZenitsuAgatsuma_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("我妻善逸を呼びますか？", "確認", MessageBoxButtons.YesNo))
+            switch (MessageBoxEx.Show("要呼出我妻善逸的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,55075,63830,1054201,1073964,1703529", 0);
@@ -1808,7 +1808,7 @@ namespace WzComparerR2.Avatar.UI
         }
         private void btnInosukeHashibira_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("嘴平伊之助を呼びますか？", "確認", MessageBoxButtons.YesNo))
+            switch (MessageBoxEx.Show("要呼出嘴平伊之助的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,20000,30000,1006567,1050783,1073965,1103743,1703530", 0);
@@ -1821,7 +1821,7 @@ namespace WzComparerR2.Avatar.UI
         }
         private void btnLaraTheSheep_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("著者のララのアバターを呼びますか？", "確認", MessageBoxButtons.YesNo))
+            switch (MessageBoxEx.Show("要呼出作者的菈菈紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,51484,61183,1003968,1052667,1072867,1082552,1703113", 0);
@@ -1835,7 +1835,7 @@ namespace WzComparerR2.Avatar.UI
 
         private void btnDskytian_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("廉姫のアバターを呼びますか？", "確認", MessageBoxButtons.YesNo))
+            switch (MessageBoxEx.Show("要呼出廉姫的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
             {
                 case DialogResult.Yes:
                     LoadCode("2018,12018,21078,61510,1053614", 0);
@@ -1848,7 +1848,7 @@ namespace WzComparerR2.Avatar.UI
         }
         private void btnAngelicBuster_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("基本エンジェリックバスターを呼びますか？\r\n\r\nYes - 新\r\nNo - 古", "確認", MessageBoxButtons.YesNoCancel))
+            switch (MessageBoxEx.Show("要呼出天使破壞者的紙娃娃預設嗎？\r\n\r\nYes - 新\r\nNo - 舊", "確認", MessageBoxButtons.YesNoCancel))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,56660,68181,1051812,1222000", 0);
@@ -1865,7 +1865,7 @@ namespace WzComparerR2.Avatar.UI
         }
         private void btnZero_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("基本ゼロを呼びますか？\r\n\r\nYes - アルファ\r\nNo - ベター", "確認", MessageBoxButtons.YesNoCancel))
+            switch (MessageBoxEx.Show("要呼出神之子的紙娃娃預設嗎？\r\n\r\nYes - 阿爾法\r\nNo - 蓓塔", "確認", MessageBoxButtons.YesNoCancel))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,20294,36633,1052606,1072814,1082521,1102552,1572001", 0);
@@ -1883,7 +1883,7 @@ namespace WzComparerR2.Avatar.UI
 
         private void btnPathfinder_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("基本パスファインダーを呼びますか？\r\n\r\nYes - 女\r\nNo - 男", "確認", MessageBoxButtons.YesNoCancel))
+            switch (MessageBoxEx.Show("要呼出開拓者的紙娃娃預設嗎？\r\n\r\nYes - 女\r\nNo - 男", "確認", MessageBoxButtons.YesNoCancel))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,28141,47525,1005313,1053402,1073334,1592000", 0);
@@ -1901,7 +1901,7 @@ namespace WzComparerR2.Avatar.UI
 
         private void btnLynn_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("基本リンを呼びますか？\r\n\r\nYes - 女\r\nNo - 男", "確認", MessageBoxButtons.YesNoCancel))
+            switch (MessageBoxEx.Show("要呼出琳恩的紙娃娃預設嗎？\r\n\r\nYes - 女\r\nNo - 男", "確認", MessageBoxButtons.YesNoCancel))
             {
                 case DialogResult.Yes:
                     LoadCode("2033,12033,56262,68197,1001163,1051821,1073839,1252000", 0);
@@ -1919,7 +1919,7 @@ namespace WzComparerR2.Avatar.UI
 
         private void btnHayato_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("基本ハヤトを呼びますか？\r\n\r\nYes - 男\r\nNo - 女", "確認", MessageBoxButtons.YesNoCancel))
+            switch (MessageBoxEx.Show("要呼出劍豪的紙娃娃預設嗎？\r\n\r\nYes - 男\r\nNo - 女", "確認", MessageBoxButtons.YesNoCancel))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,20273,36207,1003557,1052466,1072671,1082437,1542011", 0);
@@ -1936,7 +1936,7 @@ namespace WzComparerR2.Avatar.UI
         }
         private void btnBeastTamer_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("基本ビーストテーマーを呼びますか？\r\n\r\nYes - 女\r\nNo - 男", "確認", MessageBoxButtons.YesNoCancel))
+            switch (MessageBoxEx.Show("要呼出幻獸師的紙娃娃預設嗎？\r\n\r\nYes - 女\r\nNo - 男", "確認", MessageBoxButtons.YesNoCancel))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,24209,38257,1004062,1051378,1072902,1102661,1259000", 0);
@@ -1953,7 +1953,7 @@ namespace WzComparerR2.Avatar.UI
         }
         private void btnKanna_Click(object sender, EventArgs e)
         {
-            switch (MessageBoxEx.Show("基本カンナを呼びますか？\r\n\r\nYes - 女\r\nNo - 男", "確認", MessageBoxButtons.YesNoCancel))
+            switch (MessageBoxEx.Show("要呼出陰陽師的紙娃娃預設嗎？\r\n\r\nYes - 女\r\nNo - 男", "確認", MessageBoxButtons.YesNoCancel))
             {
                 case DialogResult.Yes:
                     LoadCode("2000,12000,21676,37086,1003573,1052482,1072674,1082453,1552011", 0);
@@ -1969,11 +1969,47 @@ namespace WzComparerR2.Avatar.UI
             }
         }
 
+        private void btnOldBokugen_Click(object sender, EventArgs e)
+        {
+            switch (MessageBoxEx.Show("要呼出墨玄(舊版)的紙娃娃預設嗎？\r\n\r\nYes - 男\r\nNo - 女", "確認", MessageBoxButtons.YesNoCancel))
+            {
+                case DialogResult.Yes:
+                    LoadCode("2000,12000,50646,60050,1050575,1073510,1403000", 0);
+                    return;
+
+                case DialogResult.No:
+                    LoadCode("2000,12000,51659,61040,1051647,1073897,1403000", 0);
+                    return;
+
+                case DialogResult.Cancel:
+                default:
+                    return;
+            }
+        }
+
+        private void btnNewBokugen_Click(object sender, EventArgs e)
+        {
+            switch (MessageBoxEx.Show("要呼出墨玄(新版)的紙娃娃預設嗎？\r\n\r\nYes - 男\r\nNo - 女", "確認", MessageBoxButtons.YesNoCancel))
+            {
+                case DialogResult.Yes:
+                    LoadCode("2041,12041,55661,63740,1050758,1070188,1403000", 0);
+                    return;
+
+                case DialogResult.No:
+                    LoadCode("2041,12041,56683,67230,1051837,1071203,1403000", 0);
+                    return;
+
+                case DialogResult.Cancel:
+                default:
+                    return;
+            }
+        }
+
         private void btnSaveAsGif_Click(object sender, EventArgs e)
         {
             if (this.avatar.Body == null || this.avatar.Head == null)
             {
-                MessageBoxEx.Show("キャラクターはありません。");
+                MessageBoxEx.Show("未呼出角色。");
                 return;
             }
 
