@@ -21,17 +21,34 @@ namespace WzComparerR2
             InitializeComponent();
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("MS PGothic"), 9f);
+            this.Font = new Font(new FontFamily("SimSun"), 9f);
 #endif
             this.comboBoxEx1.SelectedIndex = 0;
             this.comboBoxEx2.SelectedIndex = 0;
 
             cmbPreferredStringCopyMethod.Items.AddRange(new[]
                 {
-                new ComboItem("元の文字列") { Value = 0 },
-                new ComboItem("プレーン文字列") { Value = 1 },
-                new ComboItem("ﾒｲﾌﾟﾙWiki最適化文字列") { Value = 2 },
+                new ComboItem("原始文本") { Value = 0 },
+                new ComboItem("未格式化文本") { Value = 1 },
+                new ComboItem("楓之谷Wiki優化文本") { Value = 2 },
             });
+
+            this.comboBoxEx3.Items.AddRange((new[] { "黒", "赤", "橙", "黄", "緑", "青", "紫", "茶" }).Select(color =>
+            {
+                var comboBoxItem = new DevComponents.DotNetBar.ComboBoxItem();
+                comboBoxItem.Text = color;
+                return comboBoxItem;
+            }).ToArray());
+
+            this.comboBoxEx4.Items.AddRange((new[] { "黒", "青", "赤", "緑", "茶", "エメラルド", "紫", "アメジスト" }).Select(color =>
+            {
+                var comboBoxItem = new DevComponents.DotNetBar.ComboBoxItem();
+                comboBoxItem.Text = color;
+                return comboBoxItem;
+            }).ToArray());
+
+            this.comboBoxEx3.SelectedIndex = 0;
+            this.comboBoxEx4.SelectedIndex = 0;
         }
 
         [Link]
@@ -213,6 +230,21 @@ namespace WzComparerR2
             set { checkBoxX20.Checked = value; }
         }
 
+        [Link]
+        public int Item_CosmeticHairColor
+        {
+            get { return comboBoxEx3.SelectedIndex; }
+            set { comboBoxEx3.SelectedIndex = value; }
+        }
+
+        [Link]
+        public int Item_CosmeticFaceColor
+        {
+            get { return comboBoxEx4.SelectedIndex; }
+            set { comboBoxEx4.SelectedIndex = value; }
+        }
+
+
         public int PreferredStringCopyMethod
         {
             get
@@ -235,10 +267,17 @@ namespace WzComparerR2
             set { chkCopyParsedSkillString.Checked = value; }
         }
 
+        public bool Enable22AniStyle
+        {
+            get { return chkEnable22AniStyle.Checked; }
+            set { chkEnable22AniStyle.Checked = value; }
+        }
+
         public void Load(CharaSimConfig config)
         {
             this.PreferredStringCopyMethod = config.PreferredStringCopyMethod;
             this.CopyParsedSkillString = config.CopyParsedSkillString;
+            this.Enable22AniStyle = config.Enable22AniStyle;
             var linkProp = this.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(prop => prop.GetCustomAttributes(typeof(LinkAttribute), false).Length > 0);
 
@@ -260,6 +299,7 @@ namespace WzComparerR2
         {
             config.PreferredStringCopyMethod = this.PreferredStringCopyMethod;
             config.CopyParsedSkillString = this.CopyParsedSkillString;
+            config.Enable22AniStyle = this.Enable22AniStyle;
             var linkProp = this.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(prop => prop.GetCustomAttributes(typeof(LinkAttribute), false).Length > 0);
 

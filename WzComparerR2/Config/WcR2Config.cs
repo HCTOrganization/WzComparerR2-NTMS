@@ -20,10 +20,15 @@ namespace WzComparerR2.Config
             this.NoPatcherPrompt = false;
             this.WzVersionVerifyMode = WzLib.WzVersionVerifyMode.Fast;
             this.PreferredLayout = 0;
-            this.DesiredLanguage = "ja";
+            this.DesiredLanguage = "zh-TW";
             this.MozhiBackend = "https://mozhi.aryak.me";
             this.DetectCurrency = "auto";
             this.DesiredCurrency = "none";
+            this.OpenAIExtraOption = false;
+            this.EnableAutoUpdate = true;
+            this.OpenAISystemMessage = "";
+            this.LMTemperature = 0.7;
+            this.MaximumToken = -1;
         }
 
         /// <summary>
@@ -76,6 +81,71 @@ namespace WzComparerR2.Config
         {
             get { return (ConfigItem<string>)this["MozhiBackend"]; }
             set { this["MozhiBackend"] = value; }
+        }
+
+        /// <summary>
+        /// Language Model Configuration
+        /// </summary>
+        [ConfigurationProperty("LanguageModel")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> LanguageModel
+        {
+            get { return (ConfigItem<string>)this["LanguageModel"]; }
+            set { this["LanguageModel"] = value; }
+        }
+
+        /// <summary>
+        /// OpenAI Backend Configuration
+        /// </summary>
+        [ConfigurationProperty("OpenAIBackend")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> OpenAIBackend
+        {
+            get { return (ConfigItem<string>)this["OpenAIBackend"]; }
+            set { this["OpenAIBackend"] = value; }
+        }
+
+        /// <summary>
+        /// Enable OpenAI Extra Option Configuration
+        /// </summary>
+        [ConfigurationProperty("OpenAIExtraOption")]
+        public ConfigItem<bool> OpenAIExtraOption
+        {
+            get { return (ConfigItem<bool>)this["OpenAIExtraOption"]; }
+            set { this["OpenAIExtraOption"] = value; }
+        }
+
+        /// <summary>
+        /// OpenAI System Message Configuration
+        /// </summary>
+        [ConfigurationProperty("OpenAISystemMessage")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> OpenAISystemMessage
+        {
+            get { return (ConfigItem<string>)this["OpenAISystemMessage"]; }
+            set { this["OpenAISystemMessage"] = value; }
+        }
+
+        /// <summary>
+        /// Language Model Temperature Configuration
+        /// </summary>
+        [ConfigurationProperty("LMTemperature")]
+        [ConfigurationCollection(typeof(ConfigArrayList<double>.ItemElement))]
+        public ConfigItem<double> LMTemperature
+        {
+            get { return (ConfigItem<double>)this["LMTemperature"]; }
+            set { this["LMTemperature"] = value; }
+        }
+
+        /// <summary>
+        /// Language Model Maximum Token Configuration
+        /// </summary>
+        [ConfigurationProperty("MaximumToken")]
+        [ConfigurationCollection(typeof(ConfigArrayList<int>.ItemElement))]
+        public ConfigItem<int> MaximumToken
+        {
+            get { return (ConfigItem<int>)this["MaximumToken"]; }
+            set { this["MaximumToken"] = value; }
         }
 
         /// <summary>
@@ -140,6 +210,16 @@ namespace WzComparerR2.Config
         {
             get { return (ConfigItem<string>)this["nxSecretKey"]; }
             set { this["nxSecretKey"] = value; }
+        }
+
+        /// <summary>
+        /// Automatic Update Configuration
+        /// </summary>
+        [ConfigurationProperty("EnableAutoUpdate")]
+        public ConfigItem<bool> EnableAutoUpdate
+        {
+            get { return (ConfigItem<bool>)this["EnableAutoUpdate"]; }
+            set { this["EnableAutoUpdate"] = value; }
         }
 
         /// <summary>

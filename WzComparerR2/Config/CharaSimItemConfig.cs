@@ -49,5 +49,18 @@ namespace WzComparerR2.Config
             get { return (bool)this["showCashPurchasePrice"]; }
             set { this["showCashPurchasePrice"] = value; }
         }
+        [ConfigurationProperty("cosmeticHairColor", DefaultValue = 0)]
+        public int CosmeticHairColor
+        {
+            get { return (int)this["cosmeticHairColor"]; }
+            set { this["cosmeticHairColor"] = value; }
+        }
+
+        [ConfigurationProperty("cosmeticFaceColor", DefaultValue = 0)]
+        public int CosmeticFaceColor
+        {
+            get { return (int)this["cosmeticFaceColor"]; }
+            set { this["cosmeticFaceColor"] = value; }
+        }
     }
 }

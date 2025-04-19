@@ -109,7 +109,7 @@ namespace WzComparerR2
             this.buttonOK.Symbol = "";
             this.buttonOK.SymbolSize = 1F;
             this.buttonOK.TabIndex = 0;
-            this.buttonOK.Text = "OK";
+            this.buttonOK.Text = "確認";
             // 
             // buttonCancel
             // 
@@ -123,7 +123,7 @@ namespace WzComparerR2
             this.buttonCancel.Size = new System.Drawing.Size(65, 23);
             this.buttonCancel.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonCancel.TabIndex = 1;
-            this.buttonCancel.Text = "キャンセル";
+            this.buttonCancel.Text = "取消";
             // 
             // tableLayoutPanel1
             // 
@@ -205,7 +205,7 @@ namespace WzComparerR2
             this.labelX13.Name = "labelX13";
             this.labelX13.Size = new System.Drawing.Size(94, 20);
             this.labelX13.TabIndex = 38;
-            this.labelX13.Text = "高さ (px)";
+            this.labelX13.Text = "高 (px)";
             // 
             // line2
             // 
@@ -232,7 +232,7 @@ namespace WzComparerR2
             this.labelX1.Name = "labelX1";
             this.labelX1.Size = new System.Drawing.Size(74, 20);
             this.labelX1.TabIndex = 0;
-            this.labelX1.Text = "クリップ長";
+            this.labelX1.Text = "長";
             // 
             // line1
             // 
@@ -259,7 +259,7 @@ namespace WzComparerR2
             this.labelX3.Name = "labelX3";
             this.labelX3.Size = new System.Drawing.Size(94, 20);
             this.labelX3.TabIndex = 8;
-            this.labelX3.Text = "開始時間(ミリ秒)";
+            this.labelX3.Text = "開始時間(毫秒)";
             // 
             // labelX4
             // 
@@ -274,7 +274,7 @@ namespace WzComparerR2
             this.labelX4.Name = "labelX4";
             this.labelX4.Size = new System.Drawing.Size(94, 20);
             this.labelX4.TabIndex = 9;
-            this.labelX4.Text = "終了時間(ミリ秒)";
+            this.labelX4.Text = "終了時間(毫秒)";
             // 
             // labelX2
             // 

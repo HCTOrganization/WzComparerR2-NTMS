@@ -14,6 +14,7 @@ namespace WzComparerR2.Network
         public NetworkConfig()
         {
             this.LogLevel = WzComparerR2.Network.LogLevel.Info;
+            this.ShowActivityOnDiscord = true;
         }
 
         [ConfigurationProperty("nickName")]
@@ -42,6 +43,13 @@ namespace WzComparerR2.Network
         {
             get { return (ConfigItem<LogLevel>)this["logLevel"]; }
             set { this["logLevel"] = value; }
+        }
+
+        [ConfigurationProperty("showActivityOnDiscord")]
+        public ConfigItem<bool> ShowActivityOnDiscord
+        {
+            get { return (ConfigItem<bool>)this["showActivityOnDiscord"]; }
+            set { this["showActivityOnDiscord"] = value; }
         }
     }
 }

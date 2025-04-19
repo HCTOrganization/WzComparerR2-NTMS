@@ -35,6 +35,8 @@ namespace WzComparerR2
         public static string LibPath { get; private set; }
         private static List<Assembly> loadedPluginAssemblies = new List<Assembly>();
         public static string NxAPIBaseURL = "https://open.api.nexon.com";
+        public static string WcR2MajorVersion = "v5.7.0.";
+        public static string CheckUpdateURL = "https://api.hikaricalyx.com/WcR2-NTMS/v1/GetLatestUpdate";
         private
 
         /// <summary>
@@ -139,7 +141,23 @@ namespace WzComparerR2
         }
 
         static string GetManagedDllDirectory() => Path.Combine(Application.StartupPath, "Lib");
-        static string GetUnmanagedDllDirectory() => Path.Combine(Application.StartupPath, "Lib", Environment.Is64BitProcess ? "x64" : "x86");
+        static string GetUnmanagedDllDirectory() => Path.Combine(Application.StartupPath, "Lib", GetArchitecture());
+
+        public static string GetArchitecture()
+        {
+            switch (RuntimeInformation.ProcessArchitecture)
+            {
+                case Architecture.X86:
+                    return "x86";
+                case Architecture.X64:
+                    return "x64";
+                case Architecture.Arm64:
+                    return "ARM64";
+                default:
+                    return "unknown";
+
+            }
+        }
 
         [DllImport("kernel32.dll")]
         static extern bool SetDllDirectory(string path);

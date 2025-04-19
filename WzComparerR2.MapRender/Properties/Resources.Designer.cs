@@ -783,6 +783,36 @@ namespace WzComparerR2.MapRender.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap UI_UIMap_img_MiniMap_Min_c {
+            get {
+                object obj = ResourceManager.GetObject("UI_UIMap_img_MiniMap_Min_c", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap UI_UIMap_img_MiniMap_Min_e {
+            get {
+                object obj = ResourceManager.GetObject("UI_UIMap_img_MiniMap_Min_e", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap UI_UIMap_img_MiniMap_Min_w {
+            get {
+                object obj = ResourceManager.GetObject("UI_UIMap_img_MiniMap_Min_w", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap UI_UIMap_img_WorldMap_backgrnd {
             get {
                 object obj = ResourceManager.GetObject("UI_UIMap_img_WorldMap_backgrnd", resourceCulture);

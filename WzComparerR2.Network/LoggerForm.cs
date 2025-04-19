@@ -88,6 +88,7 @@ namespace WzComparerR2.Network
                     case LogLevel.Info: return Color.Black;
                     case LogLevel.Warn: return Color.Orange;
                     case LogLevel.Error: return Color.Red;
+                    case LogLevel.Think: return Color.DarkGreen;
                     default: return Color.DarkBlue;
                 }
             }

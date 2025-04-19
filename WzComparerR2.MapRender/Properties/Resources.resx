@@ -412,4 +412,13 @@
   <data name="UI_UIMap_img_WorldMap_mapInfo_layer_mapInfoCover" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\UI.UIMap.img.WorldMap.mapInfo.layer_mapInfoCover.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="UI_UIMap_img_MiniMap_Min_c" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\UI.UIMap.img.MiniMap.Min.c.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="UI_UIMap_img_MiniMap_Min_e" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\UI.UIMap.img.MiniMap.Min.e.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="UI_UIMap_img_MiniMap_Min_w" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\UI.UIMap.img.MiniMap.Min.w.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

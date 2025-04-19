@@ -85,6 +85,14 @@ namespace WzComparerR2.MapRender
 
         }
 
+        public void soundEffDispose() // only for soundEff
+        {
+            Bass.ChannelSetSync(hStream, SyncFlags.End, 0, (handle, channel, data, user) =>
+            {
+                this.Dispose();
+            });
+        }
+
         public enum PlayState
         {
             Stopped = 0,

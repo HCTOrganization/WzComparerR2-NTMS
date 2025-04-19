@@ -129,7 +129,7 @@
             this.labelX1.Name = "labelX1";
             this.labelX1.Size = new System.Drawing.Size(42, 16);
             this.labelX1.TabIndex = 2;
-            this.labelX1.Text = "コマンド";
+            this.labelX1.Text = "指令";
             // 
             // textBoxX1
             // 
@@ -151,7 +151,7 @@
             // 
             this.dockContainerItem1.Control = this.panelDockContainer1;
             this.dockContainerItem1.Name = "dockContainerItem1";
-            this.dockContainerItem1.Text = "ネットワークロガー";
+            this.dockContainerItem1.Text = "網路記錄器";
             // 
             // LoggerForm
             // 

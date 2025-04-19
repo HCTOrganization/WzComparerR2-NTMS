@@ -41,6 +41,8 @@ namespace WzComparerR2.CharaSim
         public int PlatinumHammer { get; set; }
         public bool CanPotential { get; internal set; }
         public string EpicHs { get; internal set; }
+        public BitmapOrigin ToolTipPreview {  get; set; }
+        public Bitmap AndroidBitmap { get; set; }
 
         public bool FixLevel { get; internal set; }
         public List<GearLevelInfo> Levels { get; internal set; }
@@ -74,6 +76,11 @@ namespace WzComparerR2.CharaSim
             get { return GetBooleanValue(GearPropType.cash); }
         }
 
+        public bool Pachinko
+        {
+            get { return GetBooleanValue(GearPropType.pachinko); }
+        }
+
         public bool GetBooleanValue(GearPropType type)
         {
             int value;
@@ -88,7 +95,7 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        public int GetMaxStar()
+        public int GetMaxStar(bool isPostNEXTClient=false)
         {
             if (!this.HasTuc)
             {
@@ -110,17 +117,35 @@ namespace WzComparerR2.CharaSim
             int reqLevel;
             this.Props.TryGetValue(GearPropType.reqLevel, out reqLevel);
             int[] data = null;
-            foreach (int[] item in starData)
+            if (isPostNEXTClient)
             {
-                if (reqLevel >= item[0])
+                foreach (int[] item in starDataPostNEXT)
                 {
-                    data = item;
-                }
-                else
-                {
-                    break;
+                    if (reqLevel >= item[0])
+                    {
+                        data = item;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
             }
+            else
+            {
+                foreach (int[] item in starData)
+                {
+                    if (reqLevel >= item[0])
+                    {
+                        data = item;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
             if (data == null)
             {
                 return 0;
@@ -130,15 +155,21 @@ namespace WzComparerR2.CharaSim
         }
 
         private static readonly int[][] starData = new int[][] {
+            new[]{ 0, 5, 3 },
+            new[]{ 95, 8, 5 },
+            new[]{ 108, 10, 8 },
+            new[]{ 118, 15, 10 },
+            new[]{ 128, 20, 12 },
+            new[]{ 138, 25, 15 },
+        };
+
+        private static readonly int[][] starDataPostNEXT = new int[][] {
             new[]{ 0, 5, 3 }, 
             new[]{ 95, 8, 5 }, 
             new[]{ 108, 10, 8 },
-            //new[]{ 120, 12, 10 }, before GMS 25 Stars update
             new[]{ 118, 15, 10 },
-            //new[]{ 130, 13, 12 }, before GMS 25 Stars update
             new[]{ 128, 20, 12 },
-            //new[]{ 140, 15, 15 }, before GMS 25 Stars update
-            new[]{ 138, 25, 15 },
+            new[]{ 138, 30, 15 },
         };
 
         public override object Clone()
@@ -448,6 +479,11 @@ namespace WzComparerR2.CharaSim
                         return (GearType)(code / 10);
                 }
             }
+            // Jewel support
+            if (code / 10000 == 178)
+            {
+                return (GearType)(code / 10000);
+            }
             // MSN support
             if (code / 10000 == 179)
             {
@@ -472,6 +508,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.emblem:
                 case GearType.powerSource:
                 case GearType.bit:
+                case GearType.jewel:
                 case (GearType)3: //发型
                     return 2;
             }
@@ -664,6 +701,13 @@ namespace WzComparerR2.CharaSim
                             if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png)
                             {
                                 gear.Sample = BitmapOrigin.CreateFromNode(subNode, findNode);
+                            }
+                            break;
+
+                        case "toolTipPreview":
+                            if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png)
+                            {
+                                gear.ToolTipPreview = BitmapOrigin.CreateFromNode(subNode, findNode);
                             }
                             break;
 

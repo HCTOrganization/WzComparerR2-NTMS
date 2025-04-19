@@ -8,6 +8,7 @@ using WzComparerR2.PluginBase;
 using WzComparerR2.WzLib;
 using WzComparerR2.Common;
 using WzComparerR2.Avatar.UI;
+using WzComparerR2.AvatarCommon;
 using System.Linq;
 
 namespace WzComparerR2.Avatar

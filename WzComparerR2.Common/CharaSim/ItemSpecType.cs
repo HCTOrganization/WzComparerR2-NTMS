@@ -12,5 +12,6 @@ namespace WzComparerR2.CharaSim
         reqSkillProficiency,
         recipeValidDay,
         recipeUseCount,
+        cosmetic,
     }
 }

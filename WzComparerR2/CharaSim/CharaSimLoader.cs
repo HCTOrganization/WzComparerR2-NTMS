@@ -123,6 +123,8 @@ namespace WzComparerR2.CharaSim
         {
             LoadedSetItems.Clear();
             LoadedExclusiveEquips.Clear();
+            LoadedCommoditiesBySN.Clear();
+            LoadedCommoditiesByItemId.Clear();
         }
 
         public static int GetActionDelay(string actionName, Wz_Node wzNode = null)

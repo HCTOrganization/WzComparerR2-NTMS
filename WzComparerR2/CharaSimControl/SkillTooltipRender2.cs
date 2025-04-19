@@ -34,6 +34,7 @@ namespace WzComparerR2.CharaSimControl
         public bool IgnoreEvalError { get; set; } = false;
         public bool ShowRangeCoordinates { get; set; } = true;
         public bool IsWideMode { get; set; } = true;
+        public bool Enable22AniStyle { get; set; }
         public Dictionary<string, List<string>> DiffSkillTags { get; set; } = new Dictionary<string, List<string>>();
         public Wz_Node wzNode { get; set; } = null;
 
@@ -51,7 +52,7 @@ namespace WzComparerR2.CharaSimControl
                 return null;
             }
 
-            CanvasRegion region = this.IsWideMode ? CanvasRegion.Wide : CanvasRegion.Original;
+            CanvasRegion region = this.IsWideMode ? (this.Enable22AniStyle ? CanvasRegion._22AniWide : CanvasRegion.Wide) : (this.Enable22AniStyle ? CanvasRegion._22AniOriginal : CanvasRegion.Original);
 
             int picHeight;
             List<int> splitterH;
@@ -105,7 +106,7 @@ namespace WzComparerR2.CharaSimControl
             g.DrawImage(originBmp, 0, 0, new Rectangle(0, 0, originBmp.Width, picHeight), GraphicsUnit.Pixel);
 
             //左上角
-            g.DrawImage(Resource.UIToolTip_img_Skill_Frame_cover, 3, 3);
+            if (!Enable22AniStyle) g.DrawImage(Resource.UIToolTip_img_Skill_Frame_cover, 3, 3);
 
             if (this.ShowObjectID)
             {
@@ -233,7 +234,7 @@ namespace WzComparerR2.CharaSimControl
             if (Skill.HyperStat)
                 GearGraphics.DrawString(g, "[等級上限 : " + Skill.MaxLevel + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
             else if (!Skill.PreBBSkill)
-                GearGraphics.DrawString(g, "[最高等級: " + Skill.MaxLevel + "]", GearGraphics.ItemDetailFont, region.SkillDescLeft, region.TextRight, ref picH, 16);
+                GearGraphics.DrawString(g, "[等級上限 : " + Skill.MaxLevel + "]", GearGraphics.ItemDetailFont, region.SkillDescLeft, region.TextRight, ref picH, 16);
 
             if (sr.Desc != null)
             {
@@ -267,7 +268,7 @@ namespace WzComparerR2.CharaSimControl
             if (Skill.TimeLimited)
             {
                 DateTime time = DateTime.Now.AddDays(7d);
-                string expireStr = time.ToString("有效日期: yyyy年 M月 d日 HH時 mm分");
+                string expireStr = time.ToString("有效期 : yyyy年 M月 d日 HH時 mm分");
                 // GearGraphics.DrawString(g, "#c" + expireStr + "#", GearGraphics.ItemDetailFont, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 GearGraphics.DrawString(g, "#c" + expireStr + "#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
             }
@@ -280,13 +281,13 @@ namespace WzComparerR2.CharaSimControl
                     sr2.Name = "(null)";
                 }
                 DateTime time = DateTime.Now.AddMinutes(Skill.RelationSkill.Item2);
-                string expireStr = time.ToString("有効期間: yyyy年 M月 d日 H時 m分");
+                string expireStr = time.ToString("有效期 : yyyy年 M月 d日 H時 m分");
                 // GearGraphics.DrawString(g, "#c" + sr2.Name + "の " + expireStr + "#", GearGraphics.ItemDetailFont, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 GearGraphics.DrawString(g, "#c" + sr2.Name + "的 " + expireStr + "#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
             }
             if (Skill.IsSequenceOn)
             {
-                if (doHighlight && DiffSkillTags.ContainsKey(skillIDstr) && DiffSkillTags[skillIDstr].Contains("IsSequenceOn"))
+                if (doHighlight && DiffSkillTags.ContainsKey(skillIDstr) && DiffSkillTags[skillIDstr].Contains("isSequenceOn"))
                 {
                     GearGraphics.DrawString(g, "#$g可登入技能順序#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
@@ -297,13 +298,13 @@ namespace WzComparerR2.CharaSimControl
             }
             if (Skill.IsPetAutoBuff)
             {
-                if (doHighlight && DiffSkillTags.ContainsKey(skillIDstr) && DiffSkillTags[skillIDstr].Contains("IsPetAutoBuff"))
+                if (doHighlight && DiffSkillTags.ContainsKey(skillIDstr) && DiffSkillTags[skillIDstr].Contains("isPetAutoBuff"))
                 {
-                    GearGraphics.DrawString(g, "#$gペットバフ自動技能登録可能#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
+                    GearGraphics.DrawString(g, "#$g可登入寵物Buff自動技能#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
                 else
                 {
-                    GearGraphics.DrawString(g, "#cペットバフ自動技能登録可能#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
+                    GearGraphics.DrawString(g, "#c可登入寵物Buff自動技能#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
             }
             /*if (Skill.ReqLevel > 0)
@@ -344,10 +345,10 @@ namespace WzComparerR2.CharaSimControl
                 }
                 string hStr = SummaryParser.GetSkillSummary(Skill, Skill.Level, sr, SummaryParams.Default, skillSummaryOptions, doHighlight, skillIDstr, this.DiffSkillTags);
 
-                GearGraphics.DrawString(g, "[現在等級" + Skill.Level + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                GearGraphics.DrawString(g, "[現在等級 " + Skill.Level + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
                 if (Skill.SkillID / 10000 / 1000 == 10 && Skill.Level == 1 && Skill.ReqLevel > 0)
                 {
-                    GearGraphics.DrawPlainText(g, "[需要等級: " + Skill.ReqLevel.ToString() + "級以上]", GearGraphics.ItemDetailFont, GearGraphics.skillYellowColor, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                    GearGraphics.DrawPlainText(g, "[必要技能 : " + Skill.ReqLevel.ToString() + "等級以上]", GearGraphics.ItemDetailFont, GearGraphics.skillYellowColor, region.LevelDescLeft, region.TextRight, ref picH, 16);
                 }
                 if (hStr != null)
                 {
@@ -387,10 +388,10 @@ namespace WzComparerR2.CharaSimControl
                     ConvertPerM = this.DisplayPermyriadAsPercent,
                     IgnoreEvalError = this.IgnoreEvalError,
                 });
-                GearGraphics.DrawString(g, "[下次等級" + (Skill.Level + 1) + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                GearGraphics.DrawString(g, "[下次等級 " + (Skill.Level + 1) + "]", GearGraphics.ItemDetailFont, region.LevelDescLeft, region.TextRight, ref picH, 16);
                 if (Skill.SkillID / 10000 / 1000 == 10 && (Skill.Level + 1) == 1 && Skill.ReqLevel > 0)
                 {
-                    GearGraphics.DrawPlainText(g, "[需要技能: " + Skill.ReqLevel.ToString() + "等級以上]", GearGraphics.ItemDetailFont, GearGraphics.skillYellowColor, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                    GearGraphics.DrawPlainText(g, "[必要技能 : " + Skill.ReqLevel.ToString() + "等級以上]", GearGraphics.ItemDetailFont, GearGraphics.skillYellowColor, region.LevelDescLeft, region.TextRight, ref picH, 16);
                 }
                 if (hStr != null)
                 {
@@ -427,7 +428,7 @@ namespace WzComparerR2.CharaSimControl
                 //delay rendering v6 splitter
                 splitterH.Add(picH);
                 picH += 15;
-                GearGraphics.DrawPlainText(g, "[連結技能]", GearGraphics.ItemDetailFont, Color.FromArgb(119, 204, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
+                GearGraphics.DrawPlainText(g, "[組合技能]", GearGraphics.ItemDetailFont, Color.FromArgb(119, 204, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
                 picH += 4;
                 BitmapOrigin icon = new BitmapOrigin();
                 Wz_Node skillNode = PluginBase.PluginManager.FindWz(string.Format(@"Skill\{0}.img\skill\{1}", Skill.AddAttackToolTipDescSkill / 10000, Skill.AddAttackToolTipDescSkill));
@@ -494,35 +495,35 @@ namespace WzComparerR2.CharaSimControl
                 List<string> attr = new List<string>();
                 if (Skill.ReqLevel > 0)
                  {
-                    attr.Add("必要等級:" + Skill.ReqLevel);
+                    attr.Add("所需等級: " + Skill.ReqLevel);
                 }
                 if (Skill.Invisible)
                 {
-                    attr.Add("不在技能窗口顯示");
+                    attr.Add("隐藏技能");
                 }
                 if (Skill.Hyper != HyperSkillType.None)
                 {
-                    attr.Add("超技能:" + Skill.Hyper);
+                    attr.Add("超級技能: " + Skill.Hyper);
                 }
                 if (Skill.CombatOrders)
                 {
                     // attr.Add("コンバットオーダー適用");
                     if (doHighlight && DiffSkillTags.ContainsKey(skillIDstr) && DiffSkillTags[skillIDstr].Contains("combatOrders"))
                     {
-                        attr.Add("#gコンバットオーダー適用#");
+                        attr.Add("#g戰鬥命令加成#");
                     }
                     else
                     {
-                        attr.Add("コンバットオーダー適用");
+                        attr.Add("戰鬥命令加成");
                     }
                 }
                 if (Skill.NotRemoved)
                 {
-                    attr.Add("無法解除Buff");
+                    attr.Add("無法被移除");
                 }
                 if (Skill.MasterLevel > 0 && Skill.MasterLevel < Skill.MaxLevel)
                 {
-                    attr.Add("マスターリーブック未使用時のマスター等級: Lv." + Skill.MasterLevel);
+                    attr.Add("初始掌握: Lv." + Skill.MasterLevel);
                 }
 
                 if (attr.Count > 0)
@@ -535,7 +536,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 foreach (string action in Skill.Action)
                 {
-                    skillDescEx.Add("#c[技能延時] " + action + ": " + CharaSimLoader.GetActionDelay(action, this.wzNode) + " ms#");
+                    skillDescEx.Add("#c[技能延遲] " + action + ": " + CharaSimLoader.GetActionDelay(action, this.wzNode) + " ms#");
                 }
             }
 
@@ -595,7 +596,7 @@ namespace WzComparerR2.CharaSimControl
         private void DrawV6SkillDotline(Graphics g, int x1, int x2, int y)
         {
             // here's a trick that we won't draw left and right part because it looks the same as background border.
-            var picCenter = Resource.UIToolTip_img_Skill_Frame_dotline_c;
+            var picCenter = Enable22AniStyle ? Resource.UIToolTipNew_img_Skill_Frame_dotline_c : Resource.UIToolTip_img_Skill_Frame_dotline_c;
             using (var brush = new TextureBrush(picCenter))
             {
                 brush.TranslateTransform(x1, y);
@@ -647,6 +648,30 @@ namespace WzComparerR2.CharaSimControl
                 TitleCenterX = 215,
                 SplitterX1 = 4,
                 SplitterX2 = 424,
+                SkillDescLeft = 92,
+                LinkedSkillNameLeft = 49,
+                LevelDescLeft = 13,
+                TextRight = 411,
+            };
+
+            public static CanvasRegion _22AniOriginal { get; } = new CanvasRegion()
+            {
+                Width = 290,
+                TitleCenterX = 144,
+                SplitterX1 = 12,
+                SplitterX2 = 276,
+                SkillDescLeft = 90,
+                LinkedSkillNameLeft = 46,
+                LevelDescLeft = 8,
+                TextRight = 272,
+            };
+
+            public static CanvasRegion _22AniWide { get; } = new CanvasRegion()
+            {
+                Width = 430,
+                TitleCenterX = 215,
+                SplitterX1 = 12,
+                SplitterX2 = 416,
                 SkillDescLeft = 92,
                 LinkedSkillNameLeft = 49,
                 LevelDescLeft = 13,

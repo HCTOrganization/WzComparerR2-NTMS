@@ -105,8 +105,8 @@ namespace WzComparerR2.MapRender.UI
             ComboBox cmbQuestList = new ComboBox();
             cmbQuestList.Width = 100;
             cmbQuestList.Height = 20;
-            Canvas.SetLeft(cmbQuestList, 250);
-            Canvas.SetTop(cmbQuestList, 23);
+            Canvas.SetLeft(cmbQuestList, 450);
+            Canvas.SetTop(cmbQuestList, 42);
             cmbQuestList.SetBinding(ComboBox.SelectedIndexProperty, new Binding(UIWorldMap.SelectedQuestLimitIndexProperty) { Source = this, Mode = BindingMode.TwoWay });
             canvas.Children.Add(cmbQuestList);
             this.CmbQuestList = cmbQuestList;
@@ -114,8 +114,8 @@ namespace WzComparerR2.MapRender.UI
             ComboBox cmbFogList = new ComboBox();
             cmbFogList.Width = 100;
             cmbFogList.Height = 20;
-            Canvas.SetLeft(cmbFogList, 250);
-            Canvas.SetTop(cmbFogList, 23);
+            Canvas.SetLeft(cmbFogList, 450);
+            Canvas.SetTop(cmbFogList, 42);
             cmbFogList.SetBinding(ComboBox.SelectedIndexProperty, new Binding(UIWorldMap.SelectedFogIndexProperty) { Source = this, Mode = BindingMode.TwoWay });
             canvas.Children.Add(cmbFogList);
             this.CmbFogList = cmbFogList;
@@ -712,6 +712,20 @@ namespace WzComparerR2.MapRender.UI
                 }
 
                 var baseOrigin = new PointF((int)this.Width / 2, (int)this.Height / 2);
+                if (baseImg?.Texture != null)
+                {
+                    var baseImgRect = new Rect(baseOrigin.X - baseImg.Origin.X, baseOrigin.Y - baseImg.Origin.Y, baseImg.Texture.Width, baseImg.Texture.Height);
+                    // workaround for CMS WorldMap177
+                    int overflowThreshold = 10;
+                    if (baseImgRect.Left < -overflowThreshold || baseImgRect.Right > this.Width + overflowThreshold
+                        || baseImgRect.Top < -overflowThreshold || baseImgRect.Bottom > this.Height + overflowThreshold)
+                    {
+                        // draw baseImg aligned center by adjusting baseOrigin
+                        PointF baseImgOriginNew = new PointF(baseImg.Texture.Width / 2, baseImg.Texture.Height / 2);
+                        PointF originDiff = new PointF(baseImgOriginNew.X - baseImg.Origin.X, baseImgOriginNew.Y - baseImg.Origin.Y);
+                        baseOrigin = new PointF(baseOrigin.X - originDiff.X, baseOrigin.Y - originDiff.Y);
+                    }
+                }
 
                 var drawOrder = new List<DrawItem>();
                 var addItem = new Action<TextureItem, object>((texture, obj) =>

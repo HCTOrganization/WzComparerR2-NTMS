@@ -4,7 +4,7 @@ using System.Text;
 using System.Drawing;
 using WzComparerR2.WzLib;
 
-namespace WzComparerR2.Avatar
+namespace WzComparerR2.AvatarCommon
 {
     public class Skin
     {

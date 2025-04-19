@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.IO.Compression;
+using System.Threading;
+using System.Threading.Tasks;
 using WzComparerR2.Patcher.Builder;
 using PartialStream = WzComparerR2.WzLib.Utilities.PartialStream;
 
@@ -15,6 +18,7 @@ namespace WzComparerR2.Patcher
             this.patchFile = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read,
                 0x4000, FileOptions.Asynchronous | FileOptions.RandomAccess);
             this.NoticeEncoding = Encoding.Default;
+            this.ThrowOnValidationFailed = true;
         }
 
         private const int MAX_PATH = 260;
@@ -25,7 +29,8 @@ namespace WzComparerR2.Patcher
 
         private string noticeText;
         private List<PatchPartContext> patchParts;
-        private Dictionary<string, uint> oldFileHash;
+        private Dictionary<string, FileHash> oldFileHash;
+
         public Encoding NoticeEncoding { get; set; }
 
         public List<PatchPartContext> PatchParts
@@ -38,12 +43,13 @@ namespace WzComparerR2.Patcher
             get { return noticeText; }
         }
 
-        public Dictionary<string, uint> OldFileHash
+        public Dictionary<string, FileHash> OldFileHash
         {
             get { return oldFileHash; }
         }
 
         public bool? IsKMST1125Format { get; private set; }
+        public bool ThrowOnValidationFailed { get; set; }
 
         public event EventHandler<PatchingEventArgs> PatchingStateChanged;
 
@@ -51,11 +57,10 @@ namespace WzComparerR2.Patcher
         /// <summary>
         /// 验证并初始化补丁解压流。
         /// </summary>
-        public void OpenDecompress()
+        public void OpenDecompress(CancellationToken cancellationToken)
         {
-            this.patchBlock = TrySplit(this.patchFile);
-
-            if (this.patchBlock == null)
+            var patchBlock = TrySplit(this.patchFile);
+            if (patchBlock == null)
             {
                 throw new Exception("解凍エラー。ストリームからパッチブロックが見つかりません。");
             }
@@ -64,7 +69,7 @@ namespace WzComparerR2.Patcher
             patchBlock.Seek(8, SeekOrigin.Begin);
             int ver = r.ReadInt32();
             uint checkSum0 = r.ReadUInt32();
-            uint checkSum1 = CheckSum.ComputeHash(patchBlock, patchBlock.Length - 0x10);
+            uint checkSum1 = CheckSum.ComputeHash(patchBlock, patchBlock.Length - 0x10, cancellationToken);
             VerifyCheckSum(checkSum0, checkSum1, "PatchFile", "0");
 
             patchBlock.Seek(16, SeekOrigin.Begin);
@@ -73,7 +78,15 @@ namespace WzComparerR2.Patcher
             {
                 patchBlock.Seek(-2, SeekOrigin.Current);
             }
-            this.inflateStream = new InflateStream(patchBlock);
+
+#if NET6_0_OR_GREATER
+            // wrap InflateStream with BufferedStream for better performance in net6+
+            bool buffered = true;
+#else
+            bool buffered = false;
+#endif
+            this.patchBlock = patchBlock;
+            this.inflateStream = new InflateStream(patchBlock, buffered);
         }
 
         private PartialStream TrySplit(Stream metaStream)
@@ -155,35 +168,35 @@ namespace WzComparerR2.Patcher
             return patchBlock;
         }
 
-        public long PrePatch()
+        public long PrePatch(CancellationToken cancellationToken)
         {
             if (this.inflateStream == null)
             {
-                this.OpenDecompress();
+                this.OpenDecompress(cancellationToken);
             }
-            else if (this.inflateStream.Position > 0) //重置到初始化
+            else
             {
-                this.inflateStream = new InflateStream(this.inflateStream);
+                this.inflateStream.Reset();
             }
 
             var patchParts = new List<PatchPartContext>();
             var r = new BinaryReader(this.inflateStream);
 
-            if (this.TryReadKMST1125FileHashList(r, out var fileHash))
+            if (this.TryReadKMST1125FileHashList(r, out var fileHashMap))
             {
-                this.oldFileHash = fileHash;
+                this.oldFileHash = fileHashMap;
                 this.IsKMST1125Format = true;
             }
             else
             {
                 this.IsKMST1125Format = false;
                 // reset file cursor
-                this.inflateStream = new InflateStream(this.inflateStream);
-                r = new BinaryReader(this.inflateStream);
+                this.inflateStream.Reset();
             }
 
             while (true)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 PatchPartContext part = ReadPatchPart(r);
 
                 if (part == null)
@@ -191,9 +204,9 @@ namespace WzComparerR2.Patcher
                     break;
                 }
 
-                if (this.IsKMST1125Format.Value && this.oldFileHash.TryGetValue(part.FileName, out uint value))
+                if (this.IsKMST1125Format.Value && this.oldFileHash.TryGetValue(part.FileName, out var fileHash))
                 {
-                    part.OldChecksum = value;
+                    part.OldChecksum = fileHash.Hash;
                 }
 
                 patchParts.Add(part);
@@ -279,9 +292,9 @@ namespace WzComparerR2.Patcher
         /// 对于已经解压的patch文件，向客户端执行更新过程。
         /// </summary>
         /// <param Name="mapleStoryFolder">冒险岛客户端所在文件夹。</param>
-        public void Patch(string mapleStoryFolder)
+        public void Patch(string mapleStoryFolder, CancellationToken cancellationToken = default)
         {
-            this.Patch(mapleStoryFolder, mapleStoryFolder);
+            this.Patch(mapleStoryFolder, mapleStoryFolder, cancellationToken);
         }
 
         /// <summary>
@@ -289,13 +302,13 @@ namespace WzComparerR2.Patcher
         /// </summary>
         /// <param Name="mapleStoryFolder">冒险岛客户端所在文件夹。</param>
         /// <param Name="tempFileFolder">生成临时文件的文件夹。</param>
-        public void Patch(string mapleStoryFolder, string tempFileFolder)
+        public void Patch(string mapleStoryFolder, string tempFileFolder, CancellationToken cancellationToken = default)
         {
             string tempDir = CreateRandomDir(tempFileFolder);
 
             if (this.inflateStream.Position > 0) //重置到初始化
             {
-                this.inflateStream = new InflateStream(this.inflateStream);
+                this.inflateStream.Reset();
             }
 
             if (this.patchParts == null) //边读取边执行
@@ -305,19 +318,20 @@ namespace WzComparerR2.Patcher
                 {
                     this.oldFileHash = fileHash;
                     this.IsKMST1125Format = true;
-                    this.ValidateFileHash(mapleStoryFolder);
+                    this.ValidateFileHash(mapleStoryFolder, this.ThrowOnValidationFailed, cancellationToken);
                 }
                 else
                 {
                     this.IsKMST1125Format = false;
                     // reset file cursor
-                    this.inflateStream = new InflateStream(this.inflateStream);
+                    this.inflateStream.Reset();
                     r = new BinaryReader(this.inflateStream);
                 }
 
                 this.patchParts = new List<PatchPartContext>();
                 while (true)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     PatchPartContext part = ReadPatchPart(r);
 
                     if (part == null)
@@ -343,7 +357,7 @@ namespace WzComparerR2.Patcher
             }
             else  //按照调整后顺序执行
             {
-                this.ValidateFileHash(mapleStoryFolder);
+                this.ValidateFileHash(mapleStoryFolder, this.ThrowOnValidationFailed, cancellationToken);
 
                 foreach (PatchPartContext part in this.patchParts)
                 {
@@ -353,7 +367,7 @@ namespace WzComparerR2.Patcher
                             CreateNewFile(part, tempDir);
                             break;
                         case 1:
-                            RebuildFile(part, tempDir, mapleStoryFolder);
+                            RebuildFile(part, tempDir, mapleStoryFolder, cancellationToken);
                             break;
                         case 2:
                             break;
@@ -381,17 +395,20 @@ namespace WzComparerR2.Patcher
             SafeDeleteDirectory(tempDir);
         }
 
-        private bool TryReadKMST1125FileHashList(BinaryReader r, out Dictionary<string, uint> fileHash)
+        private bool TryReadKMST1125FileHashList(BinaryReader r, out Dictionary<string, FileHash> fileHash)
         {
-            fileHash = new Dictionary<string, uint>();
             try
             {
+                fileHash = new Dictionary<string, FileHash>();
                 int count = r.ReadInt32();
                 for (int i = 0; i < count; i++)
                 {
                     string fn = this.ReadStringWithLength(r, MAX_PATH);
                     uint checksum = r.ReadUInt32();
-                    fileHash.Add(fn, checksum);
+                    fileHash.Add(fn, new FileHash
+                    {
+                        Hash = checksum,
+                    });
                 }
                 return true;
             }
@@ -402,24 +419,42 @@ namespace WzComparerR2.Patcher
             }
         }
 
-        private void ValidateFileHash(string msDir)
+        private void ValidateFileHash(string msDir, bool failOnValidationFailed, CancellationToken cancellationToken = default)
         {
             if (this.OldFileHash != null && this.OldFileHash.Count > 0)
             {
                 foreach (var kv in this.OldFileHash)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    // The temporary context is only used for triggering event.
                     var part = new PatchPartContext(kv.Key, -1, -1)
                     {
                         OldFilePath = Path.Combine(msDir, kv.Key)
                     };
-                    uint oldCheckSum1;
+
                     this.OnPrepareVerifyOldChecksumBegin(part);
-                    using (var fs = new FileStream(part.OldFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    uint oldCheckSum = 0;
+                    if (!File.Exists(part.OldFilePath))
                     {
-                        oldCheckSum1 = CheckSum.ComputeHash(fs, fs.Length);
+                        kv.Value.VerifyState = FileHashVerifyState.FileNotFound;
+                    }
+                    else
+                    {
+                        using (var fs = new FileStream(part.OldFilePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        {
+                            oldCheckSum = CheckSum.ComputeHash(fs, fs.Length, cancellationToken);
+                        }
+                        part.OldChecksum = kv.Value.Hash;
+                        part.OldChecksumActual = oldCheckSum;
+                        kv.Value.ActualHash = oldCheckSum;
+                        kv.Value.VerifyState = (oldCheckSum == kv.Value.Hash) ? FileHashVerifyState.Verified : FileHashVerifyState.HashNotMatch;
                     }
                     this.OnPrepareVerifyOldChecksumEnd(part);
-                    VerifyCheckSum(kv.Value, oldCheckSum1, part.FileName, "origin");
+
+                    if (failOnValidationFailed)
+                    {
+                        VerifyCheckSum(kv.Value.Hash, oldCheckSum, part.FileName, "origin");
+                    }
                 }
             }
         }
@@ -523,12 +558,12 @@ namespace WzComparerR2.Patcher
             if (part.NewFileLength <= 0)
                 return;
 
-            this.InflateStreamSeek(part.Offset);
+            this.inflateStream.Seek(part.Offset, SeekOrigin.Begin);
             FileStream tempFileStream = new FileStream(tempFileName, FileMode.Create, FileAccess.ReadWrite);
             part.TempFilePath = tempFileName;
             this.OnTempFileCreated(part);
             //创建文件同时计算checksum
-            uint checkSum1 = StreamUtils.MoveStreamWithCrc32(this.inflateStream, tempFileStream, part.NewFileLength, 0U, this.PatchingStateChanged);
+            uint checkSum1 = StreamUtils.MoveStreamWithCrc32(this.inflateStream, tempFileStream, part.NewFileLength, 0U);
             tempFileStream.Flush();
 
             this.OnVerifyNewChecksumBegin(part);
@@ -539,7 +574,7 @@ namespace WzComparerR2.Patcher
             this.OnTempFileClosed(part);
         }
 
-        public void RebuildFile(PatchPartContext part, string tempDir, string msDir)
+        public void RebuildFile(PatchPartContext part, string tempDir, string msDir, CancellationToken cancellationToken = default)
         {
             this.OnPatchStart(part);
             string tempFileName = Path.Combine(tempDir, part.FileName);
@@ -548,6 +583,7 @@ namespace WzComparerR2.Patcher
 
             var oldWzFiles = new Dictionary<string, FileStream>();
             FileStream tempFileStream = null;
+            bool deferredVerifyFileHash = false;
 
             FileStream openFile(string fileName)
             {
@@ -557,6 +593,10 @@ namespace WzComparerR2.Patcher
                 }
                 if (!oldWzFiles.TryGetValue(fileName, out var fs))
                 {
+                    if (deferredVerifyFileHash && this.oldFileHash != null)
+                    {
+                        verifyDependencyFileHash(fileName);
+                    }
                     fs = new FileStream(Path.Combine(msDir, fileName), FileMode.Open, FileAccess.Read, FileShare.Read);
                     oldWzFiles.Add(fileName, fs);
                 }
@@ -572,34 +612,108 @@ namespace WzComparerR2.Patcher
                 tempFileStream?.Close();
             }
 
+            void verifyDependencyFileHash(string depFileName)
+            {
+                if (!this.OldFileHash.TryGetValue(depFileName, out var fileHash))
+                {
+                    throw new Exception($"古いファイルハッシュが存在しません。ファイル名: {depFileName}");
+                }
+                switch (fileHash.VerifyState)
+                {
+                    case FileHashVerifyState.NotVerified:
+                        throw new Exception($"古いファイルは検証されていません。ファイル名: {depFileName}");
+                    case FileHashVerifyState.FileNotFound:
+                        throw new Exception($"古いファイルが見つかりません。ファイル名: {depFileName}");
+                    case FileHashVerifyState.HashNotMatch:
+                        throw new Exception($"古いファイルのハッシュが一致しません。ファイル名: {depFileName}");
+                }
+            }
+
+            void verifyOldFileHash(out bool skipUpdate)
+            {
+                skipUpdate = false;
+                var oldWzFile = openFile(part.FileName);
+                this.OnVerifyOldChecksumBegin(part);
+                uint oldCheckSumActual = CheckSum.ComputeHash(oldWzFile, oldWzFile.Length);
+                this.OnVerifyOldChecksumEnd(part);
+
+                if (oldCheckSumActual == part.NewChecksum && (part.NewFileLength == 0 || oldWzFile.Length == part.NewFileLength)) // file is updated
+                {
+                    skipUpdate = true;
+                }
+                else if (part.OldChecksum != null)
+                {
+                    VerifyCheckSum(part.OldChecksum.Value, oldCheckSumActual, part.FileName, "origin");
+                }
+            }
+
+            void skipIfNeeded()
+            {
+                if (part.NewFileLength == 0)
+                {
+                    this.inflateStream.Seek(part.Offset, SeekOrigin.Begin);
+                    BinaryReader r = new BinaryReader(this.inflateStream);
+                    // Here is a trick that to leverage CalcNewFileLength method to skip this file.
+                    part.NewFileLength = CalcNewFileLength(part, r);
+                }
+                else
+                {
+                    // prepatch executed, patcher can jump to the next part outside.
+                }
+            }
+
             try
             {
                 if (this.IsKMST1125Format == true)
                 {
-                    // skip old file checking
+                    // prepatch enabled
+                    if (this.OldFileHash != null && part.DependencyFiles.Count > 0)
+                    {
+                        // verify self
+                        if (File.Exists(part.OldFilePath))
+                        {
+                            if (this.OldFileHash != null && this.OldFileHash.TryGetValue(part.FileName, out var fileHash))
+                            {
+                                if (fileHash.ActualHash == part.NewChecksum)
+                                {
+                                    // file already updated, skip.
+                                    skipIfNeeded();
+                                    OnFileSkipped(part);
+                                    return;
+                                }
+                            }
+                            else
+                            {
+                                verifyOldFileHash(out bool skipUpdate);
+                                if (skipUpdate)
+                                {
+                                    skipIfNeeded();
+                                    OnFileSkipped(part);
+                                    return;
+                                }
+                            }
+                        }
+
+                        // verify dependencies
+                        foreach (var depFileName in part.DependencyFiles)
+                        {
+                            verifyDependencyFileHash(depFileName);
+                        }
+                    }
+                    else
+                    {
+                        // no DependencyFiles means prepatch is disabled, check old files on-demand.
+                        deferredVerifyFileHash = true;
+                    }
                 }
                 else if (part.OldChecksum != null)
                 {
-                    var oldWzFile = openFile(part.FileName);
-                    part.OldFileLength = (int)oldWzFile.Length;
-                    this.OnVerifyOldChecksumBegin(part);
-                    uint oldCheckSum1 = CheckSum.ComputeHash(oldWzFile, oldWzFile.Length, this.PatchingStateChanged); //旧版本文件实际hash
-                    this.OnVerifyOldChecksumEnd(part);
-                    try
+                    verifyOldFileHash(out bool skipUpdate);
+                    if (skipUpdate)
                     {
-                        VerifyCheckSum(part.OldChecksum.Value, oldCheckSum1, part.FileName, "origin");
-                    }
-                    catch
-                    {
-                        if (oldWzFile.Length == part.NewFileLength && oldCheckSum1 == part.NewChecksum) //文件已更新的场合
-                        {
-                            oldWzFile.Close();
-                            return;
-                        }
-                        else
-                        {
-                            throw;
-                        }
+                        skipIfNeeded();
+                        OnFileSkipped(part);
+                        return;
                     }
                 }
 
@@ -615,7 +729,7 @@ namespace WzComparerR2.Patcher
                 this.OnTempFileCreated(part);
                 uint newCheckSum1 = 0;
 
-                this.InflateStreamSeek(part.Offset);
+                this.inflateStream.Seek(part.Offset, SeekOrigin.Begin);
                 BinaryReader r = new BinaryReader(this.inflateStream);
 
                 double patchProc = 0;
@@ -628,6 +742,7 @@ namespace WzComparerR2.Patcher
                 int preLoadByteCount = 0;
                 while (true)
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     cmd = r.ReadInt32();
                     RebuildFileOperation op = null;
                     if (cmd != 0)
@@ -892,24 +1007,12 @@ namespace WzComparerR2.Patcher
                 Directory.CreateDirectory(dir);
         }
 
-        private void VerifyCheckSum(uint checksum0, uint checksum1, string fileName, string reason)
+        private void VerifyCheckSum(uint expected, uint actual, string fileName, string reason)
         {
-            if (checksum0 != checksum1)
+            if (expected != actual)
             {
-                throw new Exception(string.Format("ファイル「{0}」のチェックサムが一致しません({1})。 (0x{2:x8}, 0x{3:x8})", fileName, reason, checksum0, checksum1));
-            }
-        }
-
-        private void InflateStreamSeek(long offset)
-        {
-            try
-            {
-                this.inflateStream.Seek(offset, SeekOrigin.Begin);
-            }
-            catch
-            {
-                this.inflateStream = new InflateStream(this.inflateStream);
-                this.inflateStream.Seek(offset, SeekOrigin.Begin);
+                if (fileName == "MapleStory.exe" || fileName == "MapleStoryT.exe") reason = "このクライアントに最新の「Minor Patch」をインストールしましたか? ";
+                throw new Exception(string.Format("ファイル「{0}」のチェックサムが一致しません({1})。 (予想: 0x{2:x8}, 実際: 0x{3:x8})", fileName, reason, expected, actual));
             }
         }
 
@@ -977,6 +1080,11 @@ namespace WzComparerR2.Patcher
             PatchingEventArgs e = new PatchingEventArgs(part, PatchingState.ApplyFile);
             OnPatchingStateChanged(e);
         }
+        private void OnFileSkipped(PatchPartContext part)
+        {
+            PatchingEventArgs e = new PatchingEventArgs(part, PatchingState.FileSkipped);
+            OnPatchingStateChanged(e);
+        }
         #endregion
 
         ~WzPatcher()
@@ -1007,6 +1115,21 @@ namespace WzComparerR2.Patcher
             this.patchFile = null;
             this.patchBlock = null;
             this.inflateStream = null;
+        }
+
+        public class FileHash
+        {
+            public uint Hash { get; set; }
+            public uint ActualHash { get; set; }
+            public FileHashVerifyState VerifyState { get; set; }
+        }
+
+        public enum FileHashVerifyState
+        {
+            NotVerified = 0,
+            Verified,
+            HashNotMatch,
+            FileNotFound,
         }
     }
 }

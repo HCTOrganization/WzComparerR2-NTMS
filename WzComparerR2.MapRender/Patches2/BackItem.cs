@@ -19,19 +19,15 @@ namespace WzComparerR2.MapRender.Patches2
         public int Rx { get; set; }
         public int Ry { get; set; }
         public int Alpha { get; set; }
-        public int Xc { get; set; }
-        public int Yc { get; set; }
-        public bool Splited { get; set; }
         public TileMode TileMode { get; set; }
         public int ScreenMode { get; set; }
         public bool Flip { get; set; }
         public bool IsFront { get; set; }
-        public List<Tuple<int, int>> Quest { get; set; }
-        
+        public List<QuestInfo> Quest { get; private set; } = new List<QuestInfo>();
 
         public ItemView View { get; set; }
 
-        public static BackItem LoadFromNode(Wz_Node node, int x = 0, int y = 0)
+        public static BackItem LoadFromNode(Wz_Node node)
         {
             var item = new BackItem()
             {
@@ -52,34 +48,16 @@ namespace WzComparerR2.MapRender.Patches2
                 ScreenMode = node.Nodes["screenMode"].GetValueEx(0),
                 Flip = node.Nodes["f"].GetValueEx(false),
                 IsFront = node.Nodes["front"].GetValueEx(false),
-
-                Xc = 0,
-                Yc = 0,
-                Splited = false
             };
             string backTags = node.Nodes["backTags"].GetValueEx<string>(null);
             if (!string.IsNullOrWhiteSpace(backTags))
             {
                 item.Tags = backTags.Split(',').Select(tag => tag.Trim()).ToArray();
-            }
-            item.Quest = new List<Tuple<int, int>>();
-            if (node.Nodes["backTags"] != null)
-            {
-                int questID;
-                if (int.TryParse(node.Nodes["backTags"].GetValueEx<string>(null), out questID))
+
+                if (int.TryParse(backTags, out int questID))
                 {
-                    item.Quest.Add(Tuple.Create(questID, 1));
+                    item.Quest.Add(new QuestInfo(questID, 1));
                 }
-            }
-            if (x > 0)
-            {
-                item.Xc = x;
-                item.Splited = true;
-            }
-            if (y > 0)
-            {
-                item.Yc = y;
-                item.Splited = true;
             }
             return item;
         }

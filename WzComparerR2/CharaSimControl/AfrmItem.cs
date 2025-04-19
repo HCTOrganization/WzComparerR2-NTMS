@@ -547,7 +547,6 @@ namespace WzComparerR2.CharaSimControl
                     cashImg = Resource.CashItem_0;
                 }
 
-                //g.DrawImage(cashImg, origin.X + 20, origin.Y - 12);
                 g.DrawImage(cashImg, origin.X + 32 - cashOrigin.X, origin.Y - cashOrigin.Y);
             }
             if (gear.TimeLimited)
@@ -570,8 +569,7 @@ namespace WzComparerR2.CharaSimControl
                 Bitmap cashImg = null;
                 Point cashOrigin = new Point(12, 12);
 
-                int value;
-                if (item.Props.TryGetValue(ItemPropType.wonderGrade, out value) && value > 0)
+                if (item.Props.TryGetValue(ItemPropType.wonderGrade, out long value) && value > 0)
                 {
                     string resKey = $"CashShop_img_CashItem_label_{value + 3}";
                     cashImg = Resource.ResourceManager.GetObject(resKey) as Bitmap;
@@ -681,7 +679,7 @@ namespace WzComparerR2.CharaSimControl
                 this.Refresh();
                 waitForRefresh = false;
             }
-
+            
             base.OnMouseDown(e);
 
             ItemBase item = GetItemByPoint(e.Location);

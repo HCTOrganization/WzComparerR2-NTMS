@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 using System.Text.RegularExpressions;
 using WzComparerR2.WzLib;
@@ -20,6 +21,17 @@ namespace WzComparerR2.CharaSim
         public int? Link { get; set; }
 
         public BitmapOrigin Default { get; set; }
+        public Bitmap AvatarBitmap { get; set; }
+
+        public Wz_Node Component { get; set; }
+
+        public bool IsComponentNPC
+        {
+            get
+            {
+                return this.Component != null;
+            }
+        }
 
         //public LifeAnimateCollection Animates { get; private set; }
 
@@ -45,6 +57,7 @@ namespace WzComparerR2.CharaSim
                     {
                         case "shop": npcInfo.Shop = propNode.GetValueEx<int>(0) != 0; break;
                         case "link": npcInfo.Link = propNode.GetValueEx<int>(0); break;
+                        case "component": npcInfo.Component = propNode; break;
                         case "default": npcInfo.Default = BitmapOrigin.CreateFromNode(propNode, findNode); break;
                     }
                 }

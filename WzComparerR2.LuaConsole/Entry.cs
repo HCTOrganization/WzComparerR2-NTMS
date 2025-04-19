@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using WzComparerR2.Config;
 using WzComparerR2.PluginBase;
 using DevComponents.DotNetBar;
 
@@ -18,11 +19,12 @@ namespace WzComparerR2.LuaConsole
 
         protected override void OnLoad()
         {
-            var bar = this.Context.AddRibbonBar("Tools", "コンソール");
-            ButtonItem btnItem = new ButtonItem("", "Lua コンソール");
+            var bar = this.Context.AddRibbonBar("Tools", "控制台");
+            ButtonItem btnItem = new ButtonItem("", "Lua 控制台");
 
             btnItem.Click += btnItem_Click;
             bar.Items.Add(btnItem);
+            ConfigManager.RegisterAllSection(this.GetType().Assembly);
         }
 
         FrmConsole frm;

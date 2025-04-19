@@ -183,6 +183,7 @@ namespace WzComparerR2.MapRender
             this.FieldLimit = infoNode.Nodes["fieldLimit"].GetValueEx(0);
             this.FieldScript = infoNode.Nodes["fieldScript"].GetValueEx<string>(null);
 
+
             this.Barrier = infoNode.Nodes["barrier"].GetValueEx<int>();
             this.BarrierArc = infoNode.Nodes["barrierArc"].GetValueEx<int>();
             this.BarrierAut = infoNode.Nodes["barrierAut"].GetValueEx<int>();
@@ -237,40 +238,7 @@ namespace WzComparerR2.MapRender
                 item.Name = $"back_{node.Text}";
                 item.Index = int.Parse(node.Text);
 
-                if (item.Ani == 0)
-                {
-                    string path = $@"Map\Back\_Canvas\{item.BS}.img\back\{item.No}";
-                    string path2 = $@"Map\Back\{item.BS}.img\back\{item.No}";
-                    var bNode = PluginManager.FindWz(path) ?? PluginManager.FindWz(path2);
-                    if (bNode == null)
-                    {
-                        (item.IsFront ? this.Scene.Front : this.Scene.Back).Slots.Add(item);
-                        continue;
-                    }
-                    var png = bNode.GetValue<Wz_Png>();
-                    var width = png.Width;
-                    var height = png.Height;
-                    var block_size = 4096;
-                    if (width > block_size || height > block_size)
-                    {
-                        var countx = (width / block_size) + 1;
-                        var county = (height / block_size) + 1;
-                        for (int i = 0; i < countx; i++)
-                        {
-                            for (int j = 0; j < county; j++)
-                            {
-                                var newItem = BackItem.LoadFromNode(node, i + 1, j + 1);
-                                newItem.Name = $"back_{node.Text}";
-                                newItem.Index = int.Parse(node.Text);
-                                newItem.X += block_size * i;
-                                newItem.Y += block_size * j;
-                                (newItem.IsFront ? this.Scene.Front : this.Scene.Back).Slots.Add(newItem);
-                            }
-                        }
-                    }
-                    else (item.IsFront ? this.Scene.Front : this.Scene.Back).Slots.Add(item);
-                }
-                else (item.IsFront ? this.Scene.Front : this.Scene.Back).Slots.Add(item);
+                (item.IsFront ? this.Scene.Front : this.Scene.Back).Slots.Add(item);
             }
         }
 
@@ -347,14 +315,14 @@ namespace WzComparerR2.MapRender
                     item.Index = int.Parse(node.Text);
                 }
 
-                /*if (item.Type == LifeItem.LifeType.Npc)
+                if (item.Type == LifeItem.LifeType.Npc)
                 {
                     var npcNode = PluginManager.FindWz(string.Format("Npc/{0:D7}.img/info", item.ID));
                     if ((npcNode?.Nodes["hide"].GetValueEx(0) ?? 0) != 0)
                     {
                         continue;
                     }
-                }*/
+                }
 
                 //直接绑定foothold
                 ContainerNode<FootholdItem> fhNode;
@@ -707,7 +675,7 @@ namespace WzComparerR2.MapRender
                 default: throw new Exception($"Unknown back ani value: {back.Ani}.");
             }
             string path = $@"Map\Back\{back.BS}.img\{aniDir}\{back.No}";
-            var aniItem = resLoader.LoadAnimationData(path, back.Xc, back.Yc);
+            var aniItem = resLoader.LoadAnimationData(path);
 
             back.View = new BackItem.ItemView()
             {
@@ -783,6 +751,7 @@ namespace WzComparerR2.MapRender
                     var npcNode = PluginManager.FindWz(path);
 
                     //TODO: 加载npc数据
+
                     life.HideName = (npcNode?.FindNodeByPath(@"info\hideName")?.GetValueEx<int>(0) ?? 0) != 0;
                     var customFontNode = npcNode?.FindNodeByPath(@"info\customFont:func");
                     if (customFontNode != null)
@@ -985,7 +954,7 @@ namespace WzComparerR2.MapRender
                         for (int i = 0; i < particle.SubItems.Length; i++)
                         {
                             var subItem = particle.SubItems[i];
-                            if (subItem.Quest.Exists(quest => !resLoader.PatchVisibility.IsVisible(quest.Item1, quest.Item2)))
+                            if (subItem.Quest.Exists(quest => !resLoader.PatchVisibility.IsQuestVisible(quest.ID, quest.State)))
                             {
                                 continue;
                             }
@@ -1007,37 +976,52 @@ namespace WzComparerR2.MapRender
         private StateMachineAnimator CreateSMAnimator(Wz_Node node, ResourceLoader resLoader)
         {
             var aniData = new Dictionary<string, RepeatableFrameAnimationData>();
-            foreach (var actionNode in node.Nodes)
+            if ((node.Nodes["info"]?.Nodes["component"]?.Nodes?.Count ?? 0) > 0)
             {
-                var actName = actionNode.Text;
-                if (actName != "info" && !actName.StartsWith("condition"))
+                var componentNode = node.Nodes["info"]?.Nodes["component"];
+                foreach (var actName in new[] { "stand", "walk" })
                 {
-                    var ani = resLoader.LoadAnimationData(actionNode) as RepeatableFrameAnimationData;
+                    var ani = resLoader.LoadAvatarAnimationData(componentNode, actName) as RepeatableFrameAnimationData;
                     if (ani != null)
                     {
                         aniData.Add(actName, ani);
                     }
                 }
             }
-            long date = Int64.Parse(Date.ToString("yyyyMMddHHmm"));
-            foreach (var conditionNode in node.Nodes.Where(n => n.Text.StartsWith("condition")))
+            else
             {
-                if ((conditionNode.Nodes.Any(n => n.Text.All(char.IsDigit)) && conditionNode.Nodes.Where(n => n.Text.All(char.IsDigit)).All(n => resLoader.PatchVisibility.IsVisibleExact(int.Parse(n.Text), Convert.ToInt32(n.Value)))) || (conditionNode.Nodes["dateStart"].GetValueEx<long>(0) <= date && date <= conditionNode.Nodes["dateEnd"].GetValueEx<long>(0)))
+                foreach (var actionNode in node.Nodes)
                 {
-                    aniData.Clear();
-                    foreach (var conditionedActionNode in conditionNode.Nodes)
+                    var actName = actionNode.Text;
+                    if (actName != "info" && !actName.StartsWith("condition"))
                     {
-                        var conditionedActName = conditionedActionNode.Text;
-                        if (conditionedActName != "dateStart" && conditionedActName != "dateEnd")
+                        var ani = resLoader.LoadAnimationData(actionNode) as RepeatableFrameAnimationData;
+                        if (ani != null)
                         {
-                            var ani = resLoader.LoadAnimationData(conditionedActionNode) as RepeatableFrameAnimationData;
-                            if (ani != null)
-                            {
-                                aniData.Add(conditionNode.Text + "/" + conditionedActName, ani);
-                            }
+                            aniData.Add(actName, ani);
                         }
                     }
-                    break;
+                }
+                long date = Int64.Parse(Date.ToString("yyyyMMddHHmm"));
+                foreach (var conditionNode in node.Nodes.Where(n => n.Text.StartsWith("condition")))
+                {
+                    if ((conditionNode.Nodes.Any(n => n.Text.All(char.IsDigit)) && conditionNode.Nodes.Where(n => n.Text.All(char.IsDigit)).All(n => resLoader.PatchVisibility.IsQuestVisibleExact(int.Parse(n.Text), Convert.ToInt32(n.Value)))) || (conditionNode.Nodes["dateStart"].GetValueEx<long>(0) <= date && date <= conditionNode.Nodes["dateEnd"].GetValueEx<long>(0)))
+                    {
+                        aniData.Clear();
+                        foreach (var conditionedActionNode in conditionNode.Nodes)
+                        {
+                            var conditionedActName = conditionedActionNode.Text;
+                            if (conditionedActName != "dateStart" && conditionedActName != "dateEnd")
+                            {
+                                var ani = resLoader.LoadAnimationData(conditionedActionNode) as RepeatableFrameAnimationData;
+                                if (ani != null)
+                                {
+                                    aniData.Add(conditionNode.Text + "/" + conditionedActName, ani);
+                                }
+                            }
+                        }
+                        break;
+                    }
                 }
             }
             if (aniData.Count > 0)
@@ -1100,6 +1084,23 @@ namespace WzComparerR2.MapRender
                         }
                         break;
 
+                    case "move":
+                        if (this.random.NextPercent(0.3f))
+                        {
+                            e.NextState = "stand";
+                        }
+                        else
+                        {
+                            e.NextState = e.CurrentState;
+                        }
+                        break;
+
+                    case "die1":
+                        if (ani.Data.States.Contains("regen")) e.NextState = "regen";
+                        else if (ani.Data.States.Contains("stand")) e.NextState = "stand";
+                        else if (ani.Data.States.Contains("fly")) e.NextState = "fly";
+                        break;
+
                     default:
                         goto case "regen";
                 }
@@ -1108,7 +1109,7 @@ namespace WzComparerR2.MapRender
 
         private void AddNpcAI(StateMachineAnimator ani)
         {
-            var actions = new[] { "stand", "say", "mouse", "move", "hand", "laugh", "eye" };
+            var actions = new[] { "stand", "say", "mouse", "move", "hand", "laugh", "eye", "walk" };
             var availActions = ani.Data.States.Where(act => !act.EndsWith("_old") && Array.Exists(actions, acts => act.Contains(acts))).ToArray();
             if (availActions.Length > 0)
             {

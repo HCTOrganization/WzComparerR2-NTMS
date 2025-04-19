@@ -24,6 +24,7 @@ namespace WzComparerR2.CharaSimControl
         static GearGraphics()
         {
             TBrushes = new Dictionary<string, TextureBrush>();
+            TBrushes22ani = new Dictionary<string, TextureBrush>();
             TBrushes["n"] = new TextureBrush(Resource.UIToolTip_img_Item_Frame2_n, WrapMode.Tile);
             TBrushes["ne"] = new TextureBrush(Resource.UIToolTip_img_Item_Frame2_ne, WrapMode.Clamp);
             TBrushes["e"] = new TextureBrush(Resource.UIToolTip_img_Item_Frame2_e, WrapMode.Tile);
@@ -33,22 +34,36 @@ namespace WzComparerR2.CharaSimControl
             TBrushes["w"] = new TextureBrush(Resource.UIToolTip_img_Item_Frame2_w, WrapMode.Tile);
             TBrushes["nw"] = new TextureBrush(Resource.UIToolTip_img_Item_Frame2_nw, WrapMode.Clamp);
             TBrushes["c"] = new TextureBrush(Resource.UIToolTip_img_Item_Frame2_c, WrapMode.Tile);
-            SetFontFamily("MS Gothic");
+            TBrushes22ani["n"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_n, WrapMode.Tile);
+            TBrushes22ani["ne"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_ne, WrapMode.Clamp);
+            TBrushes22ani["e"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_e, WrapMode.Tile);
+            TBrushes22ani["se"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_se, WrapMode.Clamp);
+            TBrushes22ani["s"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_s, WrapMode.Tile);
+            TBrushes22ani["sw"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_sw, WrapMode.Clamp);
+            TBrushes22ani["w"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_w, WrapMode.Tile);
+            TBrushes22ani["nw"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_nw, WrapMode.Clamp);
+            TBrushes22ani["c"] = new TextureBrush(Resource.UIToolTipNew_img_Item_Common_frame_flexible_c, WrapMode.Tile);
+            SetFontFamily("SimSun");
         }
 
+        public static bool is22aniStyle { get; set; }
         public static readonly Dictionary<string, TextureBrush> TBrushes;
-        public static readonly Font ItemNameFont = new Font("MS Gothic", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
-        public static readonly Font ItemDetailFont = new Font("MS Gothic", 12f, GraphicsUnit.Pixel);
-        public static readonly Font LevelBoldFont = new Font("MS Gothic", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
-        public static readonly Font JMSKunshoFont = new Font("MS PGothic", 12f, GraphicsUnit.Pixel);
-        public static readonly Font EquipDetailFont = new Font("MS Gothic", 11f, GraphicsUnit.Pixel);
-        public static readonly Font EpicGearDetailFont = new Font("MS Gothic", 11f, GraphicsUnit.Pixel);
+        public static readonly Dictionary<string, TextureBrush> TBrushes22ani;
+        public static readonly Font ItemNameFont = new Font("SimSun", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
+        public static readonly Font ItemDetailFont = new Font("SimSun", 12f, GraphicsUnit.Pixel);
+        public static readonly Font LevelBoldFont = new Font("SimSun", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
+        public static readonly Font JMSKunshoFont = new Font("SimSun", 12f, GraphicsUnit.Pixel);
+        public static readonly Font EquipDetailFont = new Font("SimSun", 12f, GraphicsUnit.Pixel);
+        public static readonly Font EpicGearDetailFont = new Font("SimSun", 12f, GraphicsUnit.Pixel);
         public static readonly Font TahomaFont = new Font("Tahoma", 12f, GraphicsUnit.Pixel);
-        public static readonly Font SetItemPropFont = new Font("MS Gothic", 11f, GraphicsUnit.Pixel);
-        public static readonly Font ItemReqLevelFont = new Font("MS Gothic", 11f, GraphicsUnit.Pixel);
+        public static readonly Font SetItemPropFont = new Font("SimSun", 12f, GraphicsUnit.Pixel);
+        public static readonly Font ItemReqLevelFont = new Font("SimSun", 12f, GraphicsUnit.Pixel);
         public static readonly Font KMSItemNameFont = new Font("Dotum", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
         public static readonly Font KMSItemDetailFont = new Font("Dotum", 12f, GraphicsUnit.Pixel);
-        public static readonly Font KMSItemDetailFont2 = new Font("Dotum", 11f, GraphicsUnit.Pixel);
+        public static readonly Font KMSItemDetailFont2 = new Font("Dotum", 12f, GraphicsUnit.Pixel);
+        public static readonly Font Gear3NameFont = new Font("Noto Sans TC", 15f, FontStyle.Bold, GraphicsUnit.Pixel);
+        public static readonly Font KMSGear3NameFont = new Font("NanumGothicExtraBold", 15f, GraphicsUnit.Pixel);
+
 
         public static Font ItemNameFont2 { get; private set; }
         public static Font ItemDetailFont2 { get; private set; }
@@ -68,14 +83,14 @@ namespace WzComparerR2.CharaSimControl
                 ItemDetailFont2.Dispose();
                 ItemDetailFont2 = null;
             }
-            ItemDetailFont2 = new Font(fontName, 11f, GraphicsUnit.Pixel);
+            ItemDetailFont2 = new Font(fontName, 12f, GraphicsUnit.Pixel);
 
             if (EquipDetailFont2 != null)
             {
                 EquipDetailFont2.Dispose();
                 EquipDetailFont2 = null;
             }
-            EquipDetailFont2 = new Font(fontName, 11f, GraphicsUnit.Pixel);
+            EquipDetailFont2 = new Font(fontName, 12f, GraphicsUnit.Pixel);
         }
 
         public static readonly Color GearBackColor = Color.FromArgb(204, 0, 51, 85);
@@ -95,6 +110,7 @@ namespace WzComparerR2.CharaSimControl
         public static readonly Brush GrayBrush = new SolidBrush(Color.FromArgb(102, 102, 102));
         public static readonly Brush JMSGreenBrush = new SolidBrush(Color.FromArgb(119, 255, 0));
         public static readonly Color OrangeBrushColor = Color.FromArgb(255, 153, 0);
+        public static readonly Brush Gear3GreyBrush1 = new SolidBrush(Color.FromArgb(182, 190, 197));
         /// <summary>
         /// 表示物品说明中带有#c标识的橙色字体画刷。
         /// </summary>
@@ -443,7 +459,7 @@ namespace WzComparerR2.CharaSimControl
 
         public static void DrawNewTooltipBack(Graphics g, int x, int y, int width, int height)
         {
-            Dictionary<string, TextureBrush> res = TBrushes;
+            Dictionary<string, TextureBrush> res = is22aniStyle ? TBrushes22ani : TBrushes;
             //测算准线
             int[] guideX = new int[4] { 0, res["w"].Image.Width, width - res["e"].Image.Width, width };
             int[] guideY = new int[4] { 0, res["n"].Image.Height, height - res["s"].Image.Height, height };

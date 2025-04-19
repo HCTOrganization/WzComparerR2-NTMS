@@ -12,19 +12,21 @@ namespace WzComparerR2.CharaSim
             this.status = new CharacterStatus();
             this.status.Pop = 627;
             this.status.Job = 16001;
-            this.status.Level = 285;
+            this.status.Level = 286;
             this.status.MaxHP.BaseVal = 56517;
             this.status.HP = 56517;
             this.status.MaxMP.BaseVal = 53441;
             this.status.MP = 53441;
             this.status.SpecialValue.BaseVal = 0;
+            this.status.combatPower.BaseVal = 187371842;
+            this.status.attackRange.BaseVal = 48240839;
 
             this.status.Strength.BaseVal = 2278;
             this.status.Dexterity.BaseVal = 2206;
             this.status.Intelligence.BaseVal = 43515;
             this.status.Luck.BaseVal = 3367;
-            this.status.UnionLevel = 9183;
-            this.status.DojoFloor = 60;
+            this.status.UnionLevel = 9376;
+            this.status.DojoFloor = 65;
 
             this.status.CriticalRate.BaseVal = 89;
             this.status.MoveSpeed.BaseVal = 155;
@@ -47,7 +49,7 @@ namespace WzComparerR2.CharaSim
             this.status.ExpGainR = 36.00;
             this.status.StarForce.BaseVal = 295;
             this.status.ArcaneForce.BaseVal = 1350;
-            this.status.AuthenticForce.BaseVal = 600;
+            this.status.AuthenticForce.BaseVal = 660;
 
             this.itemSlots = new ItemBase[5][];
             for (int i = 0; i < this.itemSlots.Length; i++)

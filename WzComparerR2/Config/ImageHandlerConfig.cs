@@ -102,6 +102,25 @@ namespace WzComparerR2.Config
             get { return (ConfigItem<Color>)this["overlayRectColor"]; }
             set { this["overlayRectColor"] = value; }
         }
+
+        [ConfigurationProperty("ffmpegBinPath")]
+        public ConfigItem<string> FFmpegBinPath
+        {
+            get { return (ConfigItem<string>)this["ffmpegBinPath"]; }
+            set { this["ffmpegBinPath"] = value; }
+        }
+        [ConfigurationProperty("ffmpegArgument")]
+        public ConfigItem<string> FFmpegArgument
+        {
+            get { return (ConfigItem<string>)this["ffmpegArgument"]; }
+            set { this["ffmpegArgument"] = value; }
+        }
+        [ConfigurationProperty("ffmpegOutputFileExtension")]
+        public ConfigItem<string> FFmpegOutputFileExtension
+        {
+            get { return (ConfigItem<string>)this["ffmpegOutputFileExtension"]; }
+            set { this["ffmpegOutputFileExtension"] = value; }
+        }
     }
 
     public enum ImageBackgroundType

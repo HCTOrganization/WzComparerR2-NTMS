@@ -163,6 +163,7 @@ namespace WzComparerR2.CharaSim
         durability,
         reqCraft,
         cash,
+        pachinko,
         royalSpecial,
         masterSpecial,
         reduceReq,

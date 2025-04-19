@@ -9,6 +9,12 @@ namespace WzComparerR2.Config
     [SectionName("WcR2.CharaSim")]
     public sealed class CharaSimConfig : ConfigSectionBase<CharaSimConfig>
     {
+        public CharaSimConfig()
+        {
+            this.Enable22AniStyle = true;
+            this.CopyParsedSkillString = true;
+        }
+
         [ConfigurationProperty("selectedFontIndex")]
         public ConfigItem<int> SelectedFontIndex
         {
@@ -71,6 +77,13 @@ namespace WzComparerR2.Config
         {
             get { return (ConfigItem<bool>)this["CopyParsedSkillString"]; }
             set { this["CopyParsedSkillString"] = value; }
+        }
+
+        [ConfigurationProperty("Enable22AniStyle")]
+        public ConfigItem<bool> Enable22AniStyle
+        {
+            get { return (ConfigItem<bool>)this["Enable22AniStyle"]; }
+            set { this["Enable22AniStyle"] = value; }
         }
     }
 }

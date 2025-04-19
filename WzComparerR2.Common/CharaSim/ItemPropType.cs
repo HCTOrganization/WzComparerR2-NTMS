@@ -11,6 +11,7 @@ namespace WzComparerR2.CharaSim
         lv,
         reqLevel,
         cash,
+        pachinko,
         quest,
         pquest,
         tradeBlock,

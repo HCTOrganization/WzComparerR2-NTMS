@@ -47,6 +47,7 @@
             this.menuNew = new DevComponents.DotNetBar.ButtonItem();
             this.menuOpen = new DevComponents.DotNetBar.ButtonItem();
             this.menuSave = new DevComponents.DotNetBar.ButtonItem();
+            this.menuSaveAs = new DevComponents.DotNetBar.ButtonItem();
             this.menuExit = new DevComponents.DotNetBar.ButtonItem();
             this.menuDebug = new DevComponents.DotNetBar.ButtonItem();
             this.menuReset = new DevComponents.DotNetBar.ButtonItem();
@@ -55,6 +56,7 @@
             this.dockSite3 = new DevComponents.DotNetBar.DockSite();
             this.dockContainerItem3 = new DevComponents.DotNetBar.DockContainerItem();
             this.tabStrip1 = new DevComponents.DotNetBar.TabStrip();
+            this.menuRecent = new DevComponents.DotNetBar.ButtonItem();
             this.dockSite4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bar2)).BeginInit();
             this.bar2.SuspendLayout();
@@ -262,6 +264,8 @@
             this.menuNew,
             this.menuOpen,
             this.menuSave,
+            this.menuSaveAs,
+            this.menuRecent,
             this.menuExit});
             this.menuFile.Text = "ファイル(&F)";
             // 
@@ -287,12 +291,19 @@
             this.menuSave.Text = "保存";
             this.menuSave.Click += new System.EventHandler(this.menuSave_Click);
             // 
+            // menuSaveAs
+            // 
+            this.menuSaveAs.Name = "menuSaveAs";
+            this.menuSaveAs.Text = "名前を付けて保存...";
+            this.menuSaveAs.Click += new System.EventHandler(this.menuSaveAs_Click);
+            // 
             // menuExit
             // 
             this.menuExit.BeginGroup = true;
             this.menuExit.Name = "menuExit";
             this.menuExit.Shortcuts.Add(DevComponents.DotNetBar.eShortcut.AltF4);
             this.menuExit.Text = "終了";
+            this.menuExit.Click += new System.EventHandler(this.menuExit_Click);
             // 
             // menuDebug
             // 
@@ -306,6 +317,9 @@
             // menuReset
             // 
             this.menuReset.Name = "menuReset";
+            this.menuReset.Symbol = "";
+            this.menuReset.SymbolColor = System.Drawing.Color.Gray;
+            this.menuReset.SymbolSize = 9F;
             this.menuReset.Text = "リセット";
             this.menuReset.Click += new System.EventHandler(this.menuReset_Click);
             // 
@@ -314,6 +328,9 @@
             this.menuRun.BeginGroup = true;
             this.menuRun.Name = "menuRun";
             this.menuRun.Shortcuts.Add(DevComponents.DotNetBar.eShortcut.F5);
+            this.menuRun.Symbol = "";
+            this.menuRun.SymbolColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(127)))), ((int)(((byte)(29)))));
+            this.menuRun.SymbolSize = 9F;
             this.menuRun.Text = "実行";
             this.menuRun.Tooltip = "F5";
             this.menuRun.Click += new System.EventHandler(this.menuRun_Click);
@@ -322,8 +339,12 @@
             // 
             this.menuStopRun.Name = "menuStopRun";
             this.menuStopRun.Shortcuts.Add(DevComponents.DotNetBar.eShortcut.ShiftF5);
+            this.menuStopRun.Symbol = "";
+            this.menuStopRun.SymbolColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.menuStopRun.SymbolSize = 9F;
             this.menuStopRun.Text = "停止";
             this.menuStopRun.Tooltip = "Shift+F5";
+            this.menuStopRun.Click += new System.EventHandler(this.menuStopRun_Click);
             // 
             // dockSite3
             // 
@@ -359,6 +380,12 @@
             this.tabStrip1.TabIndex = 14;
             this.tabStrip1.TabLayoutType = DevComponents.DotNetBar.eTabLayoutType.FixedWithNavigationBox;
             this.tabStrip1.Text = "tabStrip1";
+            // 
+            // menuRecent
+            // 
+            this.menuRecent.BeginGroup = true;
+            this.menuRecent.Name = "menuRecent";
+            this.menuRecent.Text = "最近開いたファイル";
             // 
             // FrmConsole
             // 
@@ -420,5 +447,7 @@
         private DevComponents.DotNetBar.ButtonItem menuExit;
         private DevComponents.DotNetBar.ButtonItem menuDebug;
         private DevComponents.DotNetBar.ButtonItem menuReset;
+        private DevComponents.DotNetBar.ButtonItem menuRecent;
+        private DevComponents.DotNetBar.ButtonItem menuSaveAs;
     }
 }

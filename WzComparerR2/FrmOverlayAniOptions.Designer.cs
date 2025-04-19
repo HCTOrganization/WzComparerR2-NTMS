@@ -363,7 +363,7 @@
             this.txtPngDelay.ShowUpDown = true;
             this.txtPngDelay.Size = new System.Drawing.Size(172, 21);
             this.txtPngDelay.TabIndex = 5;
-            this.txtPngDelay.Value = 100;
+            this.txtPngDelay.Value = 120;
             // 
             // tableLayoutPanel2
             // 

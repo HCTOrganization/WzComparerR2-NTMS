@@ -244,6 +244,47 @@ namespace WzComparerR2.MapRender
             return null;
         }
 
+        private Music LoadSoundEff(string path, bool useHolder = false)
+        {
+            var bgmNode = PluginManager.FindWz(path);
+            if (bgmNode != null)
+            {
+                if (bgmNode.Value == null)
+                {
+                    bgmNode = bgmNode.Nodes.FirstOrDefault(n => n.Value is Wz_Sound || n.Value is Wz_Uol);
+                    if (bgmNode == null)
+                    {
+                        return null;
+                    }
+                }
+
+                while (bgmNode.Value is Wz_Uol uol)
+                {
+                    bgmNode = uol.HandleUol(bgmNode);
+                }
+
+                if (useHolder)
+                {
+                    var bgm = resLoader.Load<Music>(bgmNode);
+                    bgm.IsLoop = false;
+                    return bgm;
+                }
+                else
+                {
+                    Wz_Sound bgm = bgmNode.GetValue<Wz_Sound>();
+                    Music sound = null;
+                    if (bgm != null)
+                    {
+                        sound = new Music(bgm);
+                    }
+
+                    sound.IsLoop = false;
+                    return sound;
+                }
+            }
+            return null;
+        }
+
         private void AfterLoadMap(MapData mapData)
         {
             //同步可视化状态
@@ -259,7 +300,8 @@ namespace WzComparerR2.MapRender
 
             this.ui.Minimap.Mirror = mapData.ID / 10000000 == 32;
 
-            bool isTranslateRequired = Translator.IsTranslateEnabled;
+            // Disable OpenAI Translate Engine in MapRender
+            bool isTranslateRequired = Translator.IsTranslateEnabled && Translator.DefaultPreferredTranslateEngine != 9;
 
             StringResult sr;
             if (mapData.ID != null && this.StringLinker != null
@@ -589,14 +631,18 @@ namespace WzComparerR2.MapRender
             }
             else //当前地图
             {
-                viewData.ToMapID = null;
-                viewData.ToPortal = null;
+                BlinkPortal(pName);
+            }
+        }
 
-                var portal = this.mapData.Scene.FindPortal(pName);
-                if (portal != null)
-                {
-                    this.cm.StartCoroutine(OnCameraMoving(new Point(portal.X, portal.Y), 500));
-                }
+        private void BlinkPortal(string pName)
+        {
+            viewData.ToMapID = null;
+            viewData.ToPortal = null;
+            var portal = this.mapData.Scene.FindPortal(pName);
+            if (portal != null)
+            {
+                this.cm.StartCoroutine(OnCameraMoving(new Point(portal.X, portal.Y), 500));
             }
         }
 

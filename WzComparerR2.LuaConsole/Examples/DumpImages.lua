@@ -3,35 +3,14 @@ import 'WzComparerR2.WzLib'
 import 'System.IO'
 import 'System.Xml'
 
+require 'Helper'
+
 ------------------------------------------------------------
 
-local function enumAllWzNodes(node) 
-  return coroutine.wrap(function()
-    coroutine.yield(node)
-    for _,v in each(node.Nodes) do
-      for child in enumAllWzNodes(v) do
-        coroutine.yield(child)
-      end
-    end
-  end)
-end
-
 local function isPng(value)
-  if value and type(value) == "userdata" and value:GetType().Name == 'Wz_Png' then
-    return true
-  else 
-    return false
-  end
+  return value and type(value) == "userdata" and value:GetType().Name == 'Wz_Png'
 end
 
-local p = Path.GetInvalidFileNameChars()
-local ivStr = ""
-for i, v in each(p) do
-  if v >= 32 then
-    ivStr = ivStr .. string.char(v)
-  end
-end
-local ivPattern = "["..ivStr.."]"
 ------------------------------------------------------------
 
 -- all variables
@@ -51,10 +30,9 @@ end
 
 -- enum all wz_images
 for n in enumAllWzNodes(topNode) do
-  local value = n.Value
-  if value and type(value) == "userdata" and value:GetType().Name == 'Wz_Image' then
-    local img = value
-
+  local img = Wz_NodeExtension.GetNodeWzImage(n)
+  
+  if img then
     --extract wz image
     env:WriteLine('(extract)'..(img.Name))
     if img:TryExtract() then
@@ -67,7 +45,8 @@ for n in enumAllWzNodes(topNode) do
         local png = n2.Value
         if isPng(png) and (png.Width>1 or png.Height>1) then
           
-          local fn = n2.FullPath:sub(img.Name:len()+2):gsub("\\", "."):gsub(ivPattern, "")
+          local fn = n2.FullPath:sub(img.Name:len()+2):gsub("\\", ".")
+          fn = removeInvalidPathChars(fn)
           fn = Path.Combine(dir, fn .. ".png")
           
           --ensure dir exists

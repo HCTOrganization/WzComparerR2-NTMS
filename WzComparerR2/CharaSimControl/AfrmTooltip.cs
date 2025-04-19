@@ -7,6 +7,9 @@ using WzComparerR2.Common;
 using WzComparerR2.CharaSim;
 using WzComparerR2.Controls;
 using SharpDX.XAudio2;
+using System.Threading.Tasks;
+using System.Threading;
+using WzComparerR2.Properties;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -15,15 +18,20 @@ namespace WzComparerR2.CharaSimControl
         public AfrmTooltip()
         {
             this.menu = new ContextMenuStrip();
-            this.menu.Items.Add(new ToolStripMenuItem("クリップボードにコピー", null, tsmiCopy_Click));
-            this.menu.Items.Add(new ToolStripMenuItem("PNGに保存", null, tsmiSave_Click));
-            this.menu.Items.Add(new ToolStripMenuItem("文字列をコピー", null, tsmiCopyText_Click));
-            this.menu.Items.Add(new ToolStripMenuItem("閉じる (Esc)", null, tsmiClose_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("複製到剪貼簿", null, tsmiCopy_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("保存PNG", null, tsmiSave_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("保存紙娃娃", null, tsmiAvatarSave_Click));
+            this.menu.Items.Add(new ToolStripSeparator());
+            this.menu.Items.Add(new ToolStripMenuItem("複製文字", null, tsmiCopyText_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("複製譯文", null, tsmiCopyTranslate_Click));
+            this.menu.Items.Add(new ToolStripSeparator());
+            this.menu.Items.Add(new ToolStripMenuItem("關閉 (Esc)", null, tsmiClose_Click));
             this.ContextMenuStrip = this.menu;
 
             this.Size = new Size(1, 1);
             this.HideOnHover = true;
             this.GearRender = new GearTooltipRender2();
+            this.GearRender3 = new GearTooltipRender3();
             this.ItemRender = new ItemTooltipRender2();
             this.SkillRender = new SkillTooltipRender2();
             this.RecipeRender = new RecipeTooltipRender();
@@ -42,6 +50,12 @@ namespace WzComparerR2.CharaSimControl
         private bool showMenu;
         private bool showID;
 
+        public bool Enable22AniStyle { get; set; }
+
+        private Bitmap AvatarBitmap;
+        private FrmWaiting WaitingForm = new FrmWaiting();
+        private Mutex TranslateMutex = new Mutex(false, "TranslateMutex");
+
         public Object TargetItem
         {
             get { return item; }
@@ -52,6 +66,7 @@ namespace WzComparerR2.CharaSimControl
         public Character Character { get; set; }
 
         public GearTooltipRender2 GearRender { get; private set; }
+        public GearTooltipRender3 GearRender3 { get; private set; }
         public ItemTooltipRender2 ItemRender { get; private set; }
         public SkillTooltipRender2 SkillRender { get; private set; }
         public RecipeTooltipRender RecipeRender { get; private set; }
@@ -90,9 +105,15 @@ namespace WzComparerR2.CharaSimControl
             set { showMenu = value; }
         }
 
-        public override void Refresh()
+        public async override void Refresh()
         {
             this.PreRender();
+            if (Translator.IsTranslateEnabled)
+            {
+                Thread.Sleep(10);
+                TranslateMutex.WaitOne();
+                TranslateMutex.ReleaseMutex();
+            }
             if (this.Bitmap != null)
             {
                 this.SetBitmap(Bitmap);
@@ -101,8 +122,9 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
-        public void PreRender()
+        public async void PreRender()
         {
+            AvatarBitmap = null;
             if (this.item == null)
                 return;
 
@@ -114,8 +136,16 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (item is Gear)
             {
-                renderer = GearRender;
-                GearRender.Gear = this.TargetItem as Gear;
+/*                if (Enable22AniStyle)
+                {
+                    renderer = GearRender3;
+                    GearRender3.Gear = this.TargetItem as Gear;
+                }
+                else*/
+                {
+                    renderer = GearRender;
+                    GearRender.Gear = this.TargetItem as Gear;
+                }
 
                 if (false)
                 {
@@ -193,7 +223,26 @@ namespace WzComparerR2.CharaSimControl
                 return;
             }
             renderer.StringLinker = StringLinker;
-            this.Bitmap = renderer.Render();
+            if (Translator.IsTranslateEnabled)
+            {
+                Translator.WaitingForGlossaryTableRelease();
+                WaitingForm.UpdateMessage("翻譯中...");
+                WaitingForm.Show();
+                await Task.Run(() =>
+                {
+                    TranslateMutex.WaitOne();
+                    this.Bitmap = renderer.Render();
+                    TranslateMutex.ReleaseMutex();
+                });
+                WaitingForm.Hide();
+            }
+            else
+            {
+                this.Bitmap = renderer.Render();
+            }
+            if (item is Item) AvatarBitmap = (this.TargetItem as Item).AvatarBitmap;
+            if (item is Gear) AvatarBitmap = (this.TargetItem as Gear).AndroidBitmap;
+            if (item is Npc) AvatarBitmap = (this.TargetItem as Npc).AvatarBitmap;
         }
 
         void AfrmTooltip_MouseClick(object sender, System.Windows.Forms.MouseEventArgs e)
@@ -300,6 +349,47 @@ namespace WzComparerR2.CharaSimControl
             sb.Clear();
         }
 
+        async void tsmiCopyTranslate_Click(object sender, EventArgs e)
+        {
+            StringBuilder sb = new StringBuilder();
+            if (this.PreferredStringCopyMethod == 2) sb.AppendLine(this.NodeID.ToString());
+            if (!String.IsNullOrEmpty(this.NodeName)) sb.AppendLine(this.NodeName);
+            if (String.IsNullOrEmpty(this.Desc)) this.Desc = "";
+            if (String.IsNullOrEmpty(this.Pdesc)) this.Pdesc = "";
+            if (String.IsNullOrEmpty(this.AutoDesc)) this.AutoDesc = "";
+            if (String.IsNullOrEmpty(this.Hdesc)) this.Hdesc = "";
+            if (String.IsNullOrEmpty(this.DescLeftAlign)) this.DescLeftAlign = "";
+            if (this.CopyParsedSkillString && item is Skill) this.Hdesc = this.SkillRender.ParsedHdesc;
+            if (!String.IsNullOrEmpty(this.NodeName)) sb.AppendLine("<name>" + this.NodeName + "</name>");
+            if (!String.IsNullOrEmpty(this.Desc)) sb.AppendLine("<desc>" + this.Desc + "</desc>");
+            if (!String.IsNullOrEmpty(this.Pdesc)) sb.AppendLine("<pdesc>" + this.Pdesc + "</pdesc>");
+            if (!String.IsNullOrEmpty(this.AutoDesc)) sb.AppendLine("<autodesc>" + this.AutoDesc + "</autodesc>");
+            if (!String.IsNullOrEmpty(this.Hdesc)) sb.AppendLine("<hdesc>" + this.Hdesc + "</hdesc>");
+            if (!String.IsNullOrEmpty(this.DescLeftAlign)) sb.AppendLine("<descleftalign>" + this.DescLeftAlign + "</descleftalign>");
+            string translatedResult = "";
+            Translator.WaitingForGlossaryTableRelease();
+            WaitingForm.UpdateMessage("翻譯中...");
+            try
+            {
+                WaitingForm.Show();
+                await Task.Run(() => { translatedResult = Translator.AfrmTooltipTranslateBeforeCopy(sb.ToString()); });
+                Clipboard.SetText(translatedResult);
+                WaitingForm.Hide();
+                sb.Clear();
+            }
+            finally
+            {
+                if (WaitingForm.InvokeRequired)
+                {
+                    WaitingForm.Invoke(new Action(() => WaitingForm.Hide()));
+                }
+                else
+                {
+                    WaitingForm.Hide();
+                }
+            }
+        }
+
         void tsmiClose_Click(object sender, EventArgs e)
         {
             if (this.Bitmap != null)
@@ -388,6 +478,23 @@ namespace WzComparerR2.CharaSimControl
                     if (dlg.ShowDialog() == DialogResult.OK)
                     {
                         this.Bitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                }
+            }
+        }
+
+        void tsmiAvatarSave_Click(object sender, EventArgs e)
+        {
+            if (this.AvatarBitmap != null && this.item != null)
+            {
+                using (SaveFileDialog dlg = new SaveFileDialog())
+                {
+                    dlg.Filter = "PNG (*.png)|*.png|*.*|*.*";
+                    dlg.FileName = this.ImageFileName.Replace("eqp", "android");
+
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        this.AvatarBitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
                     }
                 }
             }

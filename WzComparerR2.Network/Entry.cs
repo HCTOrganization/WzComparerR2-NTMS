@@ -1,15 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using WzComparerR2.Config;
-using WzComparerR2.PluginBase;
-using WzComparerR2.Network.Contracts;
 using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
+using System.Threading;
 using DevComponents.DotNetBar;
+using DiscordRPC;
+using Newtonsoft.Json.Linq;
+using WzComparerR2.CharaSim;
+using WzComparerR2.Common;
+using WzComparerR2.Config;
+using WzComparerR2.Network.Contracts;
+using WzComparerR2.PluginBase;
+using static System.Net.Mime.MediaTypeNames;
 
 
 namespace WzComparerR2.Network
@@ -31,10 +39,25 @@ namespace WzComparerR2.Network
         }
 
         public WcClient Client { get; private set; }
+        public DiscordRpcClient DiscordClient;
 
         private Dictionary<Type, Action<object>> handlers;
         private Session session;
         private LoggerForm.LogPrinter logger;
+
+        private string AIBaseURL = "https://api.openai.com/v1";
+        private string selectedLM = "gpt-4o-mini";
+        private string systemMessage = "";
+        private string APIKeyJSON = "";
+        private double LMTemperature = 0.2;
+        private int MaximumToken = -1;
+        private bool ExtraParamEnabled = false;
+        private bool AIChatEnabled = false;
+        private bool showActivityOnDiscord;
+
+        private static Mutex AIMutex = new Mutex(false, "AIMutex");
+
+        private JObject AIChatJson = null;
 
         protected override void OnLoad()
         {
@@ -60,6 +83,8 @@ namespace WzComparerR2.Network
             this.Client.Disconnected += Client_Disconnected;
             this.Client.OnPackReceived += Client_OnPackReceived;
             var task = this.Client.Connect();
+
+            if (config.ShowActivityOnDiscord) EnableDiscordActivity("遊玩中", "正在發掘秘密");
         }
 
         private void CheckConfig()
@@ -74,6 +99,7 @@ namespace WzComparerR2.Network
                 needSave = true;
             }
 
+            showActivityOnDiscord = config.ShowActivityOnDiscord;
             string nickName = config.NickName;
             if (string.IsNullOrWhiteSpace(nickName))
             {
@@ -93,6 +119,7 @@ namespace WzComparerR2.Network
                 ConfigManager.Reload();
                 config = NetworkConfig.Default;
                 config.WcID = guid.ToString();
+                config.ShowActivityOnDiscord = showActivityOnDiscord;
                 config.NickName = nickName;
                 config.Servers = servers;
                 ConfigManager.Save();
@@ -121,7 +148,7 @@ namespace WzComparerR2.Network
             }
         }
 
-        private void Form1_OnCommand(object sender, CommandEventArgs e)
+        private async void Form1_OnCommand(object sender, CommandEventArgs e)
         {
             if (e.Command.StartsWith("/"))
             {
@@ -161,11 +188,105 @@ namespace WzComparerR2.Network
                         }
                         break;
 
+                    case "/aichat":
+                        var sbAi = new StringBuilder();
+                        string aiExtraParam = e.Command.Substring(7).Trim();
+                        if (aiExtraParam == "on")
+                        {
+                            RefreshAISettings();
+                            AIChatEnabled = true;
+                            this.Client.AutoReconnect = false;
+                            sbAi.Append("AIチャット機能が有効になっています。無効にするまで他のユーザーとチャットすることはできません。");
+                        }
+                        else if (aiExtraParam == "off")
+                        {
+                            AIChatEnabled = false;
+                            this.Client.AutoReconnect = true;
+                            sbAi.Append("AIチャット機能は無効になっています。他のユーザーとチャットできるようになりました。");
+                        }
+                        else if (AIChatEnabled)
+                        {
+                            sbAi.Append("AIチャット機能が有効になっています。");
+                        }
+                        else
+                        {
+                            sbAi.Append("AIチャット機能が無効になっています。");
+                        }
+                        Log.Info(sbAi.ToString());
+                        break;
+
+                    case "/new":
+                        var sbNewMsg = new StringBuilder();
+                        if (AIChatEnabled)
+                        {
+                            AIChatJson = InitiateChatCompletion(selectedLM, false);
+                            sbNewMsg.AppendFormat("AIチャットが初期化されました。以前のチャットはAIに送信されません。");
+                            Log.Info(sbNewMsg.ToString());
+                        }
+                        break;
+
+                    case "/sysmsg":
+                        var sbSysMsg = new StringBuilder();
+                        systemMessage = e.Command.Substring(7).Trim();
+                        if (!string.IsNullOrEmpty(systemMessage))
+                        {
+                            AIChatJson = InitiateChatCompletion(selectedLM, false);
+                            ((JArray)AIChatJson["messages"]).Add(new JObject(
+                                new JProperty("role", "system"),
+                                new JProperty("content", systemMessage)
+                            ));
+                            sbSysMsg.AppendFormat("AIへの現在のシステムメッセージは「{0}」です。AIチャットが初期化されました。", systemMessage);
+                            Log.Info(sbSysMsg.ToString());
+                        }
+                        else
+                        {
+                            AIChatJson = InitiateChatCompletion(selectedLM, false);
+                            sbSysMsg.AppendFormat("AIへの現在のシステムメッセージはクリアされます。AIチャットが初期化されました。");
+                            Log.Info(sbSysMsg.ToString());
+                        }
+                        break;
+
+                    case "/discord":
+                        var sbDiscord = new StringBuilder();
+                        string discordParam = e.Command.Substring(8).Trim();
+                        if (discordParam == "on")
+                        {
+                            EnableDiscordActivity("遊ぶ", "現在秘密を発見中");
+                            ConfigManager.Reload();
+                            NetworkConfig.Default.ShowActivityOnDiscord = true;
+                            showActivityOnDiscord = true;
+                            ConfigManager.Save();
+                            sbDiscord.Append("WzComparerR2がDiscordアクティビティで有効化されました。");
+                        }
+                        else if (discordParam == "off")
+                        {
+                            if (showActivityOnDiscord) DiscordClient.Dispose();
+                            ConfigManager.Reload();
+                            NetworkConfig.Default.ShowActivityOnDiscord = false;
+                            showActivityOnDiscord = false;
+                            ConfigManager.Save();
+                            sbDiscord.Append("WzComparerR2がDiscordアクティビティで無効化されました。");
+                        }
+                        else if (showActivityOnDiscord)
+                        {
+                            sbDiscord.Append("Discordアクティビティが有効になっています。");
+                        }
+                        else
+                        {
+                            sbDiscord.Append("Discordアクティビティが無効になっています。");
+                        }
+                        Log.Info(sbDiscord.ToString());
+                        break;
+
                     case "/help":
                         var sbHelp = new StringBuilder();
                         sbHelp.AppendFormat("ネットワークロガー コマンドの使用方法\r\n");
                         sbHelp.AppendFormat("/users : オンラインのユーザーを一覧表示します。\r\n");
                         sbHelp.AppendFormat("/name [名前] : ユーザー名を指定の名前に変更します。\r\n");
+                        sbHelp.AppendFormat("/aichat [on|off] : AIチャット機能の切り替え。\r\n");
+                        sbHelp.AppendFormat("/new : AIチャットを再初期化します。\r\n");
+                        sbHelp.AppendFormat("/sysmsg [メッセージ] : AIチャットへのシステムメッセージを指定します。\r\n");
+                        sbHelp.AppendFormat("/discord [on|off] : DiscordでのWzComparerR2のアクティビティを表示します。\r\n");
                         sbHelp.AppendFormat("/help : このヘルプを表示します。");
                         Log.Info(sbHelp.ToString());
                         break;
@@ -173,6 +294,11 @@ namespace WzComparerR2.Network
             }
             else
             {
+                if (AIChatEnabled)
+                {
+                    await Task.Run(() => ChatToAI(e.Command));
+                    return;
+                }
                 if (Client.IsConnected)
                 {
                     var pack = new PackSendChat()
@@ -187,6 +313,83 @@ namespace WzComparerR2.Network
                     Log.Warn("コマンドが失敗しました: サーバーに接続されていません。");
                 }
             }
+        }
+
+        private void RefreshAISettings()
+        {
+            if (!string.IsNullOrEmpty(Translator.OAITranslateBaseURL)) AIBaseURL = Translator.OAITranslateBaseURL;
+            if (!string.IsNullOrEmpty(Translator.DefaultLanguageModel)) selectedLM = Translator.DefaultLanguageModel;
+            if (!string.IsNullOrEmpty(Translator.DefaultTranslateAPIKey)) APIKeyJSON = Translator.DefaultTranslateAPIKey;
+            if (AIChatJson == null) AIChatJson = InitiateChatCompletion(selectedLM, false);
+        }
+
+        private async void ChatToAI(string message)
+        {
+            AIMutex.WaitOne();
+            Log.Warn(message);
+            Log.Info("AIの応答を待っています...");
+            var request = (HttpWebRequest)WebRequest.Create(AIBaseURL + "/chat/completions");
+            request.Method = "POST";
+            request.ContentType = "application/json";
+            if (!string.IsNullOrEmpty(APIKeyJSON))
+            {
+                JObject reqHeaders = JObject.Parse(APIKeyJSON);
+                foreach (var property in reqHeaders.Properties()) request.Headers.Add(property.Name, property.Value.ToString());
+            }
+            ((JArray)AIChatJson["messages"]).Add(new JObject(
+                new JProperty("role", "user"),
+                new JProperty("content", message)
+            ));
+
+            var postData = AIChatJson;
+
+            if (ExtraParamEnabled)
+            {
+                postData.Add(new JProperty("temperature", LMTemperature));
+                postData.Add(new JProperty("max_tokens", MaximumToken));
+            }
+            var byteArray = System.Text.Encoding.UTF8.GetBytes(postData.ToString());
+            request.ContentLength = byteArray.Length;
+            Stream newStream = request.GetRequestStream();
+            newStream.Write(byteArray, 0, byteArray.Length);
+            newStream.Close();
+            try
+            {
+                var response = (HttpWebResponse)request.GetResponse();
+                var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
+                JObject jrResponse = JObject.Parse(responseString);
+                string responseResult = jrResponse.SelectToken("choices[0].message.content").ToString();
+                ((JArray)AIChatJson["messages"]).Add(new JObject(
+                    new JProperty("role", "assistant"),
+                    new JProperty("content", responseResult)
+                ));
+                if (responseResult.Contains("<think>"))
+                {
+                    Log.Think(responseResult.Split(new String[] { "</think>\n\n" }, StringSplitOptions.None)[0].Replace("<think>", ""));
+                    Log.Info(responseResult.Split(new String[] { "</think>\n\n" }, StringSplitOptions.None)[1]);
+                }
+                else
+                {
+                    Log.Info(responseResult);
+                }
+            }
+            catch
+            {
+                Log.Warn("AIとのチャットに失敗しました。");
+            }
+            finally
+            {
+                AIMutex.ReleaseMutex();
+            }
+        }
+
+        private JObject InitiateChatCompletion(string languageModel, bool isStreamEnabled)
+        {
+            return new JObject(
+                new JProperty("model", languageModel),
+                new JProperty("messages", new JArray()),
+                new JProperty("stream", isStreamEnabled)
+            );
         }
 
         private void RegisterAllHandlers()
@@ -204,6 +407,17 @@ namespace WzComparerR2.Network
                     RegisterHandler(type, o => handler.DynamicInvoke(o));
                 }
             }
+        }
+
+        private void EnableDiscordActivity(string detail="", string state="")
+        {
+            DiscordClient = new DiscordRpcClient("1362447503164834102");
+            DiscordClient.Initialize();
+            DiscordClient.SetPresence(new RichPresence()
+            {
+                Details = detail,
+                State = state
+            });
         }
 
         private void RegisterHandler<T>(Action<T> handler)
@@ -351,6 +565,7 @@ namespace WzComparerR2.Network
         /// <param name="pack"></param>
         private void OnPackReceived(PackOnUserUpdate pack)
         {
+            if (AIChatEnabled) return;
             lock (this.session.Users)
             {
                 var idx = this.session.Users.FindIndex(u => u.UID == pack.UserInfo.UID && u.SID == pack.UserInfo.SID);

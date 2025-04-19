@@ -54,7 +54,7 @@ namespace WzComparerR2.CharaSimControl
             Bitmap tooltip = new Bitmap(290, DefaultPicHeight);
             Graphics g = Graphics.FromImage(tooltip);
             StringFormat format = new StringFormat();
-            int value;
+            long value;
             format.Alignment = StringAlignment.Center;
             picHeight = 10;
             iconY = 32;
@@ -95,7 +95,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
                 g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                g.DrawString("Required Level : " + value, GearGraphics.ItemReqLevelFont, Brushes.White, 92, picHeight);
+                g.DrawString("要求等级 : " + value, GearGraphics.ItemReqLevelFont, Brushes.White, 92, picHeight);
                 picHeight += 15;
                 g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SystemDefault;
             }
@@ -119,7 +119,7 @@ namespace WzComparerR2.CharaSimControl
 
         private string GetItemAttributeString()
         {
-            int value;
+            long value;
             List<string> tags = new List<string>();
 
             if (item.Props.TryGetValue(ItemPropType.quest, out value) && value != 0)

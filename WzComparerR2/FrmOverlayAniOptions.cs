@@ -26,6 +26,10 @@ namespace WzComparerR2
         public FrmOverlayAniOptions(int startIdx, int endIdx, bool isPngFrameAni)
         {
             InitializeComponent();
+#if NET6_0_OR_GREATER
+             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
+             this.Font = new Font(new FontFamily("MS Gothic"), 9f);
+#endif
             this.txtDelayOffset.Value = 0;
             this.txtMoveX.Value = 0;
             this.txtMoveY.Value = 0;

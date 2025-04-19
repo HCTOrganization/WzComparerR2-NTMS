@@ -54,7 +54,7 @@ namespace WzComparerR2.WzLib
             get { return this.Name.EndsWith(".lua"); }
         }
 
-        public Wz_Crypto.Wz_CryptoKey EncKeys
+        public IWzDecrypter EncKeys
         {
             get
             {
@@ -87,7 +87,7 @@ namespace WzComparerR2.WzLib
                 {
                     if (this.Checksum != this.CalcCheckSum(this.stream))
                     {
-                        e = new ArgumentException("checksum error");
+                        e = new ArgumentException("チェックサムエラー");
                         return false;
                     }
                     this.chec = true;
@@ -265,10 +265,11 @@ namespace WzComparerR2.WzLib
                     }
                     int w = reader.ReadCompressedInt32();
                     int h = reader.ReadCompressedInt32();
-                    int form = reader.ReadCompressedInt32() + reader.ReadByte();
-                    reader.SkipBytes(4);
+                    int form = reader.ReadCompressedInt32();
+                    int scale = reader.ReadByte();
+                    int pages = reader.ReadInt32(); // introduced in KMST 1186
                     int dataLen = reader.ReadInt32();
-                    parent.Value = new Wz_Png(w, h, dataLen, form, (uint)reader.BaseStream.Position, this);
+                    parent.Value = new Wz_Png(w, h, dataLen, (Wz_TextureFormat)form, scale, pages, (uint)reader.BaseStream.Position, this);
                     reader.SkipBytes(dataLen);
                     break;
 
@@ -285,14 +286,26 @@ namespace WzComparerR2.WzLib
                         }
                         else
                         {
-                            throw new Exception("Convex2D contains non vector2D items.");
+                            throw new Exception("Convex2Dには非vector2D項目が含まれています。");
                         }
                     }
                     parent.Value = new Wz_Convex(points);
                     break;
 
                 case "Sound_DX8":
-                    reader.SkipBytes(1);
+                    int soundDX8Ver = reader.ReadByte();
+                    if (soundDX8Ver == 1) // introduced in KMST 1184
+                    {
+                        if (reader.ReadByte() == 0x01) // read sub property
+                        {
+                            reader.SkipBytes(2);
+                            entries = reader.ReadCompressedInt32();
+                            for (int i = 0; i < entries; i++)
+                            {
+                                ExtractValue(reader, parent);
+                            }
+                        }
+                    }
                     dataLen = reader.ReadCompressedInt32();
                     int duration = reader.ReadCompressedInt32();
                     int soundDecl = reader.ReadByte();
@@ -309,37 +322,33 @@ namespace WzComparerR2.WzLib
                             var fmtExData = reader.ReadBytes(fmtExLen);
                             mediaType.CbFormat = (uint)fmtExLen;
 
-                            GCHandle gcHandle = GCHandle.Alloc(fmtExData, GCHandleType.Pinned);
-                            try
+                            if (!this.TryDecryptWaveFormatEx(fmtExData, out Interop.WAVEFORMATEX waveFormatEx))
                             {
-                                var waveFormatEx = Marshal.PtrToStructure<Interop.WAVEFORMATEX>(gcHandle.AddrOfPinnedObject());
-                                if (fmtExLen != waveFormatEx.CbSize + Marshal.SizeOf<Interop.WAVEFORMATEX>())
-                                {
-                                    //  parse waveFormatEx after decryption
-                                    this.EncKeys.Decrypt(fmtExData, 0, fmtExLen);
-                                    waveFormatEx = Marshal.PtrToStructure<Interop.WAVEFORMATEX>(gcHandle.AddrOfPinnedObject());
-                                    if (fmtExLen != waveFormatEx.CbSize + Marshal.SizeOf<Interop.WAVEFORMATEX>())
-                                    {
-                                        throw new Exception($"Failed to parse WAVEFORMATEX struct at offset {this.Offset}+{reader.BaseStream.Position}.");
-                                    }
-                                }
-                                switch (waveFormatEx.FormatTag)
-                                {
-                                    case Interop.WAVE_FORMAT_PCM:
-                                        mediaType.PbFormat = waveFormatEx;
-                                        break;
-
-                                    case Interop.WAVE_FORMAT_MPEGLAYER3:
-                                        mediaType.PbFormat = Marshal.PtrToStructure<Interop.MPEGLAYER3WAVEFORMAT>(gcHandle.AddrOfPinnedObject());
-                                        break;
-
-                                    default:
-                                        throw new Exception($"Unknown WAVEFORMATEX.FormatTag {waveFormatEx.FormatTag} at offset {this.Offset}+{reader.BaseStream.Position}.");
-                                }
+                                throw new Exception($"オフセット{this.Offset}+{reader.BaseStream.Position}でWaveFormatEx構造体を解析できませんでした。");
                             }
-                            finally
+                            switch (waveFormatEx.FormatTag)
                             {
-                                gcHandle.Free();
+                                case Interop.WAVE_FORMAT_PCM:
+                                    mediaType.PbFormat = waveFormatEx;
+                                    break;
+
+                                case Interop.WAVE_FORMAT_MPEGLAYER3:
+                                    if (fmtExLen == Interop.MPEGLAYER3WAVEFORMAT_SIZE)
+                                    {
+                                        mediaType.PbFormat = MemoryMarshal.Read<Interop.MPEGLAYER3WAVEFORMAT>(fmtExData);
+                                    }
+                                    else
+                                    {
+                                        // workaround for KMST1185
+                                        mediaType.PbFormat = new Interop.MPEGLAYER3WAVEFORMAT
+                                        {
+                                            Wfx = waveFormatEx
+                                        };
+                                    }
+                                    break;
+
+                                default:
+                                    throw new Exception($"オフセット{this.Offset}+{reader.BaseStream.Position}に不明なWaveFormatEx.FormatTag{waveFormatEx.FormatTag}があります。");
                             }
                             break;
                     }
@@ -379,7 +388,7 @@ namespace WzComparerR2.WzLib
                     break;
 
                 default:
-                    throw new Exception("unknown wz tag: " + tag);
+                    throw new Exception("不明なWZタグ:" + tag);
             }
         }
 
@@ -477,13 +486,42 @@ namespace WzComparerR2.WzLib
                     this.ExtractImg(reader, parent);
                     if (reader.BaseStream.Position != eob)
                     {
-                        throw new Exception($"Object is not fully loaded at offset {this.Offset}+{reader.BaseStream.Position}.");
+                        throw new Exception($"オブジェクトはオフセット{this.Offset}+{reader.BaseStream.Position}で完全にロードされていません。");
                     }
                     break;
 
                 default:
-                    throw new Exception($"Unknown value type {flag} at offset {this.Offset}+{reader.BaseStream.Position}.");
+                    throw new Exception($"オフセット{this.Offset}+{reader.BaseStream.Position}に不明な値タイプ{flag}があります。");
             }
+        }
+
+        private bool TryDecryptWaveFormatEx(Span<byte> data, out Interop.WAVEFORMATEX waveFormatEx)
+        {
+            // GMSv256: wz uses different keys on property name and waveFormatEx encryption.
+            Span<byte> dataCopy = stackalloc byte[data.Length];
+            foreach (var enc in new[] {
+                Wz_CryptoKeyType.BMS,
+                Wz_CryptoKeyType.KMS,
+                Wz_CryptoKeyType.GMS,
+            })
+            {
+                data.CopyTo(dataCopy);
+                this.WzFile.WzStructure.encryption.GetKeys(enc).Decrypt(dataCopy);
+                if (MemoryMarshal.TryRead(dataCopy, out waveFormatEx))
+                {
+                    if ((data.Length == waveFormatEx.CbSize + Interop.WAVEFORMATEX_SIZE)
+                         // workaround for KMST1185, waveFormatEx only has 18 bytes but cbsize is also 18.
+                         || (data.Length == waveFormatEx.CbSize && waveFormatEx.FormatTag == Interop.WAVE_FORMAT_MPEGLAYER3)
+                         )
+                    {
+                        // copy back to the original buffer
+                        dataCopy.CopyTo(data);
+                        return true;
+                    }
+                }
+            }
+            waveFormatEx = default;
+            return false;
         }
 
         private void ExtractLua(WzBinaryReader reader)
@@ -499,7 +537,7 @@ namespace WzComparerR2.WzLib
                         break;
 
                     default:
-                        throw new Exception($"Unknown Lua flag {flag} at Offset {this.Offset}+{reader.BaseStream.Position}.");
+                        throw new Exception($"オフセット{this.Offset}+{reader.BaseStream.Position}に不明なLuaフラグ{flag}があります。");
                 }
             }
         }
@@ -585,7 +623,7 @@ namespace WzComparerR2.WzLib
                 {
                     if (!reader.SkipLineAndCheckEmpty())
                     {
-                        throw new Exception("Incorrect property end line.");
+                        throw new Exception("プロパティの終了行が正しくありません。");
                     }
                     return;
                 }
@@ -593,7 +631,7 @@ namespace WzComparerR2.WzLib
                 reader.SkipWhitespaceExceptLineEnding();
                 int equalSign = reader.Read();
                 if (equalSign != '=')
-                    throw new Exception($"Expect '=' sign but got '{(char)equalSign}'.");
+                    throw new Exception($"'='記号が必要ですが、'{(char)equalSign}'が返されました。");
                 reader.SkipWhitespaceExceptLineEnding();
 
                 string stringVal = reader.ReadLine();

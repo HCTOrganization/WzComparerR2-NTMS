@@ -17,7 +17,7 @@ namespace WzComparerR2.CharaSimControl
     public class CashPackageTooltipRender : TooltipRender
     {
         private bool isTranslateRequired = Translator.IsTranslateEnabled;
-        private bool isCurrencyConversionEnabled = (Translator.DefaultDesiredCurrency != "none");
+        private bool isTMSVIPPackage = false;
         private string titleLanguage = "";
         public CashPackageTooltipRender()
         {
@@ -68,7 +68,10 @@ namespace WzComparerR2.CharaSimControl
             if (CharaSimLoader.LoadedCommoditiesByItemId.ContainsKey(CashPackage.ItemID))
                 commodityPackage = CharaSimLoader.LoadedCommoditiesByItemId[CashPackage.ItemID];
 
-            int fullWidth = Math.Max(220, TextRenderer.MeasureText(g, CashPackage.name, GearGraphics.ItemNameFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix).Width + 12 * 2);
+            // We have to hardcode VIP Package ID for now, since there's no method to know if it's VIP Package
+            isTMSVIPPackage = new int[] { 9106024, 9106025, 9106026, 9106027 }.Contains<int>(CashPackage.ItemID);
+
+            int fullWidth = Math.Max(290, TextRenderer.MeasureText(g, CashPackage.name, GearGraphics.ItemNameFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix).Width + 12 * 2);
             int[] columnWidth = { CashPackage.SN.Count < 8 ? fullWidth : 220, 220, 220 };
 
             for (int i = 0; i < CashPackage.SN.Count; ++i)
@@ -161,7 +164,7 @@ namespace WzComparerR2.CharaSimControl
 
             picH = 10;
             string translatedCashPackageName = "";
-            if (isCurrencyConversionEnabled)
+            if (Translator.DefaultDesiredCurrency != "none")
             {
                 if (Translator.DefaultDetectCurrency == "auto")
                 {
@@ -532,14 +535,14 @@ namespace WzComparerR2.CharaSimControl
                     }
                     if (commodity.originalPrice > 0 && commodity.Price < commodity.originalPrice)
                     {
-                        info += commodity.originalPrice + "ポイント    "; // HERE is making space between original price and discounted price
+                        info += commodity.originalPrice + (isTMSVIPPackage ? " VIP" : "") + "ポイント    "; // HERE is making space between original price and discounted price
                         totalOriginalPrice += commodity.originalPrice;
                     }
                     else
                     {
                         totalOriginalPrice += commodity.Price;
                     }
-                    info += commodity.Price + "ポイント";
+                    info += commodity.Price + (isTMSVIPPackage ? " VIP" : "") + "ポイント";
                     totalPrice += commodity.Price;
                 }
                 else
@@ -547,12 +550,12 @@ namespace WzComparerR2.CharaSimControl
                     info += "(" + commodity.Count + ") ";//count (개)
                     if (commodity.originalPrice > 0)
                     {
-                        info += commodity.originalPrice + "ポイント";
+                        info += commodity.originalPrice + (isTMSVIPPackage ? " VIP" : "") + "ポイント";
                         totalOriginalPrice += commodity.originalPrice;
                     }
                     else
                     {
-                        info += commodity.Price + "ポイント";
+                        info += commodity.Price + (isTMSVIPPackage ? " VIP" : "") + "ポイント";
                         totalOriginalPrice += commodity.Price;
                     }
                 }
@@ -641,14 +644,7 @@ namespace WzComparerR2.CharaSimControl
                         }
                         g.DrawImage(Resource.CSDiscount_bonus, columnRight - 47, picH + 20);
                     }
-                    if (Translator.IsKoreanStringPresent(info))
-                    {
-                        TextRenderer.DrawText(g, info, GearGraphics.KMSItemDetailFont, new Point(columnLeft + 55, picH + 39), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                    }
-                    else
-                    {
-                        TextRenderer.DrawText(g, info, GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 39), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                    }
+                    TextRenderer.DrawText(g, time, GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 39), Color.White, TextFormatFlags.NoPadding);
                 }
                 picH += 57;
 
@@ -661,13 +657,22 @@ namespace WzComparerR2.CharaSimControl
             g.DrawLine(Pens.White, 13, picH, cashBitmap.Width - 8, picH);
             picH += 11;
 
-            g.DrawImage(Resource.CSDiscount_total, 9, picH + 1);
+            g.DrawImage(Resource.CSDiscount_total, 9, picH + 2, Resource.CSDiscount_total.Width, Resource.CSDiscount_total.Height);
+
+            string exchangedPrice;
             if (totalOriginalPrice == totalPrice)
             {
-                TextRenderer.DrawText(g, totalPrice + "ポイント", GearGraphics.ItemDetailFont, new Point(64, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                if (isCurrencyConversionEnabled)
+                TextRenderer.DrawText(g, totalPrice + (isTMSVIPPackage ? " VIP" : "") + "ポイント", GearGraphics.ItemDetailFont, new Point(55, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                if (Translator.DefaultDesiredCurrency != "none")
                 {
-                    string exchangedPrice = Translator.GetConvertedCurrency(totalPrice, titleLanguage);
+                    if (isTMSVIPPackage)
+                    {
+                        exchangedPrice = Translator.GetConvertedCurrency((totalPrice / 300), titleLanguage);
+                    }
+                    else
+                    {
+                        exchangedPrice = Translator.GetConvertedCurrency(totalPrice, titleLanguage);
+                    }
                     if (!String.IsNullOrEmpty(exchangedPrice))
                     {
                         picH += 17;
@@ -677,16 +682,23 @@ namespace WzComparerR2.CharaSimControl
             }
             else
             {
-                TextRenderer.DrawText(g, totalOriginalPrice + "ポイント   " + totalPrice + "ポイント", GearGraphics.ItemDetailFont, new Point(64, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                TextRenderer.DrawText(g, totalOriginalPrice + "ポイント", GearGraphics.ItemDetailFont, new Point(64, picH), Color.Red, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                g.DrawImage(Resource.CSDiscount_arrow, 64 + TextRenderer.MeasureText(g, totalOriginalPrice + "ポイント", GearGraphics.ItemDetailFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width + 5, picH + 1);
+                TextRenderer.DrawText(g, totalOriginalPrice + (isTMSVIPPackage ? " VIP" : "") + "ポイント   " + totalPrice + (isTMSVIPPackage ? " VIP" : "") + "ポイント", GearGraphics.ItemDetailFont, new Point(55, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                TextRenderer.DrawText(g, totalOriginalPrice + (isTMSVIPPackage ? " VIP" : "") + "ポイント", GearGraphics.ItemDetailFont, new Point(55, picH), Color.Red, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                g.DrawImage(Resource.CSDiscount_arrow, 55 + TextRenderer.MeasureText(g, totalOriginalPrice + (isTMSVIPPackage ? " VIP" : "") + "ポイント", GearGraphics.ItemDetailFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width + 5, picH + 1);
                 if ((int)((100 - 100.0 * totalPrice / totalOriginalPrice)) > 0) 
                 {
                     DrawDiscountNum(g, "-" + (int)((100 - 100.0 * totalPrice / totalOriginalPrice)) + "%", cashBitmap.Width - 40, picH - 1, StringAlignment.Near);
                 }
-                if (isCurrencyConversionEnabled)
+                if (Translator.DefaultDesiredCurrency != "none")
                 {
-                    string exchangedPrice = Translator.GetConvertedCurrency(totalPrice, titleLanguage);
+                    if (isTMSVIPPackage)
+                    {
+                        exchangedPrice = Translator.GetConvertedCurrency((totalPrice / 300), titleLanguage);
+                    }
+                    else
+                    {
+                        exchangedPrice = Translator.GetConvertedCurrency(totalPrice, titleLanguage);
+                    }
                     if (!String.IsNullOrEmpty(exchangedPrice))
                     {
                         picH += 17;

@@ -2,26 +2,13 @@ import 'WzComparerR2.PluginBase'
 import 'WzComparerR2.WzLib'
 import 'System.IO'
 import 'System.Xml'
-import 'System.Text'
 
-------------------------------------------------------------
-
-local function enumAllWzNodes(node) 
-  return coroutine.wrap(function()
-    coroutine.yield(node)
-    for _,v in each(node.Nodes) do
-      for child in enumAllWzNodes(v) do
-        coroutine.yield(child)
-      end
-    end
-  end)
-end
+require "helper"
 
 ------------------------------------------------------------
 
 -- all variables
-local topWzPath = 'String'
-local topNode = PluginManager.FindWz(topWzPath)
+local topNode = PluginManager.FindWz('Etc')
 local outputDir = "D:\\wzDump"
 
 ------------------------------------------------------------
@@ -32,12 +19,10 @@ if not topNode then
   return
 end
 
-
-
 -- enum all wz_images
 for n in enumAllWzNodes(topNode) do
   local value = n.Value
-  if value and type(value) == "userdata" and value:GetType().Name == 'Wz_Image' then
+  if isWzImage(value) then
     local img = value
 
     --extract wz image
@@ -56,15 +41,7 @@ for n in enumAllWzNodes(topNode) do
       --create file
       env:WriteLine('(output)'..xmlFileName)
       local fs = File.Create(xmlFileName)
-      local xsetting = XmlWriterSettings()
-      xsetting.CloseOutput = true
-      xsetting.Indent = true
-      xsetting.Encoding = Encoding.UTF8
-      xsetting.CheckCharacters = false
-      xsetting.NewLineChars = "\r\n"
-      xsetting.NewLineHandling = NewLineHandling.None
-      xsetting.NewLineOnAttributes = false
-      local xw = XmlWriter.Create(fs, xsetting)
+      local xw = XmlWriter.Create(fs)
       
       xw:WriteStartDocument(true);
       Wz_NodeExtension.DumpAsXml(img.Node, xw)

@@ -30,6 +30,7 @@
         {
             this.superTabControl1 = new DevComponents.DotNetBar.SuperTabControl();
             this.superTabControlPanel1 = new DevComponents.DotNetBar.SuperTabControlPanel();
+            this.chkEnable22AniStyle = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX22 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX21 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX20 = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -70,6 +71,10 @@
             this.checkBoxX9 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX8 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX5 = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.labelX14 = new DevComponents.DotNetBar.LabelX();
+            this.labelX15 = new DevComponents.DotNetBar.LabelX();
+            this.comboBoxEx3 = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.comboBoxEx4 = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.superTabItem3 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabControlPanel4 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.checkBoxX7 = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -119,11 +124,11 @@
             this.superTabControl1.Location = new System.Drawing.Point(0, 0);
             this.superTabControl1.Name = "superTabControl1";
             this.superTabControl1.ReorderTabsEnabled = true;
-            this.superTabControl1.SelectedTabFont = new System.Drawing.Font("MS Gothic", 9F, System.Drawing.FontStyle.Bold);
+            this.superTabControl1.SelectedTabFont = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Bold);
             this.superTabControl1.SelectedTabIndex = 0;
             this.superTabControl1.Size = new System.Drawing.Size(344, 251);
             this.superTabControl1.TabAlignment = DevComponents.DotNetBar.eTabStripAlignment.Left;
-            this.superTabControl1.TabFont = new System.Drawing.Font("MS Gothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.superTabControl1.TabFont = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.superTabControl1.TabIndex = 0;
             this.superTabControl1.Tabs.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.superTabItem1,
@@ -182,7 +187,7 @@
             this.checkBoxX19.Size = new System.Drawing.Size(152, 16);
             this.checkBoxX19.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX19.TabIndex = 10;
-            this.checkBoxX19.Text = "ポイント購入価額を表示";
+            this.checkBoxX19.Text = "顯示購買價格";
             // 
             // checkBoxX21
             // 
@@ -197,7 +202,7 @@
             this.checkBoxX21.Size = new System.Drawing.Size(152, 16);
             this.checkBoxX21.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX21.TabIndex = 10;
-            this.checkBoxX21.Text = "戦闘力増加量を表示";
+            this.checkBoxX21.Text = "顯示戰鬥力增加量";
             // 
             // checkBoxX20
             // 
@@ -212,7 +217,7 @@
             this.checkBoxX20.Size = new System.Drawing.Size(152, 16);
             this.checkBoxX20.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX20.TabIndex = 10;
-            this.checkBoxX20.Text = "ポイント購入価額を表示";
+            this.checkBoxX20.Text = "顯示購買價格";
             // 
             // checkBoxX18
             // 
@@ -227,7 +232,7 @@
             this.checkBoxX18.Size = new System.Drawing.Size(152, 16);
             this.checkBoxX18.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX18.TabIndex = 10;
-            this.checkBoxX18.Text = "タイトルを自動的に折り返す";
+            this.checkBoxX18.Text = "標題自動換行";
             // 
             // checkBoxX17
             // 
@@ -242,7 +247,7 @@
             this.checkBoxX17.Size = new System.Drawing.Size(152, 16);
             this.checkBoxX17.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX17.TabIndex = 10;
-            this.checkBoxX17.Text = "メル販売価額を表示";
+            this.checkBoxX17.Text = "顯示楓幣出售價格";
             // 
             // checkBoxX16
             // 
@@ -257,7 +262,7 @@
             this.checkBoxX16.Size = new System.Drawing.Size(152, 16);
             this.checkBoxX16.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX16.TabIndex = 10;
-            this.checkBoxX16.Text = "メル販売価額を表示";
+            this.checkBoxX16.Text = "顯示楓幣出售價格";
             // 
             // checkBoxX15
             // 
@@ -272,7 +277,7 @@
             this.checkBoxX15.Size = new System.Drawing.Size(152, 16);
             this.checkBoxX15.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX15.TabIndex = 10;
-            this.checkBoxX15.Text = "計算エラーを無視する";
+            this.checkBoxX15.Text = "無視計算錯誤";
             // 
             // checkBoxX14
             // 
@@ -287,7 +292,7 @@
             this.checkBoxX14.Size = new System.Drawing.Size(157, 16);
             this.checkBoxX14.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX14.TabIndex = 9;
-            this.checkBoxX14.Text = "PerMをパーセントに変換する";
+            this.checkBoxX14.Text = "PerM轉換成百分比數";
             // 
             // checkBoxX13
             // 
@@ -302,7 +307,7 @@
             this.checkBoxX13.Size = new System.Drawing.Size(193, 16);
             this.checkBoxX13.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX13.TabIndex = 8;
-            this.checkBoxX13.Text = "cooltimeMSを秒に変換する";
+            this.checkBoxX13.Text = "cooltimeMS轉換成秒";
             // 
             // checkBoxX10
             // 
@@ -317,7 +322,7 @@
             this.checkBoxX10.Size = new System.Drawing.Size(123, 16);
             this.checkBoxX10.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX10.TabIndex = 7;
-            this.checkBoxX10.Text = "詳細情報を表示";
+            this.checkBoxX10.Text = "顯示詳細訊息";
             // 
             // labelX3
             // 
@@ -332,7 +337,7 @@
             this.labelX3.Name = "labelX3";
             this.labelX3.Size = new System.Drawing.Size(254, 26);
             this.labelX3.TabIndex = 6;
-            this.labelX3.Text = "<b>- +</b> キーを使用して現在のレベルを調整します<br /><b>[ ]</b> キーを使用して間隔レベルを調整します";
+            this.labelX3.Text = "使用 <b>- +</b> 鍵調整目前等級 <br />使用 <b>[ ]</b> 鍵調整間隔等級";
             // 
             // comboBoxEx2
             // 
@@ -391,7 +396,7 @@
             this.labelX2.Name = "labelX2";
             this.labelX2.Size = new System.Drawing.Size(93, 16);
             this.labelX2.TabIndex = 4;
-            this.labelX2.Text = "間隔レベル";
+            this.labelX2.Text = "間隔等級";
             // 
             // labelX1
             // 
@@ -401,11 +406,11 @@
             // 
             // 
             this.labelX1.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX1.Location = new System.Drawing.Point(13, 172);
+            this.labelX1.Location = new System.Drawing.Point(13, 176);
             this.labelX1.Name = "labelX1";
             this.labelX1.Size = new System.Drawing.Size(87, 16);
             this.labelX1.TabIndex = 3;
-            this.labelX1.Text = "現在のレベル";
+            this.labelX1.Text = "現在等級";
             // 
             // comboBoxEx1
             // 
@@ -420,7 +425,7 @@
             this.comboItem2,
             this.comboItem3,
             this.comboItem4});
-            this.comboBoxEx1.Location = new System.Drawing.Point(94, 169);
+            this.comboBoxEx1.Location = new System.Drawing.Point(94, 173);
             this.comboBoxEx1.Name = "comboBoxEx1";
             this.comboBoxEx1.Size = new System.Drawing.Size(90, 19);
             this.comboBoxEx1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -455,7 +460,7 @@
             this.checkBoxX2.Size = new System.Drawing.Size(112, 16);
             this.checkBoxX2.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX2.TabIndex = 1;
-            this.checkBoxX2.Text = "スキルディレイを表示";
+            this.checkBoxX2.Text = "顯示技能延遲";
             // 
             // checkBoxX1
             // 
@@ -470,14 +475,14 @@
             this.checkBoxX1.Size = new System.Drawing.Size(110, 16);
             this.checkBoxX1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX1.TabIndex = 0;
-            this.checkBoxX1.Text = "左上隅にIDを表示";
+            this.checkBoxX1.Text = "左上方顯示ID";
             // 
             // superTabItem1
             // 
             this.superTabItem1.AttachedControl = this.superTabControlPanel1;
             this.superTabItem1.GlobalItem = false;
             this.superTabItem1.Name = "superTabItem1";
-            this.superTabItem1.Text = "スキル";
+            this.superTabItem1.Text = "技能";
             // 
             // superTabControlPanel2
             // 
@@ -510,7 +515,7 @@
             this.checkBoxX11.Size = new System.Drawing.Size(133, 16);
             this.checkBoxX11.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX11.TabIndex = 4;
-            this.checkBoxX11.Text = "勲章のプレビューを表示";
+            this.checkBoxX11.Text = "顯示勛章預覽";
             // 
             // checkBoxX6
             // 
@@ -525,7 +530,7 @@
             this.checkBoxX6.Size = new System.Drawing.Size(145, 16);
             this.checkBoxX6.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX6.TabIndex = 3;
-            this.checkBoxX6.Text = "成長情報を表示";
+            this.checkBoxX6.Text = "顯示成長狀態";
             // 
             // checkBoxX4
             // 
@@ -540,7 +545,7 @@
             this.checkBoxX4.Size = new System.Drawing.Size(172, 16);
             this.checkBoxX4.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX4.TabIndex = 2;
-            this.checkBoxX4.Text = "武器の攻撃速度を表示";
+            this.checkBoxX4.Text = "顯示武器攻擊速度";
             // 
             // checkBoxX3
             // 
@@ -555,14 +560,14 @@
             this.checkBoxX3.Size = new System.Drawing.Size(117, 16);
             this.checkBoxX3.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX3.TabIndex = 1;
-            this.checkBoxX3.Text = "左上隅にIDを表示";
+            this.checkBoxX3.Text = "左上方顯示ID";
             // 
             // superTabItem2
             // 
             this.superTabItem2.AttachedControl = this.superTabControlPanel2;
             this.superTabItem2.GlobalItem = false;
             this.superTabItem2.Name = "superTabItem2";
-            this.superTabItem2.Text = "装備";
+            this.superTabItem2.Text = "裝備";
             // 
             // superTabControlPanel3
             // 
@@ -572,6 +577,10 @@
             this.superTabControlPanel3.Controls.Add(this.checkBoxX9);
             this.superTabControlPanel3.Controls.Add(this.checkBoxX8);
             this.superTabControlPanel3.Controls.Add(this.checkBoxX5);
+            this.superTabControlPanel3.Controls.Add(this.labelX14);
+            this.superTabControlPanel3.Controls.Add(this.labelX15);
+            this.superTabControlPanel3.Controls.Add(this.comboBoxEx3);
+            this.superTabControlPanel3.Controls.Add(this.comboBoxEx4);
             this.superTabControlPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControlPanel3.Location = new System.Drawing.Point(62, 0);
             this.superTabControlPanel3.Name = "superTabControlPanel3";
@@ -593,7 +602,67 @@
             this.checkBoxX12.Size = new System.Drawing.Size(126, 16);
             this.checkBoxX12.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX12.TabIndex = 5;
-            this.checkBoxX12.Text = "タイトルプレビューを表示";
+            this.checkBoxX12.Text = "顯示稱號預覽";
+            // 
+            // labelX14
+            // 
+            this.labelX14.AutoSize = true;
+            this.labelX14.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelX14.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX14.Location = new System.Drawing.Point(13, 156);
+            this.labelX14.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.labelX14.Name = "labelX14";
+            this.labelX14.Size = new System.Drawing.Size(89, 18);
+            this.labelX14.TabIndex = 6;
+            this.labelX14.Text = "預覽髮色";
+            // 
+            // labelX15
+            // 
+            this.labelX15.AutoSize = true;
+            this.labelX15.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelX15.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX15.Location = new System.Drawing.Point(13, 180);
+            this.labelX15.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.labelX15.Name = "labelX15";
+            this.labelX15.Size = new System.Drawing.Size(89, 18);
+            this.labelX15.TabIndex = 8;
+            this.labelX15.Text = "預覽膚色";
+            // 
+            // comboBoxEx3
+            // 
+            this.comboBoxEx3.DisplayMember = "Text";
+            this.comboBoxEx3.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.comboBoxEx3.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxEx3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboBoxEx3.FormattingEnabled = true;
+            this.comboBoxEx3.ItemHeight = 15;
+            this.comboBoxEx3.Location = new System.Drawing.Point(140, 154);
+            this.comboBoxEx3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.comboBoxEx3.Name = "comboBoxEx3";
+            this.comboBoxEx3.Size = new System.Drawing.Size(104, 21);
+            this.comboBoxEx3.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.comboBoxEx3.TabIndex = 7;
+            // 
+            // comboBoxEx4
+            // 
+            this.comboBoxEx4.DisplayMember = "Text";
+            this.comboBoxEx4.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.comboBoxEx4.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxEx4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboBoxEx4.FormattingEnabled = true;
+            this.comboBoxEx4.ItemHeight = 15;
+            this.comboBoxEx4.Location = new System.Drawing.Point(140, 178);
+            this.comboBoxEx4.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.comboBoxEx4.Name = "comboBoxEx4";
+            this.comboBoxEx4.Size = new System.Drawing.Size(104, 21);
+            this.comboBoxEx4.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.comboBoxEx4.TabIndex = 9;
             // 
             // checkBoxX9
             // 
@@ -608,7 +677,7 @@
             this.checkBoxX9.Size = new System.Drawing.Size(130, 16);
             this.checkBoxX9.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX9.TabIndex = 4;
-            this.checkBoxX9.Text = "レシピ結果を表示";
+            this.checkBoxX9.Text = "顯示配方成品";
             // 
             // checkBoxX8
             // 
@@ -623,7 +692,7 @@
             this.checkBoxX8.Size = new System.Drawing.Size(138, 16);
             this.checkBoxX8.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX8.TabIndex = 3;
-            this.checkBoxX8.Text = "レシピ素材を表示";
+            this.checkBoxX8.Text = "顯示配方素材";
             // 
             // checkBoxX5
             // 
@@ -638,14 +707,14 @@
             this.checkBoxX5.Size = new System.Drawing.Size(111, 16);
             this.checkBoxX5.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX5.TabIndex = 2;
-            this.checkBoxX5.Text = "左上隅にIDを表示";
+            this.checkBoxX5.Text = "左上方顯示ID";
             // 
             // superTabItem3
             // 
             this.superTabItem3.AttachedControl = this.superTabControlPanel3;
             this.superTabItem3.GlobalItem = false;
             this.superTabItem3.Name = "superTabItem3";
-            this.superTabItem3.Text = "アイテム";
+            this.superTabItem3.Text = "道具";
             // 
             // superTabControlPanel4
             // 
@@ -671,14 +740,14 @@
             this.checkBoxX7.Size = new System.Drawing.Size(124, 16);
             this.checkBoxX7.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX7.TabIndex = 3;
-            this.checkBoxX7.Text = "左上隅にIDを表示";
+            this.checkBoxX7.Text = "左上方顯示ID";
             // 
             // superTabItem4
             // 
             this.superTabItem4.AttachedControl = this.superTabControlPanel4;
             this.superTabItem4.GlobalItem = false;
             this.superTabItem4.Name = "superTabItem4";
-            this.superTabItem4.Text = "レシピ";
+            this.superTabItem4.Text = "配方";
             // 
             // panelEx1
             // 
@@ -702,6 +771,7 @@
             // 
             // superTabControlPanel5
             // 
+            this.superTabControlPanel5.Controls.Add(this.chkEnable22AniStyle);
             this.superTabControlPanel5.Controls.Add(this.chkCopyParsedSkillString);
             this.superTabControlPanel5.Controls.Add(this.labelX4);
             this.superTabControlPanel5.Controls.Add(this.cmbPreferredStringCopyMethod);
@@ -718,7 +788,7 @@
             this.superTabItem5.AttachedControl = this.superTabControlPanel5;
             this.superTabItem5.GlobalItem = false;
             this.superTabItem5.Name = "superTabItem5";
-            this.superTabItem5.Text = "その他";
+            this.superTabItem5.Text = "其他";
             // 
             // chkCopyParsedSkillString
             // 
@@ -732,8 +802,8 @@
             this.chkCopyParsedSkillString.Name = "chkCopyParsedSkillString";
             this.chkCopyParsedSkillString.Size = new System.Drawing.Size(124, 16);
             this.chkCopyParsedSkillString.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkCopyParsedSkillString.TabIndex = 3;
-            this.chkCopyParsedSkillString.Text = "解析されたスキル文字列をコピー";
+            this.chkCopyParsedSkillString.TabIndex = 2;
+            this.chkCopyParsedSkillString.Text = "複製前自動解析文本";
             // 
             // labelX4
             // 
@@ -747,7 +817,7 @@
             this.labelX4.Name = "labelX4";
             this.labelX4.Size = new System.Drawing.Size(87, 16);
             this.labelX4.TabIndex = 3;
-            this.labelX4.Text = "コピー方法";
+            this.labelX4.Text = "複製方式";
             // 
             // cmbPreferredStringCopyMethod
             // 
@@ -761,7 +831,22 @@
             this.cmbPreferredStringCopyMethod.Name = "cmbPreferredStringCopyMethod";
             this.cmbPreferredStringCopyMethod.Size = new System.Drawing.Size(160, 19);
             this.cmbPreferredStringCopyMethod.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.cmbPreferredStringCopyMethod.TabIndex = 2;
+            this.cmbPreferredStringCopyMethod.TabIndex = 3;
+            // 
+            // chkEnable22AniStyle
+            // 
+            this.chkEnable22AniStyle.AutoSize = true;
+            this.chkEnable22AniStyle.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkEnable22AniStyle.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkEnable22AniStyle.Location = new System.Drawing.Point(13, 60);
+            this.chkEnable22AniStyle.Name = "chkEnable22AniStyle";
+            this.chkEnable22AniStyle.Size = new System.Drawing.Size(145, 16);
+            this.chkEnable22AniStyle.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkEnable22AniStyle.TabIndex = 4;
+            this.chkEnable22AniStyle.Text = "套用22周年主題";
             // 
             // buttonX2
             // 
@@ -773,7 +858,7 @@
             this.buttonX2.Size = new System.Drawing.Size(70, 23);
             this.buttonX2.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonX2.TabIndex = 1;
-            this.buttonX2.Text = "キャンセル";
+            this.buttonX2.Text = "取消";
             // 
             // buttonX1
             // 
@@ -785,7 +870,7 @@
             this.buttonX1.Size = new System.Drawing.Size(60, 23);
             this.buttonX1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonX1.TabIndex = 0;
-            this.buttonX1.Text = "OK";
+            this.buttonX1.Text = "確認";
             // 
             // FrmQuickViewSetting
             // 
@@ -795,12 +880,12 @@
             this.Controls.Add(this.superTabControl1);
             this.Controls.Add(this.panelEx1);
             this.DoubleBuffered = true;
-            this.Font = new System.Drawing.Font("MS PGothic", 9F);
+            this.Font = new System.Drawing.Font("SimSun", 9F);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.Name = "FrmQuickViewSetting";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "プレビュー設定";
+            this.Text = "預覽設定";
             ((System.ComponentModel.ISupportInitialize)(this.superTabControl1)).EndInit();
             this.superTabControl1.ResumeLayout(false);
             this.superTabControlPanel1.ResumeLayout(false);
@@ -871,7 +956,13 @@
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX20;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX21;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX22;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkEnable22AniStyle;
+        private DevComponents.DotNetBar.LabelX labelX14;
+        private DevComponents.DotNetBar.LabelX labelX15;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx comboBoxEx3;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx comboBoxEx4;
         private DevComponents.DotNetBar.LabelX labelX4;
+
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbPreferredStringCopyMethod;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkCopyParsedSkillString;
     }

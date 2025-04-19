@@ -17,8 +17,10 @@ variables:
   outputDir_netfx_anycpu: 'WzComparerR2/bin/release/net48'
   outputDir_netfx_x86: 'WzComparerR2/bin/x86/release/net48'
   outputDir_net6_anycpu: 'WzComparerR2/bin/release/net6.0-windows'
-  outputFileName_netfx: 'JMS-v5.5.0_WzComparerR2_net48_$(Build.BuildNumber)'
-  outputFileName_net6: 'JMS-v5.5.0_WzComparerR2_net6.0-windows_$(Build.BuildNumber)'
+  outputDir_net8_anycpu: 'WzComparerR2/bin/release/net8.0-windows'
+  outputFileName_netfx: 'JMS-v5.7.0_WzComparerR2_net48_$(Build.BuildNumber)'
+  outputFileName_net6: 'JMS-v5.7.0_WzComparerR2_net6.0-windows_$(Build.BuildNumber)'
+  outputFileName_net8: 'JMS-v5.7.0_WzComparerR2_net8.0-windows_$(Build.BuildNumber)'
   isMain: $[eq(variables['Build.SourceBranch'], 'refs/heads/master')]
   accountName: 'hikari-calyx'
   containerName: 'ci-build'
@@ -60,12 +62,19 @@ steps:
   displayName: Prepare output files
   inputs:
     script: |
-      move "$(outputDir_anycpu)\*.dll" "$(outputDir_anycpu)\Lib"
-      del "$(outputDir_anycpu)\*.pdb"
-      rename "$(outputDir_anycpu)\WzComparerR2.exe" "WzComparerR2.anycpu.exe"
-      rename "$(outputDir_anycpu)\WzComparerR2.exe.config" "WzComparerR2.anycpu.exe.config"
-      copy /y "$(outputDir_x86)\WzComparerR2.exe" "$(outputDir_anycpu)"
-      copy /y "$(outputDir_x86)\WzComparerR2.exe.config" "$(outputDir_anycpu)"
+      move "$(outputDir_netfx_anycpu)\*.dll" "$(outputDir_netfx_anycpu)\Lib"
+      del "$(outputDir_netfx_anycpu)\*.pdb"
+      rename "$(outputDir_netfx_anycpu)\WzComparerR2.exe" "WzComparerR2.anycpu.exe"
+      rename "$(outputDir_netfx_anycpu)\WzComparerR2.exe.config" "WzComparerR2.anycpu.exe.config"
+      copy /y "$(outputDir_netfx_x86)\WzComparerR2.exe" "$(outputDir_netfx_anycpu)"
+      copy /y "$(outputDir_netfx_x86)\WzComparerR2.exe.config" "$(outputDir_netfx_anycpu)"
+      
+      move "$(outputDir_net6_anycpu)\*.dll" "$(outputDir_net6_anycpu)\Lib"
+      del "$(outputDir_net6_anycpu)\*.pdb"
+      move "$(outputDir_net6_anycpu)\Lib\WzComparerR2.dll" "$(outputDir_net6_anycpu)"
+      move "$(outputDir_net8_anycpu)\*.dll" "$(outputDir_net8_anycpu)\Lib"
+      del "$(outputDir_net8_anycpu)\*.pdb"
+      move "$(outputDir_net8_anycpu)\Lib\WzComparerR2.dll" "$(outputDir_net8_anycpu)"
     failOnStderr: true
 
 - task: ArchiveFiles@2
@@ -86,6 +95,15 @@ steps:
     archiveFile: '$(Build.ArtifactStagingDirectory)/$(outputFileName_net6).zip'
     replaceExistingArchive: true
 
+- task: ArchiveFiles@2
+  displayName: Compress net8 release
+  inputs:
+    rootFolderOrFile: '$(outputDir_net8_anycpu)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/$(outputFileName_net8).zip'
+    replaceExistingArchive: true
+
 - task: AzureCLI@2
   displayName: Upload to blob
   inputs:
@@ -102,11 +120,19 @@ steps:
           "srcFile"="$(outputFileName_net6).zip"
           "outputVariableName"="sasurl_net6"
         }
+        @{
+          "srcFile"="$(outputFileName_net8).zip"
+          "outputVariableName"="sasurl_net8"
+        }
       )
       
-      $expireDate = (Get-Date).ToUniversalTime().AddYears(1).ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")
+      $time = (Get-Date).ToUniversalTime()
+      $expireDate = $time.AddYears(1).ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")
       $keys = ConvertFrom-Json ((az storage account keys list --account-name $(accountName)) -join "")
       $accountKey = $keys[0].value
+      $commitID = "$(Build.SourceVersion)"
+      $buildID = "$(Build.BuildNumber)"
+      $uploadTime = $time.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
       foreach ($f in $files) {
         $srcFile = "$(Build.ArtifactStagingDirectory)/{0}" -f $f.srcFile
@@ -114,7 +140,7 @@ steps:
         $varName = $f.outputVariableName
 
         Write-Host "Uploading ${srcFile} ..."
-        az storage blob upload --auth-mode login --account-name $(accountName) --container-name $(containerName) --name $dstFile --file $srcFile
+        az storage blob upload --auth-mode login --account-name $(accountName) --container-name $(containerName) --name $dstFile --file $srcFile --tags "commitID=$commitID" "buildID=$buildID" "uploadTime=$uploadTime"
 
         Write-Host "Generate sas url..."
         $url = ConvertFrom-Json (az storage blob url --auth-mode login --account-name $(accountName) --container-name $(containerName) --name $dstFile)
@@ -154,6 +180,6 @@ steps:
     releaseNotesSource: 'inline'
     releaseNotesInline: |
       Automation build from azure-pipeline.
-      Mirror: [[JMS_WzComparerR2_net48.zip]($(sasurl_netfx))] | [[JMS_WzComparerR2_net6.0-windows.zip]($(sasurl_net6))]
+      Mirror: [[JMS_WzComparerR2_net48.zip]($(sasurl_netfx))] | [[JMS_WzComparerR2_net6.0-windows.zip]($(sasurl_net6))] | [[WcR2.net8.zip]($(sasurl_net8))]
     isPreRelease: false
     addChangeLog: false

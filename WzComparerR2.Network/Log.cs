@@ -30,6 +30,11 @@ namespace WzComparerR2.Network
             Log.Write(LogLevel.Error, format, args);
         }
 
+        public static void Think(string format, params object[] args)
+        {
+            Log.Write(LogLevel.Think, format, args);
+        }
+
         public static void Write(LogLevel logLevel, string format, params object[] args)
         {
             foreach (var logger in Loggers)
@@ -60,6 +65,7 @@ namespace WzComparerR2.Network
         Info,
         Warn,
         Error,
+        Think,
         None,
     }
 }

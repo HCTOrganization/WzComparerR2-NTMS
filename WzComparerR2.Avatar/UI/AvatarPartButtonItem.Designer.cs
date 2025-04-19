@@ -30,6 +30,7 @@
         {
             this.btnItemShow = new DevComponents.DotNetBar.ButtonItem();
             this.btnItemDel = new DevComponents.DotNetBar.ButtonItem();
+            this.chkShowEffect = new DevComponents.DotNetBar.CheckBoxItem();
             this.rdoMixColor0 = new DevComponents.DotNetBar.CheckBoxItem();
             this.rdoMixColor1 = new DevComponents.DotNetBar.CheckBoxItem();
             this.rdoMixColor2 = new DevComponents.DotNetBar.CheckBoxItem();
@@ -49,6 +50,13 @@
             // 
             this.btnItemDel.Name = "btnItemDel";
             this.btnItemDel.Text = "削除";
+            // 
+            // chkShowEffect
+            // 
+            this.chkShowEffect.Name = "chkShowEffect";
+            this.chkShowEffect.Text = "エフェクト";
+            this.chkShowEffect.Checked = true;
+            this.chkShowEffect.AutoCollapseOnClick = false;
             // 
             // rdoMixColor0
             // 
@@ -121,7 +129,8 @@
             this.ImageFixedSize = new System.Drawing.Size(32, 32);
             this.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.btnItemShow,
-            this.btnItemDel});
+            this.btnItemDel,
+            this.chkShowEffect});
             this.SubItemsExpandWidth = 16;
 
         }
@@ -130,6 +139,7 @@
 
         public DevComponents.DotNetBar.ButtonItem btnItemShow;
         public DevComponents.DotNetBar.ButtonItem btnItemDel;
+        public DevComponents.DotNetBar.CheckBoxItem chkShowEffect;
         public DevComponents.DotNetBar.CheckBoxItem rdoMixColor0;
         public DevComponents.DotNetBar.CheckBoxItem rdoMixColor1;
         public DevComponents.DotNetBar.CheckBoxItem rdoMixColor2;
