@@ -1,3 +1,5 @@
+[WzComparerR2-JMSをダウンロード](https://github.com/HikariCalyx/WzComparerR2-JMS/releases)
+
 # WzComparerR2-JMS
 - これは、JMS 用に設計されたメイプルストーリー抽出ツールです。
 - KMS、GMS、CMS などの他のクライアントで動作します。
