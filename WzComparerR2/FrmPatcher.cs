@@ -27,7 +27,7 @@ namespace WzComparerR2
             this.FormClosing += new FormClosingEventHandler(FrmPatcher_FormClosing);
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("MS PGothic"), 9f);
+            this.Font = new Font(new FontFamily("PMingLiU"), 9f);
 #endif
             panelEx1.AutoScroll = true;
 
