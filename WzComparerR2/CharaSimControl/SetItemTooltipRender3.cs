@@ -59,7 +59,8 @@ namespace WzComparerR2.CharaSimControl
             int picHeight2 = 0;
             Bitmap effectBmp = null;
 
-            if (this.SetItem.ExpandToolTip)
+            //if (this.SetItem.ExpandToolTip)
+            if (false)
             {
                 effectBmp = RenderEffectPart(specialPetSetEffectName, out picHeight2);
                 width += 298;
@@ -144,7 +145,7 @@ namespace WzComparerR2.CharaSimControl
             picHeight = 21;
             g.DrawImage(Resource.UIToolTipNew_img_Item_Equip_textIcon_set_normal, 14, picHeight - 1);
             TextRenderer.DrawText(g, this.SetItem.SetItemName, Translator.IsKoreanStringPresent(this.SetItem.SetItemName) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, new Point(46, picHeight), Color.White, TextFormatFlags.NoPadding);
-            DrawCategory(g, $"0 #$g/ {this.SetItem.ItemIDs.Parts.Count}", picHeight - 2);
+            DrawCategory(g, $"0 #$g/ {(this.SetItem.Parts ? this.SetItem.ItemIDs.Parts.Count : this.SetItem.Effects.Keys.Max())}", picHeight - 2);
             picHeight += 29;
 
             format.Alignment = StringAlignment.Far;
@@ -253,7 +254,7 @@ namespace WzComparerR2.CharaSimControl
                     itemName = itemName ?? string.Empty;
                     typeName = typeName ?? "裝備";
 
-                    var match = Regex.Match(typeName, @"^(\(.*\)|（.*）|\[.*\])$");
+/*                    var match = Regex.Match(typeName, @"^(\(.*\)|（.*）|\[.*\])$");
                     if (match.Success)
                     {
                         typeName = match.Groups[1].Success ? match.Groups[1].Value :
@@ -264,7 +265,7 @@ namespace WzComparerR2.CharaSimControl
                     if (this.SetItem.Effects.Count > 1 && this.SetItem.ItemIDs.Parts.Count == 1)
                     {
                         typeName += "  [0/3]";
-                    }
+                    }*/
 
                     if (!partNames.Contains(itemName + typeName))
                     {
