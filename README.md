@@ -19,7 +19,7 @@
 ＃ 用法
 - **2.x**: Win7+/.net4.8+/dx11.0
 
-# 翻譯函數
+# 翻譯功能
 - WzComparerR2-JMS v5.6.0 及更高版本中引入了翻譯功能。
 - 可與以下翻譯引擎搭配使用：Google、DeepL、DuckDuckGo/Bing、MyMemory、Yandex、Naver Papago。
 
