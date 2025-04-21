@@ -947,7 +947,7 @@ namespace WzComparerR2.CharaSim
                     case 11: extraJobNames.Add("聖魂騎士"); break;
                     case 12: extraJobNames.Add("烈焰巫師"); break;
                     case 22: extraJobNames.Add("\r\n龍魔導士"); break;
-                    case 32: extraJobNames.Add("龍魔導士"); break;
+                    case 32: extraJobNames.Add("煉獄巫師"); break;
                     case 172: extraJobNames.Add("琳恩"); break;
                     default: extraJobNames.Add(specJob.ToString()); break;
                 }
@@ -956,7 +956,7 @@ namespace WzComparerR2.CharaSim
             {
                 return null;
             }
-            return string.Join("､", extraJobNames) + "着用可能";
+            return "可裝備" + string.Join("、", extraJobNames);
         }
 
         public static string GetItemPropString(ItemPropType propType, long value)
