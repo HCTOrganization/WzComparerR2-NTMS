@@ -723,8 +723,8 @@ namespace WzComparerR2.CharaSim
                 case GearType.chakram: return "環刃";
                 case GearType.hexSeeker: return "能量手環";
 
-                case GearType.boxingCannon: return "拳封";
-                case GearType.boxingSky: return "拳天";
+                case GearType.boxingCannon: return "武拳";
+                case GearType.boxingSky: return "拳環";
 
                 case GearType.arcaneSymbol: return "秘法符文";
                 case GearType.authenticSymbol: return "真實符文";

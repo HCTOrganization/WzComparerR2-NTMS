@@ -558,7 +558,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 extraReq = ItemStringHelper.GetExtraJobReqString(Gear.ReqSpecJobs);
             }
-            TextRenderer.DrawText(g, "着用職業", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
+            TextRenderer.DrawText(g, "適用職業", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
             TextRenderer.DrawText(g, extraReq == null ? reqJobStr : extraReq.Replace("可裝備", "").Replace("職業群", "").Replace("職業", ""), GearGraphics.EquipMDMoris9Font, new Point(79, picH), Color.White, TextFormatFlags.NoPadding);
             picH += 16;
             if (!string.IsNullOrEmpty(extraReq))
@@ -2003,13 +2003,13 @@ namespace WzComparerR2.CharaSimControl
                 case 0:
                     return "無";
                 case 1:
-                    return "レア";
+                    return "特殊";
                 case 2:
-                    return "エピック";
+                    return "稀有";
                 case 3:
-                    return "ユニーク";
+                    return "罕見";
                 case 4:
-                    return "レジェンダリー";
+                    return "傳說";
                 default:
                     return "-";
             }
@@ -2067,11 +2067,11 @@ namespace WzComparerR2.CharaSimControl
                 categories.Add("武器");
                 if (!Gear.Cash && (Gear.IsLeftWeapon(Gear.type) || Gear.type == GearType.katara))
                 {
-                    categories.Add("片手");
+                    categories.Add("單手");
                 }
                 else if (!Gear.Cash && Gear.IsDoubleHandWeapon(Gear.type))
                 {
-                    categories.Add("両手");
+                    categories.Add("雙手");
                 }
             }
             else if (Gear.IsSubWeapon(Gear.type) || Gear.type == GearType.shield)
@@ -2080,7 +2080,7 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (Gear.IsEmblem(Gear.type))
             {
-                categories.Add("エンブレム/パワーソース");
+                categories.Add("紋章/能源");
             }
             else if (Gear.IsArmor(Gear.type))
             {
@@ -2088,7 +2088,7 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (Gear.IsAccessory(Gear.type))
             {
-                categories.Add("アクセサリ");
+                categories.Add("飾品");
             }
 
             categories.Add(ItemStringHelper.GetGearTypeString(Gear.type));
