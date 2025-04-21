@@ -209,6 +209,21 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+        public bool IsDestinyWeapon
+        {
+            get
+            {
+                if (IsGenesisWeapon &&
+                    this.Props.TryGetValue(GearPropType.reqLevel, out var equipLevel)
+                    && equipLevel == 250)
+                {
+                    return true;
+                }
+                return false;
+            }
+        }
+
+
         public void Upgrade(Wz_Node infoNode, int count)
         {
             this.ScrollUp += count;
@@ -301,6 +316,98 @@ namespace WzComparerR2.CharaSim
                     return false;
             }
         }
+
+        public static bool IsEmblem(GearType type)
+        {
+            if (type == GearType.emblem || type == GearType.powerSource)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static bool IsArmor(GearType type)
+        {
+            switch (type)
+            {
+                case GearType.cap:
+                case GearType.coat:
+                case GearType.longcoat:
+                case GearType.pants:
+                case GearType.shoes:
+                case GearType.glove:
+                case GearType.cape:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsAccessory(GearType type)
+        {
+            switch (type)
+            {
+                case GearType.faceAccessory:
+                case GearType.eyeAccessory:
+                case GearType.earrings:
+                case GearType.ring:
+                case GearType.pendant:
+                case GearType.belt:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsEnhanceable(GearType type)
+        {
+            switch (type)
+            {
+                case GearType.body:
+                case GearType.head:
+                case GearType.face:
+                case GearType.hair:
+                case GearType.hair2:
+                case GearType.face2:
+                case GearType.hair3:
+                case GearType.medal:
+                case GearType.android:
+                case GearType.shovel:
+                case GearType.pickaxe:
+                case GearType.arcaneSymbol:
+                case GearType.authenticSymbol:
+                case GearType.grandAuthenticSymbol:
+                case GearType.petEquip:
+                    return false;
+                default:
+                    return true;
+            }
+        }
+
+        public static bool CanEnhanceBonusStat(GearType type)
+        {
+            switch (type)
+            {
+                case GearType.faceAccessory:
+                case GearType.eyeAccessory:
+                case GearType.earrings:
+                case GearType.pendant:
+                case GearType.belt:
+                case GearType.cap:
+                case GearType.cape:
+                case GearType.coat:
+                case GearType.glove:
+                case GearType.longcoat:
+                case GearType.pocket:
+                case GearType.pants:
+                case GearType.shoes:
+                case GearType.totem:
+                    return true;
+                default:
+                    return IsWeapon(type) ? true : false;
+            }
+        }
+
 
         /// <summary>
         /// 获取一个值，指示装备类型是否为双手武器。
@@ -456,6 +563,12 @@ namespace WzComparerR2.CharaSim
                     return GearType.boxingCannon;
                 case 1404:
                     return GearType.chakram;
+                case 1712:
+                    return GearType.arcaneSymbol;
+                case 1713:
+                    return GearType.authenticSymbol;
+                case 1714:
+                    return GearType.grandAuthenticSymbol;
             }
             if (code / 10000 == 135)
             {

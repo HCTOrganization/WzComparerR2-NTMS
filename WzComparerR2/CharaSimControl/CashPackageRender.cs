@@ -101,14 +101,7 @@ namespace WzComparerR2.CharaSimControl
                 }
 
                 int nameWidth;
-                if (Translator.IsKoreanStringPresent(name))
-                {
-                    nameWidth = TextRenderer.MeasureText(g, name.Replace(Environment.NewLine, ""), GearGraphics.KMSItemNameFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Width;
-                }
-                else
-                {
-                    nameWidth = TextRenderer.MeasureText(g, name.Replace(Environment.NewLine, ""), GearGraphics.ItemNameFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Width;
-                }
+                nameWidth = TextRenderer.MeasureText(g, name.Replace(Environment.NewLine, ""), Translator.IsKoreanStringPresent(name) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix).Width;
                 if (commodityPackage.termStart > 0 || commodityPackage.termEnd != null)
                 {
                     nameWidth = (int)(1.5 * nameWidth);
@@ -186,27 +179,13 @@ namespace WzComparerR2.CharaSimControl
                 string[] NameLines = Translator.MergeString(CashPackage.name, translatedCashPackageName, 1, false, true).Split(new string[] { Environment.NewLine }, StringSplitOptions.None);
                 foreach (string line in NameLines)
                 {
-                    if (Translator.IsKoreanStringPresent(line))
-                    {
-                        TextRenderer.DrawText(g, line, GearGraphics.KMSItemNameFont, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
-                    }
-                    else
-                    {
-                        TextRenderer.DrawText(g, line, GearGraphics.ItemNameFont, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
-                    }
+                    TextRenderer.DrawText(g, line, Translator.IsKoreanStringPresent(line) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
                     picH += 16;
                 }
             }
             else
             {
-                if (Translator.IsKoreanStringPresent(CashPackage.name))
-                {
-                    TextRenderer.DrawText(g, CashPackage.name, GearGraphics.KMSItemNameFont, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
-                }
-                else
-                {
-                    TextRenderer.DrawText(g, CashPackage.name, GearGraphics.ItemNameFont, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
-                }
+                TextRenderer.DrawText(g, CashPackage.name, Translator.IsKoreanStringPresent(CashPackage.name) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont, new Point(cashBitmap.Width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
                 picH += 16;
             }
             if (commodityPackage.termStart > 0 || commodityPackage.termEnd != null)
@@ -232,14 +211,7 @@ namespace WzComparerR2.CharaSimControl
 
                 picH += 8;
                 //term += " >";
-                if (Translator.IsKoreanStringPresent(term))
-                {
-                    TextRenderer.DrawText(g, term, GearGraphics.KMSItemDetailFont2, new Point(cashBitmap.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush4).Color, TextFormatFlags.HorizontalCenter);
-                }
-                else
-                {
-                    TextRenderer.DrawText(g, term, GearGraphics.ItemDetailFont2, new Point(cashBitmap.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush4).Color, TextFormatFlags.HorizontalCenter);
-                }
+                TextRenderer.DrawText(g, term, Translator.IsKoreanStringPresent(term) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont, new Point(cashBitmap.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush4).Color, TextFormatFlags.HorizontalCenter);
                 picH += 16 * term.Split('\n').Length;
                 //picH += 12; < --- commented because of line above, check!
             }
@@ -301,119 +273,49 @@ namespace WzComparerR2.CharaSimControl
                 case 1:
                     if (isTranslateRequired)
                     {
-                        if (Translator.IsKoreanStringPresent(translatedCashPackageDesc))
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc, GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc, GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, translatedCashPackageDesc, Translator.IsKoreanStringPresent(translatedCashPackageDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
                     }
                     if (CashPackage.onlyCash == 0)
                     {
-                        if (Translator.IsKoreanStringPresent(CashPackage.desc))
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "", GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, CashPackage.desc, Translator.IsKoreanStringPresent(CashPackage.desc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
                     }
                     else
                     {
-                        if (Translator.IsKoreanStringPresent(CashPackage.desc))
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "\n#NEXONポイントでのみ購入可能#", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "\n#NEXONポイントでのみ購入可能#", GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, CashPackage.desc + "\n#NEXONポイントでのみ購入可能#", Translator.IsKoreanStringPresent(CashPackage.desc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
                     }
                     break;
                 case 2:
                     if (isTranslateRequired)
                     {
-                        if (Translator.IsKoreanStringPresent(CashPackage.desc))
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc, GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc, GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, CashPackage.desc, Translator.IsKoreanStringPresent(CashPackage.desc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
                     }
                     if (CashPackage.onlyCash == 0)
                     {
-                        if (Translator.IsKoreanStringPresent(translatedCashPackageDesc))
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "", GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, translatedCashPackageDesc, Translator.IsKoreanStringPresent(translatedCashPackageDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
                     }
                     else
                     {
-                        if (Translator.IsKoreanStringPresent(translatedCashPackageDesc))
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#NEXONポイントでのみ購入可能#", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#NEXONポイントでのみ購入可能#", GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#NEXONポイントでのみ購入可能#", Translator.IsKoreanStringPresent(translatedCashPackageDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
                     }
                     break;
                 case 3:
                     if (CashPackage.onlyCash == 0)
                     {
-                        if (Translator.IsKoreanStringPresent(translatedCashPackageDesc))
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "", GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, translatedCashPackageDesc, Translator.IsKoreanStringPresent(translatedCashPackageDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
                     }
                     else
                     {
-                        if (Translator.IsKoreanStringPresent(translatedCashPackageDesc))
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#NEXONポイントでのみ購入可能#", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#NEXONポイントでのみ購入可能#", GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#NEXONポイントでのみ購入可能#", Translator.IsKoreanStringPresent(translatedCashPackageDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
                     }
                     break;
                 default:
                     if (CashPackage.onlyCash == 0)
                     {
-                        if (Translator.IsKoreanStringPresent(CashPackage.desc))
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "", GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, CashPackage.desc, Translator.IsKoreanStringPresent(CashPackage.desc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
                     }
                     else
                     {
-                        if (Translator.IsKoreanStringPresent(CashPackage.desc))
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "\n#NEXONポイントでのみ購入可能#", GearGraphics.KMSItemDetailFont, 11, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, CashPackage.desc + "\n#NEXONポイントでのみ購入可能#", GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, CashPackage.desc + "\n#NEXONポイントでのみ購入可能#", Translator.IsKoreanStringPresent(CashPackage.desc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
                     }
                     break;
 
@@ -572,24 +474,10 @@ namespace WzComparerR2.CharaSimControl
                 }
                 if (time == null)
                 {
-                    if (Translator.IsKoreanStringPresent(name))
-                    {
-                        TextRenderer.DrawText(g, name.TrimEnd(Environment.NewLine.ToCharArray()), GearGraphics.KMSItemDetailFont, new Point(columnLeft + 55, picH + 17), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                    }
-                    else
-                    {
-                        TextRenderer.DrawText(g, name.TrimEnd(Environment.NewLine.ToCharArray()), GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 17), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                    }
+                    TextRenderer.DrawText(g, name.TrimEnd(Environment.NewLine.ToCharArray()), Translator.IsKoreanStringPresent(name) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 17), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                     if (commodity.Bonus == 0)
                     {
-                        if (Translator.IsKoreanStringPresent(info))
-                        {
-                            TextRenderer.DrawText(g, info, GearGraphics.KMSItemDetailFont, new Point(columnLeft + 55, picH + 33), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                        }
-                        else
-                        {
-                            TextRenderer.DrawText(g, info, GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 33), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                        }
+                        TextRenderer.DrawText(g, info, Translator.IsKoreanStringPresent(info) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 33), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                         if (commodity.originalPrice > 0 && commodity.Price < commodity.originalPrice)
                         {
                             int width = TextRenderer.MeasureText(g, info.Substring(0, info.IndexOf("    ")), GearGraphics.ItemDetailFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width;
@@ -600,27 +488,13 @@ namespace WzComparerR2.CharaSimControl
                     }
                     else
                     {
-                        if (Translator.IsKoreanStringPresent(info))
-                        {
-                            TextRenderer.DrawText(g, info, GearGraphics.KMSItemDetailFont, new Point(columnLeft + 55, picH + 33), Color.Red, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                        }
-                        else
-                        {
-                            TextRenderer.DrawText(g, info, GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 33), Color.Red, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                        }
+                        TextRenderer.DrawText(g, info, Translator.IsKoreanStringPresent(info) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 33), Color.Red, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                         g.DrawImage(Resource.CSDiscount_bonus, columnRight - 47, picH + 29);
                     }
                 }
                 else
                 {
-                    if (Translator.IsKoreanStringPresent(name))
-                    {
-                        TextRenderer.DrawText(g, name.Replace(Environment.NewLine, ""), GearGraphics.KMSItemDetailFont, new Point(columnLeft + 55, picH + 8), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                    }
-                    else
-                    {
-                        TextRenderer.DrawText(g, name.Replace(Environment.NewLine, ""), GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 8), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                    }
+                    TextRenderer.DrawText(g, name.Replace(Environment.NewLine, ""), Translator.IsKoreanStringPresent(name) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 8), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                     if (commodity.Bonus == 0)
                     {
                         TextRenderer.DrawText(g, info, GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 24), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
@@ -634,14 +508,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     else
                     {
-                        if (Translator.IsKoreanStringPresent(info))
-                        {
-                            TextRenderer.DrawText(g, info, GearGraphics.KMSItemDetailFont, new Point(columnLeft + 55, picH + 24), Color.Red, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                        }
-                        else
-                        {
-                            TextRenderer.DrawText(g, info, GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 24), Color.Red, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                        }
+                        TextRenderer.DrawText(g, info, Translator.IsKoreanStringPresent(info) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 24), Color.Red, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                         g.DrawImage(Resource.CSDiscount_bonus, columnRight - 47, picH + 20);
                     }
                     TextRenderer.DrawText(g, time, GearGraphics.ItemDetailFont, new Point(columnLeft + 55, picH + 39), Color.White, TextFormatFlags.NoPadding);

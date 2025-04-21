@@ -382,15 +382,7 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
             //SizeF titleSize = TextRenderer.MeasureText(g, sr.Name.Replace(Environment.NewLine, ""), GearGraphics.ItemNameFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
-            SizeF titleSize;
-            if (Translator.IsKoreanStringPresent(itemName))
-            {
-                titleSize = TextRenderer.MeasureText(g, itemName, GearGraphics.KMSItemNameFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
-            }
-            else
-            {
-                titleSize = TextRenderer.MeasureText(g, itemName, GearGraphics.ItemNameFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
-            }
+            SizeF titleSize = TextRenderer.MeasureText(g, itemName, Translator.IsKoreanStringPresent(itemName) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
             titleSize.Width += 9 * 2;//9 was 12
             if (titleSize.Width > 290)
             {
@@ -416,14 +408,7 @@ namespace WzComparerR2.CharaSimControl
             //绘制标题
             bool hasPart2 = false;
             format.Alignment = StringAlignment.Center;
-            if (Translator.IsKoreanStringPresent(itemName))
-            {
-                g.DrawString(itemName, GearGraphics.KMSItemNameFont, Brushes.White, tooltip.Width / 2, picH, format);
-            }
-            else
-            {
-                g.DrawString(itemName, GearGraphics.ItemNameFont2, Brushes.White, tooltip.Width / 2, picH, format);
-            }
+            g.DrawString(itemName, Translator.IsKoreanStringPresent(itemName) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont2, Brushes.White, tooltip.Width / 2, picH, format);
             picH += 22;
 
             if (Item.Props.TryGetValue(ItemPropType.wonderGrade, out value) && value > 0)
@@ -737,25 +722,11 @@ namespace WzComparerR2.CharaSimControl
                 if (isTranslateRequired)
                 {
                     string mergedDesc = Translator.MergeString(desc, Translator.TranslateString(desc), 2);
-                    if (Translator.IsKoreanStringPresent(mergedDesc))
-                    {
-                        GearGraphics.DrawString(g, mergedDesc, GearGraphics.KMSItemDetailFont, 100, right, ref picH, 16);
-                    }
-                    else
-                    {
-                        GearGraphics.DrawString(g, mergedDesc, GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
-                    }
+                    GearGraphics.DrawString(g, mergedDesc, Translator.IsKoreanStringPresent(mergedDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                 }
                 else
                 {
-                    if (Translator.IsKoreanStringPresent(desc))
-                    {
-                        GearGraphics.DrawString(g, desc, GearGraphics.KMSItemDetailFont, 100, right, ref picH, 16);
-                    }
-                    else
-                    {
-                        GearGraphics.DrawString(g, desc, GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
-                    }
+                    GearGraphics.DrawString(g, desc, Translator.IsKoreanStringPresent(desc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                 }
             }
             if (!string.IsNullOrEmpty(sr.AutoDesc))
@@ -763,25 +734,11 @@ namespace WzComparerR2.CharaSimControl
                 if (isTranslateRequired)
                 {
                     string mergedAutoDesc = Translator.MergeString(sr.AutoDesc, Translator.TranslateString(sr.AutoDesc), 2);
-                    if (Translator.IsKoreanStringPresent(mergedAutoDesc))
-                    {
-                        GearGraphics.DrawString(g, mergedAutoDesc, GearGraphics.KMSItemDetailFont, 100, right, ref picH, 16);
-                    }
-                    else
-                    {
-                        GearGraphics.DrawString(g, mergedAutoDesc, GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
-                    }
+                    GearGraphics.DrawString(g, mergedAutoDesc, Translator.IsKoreanStringPresent(mergedAutoDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                 }
                 else
                 {
-                    if (Translator.IsKoreanStringPresent(sr.AutoDesc))
-                    {
-                        GearGraphics.DrawString(g, sr.AutoDesc, GearGraphics.KMSItemDetailFont, 100, right, ref picH, 16);
-                    }
-                    else
-                    {
-                        GearGraphics.DrawString(g, sr.AutoDesc, GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
-                    }
+                    GearGraphics.DrawString(g, sr.AutoDesc, Translator.IsKoreanStringPresent(sr.AutoDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                 }
             }
             if (item.Props.TryGetValue(ItemPropType.tradeAvailable, out value) && value > 0)
@@ -918,25 +875,11 @@ namespace WzComparerR2.CharaSimControl
                     if (isTranslateRequired)
                     {
                         string mergedDescLeftAlign = Translator.MergeString(descLeftAlign, Translator.TranslateString(descLeftAlign), 2);
-                        if (Translator.IsKoreanStringPresent(mergedDescLeftAlign))
-                        {
-                            GearGraphics.DrawString(g, mergedDescLeftAlign, GearGraphics.KMSItemDetailFont, 14, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, mergedDescLeftAlign, GearGraphics.ItemDetailFont, 14, right, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, mergedDescLeftAlign, Translator.IsKoreanStringPresent(mergedDescLeftAlign) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 14, right, ref picH, 16);
                     }
                     else
                     {
-                        if (Translator.IsKoreanStringPresent(descLeftAlign))
-                        {
-                            GearGraphics.DrawString(g, descLeftAlign, GearGraphics.KMSItemDetailFont, 14, right, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, descLeftAlign, GearGraphics.ItemDetailFont, 14, right, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, descLeftAlign, Translator.IsKoreanStringPresent(descLeftAlign) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 14, right, ref picH, 16);
                     }
                 }
                 if (item.CoreSpecs.Count > 0)
@@ -1276,10 +1219,20 @@ namespace WzComparerR2.CharaSimControl
             TooltipRender renderer = this.LinkRecipeGearRender;
             if (renderer == null)
             {
-                GearTooltipRender2 defaultRenderer = new GearTooltipRender2();
-                defaultRenderer.StringLinker = this.StringLinker;
-                defaultRenderer.ShowObjectID = false;
-                renderer = defaultRenderer;
+                if (this.Enable22AniStyle)
+                {
+                    GearTooltipRender3 defaultRenderer = new GearTooltipRender3();
+                    defaultRenderer.StringLinker = this.StringLinker;
+                    defaultRenderer.ShowObjectID = false;
+                    renderer = defaultRenderer;
+                }
+                else
+                {
+                    GearTooltipRender2 defaultRenderer = new GearTooltipRender2();
+                    defaultRenderer.StringLinker = this.StringLinker;
+                    defaultRenderer.ShowObjectID = false;
+                    renderer = defaultRenderer;
+                }
             }
 
             renderer.TargetItem = gear;
@@ -1307,10 +1260,20 @@ namespace WzComparerR2.CharaSimControl
             TooltipRender renderer = this.SetItemRender;
             if (renderer == null)
             {
-                var defaultRenderer = new SetItemTooltipRender();
-                defaultRenderer.StringLinker = this.StringLinker;
-                defaultRenderer.ShowObjectID = false;
-                renderer = defaultRenderer;
+                if (this.Enable22AniStyle)
+                {
+                    var defaultRenderer = new SetItemTooltipRender3();
+                    defaultRenderer.StringLinker = this.StringLinker;
+                    defaultRenderer.ShowObjectID = false;
+                    renderer = defaultRenderer;
+                }
+                else
+                {
+                    var defaultRenderer = new SetItemTooltipRender();
+                    defaultRenderer.StringLinker = this.StringLinker;
+                    defaultRenderer.ShowObjectID = false;
+                    renderer = defaultRenderer;
+                }
             }
 
             renderer.TargetItem = setItem;

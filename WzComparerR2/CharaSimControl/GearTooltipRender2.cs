@@ -254,15 +254,7 @@ namespace WzComparerR2.CharaSimControl
 
             if (AutoTitleWrap)
             {
-                SizeF textWidth;
-                if (Translator.IsKoreanStringPresent(gearName))
-                {
-                    textWidth = TextRenderer.MeasureText(g, gearName, GearGraphics.KMSItemNameFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
-                }
-                else
-                {
-                    textWidth = TextRenderer.MeasureText(g, gearName, GearGraphics.ItemNameFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
-                }
+                SizeF textWidth = textWidth = TextRenderer.MeasureText(g, gearName, Translator.IsKoreanStringPresent(gearName) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
                 int titleWrapQuota;
                 if (System.Text.Encoding.UTF8.GetByteCount(gearName) != gearName.Length)
                 {
@@ -335,27 +327,11 @@ namespace WzComparerR2.CharaSimControl
                 {
                     case 1:
                         gearName = "(" + gearName + ")";
-                        if (Translator.IsKoreanStringPresent(translatedName))
-                        {
-                            g.DrawString(translatedName, GearGraphics.KMSItemNameFont,
-                                GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
-                        }
-                        else
-                        {
-                            g.DrawString(translatedName, GearGraphics.ItemNameFont2,
-                                GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
-                        }
+                        g.DrawString(translatedName, Translator.IsKoreanStringPresent(translatedName) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont2,
+                            GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
                         picH += 12 * (Regex.Matches(translatedName, Environment.NewLine).Count + 1) + 1;
-                        if (Translator.IsKoreanStringPresent(gearName))
-                        {
-                            g.DrawString(gearName, GearGraphics.KMSItemNameFont,
-                                GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
-                        }
-                        else
-                        {
-                            g.DrawString(gearName, GearGraphics.ItemNameFont2,
-                                GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
-                        }
+                        g.DrawString(gearName, Translator.IsKoreanStringPresent(gearName) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont2,
+                            GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
                         if (gearName.Contains(Environment.NewLine))
                         {
                             picH += 12 * Regex.Matches(gearName, Environment.NewLine).Count;
@@ -363,59 +339,27 @@ namespace WzComparerR2.CharaSimControl
                         break;
                     case 2:
                         translatedName = "(" + translatedName + ")";
-                        if (Translator.IsKoreanStringPresent(gearName))
-                        {
-                            g.DrawString(gearName, GearGraphics.KMSItemNameFont,
-                                GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
-                        }
-                        else
-                        {
-                            g.DrawString(gearName, GearGraphics.ItemNameFont2,
-                                GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
-                        }
+                        g.DrawString(gearName, Translator.IsKoreanStringPresent(gearName) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont2,
+                            GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
                         picH += 12 * (Regex.Matches(gearName, Environment.NewLine).Count + 1) + 1;
-                        if (Translator.IsKoreanStringPresent(translatedName))
-                        {
-                            g.DrawString(translatedName, GearGraphics.KMSItemNameFont,
-                                GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
-                        }
-                        else
-                        {
-                            g.DrawString(translatedName, GearGraphics.ItemNameFont2,
-                                GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
-                        }
+                        g.DrawString(translatedName, Translator.IsKoreanStringPresent(translatedName) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont2,
+                            GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
                         if (translatedName.Contains(Environment.NewLine))
                         {
                             picH += 12 * Regex.Matches(translatedName, Environment.NewLine).Count;
                         }
                         break;
                     case 3:
-                        if (Translator.IsKoreanStringPresent(translatedName))
-                        {
-                            g.DrawString(translatedName, GearGraphics.KMSItemNameFont,
-                                GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
-                        }
-                        else
-                        {
-                            g.DrawString(translatedName, GearGraphics.ItemNameFont2,
-                                GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
-                        }
+                        g.DrawString(translatedName, Translator.IsKoreanStringPresent(translatedName) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont2,
+                            GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
                         if (translatedName.Contains(Environment.NewLine))
                         {
                             picH += 12 * (Regex.Matches(translatedName, Environment.NewLine).Count);
                         }
                         break;
                     default:
-                        if (Translator.IsKoreanStringPresent(gearName))
-                        {
-                            g.DrawString(gearName, GearGraphics.KMSItemNameFont,
-                                GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
-                        }
-                        else
-                        {
-                            g.DrawString(gearName, GearGraphics.ItemNameFont2,
-                                GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
-                        }
+                        g.DrawString(gearName, Translator.IsKoreanStringPresent(gearName) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont2,
+                            GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
                         if (gearName.Contains(Environment.NewLine))
                         {
                             picH += 12 * Regex.Matches(gearName, Environment.NewLine).Count;
@@ -425,16 +369,8 @@ namespace WzComparerR2.CharaSimControl
             }
             else
             {
-                if (Translator.IsKoreanStringPresent(gearName))
-                {
-                    g.DrawString(gearName, GearGraphics.KMSItemNameFont,
-                        GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
-                }
-                else
-                {
-                    g.DrawString(gearName, GearGraphics.ItemNameFont2,
-                        GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
-                }
+                g.DrawString(gearName, Translator.IsKoreanStringPresent(gearName) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont2,
+                    GearGraphics.GetGearNameBrush(Gear.diff, Gear.ScrollUp > 0), 130, picH, format);
                 if (gearName.Contains(Environment.NewLine))
                 {
                     picH += 12 * Regex.Matches(gearName, Environment.NewLine).Count;
@@ -1400,26 +1336,11 @@ namespace WzComparerR2.CharaSimControl
                     if (isTranslateRequired)
                     {
                         string translatedDesc = Translator.MergeString(sr.Desc.Replace("#", " #"), Translator.TranslateString(sr.Desc).Replace("#", " #"), 2);
-                        if (Translator.IsKoreanStringPresent(translatedDesc))
-                        {
-                            GearGraphics.DrawString(g, translatedDesc, GearGraphics.KMSItemDetailFont2, orange2FontColorTable, 10, 243, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, translatedDesc, GearGraphics.EquipDetailFont2, orange2FontColorTable, 10, 243, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, translatedDesc, Translator.IsKoreanStringPresent(translatedDesc) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipDetailFont2, orange2FontColorTable, 10, 243, ref picH, 15);
                     }
                     else
                     {
-
-                        if (Translator.IsKoreanStringPresent(sr.Desc))
-                        {
-                            GearGraphics.DrawString(g, sr.Desc.Replace("#", " #"), GearGraphics.KMSItemDetailFont2, orange2FontColorTable, 10, 243, ref picH, 16);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, sr.Desc.Replace("#", " #"), GearGraphics.EquipDetailFont2, orange2FontColorTable, 10, 243, ref picH, 16);
-                        }
+                        GearGraphics.DrawString(g, sr.Desc.Replace("#", " #"), Translator.IsKoreanStringPresent(sr.Desc) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipDetailFont, orange2FontColorTable, 10, 243, ref picH, 15);
                     }
                 }
                 if (!string.IsNullOrEmpty(levelDesc))
@@ -1428,14 +1349,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 foreach (string str in desc)
                 {
-                    if (Translator.IsKoreanStringPresent(str))
-                    {
-                        GearGraphics.DrawString(g, str, GearGraphics.KMSItemDetailFont, orange2FontColorTable, 10, 243, ref picH, 16);
-                    }
-                    else
-                    {
-                        GearGraphics.DrawString(g, str, GearGraphics.EquipDetailFont2, orange2FontColorTable, 10, 243, ref picH, 16);
-                    }
+                    GearGraphics.DrawString(g, str, Translator.IsKoreanStringPresent(str) ? GearGraphics.KMSItemDetailFont : GearGraphics.EquipDetailFont2, orange2FontColorTable, 10, 243, ref picH, 15);
                 }
                 picH += 5;
             }
@@ -1497,15 +1411,8 @@ namespace WzComparerR2.CharaSimControl
                         g.DrawImage(res["dotline"].Image, 0, picH);
                         picH += 8;
                     }
-                    if (Translator.IsKoreanStringPresent(exclusiveEquip))
-                    {
-                        GearGraphics.DrawString(g, exclusiveEquip, GearGraphics.KMSItemDetailFont2, orange2FontColorTable, 13, 240, ref picH, 16);
-                    }
-                    else
-                    {
-                        GearGraphics.DrawString(g, exclusiveEquip, GearGraphics.EquipDetailFont2, orange2FontColorTable, 13, 240, ref picH, 16);
-                    }
-                    
+                    GearGraphics.DrawString(g, exclusiveEquip, Translator.IsKoreanStringPresent(exclusiveEquip) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipDetailFont2, orange2FontColorTable, 13, 240, ref picH, 15);
+
                     picH += 5;
                     break;
                 }
@@ -1643,7 +1550,7 @@ namespace WzComparerR2.CharaSimControl
                             {
                                 propString += " ~ " + kv.Value.Max + (propString.EndsWith("%") ? "%" : null);
                             }
-                            TextRenderer.DrawText(g, propString, GearGraphics.EquipDetailFont, new Point(12, picHeight), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                            TextRenderer.DrawText(g, propString, Translator.IsKoreanStringPresent(propString) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipDetailFont, new Point(12, picHeight), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                             picHeight += 15;
                         }
                     }
@@ -1660,7 +1567,7 @@ namespace WzComparerR2.CharaSimControl
                                 this.StringLinker.StringSkill.TryGetValue(kv.Key, out sr);
                             }
                             string text = string.Format("+{2} {0}", sr == null ? null : sr.Name, kv.Key, kv.Value);
-                            TextRenderer.DrawText(g, text, GearGraphics.EquipDetailFont, new Point(12, picHeight), ((SolidBrush)GearGraphics.OrangeBrush).Color, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                            TextRenderer.DrawText(g, text, Translator.IsKoreanStringPresent(text) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipDetailFont, new Point(12, picHeight), ((SolidBrush)GearGraphics.OrangeBrush).Color, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                             picHeight += 15;
                         }
                     }
@@ -1675,7 +1582,7 @@ namespace WzComparerR2.CharaSimControl
                         {
                             title = "装備時に獲得できるスキル：";
                         }
-                        TextRenderer.DrawText(g, title, GearGraphics.EquipDetailFont, new Point(10, picHeight), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                        TextRenderer.DrawText(g, title, Translator.IsKoreanStringPresent(title) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipDetailFont, new Point(10, picHeight), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                         picHeight += 15;
                         foreach (var kv in info.EquipmentSkills)
                         {
@@ -1685,7 +1592,7 @@ namespace WzComparerR2.CharaSimControl
                                 this.StringLinker.StringSkill.TryGetValue(kv.Key, out sr);
                             }
                             string text = string.Format("Lv{2} {0}", sr == null ? null : sr.Name, kv.Key, kv.Value);
-                            TextRenderer.DrawText(g, text, GearGraphics.EquipDetailFont, new Point(10, picHeight), ((SolidBrush)GearGraphics.OrangeBrush).Color, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                            TextRenderer.DrawText(g, text, Translator.IsKoreanStringPresent(text) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipDetailFont, new Point(10, picHeight), ((SolidBrush)GearGraphics.OrangeBrush).Color, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                             picHeight += 15;
                         }
                     }

@@ -522,6 +522,18 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         totem = 120,
         /// <summary>
+        /// 아케인심볼 1712
+        /// </summary>
+        arcaneSymbol = 1712,
+        /// <summary>
+        /// 어센틱심볼 1713
+        /// </summary>
+        authenticSymbol = 1713,
+        /// <summary>
+        /// 그랜드 어센틱심볼 1714
+        /// </summary>
+        grandAuthenticSymbol = 1714,
+        /// <summary>
         /// 宝玉 178
         /// </summary>
         jewel = 178,

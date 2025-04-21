@@ -64,6 +64,8 @@ namespace WzComparerR2.CharaSimControl
         public static readonly Font Gear3NameFont = new Font("Noto Sans TC", 15f, FontStyle.Bold, GraphicsUnit.Pixel);
         public static readonly Font KMSGear3NameFont = new Font("NanumGothicExtraBold", 15f, GraphicsUnit.Pixel);
 
+        public static readonly Font EquipMDMoris9Font = new Font("MS Gothic", 12f, GraphicsUnit.Pixel);
+        public static readonly Font EquipMDMoris9FontBold = new Font("MS Gothic", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
 
         public static Font ItemNameFont2 { get; private set; }
         public static Font ItemDetailFont2 { get; private set; }
@@ -206,6 +208,18 @@ namespace WzComparerR2.CharaSimControl
         public static readonly Color SkillSummaryOrangeTextColor = Color.FromArgb(255, 204, 0);
         public static readonly Brush SkillSummaryOrangeTextBrush = new SolidBrush(SkillSummaryOrangeTextColor);
 
+        public static readonly Brush Equip22BrushGray = new SolidBrush(Color.FromArgb(183, 191, 197));
+        public static readonly Brush Equip22BrushDarkGray = new SolidBrush(Color.FromArgb(133, 145, 159));
+        public static readonly Brush Equip22BrushRed = new SolidBrush(Color.FromArgb(255, 102, 51));
+        public static readonly Brush Equip22BrushEmphasis = new SolidBrush(Color.FromArgb(255, 204, 0));
+        public static readonly Brush Equip22BrushScroll = new SolidBrush(Color.FromArgb(175, 173, 255));
+        public static readonly Brush Equip22BrushBonusStat = new SolidBrush(Color.FromArgb(10, 227, 173));
+        public static readonly Brush Equip22BrushRare = new SolidBrush(Color.FromArgb(102, 255, 255));
+        public static readonly Brush Equip22BrushEpic = new SolidBrush(Color.FromArgb(187, 129, 255));
+        public static readonly Brush Equip22BrushLegendary = new SolidBrush(Color.FromArgb(204, 255, 0));
+        public static readonly Brush Equip22BrushExceptional = new SolidBrush(Color.FromArgb(255, 51, 51));
+        public static readonly Brush Equip22BrushEmphasisBright = new SolidBrush(Color.FromArgb(255, 245, 77));
+
         public static Brush GetGearNameBrush(int diff, bool up, bool cash = false, bool petEquip = false)
         {
             if (cash && !petEquip)
@@ -278,7 +292,7 @@ namespace WzComparerR2.CharaSimControl
             DrawString(g, s, font, null, x, x1, ref y, height, alignment);
         }
 
-        public static void DrawString(Graphics g, string s, Font font, IDictionary<string, Color> fontColorTable, int x, int x1, ref int y, int height, TextAlignment alignment = TextAlignment.Left)
+        public static void DrawString(Graphics g, string s, Font font, IDictionary<string, Color> fontColorTable, int x, int x1, ref int y, int height, TextAlignment alignment = TextAlignment.Left, int strictlyAlignLeft = 0)
         {
             if (s == null)
                 return;
@@ -295,6 +309,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 r.UseGDIRenderer = true;
                 r.FontColorTable = fontColorTable;
+                r.StrictlyAlignLeft = strictlyAlignLeft;
                 r.DrawString(g, s, font, x, x1, ref y, height, alignment);
             }
         }

@@ -14,6 +14,7 @@ namespace WzComparerR2.Text
         }
 
         public bool WordWrapEnabled { get; set; }
+        public int StrictlyAlignLeft { get; set; }
         protected StringBuilder sb;
         protected TFont font;
 
@@ -227,6 +228,15 @@ namespace WzComparerR2.Text
                 if (run.IsBreakLine)
                 { //强行换行 并且flush
                     flush(true);
+
+                    if (this.StrictlyAlignLeft >= 1)
+                    {
+                        while (r < runs.Count - 1 && runs[r + 1].IsWhiteSpace)
+                        {
+                            r += 1;
+                        }
+                    }
+
                     if (r < runs.Count - 1)
                     {
                         xOffset = runs[r + 1].X;
@@ -274,6 +284,14 @@ namespace WzComparerR2.Text
                                     run = runs[r];
                                 }
                                 flush(true);
+                                if (this.StrictlyAlignLeft >= 2)
+                                {
+                                    while (r < runs.Count && runs[r].IsWhiteSpace)
+                                    {
+                                        r += 1;
+                                        run = runs[r];
+                                    }
+                                }
                                 if (r < runs.Count)
                                 {
                                     start = run.StartIndex;

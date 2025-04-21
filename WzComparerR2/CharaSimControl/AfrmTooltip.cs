@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using System.Drawing;
 using System.Windows.Forms;
 using WzComparerR2.Common;
@@ -39,6 +40,7 @@ namespace WzComparerR2.CharaSimControl
             this.NpcRender = new NpcTooltipRenderer();
             this.HelpRender = new HelpTooltipRender();
             this.SetItemRender = new SetItemTooltipRender();
+            this.SetItemRender3 = new SetItemTooltipRender3();
             this.SizeChanged += AfrmTooltip_SizeChanged;
 
             this.MouseClick += AfrmTooltip_MouseClick;
@@ -74,6 +76,7 @@ namespace WzComparerR2.CharaSimControl
         public NpcTooltipRenderer NpcRender { get; private set; }
         public HelpTooltipRender HelpRender { get; private set; }
         public SetItemTooltipRender SetItemRender { get; private set; }
+        public SetItemTooltipRender3 SetItemRender3 { get; private set; }
 
         public string ImageFileName { get; set; }
         public string NodeName { get; set; }
@@ -93,6 +96,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 this.showID = value;
                 this.GearRender.ShowObjectID = value;
+                this.GearRender3.ShowObjectID = value;
                 this.ItemRender.ShowObjectID = value;
                 this.SkillRender.ShowObjectID = value;
                 this.RecipeRender.ShowObjectID = value;
@@ -136,12 +140,12 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (item is Gear)
             {
-/*                if (Enable22AniStyle)
+                if (Enable22AniStyle)
                 {
                     renderer = GearRender3;
                     GearRender3.Gear = this.TargetItem as Gear;
                 }
-                else*/
+                else
                 {
                     renderer = GearRender;
                     GearRender.Gear = this.TargetItem as Gear;
@@ -213,8 +217,16 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (item is SetItem)
             {
-                renderer = SetItemRender;
-                SetItemRender.SetItem = this.item as SetItem;
+                if (Enable22AniStyle)
+                {
+                    renderer = SetItemRender3;
+                    SetItemRender3.SetItem = this.item as SetItem;
+                }
+                else
+                {
+                    renderer = SetItemRender;
+                    SetItemRender.SetItem = this.item as SetItem;
+                }
             }
             else
             {
