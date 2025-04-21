@@ -64,8 +64,8 @@ namespace WzComparerR2.CharaSimControl
         public static readonly Font Gear3NameFont = new Font("Noto Sans TC", 15f, FontStyle.Bold, GraphicsUnit.Pixel);
         public static readonly Font KMSGear3NameFont = new Font("NanumGothicExtraBold", 15f, GraphicsUnit.Pixel);
 
-        public static readonly Font EquipMDMoris9Font = new Font("MS Gothic", 12f, GraphicsUnit.Pixel);
-        public static readonly Font EquipMDMoris9FontBold = new Font("MS Gothic", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
+        public static readonly Font EquipMDMoris9Font = new Font("SimSun", 12f, GraphicsUnit.Pixel);
+        public static readonly Font EquipMDMoris9FontBold = new Font("SimSun", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
 
         public static Font ItemNameFont2 { get; private set; }
         public static Font ItemDetailFont2 { get; private set; }
