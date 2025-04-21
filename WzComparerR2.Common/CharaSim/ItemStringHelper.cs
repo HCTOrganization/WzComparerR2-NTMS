@@ -895,8 +895,8 @@ namespace WzComparerR2.CharaSim
                 case 31: return "可裝備惡魔職業";
                 case 36: return "可裝備傑諾";
                 case 37: return "可裝備爆拳槍神";
-                case 41: return "劍豪";
-                case 42: return "陰陽師";
+                case 41: return "可裝備劍豪";
+                case 42: return "可裝備陰陽師";
                 case 51: return "可裝備米哈逸";
                 case 61: return "可裝備凱薩";
                 case 64: return "可裝備卡蒂娜";
@@ -941,14 +941,14 @@ namespace WzComparerR2.CharaSim
             {
                 switch (specJob)
                 {
-                    case 1: extraJobNames.AddRange(new[] { "ﾋｰﾛｰ", "ﾊﾟﾗﾃﾞｨﾝ" }); break;
-                    case 2: extraJobNames.AddRange(new[] { "ｱｰｸﾒｲｼﾞ(氷･雷)", "ｱｰｸﾒｲｼﾞ(火･毒)", "ﾋﾞｼｮｯﾌﾟ" }); break;
-                    case 4: extraJobNames.Add("シャドー"); break;
-                    case 11: extraJobNames.Add("ｿｳﾙﾏｽﾀｰ"); break;
-                    case 12: extraJobNames.Add("ﾌﾚｲﾑｳｨｻﾞｰﾄﾞ"); break;
-                    case 22: extraJobNames.Add("ｴｳﾞｧﾝ"); break;
-                    case 32: extraJobNames.Add("ﾊﾞﾄﾙﾒｲｼﾞ"); break;
-                    case 172: extraJobNames.Add("ﾘﾝ"); break;
+                    case 1: extraJobNames.AddRange(new[] { "英雄", "聖騎士" }); break;
+                    case 2: extraJobNames.AddRange(new[] { "大魔導士", "主教" }); break;
+                    case 4: extraJobNames.Add("暗影神偷"); break;
+                    case 11: extraJobNames.Add("聖魂騎士"); break;
+                    case 12: extraJobNames.Add("烈焰巫師"); break;
+                    case 22: extraJobNames.Add("\r\n龍魔導士"); break;
+                    case 32: extraJobNames.Add("龍魔導士"); break;
+                    case 172: extraJobNames.Add("琳恩"); break;
                     default: extraJobNames.Add(specJob.ToString()); break;
                 }
             }

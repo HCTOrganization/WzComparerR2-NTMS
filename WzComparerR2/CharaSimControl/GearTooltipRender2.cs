@@ -729,7 +729,7 @@ namespace WzComparerR2.CharaSimControl
                 TextRenderer.DrawText(g, "成長等級 : " + (max ? "MAX" : value.ToString()), GearGraphics.EquipDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.OrangeBrush3).Color, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                 picH += 16;
                 string expString = Gear.Levels != null && Gear.Levels.First().Point != 0 ? ": 0/" + Gear.Levels.First().Point : ": 0%";
-                TextRenderer.DrawText(g, "成長経験値" + (max ? "：MAX" : expString), GearGraphics.EquipDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.OrangeBrush3).Color, TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, "成長經驗値" + (max ? "：MAX" : expString), GearGraphics.EquipDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.OrangeBrush3).Color, TextFormatFlags.NoPadding);
                 picH += 16;
             }
             else if (Gear.ItemID / 1000 == 1712)
@@ -752,7 +752,7 @@ namespace WzComparerR2.CharaSimControl
                 picH += 16;
                 TextRenderer.DrawText(g, "成長值：1 / 29 ( 3% )", GearGraphics.EquipDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.OrangeBrush3).Color, TextFormatFlags.NoPadding);
                 picH += 16;
-                TextRenderer.DrawText(g, "経験値獲得量：+10%", GearGraphics.EquipDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.WhiteBrush).Color, TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, "經驗値獲得量：+10%", GearGraphics.EquipDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.WhiteBrush).Color, TextFormatFlags.NoPadding);
                 picH += 16;
                 TextRenderer.DrawText(g, "楓幣獲得量：+5%", GearGraphics.EquipDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.WhiteBrush).Color, TextFormatFlags.NoPadding);
                 picH += 16;
@@ -765,7 +765,7 @@ namespace WzComparerR2.CharaSimControl
                 bool max = (Gear.Seals != null && value >= Gear.Seals.Count);
                 TextRenderer.DrawText(g, "封印解除階段：" + (max ? "MAX" : value.ToString()), GearGraphics.EquipDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.OrangeBrush3).Color, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                 picH += 16;
-                TextRenderer.DrawText(g, "封印解除経験値：" + (max ? "MAX" : "0%"), GearGraphics.EquipDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.OrangeBrush3).Color, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                TextRenderer.DrawText(g, "封印解除經驗値：" + (max ? "MAX" : "0%"), GearGraphics.EquipDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.OrangeBrush3).Color, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                 picH += 16;
             }
 
@@ -984,7 +984,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 else if (Gear.GetBooleanValue(GearPropType.blockUpgradeExtraOption))
                 {
-                    TextRenderer.DrawText(g, "無法設定/重設定附加潛能", GearGraphics.EquipDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.BlockRedBrush).Color, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                    TextRenderer.DrawText(g, "無法設定/重設定附加屬性", GearGraphics.EquipDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.BlockRedBrush).Color, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                     picH += 16;
                 }
 
@@ -1598,7 +1598,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     if (info.Exp > 0)
                     {
-                        TextRenderer.DrawText(g, "必要な経験値 : " + info.Exp + "%", GearGraphics.EquipDetailFont, new Point(12, picHeight), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                        TextRenderer.DrawText(g, "必要な經驗値 : " + info.Exp + "%", GearGraphics.EquipDetailFont, new Point(12, picHeight), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                         picHeight += 15;
                     }
                     if (info.Point > 0 && info.DecPoint > 0)
@@ -1646,7 +1646,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     if (info.Exp > 0)
                     {
-                        TextRenderer.DrawText(g, "必要な経験値 : " + info.Exp + "%", GearGraphics.EquipDetailFont, new Point(10, picHeight), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                        TextRenderer.DrawText(g, "必要な經驗値 : " + info.Exp + "%", GearGraphics.EquipDetailFont, new Point(10, picHeight), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                         picHeight += 16;
                     }
                     picHeight += 2;
