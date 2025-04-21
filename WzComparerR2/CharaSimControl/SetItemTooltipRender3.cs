@@ -234,7 +234,7 @@ namespace WzComparerR2.CharaSimControl
                                     {
                                         if (itemID / 10000 == 500)
                                         {
-                                            typeName = "ペット";
+                                            typeName = "特殊";
                                         }
                                         else
                                         {
@@ -251,7 +251,7 @@ namespace WzComparerR2.CharaSimControl
                     }
 
                     itemName = itemName ?? string.Empty;
-                    typeName = typeName ?? "装備";
+                    typeName = typeName ?? "裝備";
 
                     var match = Regex.Match(typeName, @"^(\(.*\)|（.*）|\[.*\])$");
                     if (match.Success)
@@ -330,8 +330,8 @@ namespace WzComparerR2.CharaSimControl
             {
                 for (int i = 0; i < this.SetItem.CompleteCount; ++i)
                 {
-                    TextRenderer.DrawText(g, "(なし)", GearGraphics.EquipMDMoris9Font, new Point(14, picHeight), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
-                    GearGraphics.DrawString(g, "未装備", GearGraphics.EquipMDMoris9Font, new Dictionary<string, Color>() { { string.Empty, ((SolidBrush)GearGraphics.Equip22BrushGray).Color } }, 30, 283, ref picHeight, 15, Text.TextAlignment.Right);
+                    TextRenderer.DrawText(g, "(不存在)", GearGraphics.EquipMDMoris9Font, new Point(14, picHeight), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
+                    GearGraphics.DrawString(g, "未裝備", GearGraphics.EquipMDMoris9Font, new Dictionary<string, Color>() { { string.Empty, ((SolidBrush)GearGraphics.Equip22BrushGray).Color } }, 30, 283, ref picHeight, 15, Text.TextAlignment.Right);
                 }
             }
 
@@ -416,16 +416,16 @@ namespace WzComparerR2.CharaSimControl
                 var color = effect.Value.Enabled ? Color.White : ((SolidBrush)GearGraphics.Equip22BrushDarkGray).Color;
                 if (this.SetItem.SetItemID < 0)
                 {
-                    effTitle = $"[ ワールド内重複装備効果 ({effect.Key} / {this.SetItem.CompleteCount}) ]";
+                    effTitle = $"[ 伺服器内重複裝備效果 ({effect.Key} / {this.SetItem.CompleteCount}) ]";
                     worldSetEff = true;
                 }
-                else if (specialPetSetEffectName && this.SetItem.SetItemName.EndsWith("セット"))
+                else if (specialPetSetEffectName && this.SetItem.SetItemName.EndsWith("套裝"))
                 {
-                    effTitle = $"{Regex.Replace(this.SetItem.SetItemName, "セット$", "")} {effect.Key}세트 효과";
+                    effTitle = $"{Regex.Replace(this.SetItem.SetItemName, "套裝$", "")} {effect.Key}套裝效果";
                 }
                 else
                 {
-                    effTitle = effect.Key + "セット効果";
+                    effTitle = effect.Key + "套裝效果";
                 }
                 TextRenderer.DrawText(g, effTitle, GearGraphics.EquipMDMoris9Font, new Point(14 - (worldSetEff ? 1 : 0), picHeight), color, TextFormatFlags.NoPadding);
                 if (worldSetEff)
@@ -473,7 +473,7 @@ namespace WzComparerR2.CharaSimControl
                             }
                             else
                             {
-                                summary = $"スキル<{sr.Name.Replace(Environment.NewLine, "")}>使用可能";
+                                summary = $"可以使用<{sr.Name.Replace(Environment.NewLine, "")}>技能";
                                 GearGraphics.DrawPlainText(g, summary, GearGraphics.EquipMDMoris9Font, color, 14 + dx, 290, ref picHeight, 15);
                             }
                         }
@@ -483,7 +483,7 @@ namespace WzComparerR2.CharaSimControl
                         var ops = (List<SetItemBonusByTime>)prop.Value;
                         foreach (SetItemBonusByTime p in ops)
                         {
-                            GearGraphics.DrawPlainText(g, $"{p.TermStart}時間効果", GearGraphics.EquipMDMoris9Font, color, 10, 290, ref picHeight, 15);
+                            GearGraphics.DrawPlainText(g, $"{p.TermStart}小時後", GearGraphics.EquipMDMoris9Font, color, 10, 290, ref picHeight, 15);
                             foreach (var bonusProp in p.Props)
                             {
                                 var summary = ItemStringHelper.GetGearPropString(bonusProp.Key, Convert.ToInt32(bonusProp.Value));

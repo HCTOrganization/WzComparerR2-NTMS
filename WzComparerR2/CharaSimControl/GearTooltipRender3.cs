@@ -1307,7 +1307,7 @@ namespace WzComparerR2.CharaSimControl
                         break;
                 }
                 GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
-                GearGraphics.DrawString(g, "白金鐵槌强化次數 : 0", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                GearGraphics.DrawString(g, $"#$d白金鐵槌强化次數 : #0", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
 
                 switch (enhance_bonusStat)
                 {
