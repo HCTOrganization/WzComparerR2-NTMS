@@ -272,8 +272,8 @@ namespace WzComparerR2.CharaSimControl
                         Brush brush = setItemPart.Value.Enabled ? Brushes.White : GearGraphics.Equip22BrushDarkGray;
                         if (!cash)
                         {
-                            int typeWidth = TextRenderer.MeasureText(g, typeName, GearGraphics.EquipMDMoris9Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width;
-                            TextRenderer.DrawText(g, typeName, GearGraphics.EquipMDMoris9Font, new Point(14, picHeight), ((SolidBrush)brush).Color, TextFormatFlags.NoPadding);
+                            int typeWidth = TextRenderer.MeasureText(g, typeName, Translator.IsKoreanStringPresent(typeName) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width;
+                            TextRenderer.DrawText(g, typeName, Translator.IsKoreanStringPresent(typeName) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, new Point(14, picHeight), ((SolidBrush)brush).Color, TextFormatFlags.NoPadding);
                             TextRenderer.DrawText(g, Compact(g, itemName, 200), Translator.IsKoreanStringPresent(itemName) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, new Point(90, picHeight), ((SolidBrush)brush).Color, TextFormatFlags.NoPadding);
                             picHeight += 15;
                         }
@@ -287,9 +287,9 @@ namespace WzComparerR2.CharaSimControl
                                 g.DrawImage(icon.Bitmap, 15 + 2 - icon.Origin.X, picHeight + 1 + 32 - icon.Origin.Y);
                             }
                             g.DrawImage(Resource.CashItem_0, 15 + 2 + 20, picHeight + 1 + 32 - 12);
-                            int typeWidth = TextRenderer.MeasureText(g, typeName, GearGraphics.EquipMDMoris9Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width;
-                            TextRenderer.DrawText(g, Compact(g, itemName, 261 - 10 - typeWidth - 52), GearGraphics.EquipMDMoris9Font, new Point(60, picHeight), ((SolidBrush)brush).Color, TextFormatFlags.NoPadding);
-                            GearGraphics.DrawString(g, typeName, GearGraphics.EquipMDMoris9Font, new Dictionary<string, Color>() { { string.Empty, ((SolidBrush)GearGraphics.Equip22BrushGray).Color } }, 30, 283, ref picHeight, 0, Text.TextAlignment.Right);
+                            int typeWidth = TextRenderer.MeasureText(g, typeName, Translator.IsKoreanStringPresent(typeName) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width;
+                            TextRenderer.DrawText(g, Compact(g, itemName, 261 - 10 - typeWidth - 52), Translator.IsKoreanStringPresent(itemName) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, new Point(60, picHeight), ((SolidBrush)brush).Color, TextFormatFlags.NoPadding);
+                            GearGraphics.DrawString(g, typeName, Translator.IsKoreanStringPresent(typeName) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, new Dictionary<string, Color>() { { string.Empty, ((SolidBrush)GearGraphics.Equip22BrushGray).Color } }, 30, 283, ref picHeight, 0, Text.TextAlignment.Right);
                             var tempHeight = picHeight;
                             if (setItemPart.Value.ByGender)
                             {
@@ -317,7 +317,7 @@ namespace WzComparerR2.CharaSimControl
                                     {
                                         itemName = "(null)";
                                     }
-                                    TextRenderer.DrawText(g, "- " + itemName, GearGraphics.EquipDetailFont2, new Point(60, picHeight), ((SolidBrush)brush).Color, TextFormatFlags.NoPadding);
+                                    TextRenderer.DrawText(g, "- " + itemName, Translator.IsKoreanStringPresent(itemName) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipDetailFont2, new Point(60, picHeight), ((SolidBrush)brush).Color, TextFormatFlags.NoPadding);
                                     picHeight += 15;
                                 }
                             }
