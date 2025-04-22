@@ -1175,7 +1175,7 @@ namespace WzComparerR2.CharaSimControl
                         TextRenderer.DrawText(g, $"裝備時可獲得僅限1次{text}", GearGraphics.EquipMDMoris9Font, new Point(15, picH), Color.White, TextFormatFlags.NoPadding);
                         picH += 16;
                     }
-                    TextRenderer.DrawText(g, $"的經驗值。(超過每日限制、最大值時除外)#", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
+                    TextRenderer.DrawText(g, $"的經驗值。(超過每日限制、最大值時除外)", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
                     picH += 16;
                 }
             }
