@@ -144,7 +144,7 @@ namespace WzComparerR2.CharaSimControl
             picHeight = 21;
             g.DrawImage(Resource.UIToolTipNew_img_Item_Equip_textIcon_set_normal, 14, picHeight - 1);
             TextRenderer.DrawText(g, this.SetItem.SetItemName, Translator.IsKoreanStringPresent(this.SetItem.SetItemName) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, new Point(46, picHeight), Color.White, TextFormatFlags.NoPadding);
-            DrawCategory(g, $"0 / {this.SetItem.Effects.Count}", picHeight - 2);
+            DrawCategory(g, $"0 #$g/ {this.SetItem.ItemIDs.Parts.Count}", picHeight - 2);
             picHeight += 29;
 
             format.Alignment = StringAlignment.Far;
@@ -517,11 +517,13 @@ namespace WzComparerR2.CharaSimControl
 
             for (int i = categories.Count - 1; i >= 0; i--)
             {
-                var length = TextRenderer.MeasureText(g, categories[i], font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width;
+                var length = TextRenderer.MeasureText(g, categories[i].Replace("#$g", ""), font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width;
 
                 g.DrawImage(res["category_w"].Image, sp - ew - length - ww, picH);
                 g.FillRectangle(res["category_c"], sp - ew - length, picH, length, ch);
-                TextRenderer.DrawText(g, categories[i], font, new Point(sp - ew - length, picH + 2), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
+                picH += 2;
+                GearGraphics.DrawString(g, categories[i], font, new Dictionary<string, Color>() { { "$g", ((SolidBrush)GearGraphics.Equip22BrushGray).Color } }, sp - ew - length, 290, ref picH, 0);
+                picH -= 2;
                 g.DrawImage(res["category_e"].Image, sp - ew, picH);
 
                 sp -= (3 + ew + length + ww);

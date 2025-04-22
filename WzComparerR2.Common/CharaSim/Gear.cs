@@ -287,6 +287,11 @@ namespace WzComparerR2.CharaSim
                 || IsDoubleHandWeapon(type);
         }
 
+        public static bool IsCashWeapon(GearType type)
+        {
+             return type == GearType.cashWeapon;
+        }
+
         /// <summary>
         /// 获取一个值，指示装备类型是否为主手武器。
         /// </summary>

@@ -1073,6 +1073,35 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
+            // 값이 있는 설명
+            if (!string.IsNullOrEmpty(Gear.EpicHs) && sr[Gear.EpicHs] != null)
+            {
+                hasThirdContents = true;
+ 
+                var text = sr[Gear.EpicHs].Replace("#", " #").Trim();
+
+                if (!string.IsNullOrEmpty(text))
+                {
+                    switch (Translator.DefaultPreferredLayout)
+                    {
+                        case 1:
+                            GearGraphics.DrawString(g, Translator.TranslateString(text), GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                            GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                            break;
+                        case 2:
+                            GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                            GearGraphics.DrawString(g, Translator.TranslateString(text), GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                            break;
+                        case 3:
+                            GearGraphics.DrawString(g, Translator.TranslateString(text), GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                            break;
+                        default:
+                            GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                            break;
+                    }
+                }
+            }
+
             // 펫장비 능력치 이전 주문서
             if (Gear.Props.TryGetValue(GearPropType.noPetEquipStatMoveItem, out value) && value != 0)
             {
@@ -1081,7 +1110,7 @@ namespace WzComparerR2.CharaSimControl
                 GearGraphics.DrawString(g, "無法使用寵物裝備能力值轉移咒文書的物品.", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
             }
             // 캐시 이펙트
-            if (Gear.type != GearType.pickaxe && Gear.type != GearType.shovel && PluginBase.PluginManager.FindWz(string.Format("Effect/ItemEff.img/{0}/effect", Gear.ItemID)) != null)
+            if (Gear.Cash && Gear.type != GearType.pickaxe && Gear.type != GearType.shovel && PluginBase.PluginManager.FindWz(string.Format("Effect/ItemEff.img/{0}/effect", Gear.ItemID)) != null)
             {
                 hasThirdContents = true;
 
@@ -1440,7 +1469,7 @@ namespace WzComparerR2.CharaSimControl
             }
 
             // 소울
-            if (Gear.IsWeapon(Gear.type))
+            if (!Gear.Cash && Gear.IsWeapon(Gear.type))
             {
                 AddLines(0, 6, ref picH, condition: thirdLineNeeded);
                 thirdLineNeeded = false;
@@ -1472,31 +1501,6 @@ namespace WzComparerR2.CharaSimControl
                 foreach (var text in attrList)
                 {
                     GearGraphics.DrawString(g, text, Translator.IsKoreanStringPresent(text) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
-                }
-            }
-
-            if (!string.IsNullOrEmpty(Gear.EpicHs) && sr[Gear.EpicHs] != null)
-            {
-                var text = sr[Gear.EpicHs].Replace("#", " #").Trim();
-                if (!string.IsNullOrEmpty(text))
-                {
-                    switch (Translator.DefaultPreferredLayout)
-                    {
-                        case 1:
-                            GearGraphics.DrawString(g, Translator.TranslateString(text), GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
-                            GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
-                            break;
-                        case 2:
-                            GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
-                            GearGraphics.DrawString(g, Translator.TranslateString(text), GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
-                            break;
-                        case 3:
-                            GearGraphics.DrawString(g, Translator.TranslateString(text), GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
-                            break;
-                        default:
-                            GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
-                            break;
-                    }
                 }
             }
             /*
@@ -1848,7 +1852,7 @@ namespace WzComparerR2.CharaSimControl
                             {
                                 itemGroup += "道具";
                             }
-                            exclusiveEquip = $"#r無法裝備同一道具組中的多個道具# ({itemGroup})";
+                            exclusiveEquip = $"#$r無法裝備同一道具組中的多個道具# ({itemGroup})";
                         }
                         else
                         {
@@ -2062,7 +2066,7 @@ namespace WzComparerR2.CharaSimControl
         {
             List<string> categories = new List<string>();
 
-            if (Gear.IsWeapon(Gear.type))
+            if (Gear.IsWeapon(Gear.type) || Gear.IsCashWeapon(Gear.type))
             {
                 categories.Add("武器");
                 if (!Gear.Cash && (Gear.IsLeftWeapon(Gear.type) || Gear.type == GearType.katara))
@@ -2091,7 +2095,11 @@ namespace WzComparerR2.CharaSimControl
                 categories.Add("飾品");
             }
 
-            categories.Add(ItemStringHelper.GetGearTypeString(Gear.type));
+            var text = ItemStringHelper.GetGearTypeString(Gear.type);
+            if (!string.IsNullOrEmpty(text))
+            {
+                categories.Add(text);
+            }
 
             if (categories.Count <= 0) return;
 
