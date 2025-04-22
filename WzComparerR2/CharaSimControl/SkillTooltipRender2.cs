@@ -534,7 +534,14 @@ namespace WzComparerR2.CharaSimControl
         private Bitmap RenderLinkRidingGear(Gear gear)
         {
             TooltipRender renderer = this.LinkRidingGearRender;
-            if (renderer == null)
+            if (this.Enable22AniStyle)
+            {
+                GearTooltipRender3 defaultRenderer = new GearTooltipRender3();
+                defaultRenderer.StringLinker = this.StringLinker;
+                defaultRenderer.ShowObjectID = false;
+                renderer = defaultRenderer;
+            }
+            else
             {
                 GearTooltipRender2 defaultRenderer = new GearTooltipRender2();
                 defaultRenderer.StringLinker = this.StringLinker;
