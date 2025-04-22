@@ -212,7 +212,7 @@ namespace WzComparerR2.Avatar.UI
             this.bar1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.bar1.TabIndex = 0;
             this.bar1.TabStop = false;
-            this.bar1.Text = "パネル";
+            this.bar1.Text = "面板";
             // 
             // panelDockContainer1
             // 
@@ -253,7 +253,7 @@ namespace WzComparerR2.Avatar.UI
             // 
             this.dockContainerItem1.Control = this.panelDockContainer1;
             this.dockContainerItem1.Name = "dockContainerItem1";
-            this.dockContainerItem1.Text = "パネル";
+            this.dockContainerItem1.Text = "面板";
             // 
             // bar2
             // 
@@ -519,7 +519,7 @@ namespace WzComparerR2.Avatar.UI
             this.labelX3.Size = new System.Drawing.Size(31, 18);
             this.labelX3.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.labelX3.TabIndex = 3;
-            this.labelX3.Text = "乗る";
+            this.labelX3.Text = "騎乘";
             // 
             // labelX2
             // 
@@ -598,7 +598,7 @@ namespace WzComparerR2.Avatar.UI
             this.chkHairCover.Size = new System.Drawing.Size(76, 20);
             this.chkHairCover.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkHairCover.TabIndex = 9;
-            this.chkHairCover.Text = "髪を押す";
+            this.chkHairCover.Text = "遮擋頭髮";
             this.chkHairCover.CheckedChanged += new System.EventHandler(this.chkHairCover_CheckedChanged);
             // 
             // chkApplyBRM
@@ -614,7 +614,7 @@ namespace WzComparerR2.Avatar.UI
             this.chkApplyBRM.Size = new System.Drawing.Size(172, 18);
             this.chkApplyBRM.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkApplyBRM.TabIndex = 16;
-            this.chkApplyBRM.Text = "プレーヤーの位置調整（椅子）";
+            this.chkApplyBRM.Text = "調整角色位置（椅子）";
             this.chkApplyBRM.CheckedChanged += new System.EventHandler(this.chkApplyBRM_CheckedChanged);
             // 
             // cmbGroupChair
@@ -709,7 +709,7 @@ namespace WzComparerR2.Avatar.UI
             // 
             this.btnCode.Image = global::WzComparerR2.Avatar.Properties.Resources.script_code;
             this.btnCode.Name = "btnCode";
-            this.btnCode.Tooltip = "コード";
+            this.btnCode.Tooltip = "ID";
             this.btnCode.Click += new System.EventHandler(this.btnCode_Click);
             //
             // Separator1
@@ -1015,7 +1015,7 @@ namespace WzComparerR2.Avatar.UI
             this.labelX6.Size = new System.Drawing.Size(60, 18);
             this.labelX6.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.labelX6.TabIndex = 17;
-            this.labelX6.Text = "座る人数";
+            this.labelX6.Text = "乘坐人數";
             // 
             // cmbEar
             // 
@@ -1035,7 +1035,7 @@ namespace WzComparerR2.Avatar.UI
             //
             this.btnExport.Name = "btnExport";
             this.btnExport.Image = global::WzComparerR2.Avatar.Properties.Resources.export;
-            this.btnExport.Tooltip = "アクションのエクスポート";
+            this.btnExport.Tooltip = "匯出動作";
             this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
             // 
             // AvatarForm

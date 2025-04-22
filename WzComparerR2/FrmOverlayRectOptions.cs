@@ -25,7 +25,7 @@ namespace WzComparerR2
             InitializeComponent();
 #if NET6_0_OR_GREATER
              // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-             this.Font = new Font(new FontFamily("MS Gothic"), 9f);
+             this.Font = new Font(new FontFamily("SimSun"), 9f);
 #endif
             this.txtLeft.Value = 0;
             this.txtRight.Value = 0;

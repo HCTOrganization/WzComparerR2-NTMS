@@ -2012,11 +2012,11 @@ namespace WzComparerR2
                     sw.Stop();
                 }
                 GC.Collect();
-                labelItemStatus.Text = $"{sw.ElapsedMilliseconds}毫秒でソートされました。";
+                labelItemStatus.Text = $"排序完成，用時{sw.ElapsedMilliseconds}毫秒。";
             }
             else
             {
-                labelItemStatus.Text = "並べ替えに失敗しました: WZ 檔案が開かれませんでした。";
+                labelItemStatus.Text = "排序失敗：WZ 檔案未開啟。";
             }
         }
 
@@ -2025,7 +2025,7 @@ namespace WzComparerR2
             Wz_Image img = advTree1.SelectedNode?.AsWzNode()?.GetValue<Wz_Image>();
             if (img == null)
             {
-                MessageBoxEx.Show("エクスポートする IMG を選択します。");
+                MessageBoxEx.Show("選擇您想要匯出的 IMG。");
                 return;
             }
             SaveFileDialog dlg = new SaveFileDialog();
@@ -2042,7 +2042,7 @@ namespace WzComparerR2
                     s.Position = 0;
                     s.CopyTo(fs);
                     fs.Close();
-                    labelItemStatus.Text = "エクスポートされた: " + img.Name;
+                    labelItemStatus.Text = "已匯出: " + img.Name;
                 }
                 catch (Exception ex)
                 {
@@ -2057,7 +2057,7 @@ namespace WzComparerR2
             Wz_Image img = advTree1.SelectedNode?.AsWzNode()?.GetValue<Wz_Image>();
             if (img == null)
             {
-                MessageBoxEx.Show("エクスポートする XML を選択します。");
+                MessageBoxEx.Show("選擇您想要匯出的 XML。");
                 return;
             }
             SaveFileDialog dlg = new SaveFileDialog();
@@ -2085,7 +2085,7 @@ namespace WzComparerR2
                     writer.WriteEndDocument();
                     writer.Close();
 
-                    labelItemStatus.Text = "エクスポートされた: " + img.Name + "を XML として";
+                    labelItemStatus.Text = "已匯出: " + img.Name + "為 XML";
                 }
                 catch (Exception ex)
                 {
@@ -2106,7 +2106,7 @@ namespace WzComparerR2
             Wz_Image img = advTree1.SelectedNode?.AsWzNode()?.GetValue<Wz_Image>();
             if (img == null)
             {
-                MessageBoxEx.Show("エクスポートする IMG を選択します。");
+                MessageBoxEx.Show("選擇您想要匯出的 IMG。");
                 return;
             }
             Wz_File wzf = advTree1.SelectedNode.AsWzNode().GetNodeWzFile();
@@ -2162,7 +2162,7 @@ namespace WzComparerR2
                 Node searchNode = searchAdvTree(advTree, cellIndex, searchText, exact, regex, true);
                 advTree.SelectedNode = searchNode;
                 if (searchNode == null)
-                    MessageBoxEx.Show("検索結果が見つかりませんでした。", LocalizedString_JP.COMMON_ERROR);
+                    MessageBoxEx.Show("未找到結果。", LocalizedString_JP.COMMON_ERROR);
             }
             catch (Exception ex)
             {
@@ -2203,11 +2203,11 @@ namespace WzComparerR2
 
                 advTree.SelectedNode = searchNode;
                 if (searchNode == null)
-                    MessageBoxEx.Show("検索結果がありません。", "エラー");
+                    MessageBoxEx.Show("未找到搜尋結果。", "錯誤");
             }
             catch (Exception ex)
             {
-                MessageBoxEx.Show(this, ex.Message, "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBoxEx.Show(this, ex.Message, "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -2329,12 +2329,12 @@ namespace WzComparerR2
             {
                 if (!this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz()))
                 {
-                    MessageBoxEx.Show("Base.wzを選択します。", LocalizedString_JP.COMMON_ERROR);
+                    MessageBoxEx.Show("選擇 Base.wz。", LocalizedString_JP.COMMON_ERROR);
                     return;
                 }
                 QueryPerformance.End();
                 double ms = (Math.Round(QueryPerformance.GetLastInterval(), 4) * 1000);
-                labelItemStatus.Text = "文字列テーブル的リンクがリセットされました。 時間が経過した：" + ms + "毫秒";
+                labelItemStatus.Text = "字串表連結已被重置。時間經過：" + ms + "毫秒";
             }
             if (comboBoxItem2.SelectedIndex < 0)
                 comboBoxItem2.SelectedIndex = 0;
@@ -2656,14 +2656,14 @@ namespace WzComparerR2
             using (OpenFileDialog dlg = new OpenFileDialog())
             {
                 List<string> supportExt = new List<string>();
-                supportExt.Add("オーディオ檔案 (*.mp3;*.ogg;*.wav)|*.mp3;*.ogg;*.wav");
+                supportExt.Add("音訊檔案 (*.mp3;*.ogg;*.wav)|*.mp3;*.ogg;*.wav");
                 foreach (string ext in this.soundPlayer.GetPluginSupportedExt())
                 {
                     supportExt.Add(ext);
                 }
                 supportExt.Add("全部格式 (*.*)|*.*");
 
-                dlg.Title = "オーディオ檔案を選択";
+                dlg.Title = "選擇音訊檔案";
                 dlg.Filter = string.Join("|", supportExt.ToArray());
                 dlg.Multiselect = false;
 
@@ -2712,7 +2712,7 @@ namespace WzComparerR2
             using (SaveFileDialog dlg = new SaveFileDialog())
             {
                 dlg.AddExtension = true;
-                dlg.Title = "名前を付けて保存";
+                dlg.Title = "另存為";
                 dlg.Filter = "MP3 (*.mp3)|*.mp3|WAV File (*.wav)|*.wav|OGG File (*.ogg)|*.ogg|全部格式 (*.*)|*.*";
                 dlg.AddExtension = false;
                 dlg.FileName = soundPlayer.PlayingSoundName;
@@ -2724,11 +2724,11 @@ namespace WzComparerR2
                         fs = new FileStream(dlg.FileName, FileMode.Create);
                         fs.Write(data, 0, data.Length);
 
-                        MessageBoxEx.Show("檔案を保存しました。");
+                        MessageBoxEx.Show("檔案已保存。");
                     }
                     catch (Exception ex)
                     {
-                        MessageBoxEx.Show("檔案的保存に失敗しました。\r\n\r\n" + ex.ToString(), LocalizedString_JP.COMMON_ERROR);
+                        MessageBoxEx.Show("檔案保存失敗。\r\n\r\n" + ex.ToString(), LocalizedString_JP.COMMON_ERROR);
                     }
                     finally
                     {

@@ -69,7 +69,7 @@
             this.buttonOK.Symbol = "";
             this.buttonOK.SymbolSize = 1F;
             this.buttonOK.TabIndex = 0;
-            this.buttonOK.Text = "OK";
+            this.buttonOK.Text = "確認";
             // 
             // buttonCancel
             // 
@@ -83,7 +83,7 @@
             this.buttonCancel.Size = new System.Drawing.Size(88, 23);
             this.buttonCancel.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonCancel.TabIndex = 1;
-            this.buttonCancel.Text = "キャンセル";
+            this.buttonCancel.Text = "取消";
             // 
             // tableLayoutPanel1
             // 
@@ -166,7 +166,7 @@
             this.labelX3.Name = "labelX3";
             this.labelX3.Size = new System.Drawing.Size(160, 20);
             this.labelX3.TabIndex = 8;
-            this.labelX3.Text = "ｽﾀｰﾄﾃﾞｨﾚｲ (ms)";
+            this.labelX3.Text = "啟動延遲 (ms)";
             // 
             // labelX4
             // 
@@ -214,7 +214,7 @@
             this.labelX6.Name = "labelX6";
             this.labelX6.Size = new System.Drawing.Size(160, 20);
             this.labelX6.TabIndex = 11;
-            this.labelX6.Text = "フレーム選択";
+            this.labelX6.Text = "選擇幀";
             // 
             // labelX7
             // 
@@ -230,7 +230,7 @@
             this.labelX7.Name = "labelX7";
             this.labelX7.Size = new System.Drawing.Size(160, 24);
             this.labelX7.TabIndex = 12;
-            this.labelX7.Text = "PNGﾃﾞｨﾚｲ (ms)";
+            this.labelX7.Text = "PNG延遲 (ms)";
             // 
             // txtDelayOffset
             // 
@@ -400,7 +400,7 @@
             this.Name = "FrmOverlayAniOptions";
             this.Padding = new System.Windows.Forms.Padding(9, 8, 9, 8);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "アニメーションネスト設定";
+            this.Text = "動畫堆叠設定";
             this.tableLayoutPanel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.txtDelayOffset)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtMoveX)).EndInit();

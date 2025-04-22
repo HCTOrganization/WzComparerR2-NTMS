@@ -70,7 +70,7 @@
             this.buttonOK.Symbol = "";
             this.buttonOK.SymbolSize = 1F;
             this.buttonOK.TabIndex = 4;
-            this.buttonOK.Text = "OK";
+            this.buttonOK.Text = "確認";
             // 
             // buttonCancel
             // 
@@ -84,7 +84,7 @@
             this.buttonCancel.Size = new System.Drawing.Size(88, 23);
             this.buttonCancel.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonCancel.TabIndex = 5;
-            this.buttonCancel.Text = "キャンセル";
+            this.buttonCancel.Text = "取消";
             // 
             // tableLayoutPanel1
             // 
@@ -182,7 +182,7 @@
             this.labelX5.Name = "labelX5";
             this.labelX5.Size = new System.Drawing.Size(107, 20);
             this.labelX5.TabIndex = 10;
-            this.labelX5.Text = "ｽﾀｰﾄﾃﾞｨﾚｲ (ms)";
+            this.labelX5.Text = "啟動延遲 (ms)";
             // 
             // labelX6
             // 
@@ -198,7 +198,7 @@
             this.labelX6.Name = "labelX7";
             this.labelX6.Size = new System.Drawing.Size(107, 20);
             this.labelX6.TabIndex = 11;
-            this.labelX6.Text = "終了ﾃﾞｨﾚｲ (ms)";
+            this.labelX6.Text = "結束延遲 (ms)";
             // 
             // labelX7
             // 
@@ -394,7 +394,7 @@
             this.Name = "FrmOverlayRectOptions";
             this.Padding = new System.Windows.Forms.Padding(9, 8, 9, 8);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "範囲の四角形の設定";
+            this.Text = "設定範圍矩形";
             this.tableLayoutPanel1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.txtLeft)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtRight)).EndInit();

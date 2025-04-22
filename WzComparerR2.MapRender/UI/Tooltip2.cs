@@ -184,7 +184,7 @@ namespace WzComparerR2.MapRender.UI
                         var aniName = (item.View?.Animator as StateMachineAnimator)?.GetCurrent();
                         if (aniName != null)
                         {
-                            blocks.Add(PrepareTextLine(env.Fonts.TooltipContentFont, "現在のアクション: " + aniName, ref current, Color.White, ref size.X));
+                            blocks.Add(PrepareTextLine(env.Fonts.TooltipContentFont, "現在動作: " + aniName, ref current, Color.White, ref size.X));
                         }
 
                         size.Y = current.Y;

@@ -506,7 +506,7 @@ namespace WzComparerR2.CharaSimControl
             }
 
             // 전투력 증가량
-            TextRenderer.DrawText(g, "戰鬥力提升量", GearGraphics.EquipMDMoris9Font, new Point(309 - TextRenderer.MeasureText(g, "戦闘力増加量", GearGraphics.EquipMDMoris9Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width, picH + 12), ((SolidBrush)GearGraphics.Equip22BrushDarkGray).Color, TextFormatFlags.NoPadding);
+            TextRenderer.DrawText(g, "戰鬥力提升量", GearGraphics.EquipMDMoris9Font, new Point(309 - TextRenderer.MeasureText(g, "戰鬥力提升量", GearGraphics.EquipMDMoris9Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width, picH + 12), ((SolidBrush)GearGraphics.Equip22BrushDarkGray).Color, TextFormatFlags.NoPadding);
             g.DrawImage(Resource.UIToolTipNew_img_Item_Equip_imgFont_atkPow_equipped, 309 - 159, picH + 38);
             picH += 78;
 
@@ -1600,11 +1600,11 @@ namespace WzComparerR2.CharaSimControl
                     g = Graphics.FromImage(levelOrSealed);
                 }
                 picHeight += 13;
-                TextRenderer.DrawText(g, "成長の属性", GearGraphics.EquipDetailFont, new Point(261, picHeight), ((SolidBrush)GearGraphics.GreenBrush2).Color, TextFormatFlags.HorizontalCenter);
+                TextRenderer.DrawText(g, "成長屬性", GearGraphics.EquipDetailFont, new Point(261, picHeight), ((SolidBrush)GearGraphics.GreenBrush2).Color, TextFormatFlags.HorizontalCenter);
                 picHeight += 15;
                 if (Gear.FixLevel)
                 {
-                    TextRenderer.DrawText(g, "[取得時の等級固定]", GearGraphics.EquipDetailFont, new Point(261, picHeight), ((SolidBrush)GearGraphics.OrangeBrush).Color, TextFormatFlags.HorizontalCenter);
+                    TextRenderer.DrawText(g, "[達成時固定等級]", GearGraphics.EquipDetailFont, new Point(261, picHeight), ((SolidBrush)GearGraphics.OrangeBrush).Color, TextFormatFlags.HorizontalCenter);
                     picHeight += 16;
                 }
 
@@ -1630,7 +1630,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     if (info.Skills.Count > 0)
                     {
-                        string title = string.Format("技能獲得確率{2:P2} ({0}/{1}):", info.Prob, info.ProbTotal, info.Prob * 1.0 / info.ProbTotal);
+                        string title = string.Format("技能獲得率{2:P2} ({0}/{1}):", info.Prob, info.ProbTotal, info.Prob * 1.0 / info.ProbTotal);
                         TextRenderer.DrawText(g, title, GearGraphics.EquipDetailFont, new Point(12, picHeight), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                         picHeight += 15;
                         foreach (var kv in info.Skills)
@@ -1650,11 +1650,11 @@ namespace WzComparerR2.CharaSimControl
                         string title;
                         if (info.Prob < info.ProbTotal)
                         {
-                            title = string.Format("技能獲得確率{2:P2}({0}/{1}):", info.Prob, info.ProbTotal, info.Prob * 1.0 / info.ProbTotal);
+                            title = string.Format("技能獲得率{2:P2}({0}/{1}):", info.Prob, info.ProbTotal, info.Prob * 1.0 / info.ProbTotal);
                         }
                         else
                         {
-                            title = "装備時に獲得できる技能：";
+                            title = "裝備時可獲得技能：";
                         }
                         TextRenderer.DrawText(g, title, Translator.IsKoreanStringPresent(title) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipDetailFont, new Point(10, picHeight), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                         picHeight += 15;
@@ -1672,12 +1672,12 @@ namespace WzComparerR2.CharaSimControl
                     }
                     if (info.Exp > 0)
                     {
-                        TextRenderer.DrawText(g, "必要な経験値 : " + info.Exp + "%", GearGraphics.EquipDetailFont, new Point(12, picHeight), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                        TextRenderer.DrawText(g, "所需經驗值 : " + info.Exp + "%", GearGraphics.EquipDetailFont, new Point(12, picHeight), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                         picHeight += 15;
                     }
                     if (info.Point > 0 && info.DecPoint > 0)
                     {
-                        TextRenderer.DrawText(g, "必要なアンチマジック : " + info.Point + " (- 1日あたり" + info.DecPoint + ")", GearGraphics.EquipDetailFont, new Point(12, picHeight), Color.White, TextFormatFlags.NoPadding);
+                        TextRenderer.DrawText(g, "必要的反魔力 : " + info.Point + " (- 每日" + info.DecPoint + ")", GearGraphics.EquipDetailFont, new Point(12, picHeight), Color.White, TextFormatFlags.NoPadding);
                         picHeight += 15;
                     }
 
@@ -1693,7 +1693,7 @@ namespace WzComparerR2.CharaSimControl
                     g = Graphics.FromImage(levelOrSealed);
                 }
                 picHeight += 13;
-                TextRenderer.DrawText(g, "封印解除属性", GearGraphics.EquipDetailFont, new Point(261, picHeight), ((SolidBrush)GearGraphics.GreenBrush2).Color, TextFormatFlags.HorizontalCenter);
+                TextRenderer.DrawText(g, "封印解除屬性", GearGraphics.EquipDetailFont, new Point(261, picHeight), ((SolidBrush)GearGraphics.GreenBrush2).Color, TextFormatFlags.HorizontalCenter);
                 picHeight += 16;
                 for (int i = 0; i < Gear.Seals.Count; i++)
                 {
@@ -1713,14 +1713,14 @@ namespace WzComparerR2.CharaSimControl
                         Bitmap icon = info.Icon.Bitmap ?? info.IconRaw.Bitmap;
                         if (icon != null)
                         {
-                            TextRenderer.DrawText(g, "アイコン : ", GearGraphics.EquipDetailFont, new Point(10, picHeight + icon.Height / 2 - 10), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                            TextRenderer.DrawText(g, "圖示 : ", GearGraphics.EquipDetailFont, new Point(10, picHeight + icon.Height / 2 - 10), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                             g.DrawImage(icon, 52, picHeight);
                             picHeight += icon.Height;
                         }
                     }
                     if (info.Exp > 0)
                     {
-                        TextRenderer.DrawText(g, "必要な経験値 : " + info.Exp + "%", GearGraphics.EquipDetailFont, new Point(10, picHeight), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                        TextRenderer.DrawText(g, "所需經驗值 : " + info.Exp + "%", GearGraphics.EquipDetailFont, new Point(10, picHeight), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                         picHeight += 16;
                     }
                     picHeight += 2;
@@ -1795,7 +1795,7 @@ namespace WzComparerR2.CharaSimControl
 
             if (Gear.State == GearState.itemList && Gear.Cash && (!Gear.Props.TryGetValue(GearPropType.noMoveToLocker, out value) || value == 0) && (!Gear.Props.TryGetValue(GearPropType.tradeBlock, out value) || value == 0) && (!Gear.Props.TryGetValue(GearPropType.accountSharable, out value) || value == 0))
             {
-                tags.Add("#$r使用前1回に限り他人と交換することができ、アイテム使用後は交換が制限されます。#");
+                tags.Add("#$r在使用前您只能與他人交換一次，並且物品使用後將受到限制交換。#");
             }
 
             // 카르마의 가위
@@ -1839,16 +1839,16 @@ namespace WzComparerR2.CharaSimControl
                         if (!string.IsNullOrEmpty(kv.Value.Info))
                         {
                             var itemGroup = kv.Value.Info;
-                            var delStr = "は重複着用できません。";
+                            var delStr = "無法重複裝備。";
                             if (kv.Value.Info.Contains(delStr))
                             {
                                 itemGroup = itemGroup.Replace(delStr, "");
                             }
                             else if (!itemGroup.EndsWith(".") && !itemGroup.EndsWith("。"))
                             {
-                                itemGroup += "リュアイテム";
+                                itemGroup += "道具";
                             }
-                            exclusiveEquip = $"#rアイテムグループ内の重複装着不可# ({itemGroup})";
+                            exclusiveEquip = $"#r無法裝備同一道具組中的多個道具# ({itemGroup})";
                         }
                         else
                         {
@@ -1871,7 +1871,7 @@ namespace WzComparerR2.CharaSimControl
                                 break;
                             }
 
-                            exclusiveEquip = $"#$rアイテムグループ内の重複装着不可# ({string.Join(", ", itemNames)})";
+                            exclusiveEquip = $"#$r無法裝備同一道具組中的多個道具# ({string.Join(", ", itemNames)})";
                         }
                         if (!string.IsNullOrEmpty(exclusiveEquip))
                         {
@@ -1895,14 +1895,14 @@ namespace WzComparerR2.CharaSimControl
             if (Gear.Props.TryGetValue(GearPropType.abilityTimeLimited, out value) && value != 0)
             {
                 DateTime time = DateTime.Now.AddDays(7d);
-                var text = $"{ItemStringHelper.GetGearPropString3(GearPropType.abilityTimeLimited, value)[0]} ({time.ToString("yyyy年 M月 d日 HH時 mm分まで")}" +
+                var text = $"{ItemStringHelper.GetGearPropString3(GearPropType.abilityTimeLimited, value)[0]} ({time.ToString("yyyy年 M月 d日 HH時 mm分可以用")}" +
                     $"{ItemStringHelper.GetGearPropString3(GearPropType.notExtend, value)[0]})";
                 tags.Add(text);
             }
             if (Gear.Props.TryGetValue(GearPropType.timeLimited, out value) && value != 0)
             {
                 DateTime time = DateTime.Now.AddDays(7d);
-                var text = $"{ItemStringHelper.GetGearPropString3(GearPropType.timeLimited, value)[0]} ({time.ToString("yyyy年 M月 d日 HH時 mm分まで")}";
+                var text = $"{ItemStringHelper.GetGearPropString3(GearPropType.timeLimited, value)[0]} ({time.ToString("yyyy年 M月 d日 HH時 mm分可以用")}";
                 if (Gear.Props.TryGetValue(GearPropType.notExtend, out value) && value != 0)
                 {
                     text += ItemStringHelper.GetGearPropString3(GearPropType.notExtend, value)[0];

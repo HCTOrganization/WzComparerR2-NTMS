@@ -274,7 +274,7 @@ namespace WzComparerR2
             this.labelX4.Name = "labelX4";
             this.labelX4.Size = new System.Drawing.Size(94, 20);
             this.labelX4.TabIndex = 9;
-            this.labelX4.Text = "終了時間(毫秒)";
+            this.labelX4.Text = "結束時間(毫秒)";
             // 
             // labelX2
             // 
@@ -289,7 +289,7 @@ namespace WzComparerR2
             this.labelX2.Name = "labelX2";
             this.labelX2.Size = new System.Drawing.Size(74, 20);
             this.labelX2.TabIndex = 1;
-            this.labelX2.Text = "クリップ範囲";
+            this.labelX2.Text = "剪輯範圍";
             // 
             // labelX5
             // 
@@ -304,7 +304,7 @@ namespace WzComparerR2
             this.labelX5.Name = "labelX5";
             this.labelX5.Size = new System.Drawing.Size(94, 20);
             this.labelX5.TabIndex = 10;
-            this.labelX5.Text = "持続時間";
+            this.labelX5.Text = "持續時間";
             // 
             // labelX6
             // 
@@ -319,7 +319,7 @@ namespace WzComparerR2
             this.labelX6.Name = "labelX6";
             this.labelX6.Size = new System.Drawing.Size(94, 20);
             this.labelX6.TabIndex = 25;
-            this.labelX6.Text = "左部座標 (px)";
+            this.labelX6.Text = "左座標 (px)";
             // 
             // labelX7
             // 
@@ -334,7 +334,7 @@ namespace WzComparerR2
             this.labelX7.Name = "labelX7";
             this.labelX7.Size = new System.Drawing.Size(94, 20);
             this.labelX7.TabIndex = 26;
-            this.labelX7.Text = "上部座標 (px)";
+            this.labelX7.Text = "上座標 (px)";
             // 
             // labelX8
             // 
@@ -349,7 +349,7 @@ namespace WzComparerR2
             this.labelX8.Name = "labelX8";
             this.labelX8.Size = new System.Drawing.Size(94, 20);
             this.labelX8.TabIndex = 27;
-            this.labelX8.Text = "右部座標 (px)";
+            this.labelX8.Text = "右座標 (px)";
             // 
             // labelX9
             // 
@@ -364,7 +364,7 @@ namespace WzComparerR2
             this.labelX9.Name = "labelX9";
             this.labelX9.Size = new System.Drawing.Size(94, 20);
             this.labelX9.TabIndex = 28;
-            this.labelX9.Text = "下部座標 (px)";
+            this.labelX9.Text = "下座標 (px)";
             // 
             // labelX10
             // 
@@ -379,7 +379,7 @@ namespace WzComparerR2
             this.labelX10.Name = "labelX10";
             this.labelX10.Size = new System.Drawing.Size(94, 20);
             this.labelX10.TabIndex = 29;
-            this.labelX10.Text = "サイズ";
+            this.labelX10.Text = "尺寸";
             // 
             // line3
             // 
@@ -406,7 +406,7 @@ namespace WzComparerR2
             this.labelX11.Name = "labelX11";
             this.labelX11.Size = new System.Drawing.Size(74, 20);
             this.labelX11.TabIndex = 36;
-            this.labelX11.Text = "サイズ変換";
+            this.labelX11.Text = "尺寸變換";
             // 
             // labelX12
             // 
@@ -421,7 +421,7 @@ namespace WzComparerR2
             this.labelX12.Name = "labelX12";
             this.labelX12.Size = new System.Drawing.Size(94, 20);
             this.labelX12.TabIndex = 37;
-            this.labelX12.Text = "幅 (px)";
+            this.labelX12.Text = "寬 (px)";
             // 
             // labelX14
             // 
@@ -436,7 +436,7 @@ namespace WzComparerR2
             this.labelX14.Name = "labelX14";
             this.labelX14.Size = new System.Drawing.Size(94, 20);
             this.labelX14.TabIndex = 38;
-            this.labelX14.Text = "スケール (%)";
+            this.labelX14.Text = "比例 (%)";
             // 
             // txtStartTime
             // 
@@ -883,7 +883,7 @@ namespace WzComparerR2
             this.chk768Preset.Name = "chk768Preset";
             this.chk768Preset.Size = new System.Drawing.Size(120, 16);
             this.chk768Preset.TabIndex = 2;
-            this.chk768Preset.Text = "1366x768プリセット";
+            this.chk768Preset.Text = "1366x768預設";
             this.chk768Preset.UseVisualStyleBackColor = true;
             this.chk768Preset.CheckedChanged += new System.EventHandler(this.chk768Preset_CheckedChanged);
             // 

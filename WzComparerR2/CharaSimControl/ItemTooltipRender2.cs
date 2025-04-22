@@ -416,16 +416,16 @@ namespace WzComparerR2.CharaSimControl
                 switch (value)
                 {
                     case 1:
-                        TextRenderer.DrawText(g, "ワンダーブラック", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush3).Color, TextFormatFlags.HorizontalCenter);
+                        TextRenderer.DrawText(g, "Wonder Black", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush3).Color, TextFormatFlags.HorizontalCenter);
                         break;
                     case 4:
-                        TextRenderer.DrawText(g, "ルナスイート", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), GearGraphics.itemPinkColor, TextFormatFlags.HorizontalCenter);
+                        TextRenderer.DrawText(g, "Luna Sweet", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), GearGraphics.itemPinkColor, TextFormatFlags.HorizontalCenter);
                         break;
                     case 5:
-                        TextRenderer.DrawText(g, "ルナドリーム", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), ((SolidBrush)GearGraphics.BlueBrush).Color, TextFormatFlags.HorizontalCenter);
+                        TextRenderer.DrawText(g, "Luna Dream", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), ((SolidBrush)GearGraphics.BlueBrush).Color, TextFormatFlags.HorizontalCenter);
                         break;
                     case 6:
-                        TextRenderer.DrawText(g, "ルナプチ", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), GearGraphics.itemPurpleColor, TextFormatFlags.HorizontalCenter);
+                        TextRenderer.DrawText(g, "月光迷你", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), GearGraphics.itemPurpleColor, TextFormatFlags.HorizontalCenter);
                         break;
                     default:
                         picH -= 15;
@@ -519,7 +519,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 picH -= 3;
                 DateTime time = DateTime.Now.AddDays(value);
-                expireTime = "魔法の効力期限：" + time.ToString(@"yyyy年M月d日HH時mm分");
+                expireTime = "魔法時間: " + time.ToString(@"yyyy年M月d日HH時mm分");
             }
             if (!string.IsNullOrEmpty(expireTime))
             {
@@ -645,7 +645,7 @@ namespace WzComparerR2.CharaSimControl
                             switch (value)
                             {
                                 case 1:
-                                    wonderGradeString = "ワンダーブラック";
+                                    wonderGradeString = "Wonder Black";
                                     foreach (KeyValuePair<GearPropType, object> prop in setItem.Effects.Values.SelectMany(f => f.PropsV5))
                                     {
                                         if (prop.Key == GearPropType.activeSkill)
@@ -663,57 +663,57 @@ namespace WzComparerR2.CharaSimControl
                                     }
                                     break;
                                 case 4:
-                                    wonderGradeString = "ルナスイート";
-                                    setSkillName = "ルナスイート";
+                                    wonderGradeString = "Luna Sweet";
+                                    setSkillName = "Luna Sweet";
                                     break;
                                 case 5:
-                                    wonderGradeString = "ルナドリーム";
-                                    setSkillName = "ルナドリーム";
+                                    wonderGradeString = "Luna Dream";
+                                    setSkillName = "Luna Dream";
                                     break;
                             }
                             if (wonderGradeString != null)
                             {
-                                desc += $"\n#c{wonderGradeString}#ランクの#c{setItemName}#ペットを装備すると、#c{setSkillName}#セット効果が得られます。(最大3レベル)\n装備した#c{setItemName}#ペットの種類に応じて、セット効果は最大3倍まで強化されます。";
+                                desc += $"\n裝備時可獲得#c{setSkillName}#，裝備的#c{setItemName}#種類越多，該套裝效果越強。\n#c{setItemName}#可借助月光的力量，#c獲得更遠範圍的道具#。";
                             }
                         }
                     }
                 }
-                desc += "\n#cスキル：楓幣収集";
+                desc += "\n#c技能：撿拾楓幣";
                 if (item.Props.TryGetValue(ItemPropType.pickupItem, out value) && value > 0)
                 {
-                    desc += ", アイテム収集";
+                    desc += ", 撿取道具";
                 }
                 if (item.Props.TryGetValue(ItemPropType.longRange, out value) && value > 0)
                 {
-                    desc += ", 移動範囲拡大";
+                    desc += ", 擴大移動範圍";
                 }
                 if (item.Props.TryGetValue(ItemPropType.sweepForDrop, out value) && value > 0)
                 {
-                    desc += ", 自動収集";
+                    desc += ", 自動撿取";
                 }
                 if (item.Props.TryGetValue(ItemPropType.pickupAll, out value) && value > 0)
                 {
-                    desc += ", 所有権のないアイテム収集や楓幣の収集";
+                    desc += ", 撿取沒有所有權的道具和楓幣";
                 }
                 if (item.Props.TryGetValue(ItemPropType.consumeHP, out value) && value > 0)
                 {
-                    desc += ", HP回復薬充填";
+                    desc += ", 補充HP藥水";
                 }
                 if (item.Props.TryGetValue(ItemPropType.consumeMP, out value) && value > 0)
                 {
-                    desc += ", MP回復薬充填";
+                    desc += ", 補充MP藥水";
                 }
                 if (item.Props.TryGetValue(ItemPropType.autoBuff, out value) && value > 0)
                 {
-                    desc += ", バフスキル自動発動";
+                    desc += ", 自動使用加持技能";
                 }
                 if (item.Props.TryGetValue(ItemPropType.giantPet, out value) && value > 0)
                 {
-                    desc += ", ペットジャイアントスキル";
+                    desc += ", 寵物巨人技能";
                 }
                 if (item.Props.TryGetValue(ItemPropType.consumeCure, out value) && value > 0)
                 {
-                    desc += ", 万病治療薬自動使用";
+                    desc += ", 自動使用萬病治療藥";
                 }
                 desc += "#";
             }
@@ -754,25 +754,25 @@ namespace WzComparerR2.CharaSimControl
             }
             if (item.Specs.TryGetValue(ItemSpecType.recipeValidDay, out value) && value > 0)
             {
-                GearGraphics.DrawString(g, "( 制作可能期間：" + value + "日)", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "( 可製作時間：" + value + "日)", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
             }
             if (item.Specs.TryGetValue(ItemSpecType.recipeUseCount, out value) && value > 0)
             {
-                GearGraphics.DrawString(g, "( 制作可能回数：" + value + "回)", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "( 可製作次數：" + value + "回)", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
             }
             if (item.ItemID / 1000 == 5533)
             {
-                GearGraphics.DrawString(g, "\n#cこれをダブルクリックすると、ボックス内のアイテムを 3 秒ごとに順番にプレビューできます。 一部のランダムボックスはプレビューできません。#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "\n#c雙擊它將允許您每 3 秒輪流預覽盒子中的物品。部分隨機盒子無法預覽。#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
             }
             if (item.Cash)
             {
                 if (item.Props.TryGetValue(ItemPropType.noMoveToLocker, out value) && value > 0)
                 {
-                    GearGraphics.DrawString(g, "\n#cこのアイテムは現金在庫に移動できません。#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                    GearGraphics.DrawString(g, "\n#c該物品無法移至現金庫存。#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                 }
                 else if (item.Props.TryGetValue(ItemPropType.onlyCash, out value) && value > 0)
                 {
-                    GearGraphics.DrawString(g, "\n#cNEXON點でのみ購入可能#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                    GearGraphics.DrawString(g, "\n#c可使用點數購買#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                 }
                 else if ((!item.Props.TryGetValue(ItemPropType.tradeBlock, out value) || value == 0) && item.ItemID / 10000 != 501 && item.ItemID / 10000 != 502 && item.ItemID / 10000 != 516)
                 {
@@ -781,15 +781,15 @@ namespace WzComparerR2.CharaSimControl
             }
             if (item.Props.TryGetValue(ItemPropType.flatRate, out value) && value > 0)
             {
-                GearGraphics.DrawString(g, "\n#c期間定額アイテムです。#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "\n#c固定價格商品#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
             }
             if (item.Props.TryGetValue(ItemPropType.noScroll, out value) && value > 0)
             {
-                GearGraphics.DrawString(g, "#cペットのスキルスクロールやペットの名前タグは使用できません。#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "#c無法使用寵物技能捲軸和寵物名稱標籤。#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
             }
             if (item.Props.TryGetValue(ItemPropType.noRevive, out value) && value > 0)
             {
-                GearGraphics.DrawString(g, "#c生命の水は使用できません。#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "#c生命之水無法使用。#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
             }
 
             if (item.ItemID / 10000 == 500)
@@ -812,20 +812,20 @@ namespace WzComparerR2.CharaSimControl
                     }
                 }
 
-                GearGraphics.DrawString(g, "[使用可能な命令語]", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "[可使用的指令]", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                 foreach (int l0 in commandLev.Values.OrderBy(i => i).Distinct())
                 {
                     if (Translator.IsKoreanStringPresent(string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))))
                     {
-                        GearGraphics.DrawString(g, "Lv. " + l0 + "以上：" + string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s)), GearGraphics.KMSItemDetailFont, 100, right, ref picH, 16);
+                        GearGraphics.DrawString(g, "Lv. " + l0 + "以上 : " + string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s)), GearGraphics.KMSItemDetailFont, 100, right, ref picH, 16);
                     }
                     else
                     {
-                        GearGraphics.DrawString(g, "Lv. " + l0 + "以上：" + string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s)), GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                        GearGraphics.DrawString(g, "Lv. " + l0 + "以上 : " + string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s)), GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                     }
                 }
-                GearGraphics.DrawString(g, "Tip. ペットのレベルが15になると特定の言葉を言わせることができます。ペットのセリフは他のキャラクターは見えません。", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
-                GearGraphics.DrawString(g, "#c例) /ペット [命令語]#", GearGraphics.ItemDetailFont, new Dictionary<string, Color>() { { "c", ((SolidBrush)GearGraphics.OrangeBrush4).Color } }, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "Tip. 當寵物等級達15級，可讓牠說出特定的內容。寵物說的話不會讓其他玩家看到。", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "#c例) /寵物 [内容]#", GearGraphics.ItemDetailFont, new Dictionary<string, Color>() { { "c", ((SolidBrush)GearGraphics.OrangeBrush4).Color } }, 100, right, ref picH, 16);
             }
             
             string incline = null;
@@ -838,7 +838,7 @@ namespace WzComparerR2.CharaSimControl
                     ItemPropType.charmEXP };
 
             string[] inclineString = new string[]{
-                    "カリスマ ","洞察力 ","意志 ","器用さ ","感性 ","魅力 "};
+                    "領導力", "洞察力", "意志", "手藝", "感性", "魅力" };
 
             for (int i = 0; i < inclineTypes.Length; i++)
             {
@@ -850,7 +850,7 @@ namespace WzComparerR2.CharaSimControl
 
             if (!string.IsNullOrEmpty(incline))
             {
-                GearGraphics.DrawString(g, "#c装着時1回に限り" + incline.Substring(2) + "の経験値を獲得できます。(1日獲得期間の最大値を超えると、獲得できません)", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "#c裝備時可獲得僅限1次" + incline.Substring(2) + "的經驗值。(超過每日限制、最大值時除外)#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
             }
 
             picH += 3;
@@ -1029,10 +1029,10 @@ namespace WzComparerR2.CharaSimControl
                     g.DrawLine(Pens.White, 6, picH, tooltip.Width - 7, picH);
                     picH += 8;
 
-                    TextRenderer.DrawText(g, "合計経験値: " + totalExp, GearGraphics.ItemDetailFont, new Point(10, picH), ((SolidBrush)GearGraphics.OrangeBrush4).Color, TextFormatFlags.NoPadding);
+                    TextRenderer.DrawText(g, "總計經驗値: " + totalExp, GearGraphics.ItemDetailFont, new Point(10, picH), ((SolidBrush)GearGraphics.OrangeBrush4).Color, TextFormatFlags.NoPadding);
                     picH += 16;
 
-                    TextRenderer.DrawText(g, "残り経験値: " + totalExp, GearGraphics.ItemDetailFont, new Point(10, picH), Color.Red, TextFormatFlags.NoPadding);
+                    TextRenderer.DrawText(g, "剩餘經驗値: " + totalExp, GearGraphics.ItemDetailFont, new Point(10, picH), Color.Red, TextFormatFlags.NoPadding);
                     picH += 16;
 
                     string cantAccountSharable = null;
@@ -1076,7 +1076,7 @@ namespace WzComparerR2.CharaSimControl
                 picH = Math.Max(picH, iconY + 107);
                 g.DrawLine(Pens.White, 6, picH, 283, picH);//分割线
                 picH += 10;
-                TextRenderer.DrawText(g, "< 使用制限条件 >", GearGraphics.ItemDetailFont, new Point(8, picH), ((SolidBrush)GearGraphics.SetItemNameBrush).Color, TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, "< 使用限制條件 >", GearGraphics.ItemDetailFont, new Point(8, picH), ((SolidBrush)GearGraphics.SetItemNameBrush).Color, TextFormatFlags.NoPadding);
                 picH += 17;
 
                 //技能标题
@@ -1087,10 +1087,10 @@ namespace WzComparerR2.CharaSimControl
                 }
                 switch (sr.Name)
                 {
-                    case "장비제작": sr.Name = "装備制作"; break;
-                    case "장신구제작": sr.Name = "アクセサリ制作"; break;
+                    case "장비제작": sr.Name = "裝備制作"; break;
+                    case "장신구제작": sr.Name = "飾品制作"; break;
                 }
-                TextRenderer.DrawText(g, string.Format("· {0} {1}レベル以上", sr.Name, reqSkillLevel), GearGraphics.ItemDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.SetItemNameBrush).Color, TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, string.Format("· {0} {1}等級以上", sr.Name, reqSkillLevel), GearGraphics.ItemDetailFont, new Point(13, picH), ((SolidBrush)GearGraphics.SetItemNameBrush).Color, TextFormatFlags.NoPadding);
                 picH += 16;
                 picH += 6;
             }
@@ -1310,7 +1310,7 @@ namespace WzComparerR2.CharaSimControl
                     g = Graphics.FromImage(level);
                 }
                 picHeight += 13;
-                TextRenderer.DrawText(g, "成長の属性", GearGraphics.ItemDetailFont, new Point(261, picHeight), ((SolidBrush)GearGraphics.GreenBrush2).Color, TextFormatFlags.HorizontalCenter);
+                TextRenderer.DrawText(g, "成長屬性", GearGraphics.ItemDetailFont, new Point(261, picHeight), ((SolidBrush)GearGraphics.GreenBrush2).Color, TextFormatFlags.HorizontalCenter);
                 picHeight += 15;
 
                 for (int i = 0; i < Item.Levels.Count; i++)
@@ -1335,7 +1335,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     if (info.Skills.Count > 0)
                     {
-                        string title = string.Format("{2:P2}({0}/{1}) 確率でスキル強化オプションを追加 :", info.Prob, info.ProbTotal, info.Prob * 1.0 / info.ProbTotal);
+                        string title = string.Format("{2:P2}({0}/{1}) 概率下新增技能強化選項 :", info.Prob, info.ProbTotal, info.Prob * 1.0 / info.ProbTotal);
                         TextRenderer.DrawText(g, title, GearGraphics.ItemDetailFont, new Point(10, picHeight), Color.White, TextFormatFlags.NoPadding);
                         picHeight += 15;
                         foreach (var kv in info.Skills)
@@ -1355,11 +1355,11 @@ namespace WzComparerR2.CharaSimControl
                         string title;
                         if (info.Prob < info.ProbTotal)
                         {
-                            title = string.Format("{2:P2}({0}/{1}) 確率でスキル使用可能 :", info.Prob, info.ProbTotal, info.Prob * 1.0 / info.ProbTotal);
+                            title = string.Format("{2:P2}({0}/{1}) 概率下可用技能 :", info.Prob, info.ProbTotal, info.Prob * 1.0 / info.ProbTotal);
                         }
                         else
                         {
-                            title = "スキル使用可能 :";
+                            title = "可用技能 :";
                         }
                         TextRenderer.DrawText(g, title, GearGraphics.ItemDetailFont, new Point(10, picHeight), Color.White, TextFormatFlags.NoPadding);
                         picHeight += 15;

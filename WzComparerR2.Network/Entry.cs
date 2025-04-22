@@ -159,12 +159,12 @@ namespace WzComparerR2.Network
                         var sb = new StringBuilder();
                         lock (this.session.Users)
                         {
-                            sb.AppendFormat("オンラインユーザー: {0}", this.session.Users.Count);
+                            sb.AppendFormat("線上用戶: {0}", this.session.Users.Count);
                             var time = DateTime.UtcNow;
                             foreach (var user in this.session.Users)
                             {
                                 var loginTime = time - this.session.LocalTimeOffset - user.LoginTimeUTC;
-                                sb.AppendLine().AppendFormat("  ユーザー[{0}]は{1}分間オンラインです。", user.NickName, (int)loginTime.TotalMinutes);
+                                sb.AppendLine().AppendFormat("  使用者[{0}]已在線{1}分鐘。", user.NickName, (int)loginTime.TotalMinutes);
                             }
                         }
                         Log.Info(sb.ToString());
@@ -196,21 +196,21 @@ namespace WzComparerR2.Network
                             RefreshAISettings();
                             AIChatEnabled = true;
                             this.Client.AutoReconnect = false;
-                            sbAi.Append("AIチャット機能が有効になっています。無効にするまで他のユーザーとチャットすることはできません。");
+                            sbAi.Append("AI聊天功能已啟用。除非您停用它，否則您將無法與其他用戶聊天。");
                         }
                         else if (aiExtraParam == "off")
                         {
                             AIChatEnabled = false;
                             this.Client.AutoReconnect = true;
-                            sbAi.Append("AIチャット機能は無効になっています。他のユーザーとチャットできるようになりました。");
+                            sbAi.Append("AI聊天功能已停用。現在您可以與其他用戶聊天。");
                         }
                         else if (AIChatEnabled)
                         {
-                            sbAi.Append("AIチャット機能が有効になっています。");
+                            sbAi.Append("AI聊天功能已啟用。");
                         }
                         else
                         {
-                            sbAi.Append("AIチャット機能が無効になっています。");
+                            sbAi.Append("AI聊天功能已停用。");
                         }
                         Log.Info(sbAi.ToString());
                         break;
@@ -220,7 +220,7 @@ namespace WzComparerR2.Network
                         if (AIChatEnabled)
                         {
                             AIChatJson = InitiateChatCompletion(selectedLM, false);
-                            sbNewMsg.AppendFormat("AIチャットが初期化されました。以前のチャットはAIに送信されません。");
+                            sbNewMsg.AppendFormat("AI聊天已初始化。之前的聊天記錄將不會發送給AI。");
                             Log.Info(sbNewMsg.ToString());
                         }
                         break;
@@ -235,13 +235,13 @@ namespace WzComparerR2.Network
                                 new JProperty("role", "system"),
                                 new JProperty("content", systemMessage)
                             ));
-                            sbSysMsg.AppendFormat("AIへの現在のシステムメッセージは「{0}」です。AIチャットが初期化されました。", systemMessage);
+                            sbSysMsg.AppendFormat("目前發送給 AI 的系統訊息是「{0}」。 AI聊天已初始化。", systemMessage);
                             Log.Info(sbSysMsg.ToString());
                         }
                         else
                         {
                             AIChatJson = InitiateChatCompletion(selectedLM, false);
-                            sbSysMsg.AppendFormat("AIへの現在のシステムメッセージはクリアされます。AIチャットが初期化されました。");
+                            sbSysMsg.AppendFormat("任何目前發送給AI的系統訊息都將被清除。 AI聊天已初始化。");
                             Log.Info(sbSysMsg.ToString());
                         }
                         break;
@@ -251,12 +251,12 @@ namespace WzComparerR2.Network
                         string discordParam = e.Command.Substring(8).Trim();
                         if (discordParam == "on")
                         {
-                            EnableDiscordActivity("遊ぶ", "現在秘密を発見中");
+                            EnableDiscordActivity("遊玩中", "正在發掘秘密");
                             ConfigManager.Reload();
                             NetworkConfig.Default.ShowActivityOnDiscord = true;
                             showActivityOnDiscord = true;
                             ConfigManager.Save();
-                            sbDiscord.Append("WzComparerR2がDiscordアクティビティで有効化されました。");
+                            sbDiscord.Append("WzComparerR2 已在 Discord 活動中啟用。");
                         }
                         else if (discordParam == "off")
                         {
@@ -265,29 +265,29 @@ namespace WzComparerR2.Network
                             NetworkConfig.Default.ShowActivityOnDiscord = false;
                             showActivityOnDiscord = false;
                             ConfigManager.Save();
-                            sbDiscord.Append("WzComparerR2がDiscordアクティビティで無効化されました。");
+                            sbDiscord.Append("WzComparerR2 已在 Discord 活動中被停用。");
                         }
                         else if (showActivityOnDiscord)
                         {
-                            sbDiscord.Append("Discordアクティビティが有効になっています。");
+                            sbDiscord.Append("Discord 活動已啟用。");
                         }
                         else
                         {
-                            sbDiscord.Append("Discordアクティビティが無効になっています。");
+                            sbDiscord.Append("Discord 活動已停用。");
                         }
                         Log.Info(sbDiscord.ToString());
                         break;
 
                     case "/help":
                         var sbHelp = new StringBuilder();
-                        sbHelp.AppendFormat("ネットワークロガー コマンドの使用方法\r\n");
-                        sbHelp.AppendFormat("/users : オンラインのユーザーを一覧表示します。\r\n");
-                        sbHelp.AppendFormat("/name [名前] : ユーザー名を指定の名前に変更します。\r\n");
-                        sbHelp.AppendFormat("/aichat [on|off] : AIチャット機能の切り替え。\r\n");
-                        sbHelp.AppendFormat("/new : AIチャットを再初期化します。\r\n");
-                        sbHelp.AppendFormat("/sysmsg [メッセージ] : AIチャットへのシステムメッセージを指定します。\r\n");
-                        sbHelp.AppendFormat("/discord [on|off] : DiscordでのWzComparerR2のアクティビティを表示します。\r\n");
-                        sbHelp.AppendFormat("/help : このヘルプを表示します。");
+                        sbHelp.AppendFormat("如何使用網路記錄器指令\r\n");
+                        sbHelp.AppendFormat("/users:列出線上使用者。\r\n");
+                        sbHelp.AppendFormat("/name [name] : 將使用者名稱變更為指定的名稱。\r\n");
+                        sbHelp.AppendFormat("/aichat [on|off] : 切換AI聊天功能。\r\n");
+                        sbHelp.AppendFormat("/new : 重新初始化 AI 聊天。\r\n");
+                        sbHelp.AppendFormat("/sysmsg [message] : 指定傳送給AI聊天的系統訊息。\r\n");
+                        sbHelp.AppendFormat("/discord [on|off] : 在 Discord 上顯示 WzComparerR2 活動。\r\n");
+                        sbHelp.AppendFormat("/help : 顯示此幫助。");
                         Log.Info(sbHelp.ToString());
                         break;
                 }
@@ -310,7 +310,7 @@ namespace WzComparerR2.Network
                 }
                 else
                 {
-                    Log.Warn("コマンドが失敗しました: サーバーに接続されていません。");
+                    Log.Warn("命令失敗：未連接到伺服器。");
                 }
             }
         }
@@ -327,7 +327,7 @@ namespace WzComparerR2.Network
         {
             AIMutex.WaitOne();
             Log.Warn(message);
-            Log.Info("AIの応答を待っています...");
+            Log.Info("等待 AI 回應...");
             var request = (HttpWebRequest)WebRequest.Create(AIBaseURL + "/chat/completions");
             request.Method = "POST";
             request.ContentType = "application/json";
@@ -375,7 +375,7 @@ namespace WzComparerR2.Network
             }
             catch
             {
-                Log.Warn("AIとのチャットに失敗しました。");
+                Log.Warn("無法與 AI 聊天。");
             }
             finally
             {
@@ -501,7 +501,7 @@ namespace WzComparerR2.Network
         {
             this.session.LocalTimeOffset = DateTime.UtcNow - pack.CurrentTimeUTC;
 
-            Log.Info("サーバーバージョン: {0} - 日時: {1:yyyy年 MM月 dd日 HH:mm:ss}, {2:%d\\d\\ h\\h\\ m\\m\\ s\\s} 経過 - {3}人のユーザーがオンラインです。",
+            Log.Info("伺服器版本：{0} - 日期：{1:yyyy MM dd HH:mm:ss}，已過 {2:%d\\d\\ h\\h\\ m\\m\\ s\\s} - 線上用戶數：{3}。",
                 pack.Version,
                 pack.CurrentTimeUTC.ToLocalTime(),
                 pack.CurrentTimeUTC - pack.StartTimeUTC,
@@ -510,7 +510,7 @@ namespace WzComparerR2.Network
 
         private void OnPackReceived(PackLoginResp pack)
         {
-            Log.Info("ログインに成功しました。");
+            Log.Info("登入成功。");
             this.session.SID = pack.SessionID;
 
             //获取在线列表
@@ -534,7 +534,7 @@ namespace WzComparerR2.Network
 
         private void OnPackReceived(PackGetAllUsersResp pack)
         {
-            Log.Info("オンラインのユーザーは{0}人。", pack.Users.Count);
+            Log.Info("有 {0} 位用戶在線。", pack.Users.Count);
             lock (this.session.Users)
             {
                 this.session.Users.Clear();
@@ -550,11 +550,11 @@ namespace WzComparerR2.Network
             switch (pack.Type)
             {
                 case MessageType.Normal:
-                    Log.Info("(お知らせ) {0}", pack.Message);
+                    Log.Info("(注意) {0}", pack.Message);
                     break;
 
                 case MessageType.Error:
-                    Log.Error("(サーバーエラー) {0}", pack.Message);
+                    Log.Error("(伺服器錯誤) {0}", pack.Message);
                     break;
             }
         }
@@ -574,7 +574,7 @@ namespace WzComparerR2.Network
                 {
                     case UserUpdateReason.Online:
                         this.session.Users.Add(pack.UserInfo);
-                        Log.Info("[{0}]はオンラインです。", pack.UserInfo.NickName);
+                        Log.Info("[{0}] 處於在線狀態。", pack.UserInfo.NickName);
                         break;
 
                     case UserUpdateReason.Offline:
@@ -582,7 +582,7 @@ namespace WzComparerR2.Network
                         {
                             var oldUser = this.session.Users[idx];
                             this.session.Users.RemoveAt(idx);
-                            Log.Info("[{0}]はオフラインです。", oldUser.NickName);
+                            Log.Info("[{0}] 處於離線狀態。", oldUser.NickName);
                         }
                         break;
 
@@ -591,12 +591,12 @@ namespace WzComparerR2.Network
                         {
                             var oldUser = this.session.Users[idx];
                             this.session.Users[idx] = pack.UserInfo;
-                            Log.Info("[{0}]は名前を[{1}]に変更します。", oldUser.NickName, pack.UserInfo.NickName);
+                            Log.Info("[{0}] 已更名為 [{1}]。", oldUser.NickName, pack.UserInfo.NickName);
                         }
                         else
                         {
                             this.session.Users.Add(pack.UserInfo);
-                            Log.Info("[{0}]はオンラインです。", pack.UserInfo.NickName);
+                            Log.Info("[{0}] 處於在線狀態。", pack.UserInfo.NickName);
                         }
 
                         break;

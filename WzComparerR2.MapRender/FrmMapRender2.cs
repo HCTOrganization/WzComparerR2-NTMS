@@ -524,7 +524,7 @@ namespace WzComparerR2.MapRender
             string mapName = sr?["mapName"] ?? "(null)";
             int last = (mapName.LastOrDefault(c => c >= '가' && c <= '힣') - '가') % 28;
             //var message = string.Format("このマップにテレポートしますか?\r\n{0} ({1})", sr?.Name ?? "null", mapID);
-            var message = mapName + "に移動しますか？" + "\r\n" + "マップID: " + mapID;
+            var message = "要移動到" + mapName + "嗎？" + "\r\n" + "地圖ID: " + mapID;
             MessageBox.Show(message, "", MessageBoxButton.OKCancel, callback, false);
         }
 
@@ -561,17 +561,17 @@ namespace WzComparerR2.MapRender
             {
                 case "/help":
                 case "/?":
-                    this.ui.ChatBox.AppendTextHelp(@"/help 利用可能なコマンドを表示");
-                    this.ui.ChatBox.AppendTextHelp(@"/map (マップID) 指定されたマップにテレポートする");
-                    this.ui.ChatBox.AppendTextHelp(@"/back 前のマップに戻る");
-                    this.ui.ChatBox.AppendTextHelp(@"/home あなたがいる地域の町にテレポートする");
-                    this.ui.ChatBox.AppendTextHelp(@"/history [最大数] 訪問したマップの履歴");
-                    this.ui.ChatBox.AppendTextHelp(@"/minimap ミニマップ設定");
-                    this.ui.ChatBox.AppendTextHelp(@"/scene シーン設定");
-                    this.ui.ChatBox.AppendTextHelp(@"/quest クエスト設定");
-                    this.ui.ChatBox.AppendTextHelp(@"/questex クエストキーの値設定");
-                    this.ui.ChatBox.AppendTextHelp(@"/date 日付設定");
-                    this.ui.ChatBox.AppendTextHelp(@"/multibgm マルチBGM設定");
+                    this.ui.ChatBox.AppendTextHelp(@"/help 顯示可用指令");
+                    this.ui.ChatBox.AppendTextHelp(@"/map(地圖ID)傳送到指定地圖");
+                    this.ui.ChatBox.AppendTextHelp(@"/back 返回上一張地圖");
+                    this.ui.ChatBox.AppendTextHelp(@"/home 將您傳送到您所在的當地城鎮");
+                    this.ui.ChatBox.AppendTextHelp(@"/history [max number] 造訪過的地圖的歷史記錄");
+                    this.ui.ChatBox.AppendTextHelp(@"/minimap 小地圖設定");
+                    this.ui.ChatBox.AppendTextHelp(@"/scene 場景設定");
+                    this.ui.ChatBox.AppendTextHelp(@"/quest 任務設定");
+                    this.ui.ChatBox.AppendTextHelp(@"/questex 設定任務鍵值");
+                    this.ui.ChatBox.AppendTextHelp(@"/date 設定日期");
+                    this.ui.ChatBox.AppendTextHelp(@"/multibgm 多BGM設定");
                     break;
 
                 case "/map":
@@ -582,7 +582,7 @@ namespace WzComparerR2.MapRender
                     }
                     else
                     {
-                        this.ui.ChatBox.AppendTextSystem($"正しいマップIDを入力してください。");
+                        this.ui.ChatBox.AppendTextSystem($"請輸入有效的地圖ID。");
                     }
                     break;
 
@@ -593,7 +593,7 @@ namespace WzComparerR2.MapRender
                     }
                     else
                     {
-                        this.ui.ChatBox.AppendTextSystem($"戻る前のマップはありません。");
+                        this.ui.ChatBox.AppendTextSystem($"沒有上一張地圖可以回傳。");
                     }
                     break;
 
@@ -601,7 +601,7 @@ namespace WzComparerR2.MapRender
                     var retMapID = this.mapData?.ReturnMap;
                     if (retMapID == null || retMapID == 999999999)
                     {
-                        this.ui.ChatBox.AppendTextSystem($"町に戻ることはできません。");
+                        this.ui.ChatBox.AppendTextSystem($"你不能回到城鎮。");
                     }
                     else
                     {
@@ -617,7 +617,7 @@ namespace WzComparerR2.MapRender
                     {
                         historyCount = 5;
                     }
-                    this.ui.ChatBox.AppendTextHelp($"{this.viewHistory.Count}個のマップを訪問しました。");
+                    this.ui.ChatBox.AppendTextHelp($"已訪問{this.viewHistory.Count}個地圖。");
                     var node = this.viewHistory.Last;
                     while (node != null && historyCount > 0)
                     {
@@ -1287,7 +1287,7 @@ namespace WzComparerR2.MapRender
             switch (r)
             {
                 case Resolution.Window_800_600:
-                    this.ui.ChatBox.AppendTextSystem(@"推奨されない表示サイズです。一部の機能が意図したとおりに動作しない可能性があります。");
+                    this.ui.ChatBox.AppendTextSystem(@"不建議顯示尺寸。某些功能可能無法如預期運作。");
                     gameWindow.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
                     break;
                 case Resolution.Window_1024_768:

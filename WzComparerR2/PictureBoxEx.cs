@@ -644,7 +644,7 @@ namespace WzComparerR2
                 }
             }
 
-            var dialogResult = ProgressDialog.Show(this.FindForm(), "エクスポート中", "アニメーションを保存", true, false, RenderJob);
+            var dialogResult = ProgressDialog.Show(this.FindForm(), "匯出中", "保存動畫", true, false, RenderJob);
             return dialogResult == DialogResult.OK;
         }
 
@@ -706,7 +706,7 @@ namespace WzComparerR2
             this.sbInfo.Clear();
             if (ShowOverlayAni)
             {
-                this.sbInfo.Append("アニメーションのネスト中\n");
+                this.sbInfo.Append("動畫堆叠中\n");
             }
             if (this.Items.Count > 0)
             {

@@ -59,7 +59,7 @@ namespace WzComparerR2.MapRender
                 {
                     if (wzFile == null || wzFile.Type != Wz_Type.Map)
                     {
-                        if (MessageBoxEx.Show("Map.wz から IMG ファイルを選択しませんでした。\r\n続行しますか？", "警告", MessageBoxButtons.OKCancel) != DialogResult.OK)
+                        if (MessageBoxEx.Show("您沒有從 Map.wz 中選擇 IMG 檔案。 \r\n您想繼續嗎？", "警告", MessageBoxButtons.OKCancel) != DialogResult.OK)
                         {
                             goto exit;
                         }
@@ -143,7 +143,7 @@ namespace WzComparerR2.MapRender
                 }
             }
 
-            MessageBoxEx.Show("Map.wzからIMGを選択します。", "マップレンダラー");
+            MessageBoxEx.Show("從 Map.wz 中選擇 IMG。 ", "地圖渲染器");
 
         exit:
         return;

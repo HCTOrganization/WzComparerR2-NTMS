@@ -41,7 +41,7 @@ namespace WzComparerR2
 
         public static string FRMQUICKVIEWSETTINGS_DESIGNER_CHK_SHOWRANGECOORDINATES = "顯示範圍座標";
 
-        public static string GEARTOOLTIP_GENESIS_SKILL_POSSIBLE = "可用於";
+        public static string GEARTOOLTIP_GENESIS_SKILL_POSSIBLE = "可以使用";
         #endregion
     }
 }

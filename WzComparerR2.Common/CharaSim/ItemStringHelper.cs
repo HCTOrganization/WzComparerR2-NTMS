@@ -292,7 +292,7 @@ namespace WzComparerR2.CharaSim
                     res[0] = "直接打擊時的機率強弓:" + value;
                     return res;
                 case GearPropType.incPQEXPr:
-                    res[0] = "Party Quest EXP: +" + value + "%";
+                    res[0] = "组隊任務經驗值增加" + value + "%";
                     return res;
                 case GearPropType.incBDR:
                 case GearPropType.bdR:

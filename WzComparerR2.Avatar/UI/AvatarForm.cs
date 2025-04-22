@@ -2053,7 +2053,7 @@ namespace WzComparerR2.Avatar.UI
                 {
                     var dlg = new SaveFileDialog()
                     {
-                        Title = "アバターフレームを保存",
+                        Title = "紙娃娃幀保存",
                         Filter = "PNG (*.png)|*.png|*.*|*.*",
                         FileName = defaultFileName
                     };
@@ -2091,8 +2091,8 @@ namespace WzComparerR2.Avatar.UI
                 {
                     var dlg = new SaveFileDialog()
                     {
-                        Title = "アバターを保存",
-                        Filter = string.Format("{0} (*{1})|*{1}|すべてのファイル(*.*)|*.*", encoder.Name, extensionFilter),
+                        Title = "保存紙娃娃",
+                        Filter = string.Format("{0} (*{1})|*{1}|所有格式 (*.*)|*.*", encoder.Name, extensionFilter),
                         FileName = defaultFileName
                     };
                     if (dlg.ShowDialog() != DialogResult.OK)
@@ -2291,7 +2291,7 @@ namespace WzComparerR2.Avatar.UI
 
                 if (gifLayer.Frames.Count <= 0)
                 {
-                    MessageBoxEx.Show(this, "アニメーションデータの計算に失敗しました。", "エラー");
+                    MessageBoxEx.Show(this, "動畫資料計算失敗。", "錯誤");
                     return;
                 }
 
@@ -2359,13 +2359,13 @@ namespace WzComparerR2.Avatar.UI
             var matches = Regex.Matches(code, @"s?(\d+)(\+([0-7])\*(\d{1,2}))?([,\s]|$)");
             if (matches.Count <= 0)
             {
-                MessageBoxEx.Show("アイテムコードに該当するアイテムはありません.", "エラー");
+                MessageBoxEx.Show("沒有與道具 ID 相符的道具。", "錯誤");
                 return;
             }
 
             if (PluginManager.FindWz(Wz_Type.Base) == null)
             {
-                MessageBoxEx.Show("Base.wz ファイルを開けません。", "エラー");
+                MessageBoxEx.Show("未開啟 Base.wz。", "錯誤");
                 return;
             }
 
@@ -2376,7 +2376,7 @@ namespace WzComparerR2.Avatar.UI
             //试图初始化
             if (!this.inited && !this.AvatarInit())
             {
-                MessageBoxEx.Show("アバタープラグインを初期化できません。", "エラー");
+                MessageBoxEx.Show("無法初始化紙娃娃模組。", "錯誤");
                 return;
             }
             var sl = this.PluginEntry.Context.DefaultStringLinker;
@@ -2463,12 +2463,12 @@ namespace WzComparerR2.Avatar.UI
             if (failList.Count > 0)
             {
                 StringBuilder sb = new StringBuilder();
-                sb.AppendLine("そのアイテムコードが見つかりません : ");
+                sb.AppendLine("未找到以下道具ID : ");
                 foreach (var gearID in failList)
                 {
                     sb.Append("  ").AppendLine(gearID.ToString("D8"));
                 }
-                MessageBoxEx.Show(sb.ToString(), "エラー");
+                MessageBoxEx.Show(sb.ToString(), "錯誤");
             }
 
         }
@@ -2722,7 +2722,7 @@ namespace WzComparerR2.Avatar.UI
         {
             using (FolderBrowserDialog dlg = new FolderBrowserDialog())
             {
-                dlg.Description = "アバターを自動的に保存する場所を選択してください。";
+                dlg.Description = "選擇您想要自動儲存紙娃娃的位置。";
                 if (DialogResult.OK == dlg.ShowDialog())
                 {
                     specifiedSavePath = dlg.SelectedPath;
@@ -2756,7 +2756,7 @@ namespace WzComparerR2.Avatar.UI
 
             if (this.avatar.ActionName == null)
             {
-                MessageBoxEx.Show("キャラクターはありません。");
+                MessageBoxEx.Show("未找到紙娃娃。");
                 return;
             }
 
@@ -2767,7 +2767,7 @@ namespace WzComparerR2.Avatar.UI
             string extensionFilter = string.Join(";", cap.SupportedExtensions.Select(ext => $"*{ext}"));
 
             FolderBrowserDialog dlg = new FolderBrowserDialog();
-            dlg.Description = "エクスポートしたいフォルダを選択してください。";
+            dlg.Description = "選擇要匯出的資料夾。";
 
             async Task ExportGif(string actionName)
             {
@@ -2830,7 +2830,7 @@ namespace WzComparerR2.Avatar.UI
                 }
                 catch (Exception ex)
                 {
-                    context.Message = $"エラー: {ex.Message}";
+                    context.Message = $"錯誤: {ex.Message}";
                     throw;
                 }
                 finally
@@ -2841,7 +2841,7 @@ namespace WzComparerR2.Avatar.UI
 
             if (dlg.ShowDialog() == DialogResult.OK)
             {
-                ProgressDialog.Show(this.FindForm(), "エクスポート中...", avatar.Actions.Count + " アクションのエクスポート中...", true, false, ExportJob);
+                ProgressDialog.Show(this.FindForm(), "正在匯出...", "正在匯出" + avatar.Actions.Count + "個動作...", true, false, ExportJob);
             }
         }
         private static string RemoveInvalidFileNameChars(string fileName)
