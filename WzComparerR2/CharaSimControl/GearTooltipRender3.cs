@@ -507,7 +507,8 @@ namespace WzComparerR2.CharaSimControl
 
             // 전투력 증가량
             TextRenderer.DrawText(g, "戰鬥力提升量", GearGraphics.EquipMDMoris9Font, new Point(309 - TextRenderer.MeasureText(g, "戰鬥力提升量", GearGraphics.EquipMDMoris9Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width, picH + 12), ((SolidBrush)GearGraphics.Equip22BrushDarkGray).Color, TextFormatFlags.NoPadding);
-            g.DrawImage(Resource.UIToolTipNew_img_Item_Equip_imgFont_atkPow_equipped, 309 - 159, picH + 38);
+            // g.DrawImage(Resource.UIToolTipNew_img_Item_Equip_imgFont_atkPow_equipped, 309 - 159, picH + 38);
+            g.DrawImage(Resource.UIToolTipNew_img_Item_Equip_imgFont_atkPow_plus_0, 293, picH + 38);
             picH += 78;
 
             // 장비 분류
@@ -1170,12 +1171,13 @@ namespace WzComparerR2.CharaSimControl
                 {
                     hasThirdContents = true;
 
+                    List<string> textList = new List<string>();
+
                     foreach (var text in texts)
                     {
-                        TextRenderer.DrawText(g, $"裝備時可獲得僅限1次{text}", GearGraphics.EquipMDMoris9Font, new Point(15, picH), Color.White, TextFormatFlags.NoPadding);
-                        picH += 16;
+                        textList.Add(text);
                     }
-                    TextRenderer.DrawText(g, $"的經驗值。(超過每日限制、最大值時除外)", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
+                    GearGraphics.DrawString(g, $"裝備時可獲得僅限1次{string.Join("、", textList)}的經驗值。(超過每日限制、最大值時除外)", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
                     picH += 16;
                 }
             }
