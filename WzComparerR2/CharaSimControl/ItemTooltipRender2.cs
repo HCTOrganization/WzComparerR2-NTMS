@@ -416,13 +416,13 @@ namespace WzComparerR2.CharaSimControl
                 switch (value)
                 {
                     case 1:
-                        TextRenderer.DrawText(g, "Wonder Black", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush3).Color, TextFormatFlags.HorizontalCenter);
+                        TextRenderer.DrawText(g, "奇幻黑色", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush3).Color, TextFormatFlags.HorizontalCenter);
                         break;
                     case 4:
-                        TextRenderer.DrawText(g, "Luna Sweet", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), GearGraphics.itemPinkColor, TextFormatFlags.HorizontalCenter);
+                        TextRenderer.DrawText(g, "月光可愛", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), GearGraphics.itemPinkColor, TextFormatFlags.HorizontalCenter);
                         break;
                     case 5:
-                        TextRenderer.DrawText(g, "Luna Dream", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), ((SolidBrush)GearGraphics.BlueBrush).Color, TextFormatFlags.HorizontalCenter);
+                        TextRenderer.DrawText(g, "月光夢幻", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), ((SolidBrush)GearGraphics.BlueBrush).Color, TextFormatFlags.HorizontalCenter);
                         break;
                     case 6:
                         TextRenderer.DrawText(g, "月光迷你", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), GearGraphics.itemPurpleColor, TextFormatFlags.HorizontalCenter);
@@ -435,12 +435,12 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (Item.Props.TryGetValue(ItemPropType.BTSLabel, out value) && value > 0)
             {
-                TextRenderer.DrawText(g, "BTS Label", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), Color.FromArgb(187, 102, 238), TextFormatFlags.HorizontalCenter);
+                TextRenderer.DrawText(g, "BTS 標籤", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), Color.FromArgb(187, 102, 238), TextFormatFlags.HorizontalCenter);
                 picH += 15;
             }
             else if (Item.Props.TryGetValue(ItemPropType.BLACKPINKLabel, out value) && value > 0)
             {
-                TextRenderer.DrawText(g, "BLACKPINK Label", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), Color.FromArgb(255, 136, 170), TextFormatFlags.HorizontalCenter);
+                TextRenderer.DrawText(g, "BLACKPINK 標籤", GearGraphics.ItemDetailFont, new Point(tooltip.Width, picH), Color.FromArgb(255, 136, 170), TextFormatFlags.HorizontalCenter);
                 picH += 15;
             }
 
@@ -645,7 +645,7 @@ namespace WzComparerR2.CharaSimControl
                             switch (value)
                             {
                                 case 1:
-                                    wonderGradeString = "Wonder Black";
+                                    wonderGradeString = "奇幻黑色";
                                     foreach (KeyValuePair<GearPropType, object> prop in setItem.Effects.Values.SelectMany(f => f.PropsV5))
                                     {
                                         if (prop.Key == GearPropType.activeSkill)
@@ -663,12 +663,12 @@ namespace WzComparerR2.CharaSimControl
                                     }
                                     break;
                                 case 4:
-                                    wonderGradeString = "Luna Sweet";
-                                    setSkillName = "Luna Sweet";
+                                    wonderGradeString = "月光可愛";
+                                    setSkillName = "月光可愛";
                                     break;
                                 case 5:
-                                    wonderGradeString = "Luna Dream";
-                                    setSkillName = "Luna Dream";
+                                    wonderGradeString = "月光夢幻";
+                                    setSkillName = "月光夢幻";
                                     break;
                             }
                             if (wonderGradeString != null)

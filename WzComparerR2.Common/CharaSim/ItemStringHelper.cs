@@ -984,10 +984,10 @@ namespace WzComparerR2.CharaSim
                 case ItemPropType.pquest:
                     return value == 0 ? null : "組隊任務道具";
                 case ItemPropType.permanent:
-                    return value == 0 ? null : "魔法の時間が終わらないミラクルペットです。";
+                    return value == 0 ? null : "魔法時間不會結束的奇幻寵物。";
                 case ItemPropType.multiPet:
                     // return value == 0 ? null : "マルチペット(他のペットと最大3個重複使用可能)";
-                    return value == 0 ? "一般ペット(他の一般ペットと重複使用不可)" : "マルチペット(他のペットと最大3個重複使用可能)";
+                    return value == 0 ? "普通寵物（不能與其他相同普通寵物一起使用）" : "多隻寵物（最多可使用3隻相同寵物）";
                 case ItemPropType.mintable:
                     return GetGearPropString(GearPropType.mintable, value);
                 default:
