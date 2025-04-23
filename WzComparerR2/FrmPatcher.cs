@@ -664,8 +664,8 @@ namespace WzComparerR2
         private void buttonXOpen3_Click(object sender, EventArgs e)
         {
             OpenFileDialog dlg = new OpenFileDialog();
-            dlg.Title = "パッチ檔案の選択";
-            dlg.Filter = "パッチ檔案 (*.patch;*.exe)|*.patch;*.exe";
+            dlg.Title = "選擇更新檔案";
+            dlg.Filter = "更新檔案 (*.patch;*.exe)|*.patch;*.exe";
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
                 txtPatchFile2.Text = dlg.FileName;
@@ -684,15 +684,15 @@ namespace WzComparerR2
 
         private void buttonXCreate_Click(object sender, EventArgs e)
         {
-            MessageBoxEx.Show(@"> この機能は不完全なため、さらなるテストが必要です...
-> まだ不完全なのでパッチ檔案のみ選択してください。 .exe パッチは現在サポートされていません。
-> クライアントのバージョンは確認されませんので、開始する前に自分で確認してください。
-> 檔案 ブロック フィルタリングまたは檔案欠落プロンプトは、当面は利用できません。
-> 最適化がないため、大きな檔案が生成されます。 ただし、檔案が完全であることは保証されています。", "通知");
+            MessageBoxEx.Show(@"> 此功能不完整，需要進一步測試...
+> 它仍然不完整，所以請僅選擇補丁檔案。目前不支援 .exe 補丁。
+> 它不檢查客戶端版本，因此在開始之前請自行檢查。
+> 暫時不支援文件攔截過濾或缺失文件提示。
+> 缺乏優化導致檔案較大。但保證文件是完整的。", "通知");
 
             SaveFileDialog dlg = new SaveFileDialog();
-            dlg.Filter = "パッチ檔案 (*.patch)|*.patch";
-            dlg.Title = "パッチ檔案を保存";
+            dlg.Filter = "更新檔案 (*.patch)|*.patch";
+            dlg.Title = "保存更新檔案";
             dlg.CheckFileExists = false;
             dlg.InitialDirectory = Path.GetDirectoryName(txtPatchFile2.Text);
             dlg.FileName = Path.GetFileNameWithoutExtension(txtPatchFile2.Text) + "_reverse.patch";

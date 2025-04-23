@@ -842,7 +842,7 @@ namespace WzComparerR2
             this.expandablePanel3.TitleStyle.BorderColor.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelBorder;
             this.expandablePanel3.TitleStyle.ForeColor.ColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelText;
             this.expandablePanel3.TitleStyle.GradientAngle = 90;
-            this.expandablePanel3.TitleText = "逆更新ャー";
+            this.expandablePanel3.TitleText = "降版檔生成器";
             // 
             // buttonXCreate
             // 
@@ -951,7 +951,7 @@ namespace WzComparerR2
             this.labelX3.Name = "labelX3";
             this.labelX3.Size = new System.Drawing.Size(340, 18);
             this.labelX3.TabIndex = 1;
-            this.labelX3.Text = "この機能は不安定です。これは注意して使用してください。";
+            this.labelX3.Text = "此功能不穩定。請謹慎使用。";
             // 
             // superTooltip1
             // 

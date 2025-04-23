@@ -342,16 +342,16 @@ namespace WzComparerR2
             {
                 string respJson = new StreamReader(req.GetResponse().GetResponseStream(), Encoding.UTF8).ReadToEnd();
                 Clipboard.SetText(respJson);
-                respText = "この API キーは有効です。" + Environment.NewLine + "この API キーに関連付けられたキャラクターが JSON 形式でクリップボードにコピーされました。";
+                respText = "API 金鑰有效。" + Environment.NewLine + "與此 API 金鑰關聯的字元已以 JSON 格式複製到您的剪貼簿。";
             }
             catch (WebException ex)
             {
                 string respJson = new StreamReader(ex.Response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
-                respText = "この API キーは無効です。" + Environment.NewLine + respJson;
+                respText = "此 API 金鑰無效。" + Environment.NewLine + respJson;
             }
             catch (Exception ex)
             {
-                respText = "不明なエラーが発生しました：" + ex;
+                respText = "發生了未知錯誤：" + ex;
             }
             MessageBoxEx.Show(respText);
         }

@@ -302,7 +302,7 @@ namespace WzComparerR2
                         sl.StringItem.TryGetValue(itemID, out sr);
                         if (sr != null)
                         {
-                            sw.WriteLine(@"<tr style=""background-color:#ffcccc; ""><td>アイテム名</td><td>{0} (id:{1})</td></tr>", sr == null ? "null" : sr.Name, itemID);
+                            sw.WriteLine(@"<tr style=""background-color:#ffcccc; ""><td>道具名</td><td>{0} (id:{1})</td></tr>", sr == null ? "null" : sr.Name, itemID);
                         }
 
                         Item item = Item.CreateFromNode(node, PluginManager.FindWz);
@@ -316,7 +316,7 @@ namespace WzComparerR2
                                 itemImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
                                 itemImage.Dispose();
                             }
-                            sw.WriteLine(@"<tr><td>アイテム画像</td><td><img src=""items/{0}.png"" title=""{0}"" /></td></tr>", item.ItemID);
+                            sw.WriteLine(@"<tr><td>道具圖示</td><td><img src=""items/{0}.png"" title=""{0}"" /></td></tr>", item.ItemID);
                         }
 
                         Wz_Node skillOptionNode = skillOption.FindNodeByPath("skill\\" + (itemID % 1000 + 1));
@@ -339,16 +339,16 @@ namespace WzComparerR2
                             }
                             if (incNode != null)
                             {
-                                sw.WriteLine(@"<tr><td rowspan=""3"">魂の玉の属性</td><td>ステージ{0}: 物理攻撃力/魔法攻撃力増加 + {1}{2}</td></tr>", incNode.Nodes[0].Text, incNode.Nodes[0].Value, per);
+                                sw.WriteLine(@"<tr><td rowspan=""3"">靈魂寶珠屬性</td><td>階段{0}: 物理攻擊力/魔法攻擊力增加 + {1}{2}</td></tr>", incNode.Nodes[0].Text, incNode.Nodes[0].Value, per);
                                 sw.WriteLine(@"<tr><td>...</td></tr>");
-                                sw.WriteLine(@"<tr><td>ステージ{0}: 物理攻撃力/魔法攻撃力増加 + {1}{2}</td></tr>", incNode.Nodes[incNode.Nodes.Count - 1].Text, incNode.Nodes[incNode.Nodes.Count - 1].Value, per);
+                                sw.WriteLine(@"<tr><td>階段{0}: 物理攻擊力/魔法攻擊力增加 + {1}{2}</td></tr>", incNode.Nodes[incNode.Nodes.Count - 1].Text, incNode.Nodes[incNode.Nodes.Count - 1].Value, per);
                             }
 
-                            sw.WriteLine("<tr><td>必要レベル</td><td>{0}</td></tr>", reqLevel);
+                            sw.WriteLine("<tr><td>必要等級</td><td>{0}</td></tr>", reqLevel);
                             sl.StringSkill.TryGetValue(skillId, out sr);
                             if (sr != null)
                             {
-                                sw.WriteLine("<tr><td>スキル名</td><td>{0} (id:{1})</td></tr>", sr == null ? "null" : sr.Name, skillId);
+                                sw.WriteLine("<tr><td>技能名</td><td>{0} (id:{1})</td></tr>", sr == null ? "null" : sr.Name, skillId);
                             }
 
                             Skill skill = Skill.CreateFromNode(skill8000.Nodes[skillId.ToString("D7")], PluginManager.FindWz);
@@ -364,7 +364,7 @@ namespace WzComparerR2
                                     skillImage.Save(Path.Combine(skillImageDir, skill.SkillID + ".png"), System.Drawing.Imaging.ImageFormat.Png);
                                     skillImage.Dispose();
                                 }
-                                sw.WriteLine(@"<tr><td>スキルイメージ</td><td><img src=""skills/{0}.png"" title=""{0}"" /></td></tr>", skill.SkillID);
+                                sw.WriteLine(@"<tr><td>技能圖示</td><td><img src=""skills/{0}.png"" title=""{0}"" /></td></tr>", skill.SkillID);
                             }
 
                             List<KeyValuePair<int, Potential>> tempOptions = new List<KeyValuePair<int, Potential>>();

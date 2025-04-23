@@ -87,7 +87,7 @@ namespace WzComparerR2.WzLib
                 {
                     if (this.Checksum != this.CalcCheckSum(this.stream))
                     {
-                        e = new ArgumentException("チェックサムエラー");
+                        e = new ArgumentException("校驗和錯誤");
                         return false;
                     }
                     this.chec = true;
@@ -286,7 +286,7 @@ namespace WzComparerR2.WzLib
                         }
                         else
                         {
-                            throw new Exception("Convex2Dには非vector2D項目が含まれています。");
+                            throw new Exception("Convex2D包含非vector2D專案。");
                         }
                     }
                     parent.Value = new Wz_Convex(points);
@@ -324,7 +324,7 @@ namespace WzComparerR2.WzLib
 
                             if (!this.TryDecryptWaveFormatEx(fmtExData, out Interop.WAVEFORMATEX waveFormatEx))
                             {
-                                throw new Exception($"オフセット{this.Offset}+{reader.BaseStream.Position}でWaveFormatEx構造体を解析できませんでした。");
+                                throw new Exception($"無法解析偏移量為{this.Offset}+{reader.BaseStream.Position}的WaveFormatEx結構。");
                             }
                             switch (waveFormatEx.FormatTag)
                             {
@@ -348,7 +348,7 @@ namespace WzComparerR2.WzLib
                                     break;
 
                                 default:
-                                    throw new Exception($"オフセット{this.Offset}+{reader.BaseStream.Position}に不明なWaveFormatEx.FormatTag{waveFormatEx.FormatTag}があります。");
+                                    throw new Exception($"偏移量為{this.Offset}+{reader.BaseStream.Position}處的未知WaveFormatEx.FormatTag{waveFormatEx.FormatTag}。");
                             }
                             break;
                     }
@@ -388,7 +388,7 @@ namespace WzComparerR2.WzLib
                     break;
 
                 default:
-                    throw new Exception("不明なWZタグ:" + tag);
+                    throw new Exception("未知 WZ 標籤：" + tag);
             }
         }
 
@@ -486,12 +486,12 @@ namespace WzComparerR2.WzLib
                     this.ExtractImg(reader, parent);
                     if (reader.BaseStream.Position != eob)
                     {
-                        throw new Exception($"オブジェクトはオフセット{this.Offset}+{reader.BaseStream.Position}で完全にロードされていません。");
+                        throw new Exception($"物件未在偏移量{this.Offset}+{reader.BaseStream.Position}處完全載入。");
                     }
                     break;
 
                 default:
-                    throw new Exception($"オフセット{this.Offset}+{reader.BaseStream.Position}に不明な値タイプ{flag}があります。");
+                    throw new Exception($"偏移量為{this.Offset}+{reader.BaseStream.Position}處的未知值類型{flag}。");
             }
         }
 
@@ -537,7 +537,7 @@ namespace WzComparerR2.WzLib
                         break;
 
                     default:
-                        throw new Exception($"オフセット{this.Offset}+{reader.BaseStream.Position}に不明なLuaフラグ{flag}があります。");
+                        throw new Exception($"偏移量為{this.Offset}+{reader.BaseStream.Position}處的未知Lua標誌{flag}。");
                 }
             }
         }
@@ -623,7 +623,7 @@ namespace WzComparerR2.WzLib
                 {
                     if (!reader.SkipLineAndCheckEmpty())
                     {
-                        throw new Exception("プロパティの終了行が正しくありません。");
+                        throw new Exception("屬性結束行無效。");
                     }
                     return;
                 }
@@ -631,7 +631,7 @@ namespace WzComparerR2.WzLib
                 reader.SkipWhitespaceExceptLineEnding();
                 int equalSign = reader.Read();
                 if (equalSign != '=')
-                    throw new Exception($"'='記号が必要ですが、'{(char)equalSign}'が返されました。");
+                    throw new Exception($"預期為「=」符號，但傳回的是「{(char)equalSign}」。");
                 reader.SkipWhitespaceExceptLineEnding();
 
                 string stringVal = reader.ReadLine();

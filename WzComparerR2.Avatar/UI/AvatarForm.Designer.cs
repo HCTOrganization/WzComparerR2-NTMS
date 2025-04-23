@@ -581,7 +581,7 @@ namespace WzComparerR2.Avatar.UI
             this.chkHairShade.Size = new System.Drawing.Size(88, 20);
             this.chkHairShade.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkHairShade.TabIndex = 10;
-            this.chkHairShade.Text = "髪の影";
+            this.chkHairShade.Text = "髪影";
             this.chkHairShade.Enabled = false;
             this.chkHairShade.CheckedChanged += new System.EventHandler(this.chkHairShade_CheckedChanged);
             // 

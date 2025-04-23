@@ -160,12 +160,12 @@ namespace WzComparerR2.CharaSim
                     {
                         reqJobs[i] = ItemStringHelper.GetJobName(this.ConValue[i]) ?? this.ConValue[i].ToString();
                     }
-                    return "職業が" + string.Join(" あるいは ", reqJobs) + "の場合";
+                    return "職業為" + string.Join(" 或 ", reqJobs) + "時";
                 case GearPropType.reqLevel:
-                    return "レベル" + this.ConValue[0] + "以上の場合";
+                    return "等級" + this.ConValue[0] + "以上時";
                 case GearPropType.reqCraft:
                     int lastExp;
-					return "When Diligence EXP is " + this.ConValue[0] + " (Lv. " + getPersonalityLevel(this.ConValue[0], out lastExp) + " " + lastExp + " )以上の場合";
+					return "When Diligence EXP is " + this.ConValue[0] + " (Lv. " + getPersonalityLevel(this.ConValue[0], out lastExp) + " " + lastExp + " )以上時";
                 case GearPropType.reqWeekDay:
                     string[] weekdays = new string[this.ConValue.Count];
                     for (int i = 0; i < this.ConValue.Count; i++)
@@ -228,13 +228,13 @@ namespace WzComparerR2.CharaSim
         {
             switch (weekDay)
             {
-                case 0: return "日曜日";
-                case 1: return "月曜日";
-                case 2: return "火曜日";
-                case 3: return "水曜日";
-                case 4: return "木曜日";
-                case 5: return "金曜日";
-                case 6: return "土曜日";
+                case 0: return "週日";
+                case 1: return "週一";
+                case 2: return "週二";
+                case 3: return "週三";
+                case 4: return "週四";
+                case 5: return "週五";
+                case 6: return "週六";
                 default: return "週" + weekDay; //这怎么可能...
             }
         }

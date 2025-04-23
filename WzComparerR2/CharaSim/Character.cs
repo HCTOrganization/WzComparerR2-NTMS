@@ -362,7 +362,7 @@ namespace WzComparerR2.CharaSim
             int newGearIndex = Array.IndexOf<ItemBase>(itemTab, newGear);
             if (newGearIndex < 0 || newGear.State != GearState.itemList)
             {
-                throw new InvalidOperationException("不明なエラー: 装備がインベントリにありません。");
+                throw new InvalidOperationException("未知錯誤：裝備不在庫存中。");
             }
 
             int onlyEquip;
@@ -372,7 +372,7 @@ namespace WzComparerR2.CharaSim
                 {
                     if (gear.ItemID == newGear.ItemID)
                     {
-                        throw new InvalidOperationException("このアイテムは一度に 1 つしか装備できません。");
+                        throw new InvalidOperationException("一次只能裝備一件此物品。");
                     }
                 }
             }
@@ -386,7 +386,7 @@ namespace WzComparerR2.CharaSim
             Gear[] removedGear;
             if (!this.equip.AddGear(newGear, out removedGear))
             {
-                throw new InvalidOperationException("不明なエラー: 装備の追加に失敗しました。");
+                throw new InvalidOperationException("未知錯誤：新增裝備失敗。");
             }
 
             CheckGearEnabled();
@@ -418,12 +418,12 @@ namespace WzComparerR2.CharaSim
                 }
                 else
                 {
-                    errorString = "インベントリはいっぱいです。";
+                    errorString = "庫存已滿。";
                 }
             }
             else
             {
-                errorString = "このアイテムを装備するために必要な条件を満たしていません。";
+                errorString = "您不符合裝備此物品的要求。";
             }
 
             //还原装备
@@ -456,7 +456,7 @@ namespace WzComparerR2.CharaSim
             if (gear.type == GearType.shield &&
                 (status.Job / 10 == 43 || status.Job / 100 == 23 || status.Job / 100 == 31))
             {
-                errorMessage = "この職業は盾を装備できません。";
+                errorMessage = "此職業無法裝備盾牌。";
                 return false;
             }
             if (gear.type == GearType.magicArrow && status.Job / 100 != 23)
@@ -471,7 +471,7 @@ namespace WzComparerR2.CharaSim
             }
             if (!checkGearPropReq(gear))
             {
-                errorMessage = "このアイテムを装備するために必要な条件を満たしていません。";
+                errorMessage = "您不符合裝備此物品的要求。";
                 return false;
             }
             errorMessage = null;

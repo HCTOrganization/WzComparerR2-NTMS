@@ -14,7 +14,7 @@ namespace WzComparerR2
         public static string DEFAULT_INTERNAL_GUI_FONT2 = "Microsoft Jhenghei";
         public static string DEFAULT_KOREAN_FONT = "Dotum";
 
-        public static string COMMON_ERROR = "エラー";
+        public static string COMMON_ERROR = "錯誤";
 
         public static string FRMABOUT_VERSION = "[NTMS] 繁體中文版 <font color=\"#808080\">Hikari Calyx</font>";
         public static string FRMABOUT_NO_AVAILABLE_PLUGINS = "沒有可用的外掛程式。";

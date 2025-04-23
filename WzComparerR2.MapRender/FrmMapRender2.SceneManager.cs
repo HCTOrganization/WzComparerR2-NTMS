@@ -87,7 +87,7 @@ namespace WzComparerR2.MapRender
             yield return new WaitTaskCompletedCoroutine(loadMapTask);
             if (loadMapTask.Exception != null)
             {
-                this.ui.ChatBox.AppendTextSystem($"MapRender はこのマップを読み込むことができませんでした。{loadMapTask.Exception}");
+                this.ui.ChatBox.AppendTextSystem($"MapRender 無法載入此地圖。{loadMapTask.Exception}");
                 this.mapImgLoading = null;
                 this.opacity = 1;
                 yield return cm.Yield(OnSceneRunning());
