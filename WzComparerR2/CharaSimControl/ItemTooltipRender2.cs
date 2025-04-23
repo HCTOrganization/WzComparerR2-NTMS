@@ -1105,7 +1105,7 @@ namespace WzComparerR2.CharaSimControl
             if (item.GetBooleanValue(ItemPropType.autoPrice) && ShowSoldPrice)
             {
                 picH += 16;
-                GearGraphics.DrawString(g, "\r\n · 出售價格：" + (item.Level * 2) + "楓幣", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "\r\n · 出售價格：" + (item.Level > 250 ? 500 : (item.Level * 2)) + "楓幣", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
             }
 
             if (item.Cash && ShowCashPurchasePrice)
