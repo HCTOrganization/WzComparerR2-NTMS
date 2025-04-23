@@ -279,8 +279,8 @@ namespace WzComparerR2.CharaSimControl
             int gender = Gear.GetGender(Gear.ItemID);
             switch (gender)
             {
-                case 0: gearName += " (남)"; break;
-                case 1: gearName += " (여)"; break;
+                case 0: gearName += " (男)"; break;
+                case 1: gearName += " (女)"; break;
             }
 
             if (AutoTitleWrap)
