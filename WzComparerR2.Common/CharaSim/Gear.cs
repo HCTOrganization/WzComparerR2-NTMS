@@ -364,6 +364,19 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+        public static bool IsSymbol(GearType type)
+        {
+            switch (type)
+            {
+                case GearType.arcaneSymbol:
+                case GearType.authenticSymbol:
+                case GearType.grandAuthenticSymbol:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         public static bool IsEnhanceable(GearType type)
         {
             switch (type)
