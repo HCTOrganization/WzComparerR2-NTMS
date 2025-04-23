@@ -695,7 +695,7 @@ namespace WzComparerR2.CharaSimControl
                 hasThirdContents = true;
 
                 picH += 4;
-                TextRenderer.DrawText(g, "評價: " + value, GearGraphics.EquipMDMoris9Font, new Point(15, picH), Color.White, TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, "等級：" + value, GearGraphics.EquipMDMoris9Font, new Point(15, picH), Color.White, TextFormatFlags.NoPadding);
                 picH += 12;
             }
 
