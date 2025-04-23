@@ -921,12 +921,12 @@ namespace WzComparerR2.CharaSimControl
 
             if (!Gear.CanPotential && !Gear.Cash)
             {
-                TextRenderer.DrawText(g, "潜在能力設定不可", GearGraphics.EquipDetailFont, new Point(13, picH), Color.White, TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, "無法設定潛在屬性", GearGraphics.EquipDetailFont, new Point(13, picH), Color.White, TextFormatFlags.NoPadding);
                 picH += 16;
             }
             if (Gear.Props.TryGetValue(GearPropType.fixedPotential, out value) && value > 0)
             {
-                TextRenderer.DrawText(g, "アディショナル潜在能力設定不可", GearGraphics.EquipDetailFont, new Point(13, picH), Color.White, TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, "無法設定附加潛能", GearGraphics.EquipDetailFont, new Point(13, picH), Color.White, TextFormatFlags.NoPadding);
                 picH += 16;
             }
 
@@ -990,9 +990,9 @@ namespace WzComparerR2.CharaSimControl
 
                 if (Gear.type == GearType.petEquip)
                 {
-                    TextRenderer.DrawText(g, "ペット装備能力値移転書適用", GearGraphics.EquipDetailFont, new Point(13, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                    TextRenderer.DrawText(g, "寵物裝備能力轉移書可用", GearGraphics.EquipDetailFont, new Point(13, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                     picH += 16;
-                    TextRenderer.DrawText(g, "黄金つち(ペット専用)使用可能回数 : 0/2", GearGraphics.EquipDetailFont, new Point(13, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                    TextRenderer.DrawText(g, "寵物專用黃金鐵槌强化次數 : 0/2", GearGraphics.EquipDetailFont, new Point(13, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                     picH += 16;
                 }
 

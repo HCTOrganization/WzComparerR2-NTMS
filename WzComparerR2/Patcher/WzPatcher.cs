@@ -62,7 +62,7 @@ namespace WzComparerR2.Patcher
             var patchBlock = TrySplit(this.patchFile);
             if (patchBlock == null)
             {
-                throw new Exception("解凍エラー。ストリームからパッチブロックが見つかりません。");
+                throw new Exception("解壓縮錯誤。流中未找到補丁塊。");
             }
 
             BinaryReader r = new BinaryReader(patchBlock);
@@ -289,19 +289,19 @@ namespace WzComparerR2.Patcher
         }
 
         /// <summary>
-        /// 对于已经解压的patch文件，向客户端执行更新过程。
+        /// 对于已经解压的patch檔案，向客户端执行更新过程。
         /// </summary>
-        /// <param Name="mapleStoryFolder">冒险岛客户端所在文件夹。</param>
+        /// <param Name="mapleStoryFolder">冒险岛客户端所在檔案夹。</param>
         public void Patch(string mapleStoryFolder, CancellationToken cancellationToken = default)
         {
             this.Patch(mapleStoryFolder, mapleStoryFolder, cancellationToken);
         }
 
         /// <summary>
-        /// 对于已经解压的patch文件，向客户端执行更新过程，可以自己指定临时文件的文件夹。
+        /// 对于已经解压的patch檔案，向客户端执行更新过程，可以自己指定临时檔案的檔案夹。
         /// </summary>
-        /// <param Name="mapleStoryFolder">冒险岛客户端所在文件夹。</param>
-        /// <param Name="tempFileFolder">生成临时文件的文件夹。</param>
+        /// <param Name="mapleStoryFolder">冒险岛客户端所在檔案夹。</param>
+        /// <param Name="tempFileFolder">生成临时檔案的檔案夹。</param>
         public void Patch(string mapleStoryFolder, string tempFileFolder, CancellationToken cancellationToken = default)
         {
             string tempDir = CreateRandomDir(tempFileFolder);
@@ -562,7 +562,7 @@ namespace WzComparerR2.Patcher
             FileStream tempFileStream = new FileStream(tempFileName, FileMode.Create, FileAccess.ReadWrite);
             part.TempFilePath = tempFileName;
             this.OnTempFileCreated(part);
-            //创建文件同时计算checksum
+            //创建檔案同时计算checksum
             uint checkSum1 = StreamUtils.MoveStreamWithCrc32(this.inflateStream, tempFileStream, part.NewFileLength, 0U);
             tempFileStream.Flush();
 
@@ -616,16 +616,16 @@ namespace WzComparerR2.Patcher
             {
                 if (!this.OldFileHash.TryGetValue(depFileName, out var fileHash))
                 {
-                    throw new Exception($"古いファイルハッシュが存在しません。ファイル名: {depFileName}");
+                    throw new Exception($"舊檔案哈希不存在。檔案名稱：{depFileName}");
                 }
                 switch (fileHash.VerifyState)
                 {
                     case FileHashVerifyState.NotVerified:
-                        throw new Exception($"古いファイルは検証されていません。ファイル名: {depFileName}");
+                        throw new Exception($"舊檔案未經驗證。檔案名稱：{depFileName}");
                     case FileHashVerifyState.FileNotFound:
-                        throw new Exception($"古いファイルが見つかりません。ファイル名: {depFileName}");
+                        throw new Exception($"未找到舊檔案。檔案名稱：{depFileName}");
                     case FileHashVerifyState.HashNotMatch:
-                        throw new Exception($"古いファイルのハッシュが一致しません。ファイル名: {depFileName}");
+                        throw new Exception($"舊檔案哈希不匹配。檔案名稱：{depFileName}");
                 }
             }
 
@@ -771,7 +771,7 @@ namespace WzComparerR2.Patcher
                     if (cmd == 0 || (operList.Count >= operList.Capacity - 1)
                         || (op.OperType != 1 && (op.Length + preLoadByteCount > msBuffer.Capacity)))
                     {
-                        //排序预读原文件
+                        //排序预读原檔案
                         readFileOperList.Sort((left, right) => {
                             int cmp;
                             if ((cmp = string.Compare(left.FromFileName, right.FromFileName, StringComparison.OrdinalIgnoreCase)) != 0)
@@ -785,7 +785,7 @@ namespace WzComparerR2.Patcher
                             readFileOp.bufferStartIndex = position;
                         }
 
-                        //向新文件输出
+                        //向新檔案输出
                         foreach (var tempOp in operList)
                         {
                             newCheckSum1 = tempOp.Flush(openFile(tempOp.FromFileName), r.BaseStream, msBuffer, tempFileStream, newCheckSum1);
@@ -850,12 +850,12 @@ namespace WzComparerR2.Patcher
                 msBuffer.Dispose();
                 msBuffer = null;
                 tempFileStream.Flush();
-                tempFileStream.SetLength(tempFileStream.Position);  //设置文件大小为当前长度
+                tempFileStream.SetLength(tempFileStream.Position);  //设置檔案大小为当前长度
                 closeAllFiles();
 
                 this.OnVerifyNewChecksumBegin(part);
                 //tempFileStream.Seek(0, SeekOrigin.Begin);
-                //uint _newCheckSum1 = CheckSum.ComputeHash(tempFileStream, (int)tempFileStream.Length); //新生成文件的hash
+                //uint _newCheckSum1 = CheckSum.ComputeHash(tempFileStream, (int)tempFileStream.Length); //新生成檔案的hash
                 VerifyCheckSum(part.NewChecksum, newCheckSum1, part.FileName, "new");
                 this.OnVerifyNewChecksumEnd(part);
 
@@ -874,10 +874,10 @@ namespace WzComparerR2.Patcher
                 this.OperType = operType;
                 this.bufferStartIndex = -1;
             }
-            public byte OperType; //0-从补丁文件复制  1-填充字节  2-从原文件复制
+            public byte OperType; //0-从补丁檔案复制  1-填充字节  2-从原檔案复制
             public byte FillByte; //只有oper1时可用
             public ushort Index; //操作索引
-            public int StartPosition; //只有oper2时可用 原文件起始坐标
+            public int StartPosition; //只有oper2时可用 原檔案起始坐标
             public int Length; //输出区块长度
             public int bufferStartIndex; //输出缓冲流的起始索引 执行后才有值
             public string FromFileName;
@@ -1011,8 +1011,8 @@ namespace WzComparerR2.Patcher
         {
             if (expected != actual)
             {
-                if (fileName == "MapleStory.exe" || fileName == "MapleStoryT.exe") reason = "このクライアントに最新の「Minor Patch」をインストールしましたか? ";
-                throw new Exception(string.Format("ファイル「{0}」のチェックサムが一致しません({1})。 (予想: 0x{2:x8}, 実際: 0x{3:x8})", fileName, reason, expected, actual));
+                if (fileName == "MapleStory.exe" || fileName == "MapleStoryT.exe") reason = "您是否已安裝最新的 Minor Patch？";
+                throw new Exception(string.Format("檔案「{0}」的校驗和不符（{1}）。 （預期：0x{2:x8}，實際：0x{3:x8}）", fileName, reason, expected, actual));
             }
         }
 

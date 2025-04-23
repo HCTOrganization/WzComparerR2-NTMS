@@ -55,19 +55,19 @@ namespace WzComparerR2.MapRender.UI
             tab1.Content = GetTabContent1();
 
             TabItem tab2 = new TabItem();
-            tab2.Header = "ステータスバー";
+            tab2.Header = "狀態欄";
             tab2.Content = GetTabContent2();
 
             TabItem tab3 = new TabItem();
-            tab3.Header = "ミニマップ";
+            tab3.Header = "小地圖";
             tab3.Content = GetTabContent3();
 
             TabItem tab4 = new TabItem();
-            tab4.Header = "ワールドマップ";
+            tab4.Header = "世界地圖";
             tab4.Content = GetTabContent4();
 
             TabItem tab5 = new TabItem();
-            tab5.Header = "ヘルプ";
+            tab5.Header = "幫助";
             tab5.Content = GetTabContent5();
 
             TabControl tabControl = new TabControl();
@@ -82,7 +82,7 @@ namespace WzComparerR2.MapRender.UI
             TextBlock lblHint = new TextBlock();
             lblHint.Foreground = Brushes.Yellow;
             lblHint.VerticalAlignment = VerticalAlignment.Center;
-            lblHint.Text = "* 一部の設定では MapRender の再起動が必要です。";
+            lblHint.Text = "* 某些選項需要重啟MapRender才能生效。";
             lblHint.Margin = new Thickness(20, 0, 0, 0);
             grid.Children.Add(lblHint);
             Grid.SetRow(lblHint, 2);
@@ -92,14 +92,14 @@ namespace WzComparerR2.MapRender.UI
             btnOK.Width = 70;
             btnOK.Height = 20;
             btnOK.Margin = new Thickness(5);
-            btnOK.Content = "OK";
+            btnOK.Content = "確認";
             btnOK.Click += BtnOK_Click;
 
             Button btnCancel = new Button();
             btnCancel.Width = 70;
             btnCancel.Height = 20;
             btnCancel.Margin = new Thickness(5);
-            btnCancel.Content = "キャンセル";
+            btnCancel.Content = "取消";
             btnCancel.Click += BtnCancel_Click;
 
             StackPanel footerPanel = new StackPanel();
@@ -151,14 +151,14 @@ namespace WzComparerR2.MapRender.UI
 
             TextBlock lbl1 = new TextBlock();
             lbl1.VerticalAlignment = VerticalAlignment.Center;
-            lbl1.Text = "BGM";
+            lbl1.Text = "背景音樂";
             lbl1.Foreground = Brushes.Yellow;
             Grid.SetRow(lbl1, 0);
             Grid.SetColumn(lbl1, 0);
             grid.Children.Add(lbl1);
 
             CheckBox chk1 = new CheckBox();
-            chk1.Content = "バックグラウンド時はミュート";
+            chk1.Content = "不在最前時自動靜音";
             chk1.Margin = new Thickness(0, 0, 0, 0);
             chk1.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.MuteOnLeaveFocus)));
             Grid.SetRow(chk1, 1);
@@ -202,7 +202,7 @@ namespace WzComparerR2.MapRender.UI
 
             TextBlock lbl3 = new TextBlock();
             lbl3.VerticalAlignment = VerticalAlignment.Center;
-            lbl3.Text = "既定のフォント";
+            lbl3.Text = "預設字型";
             lbl3.Foreground = Brushes.Yellow;
             Grid.SetRow(lbl3, 3);
             Grid.SetColumn(lbl3, 0);
@@ -217,14 +217,14 @@ namespace WzComparerR2.MapRender.UI
 
             TextBlock lbl4 = new TextBlock();
             lbl4.VerticalAlignment = VerticalAlignment.Center;
-            lbl4.Text = "マップウィンドウ";
+            lbl4.Text = "地圖視窗";
             lbl4.Foreground = Brushes.Yellow;
             Grid.SetRow(lbl4, 4);
             Grid.SetColumn(lbl4, 0);
             grid.Children.Add(lbl4);
 
             CheckBox chk2 = new CheckBox();
-            chk2.Content = "マップ範囲制限";
+            chk2.Content = "地圖範圍限制";
             chk2.Margin = new Thickness(0, 0, 0, 0);
             chk2.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.ClipMapRegion)));
             Grid.SetRow(chk2, 5);
@@ -234,14 +234,14 @@ namespace WzComparerR2.MapRender.UI
 
             TextBlock lbl5 = new TextBlock();
             lbl5.VerticalAlignment = VerticalAlignment.Center;
-            lbl5.Text = "描画";
+            lbl5.Text = "渲染";
             lbl5.Foreground = Brushes.Yellow;
             Grid.SetRow(lbl5, 6);
             Grid.SetColumn(lbl5, 0);
             grid.Children.Add(lbl5);
 
             CheckBox chk3 = new CheckBox();
-            chk3.Content = "Direct2Dレンダラーを使用する";
+            chk3.Content = "使用Direct2D繪製";
             chk3.Margin = new Thickness(0, 0, 0, 0);
             chk3.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.UseD2dRenderer)));
             Grid.SetRow(chk3, 7);
@@ -250,7 +250,7 @@ namespace WzComparerR2.MapRender.UI
             grid.Children.Add(chk3);
 
             CheckBox chk4 = new CheckBox();
-            chk4.Content = "NPC名を表示";
+            chk4.Content = "顯示NPC名稱";
             chk4.Margin = new Thickness(0, 0, 0, 0);
             chk4.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.NpcNameVisible)));
             Grid.SetRow(chk4, 8);
@@ -259,7 +259,7 @@ namespace WzComparerR2.MapRender.UI
             grid.Children.Add(chk4);
 
             CheckBox chk5 = new CheckBox();
-            chk5.Content = "モブ名を表示";
+            chk5.Content = "顯示怪物名称";
             chk5.Margin = new Thickness(0, 0, 0, 0);
             chk5.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.MobNameVisible)));
             Grid.SetRow(chk5, 9);
@@ -269,7 +269,7 @@ namespace WzComparerR2.MapRender.UI
 
             TextBlock lbl6 = new TextBlock();
             lbl6.VerticalAlignment = VerticalAlignment.Center;
-            lbl6.Text = "スクショ";
+            lbl6.Text = "截圖";
             lbl6.Foreground = Brushes.Yellow;
             Grid.SetRow(lbl6, 10);
             Grid.SetColumn(lbl6, 0);
@@ -321,7 +321,7 @@ namespace WzComparerR2.MapRender.UI
             grid.ColumnDefinitions.Add(new ColumnDefinition());
 
             CheckBox chk1 = new CheckBox();
-            chk1.Content = "ステータスバーを開く";
+            chk1.Content = "打開狀態列";
             chk1.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.TopBarVisible)));
             Grid.SetRow(chk1, 0);
             Grid.SetColumn(chk1, 0);
@@ -339,7 +339,7 @@ namespace WzComparerR2.MapRender.UI
             grid.ColumnDefinitions.Add(new ColumnDefinition());
 
             CheckBox chk1 = new CheckBox();
-            chk1.Content = "可視領域を表示する";
+            chk1.Content = "顯示可視區域";
             chk1.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.Minimap_CameraRegionVisible)));
             Grid.SetRow(chk1, 0);
             Grid.SetColumn(chk1, 0);
@@ -357,7 +357,7 @@ namespace WzComparerR2.MapRender.UI
             grid.ColumnDefinitions.Add(new ColumnDefinition());
 
             CheckBox chk1 = new CheckBox();
-            chk1.Content = "ImageNameをInfoNameとして使用する";
+            chk1.Content = "以ImageName名稱作為InfoName";
             chk1.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.WorldMap_UseImageNameAsInfoName)));
             Grid.SetRow(chk1, 0);
             Grid.SetColumn(chk1, 0);
@@ -374,16 +374,16 @@ namespace WzComparerR2.MapRender.UI
 
             var tips = new[]
             {
-                 "ホットキー:",
+                 "快捷鍵指示：",
                  "",
-                 "[M] ミニマップ",
-                 "[W] ワールドマップ",
-                 "[Esc] セットアップ",
-                 "[Ctrl+1~0] レイヤーの切り替え",
-                 "[Ctrl+U] マップ範囲制限の切り替え",
-                 "[`] チャットウィンドウ",
-                 "[Alt+Enter] 解像度の変更",
-                 "[ScrollLock] スクショ",
+                 "[M] 小地圖",
+                 "[W] 大地圖",
+                 "[Esc] 設置",
+                 "[Ctrl+1~0] 開關圖層",
+                 "[Ctrl+U] 地圖範圍鎖定開關",
+                 "[`] 開關聊天控制台",
+                 "[Alt+Enter] 切换解析度",
+                 "[ScrollLock] 截圖",
             };
 
             foreach (var tip in tips)

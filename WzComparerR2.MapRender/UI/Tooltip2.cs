@@ -203,17 +203,17 @@ namespace WzComparerR2.MapRender.UI
             Vector2 current = Vector2.Zero;
 
             var sb = new StringBuilder();
-            sb.Append("ポータル名: ").AppendLine(item.PName);
+            sb.Append("傳點名: ").AppendLine(item.PName);
 
             string pTypeName = GetPortalTypeString(item.Type);
-            sb.Append("ポータルの種類: ").Append(item.Type);
+            sb.Append("傳點種類: ").Append(item.Type);
             if (pTypeName != null)
             {
                 sb.Append(" (").Append(pTypeName).Append(")");
             }
             sb.AppendLine();
 
-            sb.Append("マップへ: ").Append(item.ToMap);
+            sb.Append("目標地圖: ").Append(item.ToMap);
             if (item.ToMap != null)
             {
                 this.StringLinker?.StringMap.TryGetValue(item.ToMap.Value, out sr);
@@ -222,16 +222,16 @@ namespace WzComparerR2.MapRender.UI
             }
             sb.AppendLine();
 
-            sb.Append("ポータルへ: ").AppendLine(item.ToName);
+            sb.Append("傳點目標: ").AppendLine(item.ToName);
 
             if (!string.IsNullOrEmpty(item.Script))
             {
-                sb.Append("スクリプト: ").AppendLine(item.Script);
+                sb.Append("脚本: ").AppendLine(item.Script);
 
                 //Graph.img에 따른 이동경로 출력
                 if (item.GraphTargetMap.Count > 0)
                 {
-                    sb.Append("スクリプトリンクマップ: ");
+                    sb.Append("脚本關聯地圖: ");
                     foreach (var targetMapID in item.GraphTargetMap)
                     {
                         sb.Append(targetMapID);
@@ -257,9 +257,9 @@ namespace WzComparerR2.MapRender.UI
             Vector2 current = Vector2.Zero;
 
             var sb = new StringBuilder();
-            sb.Append("ポータル名: ").AppendLine(item.Name);
+            sb.Append("傳點名: ").AppendLine(item.Name);
 
-            sb.AppendLine("タイプ: 発光体群集");
+            sb.AppendLine("類別: 發光體群集");
 
             sb.Length -= 2;
 

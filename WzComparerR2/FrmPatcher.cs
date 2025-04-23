@@ -206,7 +206,7 @@ namespace WzComparerR2
                 }
                 else
                 {
-                    MessageBoxEx.Show("この檔案は存在しません。");
+                    MessageBoxEx.Show("該檔案不存在。");
                 }
             }
             catch (Exception ex)
@@ -410,7 +410,7 @@ namespace WzComparerR2
                 diskSpaceMessage.AppendLine(string.Format("所需總空間: {0}", GetBothByteAndGBValue(patchedAllFileSize)));
                 diskSpaceMessage.AppendLine(string.Format("可用磁碟空間: {0}", GetBothByteAndGBValue(availableDiskSpace)));
                 AppendStateText(diskSpaceMessage.ToString());
-                AppendStateText("完了\r\n");
+                AppendStateText("結束\r\n");
                 if (patchedAllFileSize > availableDiskSpace)
                 {
                     DialogResult PatcherPromptResult = MessageBoxEx.Show(this, diskSpaceMessage.ToString() + "\r\n可能沒有足夠的磁碟空間來完成更新。 \r\n您還想繼續嗎？", "警告", MessageBoxButtons.YesNo);
@@ -466,31 +466,31 @@ namespace WzComparerR2
                     {
                         if (session.deadPatchExecutionPlan.Check(part.FileName, out var filesCanInstantUpdate))
                         {
-                            AppendStateText($"+ 檔案[{part.FileName}]実行\r\n");
+                            AppendStateText($"+ 檔案[{part.FileName}]執行\r\n");
                             foreach (var fileName in filesCanInstantUpdate)
                             {
-                                AppendStateText($"  - 檔案[{fileName}]適用\r\n");
+                                AppendStateText($"  - 檔案[{fileName}]應用\r\n");
                             }
                         }
                         else
                         {
-                            AppendStateText($"- 檔案[{part.FileName}]を実行しますが、適用は延期されます\r\n");
+                            AppendStateText($"- 檔案[{part.FileName}]執行，但推遲應用\r\n");
                         }
                     }
                     // disable force validation
                     patcher.ThrowOnValidationFailed = false;
                 }
-                AppendStateText("パッチ適用中\r\n");
+                AppendStateText("應用更新\r\n");
                 var sw = Stopwatch.StartNew();
                 patcher.Patch(session.MSFolder, cancellationToken);
                 sw.Stop();
-                AppendStateText("完了\r\n");
+                AppendStateText("結束\r\n");
                 session.State = PatcherTaskState.Complete;
-                MessageBoxEx.Show(this, "パッチ完了。経過時間: " + sw.Elapsed, "Patcher");
+                MessageBoxEx.Show(this, "更新結束。經過時間: " + sw.Elapsed, "Patcher");
             }
             catch (OperationCanceledException)
             {
-                MessageBoxEx.Show(this.Owner, "パッチは中止されました。", "Patcher");
+                MessageBoxEx.Show(this.Owner, "更新已停止。", "Patcher");
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -523,22 +523,22 @@ namespace WzComparerR2
             switch (e.State)
             {
                 case PatchingState.PatchStart:
-                    logFunc("[" + e.Part.FileName + "] パッチ適用中 \r\n");
+                    logFunc("[" + e.Part.FileName + "] 應用更新中 \r\n");
                     break;
                 case PatchingState.VerifyOldChecksumBegin:
-                    logFunc("  パッチ前のチェックサムを確認中...");
+                    logFunc("  檢查補丁前的校驗和...");
                     break;
                 case PatchingState.VerifyOldChecksumEnd:
-                    logFunc("  完了\r\n");
+                    logFunc("  結束\r\n");
                     break;
                 case PatchingState.VerifyNewChecksumBegin:
-                    logFunc("  パッチ後のチェックサムを確認中...");
+                    logFunc("  檢查補丁後的校驗和...");
                     break;
                 case PatchingState.VerifyNewChecksumEnd:
-                    logFunc("  完了\r\n");
+                    logFunc("  結束\r\n");
                     break;
                 case PatchingState.TempFileCreated:
-                    logFunc("  一時檔案の作成中...\r\n");
+                    logFunc("  建立臨時檔案...\r\n");
                     progressBarX1.Maximum = e.Part.NewFileLength;
                     session.TemporaryFileMapping.Add(e.Part.FileName, e.Part.TempFilePath);
                     break;
@@ -547,7 +547,7 @@ namespace WzComparerR2
                     progressBarX1.Text = string.Format("{0:N0}/{1:N0}", e.CurrentFileLength, e.Part.NewFileLength);
                     break;
                 case PatchingState.TempFileClosed:
-                    logFunc("  一時檔案が作成されました。\r\n");
+                    logFunc("  已建立臨時檔案。\r\n");
                     progressBarX1.Value = 0;
                     progressBarX1.Maximum = 0;
                     progressBarX1.Text = string.Empty;
@@ -561,7 +561,7 @@ namespace WzComparerR2
                         Wz_Structure wzold = new Wz_Structure();
                         try
                         {
-                            logFunc("  檔案を比較中...\r\n");
+                            logFunc("  檔案比較中...\r\n");
                             EasyComparer comparer = new EasyComparer();
                             comparer.OutputPng = chkOutputPng.Checked;
                             comparer.OutputAddedImg = chkOutputAddedImg.Checked;
@@ -592,30 +592,30 @@ namespace WzComparerR2
                             if (session.deadPatchExecutionPlan?.Check(e.Part.FileName, out var filesCanInstantUpdate) ?? false)
                             {
                                 long currentUsedDiskSpace = availableDiskSpace - RemainingDiskSpace(session.MSFolder);
-                                logFunc(string.Format("  (即時パッチ)占有ハードディスク容量: {0}\r\n", GetBothByteAndGBValue(currentUsedDiskSpace)));
+                                logFunc(string.Format("  (即時更新)已占用磁碟空間: {0}\r\n", GetBothByteAndGBValue(currentUsedDiskSpace)));
                                 foreach (string fileName in filesCanInstantUpdate)
                                 {
                                     if (session.TemporaryFileMapping.TryGetValue(fileName, out var temporaryFileName))
                                     {
-                                        logFunc($"  (即時パッチ)檔案[{fileName}]を適用中...\r\n");
+                                        logFunc($"  (即時更新)檔案[{fileName}]應用中...\r\n");
                                         patcher.SafeMove(temporaryFileName, Path.Combine(session.MSFolder, fileName));
                                     }
                                 }
                             }
                             else
                             {
-                                logFunc("  (即時パッチ)檔案適用の延期...\r\n");
+                                logFunc("  (即時更新)檔案推遲應用...\r\n");
                             }
                         }
                         else
                         {
-                            logFunc("  (即時パッチ)檔案を適用しています...\r\n");
+                            logFunc("  (即時更新)檔案應用中...\r\n");
                             patcher.SafeMove(e.Part.TempFilePath, e.Part.OldFilePath);
                         }
                     }
                     break;
                 case PatchingState.PrepareVerifyOldChecksumBegin:
-                    logFunc($"パッチ前のチェックサムを確認中: {e.Part.FileName}");
+                    logFunc($"檢查補丁前的校驗和: {e.Part.FileName}");
                     break;
                 case PatchingState.PrepareVerifyOldChecksumEnd:
                     if (e.Part.OldChecksum != e.Part.OldChecksumActual)
@@ -624,14 +624,14 @@ namespace WzComparerR2
                     }
                     else
                     {
-                        logFunc(" 完了\r\n");
+                        logFunc(" 結束\r\n");
                     }
                     break;
                 case PatchingState.ApplyFile:
-                    logFunc($"檔案の適用: {e.Part.FileName}\r\n");
+                    logFunc($"檔案應用: {e.Part.FileName}\r\n");
                     break;
                 case PatchingState.FileSkipped:
-                    logFunc("  スキップされた檔案: " + e.Part.FileName + "\r\n");
+                    logFunc("  已跳過檔案: " + e.Part.FileName + "\r\n");
                     break;
             }
         }

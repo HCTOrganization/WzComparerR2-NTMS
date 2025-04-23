@@ -43,7 +43,7 @@ namespace WzComparerR2.MapRender.UI
             {
                 long part = value / 1_0000;
                 sb.Append(firstPart ? null : " ");
-                sb.AppendFormat("{0}万", part); // Korean: 만, TradChinese: 萬, SimpChinese+Japanese: 万
+                sb.AppendFormat("{0}萬", part); // Korean: 만, TradChinese: 萬, SimpChinese+Japanese: 万
                 value -= part * 1_0000;
                 firstPart = false;
             }
@@ -113,20 +113,20 @@ namespace WzComparerR2.MapRender.UI
             var current = Vector2.Zero;
             size = Vector2.Zero;
 
-            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "レベル: " + info.level + (info.boss ? " (ボス)" : null), ref current, Color.White, ref size.X));
+            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "等級: " + info.level + (info.boss ? " (BOSS)" : null), ref current, Color.White, ref size.X));
 
 
             blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "HP: " + ToCJKNumberExpr(info.maxHP), ref current, Color.White, ref size.X));
             blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "MP: " + ToCJKNumberExpr(info.maxMP), ref current, Color.White, ref size.X));
-            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "物理ダメージ: " + ToCJKNumberExpr(info.PADamage), ref current, Color.White, ref size.X));
-            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "魔法ダメージ: " + ToCJKNumberExpr(info.MADamage), ref current, Color.White, ref size.X));
+            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "物理攻擊力: " + ToCJKNumberExpr(info.PADamage), ref current, Color.White, ref size.X));
+            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "魔法攻擊力: " + ToCJKNumberExpr(info.MADamage), ref current, Color.White, ref size.X));
             blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "物理防御率: " + info.PDRate + "%", ref current, Color.White, ref size.X));
             blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "魔法防御率: " + info.MDRate + "%", ref current, Color.White, ref size.X));
-            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "経験値: " + ToCJKNumberExpr(info.exp), ref current, Color.White, ref size.X));
+            blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "經驗值: " + ToCJKNumberExpr(info.exp), ref current, Color.White, ref size.X));
             if (info.undead) blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "不死型", ref current, Color.White, ref size.X));
             StringBuilder sb;
             if ((sb = GetLifeElemAttrString(ref info.elemAttr)).Length > 0)
-                blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "エレメント: " + sb.ToString(), ref current, Color.White, ref size.X));
+                blocks.Add(PrepareTextLine(fonts.TooltipContentFont, "元素抗性: " + sb.ToString(), ref current, Color.White, ref size.X));
             size.Y = current.Y;
 
             return blocks.ToArray();
@@ -135,12 +135,12 @@ namespace WzComparerR2.MapRender.UI
         public static StringBuilder GetLifeElemAttrString(ref LifeInfo.ElemAttr elemAttr)
         {
             StringBuilder sb = new StringBuilder(14);
-            sb.Append(GetElemResistanceString("氷", elemAttr.I));
+            sb.Append(GetElemResistanceString("冰", elemAttr.I));
             sb.Append(GetElemResistanceString("雷", elemAttr.L));
             sb.Append(GetElemResistanceString("火", elemAttr.F));
             sb.Append(GetElemResistanceString("毒", elemAttr.S));
             sb.Append(GetElemResistanceString("聖", elemAttr.H));
-            sb.Append(GetElemResistanceString("闇", elemAttr.D));
+            sb.Append(GetElemResistanceString("暗", elemAttr.D));
             sb.Append(GetElemResistanceString("物", elemAttr.P));
             return sb;
         }
@@ -162,16 +162,16 @@ namespace WzComparerR2.MapRender.UI
         {
             switch (pType)
             {
-                case 0: return "地図の誕生点";
-                case 1: return "一般ポータル (非表示)";
-                case 2: return "一般ポータル";
-                case 3: return "一般ポータル (タッチ)";
-                case 6: return "時空ゲートポイント";
-                case 7: return "スクリプトポータル";
-                case 8: return "スクリプトポータル (非表示)";
-                case 9: return "スクリプトポータル (タッチ)";
-                case 10: return "マップ内のポータル";
-                case 12: return "弾性デバイス";
+                case 0: return "地圖出生點";
+                case 1: return "一般傳送門(隐藏)";
+                case 2: return "一般傳送門";
+                case 3: return "一般傳送門(接觸)";
+                case 6: return "时空門入口點";
+                case 7: return "脚本傳送門";
+                case 8: return "脚本傳送門(隐藏)";
+                case 9: return "脚本傳送門(接觸)";
+                case 10: return "地圖内傳送門";
+                case 12: return "彈力裝置";
                 default: return null;
             }
         }

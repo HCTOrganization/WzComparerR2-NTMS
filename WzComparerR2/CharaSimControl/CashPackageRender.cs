@@ -190,7 +190,7 @@ namespace WzComparerR2.CharaSimControl
             }
             if (commodityPackage.termStart > 0 || commodityPackage.termEnd != null)
             {
-                string term = "< 販売期間 :";
+                string term = "< 出售期間 :";
                 if (commodityPackage.termStart > 0)
                     //term += string.Format("{1:D2}/{2:D2}/{0:D2} {3:D2}:00 ", commodityPackage.termStart / 1000000, (commodityPackage.termStart / 10000) % 100, (commodityPackage.termStart / 100) % 100);
                     //term += string.Format("{1:D2}/{2}/{0} {3}:00:00", commodityPackage.termStart / 1000000, (commodityPackage.termStart / 10000) % 100, (commodityPackage.termStart / 100) % 100);
@@ -231,7 +231,7 @@ namespace WzComparerR2.CharaSimControl
                         limit = "NEXON ID";
                         break;
                     case 4:
-                        limit = "キャラクター";
+                        limit = "角色";
                         break;
                     default:
                         limit = commodityPackage.Limit.ToString();
@@ -239,7 +239,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 if (limit != null && limit.Length > 0)
                 {
-                    TextRenderer.DrawText(g, "<" + limit + "購入制限 >", GearGraphics.ItemDetailFont, new Point(cashBitmap.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush4).Color, TextFormatFlags.HorizontalCenter);
+                    TextRenderer.DrawText(g, "<" + limit + "購買限制 >", GearGraphics.ItemDetailFont, new Point(cashBitmap.Width, picH), ((SolidBrush)GearGraphics.OrangeBrush4).Color, TextFormatFlags.HorizontalCenter);
                     picH += 12;
                 }
             }
@@ -281,7 +281,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     else
                     {
-                        GearGraphics.DrawString(g, CashPackage.desc + "\n#NEXONポイントでのみ購入可能#", Translator.IsKoreanStringPresent(CashPackage.desc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
+                        GearGraphics.DrawString(g, CashPackage.desc + "\n#可使用點數購買#", Translator.IsKoreanStringPresent(CashPackage.desc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
                     }
                     break;
                 case 2:
@@ -295,7 +295,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     else
                     {
-                        GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#NEXONポイントでのみ購入可能#", Translator.IsKoreanStringPresent(translatedCashPackageDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
+                        GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#可使用點數購買#", Translator.IsKoreanStringPresent(translatedCashPackageDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
                     }
                     break;
                 case 3:
@@ -305,7 +305,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     else
                     {
-                        GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#NEXONポイントでのみ購入可能#", Translator.IsKoreanStringPresent(translatedCashPackageDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
+                        GearGraphics.DrawString(g, translatedCashPackageDesc + "\n#可使用點數購買#", Translator.IsKoreanStringPresent(translatedCashPackageDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
                     }
                     break;
                 default:
@@ -315,7 +315,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     else
                     {
-                        GearGraphics.DrawString(g, CashPackage.desc + "\n#NEXONポイントでのみ購入可能#", Translator.IsKoreanStringPresent(CashPackage.desc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
+                        GearGraphics.DrawString(g, CashPackage.desc + "\n#可使用點數購買#", Translator.IsKoreanStringPresent(CashPackage.desc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 11, right, ref picH, 16);
                     }
                     break;
 
@@ -437,14 +437,14 @@ namespace WzComparerR2.CharaSimControl
                     }
                     if (commodity.originalPrice > 0 && commodity.Price < commodity.originalPrice)
                     {
-                        info += commodity.originalPrice + (isTMSVIPPackage ? " VIP" : "") + "ポイント    "; // HERE is making space between original price and discounted price
+                        info += commodity.originalPrice + (isTMSVIPPackage ? " VIP" : "") + "點數    "; // HERE is making space between original price and discounted price
                         totalOriginalPrice += commodity.originalPrice;
                     }
                     else
                     {
                         totalOriginalPrice += commodity.Price;
                     }
-                    info += commodity.Price + (isTMSVIPPackage ? " VIP" : "") + "ポイント";
+                    info += commodity.Price + (isTMSVIPPackage ? " VIP" : "") + "點數";
                     totalPrice += commodity.Price;
                 }
                 else
@@ -452,19 +452,19 @@ namespace WzComparerR2.CharaSimControl
                     info += "(" + commodity.Count + ") ";//count (개)
                     if (commodity.originalPrice > 0)
                     {
-                        info += commodity.originalPrice + (isTMSVIPPackage ? " VIP" : "") + "ポイント";
+                        info += commodity.originalPrice + (isTMSVIPPackage ? " VIP" : "") + "點數";
                         totalOriginalPrice += commodity.originalPrice;
                     }
                     else
                     {
-                        info += commodity.Price + (isTMSVIPPackage ? " VIP" : "") + "ポイント";
+                        info += commodity.Price + (isTMSVIPPackage ? " VIP" : "") + "點數";
                         totalOriginalPrice += commodity.Price;
                     }
                 }
 
                 if (commodity.Period > 0)
                 {
-                    time = "購入時より" + commodity.Period + "日後まで使用可能";
+                    time = "購買後" + commodity.Period + "天內可使用";
                 }
 
                 g.DrawImage(Resource.CSDiscount_backgrnd, columnLeft + 13, picH + 12);
@@ -529,7 +529,7 @@ namespace WzComparerR2.CharaSimControl
             string exchangedPrice;
             if (totalOriginalPrice == totalPrice)
             {
-                TextRenderer.DrawText(g, totalPrice + (isTMSVIPPackage ? " VIP" : "") + "ポイント", GearGraphics.ItemDetailFont, new Point(55, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                TextRenderer.DrawText(g, totalPrice + (isTMSVIPPackage ? " VIP" : "") + "點數", GearGraphics.ItemDetailFont, new Point(55, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                 if (Translator.DefaultDesiredCurrency != "none")
                 {
                     if (isTMSVIPPackage)
@@ -549,9 +549,9 @@ namespace WzComparerR2.CharaSimControl
             }
             else
             {
-                TextRenderer.DrawText(g, totalOriginalPrice + (isTMSVIPPackage ? " VIP" : "") + "ポイント   " + totalPrice + (isTMSVIPPackage ? " VIP" : "") + "ポイント", GearGraphics.ItemDetailFont, new Point(55, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                TextRenderer.DrawText(g, totalOriginalPrice + (isTMSVIPPackage ? " VIP" : "") + "ポイント", GearGraphics.ItemDetailFont, new Point(55, picH), Color.Red, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
-                g.DrawImage(Resource.CSDiscount_arrow, 55 + TextRenderer.MeasureText(g, totalOriginalPrice + (isTMSVIPPackage ? " VIP" : "") + "ポイント", GearGraphics.ItemDetailFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width + 5, picH + 1);
+                TextRenderer.DrawText(g, totalOriginalPrice + (isTMSVIPPackage ? " VIP" : "") + "點數   " + totalPrice + (isTMSVIPPackage ? " VIP" : "") + "點數", GearGraphics.ItemDetailFont, new Point(55, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                TextRenderer.DrawText(g, totalOriginalPrice + (isTMSVIPPackage ? " VIP" : "") + "點數", GearGraphics.ItemDetailFont, new Point(55, picH), Color.Red, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
+                g.DrawImage(Resource.CSDiscount_arrow, 55 + TextRenderer.MeasureText(g, totalOriginalPrice + (isTMSVIPPackage ? " VIP" : "") + "點數", GearGraphics.ItemDetailFont, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width + 5, picH + 1);
                 if ((int)((100 - 100.0 * totalPrice / totalOriginalPrice)) > 0) 
                 {
                     DrawDiscountNum(g, "-" + (int)((100 - 100.0 * totalPrice / totalOriginalPrice)) + "%", cashBitmap.Width - 40, picH - 1, StringAlignment.Near);

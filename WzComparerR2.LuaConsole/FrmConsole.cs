@@ -33,7 +33,7 @@ namespace WzComparerR2.LuaConsole
         {
             if (e.CloseReason == CloseReason.UserClosing && this.runningTask?.IsCompleted == false)
             {
-                if (DialogResult.Yes != MessageBoxEx.Show(this, "進行中の作業があります。\r\n本当に終了してもよろしいですか?", "プロンプト", MessageBoxButtons.YesNo, MessageBoxIcon.Warning))
+                if (DialogResult.Yes != MessageBoxEx.Show(this, "正在進行工作。\r\n您確定要退出嗎？", "提示", MessageBoxButtons.YesNo, MessageBoxIcon.Warning))
                 {
                     e.Cancel = true;
                     return;
@@ -73,14 +73,14 @@ namespace WzComparerR2.LuaConsole
         {
             if (this.runningTask?.IsCompleted == false)
             {
-                ToastNotification.Show(this, "タスクが実行中です", 1000, eToastPosition.TopCenter);
+                ToastNotification.Show(this, "任務正在運行", 1000, eToastPosition.TopCenter);
                 return;
             }
 
             var selectedEditor = this.SelectedLuaEditor;
             if (selectedEditor == null || selectedEditor.Tag is not LuaSandbox sandbox)
             {
-                MessageBoxEx.Show(this, "現在選択されているフォームを取得できませんでした。", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBoxEx.Show(this, "無法取得目前選定的表單。", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -90,7 +90,7 @@ namespace WzComparerR2.LuaConsole
                 baseDir = Path.GetDirectoryName(selectedEditor.FileName);
             }
             sandbox.InitLuaEnv(baseDir, true);
-            this.env.WriteLine("ランタイムがリセットされました");
+            this.env.WriteLine("運行時已重置");
         }
 
         private void menuNew_Click(object sender, EventArgs e)
@@ -102,14 +102,14 @@ namespace WzComparerR2.LuaConsole
         {
             if (this.runningTask?.IsCompleted == false)
             {
-                ToastNotification.Show(this, "タスクが実行中です", 1000, eToastPosition.TopCenter);
+                ToastNotification.Show(this, "任務正在運行", 1000, eToastPosition.TopCenter);
                 return;
             }
 
             var selectedEditor = this.SelectedLuaEditor;
             if (selectedEditor == null || selectedEditor.Tag is not LuaSandbox sandbox)
             {
-                MessageBoxEx.Show(this, "現在選択されているフォームを取得できませんでした。", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBoxEx.Show(this, "無法取得目前選定的表單。", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -121,7 +121,7 @@ namespace WzComparerR2.LuaConsole
                     baseDir = Path.GetDirectoryName(selectedEditor.FileName);
                 }
 
-                this.env.WriteLine("{0}の実行を開始しています...", selectedEditor.BaseFileName);
+                this.env.WriteLine("開始執行{0}...", selectedEditor.BaseFileName);
                 sandbox.InitLuaEnv(baseDir);
                 this.cancellationTokenSource = new CancellationTokenSource();
                 this.runningTask = sandbox.DoStringAsync(selectedEditor.CodeContent, cancellationTokenSource.Token);
@@ -146,14 +146,14 @@ namespace WzComparerR2.LuaConsole
             if (this.runningTask?.IsCompleted == false && this.cancellationTokenSource != null)
             {
                 this.cancellationTokenSource.Cancel();
-                ToastNotification.Show(this, "中止しています...", 1000, eToastPosition.TopCenter);
+                ToastNotification.Show(this, "正在中止...", 1000, eToastPosition.TopCenter);
             }
         }
 
         private void menuOpen_Click(object sender, EventArgs e)
         {
             using OpenFileDialog dlg = new();
-            dlg.Filter = "Luaスクリプトファイル (*.lua)|*.lua|*.*|*.*";
+            dlg.Filter = "Lua腳本檔 (*.lua)|*.lua|*.*|*.*";
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 this.OpenFile(dlg.FileName);
@@ -205,7 +205,7 @@ namespace WzComparerR2.LuaConsole
             if (saveAs || string.IsNullOrEmpty(editor.FileName))
             {
                 using SaveFileDialog dlg = new SaveFileDialog();
-                dlg.Filter = "Luaスクリプトファイル (*.lua)|*.lua|*.*|*.*";
+                dlg.Filter = "Lua腳本檔 (*.lua)|*.lua|*.*|*.*";
                 if (editor.BaseFileName != null)
                 {
                     dlg.FileName = editor.BaseFileName;
@@ -218,7 +218,7 @@ namespace WzComparerR2.LuaConsole
             }
 
             editor.SaveFile(editor.FileName);
-            textBoxX2.AppendText($"===={editor.FileName}が保存されました====");
+            textBoxX2.AppendText($"===={editor.FileName}已保存====");
             return true;
         }
 
@@ -290,7 +290,7 @@ namespace WzComparerR2.LuaConsole
         {
             if (sender is FrmLuaEditor editor && editor.IsContentModified)
             {
-                switch (MessageBoxEx.Show(this, "ウィンドウを閉じると、保存されていない変更はすべて失われます。保存しますか？", "プロンプト", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
+                switch (MessageBoxEx.Show(this, "當您關閉視窗時，任何未儲存的變更都會遺失。您想保存嗎？", "提示", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning))
                 {
                     case DialogResult.Yes:
                         e.Cancel = !this.SaveFile(editor, false);
@@ -405,7 +405,7 @@ namespace WzComparerR2.LuaConsole
 
             public void Help()
             {
-                this.WriteLine(@"-- 標準出力関数：
+                this.WriteLine(@"-- 標準輸出函數：
 env:Write(object)
 env:Write(string format, object[] args)
 env:WriteLine(object)

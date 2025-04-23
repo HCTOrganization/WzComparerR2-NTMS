@@ -633,11 +633,11 @@ namespace WzComparerR2
                 {
                     if (ex is AggregateException aggrEx && aggrEx.InnerExceptions.Count == 1)
                     {
-                        context.Message = $"エラー: {aggrEx.InnerExceptions[0].Message}";
+                        context.Message = $"錯誤: {aggrEx.InnerExceptions[0].Message}";
                     }
                     else
                     {
-                        context.Message = $"エラー: {ex.Message}";
+                        context.Message = $"錯誤: {ex.Message}";
                     }
                     context.FullMessage = ex.ToString();
                     throw;

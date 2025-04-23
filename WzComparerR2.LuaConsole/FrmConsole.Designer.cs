@@ -111,7 +111,7 @@
             this.bar2.AutoSyncBarCaption = true;
             this.bar2.CloseSingleTab = true;
             this.bar2.Controls.Add(this.panelDockContainer1);
-            this.bar2.Font = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.bar2.Font = new System.Drawing.Font("Microsoft Jhenghei", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.bar2.GrabHandleStyle = DevComponents.DotNetBar.eGrabHandleStyle.Caption;
             this.bar2.IsMaximized = false;
             this.bar2.Items.AddRange(new DevComponents.DotNetBar.BaseItem[] {
@@ -124,7 +124,7 @@
             this.bar2.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.bar2.TabIndex = 0;
             this.bar2.TabStop = false;
-            this.bar2.Text = "出力結果";
+            this.bar2.Text = "輸出";
             // 
             // panelDockContainer1
             // 
@@ -161,7 +161,7 @@
             // 
             this.dockContainerItem1.Control = this.panelDockContainer1;
             this.dockContainerItem1.Name = "dockContainerItem1";
-            this.dockContainerItem1.Text = "出力結果";
+            this.dockContainerItem1.Text = "輸出結果";
             // 
             // dockSite9
             // 
@@ -242,7 +242,7 @@
             this.bar1.AccessibleName = "DotNetBar Bar";
             this.bar1.AccessibleRole = System.Windows.Forms.AccessibleRole.MenuBar;
             this.bar1.DockSide = DevComponents.DotNetBar.eDockSide.Top;
-            this.bar1.Font = new System.Drawing.Font("Yu Gothic UI", 9F);
+            this.bar1.Font = new System.Drawing.Font("Microsoft Jhenghei", 9F);
             this.bar1.IsMaximized = false;
             this.bar1.Items.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.menuFile,
@@ -267,20 +267,20 @@
             this.menuSaveAs,
             this.menuRecent,
             this.menuExit});
-            this.menuFile.Text = "ファイル(&F)";
+            this.menuFile.Text = "檔案(&F)";
             // 
             // menuNew
             // 
             this.menuNew.Name = "menuNew";
             this.menuNew.Shortcuts.Add(DevComponents.DotNetBar.eShortcut.CtrlN);
-            this.menuNew.Text = "新規ファイル";
+            this.menuNew.Text = "新檔案";
             this.menuNew.Click += new System.EventHandler(this.menuNew_Click);
             // 
             // menuOpen
             // 
             this.menuOpen.Name = "menuOpen";
             this.menuOpen.Shortcuts.Add(DevComponents.DotNetBar.eShortcut.CtrlO);
-            this.menuOpen.Text = "開く...";
+            this.menuOpen.Text = "打開...";
             this.menuOpen.Click += new System.EventHandler(this.menuOpen_Click);
             // 
             // menuSave
@@ -294,7 +294,7 @@
             // menuSaveAs
             // 
             this.menuSaveAs.Name = "menuSaveAs";
-            this.menuSaveAs.Text = "名前を付けて保存...";
+            this.menuSaveAs.Text = "另存為...";
             this.menuSaveAs.Click += new System.EventHandler(this.menuSaveAs_Click);
             // 
             // menuExit
@@ -302,7 +302,7 @@
             this.menuExit.BeginGroup = true;
             this.menuExit.Name = "menuExit";
             this.menuExit.Shortcuts.Add(DevComponents.DotNetBar.eShortcut.AltF4);
-            this.menuExit.Text = "終了";
+            this.menuExit.Text = "退出";
             this.menuExit.Click += new System.EventHandler(this.menuExit_Click);
             // 
             // menuDebug
@@ -312,7 +312,7 @@
             this.menuReset,
             this.menuRun,
             this.menuStopRun});
-            this.menuDebug.Text = "デバッグ(&D)";
+            this.menuDebug.Text = "調試(&D)";
             // 
             // menuReset
             // 
@@ -320,7 +320,7 @@
             this.menuReset.Symbol = "";
             this.menuReset.SymbolColor = System.Drawing.Color.Gray;
             this.menuReset.SymbolSize = 9F;
-            this.menuReset.Text = "リセット";
+            this.menuReset.Text = "重設";
             this.menuReset.Click += new System.EventHandler(this.menuReset_Click);
             // 
             // menuRun
@@ -331,7 +331,7 @@
             this.menuRun.Symbol = "";
             this.menuRun.SymbolColor = System.Drawing.Color.FromArgb(((int)(((byte)(29)))), ((int)(((byte)(127)))), ((int)(((byte)(29)))));
             this.menuRun.SymbolSize = 9F;
-            this.menuRun.Text = "実行";
+            this.menuRun.Text = "運行";
             this.menuRun.Tooltip = "F5";
             this.menuRun.Click += new System.EventHandler(this.menuRun_Click);
             // 
@@ -373,7 +373,7 @@
             this.tabStrip1.MdiTabbedDocuments = true;
             this.tabStrip1.Name = "tabStrip1";
             this.tabStrip1.SelectedTab = null;
-            this.tabStrip1.SelectedTabFont = new System.Drawing.Font("Yu Gothic UI", 9F, System.Drawing.FontStyle.Bold);
+            this.tabStrip1.SelectedTabFont = new System.Drawing.Font("Microsoft Jhenghei", 9F, System.Drawing.FontStyle.Bold);
             this.tabStrip1.Size = new System.Drawing.Size(488, 23);
             this.tabStrip1.Style = DevComponents.DotNetBar.eTabStripStyle.Office2007Document;
             this.tabStrip1.TabAlignment = DevComponents.DotNetBar.eTabStripAlignment.Top;
@@ -385,7 +385,7 @@
             // 
             this.menuRecent.BeginGroup = true;
             this.menuRecent.Name = "menuRecent";
-            this.menuRecent.Text = "最近開いたファイル";
+            this.menuRecent.Text = "最近開啟的檔案";
             // 
             // FrmConsole
             // 
@@ -405,7 +405,7 @@
             this.DoubleBuffered = true;
             this.IsMdiContainer = true;
             this.Name = "FrmConsole";
-            this.Text = "Luaコンソール";
+            this.Text = "Lua 控制台";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmConsole_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FrmConsole_FormClosed);
             this.MdiChildActivate += new System.EventHandler(this.FrmConsole_MdiChildActivate);
