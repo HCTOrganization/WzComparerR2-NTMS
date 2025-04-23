@@ -199,13 +199,13 @@ namespace WzComparerR2
         }
 
         /// <summary>
-        /// 插件加载时执行的方法，用于初始化配置文件。
+        /// 插件加载时执行的方法，用于初始化配置檔案。
         /// </summary>
         internal async void PluginOnLoad()
         {
             ConfigManager.RegisterAllSection(this.GetType().Assembly);
             var conf = ImageHandlerConfig.Default;
-            //刷新最近打开文件列表
+            //刷新最近打开檔案列表
             refreshRecentDocItems();
             //读取CharaSim配置
             UpdateCharaSimSettings();
@@ -513,6 +513,17 @@ namespace WzComparerR2
                     string aniName = this.cmbItemAniNames.SelectedItem as string;
                     aniItem.SelectedAnimationName = aniName;
                     this.cmbItemAniNames.Tooltip = aniName;
+                }
+                else if (this.pictureBoxEx1.Items[0] is FrameAnimator frameAni && this.cmbItemAniNames.SelectedItem is int selectedpage)
+                {
+                    if (frameAni.Data.Frames.Count == 1)
+                    {
+                        var png = frameAni.Data.Frames[0].Png;
+                        if (png != null && png.ActualPages > 1 && 0 <= selectedpage && selectedpage < png.ActualPages)
+                        {
+                            this.pictureBoxEx1.ShowImage(png, selectedpage);
+                        }
+                    }
                 }
                 var aniItem2 = this.pictureBoxEx1.Items[0] as Animation.MultiFrameAnimator;
                 if (aniItem2 != null)
@@ -835,7 +846,8 @@ namespace WzComparerR2
             if (frame.Png != null)
             {
                 var config = ImageHandlerConfig.Default;
-                string pngFileName = pictureBoxEx1.PictureName + ".png";
+                int page = frame.Page;
+                string pngFileName = pictureBoxEx1.PictureName + (frame.Png.ActualPages > 1 ? $".{page}" : null) + ".png";
 
                 if (config.AutoSaveEnabled)
                 {
@@ -854,7 +866,7 @@ namespace WzComparerR2
                     pngFileName = dlg.FileName;
                 }
 
-                using (var bmp = frame.Png.ExtractPng())
+                using (var bmp = frame.Png.ExtractPng(page))
                 {
                     bmp.Save(pngFileName, System.Drawing.Imaging.ImageFormat.Png);
                 }
@@ -1015,7 +1027,7 @@ namespace WzComparerR2
                 this.openedWz.Add(wz);
                 OnWzOpened(new WzStructureEventArgs(wz)); //触发事件
                 QueryPerformance.End();
-                labelItemStatus.Text = "文件已載入。時間經過：" + (Math.Round(QueryPerformance.GetLastInterval(), 4) * 1000) + "毫秒，" + wz.img_number + " IMG";
+                labelItemStatus.Text = "檔案已載入。時間經過：" + (Math.Round(QueryPerformance.GetLastInterval(), 4) * 1000) + "毫秒，" + wz.img_number + " IMG";
 
                 ConfigManager.Reload();
                 WcR2Config.Default.RecentDocuments.Remove(wzFilePath);
@@ -1368,7 +1380,7 @@ namespace WzComparerR2
             switch (value)
             {
                 case Wz_Png png:
-                    return $"png {png.Width}*{png.Height} ({png.Form})";
+                    return $"png {png.Width}*{png.Height} ({(int)png.Format}{(png.Scale > 0 ? $", {png.Scale}" : null)})";
 
                 case Wz_Vector vector:
                     return $"({vector.X}, {vector.Y})";
@@ -1443,11 +1455,19 @@ namespace WzComparerR2
                     pictureBoxEx1.PictureName = GetSelectedNodeImageName();
                     pictureBoxEx1.ShowImage(png);
                     this.cmbItemAniNames.Items.Clear();
+                    if (png.ActualPages > 1)
+                    {
+                        for (int i = 0; i < png.ActualPages; i++)
+                            this.cmbItemAniNames.Items.Add(i);
+                    }
+
                     advTree3.PathSeparator = ".";
                     textBoxX1.Text = "數據長:  " + png.DataLength + " 位元組\r\n" +
                         "偏移量:  " + png.Offset + "\r\n" +
                         "大小:  " + png.Width + "*" + png.Height + "\r\n" +
-                        "PNG形式:  " + png.Form;
+                        "PNG形式:  " + png.Format + "(" + (int)png.Format + ")\r\n" +
+                        "尺度: " + png.Scale + "(x" + png.ActualScale + ")\r\n" +
+                        "頁: " + png.Pages + "(" + png.ActualPages + ")";
 
                     var sourceNode = selectedNode.GetLinkedSourceNode(PluginManager.FindWz);
                     if (sourceNode != selectedNode)
@@ -1469,7 +1489,9 @@ namespace WzComparerR2
                             textBoxX1.AppendText("\r\n\r\n數據長:  " + png.DataLength + " 位元組\r\n" +
                                 "偏移量:  " + png.Offset + "\r\n" +
                                 "大小:  " + png.Width + "*" + png.Height + "\r\n" +
-                                "PNG形式:  " + png.Form);
+                                "PNG形式:  " + png.Format + "(" + (int)png.Format + ")\r\n" +
+                                "尺度: " + png.Scale + "(x" + png.ActualScale + ")\r\n" +
+                                "頁: " + png.Pages + "(" + png.ActualPages + ")");
                         }
                     }
                     break;
@@ -1551,7 +1573,9 @@ namespace WzComparerR2
                                         textBoxX1.AppendText("\r\n\r\n數據長:  " + png.DataLength + " 位元組\r\n" +
                                         "偏移量:  " + png.Offset + "\r\n" +
                                         "大小:  " + png.Width + "*" + png.Height + "\r\n" +
-                                            "PNG形式:  " + png.Form);
+                                            "PNG形式:  " + png.Format + "(" + (int)png.Format + ")\r\n" +
+                                            "尺度: " + png.Scale + "(x" + png.ActualScale + ")\r\n" +
+                                            "頁: " + png.Pages + "(" + png.ActualPages + ")");
                                     }
                                 }
                             }
@@ -1578,7 +1602,7 @@ namespace WzComparerR2
                         System.Diagnostics.Process.Start(tempFile);
                         break;
                     default:
-                        MessageBoxEx.Show("不识别的文件名：" + tempFile, "喵~");
+                        MessageBoxEx.Show("不识别的檔案名：" + tempFile, "喵~");
                         break;
                 }
             }*/
@@ -1684,7 +1708,7 @@ namespace WzComparerR2
             {
                 foreach (Wz_Node child in parent.Nodes)
                 {
-                    if (child.Nodes.Count == 0) //只过滤文件夹 未来有需求再改
+                    if (child.Nodes.Count == 0) //只过滤檔案夹 未来有需求再改
                     {
                         continue;
                     }
@@ -2845,11 +2869,11 @@ namespace WzComparerR2
                             f.Write(data, 0, data.Length);
                             f.Flush();
                         }
-                        this.labelItemStatus.Text = "檔案を保存しました";
+                        this.labelItemStatus.Text = "檔案已保存";
                     }
                     catch (Exception ex)
                     {
-                        MessageBoxEx.Show("保存に失敗しました\r\n" + ex.ToString(), LocalizedString_JP.COMMON_ERROR);
+                        MessageBoxEx.Show("保存失敗\r\n" + ex.ToString(), LocalizedString_JP.COMMON_ERROR);
                     }
                 }
             }
@@ -2881,11 +2905,34 @@ namespace WzComparerR2
                                 }
                             }
                         }
-                        this.labelItemStatus.Text = "檔案を保存しました";
+                        this.labelItemStatus.Text = "檔案已保存";
                     }
                     catch (Exception ex)
                     {
-                        MessageBoxEx.Show("保存に失敗しました\r\n" + ex.ToString(), LocalizedString_JP.COMMON_ERROR);
+                        MessageBoxEx.Show("保存失敗\r\n" + ex.ToString(), LocalizedString_JP.COMMON_ERROR);
+                    }
+                }
+            }
+            else if (item is Wz_Png png)
+            {
+                SaveFileDialog dlg = new SaveFileDialog();
+                dlg.Title = "保存原始Canvas數據";
+                dlg.FileName = advTree3.SelectedNode.Text + ".bin";
+                dlg.Filter = "*.*|*.*";
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        using (var dataReader = png.UnsafeOpenRead())
+                        using (var outputFile = dlg.OpenFile())
+                        {
+                            dataReader.CopyTo(outputFile);
+                        }
+                        this.labelItemStatus.Text = "檔案已保存";
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBoxEx.Show("保存失敗\r\n" + ex.ToString(), "LocalizedString_JP.COMMON_ERROR");
                     }
                 }
             }
@@ -3129,7 +3176,7 @@ namespace WzComparerR2
             Wz_File wzf = selectedNode.GetNodeWzFile();
             if (wzf == null)
             {
-                labelItemStatus.Text = "節點が属するWZ檔案が見つかりません。";
+                labelItemStatus.Text = "找不到該節點所屬的WZ檔案。";
                 return;
             }
 
@@ -3173,7 +3220,7 @@ namespace WzComparerR2
                         if (stringLinker == null || !stringLinker.StringItem.TryGetValue(item.ItemID, out sr))
                         {
                             sr = new StringResult();
-                            sr.Name = "未知的アイテム";
+                            sr.Name = "未知的道具";
                         }
                         if (item != null)
                         {
@@ -3194,7 +3241,7 @@ namespace WzComparerR2
                         if (stringLinker == null || !stringLinker.StringItem.TryGetValue(item.ItemID, out sr))
                         {
                             sr = new StringResult();
-                            sr.Name = "未知的ペット";
+                            sr.Name = "未知的寵物";
                         }
                         if (item != null)
                         {
@@ -3214,7 +3261,7 @@ namespace WzComparerR2
                         if (stringLinker == null || !stringLinker.StringSkill.TryGetValue(recipe.RecipeID, out sr))
                         {
                             sr = new StringResultSkill();
-                            sr.Name = "未知的レシピ";
+                            sr.Name = "未知的配方";
                         }
                         if (recipe != null)
                         {
@@ -3228,7 +3275,7 @@ namespace WzComparerR2
                         if (stringLinker == null || !stringLinker.StringSkill.TryGetValue(skill.SkillID, out sr))
                         {
                             sr = new StringResultSkill();
-                            sr.Name = "未知的スキル";
+                            sr.Name = "未知的技能";
                         }
                         if (skill != null)
                         {
@@ -3255,7 +3302,7 @@ namespace WzComparerR2
                     if (stringLinker == null || !stringLinker.StringMob.TryGetValue(mob.ID, out sr))
                     {
                         sr = new StringResult();
-                        sr.Name = "未知的モンスター";
+                        sr.Name = "未知的怪物";
                     }
                     if (mob != null)
                     {

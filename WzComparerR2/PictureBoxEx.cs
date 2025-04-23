@@ -60,13 +60,18 @@ namespace WzComparerR2
 
         public void ShowImage(Wz_Png png)
         {
-            if (this.ShowOverlayAni) return; // 애니메이션 중첩 중일때는 자동 png 미리보기 없음
+            this.ShowImage(png, 0);
+        }
 
+        public void ShowImage(Wz_Png png, int page)
+        {
+            if (this.ShowOverlayAni) return; // 애니메이션 중첩 중일때는 자동 png 미리보기 없음
             //添加到动画控件
             var frame = new Animation.Frame()
             {
-                Texture = png.ToTexture(this.GraphicsDevice),
+                Texture = png.ToTexture(page, this.GraphicsDevice),
                 Png = png,
+                Page = page,
                 Delay = 0,
                 Origin = Point.Zero,
             };
