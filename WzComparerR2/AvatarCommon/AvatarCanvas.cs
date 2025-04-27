@@ -2004,6 +2004,33 @@ namespace WzComparerR2.AvatarCommon
             return (byte)((byte)((float)((baseColor >> 4) * baseOpacity) + (float)((mixColor >> 4) * mixOpacity)) * 17);
         }
 
+        public bool IsPartEffectVisible(int index)
+        {
+            var realIndex = index;
+
+            if (realIndex >= PartLength)
+            {
+                switch (realIndex)
+                {
+                    case IndexChairLayer1:
+                    case IndexChairLayer2:
+                    case IndexChairEffectLayer1:
+                    case IndexChairEffectLayer2:
+                        realIndex = Array.IndexOf(Parts, Chair);
+                        break;
+                    case IndexEffectLayer1:
+                    case IndexEffectLayer2:
+                        realIndex = Array.IndexOf(Parts, Effect);
+                        break;
+                    default:
+                        realIndex = 0;
+                        break;
+                }
+            }
+
+            return (this.Parts[realIndex]?.Visible ?? false) && (this.Parts[realIndex]?.EffectVisible ?? false);
+        }
+
         #region parts
         /// <summary>
         /// 身体

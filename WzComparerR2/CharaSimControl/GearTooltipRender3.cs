@@ -851,7 +851,6 @@ namespace WzComparerR2.CharaSimControl
 
             // 장비 옵션
             List<GearPropType> props = new List<GearPropType>();
-            List<GearPropType> props2 = new List<GearPropType>();
             foreach (KeyValuePair<GearPropType, int> p in Gear.PropsV5) //5转过滤
             {
                 if ((int)p.Key < 100 && p.Value != 0)
@@ -864,55 +863,6 @@ namespace WzComparerR2.CharaSimControl
             }
             props.Sort();
             foreach (GearPropType type in props)
-            {
-                Gear.StandardProps.TryGetValue(type, out value); //standard value
-                if (value > 0 || Gear.Props[type] > 0)
-                {
-                    switch (type)
-                    {
-                        // 올스탯, 데미지, 보공, 방무 옵션 분리
-                        case GearPropType.incAllStat:
-                        case GearPropType.incIMDR:
-                        case GearPropType.imdR:
-                        case GearPropType.incDAMr:
-                        case GearPropType.damR:
-                        case GearPropType.incBDR:
-                        case GearPropType.bdR:
-                            props2.Add(type);
-                            break;
-                        default:
-                            var propStr = ItemStringHelper.GetGearPropDiffString3(type, Gear.Props[type], value);
-
-                            if (DrawProps(g, propStr, 0, picH, equip22ColorTable))
-                            {
-                                hasThirdContents = true;
-                                picH += 16;
-                            }
-
-                            break;
-                    }
-                }
-            }
-
-
-            // 공격 속도
-            if (!Gear.Props.TryGetValue(GearPropType.attackSpeed, out value)
-                && (Gear.IsWeapon(Gear.type) || Gear.type == GearType.katara)) //找不到攻速的武器
-            {
-                value = 6; //给予默认速度
-            }
-            if (!Gear.Cash && value > 0)
-            {
-                if (2 <= value && value <= 9) // check valid speed
-                {
-                    hasThirdContents = true;
-
-                    TextRenderer.DrawText(g, "攻撃速度", GearGraphics.EquipMDMoris9Font, new Point(15, picH), Color.White, TextFormatFlags.NoPadding);
-                    GearGraphics.DrawString(g, $"{10 - value}階段", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 110, ref picH, 16, alignment: Text.TextAlignment.Right);
-                }
-            }
-            // 장비 옵션2
-            foreach (GearPropType type in props2)
             {
                 Gear.StandardProps.TryGetValue(type, out value); //standard value
                 if (value > 0 || Gear.Props[type] > 0)
@@ -1035,23 +985,39 @@ namespace WzComparerR2.CharaSimControl
             // 샘플 미리보기
             //判断是否绘制徽章
             Wz_Node medalResNode = null;
+            Wz_Node chatBalloonResNode = null;
+            Wz_Node nameTagResNode = null;
             bool willDrawMedalTag = this.Gear.Sample.Bitmap == null
                 && this.Gear.Props.TryGetValue(GearPropType.medalTag, out value)
-                && this.TryGetMedalResource(value, out medalResNode);
+                && this.TryGetMedalResource(value, 0, out medalResNode);
+            bool willDrawChatBalloon = this.Gear.Props.TryGetValue(GearPropType.chatBalloon, out value)
+                && this.TryGetMedalResource(value, 1, out chatBalloonResNode);
+            bool willDrawNameTag = this.Gear.Props.TryGetValue(GearPropType.nameTag, out value)
+                && this.TryGetMedalResource(value, 2, out nameTagResNode);
 
-            if (Gear.Sample.Bitmap != null || willDrawMedalTag)
+            if (Gear.Sample.Bitmap != null || willDrawMedalTag || willDrawChatBalloon || willDrawNameTag)
             {
                 picH -= 6;
-                if (Gear.Sample.Bitmap != null)
+                hasThirdContents = true;
+
+                if (willDrawChatBalloon)
+                {
+                    GearGraphics.DrawChatBalloon(g, chatBalloonResNode, "MAPLESTORY", bitmap.Width - 10, ref picH);
+                    picH += 4;
+                }
+                else if (willDrawNameTag)
+                {
+                    GearGraphics.DrawNameTag(g, nameTagResNode, "MAPLESTORY", bitmap.Width - 10, ref picH);
+                    picH += 4;
+                }
+                else if (Gear.Sample.Bitmap != null)
                 {
                     g.DrawImage(Gear.Sample.Bitmap, (bitmap.Width - 10 - Gear.Sample.Bitmap.Width) / 2, picH);
                     picH += Gear.Sample.Bitmap.Height;
                     picH += 4;
                 }
-                if (medalResNode != null)
+                else if (medalResNode != null)
                 {
-                    hasThirdContents = true;
-
                     GearGraphics.DrawNameTag(g, medalResNode, sr.Name.Replace("의 훈장", "").Replace("の勲章", ""), bitmap.Width - 10, ref picH);
                     picH += 4;
                 }
@@ -1086,19 +1052,33 @@ namespace WzComparerR2.CharaSimControl
                     switch (Translator.DefaultPreferredLayout)
                     {
                         case 1:
-                            GearGraphics.DrawString(g, Translator.TranslateString(text), GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
-                            GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                            GearGraphics.DrawString(g, Translator.TranslateString(text), GearGraphics.EquipMDMoris9Font, new Dictionary<string, Color>() { { "c", Color.White } }, 15, 305, ref picH, 16, strictlyAlignLeft: 0);
+                            GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, new Dictionary<string, Color>() { { "c", Color.White } }, 15, 305, ref picH, 16, strictlyAlignLeft: 0);
                             break;
                         case 2:
-                            GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
-                            GearGraphics.DrawString(g, Translator.TranslateString(text), GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                            GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, new Dictionary<string, Color>() { { "c", Color.White } }, 15, 305, ref picH, 16, strictlyAlignLeft: 0);
+                            GearGraphics.DrawString(g, Translator.TranslateString(text), GearGraphics.EquipMDMoris9Font, new Dictionary<string, Color>() { { "c", Color.White } }, 15, 305, ref picH, 16, strictlyAlignLeft: 0);
                             break;
                         case 3:
-                            GearGraphics.DrawString(g, Translator.TranslateString(text), GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                            GearGraphics.DrawString(g, Translator.TranslateString(text), GearGraphics.EquipMDMoris9Font, new Dictionary<string, Color>() { { "c", Color.White } }, 15, 305, ref picH, 16, strictlyAlignLeft: 0);
                             break;
                         default:
-                            GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                            GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, new Dictionary<string, Color>() { { "c", Color.White } }, 15, 305, ref picH, 16, strictlyAlignLeft: 0);
                             break;
+                    }
+                }
+            }
+            // 슈페리얼 장비 강화 설명
+            if (Gear.HasTuc && maxStar > 0 && !Gear.GetBooleanValue(GearPropType.blockUpgradeStarforce))
+            {
+                if (Gear.Props.TryGetValue(GearPropType.superiorEqp, out value) && value > 0) //极真
+                {
+                    var text = ItemStringHelper.GetGearPropString3(GearPropType.superiorEqp, value)[0];
+                    if (!string.IsNullOrEmpty (text))
+                    {
+                        hasThirdContents = true;
+
+                        GearGraphics.DrawPlainText(g, text, GearGraphics.EquipMDMoris9Font, Color.White, 15, 305, ref picH, 16);
                     }
                 }
             }
@@ -2150,9 +2130,54 @@ namespace WzComparerR2.CharaSimControl
             return false;
         }
 
-        private bool TryGetMedalResource(int medalTag, out Wz_Node resNode)
+        public static string JoinStringWithNewline(Graphics g, string separator, List<string> texts, int width)
         {
-            resNode = PluginBase.PluginManager.FindWz("UI/NameTag.img/medal/" + medalTag);
+            if (texts == null || texts.Count <= 0)
+            {
+                return "";
+            }
+
+            StringBuilder sb = new StringBuilder();
+            int count = 1;
+            int width_total = TextRenderer.MeasureText(g, texts[0] + separator, GearGraphics.EquipMDMoris9Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width;
+            int width_add = 0;
+            sb.Append(texts[0]);
+
+            while (count < texts.Count)
+            {
+                sb.Append(separator);
+
+                width_add = TextRenderer.MeasureText(g, texts[count] + separator, GearGraphics.EquipMDMoris9Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width;
+                width_total += width_add;
+                if (width_total > width)
+                {
+                    width_total = width_add;
+                    sb.Append("\n");
+                }
+
+                sb.Append(texts[count++]);
+            }
+
+            return sb.ToString();
+        }
+
+        private bool TryGetMedalResource(int medalTag, int type, out Wz_Node resNode)
+        {
+            switch (type)
+            {
+                case 0:
+                    resNode = PluginBase.PluginManager.FindWz("UI/NameTag.img/medal/" + medalTag);
+                    break;
+                case 1:
+                    resNode = PluginBase.PluginManager.FindWz("UI/ChatBalloon.img/" + medalTag);
+                    break;
+                case 2:
+                    resNode = PluginBase.PluginManager.FindWz("UI/NameTag.img/" + medalTag);
+                    break;
+                default:
+                    resNode = null;
+                    break;
+            }
             return resNode != null;
         }
 

@@ -151,7 +151,7 @@ namespace WzComparerR2.Avatar.UI
                     }
                     break;
 
-                case Wz_Type.Item:
+                case Wz_Type.Item: // should sync with LoadCode()
                     Wz_Node itemNode = e.Node;
                     if (Int32.TryParse(itemNode.Text, out int itemID))
                     {
@@ -2130,7 +2130,7 @@ namespace WzComparerR2.Avatar.UI
                 var effectActFrames = cmbEffectFrames // get ActionFrame array from effect combobox
                     .Select((cmb, i) =>
                     {
-                        if (effectPlaying) // effect playing is bounded to body playing or taming playing with Chair part
+                        if (effectPlaying && avatar.IsPartEffectVisible(i)) // effect playing is bounded to body playing or taming playing with Chair part
                         {
                             return cmb.Items.OfType<ComboItem>().Select(cmbItem => new
                             {
@@ -2432,17 +2432,49 @@ namespace WzComparerR2.Avatar.UI
                         }
                     }
                     imgNode = FindNodeByItemID(itemWz, gearID);
-                    if (imgNode != null)
+                    if (imgNode != null) // should sync with OnSelectedNode2Changed()
                     {
+                        bool removeTamingPart = true;
+                        Wz_Vector brm = null;
+
                         int tamingMobID = imgNode.FindNodeByPath("info\\tamingMob").GetValueEx<int>(0);
                         if (tamingMobID != 0)
                         {
+                            brm = imgNode.FindNodeByPath("info\\group\\sit\\0\\bodyRelMove").GetValueEx<Wz_Vector>(null);
                             var tamingMobNode = PluginBase.PluginManager.FindWz(string.Format(@"Character\TamingMob\{0:D8}.img", tamingMobID));
                             if (tamingMobNode != null)
                             {
-                                var part = this.avatar.AddTamingPart(tamingMobNode, BitmapOrigin.CreateFromNode(imgNode.FindNodeByPath("info\\icon"), PluginBase.PluginManager.FindWz), gearID, false);
+                                removeTamingPart = false;
+
+                                this.avatar.RemoveChairPart();
+                                var part = this.avatar.AddTamingPart(tamingMobNode, BitmapOrigin.CreateFromNode(tamingMobNode.FindNodeByPath("info\\icon"), PluginBase.PluginManager.FindWz), tamingMobID, false, brm);
                                 OnNewPartAdded(part);
                             }
+                        }
+
+                        brm = imgNode.FindNodeByPath("info\\bodyRelMove").GetValueEx<Wz_Vector>(null);
+                        bool isSitActionExists = imgNode.FindNodeByPath("info\\sitAction").GetValueEx<string>(null) != null;
+                        if (gearID / 10000 == 301 || gearID / 1000 == 5204 || brm != null || isSitActionExists) // 의자 아이템, 아이템 코드나 bodyRelMove과 sitAction 속성 유무로 결정
+                        {
+                            bool fb = false;
+                            if (brm == null)
+                            {
+                                fb = false;
+                            }
+                            else if (isSitActionExists)
+                            {
+                                fb = true;
+                            }
+
+                            if (removeTamingPart) RemoveTamingPart();
+                            var part = this.avatar.AddChairPart(imgNode, BitmapOrigin.CreateFromNode(imgNode.FindNodeByPath("info\\icon"), PluginBase.PluginManager.FindWz), gearID, brm, fb);
+                            OnNewPartAdded(part);
+                        }
+
+                        if (gearID / 10000 == 501) // effect items
+                        {
+                            var part = this.avatar.AddEffectPart(imgNode);
+                            OnNewPartAdded(part);
                         }
                         continue;
                     }

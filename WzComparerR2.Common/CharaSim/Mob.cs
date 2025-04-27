@@ -197,16 +197,13 @@ namespace WzComparerR2.CharaSim
 
                 var imageFrame = new BitmapOrigin();
 
-                foreach (var action in new[] { "stand", "move", "fly" })
+                foreach (var action in new[] { @"stand\0", @"move\0", @"fly\0", @"info\thumbnail", @"info\default\0" })
                 {
-                    var actNode = linkNode.FindNodeByPath(action + @"\0");
-                    if (actNode != null)
+                    var actNode = linkNode.FindNodeByPath(action);
+                    imageFrame = BitmapOrigin.CreateFromNode(actNode, findNode);
+                    if (imageFrame.Bitmap != null && !(imageFrame.Bitmap.Width == 1 && imageFrame.Bitmap.Height == 1))
                     {
-                        imageFrame = BitmapOrigin.CreateFromNode(actNode, findNode);
-                        if (imageFrame.Bitmap != null)
-                        {
-                            break;
-                        }
+                        break;
                     }
                 }
 

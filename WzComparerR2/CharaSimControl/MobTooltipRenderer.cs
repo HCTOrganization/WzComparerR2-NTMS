@@ -203,6 +203,26 @@ namespace WzComparerR2.CharaSimControl
             {
                 propBlocks.Add(PrepareText(g, GetElemAttrString(MobInfo.ElemAttr), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
             }
+            if (MobInfo?.ID != null)
+            {
+                var locNode = PluginBase.PluginManager.FindWz("Etc\\MobLocation.img\\" + MobInfo.ID.ToString());
+                if (locNode != null)
+                {
+                    propBlocks.Add(PrepareText(g, "位置: ", GearGraphics.ItemDetailFont, GearGraphics.LocationBrush, 0, picY += 30));
+                    foreach (var locMapNode in locNode.Nodes)
+                    {
+                        int mapID = locMapNode.GetValueEx<int>(-1);
+                        string mapName = null;
+                        if (mapID >= 0)
+                        {
+                            mapName = GetMapName(mapID);
+                        }
+                        string mobLoc = string.Format(" - {0} ({1})", mapName ?? "null", mapID);
+
+                        propBlocks.Add(PrepareText(g, mobLoc, Translator.IsKoreanStringPresent(mobLoc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, GearGraphics.LocationBrush, 0, picY += 16));
+                    }
+                }
+            }
 
             picY += 28;
 
@@ -234,7 +254,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                 }
 
-                propBlocks.Add(PrepareText(g, sb.ToString(), GearGraphics.ItemDetailFont, Brushes.GreenYellow, 0, picY));
+                propBlocks.Add(PrepareText(g, sb.ToString(), Translator.IsKoreanStringPresent(sb.ToString()) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, Brushes.GreenYellow, 0, picY));
             }
             g.Dispose();
             bmp.Dispose();
@@ -290,6 +310,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 textRect.X = imgRect.Width + 4;
             }
+
             width = Math.Max(titleRect.Width, Math.Max(imgRect.Right, textRect.Right));
             titleRect.X = (width - titleRect.Width) / 2;
 
@@ -453,6 +474,16 @@ namespace WzComparerR2.CharaSimControl
             }
 
             return sb.Length > 0 ? sb.ToString() + " (" + secondPart + ")" : "0";
+        }
+        
+        private string GetMapName(int mapID)
+        {
+            StringResult sr;
+            if (this.StringLinker == null || !this.StringLinker.StringMap.TryGetValue(mapID, out sr))
+            {
+                return null;
+            }
+            return sr.Name;
         }
     }
 }
