@@ -268,6 +268,7 @@ namespace WzComparerR2
             tooltipQuickView.ItemRender.CosmeticFaceColor = Setting.Item.CosmeticFaceColor;
             tooltipQuickView.ItemRender.Enable22AniStyle = Setting.Enable22AniStyle;
             tooltipQuickView.RecipeRender.ShowObjectID = Setting.Recipe.ShowID;
+            tooltipQuickView.RecipeRender.Enable22AniStyle = Setting.Enable22AniStyle;
             GearGraphics.is22aniStyle = Setting.Enable22AniStyle;
         }
 

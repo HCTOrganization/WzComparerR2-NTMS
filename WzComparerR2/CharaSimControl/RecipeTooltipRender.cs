@@ -16,6 +16,7 @@ namespace WzComparerR2.CharaSimControl
         }
 
         public Recipe Recipe { get; set; }
+        public bool Enable22AniStyle { get; set; }
 
         public override object TargetItem
         {
@@ -47,7 +48,7 @@ namespace WzComparerR2.CharaSimControl
             g.DrawImage(originBmp, 0, 0, new Rectangle(0, 0, originBmp.Width, picHeight), GraphicsUnit.Pixel);
 
             //左上角
-            g.DrawImage(Resource.UIToolTip_img_Item_Frame2_cover, 3, 3);
+            if (!Enable22AniStyle) g.DrawImage(Resource.UIToolTip_img_Item_Frame2_cover, 3, 3);
 
             if (this.ShowObjectID)
             {
