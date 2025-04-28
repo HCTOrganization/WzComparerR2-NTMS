@@ -711,6 +711,8 @@ namespace WzComparerR2.CharaSimControl
                     hasThirdContents = true;
 
                     g.DrawImage(Resource.UIToolTipNew_img_Item_Equip_textIcon_set_guide, 15, picH - 2);
+                    SizeF SetEffectNameLength = TextRenderer.MeasureText(g, $"#$g{text}#".Replace("#c", ""), Translator.IsKoreanStringPresent($"#$g{text}#".Replace("#c", "")) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
+                    if (SetEffectNameLength.Width > 250) picH += 16;
                     GearGraphics.DrawString(g, $"#$g{text}#", Translator.IsKoreanStringPresent(text) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 308, ref picH, 16, alignment: Text.TextAlignment.Right);
                 }
             }
