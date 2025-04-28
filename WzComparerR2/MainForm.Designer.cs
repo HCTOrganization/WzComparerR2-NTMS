@@ -138,6 +138,7 @@ namespace WzComparerR2
             this.ribbonBar100 = new DevComponents.DotNetBar.RibbonBar();
             this.buttonItem1 = new DevComponents.DotNetBar.ButtonItem();
             this.btnDiscordServer = new DevComponents.DotNetBar.ButtonItem();
+            this.btnSetupWizard = new DevComponents.DotNetBar.ButtonItem();
             this.ribbonBar7 = new DevComponents.DotNetBar.RibbonBar();
             this.buttonItemUpdate = new DevComponents.DotNetBar.ButtonItem();
             this.ribbonBar6 = new DevComponents.DotNetBar.RibbonBar();
@@ -1073,6 +1074,37 @@ namespace WzComparerR2
             // 
             this.ribbonBar9.TitleStyleMouseOver.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             // 
+            // ribbonBar100
+            // 
+            this.ribbonBar100.AutoOverflowEnabled = true;
+            // 
+            // 
+            // 
+            this.ribbonBar100.BackgroundMouseOverStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            // 
+            // 
+            // 
+            this.ribbonBar100.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.ribbonBar100.ContainerControlProcessDialogKey = true;
+            this.ribbonBar100.Dock = System.Windows.Forms.DockStyle.Left;
+            this.ribbonBar100.DragDropSupport = true;
+            this.ribbonBar100.Items.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.btnSetupWizard});
+            this.ribbonBar100.Location = new System.Drawing.Point(339, 0);
+            this.ribbonBar100.Name = "ribbonBar100";
+            this.ribbonBar100.Size = new System.Drawing.Size(63, 91);
+            this.ribbonBar100.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.ribbonBar100.TabIndex = 3;
+            this.ribbonBar100.Text = "";
+            // 
+            // 
+            // 
+            this.ribbonBar100.TitleStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            // 
+            // 
+            // 
+            this.ribbonBar100.TitleStyleMouseOver.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            // 
             // itemContainer100
             // 
             // 
@@ -1477,6 +1509,7 @@ namespace WzComparerR2
             // ribbonPanel3
             // 
             this.ribbonPanel3.ColorSchemeStyle = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.ribbonPanel3.Controls.Add(this.ribbonBar100);
             this.ribbonPanel3.Controls.Add(this.ribbonBar11);
             this.ribbonPanel3.Controls.Add(this.ribbonBar7);
             this.ribbonPanel3.Controls.Add(this.ribbonBar6);
@@ -1544,6 +1577,13 @@ namespace WzComparerR2
             this.btnDiscordServer.SubItemsExpandWidth = 28;
             this.btnDiscordServer.Text = "加入 Discord 伺服器";
             this.btnDiscordServer.Click += new System.EventHandler(this.btnDiscordServer_Click);
+            // 
+            // btnSetupWizard
+            // 
+            this.btnSetupWizard.Name = "btnSetupWizard";
+            this.btnSetupWizard.SubItemsExpandWidth = 28;
+            this.btnSetupWizard.Text = "初回実行ウィザード";
+            this.btnSetupWizard.Click += new System.EventHandler(this.btnSetupWizard_Click);
             // 
             // ribbonBar7
             // 
@@ -3531,8 +3571,10 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.DockContainerItem dockContainerItem2;
         private DevComponents.DotNetBar.PanelDockContainer panelDockContainer2;
         private DevComponents.DotNetBar.RibbonBar ribbonBar11;
+        private DevComponents.DotNetBar.RibbonBar ribbonBar100;
         private DevComponents.DotNetBar.ButtonItem buttonItem1;
         private DevComponents.DotNetBar.ButtonItem btnDiscordServer;
+        private DevComponents.DotNetBar.ButtonItem btnSetupWizard;
         private DevComponents.DotNetBar.ButtonItem btnNodeBack;
         private DevComponents.DotNetBar.ButtonItem btnNodeForward;
         private System.Windows.Forms.ToolStripMenuItem tsmi2SaveAs;

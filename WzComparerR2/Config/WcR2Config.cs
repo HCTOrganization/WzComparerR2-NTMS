@@ -281,6 +281,17 @@ namespace WzComparerR2.Config
             get { return (ConfigItem<bool>)this["noPatcherPrompt"]; }
             set { this["noPatcherPrompt"] = value; }
         }
+
+        /// <summary>
+        /// Is Setup Wizard Completed Configuration
+        /// </summary>
+        [ConfigurationProperty("isSetupWizardCompleted")]
+        public ConfigItem<bool> IsSetupWizardCompleted
+        {
+            get { return (ConfigItem<bool>)this["isSetupWizardCompleted"]; }
+            set { this["isSetupWizardCompleted"] = value; }
+        }
+
         /// <summary>
         /// 获取或设置一个值，指示读取wz是否跳过img检测。
         /// </summary>
