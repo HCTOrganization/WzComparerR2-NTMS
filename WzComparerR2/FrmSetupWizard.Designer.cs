@@ -64,14 +64,14 @@ namespace WzComparerR2
             // 
             // wizard
             // 
-            this.wizard.BackButtonText = "< 戻る(&B)";
+            this.wizard.BackButtonText = "< 下一步(&B)";
             this.wizard.BackColor = System.Drawing.SystemColors.Control;
-            this.wizard.CancelButtonText = "キャンセル(&C)";
+            this.wizard.CancelButtonText = "取消(&C)";
             this.wizard.CancelButtonWidth = 80;
             this.wizard.Cursor = System.Windows.Forms.Cursors.Default;
             this.wizard.Dock = System.Windows.Forms.DockStyle.Fill;
             this.wizard.FinishButtonTabIndex = 3;
-            this.wizard.FinishButtonText = "完了(&F)";
+            this.wizard.FinishButtonText = "完成(&F)";
             this.wizard.FooterHeight = 42;
             // 
             // 
@@ -89,8 +89,8 @@ namespace WzComparerR2
             this.wizard.FooterStyle.TextAlignment = DevComponents.DotNetBar.eStyleTextAlignment.Center;
             this.wizard.FooterStyle.TextColorSchemePart = DevComponents.DotNetBar.eColorSchemePart.PanelText;
             this.wizard.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.wizard.HeaderCaptionFont = new System.Drawing.Font("MS PGothic", 12F, System.Drawing.FontStyle.Bold);
-            this.wizard.HeaderDescriptionFont = new System.Drawing.Font("MS PGothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.wizard.HeaderCaptionFont = new System.Drawing.Font("SimSun", 12F, System.Drawing.FontStyle.Bold);
+            this.wizard.HeaderDescriptionFont = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.wizard.HeaderDescriptionIndent = 16;
             this.wizard.HeaderImageSize = new System.Drawing.Size(0, 0);
             // 
@@ -110,7 +110,7 @@ namespace WzComparerR2
             this.wizard.HelpButtonVisible = false;
             this.wizard.Location = new System.Drawing.Point(0, 0);
             this.wizard.Name = "wizard";
-            this.wizard.NextButtonText = "次へ(&N) >";
+            this.wizard.NextButtonText = "下一步(&N) >";
             this.wizard.Size = new System.Drawing.Size(879, 538);
             this.wizard.TabIndex = 0;
             this.wizard.WizardPages.AddRange(new DevComponents.DotNetBar.WizardPage[] {
@@ -156,12 +156,12 @@ namespace WzComparerR2
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.BackColor = System.Drawing.Color.Transparent;
-            this.label1.Font = new System.Drawing.Font("MS PGothic", 16F);
+            this.label1.Font = new System.Drawing.Font("SimSun", 16F);
             this.label1.Location = new System.Drawing.Point(210, 17);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(655, 61);
             this.label1.TabIndex = 0;
-            this.label1.Text = "WzComparerR2-JMSへようこそ";
+            this.label1.Text = "歡迎使用WzComparerR2-NTMS";
             // 
             // label2
             // 
@@ -173,7 +173,7 @@ namespace WzComparerR2
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(654, 374);
             this.label2.TabIndex = 1;
-            this.label2.Text = "このウィザードは、WzComparerR2をより便利に使用できるように設定する方法を説明します。";
+            this.label2.Text = "此精靈將引導您配置WzComparerR2以便提高使用便利性。";
             // 
             // label3
             // 
@@ -183,7 +183,7 @@ namespace WzComparerR2
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(600, 12);
             this.label3.TabIndex = 2;
-            this.label3.Text = "続行するには、「次へ(&N)」をクリックします。";
+            this.label3.Text = "按下一步繼續。";
             // 
             // previewCommonWizardPage
             // 
@@ -203,8 +203,8 @@ namespace WzComparerR2
             this.previewCommonWizardPage.Controls.Add(this.picPreview);
             this.previewCommonWizardPage.Location = new System.Drawing.Point(7, 72);
             this.previewCommonWizardPage.Name = "previewCommonWizardPage";
-            this.previewCommonWizardPage.PageDescription = "これらのオプションはツールチップのレイアウトに影響します。";
-            this.previewCommonWizardPage.PageTitle = "プレビューオプション";
+            this.previewCommonWizardPage.PageDescription = "這些選項會影響工具提示的佈局。";
+            this.previewCommonWizardPage.PageTitle = "預覽選項";
             this.previewCommonWizardPage.Size = new System.Drawing.Size(865, 412);
             // 
             // 
@@ -233,7 +233,7 @@ namespace WzComparerR2
             this.chkEnable22AniStyle.Size = new System.Drawing.Size(192, 16);
             this.chkEnable22AniStyle.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkEnable22AniStyle.TabIndex = 5;
-            this.chkEnable22AniStyle.Text = "22周年記念テーマを有効にする";
+            this.chkEnable22AniStyle.Text = "啟用22週年紀念主題";
             this.chkEnable22AniStyle.MouseHover += new System.EventHandler(this.chkSet1_MouseHover);
             this.chkEnable22AniStyle.CheckedChanged += new System.EventHandler(this.chkSet1_CheckedChanged);
             // 
@@ -250,7 +250,7 @@ namespace WzComparerR2
             this.chkEnableAutoPreview.Size = new System.Drawing.Size(324, 16);
             this.chkEnableAutoPreview.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkEnableAutoPreview.TabIndex = 4;
-            this.chkEnableAutoPreview.Text = "IMGが選択されると自動的にプレビューを表示する（推奨）";
+            this.chkEnableAutoPreview.Text = "選擇 IMG 時自動預覽 (建議)";
             // 
             // chkShowID
             // 
@@ -265,7 +265,7 @@ namespace WzComparerR2
             this.chkShowID.Size = new System.Drawing.Size(158, 16);
             this.chkShowID.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowID.TabIndex = 6;
-            this.chkShowID.Text = "左上隅にIDを表示 (全体)";
+            this.chkShowID.Text = "在左上角顯示ID（全局）";
             this.chkShowID.MouseHover += new System.EventHandler(this.chkSet1_MouseHover);
             this.chkShowID.CheckedChanged += new System.EventHandler(this.chkSet1_CheckedChanged);
             // 
@@ -282,7 +282,7 @@ namespace WzComparerR2
             this.chkShowSoldPrice.Size = new System.Drawing.Size(158, 16);
             this.chkShowSoldPrice.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowSoldPrice.TabIndex = 7;
-            this.chkShowSoldPrice.Text = "メル販売價額表示 (全体)";
+            this.chkShowSoldPrice.Text = "顯示楓幣售價（全局）";
             this.chkShowSoldPrice.MouseHover += new System.EventHandler(this.chkSet1_MouseHover);
             this.chkShowSoldPrice.CheckedChanged += new System.EventHandler(this.chkSet1_CheckedChanged);
             // 
@@ -299,7 +299,7 @@ namespace WzComparerR2
             this.chkShowPurchasePrice.Size = new System.Drawing.Size(177, 16);
             this.chkShowPurchasePrice.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowPurchasePrice.TabIndex = 8;
-            this.chkShowPurchasePrice.Text = "ポイント購入價額表示 (全体)";
+            this.chkShowPurchasePrice.Text = "顯示點數購買價格（全局）";
             this.chkShowPurchasePrice.MouseHover += new System.EventHandler(this.chkSet2_MouseHover);
             this.chkShowPurchasePrice.CheckedChanged += new System.EventHandler(this.chkSet2_CheckedChanged);
             // 
@@ -316,7 +316,7 @@ namespace WzComparerR2
             this.chkShowSkillDelay.Size = new System.Drawing.Size(138, 16);
             this.chkShowSkillDelay.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowSkillDelay.TabIndex = 9;
-            this.chkShowSkillDelay.Text = "スキルディレイを表示";
+            this.chkShowSkillDelay.Text = "顯示技能延遲";
             this.chkShowSkillDelay.MouseHover += new System.EventHandler(this.chkSet3_MouseHover);
             this.chkShowSkillDelay.CheckedChanged += new System.EventHandler(this.chkSet3_CheckedChanged);
             // 
@@ -333,7 +333,7 @@ namespace WzComparerR2
             this.chkShowSkillRange.Size = new System.Drawing.Size(147, 16);
             this.chkShowSkillRange.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowSkillRange.TabIndex = 10;
-            this.chkShowSkillRange.Text = "スキル範囲座標を表示";
+            this.chkShowSkillRange.Text = "顯示技能範圍座標";
             this.chkShowSkillRange.MouseHover += new System.EventHandler(this.chkSet3_MouseHover);
             this.chkShowSkillRange.CheckedChanged += new System.EventHandler(this.chkSet3_CheckedChanged);
             // 
@@ -350,7 +350,7 @@ namespace WzComparerR2
             this.chkShowMedalTag.Size = new System.Drawing.Size(248, 16);
             this.chkShowMedalTag.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowMedalTag.TabIndex = 11;
-            this.chkShowMedalTag.Text = "勲章プレビューを表示 (以前のテーマのみ)";
+            this.chkShowMedalTag.Text = "顯示勳章預覽（僅限舊主題）";
             this.chkShowMedalTag.MouseHover += new System.EventHandler(this.chkSet4_MouseHover);
             this.chkShowMedalTag.CheckedChanged += new System.EventHandler(this.chkSet4_CheckedChanged);
             // 
@@ -367,7 +367,7 @@ namespace WzComparerR2
             this.chkShowNickTag.Size = new System.Drawing.Size(156, 16);
             this.chkShowNickTag.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowNickTag.TabIndex = 12;
-            this.chkShowNickTag.Text = "タイトルプレビューを表示";
+            this.chkShowNickTag.Text = "顯示稱號預覽";
             this.chkShowNickTag.MouseHover += new System.EventHandler(this.chkSet5_MouseHover);
             this.chkShowNickTag.CheckedChanged += new System.EventHandler(this.chkSet5_CheckedChanged);
             // 
@@ -389,8 +389,8 @@ namespace WzComparerR2
             this.translatorWizardPage.Controls.Add(this.chkEnableTranslate);
             this.translatorWizardPage.Location = new System.Drawing.Point(7, 72);
             this.translatorWizardPage.Name = "translatorWizardPage";
-            this.translatorWizardPage.PageDescription = "翻訳機能を使用すると、外国語で新しいコンテンツを理解できるようになります。";
-            this.translatorWizardPage.PageTitle = "翻訳機能";
+            this.translatorWizardPage.PageDescription = "翻譯功能可以幫助您理解外語的新內容。";
+            this.translatorWizardPage.PageTitle = "翻譯功能";
             this.translatorWizardPage.Size = new System.Drawing.Size(865, 412);
             // 
             // 
@@ -419,7 +419,7 @@ namespace WzComparerR2
             this.chkEnableTranslate.Size = new System.Drawing.Size(121, 16);
             this.chkEnableTranslate.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkEnableTranslate.TabIndex = 4;
-            this.chkEnableTranslate.Text = "翻訳を有効にする";
+            this.chkEnableTranslate.Text = "啟用翻譯";
             // 
             // animationOutputPage
             // 
@@ -429,8 +429,8 @@ namespace WzComparerR2
             this.animationOutputPage.AntiAlias = false;
             this.animationOutputPage.Location = new System.Drawing.Point(7, 72);
             this.animationOutputPage.Name = "animationOutputPage";
-            this.animationOutputPage.PageDescription = "アニメーションをエクスポートする方法を設定できます。";
-            this.animationOutputPage.PageTitle = "アニメーション出力";
+            this.animationOutputPage.PageDescription = "允許您配置動畫的匯出方式。";
+            this.animationOutputPage.PageTitle = "動畫匯出";
             this.animationOutputPage.Size = new System.Drawing.Size(865, 412);
             // 
             // 
@@ -481,12 +481,12 @@ namespace WzComparerR2
             this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label4.BackColor = System.Drawing.Color.Transparent;
-            this.label4.Font = new System.Drawing.Font("MS PGothic", 16F);
+            this.label4.Font = new System.Drawing.Font("SimSun", 16F);
             this.label4.Location = new System.Drawing.Point(210, 17);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(655, 61);
             this.label4.TabIndex = 0;
-            this.label4.Text = "設定完了";
+            this.label4.Text = "設定完成";
             // 
             // label5
             // 
@@ -498,7 +498,7 @@ namespace WzComparerR2
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(654, 374);
             this.label5.TabIndex = 1;
-            this.label5.Text = "初回実行ウィザードが終了しました。";
+            this.label5.Text = "首次運行精靈已完成。";
             // 
             // label6
             // 
@@ -508,7 +508,7 @@ namespace WzComparerR2
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(600, 12);
             this.label6.TabIndex = 2;
-            this.label6.Text = "設定を保存するには、「完了(&F)」をクリックします。";
+            this.label6.Text = "若要儲存設置，請按一下完成。";
             // 
             // FrmSetupWizard
             // 
@@ -518,13 +518,13 @@ namespace WzComparerR2
             this.Controls.Add(this.wizard);
             this.DoubleBuffered = true;
             this.EnableGlass = false;
-            this.Font = new System.Drawing.Font("MS PGothic", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Font = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "FrmSetupWizard";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "初回実行ウィザード";
+            this.Text = "首次運行精靈";
             this.TopMost = true;
             this.wizard.ResumeLayout(false);
             this.wizardPage1.ResumeLayout(false);

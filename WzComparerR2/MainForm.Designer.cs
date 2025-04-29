@@ -1582,7 +1582,7 @@ namespace WzComparerR2
             // 
             this.btnSetupWizard.Name = "btnSetupWizard";
             this.btnSetupWizard.SubItemsExpandWidth = 28;
-            this.btnSetupWizard.Text = "初回実行ウィザード";
+            this.btnSetupWizard.Text = "首次運行精靈";
             this.btnSetupWizard.Click += new System.EventHandler(this.btnSetupWizard_Click);
             // 
             // ribbonBar7

@@ -14,7 +14,7 @@ namespace WzComparerR2
         {
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("MS PGothic"), 9f);
+            this.Font = new Font(new FontFamily("SimSun"), 9f);
 #endif
             InitializeComponent();
             this.wizard.HeaderImage = null;
@@ -107,7 +107,7 @@ namespace WzComparerR2
 
         private void FrmSetupWizard_Load(object sender, EventArgs e)
         {
-            if (isFirstRun) this.label2.Text += "\r\n\r\n初回実行ウィザードを実行するのは今回が初めてです。「キャンセル」をクリックすると、次回からはウィザードが表示されなくなります。このウィザードには、後で「ヘルプ」タブからアクセスできます。";
+            if (isFirstRun) this.label2.Text += "\r\n\r\n這是您第一次運行首次運行精靈。如果按一下“取消”，則精靈將不再顯示。您可以稍後從「幫助」標籤存取該精靈。";
 
             //Set Default Values
         }
