@@ -2223,21 +2223,13 @@ namespace WzComparerR2.Comparer
                         string suffix = "_" + colName + ".png";
                         string canvas = "_Canvas";
 
-                        if (this.HashPngFileName)
+                        for (int i = 0; i < invalidChars.Length; i++)
                         {
-                            fileName = ToHexString(MD5Hash(fileName));
-                            // TODO: save file name mapping to another file?
+                            fileName = fileName.Replace(invalidChars[i], '_');
                         }
-                        else
+                        if (outputDir.Length + fileName.Length > 240)
                         {
-                            for (int i = 0; i < invalidChars.Length; i++)
-                            {
-                                fileName = fileName.Replace(invalidChars[i], '_');
-                            }
-                            if (outputDir.Length + fileName.Length > 240)
-                            {
-                                fileName = fileName.Substring(0, 40) + "_" + ToHexString(MD5Hash(fileName)).Substring(0, 8);
-                            }
+                            fileName = fileName.Substring(0, 40) + "_" + ToHexString(MD5Hash(fileName)).Substring(0, 8);
                         }
 
                         fileName = fileName + suffix;
@@ -2307,7 +2299,7 @@ namespace WzComparerR2.Comparer
                     return "{ img }";
 
                 default:
-                    return string.Format("<span title=\"{0}\">{1}</span>", value.GetType().Name, WebUtility.HtmlEncode(Convert.ToString(value)));
+                    return string.Format("<span title=\"{0}\">{1}</span>", value.GetType().Name, WebUtility.HtmlEncode(Convert.ToString(value.Value)));
             }
         }
 
