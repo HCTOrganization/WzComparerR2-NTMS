@@ -2294,10 +2294,21 @@ namespace WzComparerR2.Comparer
                         return string.Format("audio {0} ms", sound.Ms);
                     }
 
+                case Wz_Convex convex:
+                    return string.Format("convex {0}", string.Join(" ", convex.Points.Select(vec => $"({vec.X},{vec.Y})")));
+
+                case Wz_RawData rawData:
+                    return string.Format("rawdata {0} bytes", rawData.Length);
+
+                case Wz_Video video:
+                    return string.Format("video {0} bytes", video.Length);
+
                 case Wz_Image _:
-                    return "(img)";
+                    return "{ img }";
+
+                default:
+                    return string.Format("<span title=\"{0}\">{1}</span>", value.GetType().Name, WebUtility.HtmlEncode(Convert.ToString(value)));
             }
-            return WebUtility.HtmlEncode(Convert.ToString(value.Value));
         }
 
         public virtual void CreateStyleSheet(string outputDir)
