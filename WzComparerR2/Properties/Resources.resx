@@ -169,4 +169,136 @@
   <data name="Updater" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Updater.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="NewGear_HideID_HidePrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewGear_HideID_HidePrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewGear_HideID_ShowPrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewGear_HideID_ShowPrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewGear_ShowID_HidePrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewGear_ShowID_HidePrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewGear_ShowID_ShowPrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewGear_ShowID_ShowPrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewItem_HideID_HidePrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewItem_HideID_HidePrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewItem_HideID_HideTitle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewItem_HideID_HideTitle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewItem_HideID_ShowPrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewItem_HideID_ShowPrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewItem_HideID_ShowTitle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewItem_HideID_ShowTitle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewItem_ShowID_HidePrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewItem_ShowID_HidePrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewItem_ShowID_HideTitle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewItem_ShowID_HideTitle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewItem_ShowID_ShowPrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewItem_ShowID_ShowPrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewItem_ShowID_ShowTitle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewItem_ShowID_ShowTitle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewSkill_HideID_HideDelay_HideRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewSkill_HideID_HideDelay_HideRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewSkill_HideID_HideDelay_ShowRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewSkill_HideID_HideDelay_ShowRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewSkill_HideID_ShowDelay_HideRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewSkill_HideID_ShowDelay_HideRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewSkill_HideID_ShowDelay_ShowRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewSkill_HideID_ShowDelay_ShowRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewSkill_ShowID_HideDelay_HideRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewSkill_ShowID_HideDelay_HideRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewSkill_ShowID_HideDelay_ShowRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewSkill_ShowID_HideDelay_ShowRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewSkill_ShowID_ShowDelay_HideRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewSkill_ShowID_ShowDelay_HideRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="NewSkill_ShowID_ShowDelay_ShowRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\NewSkill_ShowID_ShowDelay_ShowRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldGear_HideID_HideMedal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldGear_HideID_HideMedal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldGear_HideID_HidePrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldGear_HideID_HidePrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldGear_HideID_ShowMedal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldGear_HideID_ShowMedal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldGear_HideID_ShowPrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldGear_HideID_ShowPrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldGear_ShowID_HideMedal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldGear_ShowID_HideMedal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldGear_ShowID_HidePrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldGear_ShowID_HidePrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldGear_ShowID_ShowMedal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldGear_ShowID_ShowMedal.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldGear_ShowID_ShowPrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldGear_ShowID_ShowPrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldItem_HideID_HidePrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldItem_HideID_HidePrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldItem_HideID_HideTitle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldItem_HideID_HideTitle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldItem_HideID_ShowPrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldItem_HideID_ShowPrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldItem_HideID_ShowTitle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldItem_HideID_ShowTitle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldItem_ShowID_HidePrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldItem_ShowID_HidePrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldItem_ShowID_HideTitle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldItem_ShowID_HideTitle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldItem_ShowID_ShowPrice" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldItem_ShowID_ShowPrice.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldItem_ShowID_ShowTitle" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldItem_ShowID_ShowTitle.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldSkill_HideID_HideDelay_HideRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldSkill_HideID_HideDelay_HideRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldSkill_HideID_HideDelay_ShowRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldSkill_HideID_HideDelay_ShowRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldSkill_HideID_ShowDelay_HideRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldSkill_HideID_ShowDelay_HideRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldSkill_HideID_ShowDelay_ShowRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldSkill_HideID_ShowDelay_ShowRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldSkill_ShowID_HideDelay_HideRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldSkill_ShowID_HideDelay_HideRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldSkill_ShowID_HideDelay_ShowRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldSkill_ShowID_HideDelay_ShowRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldSkill_ShowID_ShowDelay_HideRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldSkill_ShowID_ShowDelay_HideRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="OldSkill_ShowID_ShowDelay_ShowRange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\OldSkill_ShowID_ShowDelay_ShowRange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>
