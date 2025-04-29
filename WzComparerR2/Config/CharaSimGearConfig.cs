@@ -43,7 +43,7 @@ namespace WzComparerR2.Config
             set { this["showCashPurchasePrice"] = value; }
         }
 
-        [ConfigurationProperty("showMedalTag", DefaultValue = false)]
+        [ConfigurationProperty("showMedalTag", DefaultValue = true)]
         public bool ShowMedalTag
         {
             get { return (bool)this["showMedalTag"]; }

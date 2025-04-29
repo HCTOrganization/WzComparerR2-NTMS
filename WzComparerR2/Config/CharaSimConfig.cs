@@ -13,6 +13,7 @@ namespace WzComparerR2.Config
         {
             this.Enable22AniStyle = true;
             this.CopyParsedSkillString = true;
+            this.AutoQuickView = true;
         }
 
         [ConfigurationProperty("selectedFontIndex")]
