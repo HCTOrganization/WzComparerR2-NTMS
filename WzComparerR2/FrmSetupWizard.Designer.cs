@@ -49,6 +49,42 @@ namespace WzComparerR2
             this.picPreview = new System.Windows.Forms.PictureBox();
             this.translatorWizardPage = new DevComponents.DotNetBar.WizardPage();
             this.chkEnableTranslate = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkOpenAIExtraOption = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.cmbDesiredLanguage = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.cmbMozhiBackend = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.cmbLanguageModel = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.cmbDetectCurrency = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.cmbDesiredCurrency = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.cmbPreferredLayout = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.cmbPreferredTranslateEngine = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.translateLabelX3 = new DevComponents.DotNetBar.LabelX();
+            this.translateLabelX4 = new DevComponents.DotNetBar.LabelX();
+            this.translateLabelX5 = new DevComponents.DotNetBar.LabelX();
+            this.translateLabelX6 = new DevComponents.DotNetBar.LabelX();
+            this.translateLabelX7 = new DevComponents.DotNetBar.LabelX();
+            this.translateLabelX8 = new DevComponents.DotNetBar.LabelX();
+            this.translateLabelX9 = new DevComponents.DotNetBar.LabelX();
+            this.translateLabelX10 = new DevComponents.DotNetBar.LabelX();
+            this.translateLabelX11 = new DevComponents.DotNetBar.LabelX();
+            this.translateLabelX12 = new DevComponents.DotNetBar.LabelX();
+            this.translateLabelX13 = new DevComponents.DotNetBar.LabelX();
+            this.translateLabelX14 = new DevComponents.DotNetBar.LabelX();
+            this.translateLabelX15 = new DevComponents.DotNetBar.LabelX();
+            this.translateLabelX16 = new DevComponents.DotNetBar.LabelX();
+            this.txtAPIkey = new DevComponents.DotNetBar.Controls.TextBoxX();
+            this.txtNxAPIkey = new DevComponents.DotNetBar.Controls.TextBoxX();
+            this.txtOpenAIBackend = new DevComponents.DotNetBar.Controls.TextBoxX();
+            this.txtOpenAISystemMessage = new DevComponents.DotNetBar.Controls.TextBoxX();
+            this.txtSecretkey = new DevComponents.DotNetBar.Controls.TextBoxX();
+            this.txtLMTemperature = new DevComponents.Editors.DoubleInput();
+            this.txtMaximumToken = new DevComponents.Editors.IntegerInput();
+            this.buttonX3 = new DevComponents.DotNetBar.ButtonX();
+            this.buttonX2 = new DevComponents.DotNetBar.ButtonX();
+            this.buttonX1 = new DevComponents.DotNetBar.ButtonX();
+            this.buttonXCheck = new DevComponents.DotNetBar.ButtonX();
+            this.buttonXCheck2 = new DevComponents.DotNetBar.ButtonX();
+            this.buttonXCheck3 = new DevComponents.DotNetBar.ButtonX();
+
             this.animationOutputPage = new DevComponents.DotNetBar.WizardPage();
             this.finishedWizardPage = new DevComponents.DotNetBar.WizardPage();
             this.label4 = new System.Windows.Forms.Label();
@@ -116,7 +152,7 @@ namespace WzComparerR2
             this.wizard.WizardPages.AddRange(new DevComponents.DotNetBar.WizardPage[] {
             this.wizardPage1,
             this.previewCommonWizardPage,
-            // this.translatorWizardPage,
+            this.translatorWizardPage,
             // this.animationOutputPage,
             this.finishedWizardPage});
             this.wizard.FinishButtonClick += new System.ComponentModel.CancelEventHandler(this.wizard_FinishButtonClick);
@@ -387,6 +423,33 @@ namespace WzComparerR2
             | System.Windows.Forms.AnchorStyles.Right)));
             this.translatorWizardPage.AntiAlias = false;
             this.translatorWizardPage.Controls.Add(this.chkEnableTranslate);
+            this.translatorWizardPage.Controls.Add(this.translateLabelX5);
+            this.translatorWizardPage.Controls.Add(this.buttonX3);
+            this.translatorWizardPage.Controls.Add(this.buttonXCheck2);
+            this.translatorWizardPage.Controls.Add(this.cmbMozhiBackend);
+            this.translatorWizardPage.Controls.Add(this.cmbLanguageModel);
+            this.translatorWizardPage.Controls.Add(this.translateLabelX6);
+            this.translatorWizardPage.Controls.Add(this.cmbDesiredLanguage);
+            this.translatorWizardPage.Controls.Add(this.translateLabelX7);
+            this.translatorWizardPage.Controls.Add(this.translateLabelX8);
+            this.translatorWizardPage.Controls.Add(this.cmbPreferredTranslateEngine);
+            this.translatorWizardPage.Controls.Add(this.cmbPreferredLayout);
+            this.translatorWizardPage.Controls.Add(this.translateLabelX9);
+            this.translatorWizardPage.Controls.Add(this.cmbDetectCurrency);
+            this.translatorWizardPage.Controls.Add(this.translateLabelX10);
+            this.translatorWizardPage.Controls.Add(this.translateLabelX11);
+            this.translatorWizardPage.Controls.Add(this.translateLabelX12);
+            this.translatorWizardPage.Controls.Add(this.translateLabelX13);
+            this.translatorWizardPage.Controls.Add(this.translateLabelX14);
+            this.translatorWizardPage.Controls.Add(this.translateLabelX15);
+            this.translatorWizardPage.Controls.Add(this.translateLabelX16);
+            this.translatorWizardPage.Controls.Add(this.txtOpenAIBackend);
+            this.translatorWizardPage.Controls.Add(this.txtLMTemperature);
+            this.translatorWizardPage.Controls.Add(this.txtMaximumToken);
+            this.translatorWizardPage.Controls.Add(this.txtAPIkey);
+            this.translatorWizardPage.Controls.Add(this.chkOpenAIExtraOption);
+            this.translatorWizardPage.Controls.Add(this.txtOpenAISystemMessage);
+            this.translatorWizardPage.Controls.Add(this.cmbDesiredCurrency);
             this.translatorWizardPage.Location = new System.Drawing.Point(7, 72);
             this.translatorWizardPage.Name = "translatorWizardPage";
             this.translatorWizardPage.PageDescription = "翻譯功能可以幫助您理解外語的新內容。";
@@ -414,12 +477,383 @@ namespace WzComparerR2
             // 
             // 
             this.chkEnableTranslate.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkEnableTranslate.Location = new System.Drawing.Point(13, 12);
+            this.chkEnableTranslate.Location = new System.Drawing.Point(13, 9);
             this.chkEnableTranslate.Name = "chkEnableTranslate";
             this.chkEnableTranslate.Size = new System.Drawing.Size(121, 16);
             this.chkEnableTranslate.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkEnableTranslate.TabIndex = 4;
             this.chkEnableTranslate.Text = "啟用翻譯";
+            this.chkEnableTranslate.CheckedChanged += new System.EventHandler(this.chkEnableTranslate_CheckedChanged);
+            // 
+            // translateLabelX5
+            // 
+            this.translateLabelX5.AutoSize = true;
+            this.translateLabelX5.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.translateLabelX5.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.translateLabelX5.Location = new System.Drawing.Point(14, 33);
+            this.translateLabelX5.Name = "translateLabelX5";
+            this.translateLabelX5.TabIndex = 9;
+            this.translateLabelX5.Text = "Mozhi伺服器";
+            // 
+            // translateLabelX7
+            // 
+            this.translateLabelX7.AutoSize = true;
+            this.translateLabelX7.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.translateLabelX7.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.translateLabelX7.Location = new System.Drawing.Point(14, 60);
+            this.translateLabelX7.Name = "translateLabelX7";
+            this.translateLabelX7.TabIndex = 9;
+            this.translateLabelX7.Text = "翻譯引擎";
+            // 
+            // translateLabelX8
+            // 
+            this.translateLabelX8.AutoSize = true;
+            this.translateLabelX8.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.translateLabelX8.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.translateLabelX8.Location = new System.Drawing.Point(14, 87);
+            this.translateLabelX8.Name = "translateLabelX8";
+            this.translateLabelX8.TabIndex = 9;
+            this.translateLabelX8.Text = "譯文顯示";
+            // 
+            // translateLabelX6
+            // 
+            this.translateLabelX6.AutoSize = true;
+            this.translateLabelX6.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.translateLabelX6.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.translateLabelX6.Location = new System.Drawing.Point(14, 114);
+            this.translateLabelX6.Name = "translateLabelX6";
+            this.translateLabelX6.Size = new System.Drawing.Size(131, 16);
+            this.translateLabelX6.TabIndex = 7;
+            this.translateLabelX6.Text = "目標語言";
+            // 
+            // translateLabelX9
+            // 
+            this.translateLabelX9.AutoSize = true;
+            this.translateLabelX9.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.translateLabelX9.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.translateLabelX9.Location = new System.Drawing.Point(14, 141);
+            this.translateLabelX9.Name = "translateLabelX9";
+            this.translateLabelX9.TabIndex = 9;
+            this.translateLabelX9.Text = "點數單位";
+            // 
+            // translateLabelX10
+            // 
+            this.translateLabelX10.AutoSize = true;
+            this.translateLabelX10.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.translateLabelX10.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.translateLabelX10.Location = new System.Drawing.Point(14, 168);
+            this.translateLabelX10.Name = "translateLabelX10";
+            this.translateLabelX10.TabIndex = 9;
+            this.translateLabelX10.Text = "希望單位";
+            // 
+            // translateLabelX11
+            // 
+            this.translateLabelX11.AutoSize = true;
+            this.translateLabelX11.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.translateLabelX11.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.translateLabelX11.Location = new System.Drawing.Point(14, 33);
+            this.translateLabelX11.Name = "translateLabelX11";
+            this.translateLabelX11.TabIndex = 9;
+            this.translateLabelX11.Text = "語言模型";
+            this.translateLabelX11.Visible = false;
+            // 
+            // translateLabelX12
+            // 
+            this.translateLabelX12.AutoSize = true;
+            this.translateLabelX12.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.translateLabelX12.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.translateLabelX12.Location = new System.Drawing.Point(400, 15);
+            this.translateLabelX12.Name = "translateLabelX12";
+            this.translateLabelX12.TabIndex = 9;
+            this.translateLabelX12.Text = "後端地址";
+            this.translateLabelX12.Visible = false;
+            // 
+            // translateLabelX13
+            // 
+            this.translateLabelX13.AutoSize = true;
+            this.translateLabelX13.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.translateLabelX13.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.translateLabelX13.Location = new System.Drawing.Point(400, 123);
+            this.translateLabelX13.Name = "translateLabelX13";
+            this.translateLabelX13.TabIndex = 9;
+            this.translateLabelX13.Text = "語言模型溫度值";
+            this.translateLabelX13.Visible = false;
+            // 
+            // translateLabelX14
+            // 
+            this.translateLabelX14.AutoSize = true;
+            this.translateLabelX14.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.translateLabelX14.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.translateLabelX14.Location = new System.Drawing.Point(400, 150);
+            this.translateLabelX14.Name = "translateLabelX14";
+            this.translateLabelX14.TabIndex = 9;
+            this.translateLabelX14.Text = "最大Token上限";
+            this.translateLabelX14.Visible = false;
+            // 
+            // translateLabelX15
+            // 
+            this.translateLabelX15.AutoSize = true;
+            this.translateLabelX15.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.translateLabelX15.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.translateLabelX15.Location = new System.Drawing.Point(400, 42);
+            this.translateLabelX15.Name = "translateLabelX15";
+            this.translateLabelX15.TabIndex = 9;
+            this.translateLabelX15.Text = "AI系統訊息";
+            this.translateLabelX15.Visible = false;
+            // 
+            // translateLabelX16
+            // 
+            this.translateLabelX16.AutoSize = true;
+            this.translateLabelX16.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.translateLabelX16.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.translateLabelX16.Location = new System.Drawing.Point(400, 177);
+            this.translateLabelX16.Name = "translateLabelX16";
+            this.translateLabelX16.TabIndex = 10;
+            this.translateLabelX16.Text = "API金鑰 （不含「Bearer」）";
+            this.translateLabelX16.Visible = false;
+            // 
+            // cmbDesiredLanguage
+            // 
+            this.cmbDesiredLanguage.DisplayMember = "Text";
+            this.cmbDesiredLanguage.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbDesiredLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbDesiredLanguage.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbDesiredLanguage.FormattingEnabled = true;
+            this.cmbDesiredLanguage.ItemHeight = 13;
+            this.cmbDesiredLanguage.Width = 248;
+            this.cmbDesiredLanguage.Location = new System.Drawing.Point(110, 112);
+            this.cmbDesiredLanguage.Name = "cmbDesiredLanguage";
+            this.cmbDesiredLanguage.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbDesiredLanguage.TabIndex = 8;
+            // 
+            // cmbMozhiBackend
+            // 
+            this.cmbMozhiBackend.DisplayMember = "Text";
+            this.cmbMozhiBackend.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbMozhiBackend.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbMozhiBackend.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbMozhiBackend.FormattingEnabled = true;
+            this.cmbMozhiBackend.ItemHeight = 13;
+            this.cmbMozhiBackend.Width = 248;
+            this.cmbMozhiBackend.Location = new System.Drawing.Point(110, 31);
+            this.cmbMozhiBackend.Name = "cmbMozhiBackend";
+            this.cmbMozhiBackend.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbMozhiBackend.TabIndex = 12;
+            // 
+            // cmbLanguageModel
+            // 
+            this.cmbLanguageModel.DisplayMember = "Text";
+            this.cmbLanguageModel.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbLanguageModel.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbLanguageModel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbLanguageModel.FormattingEnabled = true;
+            this.cmbLanguageModel.ItemHeight = 13;
+            this.cmbLanguageModel.Width = 248;
+            this.cmbLanguageModel.Location = new System.Drawing.Point(110, 31);
+            this.cmbLanguageModel.Name = "cmbLanguageModel";
+            this.cmbLanguageModel.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbLanguageModel.TabIndex = 12;
+            this.cmbLanguageModel.Visible = false;
+            // 
+            // cmbPreferredTranslateEngine
+            // 
+            this.cmbPreferredTranslateEngine.DisplayMember = "Text";
+            this.cmbPreferredTranslateEngine.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbPreferredTranslateEngine.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPreferredTranslateEngine.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbPreferredTranslateEngine.FormattingEnabled = true;
+            this.cmbPreferredTranslateEngine.ItemHeight = 13;
+            this.cmbPreferredTranslateEngine.Width = 248;
+            this.cmbPreferredTranslateEngine.Location = new System.Drawing.Point(110, 58);
+            this.cmbPreferredTranslateEngine.Name = "cmbPreferredTranslateEngine";
+            this.cmbPreferredTranslateEngine.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbPreferredTranslateEngine.TabIndex = 13;
+            this.cmbPreferredTranslateEngine.SelectedIndexChanged += cmbPreferredTranslateEngine_SelectedIndexChanged;
+            // 
+            // cmbPreferredLayout
+            // 
+            this.cmbPreferredLayout.DisplayMember = "Text";
+            this.cmbPreferredLayout.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbPreferredLayout.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbPreferredLayout.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbPreferredLayout.FormattingEnabled = true;
+            this.cmbPreferredLayout.ItemHeight = 13;
+            this.cmbPreferredLayout.Width = 248;
+            this.cmbPreferredLayout.Location = new System.Drawing.Point(110, 85);
+            this.cmbPreferredLayout.Name = "cmbPreferredLayout";
+            this.cmbPreferredLayout.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbPreferredLayout.TabIndex = 15;
+            // 
+            // cmbDetectCurrency
+            // 
+            this.cmbDetectCurrency.DisplayMember = "Text";
+            this.cmbDetectCurrency.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbDetectCurrency.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbDetectCurrency.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbDetectCurrency.FormattingEnabled = true;
+            this.cmbDetectCurrency.ItemHeight = 13;
+            this.cmbDetectCurrency.Width = 248;
+            this.cmbDetectCurrency.Location = new System.Drawing.Point(110, 139);
+            this.cmbDetectCurrency.Name = "cmbDetectCurrency";
+            this.cmbDetectCurrency.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbDetectCurrency.TabIndex = 25;
+            // 
+            // cmbDesiredCurrency
+            // 
+            this.cmbDesiredCurrency.DisplayMember = "Text";
+            this.cmbDesiredCurrency.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbDesiredCurrency.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbDesiredCurrency.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbDesiredCurrency.FormattingEnabled = true;
+            this.cmbDesiredCurrency.ItemHeight = 13;
+            this.cmbDesiredCurrency.Width = 248;
+            this.cmbDesiredCurrency.Location = new System.Drawing.Point(110, 166);
+            this.cmbDesiredCurrency.Name = "cmbDesiredCurrency";
+            this.cmbDesiredCurrency.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbDesiredCurrency.TabIndex = 26;
+            // 
+            // txtOpenAIBackend
+            // 
+            // 
+            // 
+            // 
+            this.txtOpenAIBackend.Border.Class = "TextBoxBorder";
+            this.txtOpenAIBackend.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtOpenAIBackend.Location = new System.Drawing.Point(540, 13);
+            this.txtOpenAIBackend.Name = "txtOpenAIBackend";
+            this.txtOpenAIBackend.Size = new System.Drawing.Size(208, 23);
+            this.txtOpenAIBackend.TabIndex = 10;
+            this.txtOpenAIBackend.WatermarkText = "https://api.openai.com/v1";
+            this.txtOpenAIBackend.Visible = false;
+            // 
+            // txtOpenAISystemMessage
+            // 
+            // 
+            // 
+            // 
+            this.txtOpenAISystemMessage.Border.Class = "TextBoxBorder";
+            this.txtOpenAISystemMessage.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtOpenAISystemMessage.Location = new System.Drawing.Point(540, 40);
+            this.txtOpenAISystemMessage.Multiline = true;
+            this.txtOpenAISystemMessage.Name = "txtOpenAISystemMessage";
+            this.txtOpenAISystemMessage.Size = new System.Drawing.Size(208, 50);
+            this.txtOpenAISystemMessage.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtOpenAISystemMessage.TabIndex = 11;
+            this.txtOpenAISystemMessage.WatermarkText = "You are an automated translator for a community game engine, and I only need translated result in output.";
+            this.txtOpenAISystemMessage.Visible = false;
+            // 
+            // chkOpenAIExtraOption
+            // 
+            this.chkOpenAIExtraOption.AutoSize = true;
+            this.chkOpenAIExtraOption.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkOpenAIExtraOption.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkOpenAIExtraOption.Location = new System.Drawing.Point(400, 94);
+            this.chkOpenAIExtraOption.Name = "chkOpenAIExtraOption";
+            this.chkOpenAIExtraOption.Size = new System.Drawing.Size(212, 16);
+            this.chkOpenAIExtraOption.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkOpenAIExtraOption.TabIndex = 12;
+            this.chkOpenAIExtraOption.Text = "使用以下額外設定";
+            this.chkOpenAIExtraOption.CheckedChanged += new System.EventHandler(this.chkOpenAIExtraOption_CheckedChanged);
+            this.chkOpenAIExtraOption.Visible = false;
+            //
+            // txtLMTemperature
+            //
+            //
+            //
+            this.txtLMTemperature.BackgroundStyle.Class = "DateTimeInputBackground";
+            this.txtLMTemperature.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtLMTemperature.ButtonFreeText.Shortcut = DevComponents.DotNetBar.eShortcut.F2;
+            this.txtLMTemperature.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.txtLMTemperature.Location = new System.Drawing.Point(540, 121);
+            this.txtLMTemperature.MinValue = 0;
+            this.txtLMTemperature.MaxValue = 2;
+            this.txtLMTemperature.Increment = 0.1;
+            this.txtLMTemperature.DisplayFormat = "0.0";
+            this.txtLMTemperature.Name = "txtLMTemperature";
+            this.txtLMTemperature.ShowUpDown = true;
+            this.txtLMTemperature.Size = new System.Drawing.Size(70, 21);
+            this.txtLMTemperature.TabIndex = 13;
+            this.txtLMTemperature.Visible = false;
+            //
+            // txtMaximumToken
+            //
+            //
+            //
+            this.txtMaximumToken.BackgroundStyle.Class = "DateTimeInputBackground";
+            this.txtMaximumToken.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtMaximumToken.ButtonFreeText.Shortcut = DevComponents.DotNetBar.eShortcut.F2;
+            this.txtMaximumToken.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.txtMaximumToken.Location = new System.Drawing.Point(540, 148);
+            this.txtMaximumToken.MinValue = -1;
+            this.txtMaximumToken.Name = "txtMaximumToken";
+            this.txtMaximumToken.ShowUpDown = true;
+            this.txtMaximumToken.Size = new System.Drawing.Size(70, 21);
+            this.txtMaximumToken.TabIndex = 14;
+            this.txtMaximumToken.Visible = false;
+            // 
+            // txtAPIkey
+            // 
+            // 
+            // 
+            // 
+            this.txtAPIkey.Border.Class = "TextBoxBorder";
+            this.txtAPIkey.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtAPIkey.Location = new System.Drawing.Point(540, 175);
+            this.txtAPIkey.Name = "txtAPIkey";
+            this.txtAPIkey.Size = new System.Drawing.Size(208, 23);
+            this.txtAPIkey.TabIndex = 10;
+            // 
+            // buttonXCheck2
+            // 
+            this.buttonXCheck2.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.buttonXCheck2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.buttonXCheck2.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.buttonXCheck2.Location = new System.Drawing.Point(303, 4);
+            this.buttonXCheck2.Name = "buttonXCheck2";
+            this.buttonXCheck2.Size = new System.Drawing.Size(55, 19);
+            this.buttonXCheck2.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.buttonXCheck2.TabIndex = 4;
+            this.buttonXCheck2.Text = "檢查";
+            this.buttonXCheck2.Click += new System.EventHandler(this.buttonXCheck2_Click);
             // 
             // animationOutputPage
             // 
@@ -564,16 +998,41 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowNickTag;
 
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableTranslate;
-        private DevComponents.DotNetBar.LabelX lblPreferredLayout;
-        private DevComponents.DotNetBar.LabelX lblPreferredDesiredLangauge;
-        private DevComponents.DotNetBar.LabelX lblPreferredTranslateEngine;
-        private DevComponents.DotNetBar.LabelX lblMozhiBackend;
-        private DevComponents.DotNetBar.LabelX lblLanguageModel;
-        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbPreferredLayout;
-        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbPreferredDesiredLanguage;
-        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbPreferredTranslateEngine;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkOpenAIExtraOption;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbDesiredLanguage;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbMozhiBackend;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbLanguageModel;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbDetectCurrency;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbDesiredCurrency;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbPreferredLayout;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbPreferredTranslateEngine;
+        private DevComponents.DotNetBar.LabelX translateLabelX3;
+        private DevComponents.DotNetBar.LabelX translateLabelX4;
+        private DevComponents.DotNetBar.LabelX translateLabelX5;
+        private DevComponents.DotNetBar.LabelX translateLabelX6;
+        private DevComponents.DotNetBar.LabelX translateLabelX7;
+        private DevComponents.DotNetBar.LabelX translateLabelX8;
+        private DevComponents.DotNetBar.LabelX translateLabelX9;
+        private DevComponents.DotNetBar.LabelX translateLabelX10;
+        private DevComponents.DotNetBar.LabelX translateLabelX11;
+        private DevComponents.DotNetBar.LabelX translateLabelX12;
+        private DevComponents.DotNetBar.LabelX translateLabelX13;
+        private DevComponents.DotNetBar.LabelX translateLabelX14;
+        private DevComponents.DotNetBar.LabelX translateLabelX15;
+        private DevComponents.DotNetBar.LabelX translateLabelX16;
+        private DevComponents.DotNetBar.Controls.TextBoxX txtAPIkey;
+        private DevComponents.DotNetBar.Controls.TextBoxX txtNxAPIkey;
+        private DevComponents.DotNetBar.Controls.TextBoxX txtOpenAIBackend;
+        private DevComponents.DotNetBar.Controls.TextBoxX txtOpenAISystemMessage;
+        private DevComponents.DotNetBar.Controls.TextBoxX txtSecretkey;
+        private DevComponents.Editors.DoubleInput txtLMTemperature;
+        private DevComponents.Editors.IntegerInput txtMaximumToken;
+        private DevComponents.DotNetBar.ButtonX buttonX3;
+        private DevComponents.DotNetBar.ButtonX buttonX2;
+        private DevComponents.DotNetBar.ButtonX buttonX1;
+        private DevComponents.DotNetBar.ButtonX buttonXCheck;
+        private DevComponents.DotNetBar.ButtonX buttonXCheck2;
+        private DevComponents.DotNetBar.ButtonX buttonXCheck3;
         private System.Windows.Forms.PictureBox picPreview;
     }
 }
