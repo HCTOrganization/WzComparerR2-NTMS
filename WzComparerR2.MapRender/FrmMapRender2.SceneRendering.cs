@@ -884,30 +884,24 @@ namespace WzComparerR2.MapRender
             }
 
             //计算坐标
-            Point renderSize;
-            if (back.View.Animator is FrameAnimator frameAni)
+            int cx = back.Cx;
+            int cy = back.Cy;
+            if ((back.TileMode & TileMode.BothTile) != 0 && (cx == 0 || cy == 0))
             {
-                if (back.TileMode != TileMode.None && back.Ani == 1)
+                Point renderSize = Point.Zero;
+                if (back.View.Animator is FrameAnimator frameAni)
                 {
                     renderSize = frameAni.Data.GetBound().Size;
                 }
-                else
+                else if (back.View.Animator is AnimationItem aniItem)
                 {
-                    renderSize = frameAni.CurrentFrame.Rectangle.Size;
+                    // For spine animation, we don't know how to calculate the correct cx and cy
+                    renderSize = aniItem.Measure().Size;
                 }
-            }
-            else if (back.View.Animator is AnimationItem aniItem)
-            {
-                var rect = aniItem.Measure();
-                renderSize = rect.Size;
-            }
-            else
-            {
-                renderSize = Point.Zero;
-            }
 
-            int cx = (back.Cx == 0 ? renderSize.X : back.Cx);
-            int cy = (back.Cy == 0 ? renderSize.Y : back.Cy);
+                if (cx == 0) cx = renderSize.X;
+                if (cy == 0) cy = renderSize.Y;
+            }
 
             Vector2 tileOff = new Vector2(cx, cy);
             Vector2 position = new Vector2(back.X, back.Y);
