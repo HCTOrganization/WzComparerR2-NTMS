@@ -347,7 +347,7 @@ namespace WzComparerR2
                     {
                         if (wz_f.Type == e.WzType)
                         {
-                            if (e.HasChildNodes && wz_f.Node.Nodes.Count <= 0)
+                            if (wz_f.Node.Nodes.Count <= 0)
                             {
                                 continue;
                             }
