@@ -573,7 +573,7 @@ namespace WzComparerR2.AvatarCommon
                 List<ActionFrame> frames = new List<ActionFrame>();
                 for (int i = 0; ; i++)
                 {
-                    var frameNode = actionNode.FindNodeByPath(i.ToString());
+                    var frameNode = actionNode.FindNodeByPath(i.ToString())?.ResolveUol();
                     if (frameNode == null)
                     {
                         break;
@@ -615,7 +615,7 @@ namespace WzComparerR2.AvatarCommon
             Wz_Node bodyNode = PluginBase.PluginManager.FindWz("Character\\00002000.img");
             if (action.Level == 2)
             {
-                var frameNode = bodyNode.FindNodeByPath($@"{action.Name}\{frameIndex}");
+                var frameNode = bodyNode.FindNodeByPath($@"{action.Name}\{frameIndex}")?.ResolveUol();
                 if (frameNode != null)
                 {
                     ActionFrame frame = new ActionFrame();
