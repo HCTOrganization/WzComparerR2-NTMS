@@ -106,9 +106,11 @@ namespace WzComparerR2.Avatar.UI
             this.btnInosukeHashibira = new DevComponents.DotNetBar.ButtonItem();
             this.btnLaraTheSheep = new DevComponents.DotNetBar.ButtonItem();
             this.btnDskytian = new DevComponents.DotNetBar.ButtonItem();
+            this.btnCustomPreset = new DevComponents.DotNetBar.ButtonItem();
             this.Separator1 = new DevComponents.DotNetBar.Separator();
             this.Separator2 = new DevComponents.DotNetBar.Separator();
             this.Separator3 = new DevComponents.DotNetBar.Separator();
+            this.Separator4 = new DevComponents.DotNetBar.Separator();
             this.btnReset = new DevComponents.DotNetBar.ButtonItem();
             this.btnLock = new DevComponents.DotNetBar.ButtonItem();
             this.btnSaveAsGif = new DevComponents.DotNetBar.ButtonItem();
@@ -723,6 +725,10 @@ namespace WzComparerR2.Avatar.UI
             // Separator3
             //
             this.Separator3.SeparatorOrientation = DevComponents.DotNetBar.eDesignMarkerOrientation.Vertical;
+            //
+            // Separator4
+            //
+            this.Separator4.SeparatorOrientation = DevComponents.DotNetBar.eDesignMarkerOrientation.Vertical;
             // 
             // btnCharac
             // 
@@ -730,12 +736,14 @@ namespace WzComparerR2.Avatar.UI
             this.btnCharac.Image = global::WzComparerR2.Avatar.Properties.Resources.user;
             this.btnCharac.Name = "btnCharac";
             this.btnCharac.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.btnCustomPreset,
+            this.Separator1,
             this.btnMale,
             this.btnFemale,
-            this.Separator1,
+            this.Separator2,
             this.btnLaraTheSheep,
             this.btnDskytian,
-            this.Separator2,
+            this.Separator3,
             this.btnAngelicBuster,
             this.btnOldBokugen,
             this.btnNewBokugen,
@@ -746,7 +754,7 @@ namespace WzComparerR2.Avatar.UI
             this.btnBeastTamer,
             this.btnLara,
             this.btnLynn,
-            this.Separator3,
+            this.Separator4,
             this.btnPopuko,
             this.btnPipimi,
             this.btnMegumin,
@@ -757,6 +765,13 @@ namespace WzComparerR2.Avatar.UI
             this.btnZenitsuAgatsuma,
             this.btnInosukeHashibira});
             this.btnCharac.Tooltip = "初始化";
+            // 
+            // 
+            // btnCustomPreset
+            // 
+            this.btnCustomPreset.Name = "btnCustomPreset";
+            this.btnCustomPreset.Text = "自訂預設";
+            this.btnCustomPreset.Click += new System.EventHandler(this.btnCustomPreset_Click);
             // 
             // btnMale
             // 
@@ -1133,6 +1148,7 @@ namespace WzComparerR2.Avatar.UI
         private DevComponents.DotNetBar.ButtonItem btnInosukeHashibira;
         private DevComponents.DotNetBar.ButtonItem btnLaraTheSheep;
         private DevComponents.DotNetBar.ButtonItem btnDskytian;
+        private DevComponents.DotNetBar.ButtonItem btnCustomPreset;
         private DevComponents.DotNetBar.ButtonItem btnSaveAsGif;
         private DevComponents.DotNetBar.ButtonItem btnSaveOptions;
         private DevComponents.DotNetBar.ButtonItem btnEnableAutosave;
@@ -1141,6 +1157,7 @@ namespace WzComparerR2.Avatar.UI
         private DevComponents.DotNetBar.Separator Separator1;
         private DevComponents.DotNetBar.Separator Separator2;
         private DevComponents.DotNetBar.Separator Separator3;
+        private DevComponents.DotNetBar.Separator Separator4;
         private DevComponents.DotNetBar.LabelX labelX5;
         private DevComponents.DotNetBar.ButtonItem btnExport;
         private DevComponents.DotNetBar.LabelX labelX6;

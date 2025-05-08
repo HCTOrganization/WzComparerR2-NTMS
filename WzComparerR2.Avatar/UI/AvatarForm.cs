@@ -20,6 +20,7 @@ using WzComparerR2.Controls;
 using WzComparerR2.AvatarCommon;
 using WzComparerR2.Encoders;
 using System.IO;
+using DevComponents.AdvTree;
 
 namespace WzComparerR2.Avatar.UI
 {
@@ -47,6 +48,7 @@ namespace WzComparerR2.Avatar.UI
             btnReset_Click(btnReset, EventArgs.Empty);
             FillWeaponIdx();
             FillEarSelection();
+            Instance = this;
         }
 
         public SuperTabControlPanel GetTabPanel()
@@ -63,6 +65,7 @@ namespace WzComparerR2.Avatar.UI
         }
 
         public Entry PluginEntry { get; set; }
+        public static AvatarForm Instance;
 
         AvatarCanvas avatar;
         bool inited;
@@ -1833,6 +1836,42 @@ namespace WzComparerR2.Avatar.UI
             }
         }
 
+        private void btnCustomPreset_Click(object sender, EventArgs e)
+        {
+            string avatarPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images");
+            string pendingCode = GetAllPartsTag();
+            LoadAvatarForm.PendingCode = pendingCode;
+            if (LoadAvatarForm.Instance == null)
+            {
+                new LoadAvatarForm().Show();
+            }
+            else
+            {
+                LoadAvatarForm.Instance.Show();
+            }
+            LoadAvatarForm._files.Clear();
+            if (!File.Exists(avatarPath))
+            {
+                System.IO.Directory.CreateDirectory(avatarPath);
+            }
+            string[] files = Directory.GetFiles(avatarPath);
+            LoadAvatarForm._files.AddRange(files);
+            LoadAvatarForm.LoadImages();
+        }
+
+        public void SavePreset(string pendingCode)
+        {
+            if (string.IsNullOrEmpty(pendingCode)) return;
+            string avatarPresetPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images", pendingCode + ".png");
+            this.GetSelectedBodyFrame(out int bodyFrame, out _);
+            this.GetSelectedEmotionFrame(out int emoFrame, out _);
+            this.GetSelectedTamingFrame(out int tamingFrame, out _);
+            this.GetSelectedEffectFrames(out int[] effectFrames, out _);
+            var bone = this.avatar.CreateFrame(bodyFrame, emoFrame, tamingFrame, effectFrames);
+            var frame = this.avatar.DrawFrame(bone);
+            frame.Bitmap.Save(avatarPresetPath, System.Drawing.Imaging.ImageFormat.Png);
+        }
+
         private void btnDskytian_Click(object sender, EventArgs e)
         {
             switch (MessageBoxEx.Show("要呼出廉姫的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
@@ -2065,7 +2104,7 @@ namespace WzComparerR2.Avatar.UI
                 }
                 else
                 {
-                    outputFileName = System.IO.Path.Combine(specifiedSavePath, defaultFileName.Replace('\\', '.'));
+                    outputFileName = Path.Combine(specifiedSavePath, defaultFileName.Replace('\\', '.'));
                 }
 
                 var bone = this.avatar.CreateFrame(bodyFrame, emoFrame, tamingFrame, effectFrames);
@@ -2352,7 +2391,7 @@ namespace WzComparerR2.Avatar.UI
             }
         }
 
-        private void LoadCode(string code, int loadType)
+        public void LoadCode(string code, int loadType)
         {
             chairName = "";
             //解析
