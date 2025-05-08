@@ -1258,6 +1258,20 @@ namespace WzComparerR2
                 return;
             }
 
+            if (selectedNode.FullPathToFile.Contains("Language"))
+            {
+                this.advTree1.ContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+                this.toolStripMenuItem5,
+                this.tsmi1UpdateStringLinker});
+            }
+            else if (this.advTree1.ContextMenuStrip.Items.Contains(this.tsmi1UpdateStringLinker))
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    this.advTree1.ContextMenuStrip.Items.RemoveAt(this.advTree1.ContextMenuStrip.Items.Count - 1);
+                }
+            }
+
             listViewExWzDetail.BeginUpdate();
             listViewExWzDetail.Items.Clear();
 
@@ -2146,7 +2160,26 @@ namespace WzComparerR2
                 default:
                     break;
             }
+        }
 
+        private void tsmi1UpdateStringLinker_Click(object sender, EventArgs e)
+        {
+            Wz_Node stringNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("String");
+            Wz_Node itemNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Item");
+            Wz_Node etcNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Etc");
+
+            QueryPerformance.Start();
+            bool r = this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz()) && stringLinker.Update(stringNode, itemNode, etcNode); //reset(needed?) and update
+            QueryPerformance.End();
+            if (r)
+            {
+                double ms = (Math.Round(QueryPerformance.GetLastInterval(), 4) * 1000);
+                labelItemStatus.Text = "StringLinker更新完成。經過時間：" + ms + "毫秒";
+            }
+            else
+            {
+                MessageBoxEx.Show("StringLinker更新失敗。", "錯誤");
+            }
         }
         #endregion
 
