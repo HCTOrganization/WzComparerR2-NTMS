@@ -142,8 +142,9 @@ namespace WzComparerR2.CharaSimControl
             }
 
             propBlocks.Add(PrepareText(g, "種類: " + GetMobCategoryName(MobInfo.Category), GearGraphics.ItemDetailFont, Brushes.White, 0, picY));
-            string hpNum = !string.IsNullOrEmpty(MobInfo.FinalMaxHP) ? ToCJKNumberExpr(long.Parse(MobInfo.FinalMaxHP)) : ToCJKNumberExpr(MobInfo.MaxHP);
-            string mpNum = !string.IsNullOrEmpty(MobInfo.FinalMaxMP) ? ToCJKNumberExpr(long.Parse(MobInfo.FinalMaxMP)) : ToCJKNumberExpr(MobInfo.MaxMP);
+            long fmaxhp, fmaxmp;
+            string hpNum = long.TryParse(MobInfo.FinalMaxHP, out fmaxhp) ? ToCJKNumberExpr(fmaxhp) : ToCJKNumberExpr(MobInfo.MaxHP);
+            string mpNum = long.TryParse(MobInfo.FinalMaxMP, out fmaxmp) ? ToCJKNumberExpr(fmaxmp) : ToCJKNumberExpr(MobInfo.MaxMP);
             if (MobInfo.ChangeableMob)
             {
                 propBlocks.Add(PrepareText(g, "等級: 不定", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
