@@ -551,7 +551,7 @@ namespace WzComparerR2.Avatar.UI
             avatarContainer1.SetKey(actionTag);
         }
 
-        private string GetAllPartsTag()
+        public string GetAllPartsTag()
         {
             string[] partsID = new string[avatar.Parts.Length];
             for (int i = 0; i < avatar.Parts.Length; i++)
@@ -1839,8 +1839,6 @@ namespace WzComparerR2.Avatar.UI
         private void btnCustomPreset_Click(object sender, EventArgs e)
         {
             string avatarPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images");
-            string pendingCode = GetAllPartsTag();
-            LoadAvatarForm.PendingCode = pendingCode;
             if (LoadAvatarForm.Instance == null)
             {
                 new LoadAvatarForm().Show();
