@@ -3064,7 +3064,7 @@ namespace WzComparerR2
             // 
             this.tsmi1UpdateStringLinker.Name = "tsmi1UpdateStringLinker";
             this.tsmi1UpdateStringLinker.Size = new System.Drawing.Size(154, 22);
-            this.tsmi1UpdateStringLinker.Text = "更新StringLinker";
+            this.tsmi1UpdateStringLinker.Text = "更新字串表";
             this.tsmi1UpdateStringLinker.Click += new System.EventHandler(this.tsmi1UpdateStringLinker_Click); 
             // 
             // elementStyle1
