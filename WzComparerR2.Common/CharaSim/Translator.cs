@@ -187,7 +187,7 @@ namespace WzComparerR2.CharaSim
             return checkString.Any(c => (c >= '\uAC00' && c <= '\uD7A3'));
         }
 
-        public static string FullWidthKatakana(string inputString)
+        public static string FullWidthKatakana(string inputString, bool ConvertHiragana=true)
         {
             if (string.IsNullOrEmpty(inputString))
             {
@@ -195,7 +195,27 @@ namespace WzComparerR2.CharaSim
             }
             else
             {
-                return inputString.Normalize(NormalizationForm.FormKC);
+                StringBuilder sb = new StringBuilder();
+
+                if (ConvertHiragana)
+                {
+                    foreach (char c in inputString)
+                    {
+                        if (c >= 'ぁ' && c <= 'ゖ')
+                        {
+                            sb.Append((char)(c + 0x60));
+                        }
+                        else
+                        {
+                            sb.Append(c);
+                        }
+                    }
+                }
+                else
+                {
+                    sb.Append(inputString);
+                }
+                return sb.ToString().Normalize(NormalizationForm.FormKC);
             }
         }
 
