@@ -260,6 +260,26 @@ namespace WzComparerR2.CharaSim
                 }
             }
 
+            // MSEA v241 chair
+            Wz_Node customChairNode = node.FindNodeByPath("info\\customChair\\self");
+            if (customChairNode != null)
+            {
+                foreach (Wz_Node subNode in customChairNode.Nodes)
+                {
+                    if (subNode.Text == "tamingMob")
+                    {
+                        if (item.Props.ContainsKey(ItemPropType.tamingMob))
+                        {
+                            item.Props[ItemPropType.tamingMob] = Convert.ToInt64(subNode.Value);
+                        }
+                        else
+                        {
+                            item.Props.Add(ItemPropType.tamingMob, Convert.ToInt64(subNode.Value));
+                        }
+                    }
+                }
+            }
+
             Wz_Node specNode = node.FindNodeByPath("spec");
             if (specNode != null)
             {

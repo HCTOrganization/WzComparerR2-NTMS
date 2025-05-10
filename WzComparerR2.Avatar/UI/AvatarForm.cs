@@ -162,6 +162,10 @@ namespace WzComparerR2.Avatar.UI
                         Wz_Vector brm = null;
 
                         int tamingMobID = itemNode.FindNodeByPath("info\\tamingMob").GetValueEx<int>(0);
+                        if (tamingMobID == 0)
+                        {
+                            tamingMobID = itemNode.FindNodeByPath("info\\customChair\\self\\tamingMob").GetValueEx<int>(0);
+                        }
                         if (tamingMobID != 0)
                         {
                             brm = itemNode.FindNodeByPath("info\\group\\sit\\0\\bodyRelMove").GetValueEx<Wz_Vector>(null);
@@ -2475,6 +2479,10 @@ namespace WzComparerR2.Avatar.UI
                         Wz_Vector brm = null;
 
                         int tamingMobID = imgNode.FindNodeByPath("info\\tamingMob").GetValueEx<int>(0);
+                        if (tamingMobID == 0)
+                        {
+                            tamingMobID = imgNode.FindNodeByPath("info\\customChair\\self\\tamingMob").GetValueEx<int>(0);
+                        }
                         if (tamingMobID != 0)
                         {
                             brm = imgNode.FindNodeByPath("info\\group\\sit\\0\\bodyRelMove").GetValueEx<Wz_Vector>(null);
