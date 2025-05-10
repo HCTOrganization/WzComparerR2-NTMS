@@ -2500,11 +2500,14 @@ namespace WzComparerR2
 
         private IEnumerable<KeyValuePair<int, StringResult>> searchStringLinker(IEnumerable<Dictionary<int, StringResult>> dicts, string key, bool exact, bool isRegex)
         {
-            string[] match = key.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string fullWidthKey = Translator.FullWidthKatakana(key); 
+            string[] match = (key + " " + fullWidthKey).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             Regex re = null;
+            Regex fullWidthRe = null;
             if (isRegex)
             {
                 re = new Regex(key, RegexOptions.IgnoreCase);
+                fullWidthRe = new Regex(fullWidthKey, RegexOptions.IgnoreCase);
             }
 
             foreach (Dictionary<int, StringResult> dict in dicts)
@@ -2513,12 +2516,12 @@ namespace WzComparerR2
                 {
                     if (exact)
                     {
-                        if (kv.Key.ToString() == key || kv.Value.Name == key)
+                        if (kv.Key.ToString() == key || kv.Value.Name == key || Translator.FullWidthKatakana(kv.Value.Name) == fullWidthKey)
                             yield return kv;
                     }
                     else if (isRegex)
                     {
-                        if (re.IsMatch(kv.Key.ToString()) || (!string.IsNullOrEmpty(kv.Value.Name) && re.IsMatch(kv.Value.Name)))
+                        if (re.IsMatch(kv.Key.ToString()) || (!string.IsNullOrEmpty(kv.Value.Name) && re.IsMatch(kv.Value.Name)) || (!string.IsNullOrEmpty(kv.Value.Name) && fullWidthRe.IsMatch(Translator.FullWidthKatakana(kv.Value.Name))))
                         {
                             yield return kv;
                         }
@@ -2529,7 +2532,7 @@ namespace WzComparerR2
                         bool r = true;
                         foreach (string str in match)
                         {
-                            if (!(id.Contains(str) || (!string.IsNullOrEmpty(kv.Value.Name) && kv.Value.Name.Contains(str))))
+                            if (!(id.Contains(str) || (!string.IsNullOrEmpty(kv.Value.Name) && kv.Value.Name.Contains(str)) || (!string.IsNullOrEmpty(kv.Value.Name) && Translator.FullWidthKatakana(kv.Value.Name).Contains(str))))
                             {
                                 r = false;
                                 break;

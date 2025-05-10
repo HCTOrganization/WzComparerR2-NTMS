@@ -183,8 +183,20 @@ namespace WzComparerR2.CharaSim
 
         public static bool IsKoreanStringPresent(string checkString)
         {
-            if (checkString == null) return false;
+            if (string.IsNullOrEmpty(checkString)) return false;
             return checkString.Any(c => (c >= '\uAC00' && c <= '\uD7A3'));
+        }
+
+        public static string FullWidthKatakana(string inputString)
+        {
+            if (string.IsNullOrEmpty(inputString))
+            {
+                return inputString;
+            }
+            else
+            {
+                return inputString.Normalize(NormalizationForm.FormKC);
+            }
         }
 
         private static string GetKeyValue(string jsonDictKey)
