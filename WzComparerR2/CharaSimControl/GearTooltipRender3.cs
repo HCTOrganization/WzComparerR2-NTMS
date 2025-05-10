@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Resource = CharaSimResource.Resource;
-using WzComparerR2.Common;
-using WzComparerR2.CharaSim;
-using WzComparerR2.WzLib;
 using WzComparerR2.AvatarCommon;
-using DevComponents.DotNetBar;
-using Newtonsoft.Json.Linq;
+using WzComparerR2.CharaSim;
+using WzComparerR2.Common;
+using WzComparerR2.WzLib;
+using Resource = CharaSimResource.Resource;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -64,6 +62,7 @@ namespace WzComparerR2.CharaSimControl
         private string titleLanguage = "";
 
         private bool isPostNEXTClient;
+        private bool isMsnClient;
 
         public TooltipRender SetItemRender { get; set; }
         private List<int> linePos;
@@ -203,9 +202,10 @@ namespace WzComparerR2.CharaSimControl
 
         private Bitmap RenderBase(out int picH)
         {
-            StringResult destinyWeapon;
             // 1212142 = Destiny Shining Rod
-            isPostNEXTClient = StringLinker.StringEqp.TryGetValue(1212142, out destinyWeapon);
+            // 1006514 = Unchained Warrior Helm
+            isPostNEXTClient = StringLinker.StringEqp.TryGetValue(1212142, out _);
+            isMsnClient = StringLinker.StringEqp.TryGetValue(1006514, out _);
             int width = 324;
             Bitmap bitmap = new Bitmap(width, DefaultPicHeight);
             Graphics g = Graphics.FromImage(bitmap);
@@ -536,7 +536,7 @@ namespace WzComparerR2.CharaSimControl
                 {
                     if (bits[i] == '1')
                     {
-                        switch(i)
+                        switch (i)
                         {
                             case 0: reqJobStrList.Add("劍士"); break;
                             case 1: reqJobStrList.Add("法師"); break;
@@ -565,7 +565,7 @@ namespace WzComparerR2.CharaSimControl
             if (!string.IsNullOrEmpty(extraReq))
             {
                 if (extraReq.Contains("\r\n")) picH += 16;
-            } 
+            }
 
             // 요구 레벨
             this.Gear.Props.TryGetValue(GearPropType.reqLevel, out value2);
@@ -1046,7 +1046,7 @@ namespace WzComparerR2.CharaSimControl
             if (!string.IsNullOrEmpty(Gear.EpicHs) && sr[Gear.EpicHs] != null)
             {
                 hasThirdContents = true;
- 
+
                 var text = sr[Gear.EpicHs].Replace("#", " #").Trim();
 
                 if (!string.IsNullOrEmpty(text))
@@ -1076,7 +1076,7 @@ namespace WzComparerR2.CharaSimControl
                 if (Gear.Props.TryGetValue(GearPropType.superiorEqp, out value) && value > 0) //极真
                 {
                     var text = ItemStringHelper.GetGearPropString3(GearPropType.superiorEqp, value)[0];
-                    if (!string.IsNullOrEmpty (text))
+                    if (!string.IsNullOrEmpty(text))
                     {
                         hasThirdContents = true;
 
@@ -1514,27 +1514,30 @@ namespace WzComparerR2.CharaSimControl
             */
 
             // JMS exclusive pricing display
-            if (!Gear.GetBooleanValue(GearPropType.notSale) && (Gear.Props.TryGetValue(GearPropType.price, out value) && value > 0) && (!Gear.Cash) && ShowSoldPrice)
+            if (!isMsnClient)
             {
-                picH += 7;
-                GearGraphics.DrawString(g, "· 出售價格：" + value + "楓幣", GearGraphics.EquipDetailFont, 13, 244, ref picH, 16);
-                picH += 16;
-            }
-
-            if (Gear.Cash && ShowCashPurchasePrice)
-            {
-                Commodity commodityPackage = new Commodity();
-                if (CharaSimLoader.LoadedCommoditiesByItemId.ContainsKey(Gear.ItemID))
+                if (!Gear.GetBooleanValue(GearPropType.notSale) && (Gear.Props.TryGetValue(GearPropType.price, out value) && value > 0) && (!Gear.Cash) && ShowSoldPrice)
                 {
-                    commodityPackage = CharaSimLoader.LoadedCommoditiesByItemId[Gear.ItemID];
-                    if (commodityPackage.Price > 0)
+                    picH += 7;
+                    GearGraphics.DrawString(g, "· 出售價格：" + value + "楓幣", GearGraphics.EquipDetailFont, 13, 244, ref picH, 16);
+                    picH += 16;
+                }
+
+                if (Gear.Cash && ShowCashPurchasePrice)
+                {
+                    Commodity commodityPackage = new Commodity();
+                    if (CharaSimLoader.LoadedCommoditiesByItemId.ContainsKey(Gear.ItemID))
                     {
-                        picH += 16;
-                        GearGraphics.DrawString(g, "· 購買價格：" + commodityPackage.Price + "點數", GearGraphics.EquipDetailFont, 13, 244, ref picH, 16);
-                        if (Translator.DefaultDesiredCurrency != "none")
+                        commodityPackage = CharaSimLoader.LoadedCommoditiesByItemId[Gear.ItemID];
+                        if (commodityPackage.Price > 0)
                         {
-                            string exchangedPrice = Translator.GetConvertedCurrency(commodityPackage.Price, titleLanguage);
-                            GearGraphics.DrawString(g, "    " + exchangedPrice, GearGraphics.EquipDetailFont, 13, 244, ref picH, 16);
+                            picH += 16;
+                            GearGraphics.DrawString(g, "· 購買價格：" + commodityPackage.Price + "點數", GearGraphics.EquipDetailFont, 13, 244, ref picH, 16);
+                            if (Translator.DefaultDesiredCurrency != "none")
+                            {
+                                string exchangedPrice = Translator.GetConvertedCurrency(commodityPackage.Price, titleLanguage);
+                                GearGraphics.DrawString(g, "    " + exchangedPrice, GearGraphics.EquipDetailFont, 13, 244, ref picH, 16);
+                            }
                         }
                     }
                 }

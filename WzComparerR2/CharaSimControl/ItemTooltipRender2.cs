@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Drawing;
-using System.Drawing.Drawing2D;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Resource = CharaSimResource.Resource;
+using WzComparerR2.AvatarCommon;
+using WzComparerR2.CharaSim;
+using WzComparerR2.Common;
 using WzComparerR2.PluginBase;
 using WzComparerR2.WzLib;
-using WzComparerR2.Common;
-using WzComparerR2.CharaSim;
-using WzComparerR2.AvatarCommon;
+using Resource = CharaSimResource.Resource;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -59,6 +57,8 @@ namespace WzComparerR2.CharaSimControl
         public TooltipRender CashPackageRender { get; set; }
         private AvatarCanvasManager avatar { get; set; }
         private string titleLanguage = "";
+
+        private bool isMsnClient;
 
         public override Bitmap Render()
         {
@@ -337,6 +337,7 @@ namespace WzComparerR2.CharaSimControl
 
         private Bitmap RenderItem(out int picH)
         {
+            isMsnClient = StringLinker.StringEqp.TryGetValue(1006514, out _);
             bool isTranslateRequired = Translator.IsTranslateEnabled;
             Bitmap tooltip = new Bitmap(290, DefaultPicHeight);
             Graphics g = Graphics.FromImage(tooltip);
@@ -678,7 +679,7 @@ namespace WzComparerR2.CharaSimControl
                         }
                     }
                 }
-                desc += "\n#c技能：撿拾楓幣";
+                desc += isMsnClient ? "\n#c技能：撿拾NESO" : "\n#c技能：撿拾楓幣";
                 if (item.Props.TryGetValue(ItemPropType.pickupItem, out value) && value > 0)
                 {
                     desc += ", 撿取道具";
@@ -827,7 +828,7 @@ namespace WzComparerR2.CharaSimControl
                 GearGraphics.DrawString(g, "Tip. 當寵物等級達15級，可讓牠說出特定的內容。寵物說的話不會讓其他玩家看到。", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                 GearGraphics.DrawString(g, "#c例) /寵物 [内容]#", GearGraphics.ItemDetailFont, new Dictionary<string, Color>() { { "c", ((SolidBrush)GearGraphics.OrangeBrush4).Color } }, 100, right, ref picH, 16);
             }
-            
+
             string incline = null;
             ItemPropType[] inclineTypes = new ItemPropType[]{
                     ItemPropType.charismaEXP,
@@ -1096,32 +1097,35 @@ namespace WzComparerR2.CharaSimControl
             }
 
             // JMS exclusive pricing display
-            if (!item.GetBooleanValue(ItemPropType.quest) && !item.GetBooleanValue(ItemPropType.notSale) && (item.Props.TryGetValue(ItemPropType.price, out value) && value > 0) && ShowSoldPrice)
+            if (!isMsnClient)
             {
-                picH += 16;
-                GearGraphics.DrawString(g, "\r\n · 出售價格：" + value + "楓幣", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
-            }
-
-            if (item.GetBooleanValue(ItemPropType.autoPrice) && ShowSoldPrice && item.Level <= 250)
-            {
-                picH += 16;
-                GearGraphics.DrawString(g, "\r\n · 出售價格：" + (item.Level * 2) + "楓幣", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
-            }
-
-            if (item.Cash && ShowCashPurchasePrice)
-            {
-                Commodity commodityPackage = new Commodity();
-                if (CharaSimLoader.LoadedCommoditiesByItemId.ContainsKey(item.ItemID))
+                if (!item.GetBooleanValue(ItemPropType.quest) && !item.GetBooleanValue(ItemPropType.notSale) && (item.Props.TryGetValue(ItemPropType.price, out value) && value > 0) && ShowSoldPrice)
                 {
-                    commodityPackage = CharaSimLoader.LoadedCommoditiesByItemId[item.ItemID];
-                    if (commodityPackage.Price > 0)
+                    picH += 16;
+                    GearGraphics.DrawString(g, "\r\n · 出售價格：" + value + "楓幣", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                }
+
+                if (item.GetBooleanValue(ItemPropType.autoPrice) && ShowSoldPrice && item.Level <= 250)
+                {
+                    picH += 16;
+                    GearGraphics.DrawString(g, "\r\n · 出售價格：" + (item.Level * 2) + "楓幣", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                }
+
+                if (item.Cash && ShowCashPurchasePrice)
+                {
+                    Commodity commodityPackage = new Commodity();
+                    if (CharaSimLoader.LoadedCommoditiesByItemId.ContainsKey(item.ItemID))
                     {
-                        picH += 16;
-                        GearGraphics.DrawString(g, "\r\n · 購買價格：" + commodityPackage.Price + "點", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
-                        if (Translator.DefaultDesiredCurrency != "none")
+                        commodityPackage = CharaSimLoader.LoadedCommoditiesByItemId[item.ItemID];
+                        if (commodityPackage.Price > 0)
                         {
-                            string exchangedPrice = Translator.GetConvertedCurrency(commodityPackage.Price, titleLanguage);
-                            GearGraphics.DrawString(g, "    " + exchangedPrice, GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                            picH += 16;
+                            GearGraphics.DrawString(g, "\r\n · 購買價格：" + commodityPackage.Price + "點", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                            if (Translator.DefaultDesiredCurrency != "none")
+                            {
+                                string exchangedPrice = Translator.GetConvertedCurrency(commodityPackage.Price, titleLanguage);
+                                GearGraphics.DrawString(g, "    " + exchangedPrice, GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                            }
                         }
                     }
                 }
