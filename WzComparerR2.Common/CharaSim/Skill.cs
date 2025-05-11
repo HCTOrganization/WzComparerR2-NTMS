@@ -99,7 +99,7 @@ namespace WzComparerR2.CharaSim
         {
             Skill skill = new Skill();
             int skillID;
-            if (!Int32.TryParse(node.Text, out skillID))
+            if (!Int32.TryParse(node?.Text, out skillID))
                 return null;
             skill.SkillID = skillID;
 

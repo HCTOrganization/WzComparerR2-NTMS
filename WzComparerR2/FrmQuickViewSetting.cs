@@ -10,6 +10,7 @@ using System.Reflection;
 using DevComponents.Editors;
 using WzComparerR2.Config;
 using Newtonsoft.Json.Linq;
+using WzComparerR2.AvatarCommon;
 
 
 namespace WzComparerR2
@@ -33,14 +34,14 @@ namespace WzComparerR2
                 new ComboItem("楓之谷Wiki優化文本") { Value = 2 },
             });
 
-            this.comboBoxEx3.Items.AddRange((new[] { "黒", "赤", "橙", "黄", "緑", "青", "紫", "茶" }).Select(color =>
+            this.comboBoxEx3.Items.AddRange(AvatarCanvas.HairColor.Select(color =>
             {
                 var comboBoxItem = new DevComponents.DotNetBar.ComboBoxItem();
                 comboBoxItem.Text = color;
                 return comboBoxItem;
             }).ToArray());
 
-            this.comboBoxEx4.Items.AddRange((new[] { "黒", "青", "赤", "緑", "茶", "エメラルド", "紫", "アメジスト" }).Select(color =>
+            this.comboBoxEx4.Items.AddRange(AvatarCanvas.FaceColor.Select(color =>
             {
                 var comboBoxItem = new DevComponents.DotNetBar.ComboBoxItem();
                 comboBoxItem.Text = color;

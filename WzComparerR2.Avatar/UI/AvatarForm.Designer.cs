@@ -111,6 +111,7 @@ namespace WzComparerR2.Avatar.UI
             this.Separator2 = new DevComponents.DotNetBar.Separator();
             this.Separator3 = new DevComponents.DotNetBar.Separator();
             this.Separator4 = new DevComponents.DotNetBar.Separator();
+            this.btnAPI = new DevComponents.DotNetBar.ButtonItem();
             this.btnReset = new DevComponents.DotNetBar.ButtonItem();
             this.btnLock = new DevComponents.DotNetBar.ButtonItem();
             this.btnSaveAsGif = new DevComponents.DotNetBar.ButtonItem();
@@ -737,6 +738,7 @@ namespace WzComparerR2.Avatar.UI
             this.btnCharac.Name = "btnCharac";
             this.btnCharac.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.btnCustomPreset,
+            this.btnAPI,
             this.Separator1,
             this.btnMale,
             this.btnFemale,
@@ -931,6 +933,11 @@ namespace WzComparerR2.Avatar.UI
             this.btnInosukeHashibira.Name = "btnInosukeHashibira";
             this.btnInosukeHashibira.Text = "嘴平伊之助";
             this.btnInosukeHashibira.Click += new System.EventHandler(this.btnInosukeHashibira_Click);
+            // btnAPI
+            // 
+            this.btnAPI.Name = "btnAPI";
+            this.btnAPI.Text = "實際KMS角色";
+            this.btnAPI.Click += new System.EventHandler(this.btnAPI_Click);
             // 
             // btnReset
             // 
@@ -1149,6 +1156,7 @@ namespace WzComparerR2.Avatar.UI
         private DevComponents.DotNetBar.ButtonItem btnLaraTheSheep;
         private DevComponents.DotNetBar.ButtonItem btnDskytian;
         private DevComponents.DotNetBar.ButtonItem btnCustomPreset;
+        private DevComponents.DotNetBar.ButtonItem btnAPI;
         private DevComponents.DotNetBar.ButtonItem btnSaveAsGif;
         private DevComponents.DotNetBar.ButtonItem btnSaveOptions;
         private DevComponents.DotNetBar.ButtonItem btnEnableAutosave;
