@@ -640,11 +640,68 @@ namespace WzComparerR2.CharaSim
                 case GearType.powerSource:
                 case GearType.bit:
                 case GearType.jewel:
-                case (GearType)3: //发型
                     return 2;
+                case GearType.hair:
+                case GearType.hair2:
+                case GearType.hair3:
+                case GearType.face:
+                case GearType.face2:
+                    return GetCosmeticGender(code) - 1;
             }
 
             return code / 1000 % 10;
+        }
+
+        public static int GetCosmeticGender(int code)
+        {
+            var check = code / 1000;
+
+            switch (check / 10)
+            {
+                case 2: // face
+                case 5:
+                    switch (check % 10)
+                    {
+                        case 0:
+                        case 3:
+                        case 5:
+                        case 7:
+                            return 1; // 남
+
+                        case 1:
+                        case 4:
+                        case 6:
+                        case 8:
+                            return 2; // 여
+
+                        default:
+                            return 3; // 공용
+                    }
+
+                case 3: // hair
+                case 4:
+                case 6:
+                    switch (check % 10)
+                    {
+                        case 0:
+                        case 3:
+                        case 5:
+                        case 6:
+                            return 1; // 남
+
+                        case 1:
+                        case 4:
+                        case 7:
+                        case 8:
+                            return 2; // 여
+
+                        default:
+                            return 3; // 공용
+                    }
+
+                default:
+                    return 3; // 공용
+            }
         }
 
         public static bool SpecialCanPotential(GearType type)
