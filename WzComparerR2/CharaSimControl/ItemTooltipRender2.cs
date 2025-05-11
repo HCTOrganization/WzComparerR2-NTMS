@@ -813,20 +813,23 @@ namespace WzComparerR2.CharaSimControl
                     }
                 }
 
-                GearGraphics.DrawString(g, "[可使用的指令]", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
-                foreach (int l0 in commandLev.Values.OrderBy(i => i).Distinct())
+                if (commandLev.Values.Count > 0)
                 {
-                    if (Translator.IsKoreanStringPresent(string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))))
+                    GearGraphics.DrawString(g, "[可使用的指令]", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                    foreach (int l0 in commandLev.Values.OrderBy(i => i).Distinct())
                     {
-                        GearGraphics.DrawString(g, "Lv. " + l0 + "以上 : " + string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s)), GearGraphics.KMSItemDetailFont, 100, right, ref picH, 16);
+                        if (Translator.IsKoreanStringPresent(string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))))
+                        {
+                            GearGraphics.DrawString(g, "Lv. " + l0 + "以上 : " + string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s)), GearGraphics.KMSItemDetailFont, 100, right, ref picH, 16);
+                        }
+                        else
+                        {
+                            GearGraphics.DrawString(g, "Lv. " + l0 + "以上 : " + string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s)), GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                        }
                     }
-                    else
-                    {
-                        GearGraphics.DrawString(g, "Lv. " + l0 + "以上 : " + string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s)), GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
-                    }
+                    GearGraphics.DrawString(g, "Tip. 當寵物等級達15級，可讓牠說出特定的內容。寵物說的話不會讓其他玩家看到。", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                    GearGraphics.DrawString(g, "#c例) /寵物 [内容]#", GearGraphics.ItemDetailFont, new Dictionary<string, Color>() { { "c", ((SolidBrush)GearGraphics.OrangeBrush4).Color } }, 100, right, ref picH, 16);
                 }
-                GearGraphics.DrawString(g, "Tip. 當寵物等級達15級，可讓牠說出特定的內容。寵物說的話不會讓其他玩家看到。", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
-                GearGraphics.DrawString(g, "#c例) /寵物 [内容]#", GearGraphics.ItemDetailFont, new Dictionary<string, Color>() { { "c", ((SolidBrush)GearGraphics.OrangeBrush4).Color } }, 100, right, ref picH, 16);
             }
 
             string incline = null;
