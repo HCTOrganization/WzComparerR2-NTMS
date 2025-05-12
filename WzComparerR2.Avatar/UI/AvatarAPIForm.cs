@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using DevComponents.DotNetBar;
+using WzComparerR2.CharaSim;
 
 namespace WzComparerR2.Avatar.UI
 {
@@ -36,6 +37,18 @@ namespace WzComparerR2.Avatar.UI
             {
                 this.DialogResult = DialogResult.OK;
                 this.Close();
+            }
+        }
+
+        private void textBoxX1_TextChanged(object sender, EventArgs e)
+        {
+            if (Translator.IsKoreanStringPresent(textBoxX1.Text))
+            {
+                textBoxX1.Font = new Font("Dotum", 9f);
+            }
+            else
+            {
+                textBoxX1.Font = new Font("SimSun", 9f);
             }
         }
     }

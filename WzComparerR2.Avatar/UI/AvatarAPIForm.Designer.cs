@@ -79,6 +79,7 @@
             this.textBoxX1.Size = new System.Drawing.Size(260, 21);
             this.textBoxX1.TabIndex = 0;
             this.textBoxX1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxX1_KeyDown);
+            this.textBoxX1.TextChanged += new System.EventHandler(this.textBoxX1_TextChanged);
             // 
             // checkBoxX1
             // 
