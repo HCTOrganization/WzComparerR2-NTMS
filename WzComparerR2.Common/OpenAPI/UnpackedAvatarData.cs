@@ -12,18 +12,29 @@ namespace WzComparerR2.OpenAPI
         public UnpackedAvatarData(int version)
         {
             Version = version;
-            if (Utils.Structure.ContainsKey(version))
+            UnknownVer = false;
+
+            if (!Utils.Structure.ContainsKey(version))
             {
-                Unpacked = Utils.Structure[version].Select(d => new DataInfo(d.Name, d.Bits)
+                if (version < Utils.Structure.Keys.Min())
                 {
-                    Value = d.Value
-                }).ToList();
-                Unsupported = false;
+                    version = Utils.Structure.Keys.Min();
+                }
+                else
+                {
+                    version = Utils.Structure.Keys.Max();
+                }
+                UnknownVer = true;
             }
-            else Unsupported = true;
+                
+            Unpacked = Utils.Structure[version].Select(d => new DataInfo(d.Name, d.Bits)
+            {
+                Value = d.Value
+            }).ToList();
         }
+
         public int Version { get; set; }
-        public bool Unsupported { get; set; }
+        public bool UnknownVer { get; set; }
         public List<DataInfo> Unpacked { get; set; }
 
         public int GetValue(string name)

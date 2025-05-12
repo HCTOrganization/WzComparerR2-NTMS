@@ -53,6 +53,11 @@ namespace WzComparerR2.Avatar.UI
             FillWeaponIdx();
             FillEarSelection();
             Instance = this;
+
+#if NET6_0_OR_GREATER
+            // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
+            this.Font = new Font(new FontFamily("SimSun"), 9f);
+#endif
         }
 
         public SuperTabControlPanel GetTabPanel()
@@ -1014,8 +1019,8 @@ namespace WzComparerR2.Avatar.UI
                 text = string.Format("{0}\r\n{1}{2}", sr.Name, part.IsSkill ? "s" : "", part.ID);
                 if (part.IsMixing)
                 {
-                    text = string.Format("{0} ( {1} {2} : {3} {4} )\r\n{5}+{6}*{7}",
-                        Regex.Replace(sr.Name, "^([^ ]+色 )?", "ミックス "),
+                    text = string.Format("{0}\r\n{1} {2} : {3} {4}\r\n{5}+{6}*{7}",
+                        Regex.Replace(sr.Name, "^([^ ]+色 )?", "混染 "),
                         GetColorName(part.ID.Value),
                         100 - part.MixOpacity,
                         GetMixColorName(part.MixColor, part.ID.Value),
@@ -2069,7 +2074,7 @@ namespace WzComparerR2.Avatar.UI
 #if NET6_0_OR_GREATER
             if (PluginManager.FindWz(Wz_Type.Base) == null)
             {
-                MessageBoxEx.Show("未開啟 Base.wz 檔案。", "錯誤");
+                ToastNotification.Show(this, $"錯誤：未開啟 Base.wz 檔案。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
                 return;
             }
 
@@ -2080,7 +2085,7 @@ namespace WzComparerR2.Avatar.UI
                 var key = ((string)WcR2Config.Default.NxOpenAPIKey).Trim();
                 if (string.IsNullOrEmpty(key))
                 {
-                    MessageBoxEx.Show("請在設定中輸入您的 NX OpenAPI 金鑰。");
+                    ToastNotification.Show(this, $"請在設定中輸入您的 API 金鑰。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
                     return;
                 }
 
@@ -2096,18 +2101,16 @@ namespace WzComparerR2.Avatar.UI
 
                     if (dlg.Type1)
                     {
-                        try { await Type1(ocid); }
-                        catch { await Type2(ocid); }
+                        await Type1(ocid);
                     }
                     else
                     {
-                        try { await Type2(ocid); }
-                        catch { await Type1(ocid); }
+                        await Type2(ocid);
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBoxEx.Show($"{ex.Message}", "오류");
+                    ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
                 }
             }
 
@@ -2121,6 +2124,11 @@ namespace WzComparerR2.Avatar.UI
 
                 var code = $"20{res.Skin}, {res.Face + mixFace}, {res.Hair + mixHair}, {res.Cap}, {res.FaceAcc}, {res.EyeAcc}, {res.EarAcc}, {res.Coat}, {res.Pants}, {res.Shoes}, {res.Gloves}, {res.Cape}, {res.Shield}, {res.Weapon}, {res.CashWeapon}";
                 LoadCode(code, 0);
+
+                if (res.UnknownVer)
+                {
+                    throw new Exception($"未知代碼版本。 (版本: {res.Version})");
+                }
             }
 
             async Task Type2(string ocid) // 장비창 기준
@@ -2131,19 +2139,28 @@ namespace WzComparerR2.Avatar.UI
                 var faceID = FindIDFromString(res.FaceInfo["FaceName"], gender: res.Gender);
                 var hairID = FindIDFromString(res.HairInfo["HairName"], gender: res.Gender);
 
-                faceID = faceID.Remove(2, 1).Insert(2, Array.IndexOf(AvatarCanvas.FaceColor, res.FaceInfo["BaseColor"]).ToString());
-                hairID = hairID.Remove(4, 1).Insert(4, Array.IndexOf(AvatarCanvas.HairColor, res.HairInfo["BaseColor"]).ToString());
+                if (string.IsNullOrEmpty(skinID))
+                {
+                    throw new Exception($"連接並更新您的角色。");
+                }
+
+                if (!string.IsNullOrEmpty(faceID) && faceID.Length == 5)
+                    faceID = faceID.Remove(2, 1).Insert(2, Array.IndexOf(AvatarCanvas.FaceColor, res.FaceInfo["BaseColor"]).ToString());
+                if (!string.IsNullOrEmpty(hairID) && hairID.Length == 5)
+                    hairID = hairID.Remove(4, 1).Insert(4, Array.IndexOf(AvatarCanvas.HairColor, res.HairInfo["BaseColor"]).ToString());
 
                 var mixFace = !string.IsNullOrEmpty(res.FaceInfo["MixColor"]) ? $"+{Array.IndexOf(AvatarCanvas.FaceColor, res.FaceInfo["MixColor"])}*{res.FaceInfo["MixRate"]}" : "";
                 var mixHair = !string.IsNullOrEmpty(res.HairInfo["MixColor"]) ? $"+{Array.IndexOf(AvatarCanvas.HairColor, res.HairInfo["MixColor"])}*{res.HairInfo["MixRate"]}" : "";
 
                 LoadCode($"{skinID},{faceID + mixFace},{hairID + mixHair}", 0);
-                LoadCode(string.Join(",", res.ItemList), 1);
-                LoadCode(string.Join(",", res.CashBaseItemList), 1);
-                LoadCode(string.Join(",", res.CashPresetItemList), 1);
+                foreach (var list in new[] { res.ItemList, res.CashBaseItemList, res.CashPresetItemList })
+                {
+                    if (list.Count > 0)
+                        LoadCode(string.Join(",", list), 1);
+                }
             }
 #else
-            MessageBoxEx.Show("若要使用此功能，您必須使用.NET 6.0 或 .NET 8.0 版本。");
+            ToastNotification.Show(this, $"若要使用此功能，您必須使用.NET 6.0 或 .NET 8.0 版本。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
             return;
 #endif
         }
@@ -2491,13 +2508,13 @@ namespace WzComparerR2.Avatar.UI
             var matches = Regex.Matches(code, @"s?(\d+)(\+([0-7])\*(\d{1,2}))?([,\s]|$)");
             if (matches.Count <= 0)
             {
-                MessageBoxEx.Show("沒有與道具 ID 相符的道具。", "錯誤");
+                ToastNotification.Show(this, $"錯誤: 沒有與道具 ID 相符的道具。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
                 return;
             }
 
             if (PluginManager.FindWz(Wz_Type.Base) == null)
             {
-                MessageBoxEx.Show("未開啟 Base.wz。", "錯誤");
+                ToastNotification.Show(this, $"錯誤: 未開啟 Base.wz。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
                 return;
             }
 
@@ -2508,7 +2525,7 @@ namespace WzComparerR2.Avatar.UI
             //试图初始化
             if (!this.inited && !this.AvatarInit())
             {
-                MessageBoxEx.Show("無法初始化紙娃娃模組。", "錯誤");
+                ToastNotification.Show(this, $"錯誤: 無法初始化紙娃娃模組。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
                 return;
             }
             var sl = this.PluginEntry.Context.DefaultStringLinker;
@@ -2649,7 +2666,7 @@ namespace WzComparerR2.Avatar.UI
                 {
                     sb.Append("  ").AppendLine(gearID.ToString("D8"));
                 }
-                MessageBoxEx.Show(sb.ToString(), "錯誤");
+                ToastNotification.Show(this, sb.ToString(), null, 4000, eToastGlowColor.Red, eToastPosition.TopCenter);
             }
 
         }
@@ -2778,7 +2795,7 @@ namespace WzComparerR2.Avatar.UI
         {
             if (string.IsNullOrEmpty(name))
             {
-                return "0";
+                return "";
             }
 
             var sl = this.PluginEntry.Context.DefaultStringLinker;
@@ -2797,7 +2814,7 @@ namespace WzComparerR2.Avatar.UI
                     }
                 }
             }
-            return "0";
+            return "";
         }
 
         private class Animator
