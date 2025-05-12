@@ -1871,7 +1871,7 @@ namespace WzComparerR2.Avatar.UI
         public void SavePreset(string pendingCode)
         {
             if (string.IsNullOrEmpty(pendingCode)) return;
-            string avatarPresetPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images", pendingCode + ".png");
+            string avatarPresetPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images", pendingCode.Replace("*", "×") + ".png");
             this.GetSelectedBodyFrame(out int bodyFrame, out _);
             this.GetSelectedEmotionFrame(out int emoFrame, out _);
             this.GetSelectedTamingFrame(out int tamingFrame, out _);

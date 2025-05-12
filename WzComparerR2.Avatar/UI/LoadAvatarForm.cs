@@ -135,7 +135,7 @@ namespace WzComparerR2.Avatar.UI
             }
             if (Code.Length < 10)
                 return;
-            string Code2 = Code.Replace(".png", "");
+            string Code2 = Code.Replace(".png", "").Replace("×", "*");
             AvatarForm.Instance.LoadCode(Code2, 0);
         }
     }
