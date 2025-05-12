@@ -1270,7 +1270,7 @@ namespace WzComparerR2
             // 
             // comboBoxItem2
             // 
-            this.comboBoxItem2.ComboWidth = 85;
+            this.comboBoxItem2.ComboWidth = 72;
             this.comboBoxItem2.DropDownHeight = 106;
             this.comboBoxItem2.ItemHeight = 16;
             this.comboBoxItem2.Items.AddRange(new object[] {
@@ -1323,7 +1323,7 @@ namespace WzComparerR2
             // 
             // 
             this.itemContainer12.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.itemContainer12.ItemSpacing = 40;
+            this.itemContainer12.ItemSpacing = 15;
             this.itemContainer12.Name = "itemContainer12";
             this.itemContainer12.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.checkBoxItemRegex2,
@@ -1458,7 +1458,7 @@ namespace WzComparerR2
             // 
             // comboBoxItem1
             // 
-            this.comboBoxItem1.ComboWidth = 85;
+            this.comboBoxItem1.ComboWidth = 72;
             this.comboBoxItem1.DropDownHeight = 106;
             this.comboBoxItem1.ItemHeight = 16;
             this.comboBoxItem1.Items.AddRange(new object[] {
@@ -1486,7 +1486,7 @@ namespace WzComparerR2
             // 
             // 
             this.itemContainer17.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.itemContainer17.ItemSpacing = 30;
+            this.itemContainer17.ItemSpacing = 0;
             this.itemContainer17.Name = "itemContainer17";
             this.itemContainer17.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.checkBoxItemRegex1,
