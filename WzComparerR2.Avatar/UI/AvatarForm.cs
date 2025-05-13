@@ -2120,7 +2120,7 @@ namespace WzComparerR2.Avatar.UI
 
                 var mixFace = int.Parse(res.MixFaceRatio) != 0 ? $"+{res.MixFaceColor}*{res.MixFaceRatio}" : "";
                 var mixHair = int.Parse(res.MixHairRatio) != 0 ? $"+{res.MixHairColor}*{res.MixHairRatio}" : "";
-                this.avatar.EarType = int.Parse(res.EarType);
+                this.avatar.EarType = res.EarType;
 
                 var code = $"20{res.Skin}, {res.Face + mixFace}, {res.Hair + mixHair}, {res.Cap}, {res.FaceAcc}, {res.EyeAcc}, {res.EarAcc}, {res.Coat}, {res.Pants}, {res.Shoes}, {res.Gloves}, {res.Cape}, {res.Shield}, {res.Weapon}, {res.CashWeapon}";
                 LoadCode(code, 0);

@@ -269,9 +269,47 @@ namespace WzComparerR2.OpenAPI
             return ret;
         }
 
-        public string GetEarType()
+        public byte GetEarType()
         {
-            return GetValue("earType").ToString();
+            return (byte)GetValue("earType");
+        }
+
+        public byte GetJobWingTailType()
+        {
+            return (byte)GetValue("jobWingTailType");
+        }
+
+        public string GetJobWingTailTypeString()
+        {
+            switch (this.JobWingTailType)
+            {
+                case 1:
+                    return "호영";
+                case 2:
+                    return "라라";
+                default:
+                    return null;
+            }
+        }
+
+        public byte GetWeaponMotionType()
+        {
+            return (byte)GetValue("weaponMotion");
+        }
+
+        public string GetWeaponMotionTypeString()
+        {
+            switch (this.WeaponMotionType)
+            {
+                case 1:
+                    return "한손 무기 모션";
+                case 2:
+                    return "두손 무기 모션";
+                case 3:
+                    return "건 무기 모션";
+                default:
+                    return "기본 무기 모션";
+            }
         }
 
         public string GetMixHairRatio()
@@ -294,12 +332,32 @@ namespace WzComparerR2.OpenAPI
             return GetValue("mixFaceInfo").ToString().PadLeft(3, '0').Substring(0, 1);
         }
 
+        public PrismInfo GetPrismInfo(string type)
+        {
+            var ret = new PrismInfo();
+            if (GetValue($"has{type}Prism") != 0)
+            {
+                ret.ColorType = (byte)GetValue($"{type.ToLower()}PrismColorType");
+                ret.Brightness = GetValue($"{type.ToLower()}PrismBrightness") - 100;
+                ret.Saturation = GetValue($"{type.ToLower()}PrismSaturation") - 100;
+                ret.Hue = GetValue($"{type.ToLower()}PrismHue");
+                ret.Valid = true;
+            }
+            else
+            {
+                ret.Valid = false;
+            }
+            return ret;
+        }
+
         public void SetProperties()
         {
             Gender = GetGender();
+
             Skin = GetSkin();
             Face = GetFace();
             Hair = GetHair();
+
             Cap = GetCap();
             FaceAcc = GetFaceAcc();
             EyeAcc = GetEyeAcc();
@@ -312,15 +370,29 @@ namespace WzComparerR2.OpenAPI
             Shield = GetShield();
             CashWeapon = GetCashWeapon();
             Weapon = GetWeapon();
+
             Ring1 = GetRing(1);
             Ring2 = GetRing(2);
             Ring3 = GetRing(3);
             Ring4 = GetRing(4);
+
             EarType = GetEarType();
+            JobWingTailType = GetJobWingTailType();
+            WeaponMotionType = GetWeaponMotionType();
+
             MixHairRatio = GetMixHairRatio();
             MixHairColor = GetMixHairColor();
             MixFaceRatio = GetMixFaceRatio();
             MixFaceColor = GetMixFaceColor();
+
+            CapPrismInfo = GetPrismInfo("Cap");
+            CoatPrismInfo = GetPrismInfo("Coat");
+            PantsPrismInfo = GetPrismInfo("Pants");
+            ShoesPrismInfo = GetPrismInfo("Shoes");
+            GlovesPrismInfo = GetPrismInfo("Gloves");
+            CapePrismInfo = GetPrismInfo("Cape");
+            WeaponPrismInfo = GetPrismInfo("Weapon");
+            SkinPrismInfo = GetPrismInfo("Skin");
         }
 
         public int Gender { get; set; }
@@ -343,11 +415,58 @@ namespace WzComparerR2.OpenAPI
         public string Ring2 { get; set; }
         public string Ring3 { get; set; }
         public string Ring4 { get; set; }
-        public string EarType { get; set; }
+        public byte EarType { get; set; }
+        public byte JobWingTailType { get; set; }
+        public byte WeaponMotionType { get; set; }
         public string MixHairRatio { get; set; }
         public string MixHairColor { get; set; }
         public string MixFaceRatio { get; set; }
         public string MixFaceColor { get; set; }
+        public PrismInfo CapPrismInfo { get; set; }
+        public PrismInfo CoatPrismInfo { get; set; }
+        public PrismInfo PantsPrismInfo { get; set; }
+        public PrismInfo ShoesPrismInfo { get; set; }
+        public PrismInfo GlovesPrismInfo { get; set; }
+        public PrismInfo CapePrismInfo { get; set; }
+        public PrismInfo WeaponPrismInfo { get; set; }
+        public PrismInfo SkinPrismInfo { get; set; }
+    }
+
+    public class PrismInfo
+    {
+        public bool Valid { get; set; }
+        public byte ColorType { get; set; }
+        public int Hue { get; set; }
+        public int Saturation { get; set; }
+        public int Brightness { get; set; }
+
+        public bool HasValues()
+        {
+            return this.Valid;
+        }
+
+        public string GetColorType()
+        {
+            switch (ColorType)
+            {
+                case 0:
+                    return "전체 색상 계열";
+                case 1:
+                    return "빨간색 계열";
+                case 2:
+                    return "노란색 계열";
+                case 3:
+                    return "초록색 계열";
+                case 4:
+                    return "청록색 계열";
+                case 5:
+                    return "파란색 계열";
+                case 6:
+                    return "자주색 계열";
+                default:
+                    return null;
+            }
+        }
     }
 }
 #endif
