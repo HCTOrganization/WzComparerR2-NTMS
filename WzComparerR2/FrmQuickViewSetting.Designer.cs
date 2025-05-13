@@ -31,6 +31,7 @@
             this.superTabControl1 = new DevComponents.DotNetBar.SuperTabControl();
             this.superTabControlPanel1 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.chkEnable22AniStyle = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.checkBoxX23 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX22 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX21 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX20 = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -571,6 +572,7 @@
             // 
             // superTabControlPanel3
             // 
+            this.superTabControlPanel3.Controls.Add(this.checkBoxX23);
             this.superTabControlPanel3.Controls.Add(this.checkBoxX20);
             this.superTabControlPanel3.Controls.Add(this.checkBoxX17);
             this.superTabControlPanel3.Controls.Add(this.checkBoxX12);
@@ -588,6 +590,21 @@
             this.superTabControlPanel3.TabIndex = 0;
             this.superTabControlPanel3.TabItem = this.superTabItem3;
             this.superTabControlPanel3.Visible = false;
+            // 
+            // checkBoxX23
+            // 
+            this.checkBoxX23.AutoSize = true;
+            this.checkBoxX23.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.checkBoxX23.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.checkBoxX23.Location = new System.Drawing.Point(13, 154);
+            this.checkBoxX23.Name = "checkBoxX23";
+            this.checkBoxX23.Size = new System.Drawing.Size(126, 16);
+            this.checkBoxX23.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.checkBoxX23.TabIndex = 5;
+            this.checkBoxX23.Text = "顯示關聯騎寵";
             // 
             // checkBoxX12
             // 
@@ -612,7 +629,7 @@
             // 
             // 
             this.labelX14.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX14.Location = new System.Drawing.Point(13, 156);
+            this.labelX14.Location = new System.Drawing.Point(13, 180);
             this.labelX14.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.labelX14.Name = "labelX14";
             this.labelX14.Size = new System.Drawing.Size(89, 18);
@@ -627,7 +644,7 @@
             // 
             // 
             this.labelX15.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX15.Location = new System.Drawing.Point(13, 180);
+            this.labelX15.Location = new System.Drawing.Point(13, 204);
             this.labelX15.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.labelX15.Name = "labelX15";
             this.labelX15.Size = new System.Drawing.Size(89, 18);
@@ -642,7 +659,7 @@
             this.comboBoxEx3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBoxEx3.FormattingEnabled = true;
             this.comboBoxEx3.ItemHeight = 15;
-            this.comboBoxEx3.Location = new System.Drawing.Point(140, 154);
+            this.comboBoxEx3.Location = new System.Drawing.Point(140, 178);
             this.comboBoxEx3.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.comboBoxEx3.Name = "comboBoxEx3";
             this.comboBoxEx3.Size = new System.Drawing.Size(104, 21);
@@ -657,7 +674,7 @@
             this.comboBoxEx4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBoxEx4.FormattingEnabled = true;
             this.comboBoxEx4.ItemHeight = 15;
-            this.comboBoxEx4.Location = new System.Drawing.Point(140, 178);
+            this.comboBoxEx4.Location = new System.Drawing.Point(140, 202);
             this.comboBoxEx4.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.comboBoxEx4.Name = "comboBoxEx4";
             this.comboBoxEx4.Size = new System.Drawing.Size(104, 21);
@@ -956,6 +973,7 @@
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX20;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX21;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX22;
+        private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX23;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnable22AniStyle;
         private DevComponents.DotNetBar.LabelX labelX14;
         private DevComponents.DotNetBar.LabelX labelX15;

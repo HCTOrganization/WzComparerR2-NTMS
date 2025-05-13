@@ -264,6 +264,7 @@ namespace WzComparerR2
             tooltipQuickView.ItemRender.ShowNickTag = Setting.Item.ShowNickTag;
             tooltipQuickView.ItemRender.ShowSoldPrice = Setting.Item.ShowSoldPrice;
             tooltipQuickView.ItemRender.ShowCashPurchasePrice = Setting.Item.ShowCashPurchasePrice;
+            tooltipQuickView.ItemRender.ShowLinkedTamingMob = Setting.Item.ShowLinkedTamingMob;
             tooltipQuickView.ItemRender.CosmeticHairColor = Setting.Item.CosmeticHairColor;
             tooltipQuickView.ItemRender.CosmeticFaceColor = Setting.Item.CosmeticFaceColor;
             tooltipQuickView.ItemRender.Enable22AniStyle = Setting.Enable22AniStyle;
@@ -3729,6 +3730,7 @@ namespace WzComparerR2
                     comparer.ShowObjectID = chkShowObjectID.Checked;
                     comparer.ShowChangeType = chkShowChangeType.Checked;
                     comparer.ShowPrice = chkShowPrice.Checked;
+                    comparer.ShowLinkedTamingMob = chkShowLinkedTamingMob.Checked;
                     comparer.Enable22AniStyle = GearGraphics.is22aniStyle;
                     comparer.StateInfoChanged += new EventHandler(comparer_StateInfoChanged);
                     comparer.StateDetailChanged += new EventHandler(comparer_StateDetailChanged);

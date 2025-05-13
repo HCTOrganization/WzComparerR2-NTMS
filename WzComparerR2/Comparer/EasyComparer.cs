@@ -57,6 +57,7 @@ namespace WzComparerR2.Comparer
         public bool ShowObjectID { get; set; }
         public bool ShowChangeType { get; set; }
         public bool ShowPrice { get; set; }
+        public bool ShowLinkedTamingMob { get; set; }
 
         public string StateInfo
         {
@@ -822,6 +823,7 @@ namespace WzComparerR2.Comparer
                 itemRenderNewOld[i].Enable22AniStyle = this.Enable22AniStyle;
                 itemRenderNewOld[i].ShowSoldPrice = this.ShowPrice;
                 itemRenderNewOld[i].ShowCashPurchasePrice = this.ShowPrice;
+                itemRenderNewOld[i].ShowLinkedTamingMob = this.ShowLinkedTamingMob;
             }
 
             foreach (var itemID in OutputItemTooltipIDs)

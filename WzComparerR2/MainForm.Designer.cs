@@ -227,6 +227,7 @@ namespace WzComparerR2
             this.chkShowObjectID = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowChangeType = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowPrice = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowLinkedTamingMob = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.superTooltip1 = new DevComponents.DotNetBar.SuperTooltip();
             this.chkOutputRemovedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOutputAddedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -2547,6 +2548,7 @@ namespace WzComparerR2
             this.superTabControlPanel2.Controls.Add(this.chkShowObjectID);
             this.superTabControlPanel2.Controls.Add(this.chkShowChangeType);
             this.superTabControlPanel2.Controls.Add(this.chkShowPrice);
+            this.superTabControlPanel2.Controls.Add(this.chkShowLinkedTamingMob);
             this.superTabControlPanel2.Controls.Add(this.chkResolvePngLink);
             this.superTabControlPanel2.Controls.Add(this.chkOutputRemovedImg);
             this.superTabControlPanel2.Controls.Add(this.chkOutputAddedImg);
@@ -2711,6 +2713,21 @@ namespace WzComparerR2
             this.chkShowPrice.TabIndex = 19;
             this.chkShowPrice.Text = "顯示價格";
             this.chkShowPrice.Checked = true;
+            // 
+            // chkShowLinkedTamingMob
+            // 
+            // 
+            // 
+            // 
+            this.chkShowLinkedTamingMob.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowLinkedTamingMob.Location = new System.Drawing.Point(550, 277);
+            this.chkShowLinkedTamingMob.Name = "chkShowLinkedTamingMob";
+            this.chkShowLinkedTamingMob.Size = new System.Drawing.Size(135, 23);
+            this.chkShowLinkedTamingMob.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.superTooltip1.SetSuperTooltip(this.chkShowLinkedTamingMob, new DevComponents.DotNetBar.SuperTooltipInfo("顯示關聯騎寵", "", "顯示和道具關聯的騎寵。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 70)));
+            this.chkShowLinkedTamingMob.TabIndex = 20;
+            this.chkShowLinkedTamingMob.Text = "顯示關聯騎寵";
+            this.chkShowLinkedTamingMob.Checked = false;
             // 
             // chkOutputRemovedImg
             // 
@@ -3617,6 +3634,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowObjectID;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowChangeType;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowPrice;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowLinkedTamingMob;
         private DevComponents.Editors.ComboItem comboItem19;
         private DevComponents.Editors.ComboItem comboItem20;
         private DevComponents.DotNetBar.ItemContainer itemContainer100;

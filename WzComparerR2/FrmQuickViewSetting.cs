@@ -232,6 +232,13 @@ namespace WzComparerR2
         }
 
         [Link]
+        public bool Item_ShowLinkedTamingMob
+        {
+            get { return checkBoxX23.Checked; }
+            set { checkBoxX23.Checked = value; }
+        }
+
+        [Link]
         public int Item_CosmeticHairColor
         {
             get { return comboBoxEx3.SelectedIndex; }
