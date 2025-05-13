@@ -284,9 +284,9 @@ namespace WzComparerR2.OpenAPI
             switch (this.JobWingTailType)
             {
                 case 1:
-                    return "호영";
+                    return "虎影";
                 case 2:
-                    return "라라";
+                    return "菈菈";
                 default:
                     return null;
             }
@@ -302,13 +302,13 @@ namespace WzComparerR2.OpenAPI
             switch (this.WeaponMotionType)
             {
                 case 1:
-                    return "한손 무기 모션";
+                    return "單手武器動作";
                 case 2:
-                    return "두손 무기 모션";
+                    return "雙手武器動作";
                 case 3:
-                    return "건 무기 모션";
+                    return "槍武器動作";
                 default:
-                    return "기본 무기 모션";
+                    return "基本武器動作";
             }
         }
 
@@ -450,19 +450,19 @@ namespace WzComparerR2.OpenAPI
             switch (ColorType)
             {
                 case 0:
-                    return "전체 색상 계열";
+                    return "全色系";
                 case 1:
-                    return "빨간색 계열";
+                    return "紅色系";
                 case 2:
-                    return "노란색 계열";
+                    return "黃色系";
                 case 3:
-                    return "초록색 계열";
+                    return "綠色系";
                 case 4:
-                    return "청록색 계열";
+                    return "綠松色系";
                 case 5:
-                    return "파란색 계열";
+                    return "藍色系";
                 case 6:
-                    return "자주색 계열";
+                    return "紫色系";
                 default:
                     return null;
             }
