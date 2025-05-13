@@ -307,7 +307,7 @@ namespace WzComparerR2.OpenAPI
                         msg = "API檢查中。";
                         break;
                     default:
-                        msg = e.Message；
+                        msg = e.Message;
                         break;
                 }
             }
