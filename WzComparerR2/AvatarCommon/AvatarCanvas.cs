@@ -54,7 +54,7 @@ namespace WzComparerR2.AvatarCommon
         public string CapType { get; set; }
         public string GroupChair { get; set; }
 
-        public const int PartLength = 20;
+        public const int PartLength = 25;
         public const int LayerSlotLength = PartLength + 4;
         public const int IndexChairLayer1 = 18;
         public const int IndexChairLayer2 = PartLength + 0;
@@ -390,6 +390,11 @@ namespace WzComparerR2.AvatarCommon
                 case GearType.taming3:
                 case GearType.tamingChair: this.Taming = part; break;
                 case GearType.saddle: this.Saddle = part; break;
+                case GearType.pendant: this.Pendant = part; break;
+                case GearType.belt: this.Belt = part; break;
+                case GearType.shoulderPad: this.ShoulderPad = part; break;
+                case GearType.pocket: this.Pocket = part; break;
+                case GearType.emblem: this.Emblem = part; break;
                 default:
                     if (Gear.IsWeapon(gearType))
                     {
@@ -2210,6 +2215,51 @@ namespace WzComparerR2.AvatarCommon
         {
             get { return this.Parts[19]; }
             set { this.Parts[19] = value; }
+        }
+
+        /// <summary>
+        /// Pendant
+        /// </summary>
+        public AvatarPart Pendant //112
+        {
+            get { return this.Parts[20]; }
+            set { this.Parts[20] = value; }
+        }
+
+        /// <summary>
+        /// Belt
+        /// </summary>
+        public AvatarPart Belt //113
+        {
+            get { return this.Parts[21]; }
+            set { this.Parts[21] = value; }
+        }
+
+        /// <summary>
+        /// ShoulderPad
+        /// </summary>
+        public AvatarPart ShoulderPad //115
+        {
+            get { return this.Parts[22]; }
+            set { this.Parts[22] = value; }
+        }
+
+        /// <summary>
+        /// Pocket
+        /// </summary>
+        public AvatarPart Pocket //116
+        {
+            get { return this.Parts[23]; }
+            set { this.Parts[23] = value; }
+        }
+
+        /// <summary>
+        /// Pocket
+        /// </summary>
+        public AvatarPart Emblem //119
+        {
+            get { return this.Parts[24]; }
+            set { this.Parts[24] = value; }
         }
         #endregion
 

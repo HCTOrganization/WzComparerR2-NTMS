@@ -15,6 +15,7 @@ namespace WzComparerR2.AvatarCommon
             this.Node = node;
             this.Visible = true;
             this.EffectVisible = true;
+            this.HasImage = true;
             this.LoadInfo();
             this.LoadMixNodes();
             this.MixColor = this.BaseColor;
@@ -43,6 +44,7 @@ namespace WzComparerR2.AvatarCommon
         public bool EffectVisible { get; set; }
         public int? ID { get; private set; }
         public bool IsSkill { get; private set; }
+        public bool HasImage { get; private set; }
         public Wz_Vector BodyRelMove { get; set; }
         public bool ForceAction { get; set; }
         public Wz_Node[] MixNodes { get; set; }
@@ -115,6 +117,11 @@ namespace WzComparerR2.AvatarCommon
                         this.Icon = BitmapOrigin.CreateFromNode(node, PluginBase.PluginManager.FindWz);
                         break;
                 }
+            }
+
+            if (this.Node.Nodes.Count == 1)
+            {
+                this.HasImage = false;
             }
         }
 

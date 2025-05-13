@@ -1038,6 +1038,10 @@ namespace WzComparerR2.Avatar.UI
             {
                 chairName = RemoveInvalidFileNameChars(string.Format("{0}_{1}", part.ID.ToString(), text.Substring(0, text.IndexOf("\r\n"))));
             }
+            if (!part.HasImage && part.EffectNode == null)
+            {
+                text += " (未顯示)";
+            }
             btn.Text = text;
             btn.NeedRecalcSize = true;
             btn.Refresh();
