@@ -23,7 +23,7 @@ namespace WzComparerR2.Avatar.UI
                 //new ComboItem("CMS"){ Value = 3 },
                 new ComboItem("GMS北美"){ Value = 4 },
                 new ComboItem("GMS歐洲"){ Value = 5 },
-                //new ComboItem("MSEA"){ Value = 6 },
+                new ComboItem("MSEA"){ Value = 6 },
                 //new ComboItem("TMS"){ Value = 7 },
                 //new ComboItem("MSN"){ Value = 8 },
             });
@@ -87,7 +87,6 @@ namespace WzComparerR2.Avatar.UI
             {
                 case 1:
                 case 3:
-                case 6:
                     labelX1.Enabled = true;
                     checkBoxX1.Enabled = true;
                     checkBoxX2.Enabled = true;
@@ -95,14 +94,13 @@ namespace WzComparerR2.Avatar.UI
                 case 2:
                 case 4:
                 case 5:
+                case 6:
                 case 7:
                 case 8:
                     labelX1.Enabled = false;
                     checkBoxX1.Enabled = false;
                     checkBoxX2.Enabled = false;
                     break;
-
-
             }
         }
     }

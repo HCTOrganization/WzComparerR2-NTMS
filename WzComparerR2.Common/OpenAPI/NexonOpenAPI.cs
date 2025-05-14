@@ -103,6 +103,9 @@ namespace WzComparerR2.OpenAPI
                 case "GMS-EU":
                     serviceBackend = "https://www.nexon.com/api/maplestory/no-auth/ranking/v2/eu?type=overall&id=weekly&character_name=" + Uri.EscapeDataString(characterName);
                     break;
+                case "MSEA":
+                    serviceBackend = "https://msea.dakgg.io/api/v1/bypass/characters/" + Uri.EscapeDataString(characterName); // Used Maple GG API
+                    break;
             }
             try
             {
@@ -154,6 +157,28 @@ namespace WzComparerR2.OpenAPI
                         if (ranksArray.GetArrayLength() > 0)
                         {
                             avatarCode = ranksArray[0].GetProperty("characterImgURL").GetString().Replace("https://msavatar1.nexon.net/Character/", "").Replace(".png", "");
+                        }
+                    }
+                    else
+                    {
+                        avatarCode = "";
+                    }
+                }
+                else if (region == "MSEA")
+                {
+                    var client = new HttpClient();
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36");
+                    var response = await client.GetAsync(serviceBackend);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        using JsonDocument doc = JsonDocument.Parse(json);
+                        JsonElement root = doc.RootElement;
+                        if (root.TryGetProperty("data", out JsonElement dataElement) &&
+                            dataElement.TryGetProperty("characterBasic", out JsonElement characterBasicElement) &&
+                            characterBasicElement.TryGetProperty("character_image", out JsonElement characterImageElement))
+                        {
+                            avatarCode = characterImageElement.GetString().Replace("https://open.api.nexon.com/static/maplestorysea/character/look/", "");
                         }
                     }
                     else
