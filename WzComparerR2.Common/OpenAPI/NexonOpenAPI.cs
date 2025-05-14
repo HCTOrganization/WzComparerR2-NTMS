@@ -136,7 +136,7 @@ namespace WzComparerR2.OpenAPI
                     }
                     else
                     {
-                        throw new Exception("找不到角色。");
+                        throw new Exception("找不到角色。請在JMS官方網站上註冊您的代表角色。");
                     }
                 }
                 else if (region.StartsWith("GMS"))
