@@ -34,6 +34,7 @@
             this.checkBoxX1 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX2 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.labelX1 = new DevComponents.DotNetBar.LabelX();
+            this.cmbRegion = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.SuspendLayout();
             // 
             // buttonX1
@@ -46,7 +47,8 @@
             this.buttonX1.Name = "buttonX1";
             this.buttonX1.Size = new System.Drawing.Size(75, 23);
             this.buttonX1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.buttonX1.TabIndex = 3;
+            this.buttonX1.TabIndex = 4;
+            this.buttonX1.Enabled = false;
             this.buttonX1.Text = "確認";
             // 
             // buttonX2
@@ -59,7 +61,7 @@
             this.buttonX2.Name = "buttonX2";
             this.buttonX2.Size = new System.Drawing.Size(75, 23);
             this.buttonX2.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.buttonX2.TabIndex = 4;
+            this.buttonX2.TabIndex = 5;
             this.buttonX2.Text = "取消";
             // 
             // textBoxX1
@@ -76,10 +78,11 @@
             this.textBoxX1.Name = "textBoxX1";
             this.textBoxX1.PreventEnterBeep = true;
             this.textBoxX1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxX1.Size = new System.Drawing.Size(260, 21);
+            this.textBoxX1.Size = new System.Drawing.Size(180, 21);
             this.textBoxX1.TabIndex = 0;
             this.textBoxX1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxX1_KeyDown);
             this.textBoxX1.TextChanged += new System.EventHandler(this.textBoxX1_TextChanged);
+            this.textBoxX1.MaxLength = 12;
             // 
             // checkBoxX1
             // 
@@ -127,6 +130,22 @@
             this.labelX1.TabIndex = 5;
             this.labelX1.Text = "基準 :";
             // 
+            // cmbRegion
+            // 
+            this.cmbRegion.DisplayMember = "Text";
+            this.cmbRegion.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.cmbRegion.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbRegion.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.cmbRegion.FormattingEnabled = true;
+            this.cmbRegion.ItemHeight = 13;
+            this.cmbRegion.Width = 75;
+            this.cmbRegion.Location = new System.Drawing.Point(200, 12);
+            this.cmbRegion.Name = "cmbRegion";
+            this.cmbRegion.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.cmbRegion.TabIndex = 3;
+            this.cmbRegion.WatermarkText = "角色地區";
+            this.cmbRegion.SelectedIndexChanged += cmbRegion_SelectedIndexChanged;
+            // 
             // AvatarAPIForm
             // 
             this.ClientSize = new System.Drawing.Size(284, 105);
@@ -136,6 +155,7 @@
             this.Controls.Add(this.checkBoxX1);
             this.Controls.Add(this.checkBoxX2);
             this.Controls.Add(this.labelX1);
+            this.Controls.Add(this.cmbRegion);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -156,5 +176,6 @@
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX1;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX2;
         private DevComponents.DotNetBar.LabelX labelX1;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx cmbRegion;
     }
 }

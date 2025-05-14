@@ -1,20 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Text.RegularExpressions;
-using System.IO;
-using AES = System.Security.Cryptography.Aes;
-using System.Security.Cryptography;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using AES = System.Security.Cryptography.Aes;
 
 #if NET6_0_OR_GREATER
+using HtmlAgilityPack;
 using MapleStory.OpenAPI;
+using System.Net; 
 using System.Net.Http;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Encodings.Web;
+
 
 namespace WzComparerR2.OpenAPI
 {
@@ -58,6 +58,116 @@ namespace WzComparerR2.OpenAPI
             {
                 throw;
             }
+        }
+
+        public async Task<bool> isJMSUnderMaintenance()
+        {
+            try
+            {
+                using (HttpClient client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }))
+                {
+                    string url = "https://maplestory.nexon.co.jp/maintenance";
+                    HttpResponseMessage response = await client.GetAsync(url);
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            catch
+            {
+                return true;
+            }
+        }
+
+        public async Task<string> GetAvatarCode(string characterName, string region)
+        {
+            string serviceBackend = "";
+            string avatarCode = "";
+            string jmsBaseUrl = "https://maplestory.nexon.co.jp";
+            switch (region)
+            {
+                default:
+                    return avatarCode;
+                case "JMS":
+                    serviceBackend = $"{jmsBaseUrl}/community/avatar/search/?writer=" + Uri.EscapeDataString(characterName);
+                    break;
+                case "GMS-NA":
+                    serviceBackend = "https://www.nexon.com/api/maplestory/no-auth/ranking/v2/na?type=overall&id=weekly&character_name=" + Uri.EscapeDataString(characterName);
+                    break;
+                case "GMS-EU":
+                    serviceBackend = "https://www.nexon.com/api/maplestory/no-auth/ranking/v2/eu?type=overall&id=weekly&character_name=" + Uri.EscapeDataString(characterName);
+                    break;
+            }
+            try
+            {
+                if (region == "JMS")
+                {
+                    var client = new HttpClient();
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36");
+                    string html = await client.GetStringAsync(serviceBackend);
+                    HtmlDocument doc = new HtmlDocument();
+                    doc.LoadHtml(html);
+
+                    var avatarLinks = doc.DocumentNode.SelectNodes("//a[@href]")
+                        ?.Select(node => WebUtility.HtmlDecode(node.GetAttributeValue("href", "")))
+                        .Where(href => href.StartsWith("/mypage/avatar"))
+                        .Select(href => $"{jmsBaseUrl}{href}")
+                        .ToList();
+
+                    if (avatarLinks != null && avatarLinks.Count == 2)
+                    {
+                        string avatarHtml = await client.GetStringAsync(avatarLinks[0]);
+                        HtmlDocument avatarDoc = new HtmlDocument();
+                        avatarDoc.LoadHtml(avatarHtml);
+
+                        avatarCode = avatarDoc.DocumentNode.SelectNodes("//img[@src]")
+                            ?.Select(node => node.GetAttributeValue("src", ""))
+                            .FirstOrDefault(src => src.StartsWith("//avatar-maplestory.nexon.co.jp")).Replace("//avatar-maplestory.nexon.co.jp/Character/", "").Replace(".png", "");
+                    }
+                    else if (avatarLinks.Count > 2)
+                    {
+                        throw new Exception("請準確輸入角色名。");
+                    }
+                    else
+                    {
+                        throw new Exception("找不到角色。");
+                    }
+                }
+                else if (region.StartsWith("GMS"))
+                {
+                    var client = new HttpClient();
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36");
+                    var response = await client.GetAsync(serviceBackend);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        using JsonDocument doc = JsonDocument.Parse(json);
+                        JsonElement root = doc.RootElement;
+                        JsonElement ranksArray = root.GetProperty("ranks");
+
+                        if (ranksArray.GetArrayLength() > 0)
+                        {
+                            avatarCode = ranksArray[0].GetProperty("characterImgURL").GetString().Replace("https://msavatar1.nexon.net/Character/", "").Replace(".png", "");
+                        }
+                    }
+                    else
+                    {
+                        avatarCode = "";
+                    }
+                }
+            }
+            catch
+            {
+                throw new Exception("找不到角色。");
+            }
+
+            return avatarCode;
         }
 
         public async Task<UnpackedAvatarData> GetAvatarResult(string ocid)
