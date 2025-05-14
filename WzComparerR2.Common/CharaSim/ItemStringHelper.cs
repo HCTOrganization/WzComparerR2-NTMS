@@ -1343,9 +1343,9 @@ namespace WzComparerR2.CharaSim
                 case 12005:
                 case 12100: return "竈門炭治郎";
 
-                case 13000: return "皮卡啾";
+                case 13000: return "粉豆";
                 case 13001: return "雪吉拉";
-                case 13100: return "皮卡啾";
+                case 13100: return "粉豆";
                 case 13500: return "雪吉拉";
 
                 case 14000: return "凱內西斯";
