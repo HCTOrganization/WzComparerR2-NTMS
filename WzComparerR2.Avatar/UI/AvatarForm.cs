@@ -2086,35 +2086,128 @@ namespace WzComparerR2.Avatar.UI
 
             if (dlg.ShowDialog() == DialogResult.OK)
             {
-                var key = ((string)WcR2Config.Default.NxOpenAPIKey).Trim();
-                if (string.IsNullOrEmpty(key))
+                string avatarCode;
+                switch (dlg.selectedRegion)
                 {
-                    ToastNotification.Show(this, $"請在設定中輸入您的 API 金鑰。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
-                    return;
-                }
+                    default:
+                        ToastNotification.Show(this, $"請選擇角色歸屬地區。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                        return;
+                    case 1: // KMS
+                        var key = ((string)WcR2Config.Default.NxOpenAPIKey).Trim();
+                        if (string.IsNullOrEmpty(key))
+                        {
+                            ToastNotification.Show(this, $"請在設定中輸入您的 API 金鑰。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            return;
+                        }
 
-                try
-                {
-                    if (this.API == null || !this.API.CheckSameAPIKey(key))
-                    {
-                        this.API = new NexonOpenAPI(key);
-                    }
+                        try
+                        {
+                            if (this.API == null || !this.API.CheckSameAPIKey(key))
+                            {
+                                this.API = new NexonOpenAPI(key);
+                            }
 
-                    var name = dlg.CharaName;
-                    var ocid = await this.API.GetCharacterOCID(name);
+                            var name = dlg.CharaName;
+                            var ocid = await this.API.GetCharacterOCID(name);
 
-                    if (dlg.Type1)
-                    {
-                        await Type1(ocid);
-                    }
-                    else
-                    {
-                        await Type2(ocid);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            if (dlg.Type1)
+                            {
+                                await Type1(ocid);
+                            }
+                            else
+                            {
+                                await Type2(ocid);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                        }
+                        break;
+                    case 2: // JMS
+                        this.API = new NexonOpenAPI("-");
+                        bool isUnderMaintenance = await this.API.isJMSUnderMaintenance();
+                        if (isUnderMaintenance)
+                        {
+                            ToastNotification.Show(this, $"JMS現在正在維護中。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                        }
+                        else
+                        {
+                            try
+                            {
+                                avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "JMS");
+                                if (string.IsNullOrEmpty(avatarCode))
+                                {
+                                    ToastNotification.Show(this, $"找不到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                                }
+                                else
+                                {
+                                    ToastNotification.Show(this, $"{avatarCode}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            }
+                        }
+                        break;
+                    case 4: // GMS-NA
+                        this.API = new NexonOpenAPI("-");
+                        try
+                        {
+                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "GMS-NA");
+                            if (string.IsNullOrEmpty(avatarCode))
+                            {
+                                ToastNotification.Show(this, $"找不到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            }
+                            else
+                            {
+                                ToastNotification.Show(this, $"{avatarCode}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                        }
+                        break;
+                    case 5: // GMS-EU
+                        this.API = new NexonOpenAPI("-");
+                        try
+                        {
+                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "GMS-EU");
+                            if (string.IsNullOrEmpty(avatarCode))
+                            {
+                                ToastNotification.Show(this, $"找不到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            }
+                            else
+                            {
+                                ToastNotification.Show(this, $"{avatarCode}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                        }
+                        break;
+                    case 6: // MSEA
+                        this.API = new NexonOpenAPI("-");
+                        try
+                        {
+                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "MSEA");
+                            if (string.IsNullOrEmpty(avatarCode))
+                            {
+                                ToastNotification.Show(this, $"找不到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            }
+                            else
+                            {
+                                ToastNotification.Show(this, $"{avatarCode}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                        }
+                        break;
                 }
             }
 
