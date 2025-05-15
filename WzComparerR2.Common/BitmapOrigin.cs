@@ -71,15 +71,11 @@ namespace WzComparerR2
         public static BitmapOrigin CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, Wz_File wzf = null)
         {
             BitmapOrigin bp = new BitmapOrigin();
-            if (node == null || node.Value is Wz_Uol)
+            if (node == null)
             {
                 return bp;
             }
-            Wz_Uol uol;
-            while ((uol = node.ResolveUol().GetValue<Wz_Uol>(null)) != null)
-            {
-                node = uol.HandleUol(node);
-            }
+            node = node.HandleFullUol(findNode);
 
 
             //获取linkNode

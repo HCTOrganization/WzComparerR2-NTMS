@@ -64,5 +64,23 @@ namespace WzComparerR2.Common
                 return node;
             }
         }
+
+        public static Wz_Node HandleFullUol(this Wz_Node node, GlobalFindNodeFunction findNode)
+        {
+            if (node == null) return null;
+
+            if (node?.Value is Wz_Uol uol)
+            {
+                if (uol.Uol.StartsWith("/"))
+                {
+                    return findNode?.Invoke(uol.Uol.TrimStart('/'));
+                }
+                else
+                {
+                    return uol.HandleUol(node);
+                }
+            }
+            return node;
+        }
     }
 }
