@@ -484,7 +484,7 @@ namespace WzComparerR2.Comparer
                     {
                         case DifferenceType.Changed:
                             {
-                                StateInfo = string.Format("{0}/{1} 變更: {2}", count[0], count[3], diff.NodeNew.FullPath);
+                                StateInfo = string.Format("{0}/{1} 變更: {2}", count[0], count[3], diff.NodeNew.FullPathToFile);
                                 Wz_Image imgNew, imgOld;
                                 if ((imgNew = diff.ValueNew as Wz_Image) != null
                                     && ((imgOld = diff.ValueOld as Wz_Image) != null))
@@ -500,7 +500,7 @@ namespace WzComparerR2.Comparer
                         case DifferenceType.Append:
                             if (this.OutputAddedImg)
                             {
-                                StateInfo = string.Format("{0}/{1} 新增: {2}", count[1], count[4], diff.NodeNew.FullPath);
+                                StateInfo = string.Format("{0}/{1} 新增: {2}", count[1], count[4], diff.NodeNew.FullPathToFile);
                                 Wz_Image imgNew = diff.ValueNew as Wz_Image;
                                 if (imgNew != null)
                                 {
@@ -515,7 +515,7 @@ namespace WzComparerR2.Comparer
                         case DifferenceType.Remove:
                             if (this.OutputRemovedImg)
                             {
-                                StateInfo = string.Format("{0}/{1} 刪除: {2}", count[2], count[5], diff.NodeOld.FullPath);
+                                StateInfo = string.Format("{0}/{1} 刪除: {2}", count[2], count[5], diff.NodeOld.FullPathToFile);
                                 Wz_Image imgOld = diff.ValueOld as Wz_Image;
                                 if (imgOld != null)
                                 {
@@ -2063,15 +2063,15 @@ namespace WzComparerR2.Comparer
                 {
                     case DifferenceType.Changed:
                         idx = 0;
-                        col0 = diff.NodeNew.FullPath;
+                        col0 = diff.NodeNew.FullPathToFile;
                         break;
                     case DifferenceType.Append:
                         idx = 1;
-                        col0 = diff.NodeNew.FullPath;
+                        col0 = diff.NodeNew.FullPathToFile;
                         break;
                     case DifferenceType.Remove:
                         idx = 2;
-                        col0 = diff.NodeOld.FullPath;
+                        col0 = diff.NodeOld.FullPathToFile;
                         break;
                 }
                 sb.AppendFormat("<tr class=\"r{0}\">", idx);
@@ -2155,7 +2155,7 @@ namespace WzComparerR2.Comparer
             {
                 if (node != null)
                 {
-                    string fullPath = node.FullPath;
+                    string fullPath = node.FullPathToFile;
                     sw.Write("<tr class=\"r{0}\">", idx);
                     sw.Write("<td>{0}</td>", fullPath ?? " ");
                     sw.Write("<td>{0}</td>", OutputNodeValue(fullPath, node, 0, outputDir) ?? " ");
