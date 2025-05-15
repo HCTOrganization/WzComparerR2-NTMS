@@ -26,6 +26,8 @@ namespace WzComparerR2.WzLib
         {
             if (currentNode == null || currentNode.ParentNode == null || string.IsNullOrEmpty(uol))
                 return null;
+            // Workaround for absolute path started by "/", introduced in KMST 1.2.1187 with item 5157060
+            if (this.uol.StartsWith("/")) this.uol = this.uol.TrimStart('/');
             string[] dirs = this.uol.Split('/');
             currentNode = currentNode.ParentNode;
 
