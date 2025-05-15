@@ -719,6 +719,8 @@ namespace WzComparerR2.CharaSimControl
                 }
                 desc += "#";
             }
+            desc = ReplaceDescTags(desc);
+
             if (!string.IsNullOrEmpty(desc))
             {
                 if (isTranslateRequired)
@@ -776,9 +778,12 @@ namespace WzComparerR2.CharaSimControl
                 {
                     GearGraphics.DrawString(g, "\n#c可使用點數購買#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                 }
-                else if ((!item.Props.TryGetValue(ItemPropType.tradeBlock, out value) || value == 0) && item.ItemID / 10000 != 501 && item.ItemID / 10000 != 502 && item.ItemID / 10000 != 516)
+                else if ((!item.Props.TryGetValue(ItemPropType.tradeBlock, out value) || value == 0))
                 {
-                    /*GearGraphics.DrawString(g, "\n#cThis item cannot be traded once it has been used.#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);*/ //GMS - Enable when GMS uses this line.
+                    if (!(item.ItemID / 10000 != 501 || item.ItemID / 10000 != 502 || item.ItemID / 10000 != 516 || item.ItemID / 1000 != 5157 || item.ItemID / 1000 != 5158))
+                    {
+                        GearGraphics.DrawString(g, "\n#cNEXONポイントで購入すると、使用前に1回に限り他人と交換することができます。#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                    }
                 }
             }
             if (item.Props.TryGetValue(ItemPropType.flatRate, out value) && value > 0)
@@ -1407,6 +1412,34 @@ namespace WzComparerR2.CharaSimControl
         {
             resNode = PluginBase.PluginManager.FindWz("UI/NameTag.img/nick/" + nickTag);
             return resNode != null;
+        }
+
+        private string ReplaceDescTags(string text)
+        {
+            if (text.Contains("#cosmetic_EULO#"))
+            {
+                this.Item.Specs.TryGetValue(ItemSpecType.cosmetic, out long cosmeticID);
+                var gender = Gear.GetGender((int)cosmeticID);
+                var name = "";
+                if (StringLinker == null || !StringLinker.StringEqp.TryGetValue((int)cosmeticID, out var sr))
+                {
+                    sr = new StringResult();
+                    sr.Name = "(null)";
+                }
+                name = $"#c{sr.Name}{(gender == 0 ? "(남)" : (gender == 1 ? "(여)" : ""))}#";
+
+                int last = (name.LastOrDefault(c => c >= '가' && c <= '힣') - '가') % 28;
+                name += ((last == 0 || last == 8 ? "" : "으") + "로");
+
+                foreach (var color in AvatarCanvas.HairColor)
+                {
+                    name = name.Replace($"{color} ", "");
+                }
+
+                text = text.Replace("#cosmetic_EULO#", name);
+            }
+            
+            return text;
         }
     }
 }
