@@ -2124,7 +2124,7 @@ namespace WzComparerR2.Comparer
             sw.WriteLine("<tr><th colspan=\"3\"><a name=\"{1}\">{0}</a>: 變更: {2}; 新增: {3}; 刪除: {4}</th></tr>",
                 imgName, anchorName, count[0], count[1], count[2]);
             sw.WriteLine(sb.ToString());
-            sw.WriteLine("<tr><td colspan=\"3\"><a href=\"#{1}\">{0}</a></td></tr>", "Go Back", menuAnchorName);
+            sw.WriteLine("<tr><td colspan=\"3\"><a href=\"#{1}\">{0}</a></td></tr>", "返回頂部", menuAnchorName);
             sw.WriteLine("</table>");
             imgNew.Unextract();
             imgOld.Unextract();
@@ -2198,7 +2198,7 @@ namespace WzComparerR2.Comparer
             sw.WriteLine("<table class=\"img\">");
             sw.WriteLine("<tr><th colspan=\"2\"><a name=\"{1}\">{0}</a></th></tr>", imgName, anchorName);
             fnOutput(img.Node);
-            sw.WriteLine("<tr><td colspan=\"2\"><a href=\"#{1}\">{0}</a></td></tr>", "Go Back", menuAnchorName);
+            sw.WriteLine("<tr><td colspan=\"2\"><a href=\"#{1}\">{0}</a></td></tr>", "返回頂部", menuAnchorName);
             sw.WriteLine("</table>");
             img.Unextract();
         }
