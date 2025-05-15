@@ -780,9 +780,9 @@ namespace WzComparerR2.CharaSimControl
                 }
                 else if ((!item.Props.TryGetValue(ItemPropType.tradeBlock, out value) || value == 0))
                 {
-                    if (!(item.ItemID / 10000 != 501 || item.ItemID / 10000 != 502 || item.ItemID / 10000 != 516 || item.ItemID / 1000 != 5157 || item.ItemID / 1000 != 5158))
+                    if (!(item.ItemID / 10000 == 501 || item.ItemID / 10000 == 502 || item.ItemID / 10000 == 516 || item.ItemID / 1000 == 5157 || item.ItemID / 1000 == 5158))
                     {
-                        GearGraphics.DrawString(g, "\n#cNEXONポイントで購入すると、使用前に1回に限り他人と交換することができます。#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                        // GearGraphics.DrawString(g, "\n#cNEXONポイントで購入すると、使用前に1回に限り他人と交換することができます。#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
                     }
                 }
             }
@@ -1426,7 +1426,7 @@ namespace WzComparerR2.CharaSimControl
                     sr = new StringResult();
                     sr.Name = "(null)";
                 }
-                name = $"#c{sr.Name}{(gender == 0 ? "(남)" : (gender == 1 ? "(여)" : ""))}#";
+                name = $"#c{sr.Name}{(gender == 0 ? "(♂)" : (gender == 1 ? "(♀)" : ""))}#";
 
                 int last = (name.LastOrDefault(c => c >= '가' && c <= '힣') - '가') % 28;
                 name += ((last == 0 || last == 8 ? "" : "으") + "로");

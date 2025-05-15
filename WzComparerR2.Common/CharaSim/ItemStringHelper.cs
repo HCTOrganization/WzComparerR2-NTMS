@@ -315,6 +315,7 @@ namespace WzComparerR2.CharaSim
                     res[0] = "傷害上限";
                     res[1] = ToCJKNumberExpr(value);
                     return res;
+                    /*
                 case GearPropType.attackSpeed:
                     if (2 <= value && value <= 9)
                     {
@@ -322,6 +323,7 @@ namespace WzComparerR2.CharaSim
                         res[1] = $"{10 - value}段階";
                     }
                     return res;
+                    */
                 case GearPropType.nbdR:
                     res[0] = "攻擊一般怪物時傷害";
                     res[1] = "+" + value + "%";
@@ -358,16 +360,16 @@ namespace WzComparerR2.CharaSim
                     res[0] = value == 0 ? null : "#$r裝備時不可交換#";
                     return res;
                 case GearPropType.notExtend:
-                    res[0] = value == 0 ? null : ", 無法延長有效時間";
+                    res[0] = value == 0 ? null : " (無法延長)";
                     return res;
                 case GearPropType.accountSharableAfterExchange:
-                    res[0] = value == 0 ? null : "可交換1次\n(僅限在相同世界內的我的角色之間轉移)";
+                    res[0] = value == 0 ? null : "#$r可交換1次\n(僅限在相同世界內的我的角色之間轉移)#";
                     return res;
                 case GearPropType.timeLimited:
-                    res[0] = value == 0 ? null : "#$r期限制道具#";
+                    res[0] = value == 0 ? null : "期限制道具";
                     return res;
                 case GearPropType.abilityTimeLimited:
-                    res[0] = value == 0 ? null : "#$r期間限定能力値#";
+                    res[0] = value == 0 ? null : "期間限定能力値";
                     return res;
                 case GearPropType.noLookChange:
                     res[0] = value == 0 ? null : "#$r無法使用神秘鐵砧#";
