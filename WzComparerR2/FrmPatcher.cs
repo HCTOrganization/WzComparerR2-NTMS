@@ -402,7 +402,7 @@ namespace WzComparerR2
                             diskSpaceMessage.AppendLine(string.Format("其他檔案所需的空間: {0}", GetBothByteAndGBValue(patchedFileSizes[key])));
                             break;
                         default:
-                            diskSpaceMessage.AppendLine(string.Format("“{0}”所需空間: {1}", key, GetBothByteAndGBValue(patchedFileSizes[key])));
+                            diskSpaceMessage.AppendLine(string.Format("「{0}」所需空間: {1}", key, GetBothByteAndGBValue(patchedFileSizes[key])));
                             break;
                     }
                 }
