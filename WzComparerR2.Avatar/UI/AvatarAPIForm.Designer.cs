@@ -143,7 +143,7 @@
             this.cmbRegion.Name = "cmbRegion";
             this.cmbRegion.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.cmbRegion.TabIndex = 3;
-            this.cmbRegion.WatermarkText = "角色地區";
+            this.cmbRegion.WatermarkText = "地區";
             this.cmbRegion.SelectedIndexChanged += cmbRegion_SelectedIndexChanged;
             // 
             // AvatarAPIForm

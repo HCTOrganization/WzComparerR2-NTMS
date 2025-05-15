@@ -83,6 +83,10 @@ namespace WzComparerR2.Avatar.UI
         {
             buttonX1.Enabled = textBoxX1.Text.Length > 0;
             ComboItem selectedItem = (ComboItem)cmbRegion.SelectedItem;
+            if (selectedItem == null)
+            {
+                return;
+            }
             switch ((int)selectedItem.Value)
             {
                 case 1:
