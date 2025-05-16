@@ -1596,12 +1596,6 @@ namespace WzComparerR2.CharaSimControl
             var attrList = GetGearAttributeString();
             if (attrList.Count > 0)
             {
-                if (thirdLineNeeded)
-                {
-                    picH += 4;
-                    thirdLineNeeded = false;
-                }
-
                 foreach (var text in attrList)
                 {
                     GearGraphics.DrawString(g, text, Translator.IsKoreanStringPresent(text) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
