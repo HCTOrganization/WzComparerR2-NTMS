@@ -648,16 +648,19 @@ namespace WzComparerR2.CharaSimControl
             }
 
             // ----------------------------------------------------------------------
+            bool secondLineNeeded = true;
             bool hasThirdContents = false;
             bool hasOptionPart = false;
             bool hasDescPart = false;
 
             picH -= 1;
-            AddLines(0, 7, ref picH);
+            //AddLines(0, 7, ref picH);
 
             // 안드로이드
             if (Gear.type == GearType.android && Gear.Props.TryGetValue(GearPropType.android, out value) && value > 0)
             {
+                AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                secondLineNeeded = false;
                 hasThirdContents = true;
                 hasOptionPart = true;
 
@@ -751,9 +754,6 @@ namespace WzComparerR2.CharaSimControl
                 // 안드로이드 등급
                 if (Gear.Props.TryGetValue(GearPropType.grade, out value) && value > 0)
                 {
-                    hasThirdContents = true;
-                    hasOptionPart = true;
-
                     picH += 4;
                     TextRenderer.DrawText(g, "等級 : " + value, GearGraphics.EquipMDMoris9Font, new Point(15, picH), Color.White, TextFormatFlags.NoPadding);
                     picH += 12;
@@ -769,6 +769,8 @@ namespace WzComparerR2.CharaSimControl
                 var text = string.Join(", ", setList);
                 if (!string.IsNullOrEmpty(text))
                 {
+                    AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                    secondLineNeeded = false;
                     hasThirdContents = true;
                     hasOptionPart = true;
 
@@ -819,6 +821,8 @@ namespace WzComparerR2.CharaSimControl
                 var text = string.Join(", ", skillNames);
                 if (!string.IsNullOrEmpty(text))
                 {
+                    AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                    secondLineNeeded = false;
                     hasThirdContents = true;
                     hasOptionPart = true;
 
@@ -831,43 +835,36 @@ namespace WzComparerR2.CharaSimControl
 
             // 成長等級
             //绘制装备升级
-            if (Gear.Props.TryGetValue(GearPropType.level, out value) && !Gear.FixLevel)
             {
-                hasThirdContents = true;
-                hasOptionPart = true;
+                var textList = new List<string>();
+                if (Gear.Props.TryGetValue(GearPropType.level, out value) && !Gear.FixLevel)
+                {
+                    bool max = (Gear.Levels != null && value >= Gear.Levels.Count);
+                    string expString = Gear.Levels != null && Gear.Levels.First().Point != 0 ? ": 0/" + Gear.Levels.First().Point : ": 0%";
+                    textList.Add($"#$gLv : {(max ? "MAX" : value.ToString())}  EXP {(max ? ": MAX" : expString)}#");
+                }
+                else if ((GearType)Gear.type == GearType.arcaneSymbol)
+                {
+                    textList.Add($"#$gLv : 1  EXP : 1 / 12 ( 8% )#");
+                }
+                else if ((GearType)Gear.type == GearType.authenticSymbol || (GearType)Gear.type == GearType.grandAuthenticSymbol)
+                {
+                    textList.Add($"#$gLv : 1  EXP : 1 / 29 ( 3% )#");
+                }
 
-                bool max = (Gear.Levels != null && value >= Gear.Levels.Count);
-                string expString = Gear.Levels != null && Gear.Levels.First().Point != 0 ? ": 0/" + Gear.Levels.First().Point : ": 0%";
-                string text = $"Lv : {(max ? "MAX" : value.ToString())}  EXP {(max ? ": MAX" : expString)}";
-                TextRenderer.DrawText(g, "成長等級", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
-                GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 308, ref picH, 16, alignment: Text.TextAlignment.Left);
-            }
-            else if ((GearType)Gear.type == GearType.arcaneSymbol)
-            {
-                hasThirdContents = true;
-                hasOptionPart = true;
+                if (textList.Count > 0)
+                {
+                    AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                    secondLineNeeded = false;
+                    hasThirdContents = true;
+                    hasOptionPart = true;
 
-                string text = $"Lv : 1  EXP : 1 / 12 ( 8% )";
-                TextRenderer.DrawText(g, "成長等級", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
-                GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 308, ref picH, 16, alignment: Text.TextAlignment.Left);
-            }
-            else if ((GearType)Gear.type == GearType.authenticSymbol)
-            {
-                hasThirdContents = true;
-                hasOptionPart = true;
-
-                string text = $"Lv : 1  EXP : 1 / 29 ( 3% )";
-                TextRenderer.DrawText(g, "成長等級", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
-                GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 308, ref picH, 16, alignment: Text.TextAlignment.Left);
-            }
-            else if ((GearType)Gear.type == GearType.grandAuthenticSymbol)
-            {
-                hasThirdContents = true;
-                hasOptionPart = true;
-
-                string text = $"Lv : 1  EXP : 1 / 29 ( 3% )";
-                TextRenderer.DrawText(g, "成長等級", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
-                GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 308, ref picH, 16, alignment: Text.TextAlignment.Left);
+                    foreach (var text in textList)
+                    {
+                        TextRenderer.DrawText(g, "成長等級", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
+                        GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 308, ref picH, 16, alignment: Text.TextAlignment.Left);
+                    }
+                }
             }
 
             // 공격 속도
@@ -880,6 +877,8 @@ namespace WzComparerR2.CharaSimControl
             {
                 if (2 <= value && value <= 9) // check valid speed
                 {
+                    AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                    secondLineNeeded = false;
                     hasThirdContents = true;
                     hasOptionPart = true;
 
@@ -891,6 +890,8 @@ namespace WzComparerR2.CharaSimControl
             // 내구도
             if (Gear.Props.TryGetValue(GearPropType.durability, out value))
             {
+                AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                secondLineNeeded = false;
                 hasThirdContents = true;
                 hasOptionPart = true;
 
@@ -901,54 +902,57 @@ namespace WzComparerR2.CharaSimControl
             // 채집 도구
             if (Gear.type == GearType.shovel || Gear.type == GearType.pickaxe)
             {
+                var textList = new List<string>();
                 string skillName = null;
                 switch (Gear.type)
                 {
                     case GearType.shovel: skillName = "采藥"; break;
                     case GearType.pickaxe: skillName = "采礦"; break;
                 }
+
                 if (Gear.Props.TryGetValue(GearPropType.gatherTool_incSkillLevel, out value) && value > 0)
                 {
-                    hasThirdContents = true;
-                    hasOptionPart = true;
-
-                    TextRenderer.DrawText(g, skillName + " 技能等級 : +" + value, GearGraphics.EquipMDMoris9Font, new Point(15, picH), Color.White, TextFormatFlags.NoPadding);
-                    picH += 16;
+                    textList.Add($"{skillName} 技能等級 : +{value}");
                 }
                 if (Gear.Props.TryGetValue(GearPropType.gatherTool_incSpeed, out value) && value > 0)
                 {
-                    hasThirdContents = true;
-                    hasOptionPart = true;
-
-                    TextRenderer.DrawText(g, skillName + " 速度提高 : +" + value + "%", GearGraphics.EquipMDMoris9Font, new Point(15, picH), Color.White, TextFormatFlags.NoPadding);
-                    picH += 16;
+                    textList.Add($"{skillName} 速度提高 : +{value}%");
                 }
                 if (Gear.Props.TryGetValue(GearPropType.gatherTool_incNum, out value) && value > 0)
                 {
-                    hasThirdContents = true;
-                    hasOptionPart = true;
-
-                    TextRenderer.DrawText(g, "可獲得最多" + value + "個道具", GearGraphics.EquipMDMoris9Font, new Point(15, picH), Color.White, TextFormatFlags.NoPadding);
-                    picH += 16;
+                    textList.Add($"可獲得最多{value}個道具");
                 }
                 if (Gear.Props.TryGetValue(GearPropType.gatherTool_reqSkillLevel, out value) && value > 0)
                 {
+                    textList.Add($"{skillName}技能等級{value}以上可用");
+                }
+
+                if (textList.Count > 0)
+                {
+
+                    AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                    secondLineNeeded = false;
                     hasThirdContents = true;
                     hasOptionPart = true;
 
-                    TextRenderer.DrawText(g, skillName + "技能等級" + value + "以上可用", GearGraphics.EquipMDMoris9Font, new Point(15, picH), Color.White, TextFormatFlags.NoPadding);
-                    picH += 16;
+                    foreach (var text in textList)
+                    {
+                        TextRenderer.DrawText(g, text , GearGraphics.EquipMDMoris9Font, new Point(15, picH), Color.White, TextFormatFlags.NoPadding);
+                        picH += 16;
+                    }
                 }
             }
 
             // 기간 한정 능력치
             if (Gear.Props.TryGetValue(GearPropType.abilityTimeLimited, out value) && value != 0)
             {
+                AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                secondLineNeeded = false;
                 hasThirdContents = true;
                 hasOptionPart = true;
 
                 DateTime time = DateTime.Now.AddDays(7d);
-                var text = $"#$e{ItemStringHelper.GetGearPropString3(GearPropType.abilityTimeLimited, value)[0]} : {time.ToString("yyyy年 M月 d日 HH時 mm分まで")}" +
+                var text = $"#$e{ItemStringHelper.GetGearPropString3(GearPropType.abilityTimeLimited, value)[0]} : {time.ToString("yyyy年 M月 d日 HH時 mm分可以用")}" +
                     $"{ItemStringHelper.GetGearPropString3(GearPropType.notExtend, value)[0]}#";
 
                 GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 310, ref picH, 16);
@@ -974,6 +978,10 @@ namespace WzComparerR2.CharaSimControl
                 {
                     var propStr = ItemStringHelper.GetGearPropDiffString3(type, Gear.Props[type], value);
 
+                    if (!string.IsNullOrEmpty(propStr[0]))
+                        AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                    secondLineNeeded = false;
+
                     if (DrawProps(g, propStr, 0, picH, equip22ColorTable))
                     {
                         hasThirdContents = true;
@@ -987,6 +995,9 @@ namespace WzComparerR2.CharaSimControl
             {
                 foreach (var prop in new[] { "經驗値獲得量：+10%:", "楓幣獲得量：+5%:", "道具掉落率：+5%:" })
                 {
+                    AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                    secondLineNeeded = false;
+
                     if (DrawProps(g, prop.Split(':'), 5, picH, equip22ColorTable))
                     {
                         hasThirdContents = true;
@@ -1028,6 +1039,8 @@ namespace WzComparerR2.CharaSimControl
                 }
                 if (texts.Count > 0)
                 {
+                    AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                    secondLineNeeded = false;
                     hasThirdContents = true;
                     hasDescPart = true;
 
@@ -1050,6 +1063,8 @@ namespace WzComparerR2.CharaSimControl
 
                 foreach (var kv in Gear.VariableStat)
                 {
+                    AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                    secondLineNeeded = false;
                     hasThirdContents = true;
                     hasDescPart = true;
 
@@ -1085,6 +1100,8 @@ namespace WzComparerR2.CharaSimControl
                 var opt = Potential.LoadFromWz(ringOpt, ringOptLv, PluginBase.PluginManager.FindWz);
                 if (opt != null)
                 {
+                    AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                    secondLineNeeded = false;
                     hasThirdContents = true;
                     hasDescPart = true;
 
@@ -1107,36 +1124,40 @@ namespace WzComparerR2.CharaSimControl
 
             if (Gear.Sample.Bitmap != null || willDrawMedalTag || willDrawChatBalloon || willDrawNameTag)
             {
-                picH -= 6;
+                AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                secondLineNeeded = false;
+                picH -= 2;
                 hasThirdContents = true;
                 hasDescPart = true;
 
                 if (willDrawChatBalloon)
                 {
-                    GearGraphics.DrawChatBalloon(g, chatBalloonResNode, "MAPLESTORY", bitmap.Width - 10, ref picH);
+                    GearGraphics.DrawChatBalloon(g, chatBalloonResNode, "MAPLESTORY", bitmap.Width, ref picH);
                     picH += 4;
                 }
                 else if (willDrawNameTag)
                 {
-                    GearGraphics.DrawNameTag(g, nameTagResNode, "MAPLESTORY", bitmap.Width - 10, ref picH);
+                    GearGraphics.DrawNameTag(g, nameTagResNode, "MAPLESTORY", bitmap.Width, ref picH);
                     picH += 4;
                 }
                 else if (Gear.Sample.Bitmap != null)
                 {
-                    g.DrawImage(Gear.Sample.Bitmap, (bitmap.Width - 10 - Gear.Sample.Bitmap.Width) / 2, picH);
+                    g.DrawImage(Gear.Sample.Bitmap, (bitmap.Width - Gear.Sample.Bitmap.Width) / 2, picH);
                     picH += Gear.Sample.Bitmap.Height;
                     picH += 4;
                 }
                 else if (medalResNode != null)
                 {
-                    GearGraphics.DrawNameTag(g, medalResNode, sr.Name.Replace("의 훈장", "").Replace("の勲章", ""), bitmap.Width - 10, ref picH);
+                    GearGraphics.DrawNameTag(g, medalResNode, sr.Name.Replace("의 훈장", "").Replace("の勲章", ""), bitmap.Width, ref picH);
                     picH += 4;
                 }
-                picH += 2;
+                picH += 6;
             }
             // 장비 설명
             if (!string.IsNullOrEmpty(sr.Desc))
             {
+                AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                secondLineNeeded = false;
                 hasThirdContents = true;
                 hasDescPart = true;
 
@@ -1161,6 +1182,8 @@ namespace WzComparerR2.CharaSimControl
 
                 if (!string.IsNullOrEmpty(text))
                 {
+                    AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                    secondLineNeeded = false;
                     hasThirdContents = true;
                     hasDescPart = true;
                     switch (Translator.DefaultPreferredLayout)
@@ -1190,6 +1213,8 @@ namespace WzComparerR2.CharaSimControl
                     var text = ItemStringHelper.GetGearPropString3(GearPropType.superiorEqp, value)[0];
                     if (!string.IsNullOrEmpty(text))
                     {
+                        AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                        secondLineNeeded = false;
                         hasThirdContents = true;
                         hasDescPart = true;
 
@@ -1201,6 +1226,8 @@ namespace WzComparerR2.CharaSimControl
             // 펫장비 능력치 이전 주문서
             if (Gear.Props.TryGetValue(GearPropType.noPetEquipStatMoveItem, out value) && value != 0)
             {
+                AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                secondLineNeeded = false;
                 hasThirdContents = true;
                 hasDescPart = true;
 
@@ -1209,6 +1236,8 @@ namespace WzComparerR2.CharaSimControl
             // 캐시 이펙트
             if (Gear.Cash && Gear.type != GearType.pickaxe && !Gear.IsCashWeapon(Gear.type) && Gear.type != GearType.shovel && PluginBase.PluginManager.FindWz(string.Format("Effect/ItemEff.img/{0}/effect", Gear.ItemID)) != null)
             {
+                AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                secondLineNeeded = false;
                 hasThirdContents = true;
                 hasDescPart = true;
 
@@ -1266,6 +1295,8 @@ namespace WzComparerR2.CharaSimControl
 
                 if (texts.Count > 0 && Gear.Cash)
                 {
+                    AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                    secondLineNeeded = false;
                     hasThirdContents = true;
                     hasDescPart = true;
 
@@ -1883,7 +1914,7 @@ namespace WzComparerR2.CharaSimControl
             if (Gear.Props.TryGetValue(GearPropType.timeLimited, out value) && value != 0)
             {
                 DateTime time = DateTime.Now.AddDays(7d);
-                var text = $"#$r{ItemStringHelper.GetGearPropString3(GearPropType.timeLimited, value)[0]} : {time.ToString("yyyy年 M月 d日 HH時 mm分まで")}" +
+                var text = $"#$r{ItemStringHelper.GetGearPropString3(GearPropType.timeLimited, value)[0]} : {time.ToString("yyyy年 M月 d日 HH時 mm分可以用")}" +
                     $"{ItemStringHelper.GetGearPropString3(GearPropType.notExtend, value)[0]}#";
                 tags.Add(text);
             }
