@@ -51,6 +51,10 @@ namespace WzComparerR2.CharaSimControl
         public bool ShowCashPurchasePrice { get; set; }
         public bool Enable22AniStyle { get; set; }
         public CashPackage CashPackage { get; set; }
+        private bool WillDrawNickTag { get; set; }
+        private Wz_Node NickResNode {  get; set; }
+        private Bitmap ItemSample { get; set; }
+
         public TooltipRender LinkRecipeInfoRender { get; set; }
         public TooltipRender LinkRecipeGearRender { get; set; }
         public TooltipRender LinkRecipeItemRender { get; set; }
@@ -67,6 +71,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 return null;
             }
+            InitSampleResources();
             //绘制道具
             int picHeight;
             Bitmap itemBmp = RenderItem(out picHeight);
@@ -865,15 +870,11 @@ namespace WzComparerR2.CharaSimControl
 
             picH += 3;
 
-            Wz_Node nickResNode = null;
-            bool willDrawNickTag = this.ShowNickTag
-                && this.Item.Props.TryGetValue(ItemPropType.nickTag, out value)
-                && this.TryGetNickResource(value, out nickResNode);
             string descLeftAlign = sr["desc_leftalign"];
             long minLev = 0, maxLev = 0;
             bool willDrawExp = item.Props.TryGetValue(ItemPropType.exp_minLev, out minLev) && item.Props.TryGetValue(ItemPropType.exp_maxLev, out maxLev);
 
-            if (!string.IsNullOrEmpty(descLeftAlign) || item.CoreSpecs.Count > 0 || item.Sample.Bitmap != null || item.DamageSkinID != null || item.SamplePath != null || item.ShowCosmetic || willDrawNickTag || willDrawExp)
+            if (!string.IsNullOrEmpty(descLeftAlign) || item.CoreSpecs.Count > 0 || item.Sample.Bitmap != null || item.DamageSkinID != null || item.SamplePath != null || item.ShowCosmetic || this.WillDrawNickTag || willDrawExp)
             {
                 if (picH < iconY + 84)
                 {
@@ -947,6 +948,8 @@ namespace WzComparerR2.CharaSimControl
                         g.DrawImage(sample.Bitmap, (tooltip.Width - sample.Bitmap.Width) / 2, picH);
                         picH += sample.Bitmap.Height;
                         picH += 2;
+
+                        this.ItemSample = new Bitmap(sample.Bitmap);
                     }
                 }
                 if (this.item.Specs.TryGetValue(ItemSpecType.cosmetic, out value) && value > 0)
@@ -977,6 +980,9 @@ namespace WzComparerR2.CharaSimControl
                         item.AvatarBitmap = frame.Bitmap;
                         picH += frame.Bitmap.Height;
                         picH += 2;
+                        
+                        if (this.ItemSample != null) this.ItemSample.Dispose();
+                        this.ItemSample = new Bitmap(frame.Bitmap);
                     }
 
                     this.avatar.ClearCanvas();
@@ -1012,7 +1018,7 @@ namespace WzComparerR2.CharaSimControl
                         picH += 62;
                     }
                 }
-                if (nickResNode != null)
+                if (this.NickResNode != null)
                 {
                     //获取称号名称
                     string nickName;
@@ -1026,8 +1032,8 @@ namespace WzComparerR2.CharaSimControl
                     {
                         nickName = sr.Name;
                     }
-                    GearGraphics.DrawNameTag(g, nickResNode, nickName, tooltip.Width, ref picH);
-                    picH += 4; // value is either 4 or 14 (it was 14 in previous iteration)
+                    GearGraphics.DrawNameTag(g, this.NickResNode, nickName, tooltip.Width, ref picH);
+                    picH += 4;
                 }
                 if (minLev > 0 && maxLev > 0)
                 {
@@ -1440,6 +1446,80 @@ namespace WzComparerR2.CharaSimControl
             }
             
             return text;
+        }
+
+        private void InitSampleResources()
+        {
+            Wz_Node _nickResNode = null;
+
+            this.NickResNode = null;
+            if (this.ItemSample != null)
+            {
+                this.ItemSample.Dispose();
+            }
+
+            long value;
+            this.WillDrawNickTag = this.ShowNickTag
+                && this.Item.Props.TryGetValue(ItemPropType.nickTag, out value)
+                && this.TryGetNickResource(value, out _nickResNode);
+
+            this.NickResNode = _nickResNode;
+        }
+
+        public bool HasSamples()
+        {
+            return this.Item.Sample.Bitmap != null || (this.NickResNode != null && this.ShowNickTag) || this.ItemSample != null;
+        }
+
+        public Bitmap GetSampleBitmap()
+        {
+            if (this.WillDrawNickTag && this.ShowNickTag)
+            {
+                Rectangle rect = new Rectangle();
+                int block = 300;
+                using Bitmap tempBitmap = new Bitmap(block, block);
+                using Graphics tempG = Graphics.FromImage(tempBitmap);
+                tempG.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+
+                int h = block / 2;
+
+                StringResult sr;
+                if (StringLinker == null || !StringLinker.StringItem.TryGetValue(item.ItemID, out sr))
+                {
+                    sr = new StringResult();
+                    sr.Name = "(null)";
+                }
+
+                string nickName;
+                string nickWithQR = sr["nickWithQR"];
+                if (nickWithQR != null)
+                {
+                    string qrDefault = sr["qrDefault"] ?? string.Empty;
+                    nickName = Regex.Replace(nickWithQR, "#qr.*?#", qrDefault);
+                }
+                else
+                {
+                    nickName = sr.Name;
+                }
+
+                GearGraphics.DrawNameTag(tempG, this.NickResNode, nickName, tempBitmap.Width, out rect, ref h);
+
+                Bitmap resBitmap = new Bitmap(rect.Width, rect.Height);
+                using Graphics g = Graphics.FromImage(resBitmap);
+                g.DrawImage(tempBitmap, 0, 0, rect, GraphicsUnit.Pixel);
+
+                return resBitmap;
+            }
+            else if (this.Item.Sample.Bitmap != null)
+            {
+                return new Bitmap(this.Item.Sample.Bitmap);
+            }
+            else if (this.ItemSample != null)
+            {
+                return new Bitmap(this.ItemSample);
+            }
+
+            return null;
         }
     }
 }
