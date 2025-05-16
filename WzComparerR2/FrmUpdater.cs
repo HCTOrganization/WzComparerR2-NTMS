@@ -93,11 +93,9 @@ namespace WzComparerR2
                 net80url = UpdateContent.SelectToken("net80-url").ToString();
 
                 this.lblLatestVer.Text = MajorVersion + "." + BuildNumber;
-                this.advTree1.Nodes.Add(new Node("<font color=\"#FF0000\">" + ChangeTitle + "</font>"));
-                foreach (string line in Changelog.Split('\r'))
-                {
-                    this.advTree1.Nodes.Add(new Node(line));
-                }
+                AppendText(ChangeTitle + "\r\n", Color.Red);
+                AppendText(Changelog, Color.Black);
+                this.richTextBoxEx1.SelectionStart = 0;
 
                 if (Int64.Parse(BuildNumber.Replace("-", "")) > Int64.Parse(BuildInfo.BuildTime.Replace("-", "")))
                 {
@@ -200,6 +198,16 @@ namespace WzComparerR2
             var config = WcR2Config.Default;
             config.EnableAutoUpdate = chkEnableAutoUpdate.Checked;
             ConfigManager.Save();
+        }
+
+        private void AppendText(string text, Color color)
+        {
+            this.richTextBoxEx1.SelectionStart = this.richTextBoxEx1.TextLength;
+            this.richTextBoxEx1.SelectionLength = 0;
+
+            this.richTextBoxEx1.SelectionColor = color;
+            this.richTextBoxEx1.AppendText(text);
+            this.richTextBoxEx1.SelectionColor = this.richTextBoxEx1.ForeColor;
         }
 
         class UpdaterSession
