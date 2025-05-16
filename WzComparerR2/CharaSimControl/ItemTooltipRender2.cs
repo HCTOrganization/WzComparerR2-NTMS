@@ -1384,7 +1384,7 @@ namespace WzComparerR2.CharaSimControl
                             {
                                 this.StringLinker.StringSkill.TryGetValue(kv.Key, out sr);
                             }
-                            string text = string.Format(" {0} {2}レベル", sr == null ? null : sr.Name, kv.Key, kv.Value);
+                            string text = string.Format(" {0} {2}級", sr == null ? null : sr.Name, kv.Key, kv.Value);
                             TextRenderer.DrawText(g, text, GearGraphics.ItemDetailFont, new Point(10, picHeight), ((SolidBrush)GearGraphics.OrangeBrush).Color, TextFormatFlags.NoPadding);
                             picHeight += 15;
                         }
@@ -1426,7 +1426,7 @@ namespace WzComparerR2.CharaSimControl
                     sr = new StringResult();
                     sr.Name = "(null)";
                 }
-                name = Translator.IsKoreanStringPresent(sr.Name) ? $"#c{sr.Name}{(gender == 0 ? "(남)" : (gender == 1 ? "(여)" : ""))}#" : $"#c{sr.Name}{(gender == 0 ? "(♂)" : (gender == 1 ? "(♀)" : ""))}#";
+                name = Translator.IsKoreanStringPresent(sr.Name) ? $"#c{sr.Name}{(gender == 0 ? "(남)" : (gender == 1 ? "(여)" : ""))}#" : $"#c{sr.Name}{(gender == 0 ? "(男)" : (gender == 1 ? "(女)" : ""))}#";
 
                 int last = (name.LastOrDefault(c => c >= '가' && c <= '힣') - '가') % 28;
                 name += ((last == 0 || last == 8 ? "" : "으") + "로");
