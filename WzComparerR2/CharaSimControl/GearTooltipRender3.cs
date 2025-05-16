@@ -1396,10 +1396,9 @@ namespace WzComparerR2.CharaSimControl
                         text = $"#$s強化卷軸強化 : {Gear.ScrollUp}回# (剩餘{tuc}次，可修復0次)";
                         break;
                 }
-                GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
-                GearGraphics.DrawString(g, $"#$d白金鐵槌强化次數 : #0", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
                 if (!string.IsNullOrEmpty(text))
                     GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                GearGraphics.DrawString(g, $"#$d白金鐵槌强化次數 : #0", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
 
                 /*
                 switch (enhance_bonusStat)
