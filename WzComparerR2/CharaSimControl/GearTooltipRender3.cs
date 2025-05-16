@@ -407,8 +407,6 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
-            TextRenderer.DrawText(g, gearName, GearGraphics.ItemNameFont2,
-                new Point(width, picH), Color.White, TextFormatFlags.HorizontalCenter | TextFormatFlags.NoPrefix);
             picH += 20;
 
             // 스페셜 아이템
@@ -1368,7 +1366,7 @@ namespace WzComparerR2.CharaSimControl
                     cantEnhanceList.Add("附加屬性");
                 if (cantEnhanceList.Count > 0)
                 {
-                    GearGraphics.DrawString(g, $"{string.Join(", ", cantEnhanceList)}無法強化", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                    GearGraphics.DrawString(g, $"#$d無法強化{string.Join(", ", cantEnhanceList)}#", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
                 }
 
                 switch (enhance_starForce)
@@ -1891,6 +1889,12 @@ namespace WzComparerR2.CharaSimControl
                 tags.Add(text);
             }
 
+            // 민팅
+            if (Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0)
+            {
+                tags.Add(ItemStringHelper.GetGearPropString3(GearPropType.mintable, value)[0]);
+            }
+
             return tags.Where(text => !string.IsNullOrEmpty(text)).ToList();
         }
 
@@ -1987,12 +1991,6 @@ namespace WzComparerR2.CharaSimControl
                 tags.Add(string.Join("#$r,# ", tempTags));
             }
             tempTags.Clear();
-
-            // 민팅
-            if (Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0)
-            {
-                tags.Add(ItemStringHelper.GetGearPropString3(GearPropType.mintable, value)[0]);
-            }
 
             return tags.Where(text => !string.IsNullOrEmpty(text)).ToList();
         }
