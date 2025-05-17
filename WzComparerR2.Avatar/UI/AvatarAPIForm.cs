@@ -56,6 +56,19 @@ namespace WzComparerR2.Avatar.UI
             }
         }
 
+        private bool IsFullWidth(char c)
+        {
+           return (c >= 0xFF01 && c <= 0xFF5E) || // Full-width ASCII
+           (c >= 0x3000 && c <= 0x30FF) || // CJK symbols & kana
+           (c >= 0x4E00 && c <= 0x9FFF) || // Common CJK ideographs
+           (c >= 0xF900 && c <= 0xFAFF);   // CJK Compatibility
+        }
+
+        private bool IsEmoji(char c)
+        {
+            return char.GetUnicodeCategory(c) == System.Globalization.UnicodeCategory.OtherSymbol;
+        }
+
         private void textBoxX1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
@@ -67,6 +80,35 @@ namespace WzComparerR2.Avatar.UI
 
         private void textBoxX1_TextChanged(object sender, EventArgs e)
         {
+            string text = textBoxX1.Text;
+            int fullWidthCount = 0;
+            int halfWidthCount = 0;
+            string filteredText = "";
+
+            foreach (char c in text)
+            {
+                if (IsEmoji(c))
+                    continue;
+                else if (IsFullWidth(c))
+                    fullWidthCount++;
+                else
+                    halfWidthCount++;
+
+                filteredText += c;
+            }
+
+            if (fullWidthCount * 2 + halfWidthCount > 12)
+            {
+                filteredText = filteredText.Substring(0, filteredText.Length - 1);
+            }
+
+            if (textBoxX1.Text != filteredText)
+            {
+                int cursorPos = textBoxX1.SelectionStart;
+                textBoxX1.Text = filteredText;
+                textBoxX1.SelectionStart = Math.Min(cursorPos, textBoxX1.Text.Length);
+            }
+
             ComboItem selectedItem = (ComboItem)cmbRegion.SelectedItem;
             if (Translator.IsKoreanStringPresent(textBoxX1.Text))
             {
