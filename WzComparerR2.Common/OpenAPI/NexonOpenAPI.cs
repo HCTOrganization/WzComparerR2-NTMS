@@ -106,13 +106,16 @@ namespace WzComparerR2.OpenAPI
                 case "MSEA":
                     serviceBackend = "https://msea.dakgg.io/api/v1/bypass/characters/" + Uri.EscapeDataString(characterName); // Used Maple GG API
                     break;
+                case "MSN":
+                    serviceBackend = "https://msu.io/maplestoryn/api/gateway/msn/ranking/by-name?characterName=" + Uri.EscapeDataString(characterName);
+                    break;
             }
             try
             {
                 if (region == "JMS")
                 {
                     var client = new HttpClient();
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36");
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
                     string html = await client.GetStringAsync(serviceBackend);
                     HtmlDocument doc = new HtmlDocument();
                     doc.LoadHtml(html);
@@ -145,7 +148,7 @@ namespace WzComparerR2.OpenAPI
                 else if (region.StartsWith("GMS"))
                 {
                     var client = new HttpClient();
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36");
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
                     var response = await client.GetAsync(serviceBackend);
                     if (response.IsSuccessStatusCode)
                     {
@@ -167,7 +170,7 @@ namespace WzComparerR2.OpenAPI
                 else if (region == "MSEA")
                 {
                     var client = new HttpClient();
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36");
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
                     var response = await client.GetAsync(serviceBackend);
                     if (response.IsSuccessStatusCode)
                     {
@@ -179,6 +182,30 @@ namespace WzComparerR2.OpenAPI
                             characterBasicElement.TryGetProperty("character_image", out JsonElement characterImageElement))
                         {
                             avatarCode = characterImageElement.GetString().Replace("https://open.api.nexon.com/static/maplestorysea/character/look/", "");
+                        }
+                    }
+                    else
+                    {
+                        avatarCode = "";
+                    }
+                }
+                else if (region == "MSN")
+                {
+                    var client = new HttpClient();
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
+                    client.DefaultRequestHeaders.Add("Sec-Ch-Ua", "\"Chromium\";v=\"136\", \"Google Chrome\";v=\"136\", \"Not.A/Brand\";v=\"99\"");
+                    client.DefaultRequestHeaders.Add("Accept", "*/*");
+                    var response = await client.GetAsync(serviceBackend);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        using JsonDocument doc = JsonDocument.Parse(json);
+                        JsonElement root = doc.RootElement;
+                        if (root.TryGetProperty("ranking", out JsonElement rankingElement) &&
+                            rankingElement.TryGetProperty("characterBasic", out JsonElement characterBasicElement) &&
+                            characterBasicElement.TryGetProperty("imageUrl", out JsonElement characterImageElement))
+                        {
+                            avatarCode = characterImageElement.GetString().Replace("https://market-static.msu.io/msu/platform/charimages/transient/", "").Replace(".png", "");
                         }
                     }
                     else

@@ -1890,19 +1890,6 @@ namespace WzComparerR2.Avatar.UI
             frame.Bitmap.Save(avatarPresetPath, System.Drawing.Imaging.ImageFormat.Png);
         }
 
-        private void btnDskytian_Click(object sender, EventArgs e)
-        {
-            switch (MessageBoxEx.Show("要呼出廉姫的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
-            {
-                case DialogResult.Yes:
-                    LoadCode("2018,12018,21078,61510,1053614", 0);
-                    return;
-
-                case DialogResult.No:
-                default:
-                    return;
-            }
-        }
         private void btnAngelicBuster_Click(object sender, EventArgs e)
         {
             switch (MessageBoxEx.Show("要呼出天使破壞者的紙娃娃預設嗎？\r\n\r\nYes - 新\r\nNo - 舊", "確認", MessageBoxButtons.YesNoCancel))
@@ -2194,6 +2181,25 @@ namespace WzComparerR2.Avatar.UI
                         try
                         {
                             avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "MSEA");
+                            if (string.IsNullOrEmpty(avatarCode))
+                            {
+                                ToastNotification.Show(this, $"找不到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            }
+                            else
+                            {
+                                ToastNotification.Show(this, $"{avatarCode}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                        }
+                        break;
+                    case 8: // MSN
+                        this.API = new NexonOpenAPI("-");
+                        try
+                        {
+                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "MSN");
                             if (string.IsNullOrEmpty(avatarCode))
                             {
                                 ToastNotification.Show(this, $"找不到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
