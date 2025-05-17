@@ -105,7 +105,6 @@ namespace WzComparerR2.Avatar.UI
             this.btnZenitsuAgatsuma = new DevComponents.DotNetBar.ButtonItem();
             this.btnInosukeHashibira = new DevComponents.DotNetBar.ButtonItem();
             this.btnLaraTheSheep = new DevComponents.DotNetBar.ButtonItem();
-            this.btnDskytian = new DevComponents.DotNetBar.ButtonItem();
             this.btnCustomPreset = new DevComponents.DotNetBar.ButtonItem();
             this.Separator1 = new DevComponents.DotNetBar.Separator();
             this.Separator2 = new DevComponents.DotNetBar.Separator();
@@ -744,7 +743,6 @@ namespace WzComparerR2.Avatar.UI
             this.btnFemale,
             this.Separator2,
             this.btnLaraTheSheep,
-            this.btnDskytian,
             this.Separator3,
             this.btnAngelicBuster,
             this.btnOldBokugen,
@@ -793,13 +791,6 @@ namespace WzComparerR2.Avatar.UI
             this.btnLaraTheSheep.Name = "btnLaraTheSheep";
             this.btnLaraTheSheep.Text = "光卡的拉羊羊";
             this.btnLaraTheSheep.Click += new System.EventHandler(this.btnLaraTheSheep_Click);
-            // 
-            // 
-            // btnDskytian
-            // 
-            this.btnDskytian.Name = "btnDskytian";
-            this.btnDskytian.Text = "廉姫";
-            this.btnDskytian.Click += new System.EventHandler(this.btnDskytian_Click);
             // 
             // 
             // btnHayato
@@ -1154,7 +1145,6 @@ namespace WzComparerR2.Avatar.UI
         private DevComponents.DotNetBar.ButtonItem btnZenitsuAgatsuma;
         private DevComponents.DotNetBar.ButtonItem btnInosukeHashibira;
         private DevComponents.DotNetBar.ButtonItem btnLaraTheSheep;
-        private DevComponents.DotNetBar.ButtonItem btnDskytian;
         private DevComponents.DotNetBar.ButtonItem btnCustomPreset;
         private DevComponents.DotNetBar.ButtonItem btnAPI;
         private DevComponents.DotNetBar.ButtonItem btnSaveAsGif;
