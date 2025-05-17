@@ -766,8 +766,6 @@ namespace WzComparerR2.CharaSimControl
                     TextRenderer.DrawText(g, "等級 : " + value, GearGraphics.EquipMDMoris9Font, new Point(15, picH), Color.White, TextFormatFlags.NoPadding);
                     picH += 12;
                 }
-
-                this.AvatarSample = new Bitmap(appearance.Bitmap);
             }
 
             // 세트 아이템
