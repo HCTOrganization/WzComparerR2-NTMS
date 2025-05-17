@@ -2206,7 +2206,15 @@ namespace WzComparerR2.Avatar.UI
                             }
                             else
                             {
-                                ToastNotification.Show(this, $"{avatarCode}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                                string[] decodedInfo = Encoding.UTF8.GetString(Convert.FromBase64String(avatarCode)).Split("a");
+                                StringBuilder sb = new StringBuilder();
+                                sb.Append("2000,12000,20000");
+                                foreach (string i in decodedInfo)
+                                {
+                                    sb.Append(",");
+                                    if (i.Length > 1) sb.Append(i);
+                                }
+                                LoadCode(sb.ToString(), 0);
                             }
                         }
                         catch (Exception ex)
