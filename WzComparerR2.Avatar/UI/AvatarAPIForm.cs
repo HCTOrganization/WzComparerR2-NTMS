@@ -7,7 +7,7 @@ using WzComparerR2.CharaSim;
 
 namespace WzComparerR2.Avatar.UI
 {
-    public partial class AvatarAPIForm : DevComponents.DotNetBar.OfficeForm
+    public partial class AvatarAPIForm : DevComponents.DotNetBar.Office2007Form
     {
         public AvatarAPIForm()
         {
@@ -25,7 +25,7 @@ namespace WzComparerR2.Avatar.UI
                 new ComboItem("GMS歐洲"){ Value = 5 },
                 new ComboItem("MSEA"){ Value = 6 },
                 //new ComboItem("TMS"){ Value = 7 },
-                //new ComboItem("MSN"){ Value = 8 },
+                new ComboItem("MSN"){ Value = 8 },
             });
         }
 
