@@ -1898,7 +1898,7 @@ namespace WzComparerR2.CharaSimControl
 
             if (Gear.State == GearState.itemList && Gear.Cash && (!Gear.Props.TryGetValue(GearPropType.noMoveToLocker, out value) || value == 0) && (!Gear.Props.TryGetValue(GearPropType.tradeBlock, out value) || value == 0) && (!Gear.Props.TryGetValue(GearPropType.accountSharable, out value) || value == 0))
             {
-                tags.Add("#$r在使用前您只能與他人交換一次，並且物品使用後將受到限制交換。#");
+                // tags.Add("#$r在使用前您只能與他人交換一次，並且物品使用後將受到限制交換。#");
             }
 
             // 기간제
