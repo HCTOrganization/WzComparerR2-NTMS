@@ -2207,14 +2207,26 @@ namespace WzComparerR2.Avatar.UI
                             else
                             {
                                 string[] decodedInfo = Encoding.UTF8.GetString(Convert.FromBase64String(avatarCode)).Split("a");
-                                StringBuilder sb = new StringBuilder();
-                                sb.Append("2000,12000,20000");
-                                foreach (string i in decodedInfo)
+                                List<string> msnCode = new List<string> {};
+                                msnCode.Add((Int32.Parse(decodedInfo[0]) + 2000).ToString());
+                                msnCode.Add((Int32.Parse(decodedInfo[1]) + 12000).ToString());
+                                foreach (string itemCode in decodedInfo.Skip(2))
                                 {
-                                    sb.Append(",");
-                                    if (i.Length > 1) sb.Append(i);
+                                    switch (itemCode.Length)
+                                    {
+                                        default:
+                                            break;
+                                        case 5:
+                                        case 7:
+                                            msnCode.Add(itemCode);
+                                            break;
+                                        case 8:
+                                            msnCode.Add(itemCode.Substring(0, 5));
+                                            break;
+
+                                    }
                                 }
-                                LoadCode(sb.ToString(), 0);
+                                LoadCode(string.Join(",", msnCode), 0);
                             }
                         }
                         catch (Exception ex)
