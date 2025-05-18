@@ -554,7 +554,7 @@ namespace WzComparerR2.MapRender
                         {
                             move = GetMovingObjPos(obj);
                         }
-                        if (obj.Flip)
+                        if (obj.View.Flip)
                         {
                             rect.X = 2 * x - rect.X - rect.Width;
                         }
@@ -725,7 +725,7 @@ namespace WzComparerR2.MapRender
                     if (item is ObjItem obj && obj.Light && obj.View.Animator is FrameAnimator frameAni)
                     {
                         var frame = frameAni.CurrentFrame;
-                        this.lightRenderer.DrawTextureLight(frame.Texture, new Vector2(obj.X, obj.Y), frame.AtlasRect, frame.Origin.ToVector2(), obj.Flip, new Color(Color.White, frame.A0));
+                        this.lightRenderer.DrawTextureLight(frame.Texture, new Vector2(obj.X, obj.Y), frame.AtlasRect, frame.Origin.ToVector2(), obj.View.Flip, new Color(Color.White, frame.A0));
                     }
                 }
             }
@@ -1024,7 +1024,7 @@ namespace WzComparerR2.MapRender
 
         private MeshItem GetMeshObj(ObjItem obj)
         {
-            var renderObj = GetRenderObject(obj.View.Animator, flip: obj.Flip);
+            var renderObj = GetRenderObject(obj.View.Animator, flip: obj.View.Flip);
             if (renderObj == null)
             {
                 return null;
@@ -1039,7 +1039,7 @@ namespace WzComparerR2.MapRender
             {
                 mesh.Position += GetMovingObjPos(obj);
             }
-            mesh.FlipX = obj.Flip;
+            mesh.FlipX = obj.View.Flip;
 
             return mesh;
         }
@@ -1205,12 +1205,12 @@ namespace WzComparerR2.MapRender
             {
                 case 1:
                 case 2: // line
-                    time *= Math.PI * 2 / (obj.MoveP + obj.MoveDelay);
+                    time *= Math.PI * 2 / obj.MoveP;
                     movingX = obj.MoveW * Math.Cos(time);
                     movingY = obj.MoveH * Math.Cos(time);
                     break;
                 case 3: // circle
-                    time *= Math.PI * 2 / (obj.MoveP + obj.MoveDelay);
+                    time *= Math.PI * 2 / obj.MoveP;
                     movingX = obj.MoveW * Math.Cos(time);
                     movingY = obj.MoveH * Math.Sin(time);
                     break;
@@ -1225,7 +1225,7 @@ namespace WzComparerR2.MapRender
                     {
                         time -= freq / 2;
                         if (obj.MoveType == 8)
-                            obj.Flip = !obj.FlipReal;
+                            obj.View.Flip = !obj.Flip;
 
                         if (obj.MoveType != 6)
                             sign = +1;
@@ -1233,7 +1233,7 @@ namespace WzComparerR2.MapRender
                     else
                     {
                         if (obj.MoveType == 8)
-                            obj.Flip = obj.FlipReal;
+                            obj.View.Flip = obj.Flip;
                     }
 
                     movingX = (Math.Min(1, Math.Max(-1, (time - obj.MoveDelay) * -2 / obj.MoveP + 1)) * sign + 1) / 2 * obj.MoveW;
