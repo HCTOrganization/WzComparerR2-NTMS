@@ -248,6 +248,34 @@ namespace WzComparerR2.OpenAPI
             }
         }
 
+        public async Task<UnpackedAvatarData> ParseAvatarCode(string avatarCode)
+        {
+            try
+            {
+                var decrypted = Utils.Decrypt(avatarCode);
+                var version = Utils.CheckVer(decrypted);
+
+                var unpackedData = new UnpackedAvatarData(version);
+
+                Utils.Unpack(unpackedData, decrypted);
+                unpackedData.SetProperties();
+
+                return unpackedData;
+            }
+            catch (MapleStoryAPIException e)
+            {
+                switch (e.ErrorCode)
+                {
+                    default:
+                        throw new Exception(Utils.GetExceptionMsg(e));
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
         public async Task<LoadedAvatarData> GetAvatarResult2(string ocid)
         {
             var result = new LoadedAvatarData();

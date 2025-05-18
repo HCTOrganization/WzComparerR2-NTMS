@@ -2094,6 +2094,7 @@ namespace WzComparerR2.Avatar.UI
                                 this.API = new NexonOpenAPI(key);
                             }
 
+                            ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
                             var name = dlg.CharaName;
                             var ocid = await this.API.GetCharacterOCID(name);
 
@@ -2122,6 +2123,7 @@ namespace WzComparerR2.Avatar.UI
                         {
                             try
                             {
+                                ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
                                 avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "JMS");
                                 if (string.IsNullOrEmpty(avatarCode))
                                 {
@@ -2129,12 +2131,12 @@ namespace WzComparerR2.Avatar.UI
                                 }
                                 else
                                 {
-                                    ToastNotification.Show(this, $"{avatarCode}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                                    await Type3(avatarCode);
                                 }
                             }
                             catch (Exception ex)
                             {
-                                ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                                ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
                             }
                         }
                         break;
@@ -2142,6 +2144,7 @@ namespace WzComparerR2.Avatar.UI
                         this.API = new NexonOpenAPI("-");
                         try
                         {
+                            ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
                             avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "GMS-NA");
                             if (string.IsNullOrEmpty(avatarCode))
                             {
@@ -2149,18 +2152,19 @@ namespace WzComparerR2.Avatar.UI
                             }
                             else
                             {
-                                ToastNotification.Show(this, $"{avatarCode}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                                await Type3(avatarCode);
                             }
                         }
                         catch (Exception ex)
                         {
-                            ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
                         }
                         break;
                     case 5: // GMS-EU
                         this.API = new NexonOpenAPI("-");
                         try
                         {
+                            ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
                             avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "GMS-EU");
                             if (string.IsNullOrEmpty(avatarCode))
                             {
@@ -2168,18 +2172,19 @@ namespace WzComparerR2.Avatar.UI
                             }
                             else
                             {
-                                ToastNotification.Show(this, $"{avatarCode}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                                await Type3(avatarCode);
                             }
                         }
                         catch (Exception ex)
                         {
-                            ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
                         }
                         break;
                     case 6: // MSEA
                         this.API = new NexonOpenAPI("-");
                         try
                         {
+                            ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
                             avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "MSEA");
                             if (string.IsNullOrEmpty(avatarCode))
                             {
@@ -2187,12 +2192,12 @@ namespace WzComparerR2.Avatar.UI
                             }
                             else
                             {
-                                ToastNotification.Show(this, $"{avatarCode}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                                await Type3(avatarCode);
                             }
                         }
                         catch (Exception ex)
                         {
-                            ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
                         }
                         break;
                     case 8: // MSN
@@ -2231,7 +2236,7 @@ namespace WzComparerR2.Avatar.UI
                         }
                         catch (Exception ex)
                         {
-                            ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
                         }
                         break;
                 }
@@ -2288,6 +2293,31 @@ namespace WzComparerR2.Avatar.UI
                 {
                     if (list.Count > 0)
                         LoadCode(string.Join(",", list), 1);
+                }
+            }
+
+            async Task Type3(string avatarCode) // 외형 기준
+            {
+                UnpackedAvatarData res = await this.API.ParseAvatarCode(avatarCode);
+
+                var mixFace = int.Parse(res.MixFaceRatio) != 0 ? $"+{res.MixFaceColor}*{res.MixFaceRatio}" : "";
+                var mixHair = int.Parse(res.MixHairRatio) != 0 ? $"+{res.MixHairColor}*{res.MixHairRatio}" : "";
+
+                for (int i = 0; i < this.cmbEar.Items.Count; i++)
+                {
+                    if ((this.cmbEar.Items[i] as ComboItem).Text == res.EarType.ToString())
+                    {
+                        this.cmbEar.SelectedIndex = i;
+                        break;
+                    }
+                }
+
+                var code = $"20{res.Skin}, {res.Face + mixFace}, {res.Hair + mixHair}, {res.Cap}, {res.FaceAcc}, {res.EyeAcc}, {res.EarAcc}, {res.Coat}, {res.Pants}, {res.Shoes}, {res.Gloves}, {res.Cape}, {res.Shield}, {res.Weapon}, {res.CashWeapon}";
+                LoadCode(code, 0);
+
+                if (res.UnknownVer)
+                {
+                    throw new Exception($"未知のコードバージョンです. (バージョン: {res.Version})");
                 }
             }
 #else
