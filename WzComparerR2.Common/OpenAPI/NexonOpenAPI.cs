@@ -12,6 +12,7 @@ using MapleStory.OpenAPI;
 using System.Net; 
 using System.Net.Http;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Text.Encodings.Web;
 
@@ -94,6 +95,9 @@ namespace WzComparerR2.OpenAPI
             {
                 default:
                     return avatarCode;
+                case "KMS":
+                    serviceBackend = "https://maple.dakgg.io/api/v1/bypass/characters/" + Uri.EscapeDataString(characterName); // Used Maple GG API
+                    break;
                 case "JMS":
                     serviceBackend = $"{jmsBaseUrl}/community/avatar/search/?writer=" + Uri.EscapeDataString(characterName);
                     break;
@@ -105,6 +109,9 @@ namespace WzComparerR2.OpenAPI
                     break;
                 case "MSEA":
                     serviceBackend = "https://msea.dakgg.io/api/v1/bypass/characters/" + Uri.EscapeDataString(characterName); // Used Maple GG API
+                    break;
+                case "TMS":
+                    serviceBackend = "https://tw-event.beanfun.com/MapleStory/api/UnionWebRank/GetRank";
                     break;
                 case "MSN":
                     serviceBackend = "https://msu.io/maplestoryn/api/gateway/msn/ranking/by-name?characterName=" + Uri.EscapeDataString(characterName);
@@ -167,7 +174,7 @@ namespace WzComparerR2.OpenAPI
                         avatarCode = "";
                     }
                 }
-                else if (region == "MSEA")
+                else if (region == "MSEA" || region == "KMS")
                 {
                     var client = new HttpClient();
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
@@ -181,7 +188,30 @@ namespace WzComparerR2.OpenAPI
                             dataElement.TryGetProperty("characterBasic", out JsonElement characterBasicElement) &&
                             characterBasicElement.TryGetProperty("character_image", out JsonElement characterImageElement))
                         {
-                            avatarCode = characterImageElement.GetString().Replace("https://open.api.nexon.com/static/maplestorysea/character/look/", "");
+                            avatarCode = characterImageElement.GetString().Replace("https://open.api.nexon.com/static/maplestorysea/character/look/", "").Replace("https://open.api.nexon.com/static/maplestory/character/look/", "");
+                        }
+                    }
+                    else
+                    {
+                        avatarCode = "";
+                    }
+                }
+                else if (region == "TMS")
+                {
+                    var client = new HttpClient();
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
+                    string jsonPayload = $"{{\"RankType\":1,\"GameWorldId\":\"-1\",\"CharacterName\":\"{characterName}\"}}";
+                    var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(serviceBackend, content);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        using JsonDocument doc = JsonDocument.Parse(json);
+                        JsonElement root = doc.RootElement;
+                        if (root.TryGetProperty("Data", out JsonElement dataElement) &&
+                            dataElement.TryGetProperty("CharacterLookCipherText", out JsonElement characterLookCipherText))
+                        {
+                            avatarCode = characterLookCipherText.GetString();
                         }
                     }
                     else
@@ -253,6 +283,44 @@ namespace WzComparerR2.OpenAPI
             try
             {
                 var decrypted = Utils.Decrypt(avatarCode);
+                var version = Utils.CheckVer(decrypted);
+
+                var unpackedData = new UnpackedAvatarData(version);
+
+                Utils.Unpack(unpackedData, decrypted);
+                unpackedData.SetProperties();
+
+                return unpackedData;
+            }
+            catch (MapleStoryAPIException e)
+            {
+                switch (e.ErrorCode)
+                {
+                    default:
+                        throw new Exception(Utils.GetExceptionMsg(e));
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public async Task<UnpackedAvatarData> ParseCharacterLookCipherText(string cipherText)
+        {
+            if (cipherText.StartsWith("0x"))
+                cipherText = cipherText.Substring(2);
+
+            int length = cipherText.Length / 2;
+            byte[] bytes = new byte[length];
+
+            for (int i = 0; i < length; i++)
+            {
+                bytes[i] = Convert.ToByte(cipherText.Substring(i * 2, 2), 16);
+            }
+            try
+            {
+                var decrypted = bytes;
                 var version = Utils.CheckVer(decrypted);
 
                 var unpackedData = new UnpackedAvatarData(version);

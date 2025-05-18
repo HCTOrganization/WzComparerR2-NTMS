@@ -101,6 +101,7 @@
             this.checkBoxX1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX1.TabIndex = 1;
             this.checkBoxX1.Text = "外觀";
+            this.checkBoxX1.Visible = false;
             // 
             // checkBoxX2
             // 
@@ -116,6 +117,7 @@
             this.checkBoxX2.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.checkBoxX2.TabIndex = 2;
             this.checkBoxX2.Text = "裝備窗";
+            this.checkBoxX2.Visible = false;
             // 
             // labelX1
             // 
@@ -129,6 +131,7 @@
             this.labelX1.Size = new System.Drawing.Size(56, 18);
             this.labelX1.TabIndex = 5;
             this.labelX1.Text = "基準 :";
+            this.labelX1.Visible = false;
             // 
             // cmbRegion
             // 

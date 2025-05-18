@@ -2080,6 +2080,27 @@ namespace WzComparerR2.Avatar.UI
                         ToastNotification.Show(this, $"請選擇角色歸屬地區。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
                         return;
                     case 1: // KMS
+                        this.API = new NexonOpenAPI("-");
+                        try
+                        {
+                            ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
+                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "KMS");
+                            if (string.IsNullOrEmpty(avatarCode))
+                            {
+                                ToastNotification.Show(this, $"找不到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            }
+                            else
+                            {
+                                await Type3(avatarCode);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
+                        }
+                        break;
+
+                        // Following are unused
                         var key = ((string)WcR2Config.Default.NxOpenAPIKey).Trim();
                         if (string.IsNullOrEmpty(key))
                         {
@@ -2200,6 +2221,26 @@ namespace WzComparerR2.Avatar.UI
                             ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
                         }
                         break;
+                    case 7: // TMS
+                        this.API = new NexonOpenAPI("-");
+                        try
+                        {
+                            ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
+                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "TMS");
+                            if (string.IsNullOrEmpty(avatarCode))
+                            {
+                                ToastNotification.Show(this, $"找不到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            }
+                            else
+                            {
+                                await Type4(avatarCode);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
+                        }
+                        break;
                     case 8: // MSN
                         this.API = new NexonOpenAPI("-");
                         try
@@ -2296,9 +2337,34 @@ namespace WzComparerR2.Avatar.UI
                 }
             }
 
-            async Task Type3(string avatarCode) // 외형 기준
+            async Task Type3(string avatarCode) // raw avatarCode
             {
                 UnpackedAvatarData res = await this.API.ParseAvatarCode(avatarCode);
+
+                var mixFace = int.Parse(res.MixFaceRatio) != 0 ? $"+{res.MixFaceColor}*{res.MixFaceRatio}" : "";
+                var mixHair = int.Parse(res.MixHairRatio) != 0 ? $"+{res.MixHairColor}*{res.MixHairRatio}" : "";
+
+                for (int i = 0; i < this.cmbEar.Items.Count; i++)
+                {
+                    if ((this.cmbEar.Items[i] as ComboItem).Text == res.EarType.ToString())
+                    {
+                        this.cmbEar.SelectedIndex = i;
+                        break;
+                    }
+                }
+
+                var code = $"20{res.Skin}, {res.Face + mixFace}, {res.Hair + mixHair}, {res.Cap}, {res.FaceAcc}, {res.EyeAcc}, {res.EarAcc}, {res.Coat}, {res.Pants}, {res.Shoes}, {res.Gloves}, {res.Cape}, {res.Shield}, {res.Weapon}, {res.CashWeapon}";
+                LoadCode(code, 0);
+
+                if (res.UnknownVer)
+                {
+                    throw new Exception($"未知のコードバージョンです. (バージョン: {res.Version})");
+                }
+            }
+
+            async Task Type4(string avatarCode) // TMS cipherText
+            {
+                UnpackedAvatarData res = await this.API.ParseCharacterLookCipherText(avatarCode);
 
                 var mixFace = int.Parse(res.MixFaceRatio) != 0 ? $"+{res.MixFaceColor}*{res.MixFaceRatio}" : "";
                 var mixHair = int.Parse(res.MixHairRatio) != 0 ? $"+{res.MixHairColor}*{res.MixHairRatio}" : "";
