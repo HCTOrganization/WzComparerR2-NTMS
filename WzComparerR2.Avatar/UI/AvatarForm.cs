@@ -2378,7 +2378,7 @@ namespace WzComparerR2.Avatar.UI
                     }
                 }
 
-                var code = $"20{res.Skin}, {res.Face + mixFace}, {res.Hair + mixHair}, {res.Cap}, {res.FaceAcc}, {res.EyeAcc}, {res.EarAcc}, {res.Coat}, {res.Pants}, {res.Shoes}, {res.Gloves}, {res.Cape}, {res.Shield}, {res.Weapon}, {res.CashWeapon}";
+                var code = $"20{res.Skin}, {res.Face}, {res.Face + mixFace}, {res.Hair}, {res.Hair + mixHair}, {res.Cap}, {res.FaceAcc}, {res.EyeAcc}, {res.EarAcc}, {res.Coat}, {res.Pants}, {res.Shoes}, {res.Gloves}, {res.Cape}, {res.Shield}, {res.Weapon}, {res.CashWeapon}";
                 LoadCode(code, 0);
 
                 if (res.UnknownVer)
