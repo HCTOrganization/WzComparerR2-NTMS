@@ -309,7 +309,7 @@ namespace WzComparerR2.OpenAPI
         public async Task<UnpackedAvatarData> ParseCharacterLookCipherText(string cipherText)
         {
             if (cipherText.StartsWith("0x"))
-                cipherText = cipherText.Substring(2);
+                cipherText = cipherText.Substring(2).PadRight(256, '0');
 
             int length = cipherText.Length / 2;
             byte[] bytes = new byte[length];
