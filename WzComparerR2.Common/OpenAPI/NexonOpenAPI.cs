@@ -130,6 +130,11 @@ namespace WzComparerR2.OpenAPI
                         avatarCode = rankingAvatarCode;
                         return avatarCode;
                     }
+                    bool isUnderMaintenance = await isJMSUnderMaintenance();
+                    if (isUnderMaintenance)
+                    {
+                        throw new Exception("JMS現在正在維護中。");
+                    }
                     string html = await client.GetStringAsync(serviceBackend);
                     HtmlDocument doc = new HtmlDocument();
                     doc.LoadHtml(html);

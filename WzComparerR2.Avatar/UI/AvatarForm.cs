@@ -2141,30 +2141,22 @@ namespace WzComparerR2.Avatar.UI
                         break;
                     case 2: // JMS
                         this.API = new NexonOpenAPI("-");
-                        bool isUnderMaintenance = await this.API.isJMSUnderMaintenance();
-                        if (isUnderMaintenance)
+                        try
                         {
-                            ToastNotification.Show(this, $"JMS現在正在維護中。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
+                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "JMS");
+                            if (string.IsNullOrEmpty(avatarCode))
+                            {
+                                ToastNotification.Show(this, $"找不到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            }
+                            else
+                            {
+                                await Type3(avatarCode);
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            try
-                            {
-                                ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
-                                avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "JMS");
-                                if (string.IsNullOrEmpty(avatarCode))
-                                {
-                                    ToastNotification.Show(this, $"找不到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
-                                }
-                                else
-                                {
-                                    await Type3(avatarCode);
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
-                            }
+                            ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
                         }
                         break;
                     case 4: // GMS-NA
