@@ -89,6 +89,8 @@ namespace WzComparerR2.Avatar.UI
         private bool updatingActionEffect = false;
 #if NET6_0_OR_GREATER
         private NexonOpenAPI API;
+        private string characterName = "";
+        private int previousRegion = 7;
 #endif
 
         private string chairName;
@@ -2070,9 +2072,13 @@ namespace WzComparerR2.Avatar.UI
             }
 
             var dlg = new AvatarAPIForm();
+            dlg.CharaName = characterName;
+            dlg.selectedRegion = previousRegion;
 
             if (dlg.ShowDialog() == DialogResult.OK)
             {
+                characterName = dlg.CharaName;
+                previousRegion = dlg.selectedRegion;
                 string avatarCode;
                 switch (dlg.selectedRegion)
                 {
