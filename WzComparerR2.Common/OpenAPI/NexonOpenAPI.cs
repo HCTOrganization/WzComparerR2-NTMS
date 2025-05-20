@@ -91,6 +91,7 @@ namespace WzComparerR2.OpenAPI
             string serviceBackend = "";
             string avatarCode = "";
             string jmsBaseUrl = "https://maplestory.nexon.co.jp";
+            string b64CharName = Uri.EscapeDataString(Convert.ToBase64String(Encoding.UTF8.GetBytes(characterName)));
             switch (region)
             {
                 default:
@@ -123,6 +124,12 @@ namespace WzComparerR2.OpenAPI
                 {
                     var client = new HttpClient();
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
+                    string rankingAvatarCode = await client.GetStringAsync("https://api.hikaricalyx.com/WcR2-JMS/v1/GetRankingChar?CharacterName=" + b64CharName);
+                    if (!string.IsNullOrEmpty(rankingAvatarCode))
+                    {
+                        avatarCode = rankingAvatarCode;
+                        return avatarCode;
+                    }
                     string html = await client.GetStringAsync(serviceBackend);
                     HtmlDocument doc = new HtmlDocument();
                     doc.LoadHtml(html);
