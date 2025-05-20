@@ -70,7 +70,7 @@ namespace WzComparerR2.OpenAPI
                     string url = "https://maplestory.nexon.co.jp/maintenance";
                     HttpResponseMessage response = await client.GetAsync(url);
 
-                    if (response.StatusCode == System.Net.HttpStatusCode.OK)
+                    if (response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable)
                     {
                         return true;
                     }
@@ -246,9 +246,9 @@ namespace WzComparerR2.OpenAPI
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                throw new Exception("找不到角色。");
+                throw ex;
             }
 
             return avatarCode;
