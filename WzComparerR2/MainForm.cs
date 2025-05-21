@@ -3410,7 +3410,7 @@ namespace WzComparerR2
 
             if (item != null)
             {
-                GearGraphics.SetFontFamily("SimSun");
+                GearGraphics.SetFontFamily(item.Text);
                 ConfigManager.Reload();
                 CharaSimConfig.Default.SelectedFontIndex = comboBoxItemLanguage.SelectedIndex;
                 ConfigManager.Save();

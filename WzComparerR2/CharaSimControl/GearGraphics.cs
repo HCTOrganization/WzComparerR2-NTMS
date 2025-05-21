@@ -49,23 +49,23 @@ namespace WzComparerR2.CharaSimControl
         public static bool is22aniStyle { get; set; }
         public static readonly Dictionary<string, TextureBrush> TBrushes;
         public static readonly Dictionary<string, TextureBrush> TBrushes22ani;
-        public static readonly Font ItemNameFont = new Font("SimSun", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
-        public static readonly Font ItemDetailFont = new Font("SimSun", 12f, GraphicsUnit.Pixel);
-        public static readonly Font LevelBoldFont = new Font("SimSun", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
-        public static readonly Font JMSKunshoFont = new Font("SimSun", 12f, GraphicsUnit.Pixel);
-        public static readonly Font EquipDetailFont = new Font("SimSun", 12f, GraphicsUnit.Pixel);
-        public static readonly Font EpicGearDetailFont = new Font("SimSun", 12f, GraphicsUnit.Pixel);
+        public static Font ItemNameFont { get; private set; }
+        public static Font ItemDetailFont { get; private set; }
+        public static Font LevelBoldFont { get; private set; }
+        public static Font JMSKunshoFont { get; private set; }
+        public static Font EquipDetailFont { get; private set; }
+        public static Font EpicGearDetailFont { get; private set; }
         public static readonly Font TahomaFont = new Font("Tahoma", 12f, GraphicsUnit.Pixel);
-        public static readonly Font SetItemPropFont = new Font("SimSun", 12f, GraphicsUnit.Pixel);
-        public static readonly Font ItemReqLevelFont = new Font("SimSun", 12f, GraphicsUnit.Pixel);
+        public static Font SetItemPropFont { get; private set; }
+        public static Font ItemReqLevelFont { get; private set; }
         public static readonly Font KMSItemNameFont = new Font("Dotum", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
         public static readonly Font KMSItemDetailFont = new Font("Dotum", 12f, GraphicsUnit.Pixel);
         public static readonly Font KMSItemDetailFont2 = new Font("Dotum", 12f, GraphicsUnit.Pixel);
         public static readonly Font Gear3NameFont = new Font("Noto Sans TC", 15f, FontStyle.Bold, GraphicsUnit.Pixel);
         public static readonly Font KMSGear3NameFont = new Font("NanumGothicExtraBold", 15f, GraphicsUnit.Pixel);
 
-        public static readonly Font EquipMDMoris9Font = new Font("SimSun", 12f, GraphicsUnit.Pixel);
-        public static readonly Font EquipMDMoris9FontBold = new Font("SimSun", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
+        public static Font EquipMDMoris9Font { get; private set; }
+        public static Font EquipMDMoris9FontBold { get; private set; }
 
         public static Font ItemNameFont2 { get; private set; }
         public static Font ItemDetailFont2 { get; private set; }
@@ -73,6 +73,66 @@ namespace WzComparerR2.CharaSimControl
 
         public static void SetFontFamily(string fontName)
         {
+            if (ItemNameFont != null)
+            {
+                ItemNameFont.Dispose();
+                ItemNameFont = null;
+            }
+            ItemNameFont = new Font(fontName, 14f, FontStyle.Bold, GraphicsUnit.Pixel);
+            if (ItemDetailFont != null)
+            {
+                ItemDetailFont.Dispose();
+                ItemDetailFont = null;
+            }
+            ItemDetailFont = new Font(fontName, 12f, GraphicsUnit.Pixel);
+            if (LevelBoldFont != null)
+            {
+                LevelBoldFont.Dispose();
+                LevelBoldFont = null;
+            }
+            LevelBoldFont = new Font(fontName, 12f, FontStyle.Bold, GraphicsUnit.Pixel);
+            if (JMSKunshoFont != null)
+            {
+                JMSKunshoFont.Dispose();
+                JMSKunshoFont = null;
+            }
+            JMSKunshoFont = new Font(fontName, 12f, GraphicsUnit.Pixel);
+            if (EquipDetailFont != null)
+            {
+                EquipDetailFont.Dispose();
+                EquipDetailFont = null;
+            }
+            EquipDetailFont = new Font(fontName, 12f, GraphicsUnit.Pixel);
+            if (EpicGearDetailFont != null)
+            {
+                EpicGearDetailFont.Dispose();
+                EpicGearDetailFont = null;
+            }
+            EpicGearDetailFont = new Font(fontName, 12f, GraphicsUnit.Pixel);
+            if (SetItemPropFont != null)
+            {
+                SetItemPropFont.Dispose();
+                SetItemPropFont = null;
+            }
+            SetItemPropFont = new Font(fontName, 12f, GraphicsUnit.Pixel);
+            if (ItemReqLevelFont != null)
+            {
+                ItemReqLevelFont.Dispose();
+                ItemReqLevelFont = null;
+            }
+            ItemReqLevelFont = new Font(fontName, 12f, GraphicsUnit.Pixel);
+            if (EquipMDMoris9Font != null)
+            {
+                EquipMDMoris9Font.Dispose();
+                EquipMDMoris9Font = null;
+            }
+            EquipMDMoris9Font = new Font(fontName, 12f, GraphicsUnit.Pixel);
+            if (EquipMDMoris9FontBold != null)
+            {
+                EquipMDMoris9FontBold.Dispose();
+                EquipMDMoris9FontBold = null;
+            }
+            EquipMDMoris9FontBold = new Font(fontName, 12f, FontStyle.Bold, GraphicsUnit.Pixel);
             if (ItemNameFont2 != null)
             {
                 ItemNameFont2.Dispose();
