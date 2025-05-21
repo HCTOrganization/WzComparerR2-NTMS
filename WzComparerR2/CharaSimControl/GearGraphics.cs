@@ -58,9 +58,9 @@ namespace WzComparerR2.CharaSimControl
         public static readonly Font TahomaFont = new Font("Tahoma", 12f, GraphicsUnit.Pixel);
         public static Font SetItemPropFont { get; private set; }
         public static Font ItemReqLevelFont { get; private set; }
-        public static readonly Font KMSItemNameFont = new Font("Dotum", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
-        public static readonly Font KMSItemDetailFont = new Font("Dotum", 12f, GraphicsUnit.Pixel);
-        public static readonly Font KMSItemDetailFont2 = new Font("Dotum", 12f, GraphicsUnit.Pixel);
+        public static Font KMSItemNameFont { get; private set; }
+        public static Font KMSItemDetailFont { get; private set; }
+        public static Font KMSItemDetailFont2 { get; private set; }
         public static readonly Font Gear3NameFont = new Font("Noto Sans TC", 15f, FontStyle.Bold, GraphicsUnit.Pixel);
         public static readonly Font KMSGear3NameFont = new Font("NanumGothicExtraBold", 15f, GraphicsUnit.Pixel);
 
@@ -121,6 +121,24 @@ namespace WzComparerR2.CharaSimControl
                 ItemReqLevelFont = null;
             }
             ItemReqLevelFont = new Font(fontName, 12f, GraphicsUnit.Pixel);
+            if (KMSItemNameFont != null)
+            {
+                KMSItemNameFont.Dispose();
+                KMSItemNameFont = null;
+            }
+            KMSItemNameFont = new Font(fontName.StartsWith("Noto Sans") ? "Noto Sans KR" : "Dotum", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
+            if (KMSItemDetailFont != null)
+            {
+                KMSItemDetailFont.Dispose();
+                KMSItemDetailFont = null;
+            }
+            KMSItemDetailFont = new Font(fontName.StartsWith("Noto Sans") ? "Noto Sans KR" : "Dotum", 12f, GraphicsUnit.Pixel);
+            if (KMSItemDetailFont2 != null)
+            {
+                KMSItemDetailFont2.Dispose();
+                KMSItemDetailFont2 = null;
+            }
+            KMSItemDetailFont2 = new Font(fontName.StartsWith("Noto Sans") ? "Noto Sans KR" : "Dotum", 11f, GraphicsUnit.Pixel);
             if (EquipMDMoris9Font != null)
             {
                 EquipMDMoris9Font.Dispose();
