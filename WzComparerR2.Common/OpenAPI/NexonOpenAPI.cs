@@ -157,7 +157,18 @@ namespace WzComparerR2.OpenAPI
                     }
                     else if (avatarLinks.Count > 2)
                     {
-                        throw new Exception("請準確輸入角色名。");
+                        EdgeWebView webView = new EdgeWebView();
+                        EdgeWebView.webViewUri = serviceBackend;
+                        EdgeWebView.customCheckUri = "https://maplestory.nexon.co.jp";
+                        EdgeWebView.customCheckCondition = "https://maplestory.nexon.co.jp/mypage/avatar";
+                        webView.ShowDialog();
+                        string avatarHtml = await client.GetStringAsync(webView.currentUri);
+                        HtmlDocument avatarDoc = new HtmlDocument();
+                        avatarDoc.LoadHtml(avatarHtml);
+
+                        avatarCode = avatarDoc.DocumentNode.SelectNodes("//img[@src]")
+                            ?.Select(node => node.GetAttributeValue("src", ""))
+                            .FirstOrDefault(src => src.StartsWith("//avatar-maplestory.nexon.co.jp")).Replace("//avatar-maplestory.nexon.co.jp/Character/", "").Replace(".png", "");
                     }
                     else
                     {
