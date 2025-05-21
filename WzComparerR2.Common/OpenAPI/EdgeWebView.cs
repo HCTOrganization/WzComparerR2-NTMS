@@ -46,6 +46,9 @@ namespace WzComparerR2.OpenAPI
                 }
                 else
                 {
+                    RemoveLiElements("btn-stamp-push");
+                    RemovePElements("btn-public");
+                    RemovePElements("btn-avatar-top");
                     ScrollToElement("anc02");
                 }
             }
@@ -78,7 +81,39 @@ namespace WzComparerR2.OpenAPI
             {
                 throw ex;
             }
-}
+        }
+
+        private async void RemoveLiElements(string className)
+        {
+            try
+            {
+                string script = $@"
+                    var elements = document.querySelectorAll('li.{className}');
+                    elements.forEach(el => el.remove());
+                ";
+                await webView.CoreWebView2.ExecuteScriptAsync(script);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private async void RemovePElements(string className)
+        {
+            try
+            {
+                string script = $@"
+                    var elements = document.querySelectorAll('p.{className}');
+                    elements.forEach(el => el.remove());
+                ";
+                await webView.CoreWebView2.ExecuteScriptAsync(script);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
     }
 
     public class MyJsonModel
