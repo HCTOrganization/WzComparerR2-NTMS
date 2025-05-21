@@ -1404,7 +1404,7 @@ namespace WzComparerR2.CharaSimControl
                 if (enhance_scroll == 0)
                     cantEnhanceList.Add("強化卷軸");
                 if (enhance_bonusStat == 0)
-                    cantEnhanceList.Add("附加屬性");
+                    cantEnhanceList.Add("追加屬性");
                 if (cantEnhanceList.Count > 0)
                 {
                     GearGraphics.DrawString(g, $"#$d無法強化{string.Join(", ", cantEnhanceList)}#", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
@@ -1445,10 +1445,10 @@ namespace WzComparerR2.CharaSimControl
                 switch (enhance_bonusStat)
                 {
                     case 0:
-                        text = $"#$d附加屬性 : 無法強化#";
+                        text = $"#$d追加屬性 : 無法強化#";
                         break;
                     case 1:
-                        text = $"#$d附加屬性 : 無";
+                        text = $"#$d追加屬性 : 無";
                         break;
                 }
                 if (!string.IsNullOrEmpty(text))
