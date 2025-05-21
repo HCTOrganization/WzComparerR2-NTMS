@@ -1280,7 +1280,7 @@ namespace WzComparerR2.CharaSim
                 case 4210: return "陰陽師(2轉)";
                 case 4211: return "陰陽師(3轉)";
                 case 4212: return "陰陽師(4轉)";
-                case 4216: return "陰陽師(6轉)";
+                case 4214: return "陰陽師(6轉)";
 
 
                 case 5000: return "無名少年";
