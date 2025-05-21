@@ -756,6 +756,7 @@ namespace WzComparerR2.CharaSim
 
         private static void CacheTranslationResult(string orgText, string translatedText)
         {
+            if (orgText.Contains("\r\n") && (orgText == translatedText)) return;
             JObject currentTranslationCache = new JObject();
             string cachePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "TranslationCache");
             switch (DefaultPreferredTranslateEngine)
