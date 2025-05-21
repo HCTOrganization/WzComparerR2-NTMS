@@ -100,7 +100,7 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incDAMr: return "總傷害 : " + sign + value + "%";
                 case GearPropType.incCr: return "爆擊率 : " + sign + value + "%";
                 case GearPropType.incCDr: return "爆擊傷害 : " + sign + value + "%";
-                case GearPropType.knockback: return "直接打擊時的機率強弓:" + value;
+                case GearPropType.knockback: return "直接打擊時，以 " + value + "%的機率強弓";
                 //case GearPropType.incPVPDamage: return "Battle Mode ATT " + sign + " " + value;
                 case GearPropType.incPQEXPr: return "组隊任務經驗值增加" + value + "%";
                 case GearPropType.incEXPr: return "經驗值增加" + value + "%";
@@ -295,7 +295,7 @@ namespace WzComparerR2.CharaSim
                     res[1] = sign + value + "%";
                     return res;
                 case GearPropType.knockback:
-                    res[0] = "直接打擊時的機率強弓:" + value;
+                    res[0] = "直接打擊時，以 " + value + "%的機率強弓";
                     return res;
                 case GearPropType.incPQEXPr:
                     res[0] = "组隊任務經驗值增加";
