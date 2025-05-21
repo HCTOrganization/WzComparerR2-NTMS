@@ -319,7 +319,7 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.attackSpeed:
                     if (2 <= value && value <= 9)
                     {
-                        res[0] = "攻撃速度";
+                        res[0] = "攻擊速度";
                         res[1] = $"{10 - value}段階";
                     }
                     return res;
@@ -1455,6 +1455,72 @@ namespace WzComparerR2.CharaSim
             }
 
             return sb.Length > 0 ? sb.ToString() : "0";
+        }
+
+        public static string GetMobSkillName(int id)
+        {
+            switch (id)
+            {
+                case 100: return "物理攻擊力增加";
+                case 101: return "魔法攻擊力增加";
+                case 102: return "物理防御力增加";
+                case 103: return "魔法防御力增加";
+                case 105: return "HP吸收";
+
+                case 110: return "周辺物理攻擊力增加";
+                case 111: return "周辺魔法攻擊力增加";
+                case 112: return "周辺物理防御力增加";
+                case 113: return "周辺魔法防御力增加";
+                case 114: return "HP回復";
+                case 115: return "移動速度增加";
+
+                case 120: return "封印";
+                case 121: return "打偏";
+                case 122: return "虛弱";
+                case 123: return "束縛";
+                case 124: return "詛咒";
+                case 125: return "中毒";
+                case 126: return "減速";
+                case 127: return "解除增益";
+                case 128: return "誘惑";
+                case 129: return "追放";
+
+                case 131: return "範圍持續傷害";
+                case 132: return "混乱";
+                case 133: return "不死族";
+                case 134: return "藥水封印";
+                case 135: return "永不停止";
+                case 136: return "暗闇";
+                case 137: return "冷凍";
+                case 138: return "潛能無效";
+
+                case 140: return "物理攻擊無視";
+                case 141: return "魔法攻擊無視";
+                case 142: return "硬化技能";
+                case 143: return "物理攻擊反射";
+                case 144: return "魔法攻擊反射";
+                case 145: return "攻擊反射";
+                case 146: return "無敵";
+
+                case 150: return "物理攻擊力增加";
+                case 151: return "魔法攻擊力增加";
+                case 152: return "物理防御力增加";
+                case 153: return "魔法防御力增加";
+                case 154: return "命中率增加";
+                case 155: return "回避率增加";
+                case 156: return "移動速度增加";
+
+                case 170: return "傳送";
+                case 171: return "爆發";
+                case 172: return "變異";
+                case 173: return "空降";
+                case 174: return "石化";
+
+                case 200: return "召喚";
+                case 201: return "召喚";
+
+                default: return null;
+            }
         }
     }
 }
