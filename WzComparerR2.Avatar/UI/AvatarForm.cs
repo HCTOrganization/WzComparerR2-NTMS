@@ -2356,7 +2356,7 @@ namespace WzComparerR2.Avatar.UI
 
                 if (res.UnknownVer)
                 {
-                    throw new Exception($"未知のコードバージョンです. (バージョン: {res.Version})");
+                    throw new Exception($"未知代碼版本 (版本: {res.Version})");
                 }
             }
 
@@ -2381,7 +2381,7 @@ namespace WzComparerR2.Avatar.UI
 
                 if (res.UnknownVer)
                 {
-                    throw new Exception($"未知のコードバージョンです. (バージョン: {res.Version})");
+                    throw new Exception($"未知代碼版本 (版本: {res.Version})");
                 }
             }
 #else
