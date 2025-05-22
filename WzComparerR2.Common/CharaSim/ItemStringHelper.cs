@@ -1409,6 +1409,19 @@ namespace WzComparerR2.CharaSim
                 case 17512: return "墨玄(4轉)";
                 case 17514: return "墨玄(6轉)";
 
+                case 18000: return "施亞阿斯特";
+                case 18001: return "葉里萊特";
+                case 18100: return "葉里萊特(1轉)";
+                case 18110: return "葉里萊特(2轉)";
+                case 18111: return "葉里萊特(3轉)";
+                case 18112: return "葉里萊特(4轉)";
+                case 18114: return "葉里萊特(6轉)";
+                case 18200: return "施亞阿斯特(1轉)";
+                case 18210: return "施亞阿斯特(2轉)";
+                case 18211: return "施亞阿斯特(3轉)";
+                case 18212: return "施亞阿斯特(4轉)";
+                case 18214: return "施亞阿斯特(6轉)";
+
                 case 40000: return "5轉";
                 case 40001: return "5轉(劍士)";
                 case 40002: return "5轉(法師)";
