@@ -901,6 +901,13 @@ namespace WzComparerR2.CharaSim
                 case GearType.boxingSky: return GetExtraJobReqString(175);
 
                 case GearType.ornament: return GetExtraJobReqString(162);
+
+                //18xxx
+                case GearType.gram:
+                case GearType.keir: return "可裝備葉里";
+
+                case GearType.celestialLight:
+                case GearType.compass: return "可裝備施亞";
                 default: return null;
             }
         }
