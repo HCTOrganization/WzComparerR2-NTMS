@@ -904,10 +904,10 @@ namespace WzComparerR2.CharaSim
 
                 //18xxx
                 case GearType.gram:
-                case GearType.keir: return "可裝備葉里";
+                case GearType.keir: return GetExtraJobReqString(181);
 
                 case GearType.celestialLight:
-                case GearType.compass: return "可裝備施亞";
+                case GearType.compass: return GetExtraJobReqString(182);
                 default: return null;
             }
         }
@@ -947,7 +947,8 @@ namespace WzComparerR2.CharaSim
                 case 164: return "可裝備虎影";
                 case 172: return "可裝備琳恩";
                 case 175: return "可裝備墨玄";
-
+                case 181: return "可裝備葉里";
+                case 182: return "可裝備施亞";
                 default: return null;
             }
         }
