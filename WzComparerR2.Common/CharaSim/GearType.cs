@@ -397,6 +397,14 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         hexSeeker = 135403,
         /// <summary>
+        /// Compass 135404
+        /// </summary>
+        compass = 135404,
+        /// <summary>
+        /// Keir 135405x
+        /// </summary>
+        keir = 135405,
+        /// <summary>
         /// 手杖
         /// </summary>
         cane = 136,
@@ -501,6 +509,14 @@ namespace WzComparerR2.CharaSim
         /// 远古弓 159
         /// </summary>
         ancientBow = 159,
+        /// <summary>
+        /// Celestial Light 171
+        /// </summary>
+        celestialLight = 171,
+        /// <summary>
+        /// Gram 172
+        /// </summary>
+        gram = 172,
         /// <summary>
         /// 拼图 168
         /// </summary>
