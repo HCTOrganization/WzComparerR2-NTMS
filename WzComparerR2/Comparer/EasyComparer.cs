@@ -491,7 +491,7 @@ namespace WzComparerR2.Comparer
                                 {
                                     string anchorName = "a_0_" + count[0];
                                     string menuAnchorName = "m_0_" + count[0];
-                                    CompareImg(imgNew, imgOld, diff.NodeNew.FullPathToFile, anchorName, menuAnchorName, srcDirPath, sw);
+                                    CompareImg(imgNew, imgOld, diff.NodeNew.FullPathToFile, anchorName, menuAnchorName, srcDirPath, sw, fileNew[0].GetMergedVersion(), fileOld[0].GetMergedVersion());
                                 }
                                 count[0]++;
                             }
@@ -706,10 +706,19 @@ namespace WzComparerR2.Comparer
                 switch (nullSkillIdx)
                 {
                     case 0: // change
-                        skillType = "變更";
+                        //skillType = "變更";
 
                         Bitmap ImageNew = skillRenderNewOld[0].Render(true);
                         Bitmap ImageOld = skillRenderNewOld[1].Render(true);
+                        if (ShowChangeType)
+                        {
+                            int picHchange = 13;
+                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            picHchange = 13;
+                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                        }
+
                         resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
                         g = Graphics.FromImage(resultImage);
 
@@ -919,11 +928,19 @@ namespace WzComparerR2.Comparer
                 switch (nullItemIdx)
                 {
                     case 0: // change
-                        itemType = "變更";
+                        //itemType = "變更";
 
                         Bitmap ImageNew = itemRenderNewOld[0].Render();
                         Bitmap ImageOld = itemRenderNewOld[1].Render();
                         if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                        if (ShowChangeType)
+                        {
+                            int picHchange = 13;
+                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            picHchange = 13;
+                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                        }
                         resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
                         g = Graphics.FromImage(resultImage);
 
@@ -1176,11 +1193,19 @@ namespace WzComparerR2.Comparer
                 switch (nullEqpIdx)
                 {
                     case 0: // change
-                        gearType = "變更";
+                        //gearType = "變更";
 
                         Bitmap ImageNew = gearRenderNewOld[0].Render();
                         Bitmap ImageOld = gearRenderNewOld[1].Render();
                         if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                        if (ShowChangeType)
+                        {
+                            int picHchange = 13;
+                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            picHchange = 13;
+                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                        }
                         resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
                         g = Graphics.FromImage(resultImage);
 
@@ -1438,6 +1463,14 @@ namespace WzComparerR2.Comparer
                         Bitmap ImageNew = gearRenderNewOld[0].Render();
                         Bitmap ImageOld = gearRenderNewOld[1].Render();
                         if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                        if (ShowChangeType)
+                        {
+                            int picHchange = 13;
+                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            picHchange = 13;
+                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                        }
                         resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
                         g = Graphics.FromImage(resultImage);
 
@@ -1564,11 +1597,19 @@ namespace WzComparerR2.Comparer
                 switch (nullMobIdx)
                 {
                     case 0: // change
-                        mobType = "變更";
+                        //mobType = "變更";
 
                         Bitmap ImageNew = mobRenderNewOld[0].Render();
                         Bitmap ImageOld = mobRenderNewOld[1].Render();
                         if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                        if (ShowChangeType)
+                        {
+                            int picHchange = 1;
+                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", mobTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            picHchange = 1;
+                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", mobTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                        }
                         resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
                         g = Graphics.FromImage(resultImage);
 
@@ -1690,11 +1731,19 @@ namespace WzComparerR2.Comparer
                 switch (nullNpcIdx)
                 {
                     case 0: // change
-                        npcType = "變更";
+                        //npcType = "變更";
 
                         Bitmap ImageNew = npcRenderNewOld[0].Render();
                         Bitmap ImageOld = npcRenderNewOld[1].Render();
                         if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                        if (ShowChangeType)
+                        {
+                            int picHchange = 1;
+                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", npcTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            picHchange = 1;
+                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", npcTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                        }
                         resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
                         g = Graphics.FromImage(resultImage);
 
@@ -1821,11 +1870,19 @@ namespace WzComparerR2.Comparer
                 switch (nullItemIdx)
                 {
                     case 0: // change
-                        itemType = "變更";
+                        //itemType = "變更";
 
                         Bitmap ImageNew = cashRenderNewOld[0].Render();
                         Bitmap ImageOld = cashRenderNewOld[1].Render();
                         if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                        if (ShowChangeType)
+                        {
+                            int picHchange = 13;
+                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            picHchange = 13;
+                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                        }
                         resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
                         g = Graphics.FromImage(resultImage);
 
@@ -2045,16 +2102,16 @@ namespace WzComparerR2.Comparer
             }
         }
 
-        private void CompareImg(Wz_Image imgNew, Wz_Image imgOld, string imgName, string anchorName, string menuAnchorName, string outputDir, StreamWriter sw)
+        private void CompareImg(Wz_Image imgNew, Wz_Image imgOld, string imgName, string anchorName, string menuAnchorName, string outputDir, StreamWriter sw, int newNumber=0, int oldNumber=0)
         {
-            StateDetail = "Extracting IMG";
+            StateDetail = "IMG匯出中";
             if (!imgNew.TryExtract() || !imgOld.TryExtract())
                 return;
-            StateDetail = "Comparing IMG";
+            StateDetail = "IMG比較中";
             List<CompareDifference> diffList = new List<CompareDifference>(Comparer.Compare(imgNew.Node, imgOld.Node));
             StringBuilder sb = new StringBuilder();
             int[] count = new int[3];
-            StateDetail = "Total of " + diffList.Count + " changes";
+            StateDetail = "總計" + diffList.Count + "條變更";
             foreach (var diff in diffList)
             {
                 int idx = -1;
@@ -2123,6 +2180,7 @@ namespace WzComparerR2.Comparer
             sw.WriteLine("<table class=\"img{0}\">", noChange ? " noChange" : "");
             sw.WriteLine("<tr><th colspan=\"3\"><a name=\"{1}\">{0}</a>: 變更: {2}; 新增: {3}; 刪除: {4}</th></tr>",
                 imgName, anchorName, count[0], count[1], count[2]);
+            sw.WriteLine(String.Format(@"<tr><th>路徑</th><th>舊版本 (v{0})</th><th>新版本 (v{1})</th></tr>", oldNumber, newNumber));
             sw.WriteLine(sb.ToString());
             sw.WriteLine("<tr><td colspan=\"3\"><a href=\"#{1}\">{0}</a></td></tr>", "返回頂部", menuAnchorName);
             sw.WriteLine("</table>");
