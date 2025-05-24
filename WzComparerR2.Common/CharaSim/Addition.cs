@@ -29,8 +29,8 @@ namespace WzComparerR2.CharaSim
                     {
                         string v1;
                         if (this.Props.TryGetValue("prob", out v1))
-                            sb.Append("Has a " + v1 + "% chance ");
-                        sb.Append("to deal " + Props["damage"] + "% extra damage on boss monsters.");
+                            sb.Append("有" + v1 + "的機率");
+                        sb.Append("對BOSS怪物造成" + Props["damage"] + "額外傷害");
                     }
                     return sb.ToString();
                 case AdditionType.critical:
@@ -39,11 +39,11 @@ namespace WzComparerR2.CharaSim
                         string val;
                         if (this.Props.TryGetValue("prob", out val))
                         {
-                            sb.AppendFormat("クリティカル率 +{0}%\r\n", val);
+                            sb.AppendFormat("暴擊率 +{0}%\r\n", val);
                         }
                         if (this.Props.TryGetValue("damage", out val))
                         {
-                            sb.AppendFormat("クリティカルダメージ +{0}%增加\r\n", val);
+                            sb.AppendFormat("暴擊傷害增加 +{0}%\r\n", val);
                         }
                         if (sb.Length > 2)
                         {
@@ -58,12 +58,12 @@ namespace WzComparerR2.CharaSim
                         {
                             switch (v1[0])
                             {
-                                case 'I': elem = "氷"; break;
+                                case 'I': elem = "冰"; break;
                                 case 'F': elem = "火"; break;
                                 case 'L': elem = "雷"; break;
                                 default: elem = v1[0].ToString(); break;
                             }
-                            return elem + " Attribute: +" + v1.Substring(1) + "%";
+                            return elem + " 屬性: +" + v1.Substring(1) + "%";
                         }
                     }
                     break;
@@ -74,49 +74,49 @@ namespace WzComparerR2.CharaSim
                         string v1;
                         if (this.Props.TryGetValue("hpChangePerTime", out v1))
                         {
-                            sb.Append("HP per 10 seconds " + v1);
+                            sb.Append("每10秒" + v1 + "HP");
                         }
                     }
                     return sb.ToString();
                 case AdditionType.mobcategory:
-                    return "When attacking " + ItemStringHelper.GetMobCategoryName(Convert.ToInt32(this.Props["category"])) + " enemies, deals " + this.Props["damage"] + "% extra damage.";
+                    return ItemStringHelper.GetMobCategoryName("攻擊" + Convert.ToInt32(this.Props["category"])) + "類型的敵人可造成" + this.Props["damage"] + "%額外傷害";
                 case AdditionType.mobdie:
                     sb = new StringBuilder();
                     {
                         string v1;
                         if (this.Props.TryGetValue("hpIncOnMobDie", out v1))
                         {
-                            sb.AppendLine("When you kill a monster, to recover " + v1 + " HP");
+                            sb.AppendLine("擊殺敵人時回復" + v1 + "HP");
                         }
                         if (this.Props.TryGetValue("hpIncRatioOnMobDie", out v1))
                         {
-                            sb.AppendLine("When you kill a monster, has a " + Props["hpRatioProp"] + "% chance to recover " + v1 + "% of damage to as HP (Cannot recover more than 10% of Max HP.)");
+                            sb.AppendLine("擊殺敵人時，有" + Props["hpRatioProp"] + "%的機率將承受傷害的" + v1 + "%回復為HP (不能恢復超過最大HP的10%)");
                         }
                         if (this.Props.TryGetValue("mpIncOnMobDie", out v1))
                         {
-                            sb.AppendLine("When you kill a monster, to recover " + v1 + " MP");
+                            sb.AppendLine("擊殺敵人時回復" + v1 + "MP");
                         }
                         if (this.Props.TryGetValue("mpIncRatioOnMobDie", out v1))
                         {
-                            sb.AppendLine("When you kill a monster, has a " + Props["hpRatioProp"] + "% chance to recover " + v1 + "% of damage to as MP (Cannot recover more than 10% of Max MP.)");
+                            sb.AppendLine("擊殺敵人時，有" + Props["hpRatioProp"] + "%的機率將承受傷害的" + v1 + "%回復為MP (不能恢復超過最大MP的10%)");
                         }
                     }
                     if (sb.Length > 0)
                     {
-                        sb.Append("Function may be limited in some locations.");
+                        sb.Append("功能可能會因地點而受到限制。");
                         return sb.ToString();
                     }
                     break;
                 case AdditionType.skill:
                     switch (Convert.ToInt32(this.Props["id"]))
                     {
-                        case 90000000: return "Has a chance to add: Instant Death effect";
-                        case 90001001: return "Has a chance to add: Knock Down effect";
-                        case 90001002: return "Has a chance to add: Slow effect";
-                        case 90001003: return "Has a chance to add: Poison effect";
-                        case 90001004: return "Has a chance to add: Darkness effect";
-                        case 90001005: return "Has a chance to add: Seal effect";
-                        case 90001006: return "Has a chance to add: Freeze effect";
+                        case 90000000: return "機率性 死亡 效果增加";
+                        case 90001001: return "機率性 氣絶 效果增加";
+                        case 90001002: return "機率性 緩速術 效果增加";
+                        case 90001003: return "機率性 毒 效果增加";
+                        case 90001004: return "機率性 暗黑 效果增加";
+                        case 90001005: return "機率性 封印 效果增加";
+                        case 90001006: return "機率性 結冰 效果增加";
                     }
                     break;
                 case AdditionType.statinc:
