@@ -269,6 +269,11 @@ namespace WzComparerR2
                     return;
                 }
             }
+            if (!HasWritePermission(txtMSFolder.Text))
+            {
+                MessageBoxEx.Show("您沒有權限更新此資料夾中安裝的遊戲。\r\n\r\n請以系統管理員身分執行WzComparerR2。", "錯誤", MessageBoxButtons.OK);
+                return;
+            }
             if (this.patcherSession != null)
             {
                 if (this.patcherSession.State == PatcherTaskState.WaitForContinue)
@@ -425,6 +430,7 @@ namespace WzComparerR2
                     DialogResult PatcherPromptResult = MessageBoxEx.Show(this, diskSpaceMessage.ToString() + "\r\n可能沒有足夠的磁碟空間來完成更新。 \r\n您還想繼續嗎？", "警告", MessageBoxButtons.YesNo);
                     if (PatcherPromptResult == DialogResult.No)
                     {
+                        AppendStateText("更新已中止\r\n");
                         throw new OperationCanceledException("更新已中止。");
                     }
                 }
@@ -782,6 +788,20 @@ namespace WzComparerR2
             else
             {
                 return $"{size:N0} 位元組 ({targetbytes:0.##} {sizes[order]})";
+            }
+        }
+
+        static bool HasWritePermission(string directoryPath)
+        {
+            try
+            {
+                string testFilePath = Path.Combine(directoryPath, "test.tmp");
+                using (FileStream fs = File.Create(testFilePath, 1, FileOptions.DeleteOnClose)) { }
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 
