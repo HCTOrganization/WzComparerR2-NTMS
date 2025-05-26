@@ -331,6 +331,15 @@ namespace WzComparerR2
             try
             {
                 patcher = new WzPatcher(session.PatchFile);
+                this.chkPrePatch.Enabled = false;
+                this.chkDeadPatch.Enabled = false;
+                this.txtPatchFile.Enabled = false;
+                this.txtMSFolder.Enabled = false;
+                this.buttonXOpen1.Enabled = false;
+                this.buttonXOpen2.Enabled = false;
+                this.labelX1.Enabled = false;
+                this.labelX2.Enabled = false;
+                this.buttonXPatch.Enabled = false;
                 patcher.NoticeEncoding = this.PatcherNoticeEncoding ?? Encoding.Default;
                 patcher.PatchingStateChanged += (o, e) => this.patcher_PatchingStateChanged(o, e, session, AppendStateText);
                 AppendStateText($"更新檔案名稱: {session.PatchFile}\r\n");
@@ -437,6 +446,7 @@ namespace WzComparerR2
                     {
                         this.advTreePatchFiles.BeginUpdate();
                         this.advTreePatchFiles.Enabled = true;
+                        this.buttonXPatch.Enabled = true;
                         this.advTreePatchFiles.EndUpdate();
                     });
 
@@ -446,6 +456,7 @@ namespace WzComparerR2
                     this.Invoke(() =>
                     {
                         this.advTreePatchFiles.Enabled = false;
+                        this.buttonXPatch.Enabled = false;
                     });
                     session.State = PatcherTaskState.Patching;
                     patcher.PatchParts.Clear();
@@ -504,9 +515,18 @@ namespace WzComparerR2
             }
             finally
             {
-                patchedFileSizes.Clear();
-                patchedFileIndex.Clear();
-                finishedFileIndex.Clear();
+                this.chkPrePatch.Enabled = true;
+                this.chkDeadPatch.Enabled = true;
+                this.txtPatchFile.Enabled = true;
+                this.txtMSFolder.Enabled = true;
+                this.buttonXOpen1.Enabled = true;
+                this.buttonXOpen2.Enabled = true;
+                this.buttonXPatch.Enabled = true;
+                this.labelX1.Enabled = true;
+                this.labelX2.Enabled = true;
+                this.patchedFileSizes.Clear();
+                this.patchedFileIndex.Clear();
+                this.finishedFileIndex.Clear();
                 session.State = PatcherTaskState.Complete;
                 if (patcher != null)
                 {
