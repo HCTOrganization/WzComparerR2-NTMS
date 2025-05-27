@@ -79,7 +79,7 @@ namespace WzComparerR2.CharaSim
                     }
                     return sb.ToString();
                 case AdditionType.mobcategory:
-                    return ItemStringHelper.GetMobCategoryName("攻擊" + Convert.ToInt32(this.Props["category"])) + "類型的敵人可造成" + this.Props["damage"] + "%額外傷害";
+                    return "攻擊" + ItemStringHelper.GetMobCategoryName(Convert.ToInt32(this.Props["category"])) + "類型的敵人可造成" + this.Props["damage"] + "%額外傷害";
                 case AdditionType.mobdie:
                     sb = new StringBuilder();
                     {
