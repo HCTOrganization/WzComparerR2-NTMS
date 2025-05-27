@@ -186,7 +186,9 @@ namespace WzComparerR2
             this.buttonItemExtractGifEx = new DevComponents.DotNetBar.ButtonItem();
             this.buttonItemGifSetting = new DevComponents.DotNetBar.ButtonItem();
             this.buttonDisableOverlayAni = new DevComponents.DotNetBar.ButtonItem();
-            this.buttonOverlayRect = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonHitboxOverlay = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonLoadMultiFrameAniList = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonOverlayExtractGifEx = new DevComponents.DotNetBar.ButtonItem();
             this.textBoxX1 = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.expandableSplitter1 = new DevComponents.DotNetBar.ExpandableSplitter();
             this.panelEx1 = new DevComponents.DotNetBar.PanelEx();
@@ -2238,7 +2240,9 @@ namespace WzComparerR2
             this.itemContainer44.Name = "itemContainer44";
             this.itemContainer44.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.buttonDisableOverlayAni,
-            this.buttonOverlayRect});
+            this.buttonHitboxOverlay,
+            this.buttonOverlayExtractGifEx,
+            this.buttonLoadMultiFrameAniList});
             // 
             // 
             // 
@@ -2250,11 +2254,26 @@ namespace WzComparerR2
             this.buttonDisableOverlayAni.Text = "清除堆叠";
             this.buttonDisableOverlayAni.Click += new System.EventHandler(this.buttonDisableOverlayAni_Click);
             // 
+            // buttonHitboxOverlay
+            // 
+            this.buttonHitboxOverlay.Name = "buttonHitboxOverlay";
+            this.buttonHitboxOverlay.Text = "繪製範圍";
+            this.buttonHitboxOverlay.Tooltip = "在輸入的區域內繪製半透明的形狀。";
+            this.buttonHitboxOverlay.Click += new System.EventHandler(this.buttonHitboxOverlay_Click);
+            // 
+            // buttonItemExtractGifEx
+            //
+            this.buttonOverlayExtractGifEx.Name = "buttonOverlayExtractGifEx";
+            this.buttonOverlayExtractGifEx.Text = "堆叠+";
+            this.buttonOverlayExtractGifEx.Tooltip = "透過在所有子節點上呼叫動畫來堆叠，而不是從0開始依序呼叫。";
+            this.buttonOverlayExtractGifEx.Click += new System.EventHandler(this.buttonItemGif2_Click);
+            // 
             // buttonOverlayRect
             // 
-            this.buttonOverlayRect.Name = "buttonOverlayRect";
-            this.buttonOverlayRect.Text = "新增範圍矩形";
-            this.buttonOverlayRect.Click += new System.EventHandler(this.buttonOverlayRect_Click);
+            this.buttonLoadMultiFrameAniList.Name = "buttonLoadMultiFrameAniList";
+            this.buttonLoadMultiFrameAniList.Text = "載入多重幀";
+            this.buttonLoadMultiFrameAniList.Tooltip = "載入已找到的幀列表。您可以選擇任意已載入的序列進行堆叠。";
+            this.buttonLoadMultiFrameAniList.Click += new System.EventHandler(this.buttonLoadMultiFrameAniList_Click);
             // 
             // textBoxX1
             // 
@@ -3545,7 +3564,9 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ButtonItem buttonItemExtractGifEx;
         private DevComponents.DotNetBar.ButtonItem buttonItemGifSetting;
         private DevComponents.DotNetBar.ButtonItem buttonDisableOverlayAni;
-        private DevComponents.DotNetBar.ButtonItem buttonOverlayRect;
+        private DevComponents.DotNetBar.ButtonItem buttonHitboxOverlay; 
+        private DevComponents.DotNetBar.ButtonItem buttonLoadMultiFrameAniList;
+        private DevComponents.DotNetBar.ButtonItem buttonOverlayExtractGifEx;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip2;
         private System.Windows.Forms.ToolStripMenuItem tsmi2ExpandAll;
         private System.Windows.Forms.ToolStripMenuItem tsmi2CollapseAll;

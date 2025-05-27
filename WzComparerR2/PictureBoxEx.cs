@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Xna.Framework;
-
+using Microsoft.Xna.Framework.Graphics;
+using SpineV2 = Spine.V2;
 using WzComparerR2.Animation;
 using WzComparerR2.Common;
 using WzComparerR2.Config;
@@ -66,6 +67,7 @@ namespace WzComparerR2
         public void ShowImage(Wz_Png png, int page)
         {
             if (this.ShowOverlayAni) return; // 애니메이션 중첩 중일때는 자동 png 미리보기 없음
+
             //添加到动画控件
             var frame = new Animation.Frame()
             {
@@ -141,16 +143,21 @@ namespace WzComparerR2
         }
 
         // 애니메이션 중첩
-        public void ShowOverlayAnimation(FrameAnimationData data, bool isPngFrameAni = false)
+        public void ShowOverlayAnimation(FrameAnimationData data, string multiFrameInfo = null, bool isPngFrameAni = false)
         {
-            this.ShowOverlayAnimation(new FrameAnimator(data), isPngFrameAni);
+            this.ShowOverlayAnimation(new FrameAnimator(data), multiFrameInfo, isPngFrameAni);
         }
 
         public void ShowAnimation(AnimationItem animator)
         {
             if (this.Items.Count > 0)
             {
+                var itemsCopy = new List<AnimationItem>(this.Items);
                 this.Items.Clear();
+                foreach (var aniItem in itemsCopy)
+                {
+                    this.DisposeAnimationItem(aniItem);
+                }
             }
 
             this.Items.Add(animator);
@@ -164,7 +171,7 @@ namespace WzComparerR2
         }
 
         // 애니메이션 중첩
-        public void ShowOverlayAnimation(AnimationItem animator, bool isPngFrameAni)
+        public void ShowOverlayAnimation(AnimationItem animator, string multiFrameInfo, bool isPngFrameAni)
         {
             if (!ShowOverlayAni)
             {
@@ -184,13 +191,13 @@ namespace WzComparerR2
 
             FrameAnimator aniItem = (FrameAnimator)animator;
 
-            var frmOverlayAniOptions = new FrmOverlayAniOptions(0, aniItem.Data.Frames.Count - 1, isPngFrameAni);
+            var frmOverlayAniOptions = new FrmOverlayAniOptions(0, aniItem.Data.Frames.Count - 1, multiFrameInfo, isPngFrameAni);
             int delayOffset = 0;
             int moveX = 0;
             int moveY = 0;
             int frameStart = 0;
             int frameEnd = 0;
-            int pngDelay = 100;
+            int pngDelay = 120;
 
             // 정보 받아오기
             if (frmOverlayAniOptions.ShowDialog() == DialogResult.OK)
@@ -214,8 +221,7 @@ namespace WzComparerR2
 
             var config = ImageHandlerConfig.Default;
             var newAniItem = new FrameAnimator(FrameAnimationData.MergeAnimationData(baseAniItem.Data, aniItem.Data,
-                    this.GraphicsDevice, System.Drawing.Color.FromArgb(config.BackgroundType.Value == ImageBackgroundType.Transparent ? 0 : 255, config.BackgroundColor.Value).ToXnaColor(),
-                    delayOffset, moveX, moveY, frameStart, frameEnd));
+                    this.GraphicsDevice, delayOffset, moveX, moveY, frameStart, frameEnd));
 
             this.Items.Add(newAniItem);
 
@@ -227,7 +233,7 @@ namespace WzComparerR2
             this.Invalidate();
         }
 
-        public void AddOverlayRect()
+        public void AddHitboxOverlay()
         {
             FrameAnimator baseAniItem;
             if (this.Items.Count == 0)
@@ -251,19 +257,29 @@ namespace WzComparerR2
             var frmOverlayAniOptions = new FrmOverlayRectOptions(0, baseDelayAll, config);
             int startTime = 0;
             int endTime = 0;
-            int rectBlend = 153;
-            int outlineBlend = 255;
+            int radius = 0;
             Point lt;
             Point rb;
             Color bgColor = System.Drawing.Color.FromArgb(config.BackgroundType.Value == ImageBackgroundType.Transparent ? 0 : 255, config.BackgroundColor.Value).ToXnaColor();
 
             if (frmOverlayAniOptions.ShowDialog() == DialogResult.OK)
             {
-                frmOverlayAniOptions.GetValues(out lt, out rb, out startTime, out endTime, config);
-                Color rectColor = System.Drawing.Color.FromArgb(rectBlend, config.OverlayRectColor.Value).ToXnaColor();
-                Color outlineColor = System.Drawing.Color.FromArgb(outlineBlend, config.OverlayRectColor.Value).ToXnaColor();
+                frmOverlayAniOptions.GetValues(out lt, out rb, out startTime, out endTime, out radius, out int alpha, out int type, config);
+                Color fillColor = System.Drawing.Color.FromArgb((255 * alpha / 100), config.OverlayRectColor.Value).ToXnaColor();
+                Color outlineColor = System.Drawing.Color.FromArgb(255, config.OverlayRectColor.Value).ToXnaColor();
 
-                var aniItemData = FrameAnimationData.CreateRectData(lt, rb, endTime - startTime, this.GraphicsDevice, bgColor, rectColor, outlineColor);
+                FrameAnimationData aniItemData = null;
+                switch (type)
+                {
+                    case 0:
+                        aniItemData = FrameAnimationData.CreateRectData(lt, rb, endTime - startTime, this.GraphicsDevice, fillColor, outlineColor);
+                        break;
+                    case 1:
+                        aniItemData = FrameAnimationData.CreateCircleData(lt, radius, endTime - startTime, this.GraphicsDevice, fillColor, outlineColor);
+                        break;
+                    default:
+                        break;
+                }
 
                 if (aniItemData == null) return;
 
@@ -274,8 +290,7 @@ namespace WzComparerR2
             this.Items.Clear();
 
             var newAniItem = new FrameAnimator(FrameAnimationData.MergeAnimationData(baseAniItem.Data, aniItem.Data,
-                    this.GraphicsDevice, bgColor,
-                    startTime, 0, 0, 0, 0));
+                    this.GraphicsDevice, startTime, 0, 0, 0, 0));
 
             this.Items.Add(newAniItem);
 
@@ -581,7 +596,7 @@ namespace WzComparerR2
 
             async Task RenderJob(IProgressDialogContext context, CancellationToken cancellationToken)
             {
-                bool isCompareAndMergeFrames = timeline == null && !cap.IsFixedFrameRate; ;
+                bool isCompareAndMergeFrames = timeline == null && !cap.IsFixedFrameRate;
 
                 // build pipeline
                 IEnumerable<int> delayEnumerator = timeline == null ? RenderDelay() : ClipTimeline(timeline);
@@ -734,6 +749,62 @@ namespace WzComparerR2
                     base.GlobalScale,
                     aniItem.Length <= 0 ? 0 : (time % aniItem.Length),
                     aniItem.Length);
+            }
+        }
+
+        private void DisposeAnimationItem(AnimationItem animationItem)
+        {
+            switch (animationItem)
+            {
+                case FrameAnimator frameAni:
+                    if (frameAni.Data?.Frames != null)
+                    {
+                        foreach (var frame in frameAni.Data.Frames)
+                        {
+                            if (frame.Texture != null && !frame.Texture.IsDisposed)
+                            {
+                                frame.Texture.Dispose();
+                            }
+                        }
+                    }
+                    break;
+                case SpineAnimatorV2 spineV2:
+                    if (spineV2.Skeleton != null)
+                    {
+                        foreach (var slot in spineV2.Skeleton.Slots.Items)
+                        {
+                            var atlasRegion = (slot.Attachment switch
+                            {
+                                SpineV2.MeshAttachment mesh => mesh.RendererObject,
+                                SpineV2.RegionAttachment region => region.RendererObject,
+                                SpineV2.SkinnedMeshAttachment skinnedMesh => skinnedMesh.RendererObject,
+                                _ => null
+                            }) as SpineV2.AtlasRegion;
+                            if (atlasRegion?.page?.rendererObject is Texture2D texture && !texture.IsDisposed)
+                            {
+                                texture.Dispose();
+                            }
+                        }
+                    }
+                    break;
+                case SpineAnimatorV4 spineV4:
+                    if (spineV4.Skeleton != null)
+                    {
+                        foreach (var slot in spineV4.Skeleton.Slots.Items)
+                        {
+                            var atlasRegion = (slot.Attachment switch
+                            {
+                                Spine.MeshAttachment mesh => mesh.Region,
+                                Spine.RegionAttachment region => region.Region,
+                                _ => null
+                            }) as Spine.AtlasRegion;
+                            if (atlasRegion?.page?.rendererObject is Texture2D texture && !texture.IsDisposed)
+                            {
+                                texture.Dispose();
+                            }
+                        }
+                    }
+                    break;
             }
         }
     }

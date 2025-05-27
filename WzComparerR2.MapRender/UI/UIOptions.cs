@@ -634,6 +634,10 @@ namespace WzComparerR2.MapRender.UI
         private bool _worldmap_useImageNameAsInfoName;
         private bool _forceCaptureWithResolution;
         private string _screenshotBackgroundColor;
+        private string _scLeft;
+        private string _scTop;
+        private string _scRight;
+        private string _scBottom;
 
         public bool MuteOnLeaveFocus
         {
@@ -706,7 +710,7 @@ namespace WzComparerR2.MapRender.UI
             get { return this._forceCaptureWithResolution; }
             set { base.SetProperty(ref this._forceCaptureWithResolution, value); }
         }
-        
+
         public string ScLeft
         {
             get { return this._scLeft; }

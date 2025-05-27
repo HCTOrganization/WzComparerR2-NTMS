@@ -64,7 +64,7 @@ namespace WzComparerR2.Animation
                 else
                 {
                     return Rectangle.Empty;
-                }
+                }   
             }
         }
 

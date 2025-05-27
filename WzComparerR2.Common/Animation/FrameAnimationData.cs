@@ -6,10 +6,11 @@ using WzComparerR2.WzLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using DevComponents.DotNetBar;
+using WzComparerR2.Rendering;
 
 namespace WzComparerR2.Animation
 {
-    public class FrameAnimationData
+    public class FrameAnimationData 
     {
         public FrameAnimationData()
         {
@@ -40,7 +41,7 @@ namespace WzComparerR2.Animation
             var anime = new FrameAnimationData();
             if (options.HasFlag(FrameAnimationCreatingOptions.ScanAllChildrenFrames))
             {
-                foreach (var frameNode in node.Nodes)
+                foreach(var frameNode in node.Nodes)
                 {
                     Frame frame = Frame.CreateFromNode(frameNode, graphicsDevice, findNode);
                     if (frame != null)
@@ -88,22 +89,20 @@ namespace WzComparerR2.Animation
                 return null;
         }
 
-        public static FrameAnimationData CreateRectData(Point lt, Point rb, int delay, GraphicsDevice graphicsDevice, Color bgColor, Color rectColor, Color outlineColor)
+        public static FrameAnimationData CreateRectData(Point lt, Point rb, int delay, GraphicsDevice graphicsDevice, Color fillColor, Color outlineColor)
         {
-            int outline = 2;
-
+            var thickness = 2;
             var width = -lt.X + rb.X;
             var height = -lt.Y + rb.Y;
 
             if (width <= 0 || height <= 0)
             {
-                MessageBoxEx.Show("입력한 범위가 올바르지 않습니다.", "범위 설정 오류");
+                MessageBoxEx.Show("入力した範囲が正しくありません。", "範囲設定エラー");
                 return null;
             }
 
-
-            SpriteBatch spriteBatch = new SpriteBatch(graphicsDevice);
-            Texture2D rectangleTexture;
+            using SpriteBatchEx spriteBatch = new SpriteBatchEx(graphicsDevice);
+            Rectangle rectangle = new Rectangle(0, 0, width, height);
 
             RenderTarget2D renderTarget = new RenderTarget2D(graphicsDevice, width, height, false, SurfaceFormat.Bgra32, DepthFormat.None, 0, Microsoft.Xna.Framework.Graphics.RenderTargetUsage.DiscardContents);
             graphicsDevice.SetRenderTarget(renderTarget);
@@ -111,28 +110,14 @@ namespace WzComparerR2.Animation
 
             spriteBatch.Begin();
 
-            Texture2D colTexture = new Texture2D(graphicsDevice, 1, 1);
-            colTexture.SetData(new[] { rectColor });
-            Texture2D outlineTexture = new Texture2D(graphicsDevice, 1, 1);
-            outlineTexture.SetData(new[] { rectColor });
-
-            Rectangle rectangle = new Rectangle(0, 0, width, height);
-            Color rectangleColor = rectColor;
-
-            spriteBatch.Draw(colTexture, rectangle, rectangleColor); // 반투명 영역
-            spriteBatch.Draw(outlineTexture, new Rectangle(rectangle.Left, rectangle.Top, rectangle.Width, outline), outlineColor); // 테두리
-            spriteBatch.Draw(outlineTexture, new Rectangle(rectangle.Left, rectangle.Top, outline, rectangle.Height), outlineColor);
-            spriteBatch.Draw(outlineTexture, new Rectangle(rectangle.Left, rectangle.Bottom - outline, rectangle.Width, outline), outlineColor);
-            spriteBatch.Draw(outlineTexture, new Rectangle(rectangle.Right - outline, rectangle.Top, outline, rectangle.Height), outlineColor);
+            spriteBatch.FillRectangle(rectangle, fillColor);
+            spriteBatch.DrawThickRectangle(rectangle, outlineColor, thickness);
 
             spriteBatch.End();
-
             graphicsDevice.SetRenderTarget(null);
 
-            rectangleTexture = (Texture2D)renderTarget;
-
             Point origin = new Point(-lt.X, -lt.Y);
-            var tmpFrame = new Frame(rectangleTexture, origin, 0, delay, true);
+            var tmpFrame = new Frame((Texture2D)renderTarget, origin, 0, delay, true);
             var tmpFrameAnimationData = new FrameAnimationData();
             tmpFrameAnimationData.Frames.Add(tmpFrame);
 
@@ -140,10 +125,47 @@ namespace WzComparerR2.Animation
                 return tmpFrameAnimationData;
             else
                 return null;
-
         }
 
-        public static FrameAnimationData MergeAnimationData(FrameAnimationData baseData, FrameAnimationData addData, GraphicsDevice graphicsDevice, Color bgColor, int delayOffset, int moveX, int moveY, int frameStart, int frameEnd)
+        public static FrameAnimationData CreateCircleData(Point pos, int radius, int delay, GraphicsDevice graphicsDevice, Color fillColor, Color outlineColor)
+        {
+            int thickness = 2;
+            var x = pos.X;
+            var y = pos.Y;
+
+            if (radius <= 0)
+            {
+                MessageBoxEx.Show("입력한 반지름이 올바르지 않습니다.", "범위 설정 오류");
+                return null;
+            }
+
+            using var bmp = new System.Drawing.Bitmap(radius * 2, radius * 2);
+            using (var g = System.Drawing.Graphics.FromImage(bmp))
+            {
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                using (var brush = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(fillColor.A, fillColor.R, fillColor.G, fillColor.B)))
+                {
+                    g.FillEllipse(brush, 0, 0, radius * 2, radius * 2);
+                }
+                using (var pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(outlineColor.A, outlineColor.R, outlineColor.G, outlineColor.B), thickness))
+                {
+                    int inset = thickness / 2;
+                    g.DrawEllipse(pen, inset, inset, radius * 2 - thickness, radius * 2 - thickness);
+                }
+            }
+
+            Point origin = new Point(-x + radius, -y + radius);
+            var tmpFrame = new Frame(bmp.ToTexture(graphicsDevice), origin, 0, delay, true);
+            var tmpFrameAnimationData = new FrameAnimationData();
+            tmpFrameAnimationData.Frames.Add(tmpFrame);
+
+            if (tmpFrameAnimationData.Frames.Count > 0)
+                return tmpFrameAnimationData;
+            else
+                return null;
+        }
+
+        public static FrameAnimationData MergeAnimationData(FrameAnimationData baseData, FrameAnimationData addData, GraphicsDevice graphicsDevice, int delayOffset, int moveX, int moveY, int frameStart, int frameEnd)
         {
             var anime = new FrameAnimationData();
             int baseCount = 0;
@@ -205,7 +227,8 @@ namespace WzComparerR2.Animation
                 {
                     if (baseData.Frames[baseCount].Delay > frontDelay)
                     {
-                        Frame f = new Frame(baseData.Frames[baseCount].Texture, baseData.Frames[baseCount].Origin, baseData.Frames[baseCount].Z, frontDelay, baseData.Frames[baseCount].Blend);
+                        var curFrame = baseData.Frames[baseCount];
+                        Frame f = new Frame(curFrame.Texture, curFrame.Origin, curFrame.Z, frontDelay, curFrame.Blend);
                         anime.Frames.Add(f);
 
                         baseData.Frames[baseCount].Delay -= frontDelay;
@@ -213,7 +236,10 @@ namespace WzComparerR2.Animation
                     }
                     else
                     {
-                        anime.Frames.Add(baseData.Frames[baseCount]);
+                        var curFrame = baseData.Frames[baseCount];
+                        Frame f = new Frame(curFrame.Texture, curFrame.Origin, curFrame.Z, curFrame.Delay, curFrame.Blend);
+                        anime.Frames.Add(f);
+
                         frontDelay -= baseData.Frames[baseCount].Delay;
                         baseCount++;
                     }
@@ -229,7 +255,7 @@ namespace WzComparerR2.Animation
                         Point newOrigin;
                         globalDelay += thisDelay;
 
-                        Frame thisFrame = new Frame(MergeFrameTextures(baseData.Frames[baseCount], addData.Frames[addCount], graphicsDevice, out newOrigin, bgColor),
+                        Frame thisFrame = new Frame(MergeFrameTextures(baseData.Frames[baseCount], addData.Frames[addCount], graphicsDevice, out newOrigin),
                             newOrigin, baseData.Frames[baseCount].Z, thisDelay, baseData.Frames[baseCount].Blend);
 
                         anime.Frames.Add(thisFrame);
@@ -247,6 +273,16 @@ namespace WzComparerR2.Animation
                         }
                         if (globalDelay >= maxDelay) break;
                     }
+                }
+
+                // dispose textures which is not needed anymore
+                for (int i = 0; i < baseCount; i++)
+                {
+                    baseData.Frames[i].Texture?.Dispose();
+                }
+                for (int i = 0; i < addCount; i++)
+                {
+                    addData.Frames[i].Texture?.Dispose();
                 }
 
                 // 남은 프레임 붙여넣기
@@ -272,7 +308,7 @@ namespace WzComparerR2.Animation
                 return null;
         }
 
-        private static Texture2D MergeFrameTextures(Frame frame1, Frame frame2, GraphicsDevice graphicsDevice, out Point newOrigin, Color bgColor)
+        private static Texture2D MergeFrameTextures(Frame frame1, Frame frame2, GraphicsDevice graphicsDevice, out Point newOrigin)
         {
             Texture2D texture1 = frame1.Texture;
             Texture2D texture2 = frame2.Texture;
@@ -291,27 +327,27 @@ namespace WzComparerR2.Animation
             int width = texture1.Width + dl + dr;
             int height = texture1.Height + dt + db;
             newOrigin = new Point(frame1.Origin.X + dl, frame1.Origin.Y + dt);
+            var offsetX = newOrigin.X - frame2.Origin.X - dl;
+            var offsetY = newOrigin.Y - frame2.Origin.Y - dt;
 
             RenderTarget2D renderTarget = new RenderTarget2D(graphicsDevice, width, height, false, SurfaceFormat.Bgra32, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
-            SpriteBatch spriteBatch = new SpriteBatch(graphicsDevice);
+            using SpriteBatch spriteBatch = new SpriteBatch(graphicsDevice);
+            using PngEffect pngEffect = new PngEffect(graphicsDevice);
+            pngEffect.Overlay = true;
 
             graphicsDevice.SetRenderTarget(renderTarget);
-            graphicsDevice.Clear(bgColor);
+            graphicsDevice.Clear(Color.Transparent);
 
-            spriteBatch.Begin(SpriteSortMode.Deferred, new BlendState()
-            {
-                AlphaSourceBlend = Blend.One,
-                AlphaDestinationBlend = Blend.InverseSourceAlpha,
-                AlphaBlendFunction = BlendFunction.Add,
-                ColorSourceBlend = Blend.SourceAlpha,
-                ColorDestinationBlend = Blend.InverseSourceAlpha,
-                ColorBlendFunction = BlendFunction.Add,
-            }
-            );
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque);
+            spriteBatch.Draw(texture1, new Vector2(dl, dt), null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
+            spriteBatch.End();
 
-            spriteBatch.Draw(texture1, new Vector2(dl, dt), null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 1);
+            pngEffect.Parameters["TextureDst"].SetValue(texture1);
+            pngEffect.Parameters["scaler"].SetValue(new Vector2((float)texture2.Width / texture1.Width, (float)texture2.Height / texture1.Height));
+            pngEffect.Parameters["offset"].SetValue(new Vector2((float)offsetX / texture1.Width, (float)offsetY / texture1.Height));
+
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.Opaque, null, null, null, pngEffect, null);
             spriteBatch.Draw(texture2, new Vector2(newOrigin.X - frame2.Origin.X, newOrigin.Y - frame2.Origin.Y), null, Color.White, 0, Vector2.Zero, 1, SpriteEffects.None, 0);
-
             spriteBatch.End();
 
             graphicsDevice.SetRenderTarget(null);

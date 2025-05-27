@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace WzComparerR2.Animation
 {
-    public class MultiFrameAnimationData
+    public class MultiFrameAnimationData 
     {
         public MultiFrameAnimationData()
         {
@@ -82,6 +82,43 @@ namespace WzComparerR2.Animation
                 return anime;
             else
                 return null;
+        }
+
+        public static List<string> CreateListFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
+        {
+            if (node == null)
+                return null;
+            var anime = new List<string>();
+            for (int i = 0; ; i++)
+            {
+                Wz_Node frameNode = node.FindNodeByPath(i.ToString());
+
+                if (frameNode == null)
+                    break;
+
+                while (frameNode.Value is Wz_Uol)
+                {
+                    Wz_Uol uol = frameNode.Value as Wz_Uol;
+                    Wz_Node uolNode = uol.HandleUol(frameNode);
+                    if (uolNode != null)
+                    {
+                        frameNode = uolNode;
+                    }
+                }
+
+                foreach (Wz_Node aniNode in frameNode.Nodes)
+                {
+                    if (!anime.Contains(aniNode.Text) && aniNode.Value is Wz_Png)
+                    {
+                        if (i != 0)
+                        {
+                            return null;
+                        }
+                        anime.Add(aniNode.Text);
+                    }
+                }
+            }
+            return anime;
         }
     }
 }

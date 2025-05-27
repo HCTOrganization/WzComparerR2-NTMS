@@ -679,7 +679,21 @@ namespace WzComparerR2
 
                 if (pngFrameData != null)
                 {
-                    this.pictureBoxEx1.ShowOverlayAnimation(pngFrameData, true);
+                    this.pictureBoxEx1.ShowOverlayAnimation(pngFrameData, isPngFrameAni: true);
+                    this.cmbItemAniNames.Items.Clear();
+                    this.cmbItemSkins.Visible = false;
+                    this.pictureBoxEx1.PictureName = aniName;
+                }
+
+                return;
+            }
+            else if (node.Value is Wz_Video)
+            {
+                var videoFrameData = this.pictureBoxEx1.LoadVideo(node.Value as Wz_Video);
+
+                if (videoFrameData != null)
+                {
+                    this.pictureBoxEx1.ShowOverlayAnimation(videoFrameData);
                     this.cmbItemAniNames.Items.Clear();
                     this.cmbItemSkins.Visible = false;
                     this.pictureBoxEx1.PictureName = aniName;
@@ -712,7 +726,8 @@ namespace WzComparerR2
             }
             else
             {
-                var frameData = this.pictureBoxEx1.LoadFrameAnimation(node);
+                var options = (sender == this.buttonOverlayExtractGifEx) ? FrameAnimationCreatingOptions.ScanAllChildrenFrames : default;
+                var frameData = this.pictureBoxEx1.LoadFrameAnimation(node, options);
 
                 if (frameData != null)
                 {
@@ -727,19 +742,50 @@ namespace WzComparerR2
 
                     if (multiData != null)
                     {
-                        /*
-                        this.pictureBoxEx1.ShowAnimation(multiData);
-                        var aniItem = this.pictureBoxEx1.Items[0] as Animation.MultiFrameAnimator;
+                        foreach (var kv_frames in multiData.Frames)
+                        {
+                            var selectedFrameData = new FrameAnimationData(kv_frames.Value);
+
+                            this.pictureBoxEx1.ShowOverlayAnimation(selectedFrameData, multiFrameInfo: kv_frames.Key);
+                        }
                         this.cmbItemAniNames.Items.Clear();
-                        this.cmbItemAniNames.Items.AddRange(aniItem.Animations.ToArray());
-                        this.cmbItemAniNames.SelectedIndex = 0;
-                        */
-                        MessageBoxEx.Show("マルチフレームアニメーションネストにすることはできません。", "未実装");
-                        return;
+                        this.cmbItemSkins.Visible = false;
+                        this.pictureBoxEx1.PictureName = aniName;
                     }
+
+                    return;
                 }
             }
             //this.pictureBoxEx1.PictureName = aniName;
+        }
+
+        private void OverlayMultiFrameWithKey(object sender, EventArgs e)
+        {
+            if (advTree3.SelectedNode == null)
+                return;
+
+            Wz_Node node = advTree3.SelectedNode.AsWzNode();
+            string aniName = "ネスト_" + GetSelectedNodeImageName();
+
+            if ((sender as ButtonItem).Name != aniName)
+            {
+                MessageBoxEx.Show("ロードされたマルチフレームのリストと現在選択されているノードが一致しません。", "エラー");
+                return;
+            }
+
+            var multiData = this.pictureBoxEx1.LoadMultiFrameAnimation(node);
+            var key = (sender as ButtonItem).Text;
+
+            if (multiData != null && multiData.Frames.ContainsKey(key))
+            {
+                var selectedFrameData = new FrameAnimationData(multiData.Frames[key]);
+                this.pictureBoxEx1.ShowOverlayAnimation(selectedFrameData, multiFrameInfo: key);
+                this.cmbItemAniNames.Items.Clear();
+                this.cmbItemSkins.Visible = false;
+                this.pictureBoxEx1.PictureName = aniName;
+            }
+
+            return;
         }
 
         private string GetSelectedNodeImageName()
@@ -791,11 +837,41 @@ namespace WzComparerR2
             }
         }
 
-        private void buttonOverlayRect_Click(object sender, EventArgs e)
+        private void buttonHitboxOverlay_Click(object sender, EventArgs e)
         {
             if (this.pictureBoxEx1.ShowOverlayAni)
             {
-                this.pictureBoxEx1.AddOverlayRect();
+                this.pictureBoxEx1.AddHitboxOverlay();
+            }
+        }
+
+        private void buttonLoadMultiFrameAniList_Click(object sender, EventArgs e)
+        {
+            if (advTree3.SelectedNode == null)
+                return;
+
+            Wz_Node node = advTree3.SelectedNode.AsWzNode();
+            string aniNameKey = "ネスト_" + GetSelectedNodeImageName();
+
+            if ((sender as ButtonItem).Name == aniNameKey)
+            {
+                return;
+            }
+
+            this.buttonLoadMultiFrameAniList.SubItems.Clear();
+            (sender as ButtonItem).Name = aniNameKey;
+
+            var list = MultiFrameAnimationData.CreateListFromNode(node, PluginBase.PluginManager.FindWz);
+            if (list.Count > 0)
+            {
+                this.buttonLoadMultiFrameAniList.SubItems.AddRange(list.Select(item =>
+                {
+                    var buttonItem = new DevComponents.DotNetBar.ButtonItem();
+                    buttonItem.Name = aniNameKey;
+                    buttonItem.Text = item;
+                    buttonItem.Click += new System.EventHandler(this.OverlayMultiFrameWithKey);
+                    return buttonItem as BaseItem;
+                }).ToArray());
             }
         }
 

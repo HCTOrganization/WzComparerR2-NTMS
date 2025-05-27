@@ -18,18 +18,22 @@ namespace WzComparerR2
 
         }
 
-        public FrmOverlayAniOptions(int startIdx, int endIdx) : this(startIdx, endIdx, false)
+        public FrmOverlayAniOptions(int startIdx, int endIdx) : this(startIdx, endIdx, null, false)
         {
 
         }
 
-        public FrmOverlayAniOptions(int startIdx, int endIdx, bool isPngFrameAni)
+        public FrmOverlayAniOptions(int startIdx, int endIdx, string multiFrameInfo, bool isPngFrameAni)
         {
             InitializeComponent();
 #if NET6_0_OR_GREATER
              // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
              this.Font = new Font(new FontFamily("SimSun"), 9f);
 #endif
+            if (multiFrameInfo != null)
+            {
+                this.Text += " (多重幀 : " + multiFrameInfo + ")";
+            }
             this.txtDelayOffset.Value = 0;
             this.txtMoveX.Value = 0;
             this.txtMoveY.Value = 0;
