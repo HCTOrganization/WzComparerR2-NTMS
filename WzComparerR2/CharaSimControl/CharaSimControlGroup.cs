@@ -25,6 +25,8 @@ namespace WzComparerR2.CharaSimControl
         private Character character;
         private StringLinker stringLinker;
 
+        public bool Enable22AniStyle { get; set; }
+
         public AfrmItem UIItem
         {
             get
@@ -224,6 +226,7 @@ namespace WzComparerR2.CharaSimControl
 
         private void frmItem_ItemMouseMove(object sender, ItemMouseEventArgs e)
         {
+            tooltip.Enable22AniStyle = Enable22AniStyle;
             if (e.Item == null)
             {
                 tooltip.Visible = false;

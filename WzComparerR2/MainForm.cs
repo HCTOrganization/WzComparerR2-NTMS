@@ -271,6 +271,7 @@ namespace WzComparerR2
             tooltipQuickView.RecipeRender.ShowObjectID = Setting.Recipe.ShowID;
             tooltipQuickView.RecipeRender.Enable22AniStyle = Setting.Enable22AniStyle;
             GearGraphics.is22aniStyle = Setting.Enable22AniStyle;
+            charaSimCtrl.Enable22AniStyle = Setting.Enable22AniStyle;
         }
 
         void UpdateWzLoadingSettings()
