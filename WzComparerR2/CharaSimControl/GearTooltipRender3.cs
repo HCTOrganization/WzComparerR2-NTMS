@@ -856,7 +856,7 @@ namespace WzComparerR2.CharaSimControl
                 if (Gear.Props.TryGetValue(GearPropType.level, out value) && !Gear.FixLevel)
                 {
                     bool max = (Gear.Levels != null && value >= Gear.Levels.Count);
-                    string expString = Gear.Levels != null && Gear.Levels.First().Point != 0 ? ": 0/" + Gear.Levels.First().Point : ": 0%";
+                    string expString = Gear.Levels != null && Gear.Levels.First().Point != 0 ? ": 0 / " + Gear.Levels.First().Point : ": 0%";
                     textList.Add($"#$gLv : {(max ? "MAX" : value.ToString())}  EXP {(max ? ": MAX" : expString)}#");
                 }
                 else if ((GearType)Gear.type == GearType.arcaneSymbol)
