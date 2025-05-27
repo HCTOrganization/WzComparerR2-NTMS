@@ -1294,6 +1294,8 @@ namespace WzComparerR2.MapRender
         private void SwitchResolution(Resolution r)
         {
             Form gameWindow = (Form)Form.FromHandle(this.Window.Handle);
+            int currentWidth = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width;
+            int currentHeight = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height;
             switch (r)
             {
                 case Resolution.Window_800_600:
@@ -1307,7 +1309,17 @@ namespace WzComparerR2.MapRender
                 case Resolution.Window_2560_1080:
                 case Resolution.Window_2560_1440:
                 case Resolution.Window_3440_1440:
-                    gameWindow.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+                    string[] resolutionName = r.ToString().Split('_');
+                    if (currentWidth <= Int32.Parse(resolutionName[1]) || currentHeight <= Int32.Parse(resolutionName[2]))
+                    {
+                        r = Resolution.WindowFullScreen;
+                        gameWindow.SetDesktopLocation(0, 0);
+                        gameWindow.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+                    }
+                    else
+                    {
+                        gameWindow.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+                    }
                     break;
                 case Resolution.WindowFullScreen:
                     gameWindow.SetDesktopLocation(0, 0);
