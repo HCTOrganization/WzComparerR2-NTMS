@@ -50,6 +50,7 @@ namespace WzComparerR2.MapRender
             this.patchVisibility.IlluminantClusterPathVisible = false;
             this.patchVisibility.SpringPortalPathVisible = false;
             this.patchVisibility.ObstacleAreaVisible = false;
+            this.patchVisibility.CaptureRectVisible = false;
 
             var form = Form.FromHandle(this.Window.Handle) as Form;
             form.Load += Form_Load;
@@ -131,6 +132,8 @@ namespace WzComparerR2.MapRender
         PatchVisibility patchVisibility;
 
         bool prepareCapture;
+        bool captureViewPortOnly;
+        bool ForceCaptureWithResolution;
         Task captureTask;
         Resolution resolution;
         float opacity;
@@ -151,6 +154,7 @@ namespace WzComparerR2.MapRender
         bool isExiting;
 
         bool CamaraChangedEffState = true;
+        Rectangle CaptureRect = new Rectangle();
 
         protected override void Initialize()
         {
@@ -218,6 +222,8 @@ namespace WzComparerR2.MapRender
                     uiWnd.DataContext = new UIOptionsDataModel();
                     uiWnd.OK += UIOption_OK;
                     uiWnd.Cancel += UIOption_Cancel;
+                    uiWnd.ResetSCRect += UIOption_ResetSCRect;
+                    uiWnd.ChkForceClickEvent += UIOption_ChkForceClickEvent;
                     uiWnd.Visible += UiWnd_Visible;
                     uiWnd.Visibility = EmptyKeys.UserInterface.Visibility.Visible;
                     this.ui.Windows.Add(uiWnd);
@@ -230,7 +236,9 @@ namespace WzComparerR2.MapRender
             }), KeyCode.Escape, ModifierKeys.None));
 
             //截图
-            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { if (CanCapture()) prepareCapture = true; }), KeyCode.Scroll, ModifierKeys.None));
+            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { if (CanCapture()) prepareCapture = true; captureViewPortOnly = false; }), KeyCode.Scroll, ModifierKeys.None));
+            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { if (CanCapture()) prepareCapture = true; captureViewPortOnly = true; }), KeyCode.S, ModifierKeys.Control));
+            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.CaptureRectVisible = !this.patchVisibility.CaptureRectVisible), KeyCode.S, ModifierKeys.None));
 
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { renderEnv.Camera.AdjustRectEnabled = !renderEnv.Camera.AdjustRectEnabled; }), KeyCode.U, ModifierKeys.Control));
 
@@ -398,6 +406,8 @@ namespace WzComparerR2.MapRender
                 //鼠标移动
                 bool isMouseDown = false;
                 var direction2 = Vector2.Zero;
+                int captureRectClickedPos = -1;
+                Point prevMousePos = Point.Zero;
 
                 Action<EmptyKeys.UserInterface.Input.MouseEventArgs> calcMouseMoveDir = e =>
                 {
@@ -425,6 +435,67 @@ namespace WzComparerR2.MapRender
                         isMouseDown = true;
                         calcMouseMoveDir(e);
                     }
+                    else if (e.ChangedButton == EmptyKeys.UserInterface.Input.MouseButton.Left)
+                    {
+                        if (this.patchVisibility.CaptureRectVisible)
+                        {
+                            Rectangle rect = this.renderEnv.Camera.WorldRect;
+                            if (!this.CaptureRect.IsEmpty)
+                            {
+                                rect = this.CaptureRect;
+                            }
+
+                            //  1 | 5 | 2
+                            //  8 | 0 | 6
+                            //  4 | 7 | 3
+                            var mouse = this.renderEnv.Input.MousePosition;
+                            var mousePos = this.renderEnv.Camera.CameraToWorld(mouse);
+                            int x = mousePos.X;
+                            int y = mousePos.Y;
+                            int inner = 15;
+                            int outer = 10;
+                            int pos = -1;
+                            if (rect.Left - outer <= x && x < rect.Left + inner && rect.Top - outer <= y && y < rect.Top + inner)
+                            {
+                                pos = 1;
+                            }
+                            else if (rect.Right - inner <= x && x < rect.Right + outer && rect.Top - outer <= y && y < rect.Top + inner)
+                            {
+                                pos = 2;
+                            }
+                            else if (rect.Right - inner <= x && x < rect.Right + outer && rect.Bottom - inner <= y && y < rect.Bottom + outer)
+                            {
+                                pos = 3;
+                            }
+                            else if (rect.Left - outer <= x && x < rect.Left + inner && rect.Bottom - inner <= y && y < rect.Bottom + outer)
+                            {
+                                pos = 4;
+                            }
+                            else if (rect.Left - outer <= x && x < rect.Right + outer && rect.Top - outer <= y && y < rect.Top + inner)
+                            {
+                                pos = 5;
+                            }
+                            else if (rect.Right - inner <= x && x < rect.Right + outer && rect.Top - outer <= y && y < rect.Bottom + outer)
+                            {
+                                pos = 6;
+                            }
+                            else if (rect.Left - outer <= x && x < rect.Right + outer && rect.Bottom - inner <= y && y < rect.Bottom + outer)
+                            {
+                                pos = 7;
+                            }
+                            else if (rect.Left - outer <= x && x < rect.Left + inner && rect.Top - outer <= y && y < rect.Bottom + outer)
+                            {
+                                pos = 8;
+                            }
+                            else if (rect.Contains(x, y))
+                            {
+                                pos = 0;
+                            }
+
+                            captureRectClickedPos = pos;
+                            prevMousePos = mousePos;
+                        }
+                    }
                 };
                 this.ui.MouseDown += mouseBtnEv;
                 this.attachedEvent.Add(EventDisposable(mouseBtnEv, _ev => this.ui.MouseDown -= _ev));
@@ -434,6 +505,63 @@ namespace WzComparerR2.MapRender
                     if (isMouseDown)
                     {
                         calcMouseMoveDir(e);
+                    }
+                    if (captureRectClickedPos >= 0)
+                    {
+                        var mouse = this.renderEnv.Input.MousePosition;
+                        var mousePos = this.renderEnv.Camera.CameraToWorld(mouse);
+                        var dx = mousePos.X - prevMousePos.X;
+                        var dy = mousePos.Y - prevMousePos.Y;
+                        var minX = 25;
+                        var minY = 25;
+                        Rectangle rect = this.renderEnv.Camera.WorldRect;
+                        if (!this.CaptureRect.IsEmpty)
+                        {
+                            rect = this.CaptureRect;
+                        }
+
+                        if (captureRectClickedPos == 0)
+                        {
+                            rect.X += dx;
+                            rect.Y += dy;
+                        }
+                        if (captureRectClickedPos == 1 || captureRectClickedPos == 4 || captureRectClickedPos == 8) // L
+                        {
+                            var pdx = dx;
+                            rect.Width -= dx;
+                            if (rect.Width < minX)
+                            {
+                                pdx -= Math.Max(0, minX - rect.Width);
+                                rect.Width = minX;
+                            }
+                            rect.X += pdx;
+                        }
+                        if (captureRectClickedPos == 1 || captureRectClickedPos == 2 || captureRectClickedPos == 5) // T
+                        {
+                            var pdy = dy;
+                            rect.Height -= dy;
+                            if (rect.Height < minY)
+                            {
+                                pdy -= Math.Max(0, minY - rect.Height);
+                                rect.Height = minY;
+                            }
+                            rect.Y += pdy;
+                        }
+                        if (captureRectClickedPos == 2 || captureRectClickedPos == 3 || captureRectClickedPos == 6) // R
+                        {
+                            rect.Width += dx;
+                        }
+                        if (captureRectClickedPos == 3 || captureRectClickedPos == 4 || captureRectClickedPos == 7) // B
+                        {
+                            rect.Height += dy;
+                        }
+
+                        rect.Width = Math.Max(minX, rect.Width);
+                        rect.Height = Math.Max(minY, rect.Height);
+                        this.CaptureRect = rect;
+                        var uiWnd = this.ui.Windows.OfType<UIOptions>().FirstOrDefault();
+                        if (uiWnd != null) LoadCaptureRectOptionData(uiWnd.DataContext as UIOptionsDataModel);
+                        prevMousePos = mousePos;
                     }
                 };
                 this.ui.MouseMove += mouseEv;
@@ -445,6 +573,11 @@ namespace WzComparerR2.MapRender
                     {
                         isMouseDown = false;
                         direction2 = Vector2.Zero;
+                    }
+                    else if (e.ChangedButton == EmptyKeys.UserInterface.Input.MouseButton.Left)
+                    {
+                        captureRectClickedPos = -1;
+                        prevMousePos = Point.Zero;
                     }
                 };
                 this.ui.MouseUp += mouseBtnEv;
@@ -508,7 +641,27 @@ namespace WzComparerR2.MapRender
             var wnd = sender as UIOptions;
             wnd.Hide();
         }
+        
+        private void UIOption_ResetSCRect(object sender, EventArgs e)
+        {
+            var wnd = sender as UIOptions;
+            var data = wnd.DataContext as UIOptionsDataModel;
+            ResetCaptureRect();
+            LoadCaptureRectOptionData(data);
+        }
 
+        private void UIOption_ChkForceClickEvent(object sender, EventArgs e)
+        {
+            var wnd = sender as UIOptions;
+            var data = wnd.DataContext as UIOptionsDataModel;
+            this.ForceCaptureWithResolution = data.ForceCaptureWithResolution;
+            if (data.ForceCaptureWithResolution)
+            {
+                ResetCaptureRect();
+                LoadCaptureRectOptionData(data);
+            }
+        }
+        
         private void UiWnd_Visible(object sender, RoutedEventArgs e)
         {
             var wnd = sender as UIOptions;
@@ -986,6 +1139,7 @@ namespace WzComparerR2.MapRender
                 {
                     DrawScene(gameTime);
                     DrawTooltipItems(gameTime);
+                    DrawCaptureRect(gameTime);
                 }
                 this.ui.Draw(gameTime.ElapsedGameTime.TotalMilliseconds);
                 this.tooltip.Draw(gameTime, renderEnv);
@@ -1022,7 +1176,19 @@ namespace WzComparerR2.MapRender
             var maxTextureWidth = 4096;
             var maxTextureHeight = 4096;
 
-            Rectangle oldRect = this.renderEnv.Camera.WorldRect;
+            Rectangle originalWorldRect = this.renderEnv.Camera.WorldRect;
+            Rectangle oldRect = originalWorldRect;
+            // 보이는 화면만 캡쳐
+            if (captureViewPortOnly)
+            {
+                oldRect = new Rectangle((int)this.renderEnv.Camera.Center.X - this.renderEnv.Camera.Width / 2, (int)this.renderEnv.Camera.Center.Y - this.renderEnv.Camera.Height / 2,
+                    this.renderEnv.Camera.Width, this.renderEnv.Camera.Height);
+            }
+            // 스크린샷 커스텀 범위
+            else if (!(this.CaptureRect.IsEmpty || this.CaptureRect.Width == 0 || this.CaptureRect.Height == 0))
+            {
+                oldRect = this.CaptureRect;
+            }
             int width = Math.Min(oldRect.Width, maxTextureWidth);
             int height = Math.Min(oldRect.Height, maxTextureHeight);
             this.renderEnv.Camera.UseWorldRect = true;
@@ -1192,6 +1358,7 @@ namespace WzComparerR2.MapRender
             this.ui.WorldMap.UseImageNameAsInfoName = config.WorldMap_UseImageNameAsInfoName;
             this.batcher.D2DEnabled = config.UseD2dRenderer;
             (this.Content as WcR2ContentManager).UseD2DFont = config.UseD2dRenderer;
+            this.ForceCaptureWithResolution = config.ForceCaptureWithResolution;
         }
 
         private void LoadOptionData(UIOptionsDataModel model)
@@ -1208,6 +1375,8 @@ namespace WzComparerR2.MapRender
             model.ScreenshotBackgroundColor = config.ScreenshotBackgroundColor;
             model.Minimap_CameraRegionVisible = this.ui.Minimap.CameraRegionVisible;
             model.WorldMap_UseImageNameAsInfoName = this.ui.WorldMap.UseImageNameAsInfoName;
+            model.ForceCaptureWithResolution = config.ForceCaptureWithResolution;
+            LoadCaptureRectOptionData(model);
         }
 
         private void SaveOptionData(UIOptionsDataModel model)
@@ -1225,7 +1394,53 @@ namespace WzComparerR2.MapRender
             config.ScreenshotBackgroundColor = model.ScreenshotBackgroundColor;
             config.Minimap_CameraRegionVisible = model.Minimap_CameraRegionVisible;
             config.WorldMap_UseImageNameAsInfoName = model.WorldMap_UseImageNameAsInfoName;
+            config.ForceCaptureWithResolution = model.ForceCaptureWithResolution;
             WzComparerR2.Config.ConfigManager.Save();
+
+            if (int.TryParse(model.ScLeft, out int left) && int.TryParse(model.ScTop, out int top)
+                && int.TryParse(model.ScRight, out int right) && int.TryParse(model.ScBottom, out int bottom))
+                this.CaptureRect = new Rectangle(left, top, Math.Max(0, right - left), Math.Max(0, bottom - top));
+        }
+
+        private void LoadCaptureRectOptionData(UIOptionsDataModel model)
+        {
+            if (this.CaptureRect.IsEmpty)
+            {
+                Rectangle src = this.renderEnv.Camera.WorldRect;
+
+                model.ScLeft = src.Left.ToString();
+                model.ScTop = src.Top.ToString();
+                model.ScRight = src.Right.ToString();
+                model.ScBottom = src.Bottom.ToString();
+            }
+            else
+            {
+                model.ScLeft = this.CaptureRect.Left.ToString();
+                model.ScTop = this.CaptureRect.Top.ToString();
+                model.ScRight = this.CaptureRect.Right.ToString();
+                model.ScBottom = this.CaptureRect.Bottom.ToString();
+            }
+        }
+
+        private void ResetCaptureRect()
+        {
+            // 해상도 기준으로 스크린샷 최소 크기 조절
+            if (this.ForceCaptureWithResolution)
+            {
+                Rectangle src = this.renderEnv.Camera.WorldRect;
+                if (src.Width < this.renderEnv.Camera.Width)
+                {
+                    src.X -= (this.renderEnv.Camera.Width - src.Width) / 2;
+                    src.Width = this.renderEnv.Camera.Width;
+                }
+                if (src.Height < this.renderEnv.Camera.Height)
+                {
+                    src.Y -= (this.renderEnv.Camera.Height - src.Height) / 2;
+                    src.Height = this.renderEnv.Camera.Height;
+                }
+                this.CaptureRect = src;
+            }
+            else this.CaptureRect = new Rectangle();
         }
         #endregion
 
@@ -1289,6 +1504,7 @@ namespace WzComparerR2.MapRender
         {
             var r = (Resolution)(((int)this.resolution + 1) % 9);
             SwitchResolution(r);
+            ResetCaptureRect();
         }
 
         private void SwitchResolution(Resolution r)

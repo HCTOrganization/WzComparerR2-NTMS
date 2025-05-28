@@ -24,6 +24,8 @@ namespace WzComparerR2.MapRender.UI
 
         public event EventHandler OK;
         public event EventHandler Cancel;
+        public event EventHandler ResetSCRect;
+        public event EventHandler ChkForceClickEvent;
 
         protected override void InitializeComponents()
         {
@@ -67,14 +69,18 @@ namespace WzComparerR2.MapRender.UI
             tab4.Content = GetTabContent4();
 
             TabItem tab5 = new TabItem();
-            tab5.Header = "幫助";
-            tab5.Content = GetTabContent5();
+            tab5.Header = "截圖範圍";
+            tab5.Content = GetTabContentSC();
+
+            TabItem tab6 = new TabItem();
+            tab6.Header = "幫助";
+            tab6.Content = GetTabContent5();
 
             TabControl tabControl = new TabControl();
             tabControl.Resources.Add(typeof(TabItem), GetTabItemStyle());
             tabControl.Margin = new Thickness(5, 0, 5, 0);
             tabControl.TabStripPlacement = Dock.Left;
-            tabControl.ItemsSource = new[] { tab1, tab2, tab3, tab4, tab5 };
+            tabControl.ItemsSource = new[] { tab1, tab2, tab3, tab4, tab5, tab6 };
             grid.Children.Add(tabControl);
             Grid.SetRow(tabControl, 1);
             Grid.SetColumn(tabControl, 0);
@@ -115,8 +121,8 @@ namespace WzComparerR2.MapRender.UI
             Grid.SetRow(footer, 3);
             Grid.SetColumn(footer, 0);
 
-            this.Width = 360;
-            this.Height = 240;
+            this.Width = 400;
+            this.Height = 300;
             this.SetResourceReference(BackgroundProperty, MapRenderResourceKey.TooltipBrush);
             base.InitializeComponents();
         }
@@ -129,6 +135,18 @@ namespace WzComparerR2.MapRender.UI
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
             this.Cancel?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void BtnSCReset_Click(object sender, RoutedEventArgs e)
+        {
+            this.ResetSCRect?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        private void ChkForce_Click(object sender, RoutedEventArgs e)
+        {
+            this.ChkForceClickEvent?.Invoke(this, EventArgs.Empty);
+            return;
         }
 
         private UIElement GetTabContent1()
@@ -144,8 +162,8 @@ namespace WzComparerR2.MapRender.UI
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
-            grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
-            grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
+            //grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
+            //grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
             grid.ColumnDefinitions.Add(new ColumnDefinition());
             grid.ColumnDefinitions.Add(new ColumnDefinition());
 
@@ -159,7 +177,8 @@ namespace WzComparerR2.MapRender.UI
 
             CheckBox chk1 = new CheckBox();
             chk1.Content = "不在最前時自動靜音";
-            chk1.Margin = new Thickness(0, 0, 0, 0);
+            chk1.Margin = new Thickness(18, 0, 0, 0);
+            chk1.Background = Brushes.Gray;
             chk1.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.MuteOnLeaveFocus)));
             Grid.SetRow(chk1, 1);
             Grid.SetColumn(chk1, 0);
@@ -225,7 +244,8 @@ namespace WzComparerR2.MapRender.UI
 
             CheckBox chk2 = new CheckBox();
             chk2.Content = "地圖範圍限制";
-            chk2.Margin = new Thickness(0, 0, 0, 0);
+            chk2.Margin = new Thickness(18, 0, 0, 0);
+            chk2.Background = Brushes.Gray;
             chk2.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.ClipMapRegion)));
             Grid.SetRow(chk2, 5);
             Grid.SetColumn(chk2, 0);
@@ -242,7 +262,8 @@ namespace WzComparerR2.MapRender.UI
 
             CheckBox chk3 = new CheckBox();
             chk3.Content = "使用Direct2D繪製";
-            chk3.Margin = new Thickness(0, 0, 0, 0);
+            chk3.Margin = new Thickness(18, 0, 0, 0);
+            chk3.Background = Brushes.Gray;
             chk3.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.UseD2dRenderer)));
             Grid.SetRow(chk3, 7);
             Grid.SetColumn(chk3, 0);
@@ -251,7 +272,8 @@ namespace WzComparerR2.MapRender.UI
 
             CheckBox chk4 = new CheckBox();
             chk4.Content = "顯示NPC名稱";
-            chk4.Margin = new Thickness(0, 0, 0, 0);
+            chk4.Margin = new Thickness(18, 0, 0, 0);
+            chk4.Background = Brushes.Gray;
             chk4.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.NpcNameVisible)));
             Grid.SetRow(chk4, 8);
             Grid.SetColumn(chk4, 0);
@@ -260,14 +282,15 @@ namespace WzComparerR2.MapRender.UI
 
             CheckBox chk5 = new CheckBox();
             chk5.Content = "顯示怪物名称";
-            chk5.Margin = new Thickness(0, 0, 0, 0);
+            chk5.Margin = new Thickness(18, 0, 0, 0);
+            chk5.Background = Brushes.Gray;
             chk5.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.MobNameVisible)));
             Grid.SetRow(chk5, 9);
             Grid.SetColumn(chk5, 0);
             Grid.SetColumnSpan(chk5, 2);
             grid.Children.Add(chk5);
 
-            TextBlock lbl6 = new TextBlock();
+            /*TextBlock lbl6 = new TextBlock();
             lbl6.VerticalAlignment = VerticalAlignment.Center;
             lbl6.Text = "截圖";
             lbl6.Foreground = Brushes.Yellow;
@@ -286,12 +309,12 @@ namespace WzComparerR2.MapRender.UI
             lbl7.TextAlignment = TextAlignment.Center;
             lbl7.HorizontalAlignment = HorizontalAlignment.Center;
             lbl7.VerticalAlignment = VerticalAlignment.Center;
-            lbl7.Padding = new Thickness(12, 0, 0, 0);
+            lbl7.Padding = new Thickness(24, 0, 0, 0);
             lbl7.Text = "背景色 (ARGB)";
             pnl2.Children.Add(lbl7);
 
             TextBox tb1 = new TextBox();
-            tb1.Width = 50;
+            tb1.Width = 60;
             tb1.HorizontalAlignment = HorizontalAlignment.Center;
             tb1.VerticalAlignment = VerticalAlignment.Center;
             tb1.MaxLength = 8;
@@ -306,7 +329,7 @@ namespace WzComparerR2.MapRender.UI
             {
                 Converter = UIHelper.CreateConverter((string s) => ColorWConverter.TryParse(s, out var color) ? new SolidColorBrush(color) : null)
             });
-            pnl2.Children.Add(img1);
+            pnl2.Children.Add(img1);*/
 
             ScrollViewer viewer = new ScrollViewer();
             viewer.Content = grid;
@@ -322,6 +345,7 @@ namespace WzComparerR2.MapRender.UI
 
             CheckBox chk1 = new CheckBox();
             chk1.Content = "打開狀態列";
+            chk1.Background = Brushes.Gray;
             chk1.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.TopBarVisible)));
             Grid.SetRow(chk1, 0);
             Grid.SetColumn(chk1, 0);
@@ -340,6 +364,7 @@ namespace WzComparerR2.MapRender.UI
 
             CheckBox chk1 = new CheckBox();
             chk1.Content = "顯示可視區域";
+            chk1.Background = Brushes.Gray;
             chk1.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.Minimap_CameraRegionVisible)));
             Grid.SetRow(chk1, 0);
             Grid.SetColumn(chk1, 0);
@@ -358,6 +383,7 @@ namespace WzComparerR2.MapRender.UI
 
             CheckBox chk1 = new CheckBox();
             chk1.Content = "以ImageName名稱作為InfoName";
+            chk1.Background = Brushes.Gray;
             chk1.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.WorldMap_UseImageNameAsInfoName)));
             Grid.SetRow(chk1, 0);
             Grid.SetColumn(chk1, 0);
@@ -367,11 +393,173 @@ namespace WzComparerR2.MapRender.UI
             return grid;
         }
 
+        private UIElement GetTabContentSC()
+        {
+            Grid grid = new Grid();
+            grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
+            grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
+            grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
+            grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
+            grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
+            grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
+            grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
+            grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
+            grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
+            grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(60, GridUnitType.Pixel) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(60, GridUnitType.Pixel) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(60, GridUnitType.Pixel) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = new GridLength(60, GridUnitType.Pixel) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition());
+
+            TextBlock lblSCRect = new TextBlock();
+            lblSCRect.VerticalAlignment = VerticalAlignment.Center;
+            lblSCRect.Text = "範囲";
+            lblSCRect.Foreground = Brushes.Yellow;
+            Grid.SetRow(lblSCRect, 0);
+            Grid.SetColumn(lblSCRect, 0);
+            grid.Children.Add(lblSCRect);
+
+            TextBlock lblSCLeft = new TextBlock();
+            lblSCLeft.HorizontalAlignment = HorizontalAlignment.Center;
+            lblSCLeft.VerticalAlignment = VerticalAlignment.Center;
+            lblSCLeft.Text = "左";
+            Grid.SetRow(lblSCLeft, 3);
+            Grid.SetColumn(lblSCLeft, 0);
+            grid.Children.Add(lblSCLeft);
+
+            TextBlock lblSCTop = new TextBlock();
+            lblSCTop.HorizontalAlignment = HorizontalAlignment.Center;
+            lblSCTop.VerticalAlignment = VerticalAlignment.Center;
+            lblSCTop.Text = "上";
+            Grid.SetRow(lblSCTop, 1);
+            Grid.SetColumn(lblSCTop, 1);
+            grid.Children.Add(lblSCTop);
+
+            TextBlock lblSCRight = new TextBlock();
+            lblSCRight.HorizontalAlignment = HorizontalAlignment.Center;
+            lblSCRight.VerticalAlignment = VerticalAlignment.Center;
+            lblSCRight.Text = "右";
+            Grid.SetRow(lblSCRight, 3);
+            Grid.SetColumn(lblSCRight, 2);
+            grid.Children.Add(lblSCRight);
+
+            TextBlock lblSCBottom = new TextBlock();
+            lblSCBottom.HorizontalAlignment = HorizontalAlignment.Center;
+            lblSCBottom.VerticalAlignment = VerticalAlignment.Center;
+            lblSCBottom.Text = "下";
+            Grid.SetRow(lblSCBottom, 5);
+            Grid.SetColumn(lblSCBottom, 1);
+            grid.Children.Add(lblSCBottom);
+
+            TextBox tbSCLeft = new TextBox();
+            tbSCLeft.Width = 60;
+            tbSCLeft.HorizontalAlignment = HorizontalAlignment.Center;
+            tbSCLeft.VerticalAlignment = VerticalAlignment.Center;
+            tbSCLeft.MaxLength = 6;
+            tbSCLeft.SetBinding(TextBox.TextProperty, new Binding(nameof(UIOptionsDataModel.ScLeft)));
+            Grid.SetRow(tbSCLeft, 4);
+            Grid.SetColumn(tbSCLeft, 0);
+            grid.Children.Add(tbSCLeft);
+
+            TextBox tbSCTop = new TextBox();
+            tbSCTop.Width = 60;
+            tbSCTop.HorizontalAlignment = HorizontalAlignment.Center;
+            tbSCTop.VerticalAlignment = VerticalAlignment.Center;
+            tbSCTop.MaxLength = 6;
+            tbSCTop.SetBinding(TextBox.TextProperty, new Binding(nameof(UIOptionsDataModel.ScTop)));
+            Grid.SetRow(tbSCTop, 2);
+            Grid.SetColumn(tbSCTop, 1);
+            grid.Children.Add(tbSCTop);
+
+            TextBox tbSCRight = new TextBox();
+            tbSCRight.Width = 60;
+            tbSCRight.HorizontalAlignment = HorizontalAlignment.Center;
+            tbSCRight.VerticalAlignment = VerticalAlignment.Center;
+            tbSCRight.MaxLength = 6;
+            tbSCRight.SetBinding(TextBox.TextProperty, new Binding(nameof(UIOptionsDataModel.ScRight)));
+            Grid.SetRow(tbSCRight, 4);
+            Grid.SetColumn(tbSCRight, 2);
+
+            TextBox tbSCBottom = new TextBox();
+            tbSCBottom.Width = 60;
+            tbSCBottom.HorizontalAlignment = HorizontalAlignment.Center;
+            tbSCBottom.VerticalAlignment = VerticalAlignment.Center;
+            tbSCBottom.MaxLength = 6;
+            tbSCBottom.SetBinding(TextBox.TextProperty, new Binding(nameof(UIOptionsDataModel.ScBottom)));
+            Grid.SetRow(tbSCBottom, 6);
+            Grid.SetColumn(tbSCBottom, 1);
+            grid.Children.Add(tbSCBottom);
+            grid.Children.Add(tbSCRight);
+
+            Button btnSCReset = new Button();
+            btnSCReset.Width = 60;
+            btnSCReset.Height = 20;
+            btnSCReset.Margin = new Thickness(5);
+            btnSCReset.Content = "初期化";
+            btnSCReset.Click += BtnSCReset_Click;
+            Grid.SetRow(btnSCReset, 6);
+            Grid.SetColumn(btnSCReset, 3);
+            grid.Children.Add(btnSCReset);
+
+            CheckBox chkForce = new CheckBox();
+            chkForce.Content = "最小サイズを現在の解像度に合わせる";
+            chkForce.Background = Brushes.Gray;
+            chkForce.Click += ChkForce_Click;
+            chkForce.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.ForceCaptureWithResolution)));
+            Grid.SetRow(chkForce, 7);
+            Grid.SetColumn(chkForce, 0);
+            Grid.SetColumnSpan(chkForce, 4);
+            grid.Children.Add(chkForce);
+
+            /***************/
+
+            TextBlock lbl6 = new TextBlock();
+            lbl6.VerticalAlignment = VerticalAlignment.Center;
+            lbl6.Text = "背景色(ARGB)";
+            lbl6.Foreground = Brushes.Yellow;
+            Grid.SetRow(lbl6, 8);
+            Grid.SetColumn(lbl6, 0);
+            Grid.SetColumnSpan(lbl6, 4);
+            grid.Children.Add(lbl6);
+
+            StackPanel pnl2 = new StackPanel();
+            pnl2.Orientation = Orientation.Horizontal;
+            Grid.SetRow(pnl2, 9);
+            Grid.SetColumn(pnl2, 0);
+            Grid.SetColumnSpan(pnl2, 4);
+            grid.Children.Add(pnl2);
+
+            TextBox tb1 = new TextBox();
+            tb1.Width = 60;
+            tb1.HorizontalAlignment = HorizontalAlignment.Center;
+            tb1.VerticalAlignment = VerticalAlignment.Center;
+            tb1.MaxLength = 8;
+            tb1.SetBinding(TextBox.TextProperty, new Binding(nameof(UIOptionsDataModel.ScreenshotBackgroundColor)));
+            pnl2.Children.Add(tb1);
+
+            Canvas img1 = new Canvas();
+            img1.Width = 20;
+            img1.Height = 20;
+            img1.Margin = new Thickness(2);
+            img1.SetBinding(Canvas.BackgroundProperty, new Binding(nameof(UIOptionsDataModel.ScreenshotBackgroundColor))
+            {
+                Converter = UIHelper.CreateConverter((string s) => ColorWConverter.TryParse(s, out var color) ? new SolidColorBrush(color) : null)
+            });
+            pnl2.Children.Add(img1);
+
+            /**************/
+
+            ScrollViewer viewer = new ScrollViewer();
+            viewer.Content = grid;
+            return viewer;
+        }
+
         private UIElement GetTabContent5()
         {
             StackPanel panel = new StackPanel();
             panel.Orientation = Orientation.Vertical;
-
+            
             var tips = new[]
             {
                  "快捷鍵指示：",
@@ -383,6 +571,7 @@ namespace WzComparerR2.MapRender.UI
                  "[Ctrl+U] 地圖範圍鎖定開關",
                  "[`] 開關聊天控制台",
                  "[Alt+Enter] 切换解析度",
+                 "[S] 顯示截圖範圍",
                  "[ScrollLock] 截圖",
             };
 
@@ -443,6 +632,7 @@ namespace WzComparerR2.MapRender.UI
         private bool _topBarVisible;
         private bool _minimap_cameraRegionVisible;
         private bool _worldmap_useImageNameAsInfoName;
+        private bool _forceCaptureWithResolution;
         private string _screenshotBackgroundColor;
 
         public bool MuteOnLeaveFocus
@@ -509,6 +699,36 @@ namespace WzComparerR2.MapRender.UI
         {
             get { return this._worldmap_useImageNameAsInfoName; }
             set { base.SetProperty(ref this._worldmap_useImageNameAsInfoName, value); }
+        }
+
+        public bool ForceCaptureWithResolution
+        {
+            get { return this._forceCaptureWithResolution; }
+            set { base.SetProperty(ref this._forceCaptureWithResolution, value); }
+        }
+        
+        public string ScLeft
+        {
+            get { return this._scLeft; }
+            set { base.SetProperty(ref this._scLeft, value); }
+        }
+
+        public string ScTop
+        {
+            get { return this._scTop; }
+            set { base.SetProperty(ref this._scTop, value); }
+        }
+
+        public string ScBottom
+        {
+            get { return this._scBottom; }
+            set { base.SetProperty(ref this._scBottom, value); }
+        }
+
+        public string ScRight
+        {
+            get { return this._scRight; }
+            set { base.SetProperty(ref this._scRight, value); }
         }
     }
 }
