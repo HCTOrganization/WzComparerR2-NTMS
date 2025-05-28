@@ -97,7 +97,7 @@ namespace WzComparerR2.Animation
 
             if (width <= 0 || height <= 0)
             {
-                MessageBoxEx.Show("入力した範囲が正しくありません。", "範囲設定エラー");
+                MessageBoxEx.Show("您輸入的範圍無效。", "範圍設定錯誤");
                 return null;
             }
 
@@ -135,7 +135,7 @@ namespace WzComparerR2.Animation
 
             if (radius <= 0)
             {
-                MessageBoxEx.Show("입력한 반지름이 올바르지 않습니다.", "범위 설정 오류");
+                MessageBoxEx.Show("您輸入的半徑不正確。", "範圍設定錯誤");
                 return null;
             }
 

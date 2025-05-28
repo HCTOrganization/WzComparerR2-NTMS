@@ -70,11 +70,11 @@ namespace WzComparerR2.MapRender.UI
 
             TabItem tab5 = new TabItem();
             tab5.Header = "截圖範圍";
-            tab5.Content = GetTabContentSC();
+            tab5.Content = GetTabContent5();
 
             TabItem tab6 = new TabItem();
             tab6.Header = "幫助";
-            tab6.Content = GetTabContent5();
+            tab6.Content = GetTabContent6();
 
             TabControl tabControl = new TabControl();
             tabControl.Resources.Add(typeof(TabItem), GetTabItemStyle());
@@ -393,7 +393,7 @@ namespace WzComparerR2.MapRender.UI
             return grid;
         }
 
-        private UIElement GetTabContentSC()
+        private UIElement GetTabContent5()
         {
             Grid grid = new Grid();
             grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
@@ -555,7 +555,7 @@ namespace WzComparerR2.MapRender.UI
             return viewer;
         }
 
-        private UIElement GetTabContent5()
+        private UIElement GetTabContent6()
         {
             StackPanel panel = new StackPanel();
             panel.Orientation = Orientation.Vertical;
