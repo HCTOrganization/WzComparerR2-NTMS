@@ -4,20 +4,16 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
-using DevComponents.DotNetBar;
 using DiscordRPC;
 using Newtonsoft.Json.Linq;
 using WzComparerR2.CharaSim;
-using WzComparerR2.Common;
 using WzComparerR2.Config;
 using WzComparerR2.Network.Contracts;
 using WzComparerR2.PluginBase;
-using static System.Net.Mime.MediaTypeNames;
 
 
 namespace WzComparerR2.Network
@@ -55,7 +51,7 @@ namespace WzComparerR2.Network
         private bool AIChatEnabled = false;
         private bool showActivityOnDiscord;
 
-        private static Mutex AIMutex = new Mutex(false, "AIMutex");
+        private static readonly SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
 
         private JObject AIChatJson = null;
 
@@ -191,6 +187,7 @@ namespace WzComparerR2.Network
                     case "/aichat":
                         var sbAi = new StringBuilder();
                         string aiExtraParam = e.Command.Substring(7).Trim();
+                        semaphore.Wait();
                         if (aiExtraParam == "on")
                         {
                             RefreshAISettings();
@@ -213,24 +210,28 @@ namespace WzComparerR2.Network
                             sbAi.Append("AI聊天功能已停用。");
                         }
                         Log.Info(sbAi.ToString());
+                        semaphore.Release();
                         break;
 
                     case "/new":
                         var sbNewMsg = new StringBuilder();
+                        semaphore.Wait();
                         if (AIChatEnabled)
                         {
-                            AIChatJson = InitiateChatCompletion(selectedLM, false);
+                            AIChatJson = InitiateChatCompletion(selectedLM);
                             sbNewMsg.AppendFormat("AI聊天已初始化。之前的聊天記錄將不會發送給AI。");
                             Log.Info(sbNewMsg.ToString());
                         }
+                        semaphore.Release();
                         break;
 
                     case "/sysmsg":
                         var sbSysMsg = new StringBuilder();
                         systemMessage = e.Command.Substring(7).Trim();
+                        semaphore.Wait();
                         if (!string.IsNullOrEmpty(systemMessage))
                         {
-                            AIChatJson = InitiateChatCompletion(selectedLM, false);
+                            AIChatJson = InitiateChatCompletion(selectedLM);
                             ((JArray)AIChatJson["messages"]).Add(new JObject(
                                 new JProperty("role", "system"),
                                 new JProperty("content", systemMessage)
@@ -240,10 +241,11 @@ namespace WzComparerR2.Network
                         }
                         else
                         {
-                            AIChatJson = InitiateChatCompletion(selectedLM, false);
+                            AIChatJson = InitiateChatCompletion(selectedLM);
                             sbSysMsg.AppendFormat("任何目前發送給AI的系統訊息都將被清除。 AI聊天已初始化。");
                             Log.Info(sbSysMsg.ToString());
                         }
+                        semaphore.Release();
                         break;
 
                     case "/discord":
@@ -320,71 +322,104 @@ namespace WzComparerR2.Network
             if (!string.IsNullOrEmpty(Translator.OAITranslateBaseURL)) AIBaseURL = Translator.OAITranslateBaseURL;
             if (!string.IsNullOrEmpty(Translator.DefaultLanguageModel)) selectedLM = Translator.DefaultLanguageModel;
             if (!string.IsNullOrEmpty(Translator.DefaultTranslateAPIKey)) APIKeyJSON = Translator.DefaultTranslateAPIKey;
-            if (AIChatJson == null) AIChatJson = InitiateChatCompletion(selectedLM, false);
+            if (AIChatJson == null) AIChatJson = InitiateChatCompletion(selectedLM);
         }
 
         private async void ChatToAI(string message)
         {
-            AIMutex.WaitOne();
-            Log.Warn(message);
-            Log.Info("等待 AI 回應...");
-            var request = (HttpWebRequest)WebRequest.Create(AIBaseURL + "/chat/completions");
-            request.Method = "POST";
-            request.ContentType = "application/json";
-            if (!string.IsNullOrEmpty(APIKeyJSON))
-            {
-                JObject reqHeaders = JObject.Parse(APIKeyJSON);
-                foreach (var property in reqHeaders.Properties()) request.Headers.Add(property.Name, property.Value.ToString());
-            }
-            ((JArray)AIChatJson["messages"]).Add(new JObject(
-                new JProperty("role", "user"),
-                new JProperty("content", message)
-            ));
-
-            var postData = AIChatJson;
-
-            if (ExtraParamEnabled)
-            {
-                postData.Add(new JProperty("temperature", LMTemperature));
-                postData.Add(new JProperty("max_tokens", MaximumToken));
-            }
-            var byteArray = System.Text.Encoding.UTF8.GetBytes(postData.ToString());
-            request.ContentLength = byteArray.Length;
-            Stream newStream = request.GetRequestStream();
-            newStream.Write(byteArray, 0, byteArray.Length);
-            newStream.Close();
+            await semaphore.WaitAsync();
             try
             {
-                var response = (HttpWebResponse)request.GetResponse();
-                var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
-                JObject jrResponse = JObject.Parse(responseString);
-                string responseResult = jrResponse.SelectToken("choices[0].message.content").ToString();
+                Log.Warn(message);
+                // Log.Info("AIの応答を待っています...");
+                bool isThinking = false;
+                StringBuilder responseResult = new StringBuilder();
+                ((JArray)AIChatJson["messages"]).Add(new JObject(
+                    new JProperty("role", "user"),
+                    new JProperty("content", message)
+                ));
+                var postData = AIChatJson;
+                if (ExtraParamEnabled)
+                {
+                    postData.Add(new JProperty("temperature", LMTemperature));
+                    postData.Add(new JProperty("max_tokens", MaximumToken));
+                }
+                var request = (HttpWebRequest)WebRequest.Create(AIBaseURL + "/chat/completions");
+                request.Method = "POST";
+                request.ContentType = "application/json";
+                if (!string.IsNullOrEmpty(APIKeyJSON))
+                {
+                    JObject reqHeaders = JObject.Parse(APIKeyJSON);
+                    foreach (var property in reqHeaders.Properties()) request.Headers.Add(property.Name, property.Value.ToString());
+                }
+                //var byteArray = System.Text.Encoding.UTF8.GetBytes(postData.ToString());
+                //request.ContentLength = byteArray.Length;
+                using (var writer = new StreamWriter(request.GetRequestStream()))
+                {
+                    writer.Write(postData.ToString());
+                    writer.Flush();
+                }
+                using (var resp = await request.GetResponseAsync())
+                using (var stream = resp.GetResponseStream())
+                using (var reader = new StreamReader(stream))
+                {
+                    Log.WriteTimeStamp();
+                    while (!reader.EndOfStream)
+                    {
+                        var line = await reader.ReadLineAsync();
+                        if (!string.IsNullOrWhiteSpace(line) && line.StartsWith("data:"))
+                        {
+                            string jsonData = line.Substring(5).Trim();
+                            if (jsonData == "[DONE]") break;
+
+                            JObject jsonObj = JObject.Parse(jsonData);
+                            string text = jsonObj["choices"]?[0]?["delta"]?["content"]?.ToString();
+                            string finish_reason = jsonObj["choices"]?[0]?["finish_reason"]?.ToString();
+
+                            if (text == "<think>")
+                            {
+                                isThinking = true;
+                                continue;
+                            }
+                            else if (text == "</think>")
+                            {
+                                isThinking = false;
+                                continue;
+                            }
+
+                            if (!string.IsNullOrEmpty(text))
+                            {
+                                Log.WriteAI(text, isThinking);
+                                responseResult.Append(text);
+                            }
+
+                            if (!string.IsNullOrEmpty(finish_reason)) break;
+                        }
+                    }
+                    Log.WriteAI(Environment.NewLine, false);
+                }
                 ((JArray)AIChatJson["messages"]).Add(new JObject(
                     new JProperty("role", "assistant"),
-                    new JProperty("content", responseResult)
+                    new JProperty("content", responseResult.ToString())
                 ));
-                if (responseResult.Contains("<think>"))
-                {
-                    Log.Think(responseResult.Split(new String[] { "</think>\n\n" }, StringSplitOptions.None)[0].Replace("<think>", ""));
-                    Log.Info(responseResult.Split(new String[] { "</think>\n\n" }, StringSplitOptions.None)[1]);
-                }
-                else
-                {
-                    Log.Info(responseResult);
-                }
             }
-            catch
+            catch (Exception ex)
             {
-                Log.Warn("無法與 AI 聊天。");
+                Log.Error("AI聊天请求失敗: " + ex.Message);
             }
             finally
             {
-                AIMutex.ReleaseMutex();
+                semaphore.Release();
             }
         }
 
-        private JObject InitiateChatCompletion(string languageModel, bool isStreamEnabled)
+        private JObject InitiateChatCompletion(string languageModel)
         {
+#if NET6_0_OR_GREATER
+            bool isStreamEnabled = true;
+#else
+            bool isStreamEnabled = false;
+#endif
             return new JObject(
                 new JProperty("model", languageModel),
                 new JProperty("messages", new JArray()),
@@ -409,7 +444,7 @@ namespace WzComparerR2.Network
             }
         }
 
-        private void EnableDiscordActivity(string detail="", string state="")
+        private void EnableDiscordActivity(string detail = "", string state = "")
         {
             DiscordClient = new DiscordRpcClient("1362447503164834102");
             DiscordClient.Initialize();

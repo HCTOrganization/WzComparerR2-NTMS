@@ -70,6 +70,39 @@ namespace WzComparerR2.Network
                 }
             }
 
+            void ILogger.WriteTimeStamp(LogLevel logLevel)
+            {
+                if (logLevel >= this.Level)
+                {
+                    var color = GetLogColor(logLevel);
+
+                    if (logLevel < LogLevel.None)
+                    {
+                        this.AppendText($"[{logLevel}] ", color);
+                    }
+                    this.AppendText($"[{DateTime.Now:HH:mm:ss}] ", Color.Blue);
+                    this.textbox.ScrollToCaret();
+                }
+            }
+
+            void ILogger.WriteAI(LogLevel logLevel, string format, params object[] args)
+            {
+                if (logLevel >= this.Level)
+                {
+                    var color = GetLogColor(logLevel);
+
+                    if (args == null || args.Length <= 0)
+                    {
+                        this.AppendText(format, color);
+                    }
+                    else
+                    {
+                        this.AppendText(string.Format(format, args), color);
+                    }
+                    this.textbox.ScrollToCaret();
+                }
+            }
+
             private void AppendText(string text, Color color)
             {
                 this.textbox.SelectionStart = this.textbox.TextLength;
