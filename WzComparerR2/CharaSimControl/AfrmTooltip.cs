@@ -502,7 +502,7 @@ namespace WzComparerR2.CharaSimControl
                 using (SaveFileDialog dlg = new SaveFileDialog())
                 {
                     dlg.Filter = "PNG (*.png)|*.png|*.*|*.*";
-                    dlg.FileName = this.ImageFileName.Replace("eqp", "android");
+                    dlg.FileName = this.ImageFileName.Replace("eqp", "avatar");
 
                     if (dlg.ShowDialog() == DialogResult.OK)
                     {

@@ -260,6 +260,7 @@ namespace WzComparerR2.CharaSim
         blockUpgradeStarforce,
         blockUpgradeExtraOption,
         mintable,
+        cosmetic,
 
         gatherTool_incSkillLevel = 2000,
         gatherTool_incSpeed,

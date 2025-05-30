@@ -57,6 +57,8 @@ namespace WzComparerR2.CharaSimControl
         public bool ShowCashPurchasePrice { get; set; }
         public bool ShowCombatPower { get; set; }
         public bool AutoTitleWrap { get; set; }
+        public int CosmeticHairColor { get; set; }
+        public int CosmeticFaceColor { get; set; }
         private string titleLanguage = "";
 
         private bool isPostNEXTClient;
@@ -833,6 +835,51 @@ namespace WzComparerR2.CharaSimControl
                 TextRenderer.DrawText(g, "等級：" + value, GearGraphics.EquipDetailFont, new Point(13, picH), Color.White, TextFormatFlags.NoPadding | TextFormatFlags.NoPrefix);
                 picH += 16;
                 hasPart2 = true;
+            }
+            //MSN Cosmetic
+            if ((Gear.type == GearType.face_n || Gear.type == GearType.hair_n) && Gear.Props.TryGetValue(GearPropType.cosmetic, out value) && value > 0)
+            {
+                string colorName = "";
+                if (Gear.type == GearType.hair_n) colorName = AvatarCanvas.HairColor[this.CosmeticHairColor];
+                else if (Gear.type == GearType.face_n) colorName = AvatarCanvas.HairColor[this.CosmeticFaceColor];
+                GearGraphics.DrawString(g, $"顔色：#c{colorName}#", GearGraphics.EquipDetailFont, orange2FontColorTable, 13, 244, ref picH, 15);
+                TextRenderer.DrawText(g, "外型：", GearGraphics.EquipDetailFont, new Point(13, picH), Color.White, TextFormatFlags.NoPadding);
+                if (this.avatar == null)
+                {
+                    this.avatar = new AvatarCanvasManager();
+                }
+
+                this.avatar.SetCosmeticColor(this.CosmeticHairColor, this.CosmeticFaceColor);
+
+                if (value < 1000)
+                {
+                    this.avatar.AddBodyFromSkin3((int)value);
+                }
+                else
+                {
+                    this.avatar.AddBodyFromSkin4(2015);
+                    this.avatar.AddHairOrFace((int)value);
+                }
+
+                this.avatar.AddGears([1042194, 1062153]);
+
+                var appearance = this.avatar.GetBitmapOrigin();
+                if (appearance.Bitmap != null)
+                {
+                    var imgrect = new Rectangle(Math.Max(appearance.Origin.X - 50, 0),
+                        Math.Max(appearance.Origin.Y - 100, 0),
+                        Math.Min(appearance.Bitmap.Width, appearance.Origin.X + 50) - Math.Max(appearance.Origin.X - 50, 0),
+                        Math.Min(appearance.Origin.Y, 100));
+                    g.DrawImage(appearance.Bitmap, 88 - Math.Min(appearance.Origin.X, 50), picH + Math.Max(80 - appearance.Origin.Y, 0), imgrect, GraphicsUnit.Pixel);
+                    Gear.AndroidBitmap = appearance.Bitmap;
+                    picH += appearance.Bitmap.Height;
+                    picH += 2;
+
+                    Gear.AndroidBitmap = appearance.Bitmap;
+                    picH += 30;
+                }
+
+                this.avatar.ClearCanvas();
             }
 
 

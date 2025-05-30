@@ -59,6 +59,8 @@ namespace WzComparerR2.CharaSimControl
         public bool ShowSoldPrice { get; set; }
         public bool ShowCashPurchasePrice { get; set; }
         public bool AutoTitleWrap { get; set; }
+        public int CosmeticHairColor { get; set; }
+        public int CosmeticFaceColor { get; set; }
         private string titleLanguage = "";
 
         private bool isPostNEXTClient;
@@ -760,6 +762,51 @@ namespace WzComparerR2.CharaSimControl
                 {
                     GearGraphics.DrawString(g, $"#c{string.Join(", ", randomParts)}  此機器人首次裝備範例中其中一個圖片時就會決定外型。#", GearGraphics.EquipMDMoris9Font, null, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
                 }
+            }
+            //MSN Cosmetic
+            if ((Gear.type == GearType.face_n || Gear.type == GearType.hair_n) && Gear.Props.TryGetValue(GearPropType.cosmetic, out value) && value > 0)
+            {
+                string colorName = "";
+                if (Gear.type == GearType.hair_n) colorName = AvatarCanvas.HairColor[this.CosmeticHairColor];
+                else if (Gear.type == GearType.face_n) colorName = AvatarCanvas.HairColor[this.CosmeticFaceColor];
+                GearGraphics.DrawString(g, $"顔色：#c{colorName}#", GearGraphics.EquipMDMoris9Font, null, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
+                TextRenderer.DrawText(g, "外型：", GearGraphics.EquipMDMoris9Font, new Point(13, picH), Color.White, TextFormatFlags.NoPadding);
+                if (this.avatar == null)
+                {
+                    this.avatar = new AvatarCanvasManager();
+                }
+
+                this.avatar.SetCosmeticColor(this.CosmeticHairColor, this.CosmeticFaceColor);
+
+                if (value < 1000)
+                {
+                    this.avatar.AddBodyFromSkin3((int)value);
+                }
+                else
+                {
+                    this.avatar.AddBodyFromSkin4(2015);
+                    this.avatar.AddHairOrFace((int)value);
+                }
+
+                this.avatar.AddGears([1042194, 1062153]);
+
+                var appearance = this.avatar.GetBitmapOrigin();
+                if (appearance.Bitmap != null)
+                {
+                    var imgrect = new Rectangle(Math.Max(appearance.Origin.X - 50, 0),
+                        Math.Max(appearance.Origin.Y - 100, 0),
+                        Math.Min(appearance.Bitmap.Width, appearance.Origin.X + 50) - Math.Max(appearance.Origin.X - 50, 0),
+                        Math.Min(appearance.Origin.Y, 100));
+                    g.DrawImage(appearance.Bitmap, 88 - Math.Min(appearance.Origin.X, 50), picH + Math.Max(80 - appearance.Origin.Y, 0), imgrect, GraphicsUnit.Pixel);
+                    Gear.AndroidBitmap = appearance.Bitmap;
+                    picH += appearance.Bitmap.Height;
+                    picH += 2;
+
+                    Gear.AndroidBitmap = appearance.Bitmap;
+                    picH += 30;
+                }
+
+                this.avatar.ClearCanvas();
             }
             // 안드로이드 등급
             if (Gear.Props.TryGetValue(GearPropType.grade, out value) && value > 0)
