@@ -770,7 +770,7 @@ namespace WzComparerR2.CharaSimControl
                 if (Gear.type == GearType.hair_n) colorName = AvatarCanvas.HairColor[this.CosmeticHairColor];
                 else if (Gear.type == GearType.face_n) colorName = AvatarCanvas.HairColor[this.CosmeticFaceColor];
                 GearGraphics.DrawString(g, $"顔色：#c{colorName}#", GearGraphics.EquipMDMoris9Font, null, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
-                TextRenderer.DrawText(g, "外型：", GearGraphics.EquipMDMoris9Font, new Point(13, picH), Color.White, TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, "外型：", GearGraphics.EquipMDMoris9Font, new Point(15, picH + 2), Color.White, TextFormatFlags.NoPadding);
                 if (this.avatar == null)
                 {
                     this.avatar = new AvatarCanvasManager();
