@@ -1215,23 +1215,21 @@ namespace WzComparerR2.CharaSimControl
 
                 if (isTranslateRequired)
                 {
-                    string translatedDesc = Translator.MergeString(sr.Desc.Replace("#", " #").Trim(), Translator.TranslateString(sr.Desc).Replace("#", " #").Trim(), 2);
+                    string translatedDesc = Translator.MergeString(sr.Desc.Trim(), Translator.TranslateString(sr.Desc).Replace("#", " #").Trim(), 2);
                     GearGraphics.DrawString(g, translatedDesc, Translator.IsKoreanStringPresent(translatedDesc) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
                 }
                 else
                 {
 
-                    GearGraphics.DrawString(g, sr.Desc.Replace("#", " #").Trim(), Translator.IsKoreanStringPresent(sr.Desc) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
+                    GearGraphics.DrawString(g, sr.Desc.Trim(), Translator.IsKoreanStringPresent(sr.Desc) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
                 }
             }
 
             // 값이 있는 설명
             if (!string.IsNullOrEmpty(Gear.EpicHs) && sr[Gear.EpicHs] != null)
             {
-                hasThirdContents = true;
-
-                var text = sr[Gear.EpicHs].Replace("#", " #").Trim();
-
+                //var text = sr[Gear.EpicHs].Replace("#", " #").Trim();
+                var text = sr[Gear.EpicHs].Trim();
                 if (!string.IsNullOrEmpty(text))
                 {
                     AddLines(0, 7, ref picH, condition: secondLineNeeded);
