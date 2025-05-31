@@ -131,10 +131,25 @@ namespace WzComparerR2.Avatar.UI
             }
             switch ((int)selectedItem.Value)
             {
+                case 2:
+                    labelX1.Text = "產生的紙娃娃可能不準確。";
+                    labelX1.Visible = true;
+                    break;
+                case 4:
+                case 5:
+                    labelX1.Text = "多年未登入的角色可能無法正確讀取。";
+                    labelX1.Visible = true;
+                    break;
+                case 6:
+                    labelX1.Text = "若提示找不到角色，請登入該角色。";
+                    labelX1.Visible = true;
+                    break;
+                case 7:
+                    labelX1.Text = "僅可讀取聯盟戰地排行榜中列出的角色。";
+                    labelX1.Visible = true;
+                    break;
                 default:
-                    labelX1.Enabled = false;
-                    checkBoxX1.Enabled = false;
-                    checkBoxX2.Enabled = false;
+                    labelX1.Visible = false;
                     break;
             }
         }
