@@ -252,6 +252,27 @@ namespace WzComparerR2
             set { comboBoxEx4.SelectedIndex = value; }
         }
 
+        [Link]
+        public bool Map_ShowMiniMap
+        {
+            get { return chkShowMiniMap.Checked; }
+            set { chkShowMiniMap.Checked = value; }
+        }
+
+        [Link]
+        public bool Map_ShowMapObjectID
+        {
+            get { return chkShowMapObjectID.Checked; }
+            set { chkShowMapObjectID.Checked = value; }
+        }
+
+        [Link]
+        public bool Map_ShowMobNpcObjectID
+        {
+            get { return chkShowMobNpcObjectID.Checked; }
+            set { chkShowMobNpcObjectID.Checked = value; }
+        }
+
 
         public int PreferredStringCopyMethod
         {

@@ -31,11 +31,13 @@ namespace WzComparerR2.Comparer
         private List<string> OutputCashTooltipIDs { get; set; } = new List<string>();
         private List<string> OutputGearTooltipIDs { get; set; } = new List<string>();
         private List<string> OutputItemTooltipIDs { get; set; } = new List<string>();
+        private List<string> OutputMapTooltipIDs { get; set; } = new List<string>();
         private List<string> OutputMobTooltipIDs { get; set; } = new List<string>();
         private List<string> OutputNpcTooltipIDs { get; set; } = new List<string>();
         private Dictionary<string, List<string>> DiffCashTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffGearTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffItemTags { get; set; } = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<string>> DiffMapTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffMobTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffNpcTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffSkillTags { get; set; } = new Dictionary<string, List<string>>();
@@ -49,6 +51,7 @@ namespace WzComparerR2.Comparer
         public bool OutputCashTooltip { get; set; }
         public bool OutputGearTooltip { get; set; }
         public bool OutputItemTooltip { get; set; }
+        public bool OutputMapTooltip { get; set; }
         public bool OutputMobTooltip { get; set; }
         public bool OutputNpcTooltip { get; set; }
         public bool OutputSkillTooltip { get; set; }
@@ -112,7 +115,7 @@ namespace WzComparerR2.Comparer
                 WzFileComparer comparer = new WzFileComparer();
                 comparer.IgnoreWzFile = true;
 
-                if (OutputCashTooltip || OutputGearTooltip || OutputItemTooltip || OutputMobTooltip || OutputNpcTooltip || OutputSkillTooltip)
+                if (OutputCashTooltip || OutputGearTooltip || OutputItemTooltip || OutputMapTooltip || OutputMobTooltip || OutputNpcTooltip || OutputSkillTooltip)
                 {
                     this.WzNewOld[0] = fileNew.Node;
                     this.WzNewOld[1] = fileOld.Node;
@@ -371,6 +374,7 @@ namespace WzComparerR2.Comparer
             string skillTooltipPath = Path.Combine(outputDir, "SkillTooltips");
             string itemTooltipPath = Path.Combine(outputDir, "ItemTooltips");
             string gearTooltipPath = Path.Combine(outputDir, "GearTooltips");
+            string mapTooltipPath = Path.Combine(outputDir, "MapTooltips");
             string mobTooltipPath = Path.Combine(outputDir, "MobTooltips");
             string npcTooltipPath = Path.Combine(outputDir, "NpcTooltips");
 
@@ -596,6 +600,14 @@ namespace WzComparerR2.Comparer
                     SaveGearTooltip(gearTooltipPath);
                 }
             }
+            if (OutputMapTooltip && type.ToString() == "String" && OutputMapTooltipIDs != null)
+            {
+                if (!Directory.Exists(mapTooltipPath))
+                {
+                    Directory.CreateDirectory(mapTooltipPath);
+                }
+                SaveMapTooltip(mapTooltipPath);
+            }
             if (OutputMobTooltip && type.ToString() == "String" && OutputMobTooltipIDs != null)
             {
                 if (!Directory.Exists(mobTooltipPath))
@@ -712,10 +724,10 @@ namespace WzComparerR2.Comparer
                         Bitmap ImageOld = skillRenderNewOld[1].Render(true);
                         if (ShowChangeType)
                         {
-                            int picHchange = 13;
+                            int picHchange = ShowObjectID ? 13 : 1;
                             Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
                             GearGraphics.DrawPlainText(gNewOld[1], "變更前", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = 13;
+                            picHchange = ShowObjectID ? 13 : 1;
                             GearGraphics.DrawPlainText(gNewOld[0], "變更後", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
                         }
 
@@ -750,7 +762,7 @@ namespace WzComparerR2.Comparer
                 }
 
                 var skillTypeTextInfo = g.MeasureString(skillType, GearGraphics.ItemDetailFont);
-                int picH = 13;
+                int picH = ShowObjectID ? 13 : 1;
                 if (ShowChangeType) GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
 
                 string categoryPath = (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其他");
@@ -935,10 +947,10 @@ namespace WzComparerR2.Comparer
                         if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
                         if (ShowChangeType)
                         {
-                            int picHchange = 13;
+                            int picHchange = ShowObjectID ? 13 : 1;
                             Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
                             GearGraphics.DrawPlainText(gNewOld[1], "變更前", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = 13;
+                            picHchange = ShowObjectID ? 13 : 1;
                             GearGraphics.DrawPlainText(gNewOld[0], "變更後", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
                         }
                         resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
@@ -977,7 +989,7 @@ namespace WzComparerR2.Comparer
                 }
 
                 var itemTypeTextInfo = g.MeasureString(itemType, GearGraphics.ItemDetailFont);
-                int picH = 13;
+                int picH = ShowObjectID ? 13 : 1;
                 if (ShowChangeType) GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
 
                 string imageName = Path.Combine(itemTooltipPath, categoryPath, "道具_" + itemID + "_" + ItemName + "_" + itemType + ".png");
@@ -1200,10 +1212,10 @@ namespace WzComparerR2.Comparer
                         if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
                         if (ShowChangeType)
                         {
-                            int picHchange = 13;
+                            int picHchange = ShowObjectID ? 13 : 1;
                             Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
                             GearGraphics.DrawPlainText(gNewOld[1], "變更前", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = 13;
+                            picHchange = ShowObjectID ? 13 : 1;
                             GearGraphics.DrawPlainText(gNewOld[0], "變更後", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
                         }
                         resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
@@ -1244,7 +1256,7 @@ namespace WzComparerR2.Comparer
                 }
 
                 var gearTypeTextInfo = g.MeasureString(gearType, GearGraphics.ItemDetailFont);
-                int picH = 13;
+                int picH = ShowObjectID ? 13 : 1;
                 if (ShowChangeType) GearGraphics.DrawPlainText(g, gearType, gearTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(gearTypeTextInfo.Width) + 2, ref picH, 10);
 
                 string imageName = Path.Combine(gearTooltipPath, categoryPath, "裝備_" + gearID + "_" + EqpName + "_" + gearType + ".png");
@@ -1465,10 +1477,10 @@ namespace WzComparerR2.Comparer
                         if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
                         if (ShowChangeType)
                         {
-                            int picHchange = 13;
+                            int picHchange = ShowObjectID ? 13 : 1;
                             Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
                             GearGraphics.DrawPlainText(gNewOld[1], "變更前", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = 13;
+                            picHchange = ShowObjectID ? 13 : 1;
                             GearGraphics.DrawPlainText(gNewOld[0], "變更後", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
                         }
                         resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
@@ -1509,7 +1521,7 @@ namespace WzComparerR2.Comparer
                 }
 
                 var gearTypeTextInfo = g.MeasureString(gearType, GearGraphics.ItemDetailFont);
-                int picH = 13;
+                int picH = ShowObjectID ? 13 : 1;
                 if (ShowChangeType) GearGraphics.DrawPlainText(g, gearType, gearTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(gearTypeTextInfo.Width) + 2, ref picH, 10);
 
                 string imageName = Path.Combine(gearTooltipPath, categoryPath, "裝備_" + gearID + "_" + EqpName + "_" + gearType + ".png");
@@ -1522,6 +1534,144 @@ namespace WzComparerR2.Comparer
             }
             OutputGearTooltipIDs.Clear();
             DiffGearTags.Clear();
+        }
+
+        private void SaveMapTooltip(string mapTooltipPath)
+        {
+            MapTooltipRenderer[] mapRenderNewOld = new MapTooltipRenderer[2];
+            int count = 0;
+            int allCount = OutputMapTooltipIDs.Count;
+            var mapTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
+
+            for (int i = 0; i < 2; i++) // 0: New, 1: Old
+            {
+                this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
+                this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
+                this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+
+                mapRenderNewOld[i] = new MapTooltipRenderer();
+                mapRenderNewOld[i].StringLinker = new StringLinker();
+                mapRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i]);
+                mapRenderNewOld[i].Enable22AniStyle = this.Enable22AniStyle;
+                mapRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                mapRenderNewOld[i].ShowMiniMap = true;
+                mapRenderNewOld[i].ShowMobNpcObjectID = this.ShowObjectID;
+            }
+
+            foreach (var mapID in OutputMapTooltipIDs)
+            {
+                if (!int.TryParse(mapID, out _)) continue;
+                StateInfo = string.Format("{0}/{1} 地圖: {2}", ++count, allCount, mapID);
+                StateDetail = "Map 對比中...";
+                string mapType = "";
+                string mapNodePath = String.Format(@"Map\Map\Map{0}\{1:D}.img", int.Parse(mapID) / 100000000, mapID);
+
+                StringResult sr;
+                string MapName;
+                if (mapRenderNewOld[1].StringLinker == null || !mapRenderNewOld[1].StringLinker.StringMap.TryGetValue(int.Parse(mapID), out sr))
+                {
+                    sr = new StringResult();
+                    sr.Name = "未知的地圖";
+                }
+                MapName = sr.Name;
+                if (mapRenderNewOld[0].StringLinker == null || !mapRenderNewOld[0].StringLinker.StringMap.TryGetValue(int.Parse(mapID), out sr))
+                {
+                    sr = new StringResult();
+                    sr.Name = "未知的地圖";
+                }
+                if (MapName != sr.Name && MapName != "未知的地圖" && sr.Name != "未知的地圖")
+                {
+                    MapName += "_" + sr.Name;
+                }
+                else if (MapName == "未知的地圖")
+                {
+                    MapName = sr.Name;
+                }
+                if (String.IsNullOrEmpty(MapName)) MapName = "未知的地圖";
+                MapName = RemoveInvalidFileNameChars(MapName);
+                int nullMapIdx = 0;
+
+                // 變更前後のツールチップ画像の作成
+                for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                {
+                    Map map = Map.CreateFromNode(PluginManager.FindWz(mapNodePath, WzFileNewOld[i]), PluginManager.FindWz);
+
+                    if (map != null)
+                    {
+                        mapRenderNewOld[i].Map = map;
+                    }
+                    else
+                    {
+                        nullMapIdx = i + 1;
+                    }
+                }
+
+                // ツールチップ画像を合わせる
+                Bitmap resultImage = null;
+                Graphics g = null;
+
+                switch (nullMapIdx)
+                {
+                    case 0: // change
+                        //mapType = "變更";
+
+                        Bitmap ImageNew = mapRenderNewOld[0].Render();
+                        Bitmap ImageOld = mapRenderNewOld[1].Render();
+                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                        if (ShowChangeType)
+                        {
+                            int picHchange = ShowObjectID ? 13 : 1;
+                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", mapTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            picHchange = ShowObjectID ? 13 : 1;
+                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", mapTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                        }
+                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                        g = Graphics.FromImage(resultImage);
+
+                        g.DrawImage(ImageOld, 0, 0);
+                        g.DrawImage(ImageNew, ImageOld.Width, 0);
+                        break;
+
+                    case 1: // delete
+                        mapType = "刪除";
+
+                        resultImage = mapRenderNewOld[1].Render();
+                        if (resultImage == null) continue;
+                        g = Graphics.FromImage(resultImage);
+                        break;
+
+                    case 2: // add
+                        mapType = "新增";
+
+                        resultImage = mapRenderNewOld[0].Render();
+                        if (resultImage == null) continue;
+                        g = Graphics.FromImage(resultImage);
+                        break;
+
+                    default:
+                        break;
+                }
+
+                if (resultImage == null || g == null)
+                {
+                    continue;
+                }
+
+                var mapTypeTextInfo = g.MeasureString(mapType, GearGraphics.ItemDetailFont);
+                int picH = ShowObjectID ? 13 : 1;
+                if (ShowChangeType) GearGraphics.DrawPlainText(g, mapType, mapTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(mapTypeTextInfo.Width) + 2, ref picH, 10);
+
+                string imageName = Path.Combine(mapTooltipPath, "地圖_" + mapID + "_" + MapName + "_" + mapType + ".png");
+                if (!File.Exists(imageName))
+                {
+                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                }
+                resultImage.Dispose();
+                g.Dispose();
+            }
+            OutputMapTooltipIDs.Clear();
+            DiffMapTags.Clear();
         }
 
         private void SaveMobTooltip(string mobTooltipPath)
@@ -1877,10 +2027,10 @@ namespace WzComparerR2.Comparer
                         if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
                         if (ShowChangeType)
                         {
-                            int picHchange = 13;
+                            int picHchange = ShowObjectID ? 13 : 1;
                             Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
                             GearGraphics.DrawPlainText(gNewOld[1], "變更前", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = 13;
+                            picHchange = ShowObjectID ? 13 : 1;
                             GearGraphics.DrawPlainText(gNewOld[0], "變更後", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
                         }
                         resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
@@ -1916,7 +2066,7 @@ namespace WzComparerR2.Comparer
                 }
 
                 var itemTypeTextInfo = g.MeasureString(itemType, GearGraphics.ItemDetailFont);
-                int picH = 13;
+                int picH = ShowObjectID ? 13 : 1;
                 if (ShowChangeType) GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
 
                 string imageName = Path.Combine(itemTooltipPath, "Item_" + itemID + "_" + ItemName + "_" + itemType + ".png");
@@ -2031,6 +2181,39 @@ namespace WzComparerR2.Comparer
                     if (tag != null && !DiffGearTags[gearID].Contains(tag))
                     {
                         DiffGearTags[gearID].Add(tag);
+                    }
+                }
+            }
+        }
+
+        //異なるMapノードからMapIDを取得する
+        private void GetMapID(Wz_Node node)
+        {
+            if (node == null) return;
+
+            Match match = Regex.Match(node.FullPathToFile, @"^String\\Map.img\\(\w+)\\(\d+).*");
+            string tag = null;
+            if (!match.Success)
+            {
+                tag = node.Text;
+                match = Regex.Match(node.FullPathToFile, @"^Map\\Map\\Map[0-9]\\(\d+).img\\.*");
+            }
+
+            if (match.Success)
+            {
+                string gearID = match.Groups[1].ToString();
+
+                if (gearID != null)
+                {
+                    if (!OutputMapTooltipIDs.Contains(gearID))
+                    {
+                        OutputMapTooltipIDs.Add(gearID);
+                        DiffMapTags[gearID] = new List<string>();
+                    }
+
+                    if (tag != null && !DiffMapTags[gearID].Contains(tag))
+                    {
+                        DiffMapTags[gearID].Add(tag);
                     }
                 }
             }
@@ -2156,6 +2339,12 @@ namespace WzComparerR2.Comparer
                     GetGearID(diff.NodeNew);
                     GetGearID(diff.NodeOld);
                 }
+                // 變更的地圖Tooltip处理
+                if (OutputMapTooltip && (outputDir.Contains("Map") || outputDir.Contains("String")))
+                {
+                    GetMapID(diff.NodeNew);
+                    GetMapID(diff.NodeOld);
+                }
                 // 變更的怪物Tooltip处理
                 if (OutputMobTooltip && (outputDir.Contains("Mob") || outputDir.Contains("String")))
                 {
@@ -2231,6 +2420,10 @@ namespace WzComparerR2.Comparer
                     if (OutputGearTooltip && outputDir.Contains("Character"))
                     {
                         GetGearID(node);
+                    }
+                    if (OutputMapTooltip && outputDir.Contains("Map"))
+                    {
+                        GetMapID(node);
                     }
                     if (OutputMobTooltip && outputDir.Contains("Mob"))
                     {

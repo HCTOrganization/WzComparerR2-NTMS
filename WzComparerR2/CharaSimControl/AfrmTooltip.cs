@@ -36,6 +36,7 @@ namespace WzComparerR2.CharaSimControl
             this.ItemRender = new ItemTooltipRender2();
             this.SkillRender = new SkillTooltipRender2();
             this.RecipeRender = new RecipeTooltipRender();
+            this.MapRender = new MapTooltipRenderer();
             this.MobRender = new MobTooltipRenderer();
             this.NpcRender = new NpcTooltipRenderer();
             this.HelpRender = new HelpTooltipRender();
@@ -56,7 +57,7 @@ namespace WzComparerR2.CharaSimControl
 
         private Bitmap AvatarBitmap;
         private FrmWaiting WaitingForm = new FrmWaiting();
-        private Mutex TranslateMutex = new Mutex(false, "TranslateMutex");
+        private static readonly SemaphoreSlim TranslateSemaphore = new SemaphoreSlim(1, 1);
 
         public Object TargetItem
         {
@@ -72,6 +73,7 @@ namespace WzComparerR2.CharaSimControl
         public ItemTooltipRender2 ItemRender { get; private set; }
         public SkillTooltipRender2 SkillRender { get; private set; }
         public RecipeTooltipRender RecipeRender { get; private set; }
+        public MapTooltipRenderer MapRender { get; private set; }
         public MobTooltipRenderer MobRender { get; private set; }
         public NpcTooltipRenderer NpcRender { get; private set; }
         public HelpTooltipRender HelpRender { get; private set; }
@@ -114,9 +116,9 @@ namespace WzComparerR2.CharaSimControl
             this.PreRender();
             if (Translator.IsTranslateEnabled)
             {
+                TranslateSemaphore.Wait();
                 Thread.Sleep(10);
-                TranslateMutex.WaitOne();
-                TranslateMutex.ReleaseMutex();
+                TranslateSemaphore.Release();
             }
             if (this.Bitmap != null)
             {
@@ -200,6 +202,11 @@ namespace WzComparerR2.CharaSimControl
                 renderer = RecipeRender;
                 RecipeRender.Recipe = this.item as Recipe;
             }
+            else if (item is Map)
+            {
+                renderer = MapRender;
+                MapRender.Map = this.item as Map;
+            }
             else if (item is Mob)
             {
                 renderer = MobRender;
@@ -242,9 +249,9 @@ namespace WzComparerR2.CharaSimControl
                 WaitingForm.Show();
                 await Task.Run(() =>
                 {
-                    TranslateMutex.WaitOne();
+                    TranslateSemaphore.Wait();
                     this.Bitmap = renderer.Render();
-                    TranslateMutex.ReleaseMutex();
+                    TranslateSemaphore.Release();
                 });
                 WaitingForm.Hide();
             }

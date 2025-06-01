@@ -207,9 +207,13 @@ namespace WzComparerR2.Common
                                     }
                                     if (strResult == null) strResult = new StringResult();
 
+                                    var streetName = GetDefaultString(linkNode, "streetName");
+                                    var mapName = GetDefaultString(linkNode, "mapName");
                                     strResult.Name = string.Format("{0} : {1}",
-                                        GetDefaultString(linkNode, "streetName"),
-                                        GetDefaultString(linkNode, "mapName")) ?? strResult.Name;
+                                        streetName,
+                                        mapName) ?? strResult.Name;
+                                    strResult.StreetName = streetName ?? strResult.StreetName;
+                                    strResult.MapName = mapName ?? strResult.MapName;
                                     strResult.Desc = GetDefaultString(linkNode, "mapDesc") ?? strResult.Desc;
                                     if (tree.FullPath == test_tree.FullPath)
                                     {

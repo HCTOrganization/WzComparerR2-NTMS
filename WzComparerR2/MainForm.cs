@@ -272,6 +272,10 @@ namespace WzComparerR2
             tooltipQuickView.ItemRender.CosmeticHairColor = Setting.Item.CosmeticHairColor;
             tooltipQuickView.ItemRender.CosmeticFaceColor = Setting.Item.CosmeticFaceColor;
             tooltipQuickView.ItemRender.Enable22AniStyle = Setting.Enable22AniStyle;
+            tooltipQuickView.MapRender.ShowMiniMap = Setting.Map.ShowMiniMap;
+            tooltipQuickView.MapRender.ShowObjectID = Setting.Map.ShowMapObjectID;
+            tooltipQuickView.MapRender.ShowMobNpcObjectID = Setting.Map.ShowMobNpcObjectID;
+            tooltipQuickView.MapRender.Enable22AniStyle = Setting.Enable22AniStyle;
             tooltipQuickView.RecipeRender.ShowObjectID = Setting.Recipe.ShowID;
             tooltipQuickView.RecipeRender.Enable22AniStyle = Setting.Enable22AniStyle;
             GearGraphics.is22aniStyle = Setting.Enable22AniStyle;
@@ -3412,6 +3416,22 @@ namespace WzComparerR2
                     }
                     break;
 
+                case Wz_Type.Map:
+                    if ((image = selectedNode.GetValue<Wz_Image>()) == null || !image.TryExtract())
+                        return;
+                    var map = Map.CreateFromNode(image.Node, PluginManager.FindWz);
+                    obj = map;
+                    if (stringLinker == null || !stringLinker.StringMap.TryGetValue(map.MapID, out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知のマップ";
+                    }
+                    if (map != null)
+                    {
+                        fileName = "map_" + map.MapID + "_" + RemoveInvalidFileNameChars(sr.Name.Replace(" : ", ":")) + ".png";
+                    }
+                    break;
+
                 case Wz_Type.Mob:
                     if (selectedNode.FullPathToFile.Contains("BossPattern")) return; // Ignore BossPattern to prevent Auto Preview crash
                     if ((image = selectedNode.GetValue<Wz_Image>()) == null || !image.TryExtract())
@@ -3804,6 +3824,7 @@ namespace WzComparerR2
                     comparer.OutputSkillTooltip = chkOutputSkillTooltip.Checked;
                     comparer.OutputItemTooltip = chkOutputItemTooltip.Checked;
                     comparer.OutputGearTooltip = chkOutputEqpTooltip.Checked;
+                    comparer.OutputMapTooltip = chkOutputMapTooltip.Checked;
                     comparer.OutputMobTooltip = chkOutputMobTooltip.Checked;
                     comparer.OutputNpcTooltip = chkOutputNpcTooltip.Checked;
                     comparer.OutputCashTooltip = chkOutputCashTooltip.Checked;
@@ -3841,6 +3862,7 @@ namespace WzComparerR2
                                     chkOutputSkillTooltip.Enabled = false;
                                     chkOutputItemTooltip.Enabled = false;
                                     chkOutputEqpTooltip.Enabled = false;
+                                    chkOutputMapTooltip.Enabled = false;
                                     chkOutputMobTooltip.Enabled = false;
                                     chkOutputNpcTooltip.Enabled = false;
                                     // chkOutputCashTooltip.Enabled = false;
@@ -3889,6 +3911,7 @@ namespace WzComparerR2
                         chkOutputSkillTooltip.Enabled = true;
                         chkOutputItemTooltip.Enabled = true;
                         chkOutputEqpTooltip.Enabled = true;
+                        chkOutputMapTooltip.Enabled = true;
                         chkOutputMobTooltip.Enabled = true;
                         chkOutputNpcTooltip.Enabled = true;
                         // chkOutputCashTooltip.Enabled = true;
