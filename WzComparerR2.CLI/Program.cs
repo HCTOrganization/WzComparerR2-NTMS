@@ -39,6 +39,11 @@ namespace WzComparerR2.CLI
 
         private static void CliPatcherSession(string[] args)
         {
+            if (args.Length == 1)
+            {
+                PrintUsage("patch");
+                return;
+            }
             CliPatcher patcher = new CliPatcher();
             switch (args[1])
             {
@@ -143,7 +148,7 @@ namespace WzComparerR2.CLI
                     }
                     break;
                 default:
-                    PrintUsage();
+                    PrintUsage("patch");
                     return;
             }
         }
