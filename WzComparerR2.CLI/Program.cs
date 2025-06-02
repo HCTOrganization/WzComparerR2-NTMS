@@ -39,7 +39,7 @@ namespace WzComparerR2.CLI
 
         private static void CliPatcherSession(string[] args)
         {
-            if (args.Length == 1)
+            if (args.Length < 2)
             {
                 PrintUsage("patch");
                 return;
@@ -48,12 +48,12 @@ namespace WzComparerR2.CLI
             switch (args[1])
             {
                 case "find":
-                    if (args[2] == "--help")
+                    if (args.Length < 4)
                     {
-                        PrintUsage("apply");
+                        PrintUsage("find");
                         return;
                     }
-                    if (args.Length < 4)
+                    if (args[2] == "--help")
                     {
                         PrintUsage("find");
                         return;
@@ -90,12 +90,12 @@ namespace WzComparerR2.CLI
                         return;
                     }
                 case "apply":
-                    if (args[2] == "--help")
+                    if (args.Length < 4)
                     {
                         PrintUsage("apply");
                         return;
                     }
-                    if (args.Length < 4)
+                    if (args[2] == "--help")
                     {
                         PrintUsage("apply");
                         return;
