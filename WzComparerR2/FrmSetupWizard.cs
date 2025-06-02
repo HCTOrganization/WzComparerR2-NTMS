@@ -692,7 +692,7 @@ namespace WzComparerR2
             parseAPIkey();
             this.Enable22AniStyle = characonfig.Enable22AniStyle;
             this.EnableAutoPreview = characonfig.AutoQuickView;
-            this.ShowObjectID = characonfig.Gear.ShowID || characonfig.Item.ShowID || characonfig.Skill.ShowID || characonfig.Recipe.ShowID;
+            this.ShowObjectID = characonfig.Gear.ShowID || characonfig.Item.ShowID || characonfig.Skill.ShowID || characonfig.Recipe.ShowID || characonfig.Map.ShowMapObjectID || characonfig.Map.ShowMobNpcObjectID;
             this.ShowSoldPrice = characonfig.Gear.ShowSoldPrice || characonfig.Item.ShowSoldPrice;
             this.ShowPurchasePrice = characonfig.Gear.ShowCashPurchasePrice || characonfig.Item.ShowCashPurchasePrice;
             this.ShowMedalTag = characonfig.Gear.ShowMedalTag;
@@ -730,6 +730,8 @@ namespace WzComparerR2
             characonfig.Item.ShowID = this.ShowObjectID;
             characonfig.Skill.ShowID = this.ShowObjectID;
             characonfig.Recipe.ShowID = this.ShowObjectID;
+            characonfig.Map.ShowMapObjectID = this.ShowObjectID;
+            characonfig.Map.ShowMobNpcObjectID = this.ShowObjectID;
             characonfig.Gear.ShowSoldPrice = this.ShowSoldPrice;
             characonfig.Item.ShowSoldPrice = this.ShowSoldPrice;
             characonfig.Gear.ShowCashPurchasePrice = this.ShowPurchasePrice;
