@@ -679,7 +679,7 @@ namespace WzComparerR2
                 return;
 
             Wz_Node node = advTree3.SelectedNode.AsWzNode();
-            string aniName = "ネスト_" + GetSelectedNodeImageName();
+            string aniName = "堆叠_" + GetSelectedNodeImageName();
 
             if (node.Value is Wz_Png)
             {
@@ -729,7 +729,7 @@ namespace WzComparerR2
                     this.cmbItemSkins.SelectedIndex = aniItem.Skins.IndexOf(aniItem.SelectedSkin);
                 }
                 */
-                MessageBoxEx.Show("Spineアニメーションネストにすることはできません。", "未実装");
+                MessageBoxEx.Show("Spine動畫不能堆疊。", "未實裝");
                 return;
             }
             else
@@ -773,11 +773,11 @@ namespace WzComparerR2
                 return;
 
             Wz_Node node = advTree3.SelectedNode.AsWzNode();
-            string aniName = "ネスト_" + GetSelectedNodeImageName();
+            string aniName = "堆叠_" + GetSelectedNodeImageName();
 
             if ((sender as ButtonItem).Name != aniName)
             {
-                MessageBoxEx.Show("ロードされたマルチフレームのリストと現在選択されているノードが一致しません。", "エラー");
+                MessageBoxEx.Show("載入的多重幀列表與目前選定的節點不匹配。", "錯誤");
                 return;
             }
 
@@ -859,7 +859,7 @@ namespace WzComparerR2
                 return;
 
             Wz_Node node = advTree3.SelectedNode.AsWzNode();
-            string aniNameKey = "ネスト_" + GetSelectedNodeImageName();
+            string aniNameKey = "堆叠_" + GetSelectedNodeImageName();
 
             if ((sender as ButtonItem).Name == aniNameKey)
             {
@@ -894,7 +894,7 @@ namespace WzComparerR2
         {
             using (FolderBrowserDialog dlg = new FolderBrowserDialog())
             {
-                dlg.Description = "画像を自動的に保存する保存先フォルダを選択します。";
+                dlg.Description = "選擇將自動儲存圖片的目標資料夾。";
                 dlg.SelectedPath = ImageHandlerConfig.Default.AutoSavePictureFolder;
                 if (DialogResult.OK == dlg.ShowDialog())
                 {
@@ -3066,14 +3066,14 @@ namespace WzComparerR2
             Wz_Uol uol = advTree3.SelectedNode?.AsWzNode()?.Value as Wz_Uol;
             if (uol == null)
             {
-                labelItemStatus.Text = "UOL節點が選択されていません。";
+                labelItemStatus.Text = "未選擇UOL節點。";
                 return;
             }
 
             Node uolNode = handleUol(advTree3.SelectedNode, uol.Uol);
             if (uolNode == null)
             {
-                labelItemStatus.Text = "対象的UOL節點が見つかりませんでした。";
+                labelItemStatus.Text = "找不到目標UOL節點。";
                 return;
             }
             else
@@ -3424,7 +3424,7 @@ namespace WzComparerR2
                     if (stringLinker == null || !stringLinker.StringMap.TryGetValue(map.MapID, out sr))
                     {
                         sr = new StringResult();
-                        sr.Name = "未知のマップ";
+                        sr.Name = "未知的地圖";
                     }
                     if (map != null)
                     {
