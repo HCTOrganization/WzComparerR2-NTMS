@@ -14,6 +14,7 @@
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
     <Platforms>AnyCPU;ARM64</Platforms>
 	<FormattedBuildTime>$([System.DateTime]::Now.ToString("yyMMdd-HHmm"))</FormattedBuildTime>
+	<SignAssembly>False</SignAssembly>
   </PropertyGroup>
   <PropertyGroup Condition="$(Platform) == 'AnyCPU'">
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -46,6 +47,7 @@
     <ProjectReference Include="..\WzComparerR2.Common\WzComparerR2.Common.csproj" />
     <ProjectReference Include="..\WzComparerR2.WzLib\WzComparerR2.WzLib.csproj" />
     <ProjectReference Include="..\WzComparerR2.PluginBase\WzComparerR2.PluginBase.csproj" />
+    <ProjectReference Include="..\WzComparerR2.CLI\WzComparerR2.CLI.csproj" />
     <ProjectReference Include="..\CharaSimResource\CharaSimResource.csproj" />
     <PackageReference Include="MonoGame.Framework.WindowsDX" Version="$(MonogameFrameworkVersion)" />
     <PackageReference Include="SharpDX" Version="$(SharpDXVersion)" />
@@ -66,7 +68,7 @@
     </Compile>
   </ItemGroup>
   <Target Name="UpdateBuildTime" BeforeTargets="BeforeCompile">
-	<WriteLinesToFile File="BuildInfo.cs" Lines="namespace WzComparerR2 { internal class BuildInfo { public static string BuildTime => &quot;$(FormattedBuildTime)&quot;%3b } }" Overwrite="true" />
+	<WriteLinesToFile File="BuildInfo.cs" Lines="namespace WzComparerR2 { internal class BuildInfo { public static string BuildTime =&gt; &quot;$(FormattedBuildTime)&quot;%3b } }" Overwrite="true" />
 	<WriteLinesToFile File="BuildDate.txt" Lines="$(FormattedBuildTime)" Overwrite="true" />
   </Target>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="$([MSBuild]::IsOSPlatform('Windows'))">

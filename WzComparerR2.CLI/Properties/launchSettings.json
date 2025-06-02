@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WzComparerR2.CLI": {
+      "commandName": "Project",
+      "commandLineArgs": "patch apply E:\\Downloads\\01to05.patch \"I:\\tee dir\\\" --immediate"
+    }
+  }
+}
