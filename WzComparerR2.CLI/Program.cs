@@ -208,10 +208,11 @@ namespace WzComparerR2.CLI
                     Console.WriteLine("    wcr2cli patch find KMS-Minor 403 1 4");
                     break;
                 case "apply":
-                    Console.WriteLine("    wcr2cli patch apply [patch_file_path] [game_installation_path] [--immediate] [--verbose]");
+                    Console.WriteLine("    wcr2cli patch apply [patch_file_path] [game_installation_path] [--immediate] [--verbose] [--override]");
                     Console.WriteLine("");
                     Console.WriteLine("Supplying \"--immediate\" switch will enable Immediate Patch.");
                     Console.WriteLine("Supplying \"--verbose\" switch will enable verbose output (not implemented yet).");
+                    Console.WriteLine("Supplying \"--override\" switch will accept any confirmation message automatically.");
                     Console.WriteLine("");
                     Console.WriteLine("Both patch file path and game installation path must be absolute path.");
                     Console.WriteLine("If the path contains spaces, the path must be wrapped by a pair of quotes.");
