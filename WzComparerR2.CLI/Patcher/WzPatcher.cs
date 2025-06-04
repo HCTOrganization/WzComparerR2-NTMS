@@ -7,7 +7,7 @@ using System.IO.Compression;
 using System.Threading;
 using System.Threading.Tasks;
 using WzComparerR2.Patcher.Builder;
-using PartialStream = WzComparerR2.WzLib.Utilities.PartialStream;
+using PartialStream = WzComparerR2.Patcher.Builder.PartialStream;
 
 namespace WzComparerR2.Patcher
 {
