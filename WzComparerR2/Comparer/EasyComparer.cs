@@ -2744,14 +2744,7 @@ namespace WzComparerR2.Comparer
                         switch (baseSkillIDInt / 1000)
                         {
                             case 0:
-                                if (new int[] { 508, 570, 571, 572 }.Contains(baseSkillIDInt)) // ジェット
-                                {
-                                    return false;
-                                }
-                                else
-                                {
-                                    return true;
-                                }
+                                return !(new int[] { 508, 570, 571, 572 }.Contains(baseSkillIDInt)); // ジェット
                             case 4: // 暁の陣
                             case 11: // ビーストテイマー
                             case 12: // アニメコラボ
@@ -2800,14 +2793,7 @@ namespace WzComparerR2.Comparer
             switch (skillID / 10000000)
             {
                 case 0:
-                    if (new int[] { 508, 570, 571, 572 }.Contains((int)skillID / 10000)) // ジェット
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
+                    return !(new int[] { 508, 570, 571, 572 }.Contains((int)skillID / 10000)); // ジェット
                 case 4: // 暁の陣
                 case 11: // ビーストテイマー
                 case 12: // アニメコラボ
