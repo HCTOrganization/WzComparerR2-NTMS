@@ -3833,6 +3833,7 @@ namespace WzComparerR2
                     comparer.ShowChangeType = chkShowChangeType.Checked;
                     comparer.ShowPrice = chkShowPrice.Checked;
                     comparer.ShowLinkedTamingMob = chkShowLinkedTamingMob.Checked;
+                    comparer.SkipKMSContent = chkSkipKMSContent.Checked;
                     comparer.Enable22AniStyle = GearGraphics.is22aniStyle;
                     comparer.StateInfoChanged += new EventHandler(comparer_StateInfoChanged);
                     comparer.StateDetailChanged += new EventHandler(comparer_StateDetailChanged);
@@ -3871,6 +3872,7 @@ namespace WzComparerR2
                                     chkShowPrice.Enabled = false;
                                     chkHashPngFileName.Enabled = false;
                                     chkShowLinkedTamingMob.Enabled = false;
+                                    chkSkipKMSContent.Enabled = false;
                                     comparer.EasyCompareWzFiles(fileNew, fileOld, dlg.SelectedPath);
                                     return;
 
@@ -3920,6 +3922,7 @@ namespace WzComparerR2
                         chkShowPrice.Enabled = true;
                         chkHashPngFileName.Enabled = true;
                         chkShowLinkedTamingMob.Enabled = true;
+                        chkSkipKMSContent.Enabled = true;
                     }
                 });
                 compareThread.Priority = ThreadPriority.Highest;

@@ -232,6 +232,7 @@ namespace WzComparerR2
             this.chkShowChangeType = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowPrice = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowLinkedTamingMob = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkSkipKMSContent = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.superTooltip1 = new DevComponents.DotNetBar.SuperTooltip();
             this.chkOutputRemovedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOutputAddedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -2580,6 +2581,7 @@ namespace WzComparerR2
             this.superTabControlPanel2.Controls.Add(this.chkShowChangeType);
             this.superTabControlPanel2.Controls.Add(this.chkShowPrice);
             this.superTabControlPanel2.Controls.Add(this.chkShowLinkedTamingMob);
+            this.superTabControlPanel2.Controls.Add(this.chkSkipKMSContent);
             this.superTabControlPanel2.Controls.Add(this.chkResolvePngLink);
             this.superTabControlPanel2.Controls.Add(this.chkOutputRemovedImg);
             this.superTabControlPanel2.Controls.Add(this.chkOutputAddedImg);
@@ -2772,6 +2774,21 @@ namespace WzComparerR2
             this.chkShowLinkedTamingMob.TabIndex = 21;
             this.chkShowLinkedTamingMob.Text = "顯示關聯騎寵";
             this.chkShowLinkedTamingMob.Checked = false;
+            // 
+            // chkSkipKMSContent
+            // 
+            // 
+            // 
+            // 
+            this.chkSkipKMSContent.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkSkipKMSContent.Location = new System.Drawing.Point(550, 331);
+            this.chkSkipKMSContent.Name = "chkSkipKMSContent";
+            this.chkSkipKMSContent.Size = new System.Drawing.Size(145, 23);
+            this.chkSkipKMSContent.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.superTooltip1.SetSuperTooltip(this.chkSkipKMSContent, new DevComponents.DotNetBar.SuperTooltipInfo("跳過KMS職業對比", "", "不對比KMS存在的職業。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 70)));
+            this.chkSkipKMSContent.TabIndex = 22;
+            this.chkSkipKMSContent.Text = "跳過KMS職業對比";
+            this.chkSkipKMSContent.Checked = false;
             // 
             // chkOutputRemovedImg
             // 
@@ -3682,6 +3699,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowChangeType;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowPrice;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowLinkedTamingMob;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkSkipKMSContent;
         private DevComponents.Editors.ComboItem comboItem19;
         private DevComponents.Editors.ComboItem comboItem20;
         private DevComponents.Editors.ComboItem comboItem21;

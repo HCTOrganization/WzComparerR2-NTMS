@@ -41,6 +41,7 @@ namespace WzComparerR2.Comparer
         private Dictionary<string, List<string>> DiffMobTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffNpcTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffSkillTags { get; set; } = new Dictionary<string, List<string>>();
+        private Dictionary<int, List<int>> FifthJobSkillToJobID { get; set; } = new Dictionary<int, List<int>>();
         public WzFileComparer Comparer { get; protected set; }
         private string stateInfo;
         private string stateDetail;
@@ -61,6 +62,7 @@ namespace WzComparerR2.Comparer
         public bool ShowChangeType { get; set; }
         public bool ShowPrice { get; set; }
         public bool ShowLinkedTamingMob { get; set; }
+        public bool SkipKMSContent { get; set; }
 
         public string StateInfo
         {
@@ -115,12 +117,48 @@ namespace WzComparerR2.Comparer
                 WzFileComparer comparer = new WzFileComparer();
                 comparer.IgnoreWzFile = true;
 
-                if (OutputCashTooltip || OutputGearTooltip || OutputItemTooltip || OutputMapTooltip || OutputMobTooltip || OutputNpcTooltip || OutputSkillTooltip)
+                if (OutputCashTooltip || OutputGearTooltip || OutputItemTooltip || OutputMapTooltip || OutputMobTooltip || OutputNpcTooltip || OutputSkillTooltip || SkipKMSContent)
                 {
                     this.WzNewOld[0] = fileNew.Node;
                     this.WzNewOld[1] = fileOld.Node;
                     this.WzFileNewOld[0] = fileNew.Node.GetNodeWzFile();
                     this.WzFileNewOld[1] = fileOld.Node.GetNodeWzFile();
+                    if (SkipKMSContent)
+                    {
+                        StateInfo = "正在初始化5轉技能職業對應關係...";
+                        for (int i = 0; i < 2; i++)
+                        {
+                            Wz_Node vCoreData = PluginManager.FindWz("Etc\\VCore.img\\CoreData", WzFileNewOld[i]);
+                            if (vCoreData == null) break;
+
+                            foreach (Wz_Node data in vCoreData.Nodes)
+                            {
+                                Wz_Node connectSkill = data.FindNodeByPath("connectSkill").ResolveUol();
+                                Wz_Node jobIDValue = data.FindNodeByPath("job").ResolveUol();
+                                List<int> applicableJobID = new List<int>();
+                                foreach (Wz_Node jobID in jobIDValue.Nodes)
+                                {
+                                    applicableJobID.Add(jobID.GetValueEx<int>(0));
+                                }
+                                if (connectSkill == null)
+                                {
+                                    int skillIDValue = data.FindNodeByPath("spCoreOption\\effect\\skill_id").ResolveUol().GetValueEx<int>(0);
+                                    if (!FifthJobSkillToJobID.ContainsKey(skillIDValue)) FifthJobSkillToJobID.Add(skillIDValue, [0]);
+                                }
+                                else
+                                {
+                                    foreach (Wz_Node skillID in connectSkill.Nodes)
+                                    {
+                                        int skillIDValue = skillID.GetValueEx<int>(0);
+                                        if (skillIDValue > 0 && !FifthJobSkillToJobID.ContainsKey(skillIDValue))
+                                        {
+                                            FifthJobSkillToJobID.Add(skillIDValue, applicableJobID);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
 
@@ -416,6 +454,7 @@ namespace WzComparerR2.Comparer
                     this.EnableDarkMode ? "- 暗黑模式" : null,
                     "- Compare " + this.Comparer.PngComparison,
                     this.Comparer.ResolvePngLink ? "- 解析PNG連結" : null,
+                    this.SkipKMSContent ? "- 跳過KMS職業對比" : null,
                 }.Where(p => p != null)));
                 sw.WriteLine("</table>");
                 sw.WriteLine("</p>");
@@ -432,10 +471,20 @@ namespace WzComparerR2.Comparer
                     {
                         case DifferenceType.Changed:
                             idx = 0;
+                            if (SkipKMSContent && (isKMSNode(diff.NodeNew) || isKMSNode(diff.NodeOld)))
+                            {
+                                kmsContent.Add(diff);
+                                continue;
+                            }
                             detail = string.Format("<a name=\"m_{1}_{2}\" href=\"#a_{1}_{2}\">{0}</a>", diff.NodeNew.FullPathToFile, idx, count[idx]);
                             break;
                         case DifferenceType.Append:
                             idx = 1;
+                            if (SkipKMSContent && isKMSNode(diff.NodeNew))
+                            {
+                                kmsContent.Add(diff);
+                                continue;
+                            }
                             if (this.OutputAddedImg)
                             {
                                 detail = string.Format("<a name=\"m_{1}_{2}\" href=\"#a_{1}_{2}\">{0}</a>", diff.NodeNew.FullPathToFile, idx, count[idx]);
@@ -447,6 +496,11 @@ namespace WzComparerR2.Comparer
                             break;
                         case DifferenceType.Remove:
                             idx = 2;
+                            if (SkipKMSContent && isKMSNode(diff.NodeOld))
+                            {
+                                kmsContent.Add(diff);
+                                continue;
+                            }
                             if (this.OutputRemovedImg)
                             {
                                 detail = string.Format("<a name=\"m_{1}_{2}\" href=\"#a_{1}_{2}\">{0}</a>", diff.NodeOld.FullPathToFile, idx, count[idx]);
@@ -483,6 +537,12 @@ namespace WzComparerR2.Comparer
 
                 foreach (CompareDifference diff in diffLst)
                 {
+                    if (kmsContent.Contains(diff))
+                    {
+                        StateInfo = string.Format("{0}/{1} 変更: {2}", count[0], count[3], "KMS內容");
+                        count[0]++;
+                        continue;
+                    }
                     OnPatchingStateChanged(new Patcher.PatchingEventArgs(part, Patcher.PatchingState.TempFileBuildProcessChanged, count[0] + count[1] + count[2]));
                     switch (diff.DifferenceType)
                     {
@@ -663,6 +723,8 @@ namespace WzComparerR2.Comparer
             {
                 StateInfo = string.Format("{0}/{1} 技能: {2}", ++count, allCount, skillID);
                 StateDetail = "Skill 對比中...";
+
+                if (SkipKMSContent && isKMSSkillID(Int32.Parse(skillID))) continue;
 
                 string skillType = "";
                 string skillNodePath = int.Parse(skillID) / 10000000 == 8 ? String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 100, skillID) : String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 10000, skillID);
@@ -2657,6 +2719,115 @@ namespace WzComparerR2.Comparer
                     // Unlock bits
                     bitmap.UnlockBits(bmpData);
                 }
+            }
+        }
+
+        private bool isKMSNode(Wz_Node node)
+        {
+            if (node == null)
+                return false;
+            if (node.FullPathToFile.Contains("BossPattern")) return true;
+            else if (node.FullPathToFile.StartsWith("Skill"))
+            {
+                string skillNodePath = node.FullPathToFile.Replace("_Canvas\\", "");
+                Match SkillMatch1 = Regex.Match(skillNodePath, @"^Skill\\\d+\\\d+\.img\\(\d+)$");
+                if (SkillMatch1.Success)
+                {
+                    return false;
+                }
+                else
+                {
+                    string baseSkillID = skillNodePath.Split('\\')[1].Replace(".img", "");
+                    if (Int32.TryParse(baseSkillID, out int baseSkillIDInt))
+                    {
+                        switch (baseSkillIDInt / 1000)
+                        {
+                            case 0:
+                                if (new int[] { 508, 570, 571, 572 }.Contains(baseSkillIDInt)) // ジェット
+                                {
+                                    return false;
+                                }
+                                else
+                                {
+                                    return true;
+                                }
+                            case 4: // 暁の陣
+                            case 11: // ビーストテイマー
+                            case 12: // アニメコラボ
+                            case 17: // 江湖
+                            case 18: // Shine
+                                return false;
+                            case 40: // 5次スキル
+                            case 50: // 6次強化コア
+                                if (skillNodePath.Split('\\').Length < 4)
+                                {
+                                    return false;
+                                }
+                                else
+                                {
+                                    if (Int32.TryParse(skillNodePath.Split('\\')[3], out int skillID))
+                                    {
+                                        return isKMSSkillID(skillID);
+                                    }
+                                    else
+                                    {
+                                        return false;
+                                    }
+                                }
+                            default:
+                                return true;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private bool isKMSSkillID(int skillID)
+        {
+            switch (skillID / 10000000)
+            {
+                case 0:
+                    if (new int[] { 508, 570, 571, 572 }.Contains((int)skillID / 10000)) // ジェット
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                case 4: // 暁の陣
+                case 11: // ビーストテイマー
+                case 12: // アニメコラボ
+                case 17: // 江湖
+                case 18: // Shine
+                    return false;
+                case 40: // 5次スキル
+                case 50: // 6次強化コア
+                    if (FifthJobSkillToJobID.ContainsKey(skillID))
+                    {
+                        bool KMSClassOnly = true;
+                        foreach (int jobID in FifthJobSkillToJobID[skillID])
+                        {
+                            KMSClassOnly = KMSClassOnly &&
+                                           (jobID == 572 || jobID / 1000 == 4 || jobID / 1000 == 11 ||
+                                            jobID / 1000 == 12 || jobID / 1000 == 17 || jobID / 1000 == 18);
+                        }
+                        return KMSClassOnly;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                default:
+                    return true;
             }
         }
     }
