@@ -3419,6 +3419,7 @@ namespace WzComparerR2
                 case Wz_Type.Map:
                     if ((image = selectedNode.GetValue<Wz_Image>()) == null || !image.TryExtract())
                         return;
+                    if (!image.Node.FullPathToFile.StartsWith("Map\\Map\\Map")) return; // Ignore other assets to prevent Auto Preview crash
                     var map = Map.CreateFromNode(image.Node, PluginManager.FindWz);
                     obj = map;
                     if (stringLinker == null || !stringLinker.StringMap.TryGetValue(map.MapID, out sr))
