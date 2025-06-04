@@ -841,7 +841,7 @@ namespace WzComparerR2
             if (this.pictureBoxEx1.ShowOverlayAni)
             {
                 this.pictureBoxEx1.ShowOverlayAni = false;
-                this.pictureBoxEx1.Items.Clear();
+                this.pictureBoxEx1.ClearItemList();
             }
         }
 
