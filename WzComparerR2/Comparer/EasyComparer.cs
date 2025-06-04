@@ -2808,7 +2808,7 @@ namespace WzComparerR2.Comparer
                         foreach (int jobID in FifthJobSkillToJobID[skillID])
                         {
                             KMSClassOnly = KMSClassOnly &&
-                                           (jobID == 572 || jobID / 1000 == 4 || jobID / 1000 == 11 ||
+                                           !(jobID == 572 || jobID / 1000 == 4 || jobID / 1000 == 11 ||
                                             jobID / 1000 == 12 || jobID / 1000 == 17 || jobID / 1000 == 18);
                         }
                         return KMSClassOnly;
