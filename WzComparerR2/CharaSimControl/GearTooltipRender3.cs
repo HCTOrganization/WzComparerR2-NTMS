@@ -512,7 +512,7 @@ namespace WzComparerR2.CharaSimControl
             }
 
             // 캐시 라벨 아이콘
-            if (Gear.Cash)
+            if (Gear.Cash && !(Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0))
             {
                 Bitmap cashImg = null;
                 Point cashOrigin = new Point(12, 12);

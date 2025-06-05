@@ -566,7 +566,7 @@ namespace WzComparerR2.CharaSimControl
                 picH + 6 + (33 - item.Icon.Origin.Y) * 2);
                 //picH + 8 + (33 - item.Icon.Bitmap.Height) * 2);
             }
-            if (item.Cash)
+            if (item.Cash && !(item.Props.TryGetValue(ItemPropType.mintable, out value) && value != 0))
             {
                 Bitmap cashImg = null;
                 Point cashOrigin = new Point(12, 12);

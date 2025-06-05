@@ -522,7 +522,7 @@ namespace WzComparerR2.CharaSimControl
 
                 attr.Dispose();
             }
-            if (Gear.Cash) //绘制cash标识
+            if (Gear.Cash && Gear.Cash && !(Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0)) //绘制cash标识
             {
                 Bitmap cashImg = null;
                 Point cashOrigin = new Point(12, 12);
