@@ -581,7 +581,7 @@ namespace WzComparerR2.MapRender
             if (patchVisibility.CaptureRectVisible)
             {
                 var origin = this.renderEnv.Camera.Origin.ToPoint();
-                this.batcher.Begin(new Vector2(-origin.X, -origin.Y), (float)cm.GameTime.TotalGameTime.TotalMilliseconds / 1000);
+                this.batcher.Begin(new Vector2(-origin.X, -origin.Y), (float)(gameTime.TotalGameTime.TotalSeconds % 1000));
 
                 Rectangle rect = this.renderEnv.Camera.WorldRect;
                 if (!this.CaptureRect.IsEmpty)
