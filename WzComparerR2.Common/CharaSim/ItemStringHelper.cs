@@ -139,7 +139,7 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.fixedPotential: return value == 0 ? null : "無法重設潛能";
                 case GearPropType.superiorEqp: return value == 0 ? null : "道具強化成功時, 可以獲得更高效果. ";
                 case GearPropType.nActivatedSocket: return value == 0 ? null : "#c可以鑲嵌星岩#";
-                case GearPropType.jokerToSetItem: return value == 0 ? null : " c當前裝備3個以上的所有套装道具中包含的幸運物品！#";
+                case GearPropType.jokerToSetItem: return value == 0 ? null : " #c當前裝備3個以上的所有套装道具中包含的幸運物品！#";
                 case GearPropType.abilityTimeLimited: return value == 0 ? null : "期間限定能力值";
                 case GearPropType.blockGoldHammer: return value == 0 ? null : "無法使用黄金鐵鎚";
                 case GearPropType.cantRepair: return value == 0 ? null : "無法修理";
