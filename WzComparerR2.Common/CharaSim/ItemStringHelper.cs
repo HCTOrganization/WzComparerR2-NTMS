@@ -1400,6 +1400,12 @@ namespace WzComparerR2.CharaSim
 
                 case 16000: return "阿尼瑪盜賊";
                 case 16001: return "菈菈";
+                case 16002: return "Len";
+                case 16100: return "Len(1次)";
+                case 16110: return "Len(2次)";
+                case 16111: return "Len(3次)";
+                case 16112: return "Len(4次)";
+                case 16114: return "Len(6次)";
                 case 16200: return "菈菈(1轉)";
                 case 16210: return "菈菈(2轉)";
                 case 16211: return "菈菈(3轉)";
