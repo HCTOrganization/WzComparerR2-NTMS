@@ -759,6 +759,9 @@ namespace WzComparerR2.CharaSim
                 case GearType.gram: return "克拉";
                 case GearType.keir: return "克伊勒";
 
+                case GearType.plumSword: return "梅花劍";
+                case GearType.yeouiGem: return "汝矣宝珠";
+
                 default: return null;
             }
         }
@@ -908,6 +911,9 @@ namespace WzComparerR2.CharaSim
 
                 case GearType.celestialLight:
                 case GearType.compass: return GetExtraJobReqString(182);
+
+                case GearType.plumSword:
+                case GearType.yeouiGem: return GetExtraJobReqString(161);
                 default: return null;
             }
         }
@@ -943,6 +949,7 @@ namespace WzComparerR2.CharaSim
                 case 151: return "可裝備阿戴爾";
                 case 152: return "可裝備伊利恩";
                 case 155: return "可裝備亞克";
+                case 162: return "可裝備蓮";
                 case 162: return "可裝備菈菈";
                 case 164: return "可裝備虎影";
                 case 172: return "可裝備琳恩";
@@ -1400,12 +1407,12 @@ namespace WzComparerR2.CharaSim
 
                 case 16000: return "阿尼瑪盜賊";
                 case 16001: return "菈菈";
-                case 16002: return "Len";
-                case 16100: return "Len(1次)";
-                case 16110: return "Len(2次)";
-                case 16111: return "Len(3次)";
-                case 16112: return "Len(4次)";
-                case 16114: return "Len(6次)";
+                case 16002: return "蓮";
+                case 16100: return "蓮(1次)";
+                case 16110: return "蓮(2次)";
+                case 16111: return "蓮(3次)";
+                case 16112: return "蓮(4次)";
+                case 16114: return "蓮(6次)";
                 case 16200: return "菈菈(1轉)";
                 case 16210: return "菈菈(2轉)";
                 case 16211: return "菈菈(3轉)";

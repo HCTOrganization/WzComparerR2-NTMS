@@ -161,6 +161,10 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         breathShooter = 1214,
         /// <summary>
+        /// Plum Sword 1215
+        /// </summary>
+        plumSword = 1215,
+        /// <summary>
         /// 灵魂手铳 122
         /// </summary>
         soulShooter = 122,
@@ -397,13 +401,17 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         hexSeeker = 135403,
         /// <summary>
-        /// Compass 135404
+        /// yeouiGem 135404
         /// </summary>
-        compass = 135404,
+        yeouiGem = 135404,
         /// <summary>
-        /// Keir 135405x
+        /// Compass 135405x
         /// </summary>
-        keir = 135405,
+        compass = 135405,
+        /// <summary>
+        /// Keir 135406x
+        /// </summary>
+        keir = 135406,
         /// <summary>
         /// 手杖
         /// </summary>
