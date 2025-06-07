@@ -160,6 +160,16 @@ namespace WzComparerR2.Config
         }
 
         /// <summary>
+        /// Preferred Client Region Configuration
+        /// </summary>
+        [ConfigurationProperty("PreferredClientRegion")]
+        public ConfigItem<int> PreferredClientRegion
+        {
+            get { return (ConfigItem<int>)this["PreferredClientRegion"]; }
+            set { this["PreferredClientRegion"] = value; }
+        }
+
+        /// <summary>
         /// Preferred Translate Engine Configuration
         /// </summary>
         [ConfigurationProperty("PreferredTranslateEngine")]

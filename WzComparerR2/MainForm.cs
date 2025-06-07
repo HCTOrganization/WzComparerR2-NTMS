@@ -298,6 +298,22 @@ namespace WzComparerR2
             Wz_Structure.DefaultAutoDetectExtFiles = config.AutoDetectExtFiles;
             Wz_Structure.DefaultImgCheckDisabled = config.ImgCheckDisabled;
             Wz_Structure.DefaultWzVersionVerifyMode = config.WzVersionVerifyMode;
+            switch (config.PreferredClientRegion)
+            {
+                default:
+                case 0:
+                    this.buttonItemJMS.Checked = true;
+                    break;
+                case 1:
+                    this.buttonItemKMS.Checked = true;
+                    break;
+                case 2:
+                    this.buttonItemKMST.Checked = true;
+                    break;
+                case 3:
+                    this.buttonItemMSN.Checked = true;
+                    break;
+            }
         }
 
         void UpdateTranslateSettings()
@@ -2695,73 +2711,175 @@ namespace WzComparerR2
 
         private void buttonInstallGame_Click(object sender, EventArgs e)
         {
-            if (!IsUriSchemeRegistered("ngm"))
+            int preferredRegion = WcR2Config.Default.PreferredClientRegion;
+            string ngmProtocol = "ngm";
+            string gameCode = "16785939@bb01";
+            switch (preferredRegion)
             {
-                ngmInstallPrompt();
+                default:
+                    break;
+                case 1:
+                    gameCode = "589825";
+                    break;
+                case 2:
+                    gameCode = "589826";
+                    break;
+                case 3:
+                    ngmProtocol = "msul";
+                    gameCode = "106690@d811";
+                    break;
+            }
+
+            if (!IsUriSchemeRegistered(ngmProtocol))
+            {
+                ngmInstallPrompt(ngmProtocol);
                 return;
             }
             else
             {
                 try
                 {
-                    #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
                     Process.Start(new ProcessStartInfo
                     {
                         UseShellExecute = true,
-                        FileName = "ngm://launch/ -mode:install -game:'16785939@bb01'",
+                        FileName = ngmProtocol + "://launch/ -mode:install -game:'" + gameCode + "'",
                     });
-                    #else
-                    Process.Start("ngm://launch/ -mode:install -game:'16785939@bb01'");
-                    #endif
+#else
+                    Process.Start(ngmProtocol + "://launch/ -mode:install -game:'" + gameCode + "'");
+#endif
                 }
                 catch
                 {
-                    ngmInstallPrompt();
+                    ngmInstallPrompt(ngmProtocol);
                 }
             }
+            return;
         }
 
         private void buttonGameStart_Click(object sender, EventArgs e)
         {
-            if (!IsUriSchemeRegistered("ngm"))
+            int preferredRegion = WcR2Config.Default.PreferredClientRegion;
+            string ngmProtocol = "ngm";
+            string gameCode = "16785939@bb01";
+            switch (preferredRegion)
             {
-                ngmInstallPrompt();
+                default:
+                    break;
+                case 1:
+                    gameCode = "589825";
+                    break;
+                case 2:
+                    gameCode = "589826";
+                    break;
+                case 3:
+                    ngmProtocol = "msul";
+                    gameCode = "106690@d811";
+                    break;
+            }
+
+            if (!IsUriSchemeRegistered(ngmProtocol))
+            {
+                ngmInstallPrompt(ngmProtocol);
                 return;
             }
             else
             {
                 try
                 {
-                    #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
                     Process.Start(new ProcessStartInfo
                     {
                         UseShellExecute = true,
-                        FileName = "ngm://launch/ -mode:launch -game:'16785939@bb01'",
+                        FileName = ngmProtocol + "://launch/ -mode:launch -game:'" + gameCode + "'",
                     });
-                    #else
-                    Process.Start("ngm://launch/ -mode:launch -game:'16785939@bb01'");
-                    #endif
+#else
+                    Process.Start(ngmProtocol + "://launch/ -mode:launch -game:'" + gameCode + "'");
+#endif
                 }
                 catch
                 {
-                    ngmInstallPrompt();
+                    ngmInstallPrompt(ngmProtocol);
                 }
             }
+            return;
         }
 
-        private void ngmInstallPrompt()
+        private void buttonItemJMS_Click(object sender, EventArgs e)
         {
-            DialogResult ngmresult = MessageBoxEx.Show("下載或啟動遊戲需要 Nexon Game Manager，但它似乎尚未安裝。 \r\n\r\n是否要下載並安裝？", "確認", MessageBoxButtons.YesNo);
+            ConfigManager.Reload();
+            WcR2Config.Default.PreferredClientRegion = 0;
+            this.buttonItemKMS.Checked = false;
+            this.buttonItemKMST.Checked = false;
+            this.buttonItemMSN.Checked = false;
+            ConfigManager.Save();
+        }
+
+        private void buttonItemKMS_Click(object sender, EventArgs e)
+        {
+            ConfigManager.Reload();
+            WcR2Config.Default.PreferredClientRegion = 1;
+            this.buttonItemJMS.Checked = false;
+            this.buttonItemKMST.Checked = false;
+            this.buttonItemMSN.Checked = false;
+            ConfigManager.Save();
+        }
+
+        private void buttonItemKMST_Click(object sender, EventArgs e)
+        {
+            ConfigManager.Reload();
+            WcR2Config.Default.PreferredClientRegion = 2;
+            this.buttonItemJMS.Checked = false;
+            this.buttonItemKMS.Checked = false;
+            this.buttonItemMSN.Checked = false;
+            ConfigManager.Save();
+        }
+
+        private void buttonItemMSN_Click(object sender, EventArgs e)
+        {
+            ConfigManager.Reload();
+            WcR2Config.Default.PreferredClientRegion = 3;
+            this.buttonItemJMS.Checked = false;
+            this.buttonItemKMS.Checked = false;
+            this.buttonItemKMST.Checked = false;
+            ConfigManager.Save();
+        }
+
+        private void ngmInstallPrompt(string protocol)
+        {
+            if (string.IsNullOrEmpty(protocol))
+            {
+                protocol = "ngm";
+            }
+            string message = "";
+            string url = "";
+            switch (protocol)
+            {
+                default:
+                case "ngm":
+                    message = "下載或啟動遊戲需要 Nexon Game Manager，但它似乎尚未安裝。 \r\n\r\n是否要下載並安裝？";
+                    url = "https://platform.nexon.com/NGM/Bin/Install_NGM.exe";
+                    break;
+                case "msul":
+                    message = "下載或啟動遊戲需要 Nexpace Game Manager，但它似乎尚未安裝。 \r\n\r\n是否要下載並安裝？";
+                    url = "https://static.msu.io/ngm/Bin/Install_NGM.exe";
+                    break;
+                case "gamania":
+                    message = "下載或啟動遊戲需要 Gamania Games Manager，但它似乎尚未安裝。 \r\n\r\n是否要下載並安裝？";
+                    url = "https://tw.beanfun.com/ggm/index.html";
+                    break;
+            }
+            DialogResult ngmresult = MessageBoxEx.Show(message, "確認", MessageBoxButtons.YesNo);
             if (ngmresult == DialogResult.Yes)
             {
 #if NET6_0_OR_GREATER
                 Process.Start(new ProcessStartInfo
                 {
                     UseShellExecute = true,
-                    FileName = "https://platform.nexon.com/NGM/Bin/Install_NGM.exe",
+                    FileName = url,
                 });
 #else
-                Process.Start("https://platform.nexon.com/NGM/Bin/Install_NGM.exe");
+                Process.Start(url);
                 #endif
             }
         }

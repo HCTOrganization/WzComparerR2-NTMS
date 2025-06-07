@@ -97,6 +97,10 @@ namespace WzComparerR2
             this.buttonItemPatcher = new DevComponents.DotNetBar.ButtonItem();
             this.buttonItemInstallGame = new DevComponents.DotNetBar.ButtonItem();
             this.buttonItemGameStart = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonItemJMS = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonItemKMS = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonItemKMST = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonItemMSN = new DevComponents.DotNetBar.ButtonItem();
             this.ribbonBar4 = new DevComponents.DotNetBar.RibbonBar();
             this.itemContainer10 = new DevComponents.DotNetBar.ItemContainer();
             this.itemContainer8 = new DevComponents.DotNetBar.ItemContainer();
@@ -1184,9 +1188,45 @@ namespace WzComparerR2
             // 
             this.buttonItemGameStart.Name = "buttonItemGameStart";
             this.buttonItemGameStart.SubItemsExpandWidth = 16;
+            this.buttonItemGameStart.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.buttonItemJMS,
+            this.buttonItemKMS,
+            this.buttonItemKMST,
+            this.buttonItemMSN});
             this.buttonItemGameStart.Text = "啟動遊戲";
-            this.buttonItemGameStart.Enabled = false;
             this.buttonItemGameStart.Click += new System.EventHandler(this.buttonGameStart_Click);
+            // 
+            // buttonItemJMS
+            // 
+            this.buttonItemJMS.AutoCheckOnClick = true;
+            this.buttonItemJMS.Name = "buttonItemJMS";
+            this.buttonItemJMS.Text = "JMS";
+            this.buttonItemJMS.Tooltip = "JMS";
+            this.buttonItemJMS.Click += new System.EventHandler(this.buttonItemJMS_Click);
+            // 
+            // buttonItemKMS
+            // 
+            this.buttonItemKMS.AutoCheckOnClick = true;
+            this.buttonItemKMS.Name = "buttonItemKMS";
+            this.buttonItemKMS.Text = "KMS";
+            this.buttonItemKMS.Tooltip = "KMS";
+            this.buttonItemKMS.Click += new System.EventHandler(this.buttonItemKMS_Click);
+            // 
+            // buttonItemKMST
+            // 
+            this.buttonItemKMST.AutoCheckOnClick = true;
+            this.buttonItemKMST.Name = "buttonItemKMST";
+            this.buttonItemKMST.Text = "KMST";
+            this.buttonItemKMST.Tooltip = "KMST";
+            this.buttonItemKMST.Click += new System.EventHandler(this.buttonItemKMST_Click);
+            // 
+            // buttonItemMSN
+            // 
+            this.buttonItemMSN.AutoCheckOnClick = true;
+            this.buttonItemMSN.Name = "buttonItemMSN";
+            this.buttonItemMSN.Text = "MSN";
+            this.buttonItemMSN.Tooltip = "MSN";
+            this.buttonItemMSN.Click += new System.EventHandler(this.buttonItemMSN_Click);
             // 
             // ribbonBar4
             // 
@@ -3622,6 +3662,10 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ButtonItem buttonItemPatcher;
         private DevComponents.DotNetBar.ButtonItem buttonItemInstallGame;
         private DevComponents.DotNetBar.ButtonItem buttonItemGameStart;
+        private DevComponents.DotNetBar.ButtonItem buttonItemJMS;
+        private DevComponents.DotNetBar.ButtonItem buttonItemKMS;
+        private DevComponents.DotNetBar.ButtonItem buttonItemKMST;
+        private DevComponents.DotNetBar.ButtonItem buttonItemMSN;
         private DevComponents.DotNetBar.ItemContainer itemContainer41;
         private DevComponents.DotNetBar.ButtonItem buttonItemLoadChara;
         private DevComponents.DotNetBar.ButtonItem buttonItemSaveChara;
