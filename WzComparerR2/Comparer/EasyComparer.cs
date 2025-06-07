@@ -41,6 +41,8 @@ namespace WzComparerR2.Comparer
         private Dictionary<string, List<string>> DiffMobTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffNpcTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffSkillTags { get; set; } = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<int>> KMSContentID { get; set; } = new Dictionary<string, List<int>>();
+        private Dictionary<string, List<string>> KMSComponentDict { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<int, List<int>> FifthJobSkillToJobID { get; set; } = new Dictionary<int, List<int>>();
         public WzFileComparer Comparer { get; protected set; }
         private string stateInfo;
@@ -63,6 +65,7 @@ namespace WzComparerR2.Comparer
         public bool ShowPrice { get; set; }
         public bool ShowLinkedTamingMob { get; set; }
         public bool SkipKMSContent { get; set; }
+        public bool DownloadKMSContentDB { get; set; }
 
         public string StateInfo
         {
@@ -125,6 +128,82 @@ namespace WzComparerR2.Comparer
                     this.WzFileNewOld[1] = fileOld.Node.GetNodeWzFile();
                     if (SkipKMSContent)
                     {
+                        if (DownloadKMSContentDB)
+                        {
+                            foreach (string item in new string[] { "Item", "Map", "Mob", "Npc" })
+                            {
+                                StateInfo = string.Format("正在下載KMS的{0}資料庫...", item);
+                                var request = (HttpWebRequest)WebRequest.Create(string.Format("https://raw.githubusercontent.com/HikariCalyx/KMSContent/refs/heads/main/{0}ID.txt", item));
+                                request.Method = "GET";
+                                request.UserAgent = "WzComparerR2-NTMS/1.0";
+                                request.Timeout = 15000;
+                                try
+                                {
+                                    var response = (HttpWebResponse)request.GetResponse();
+                                    var responseString = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
+                                    foreach (string line in responseString.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("#")) continue;
+                                        string[] parts = line.Split(new[] { ' ' }, 2);
+                                        if (parts.Length > 1) continue;
+                                        string id = parts[0];
+                                        if (int.TryParse(id, out int parsedID))
+                                        {
+                                            if (!KMSContentID.ContainsKey(item))
+                                            {
+                                                KMSContentID[item] = new List<int>();
+                                            }
+                                            if (!KMSContentID[item].Contains(parsedID))
+                                            {
+                                                KMSContentID[item].Add(parsedID);
+                                            }
+                                        }
+                                    }
+                                }
+                                catch
+                                {
+                                    if (!KMSContentID.ContainsKey(item))
+                                    {
+                                        KMSContentID[item] = new List<int>();
+                                    }
+                                }
+                            }
+                            foreach (string item in new string[] { "Effect", "MapBack", "MapObj", "MapTile", "MapWorldMap" })
+                            {
+                                StateInfo = string.Format("正在下載KMS的{0}資料庫...", item);
+                                var request = (HttpWebRequest)WebRequest.Create(string.Format("https://raw.githubusercontent.com/HikariCalyx/KMSContent/refs/heads/main/{0}ImgList.txt", item));
+                                request.Method = "GET";
+                                request.UserAgent = "WzComparerR2-NTMS/1.0";
+                                request.Timeout = 15000;
+                                try
+                                {
+                                    var response = (HttpWebResponse)request.GetResponse();
+                                    var responseString = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
+                                    foreach (string line in responseString.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                                    {
+                                        if (line.StartsWith("#")) continue;
+                                        string[] parts = line.Split(new[] { ' ' }, 2);
+                                        if (parts.Length > 1) continue;
+                                        string img = parts[0];
+                                        if (!KMSComponentDict.ContainsKey(item))
+                                        {
+                                            KMSComponentDict[item] = new List<string>();
+                                        }
+                                        if (!KMSComponentDict[item].Contains(img))
+                                        {
+                                            KMSComponentDict[item].Add(img);
+                                        }
+                                    }
+                                }
+                                catch
+                                {
+                                    if (!KMSComponentDict.ContainsKey(item))
+                                    {
+                                        KMSComponentDict[item] = new List<string>();
+                                    }
+                                }
+                            }
+                        }
                         StateInfo = "正在初始化5轉技能職業對應關係...";
                         for (int i = 0; i < 2; i++)
                         {
@@ -919,6 +998,7 @@ namespace WzComparerR2.Comparer
                 string categoryPath = "";
 
                 if (!int.TryParse(itemID, out _)) continue;
+                if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(itemID)))) continue;
 
                 if (itemID.StartsWith("03015")) // 判断开头是否是03015
                 {
@@ -1099,6 +1179,8 @@ namespace WzComparerR2.Comparer
                 string categoryPath = "";
 
                 if (!int.TryParse(gearID, out _)) continue;
+
+                if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(gearID)))) continue;
 
                 if (Regex.IsMatch(gearID, "^0101|^0102|^0103|^0112|^0113|^0114|^0115|^0116|^0118|^0119")) // 判断开头是否是0101~0103或0112~0116-0118~0119
                 {
@@ -1364,6 +1446,7 @@ namespace WzComparerR2.Comparer
                 string categoryPath = "";
 
                 if (!int.TryParse(gearID, out _)) continue;
+                if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(gearID)))) continue;
 
                 if (Regex.IsMatch(gearID, "^0101|^0102|^0103|^0112|^0113|^0114|^0115|^0116|^0118|^0119")) // 判断开头是否是0101~0103或0112~0116-0118~0119
                 {
@@ -1629,6 +1712,8 @@ namespace WzComparerR2.Comparer
                 string mapType = "";
                 string mapNodePath = String.Format(@"Map\Map\Map{0}\{1:D}.img", int.Parse(mapID) / 100000000, mapID);
 
+                if (SkipKMSContent && KMSContentID["Map"].Contains((Int32.Parse(mapID)))) continue;
+
                 StringResult sr;
                 string MapName;
                 if (mapRenderNewOld[1].StringLinker == null || !mapRenderNewOld[1].StringLinker.StringMap.TryGetValue(int.Parse(mapID), out sr))
@@ -1763,6 +1848,8 @@ namespace WzComparerR2.Comparer
                 string mobType = "";
                 string mobNodePath = String.Format(@"Mob\{0:D}.img", mobID);
 
+                if (SkipKMSContent && KMSContentID["Mob"].Contains((Int32.Parse(mobID)))) continue;
+
                 StringResult sr;
                 string MobName;
                 if (mobRenderNewOld[1].StringLinker == null || !mobRenderNewOld[1].StringLinker.StringMob.TryGetValue(int.Parse(mobID), out sr))
@@ -1896,6 +1983,8 @@ namespace WzComparerR2.Comparer
                 StateDetail = "Npc 對比中...";
                 string npcType = "";
                 string npcNodePath = String.Format(@"Npc\{0:D}.img", npcID);
+
+                if (SkipKMSContent && KMSContentID["Npc"].Contains((Int32.Parse(npcID)))) continue;
 
                 StringResult sr;
                 string NpcName;
@@ -2035,6 +2124,8 @@ namespace WzComparerR2.Comparer
                 {
                     itemNodePath = String.Format(@"Item\Special\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
                 }
+
+                if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(itemID)))) continue;
 
                 StringResult sr;
                 string ItemName;
@@ -2727,7 +2818,185 @@ namespace WzComparerR2.Comparer
         {
             if (node == null)
                 return false;
-            if (node.FullPathToFile.Contains("BossPattern")) return true;
+            if (node.FullPathToFile.StartsWith("Character"))
+            {
+                string[] gearNodePath = node.FullPathToFile.Split('\\');
+                string gearImgStr = gearNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                if (gearImgStr == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    if (Int32.TryParse(gearImgStr.Replace(".img", ""), out int gearID))
+                    {
+                        if (KMSContentID.ContainsKey("Item"))
+                        {
+                            return KMSContentID["Item"].Contains(gearID);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            else if (node.FullPathToFile.StartsWith("Effect"))
+            {
+                string[] effectNodePath = node.FullPathToFile.Split('\\');
+                string effectImgStr = effectNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                if (KMSComponentDict.ContainsKey("Effect"))
+                {
+                    return KMSComponentDict["Effect"].Contains(effectImgStr);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else if (node.FullPathToFile.StartsWith("Item"))
+            {
+                string[] itemNodePath = node.FullPathToFile.Split('\\');
+                int itemBaseImgIndex = Array.FindIndex(itemNodePath, s => s.EndsWith(".img"));
+                if (itemBaseImgIndex != -1 && itemBaseImgIndex < itemNodePath.Length - 1)
+                {
+                    if (Int32.TryParse(itemNodePath[itemBaseImgIndex + 1], out int itemID))
+                    {
+                        if (KMSContentID.ContainsKey("Item"))
+                        {
+                            return KMSContentID["Item"].Contains(itemID);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else if (node.FullPathToFile.StartsWith("Map"))
+            {
+                string[] mapNodePath = node.FullPathToFile.Split('\\');
+                string mapImgStr = mapNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                if (mapImgStr == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    if (Int32.TryParse(mapImgStr.Replace(".img", ""), out int mapID))
+                    {
+                        if (KMSContentID.ContainsKey("Map"))
+                        {
+                            return KMSContentID["Map"].Contains(mapID);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        if (mapNodePath.Length > 2)
+                        {
+                            switch (mapNodePath[1])
+                            {
+                                case "Back":
+                                    if (KMSComponentDict.ContainsKey("MapBack"))
+                                    {
+                                        return KMSComponentDict["MapBack"].Contains(mapImgStr);
+                                    }
+                                    break;
+                                case "Obj":
+                                    if (KMSComponentDict.ContainsKey("MapObj"))
+                                    {
+                                        return KMSComponentDict["MapObj"].Contains(mapImgStr);
+                                    }
+                                    break;
+                                case "Tile":
+                                    if (KMSComponentDict.ContainsKey("MapTile"))
+                                    {
+                                        return KMSComponentDict["MapTile"].Contains(mapImgStr);
+                                    }
+                                    break;
+                                case "WorldMap":
+                                    if (KMSComponentDict.ContainsKey("MapWorldMap"))
+                                    {
+                                        return KMSComponentDict["MapWorldMap"].Contains(mapImgStr);
+                                    }
+                                    break;
+                            }
+                        }
+                        return false;
+                    }
+                }
+            }
+            else if (node.FullPathToFile.StartsWith("Mob"))
+            {
+                string[] mobNodePath = node.FullPathToFile.Split('\\');
+                if (mobNodePath.Contains("BossPattern")) return true;
+                string mobImgStr = mobNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                if (mobImgStr == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    if (Int32.TryParse(mobImgStr.Replace(".img", ""), out int mobID))
+                    {
+                        if (KMSContentID.ContainsKey("Mob"))
+                        {
+                            return KMSContentID["Mob"].Contains(mobID);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
+            else if (node.FullPathToFile.StartsWith("Npc"))
+            {
+                string[] npcNodePath = node.FullPathToFile.Split('\\');
+                string npcImgStr = npcNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                if (npcImgStr == null)
+                {
+                    return false;
+                }
+                else
+                {
+                    if (Int32.TryParse(npcImgStr.Replace(".img", ""), out int npcID))
+                    {
+                        if (KMSContentID.ContainsKey("Npc"))
+                        {
+                            return KMSContentID["Npc"].Contains(npcID);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+            }
             else if (node.FullPathToFile.StartsWith("Skill"))
             {
                 string skillNodePath = node.FullPathToFile.Replace("_Canvas\\", "");
