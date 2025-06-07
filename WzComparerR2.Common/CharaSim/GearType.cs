@@ -161,9 +161,9 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         breathShooter = 1214,
         /// <summary>
-        /// Plum Sword 1215
+        /// Long Sword 1215
         /// </summary>
-        plumSword = 1215,
+        longSword = 1215,
         /// <summary>
         /// 灵魂手铳 122
         /// </summary>
