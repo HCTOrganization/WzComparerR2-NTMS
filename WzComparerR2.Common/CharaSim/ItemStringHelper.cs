@@ -949,7 +949,7 @@ namespace WzComparerR2.CharaSim
                 case 151: return "可裝備阿戴爾";
                 case 152: return "可裝備伊利恩";
                 case 155: return "可裝備亞克";
-                case 162: return "可裝備蓮";
+                case 161: return "可裝備蓮";
                 case 162: return "可裝備菈菈";
                 case 164: return "可裝備虎影";
                 case 172: return "可裝備琳恩";
