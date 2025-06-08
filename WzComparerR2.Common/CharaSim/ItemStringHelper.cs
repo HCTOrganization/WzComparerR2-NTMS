@@ -158,6 +158,8 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incARC: return "ARC : " + sign + value;
                 case GearPropType.incAUT: return "AUT : " + sign + value;
 
+                case GearPropType.incCHUC: return "星力 : " + sign + value;
+
                 case GearPropType.Etuc: return "可進行卓越強化。 (最大\n\r: " + value + "次)";
                 case GearPropType.CuttableCount: return "可使用剪刀次數：" + value + "次";
                 default: return null;
