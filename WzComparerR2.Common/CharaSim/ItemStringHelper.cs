@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -1295,6 +1295,9 @@ namespace WzComparerR2.CharaSim
 
                 case 4001: return "劍豪";
                 case 4002: return "陰陽師";
+                case 4003:
+                case 4004:
+                case 4005: return "曉之陣";
                 case 4100: return "劍豪(1轉)";
                 case 4110: return "劍豪(2轉)";
                 case 4111: return "劍豪(3轉)";
@@ -1305,6 +1308,21 @@ namespace WzComparerR2.CharaSim
                 case 4211: return "陰陽師(3轉)";
                 case 4212: return "陰陽師(4轉)";
                 case 4214: return "陰陽師(6轉)";
+                case 4300: return "曉之陣弓手(1轉)";
+                case 4310: return "曉之陣弓手(2轉)";
+                case 4311: return "曉之陣弓手(3轉)";
+                case 4312: return "曉之陣弓手(4轉)";
+                case 4314: return "曉之陣弓手(6轉)";
+                case 4400: return "曉之陣盜賊(1轉)";
+                case 4410: return "曉之陣盜賊(2轉)";
+                case 4411: return "曉之陣盜賊(3轉)";
+                case 4412: return "曉之陣盜賊(4轉)";
+                case 4414: return "曉之陣盜賊(6轉)";
+                case 4500: return "曉之陣海盜(1轉)";
+                case 4510: return "曉之陣海盜(2轉)";
+                case 4511: return "曉之陣海盜(3轉)";
+                case 4512: return "曉之陣海盜(4轉)";
+                case 4514: return "曉之陣海盜(6轉)";
 
 
                 case 5000: return "無名少年";
@@ -1319,11 +1337,17 @@ namespace WzComparerR2.CharaSim
                 case 6001: return "天使破壞者";
                 case 6002: return "卡蒂娜";
                 case 6003: return "凱殷";
+                case 6004: return "超新星";
                 case 6100: return "凱薩(1轉)";
                 case 6110: return "凱薩(2轉)";
                 case 6111: return "凱薩(3轉)";
                 case 6112: return "凱薩(4轉)";
                 case 6114: return "凱薩(6轉)";
+                case 6200: return "超新星法師(1轉)";
+                case 6210: return "超新星法師(2轉)"; 
+                case 6211: return "超新星法師(3轉)";
+                case 6212: return "超新星法師(4轉)";
+                case 6214: return "超新星法師(6轉)";
                 case 6300: return "凱殷(1轉)";
                 case 6310: return "凱殷(2轉)";
                 case 6311: return "凱殷(3轉)";
@@ -1386,6 +1410,7 @@ namespace WzComparerR2.CharaSim
                 case 15001: return "亞克";
                 case 15002: return "阿戴爾";
                 case 15003: return "卡莉";
+                case 15004: return "雷普";
                 case 15100: return "阿戴爾(1轉)";
                 case 15110: return "阿戴爾(2轉)";
                 case 15111: return "阿戴爾(3轉)";
@@ -1396,6 +1421,11 @@ namespace WzComparerR2.CharaSim
                 case 15211: return "伊利恩(3轉)";
                 case 15212: return "伊利恩(4轉)";
                 case 15214: return "伊利恩(6轉)";
+                case 15300: return "雷普弓手(1轉)";
+                case 15310: return "雷普弓手(2轉)";
+                case 15311: return "雷普弓手(3轉)";
+                case 15312: return "雷普弓手(4轉)";
+                case 15314: return "雷普弓手(6轉)";
                 case 15400: return "卡莉(1轉)";
                 case 15410: return "卡莉(2轉)";
                 case 15411: return "卡莉(3轉)";
@@ -1407,27 +1437,47 @@ namespace WzComparerR2.CharaSim
                 case 15512: return "亞克(4轉)";
                 case 15514: return "亞克(6轉)";
 
-                case 16000: return "阿尼瑪盜賊";
+                case 16000: return "虎影";
                 case 16001: return "菈菈";
                 case 16002: return "蓮";
-                case 16100: return "蓮(1次)";
-                case 16110: return "蓮(2次)";
-                case 16111: return "蓮(3次)";
-                case 16112: return "蓮(4次)";
-                case 16114: return "蓮(6次)";
+                case 16003:
+                case 16004: return "阿尼瑪";
+                case 16100: return "蓮(1轉)";
+                case 16110: return "蓮(2轉)";
+                case 16111: return "蓮(3轉)";
+                case 16112: return "蓮(4轉)";
+                case 16114: return "蓮(6轉)";
                 case 16200: return "菈菈(1轉)";
                 case 16210: return "菈菈(2轉)";
                 case 16211: return "菈菈(3轉)";
                 case 16212: return "菈菈(4轉)";
                 case 16214: return "菈菈(6轉)";
+                case 16300: return "阿尼瑪弓手(1轉)";
+                case 16310: return "阿尼瑪弓手(2轉)";
+                case 16311: return "阿尼瑪弓手(3轉)";
+                case 16312: return "阿尼瑪弓手(4轉)";
+                case 16314: return "阿尼瑪弓手(6轉)";
                 case 16400: return "虎影(1轉)";
                 case 16410: return "虎影(2轉)";
                 case 16411: return "虎影(3轉)";
                 case 16412: return "虎影(4轉)";
                 case 16414: return "虎影(6轉)";
+                case 16500: return "阿尼瑪海盜(1轉)";
+                case 16510: return "阿尼瑪海盜(2轉)";
+                case 16511: return "阿尼瑪海盜(3轉)";
+                case 16512: return "阿尼瑪海盜(4轉)";
+                case 16514: return "阿尼瑪海盜(6轉)";
 
                 case 17000: return "墨玄";
                 case 17001: return "琳恩";
+                case 17002:
+                case 17003:
+                case 17004: return "江湖";
+                case 17100: return "江湖劍士(1轉)";
+                case 17110: return "江湖劍士(2轉)";
+                case 17111: return "江湖劍士(3轉)";
+                case 17112: return "江湖劍士(4轉)";
+                case 17114: return "江湖劍士(6轉)";
                 case 17200: return "琳恩(1轉)";
                 case 17210: return "琳恩(2轉)";
                 case 17211: return "琳恩(3轉)";
@@ -1438,9 +1488,22 @@ namespace WzComparerR2.CharaSim
                 case 17511: return "墨玄(3轉)";
                 case 17512: return "墨玄(4轉)";
                 case 17514: return "墨玄(6轉)";
+                case 17300: return "江湖弓手(1轉)";
+                case 17310: return "江湖弓手(2轉)";
+                case 17311: return "江湖弓手(3轉)";
+                case 17312: return "江湖弓手(4轉)";
+                case 17314: return "江湖弓手(6轉)";
+                case 17400: return "江湖盜賊(1轉)";
+                case 17410: return "江湖盜賊(2轉)";
+                case 17411: return "江湖盜賊(3轉)";
+                case 17412: return "江湖盜賊(4轉)";
+                case 17414: return "江湖盜賊(6轉)";
 
                 case 18000: return "施亞阿斯特";
                 case 18001: return "葉里萊特";
+                case 18002:
+                case 18003:
+                case 18004: return "閃耀";
                 case 18100: return "葉里萊特(1轉)";
                 case 18110: return "葉里萊特(2轉)";
                 case 18111: return "葉里萊特(3轉)";
@@ -1451,6 +1514,21 @@ namespace WzComparerR2.CharaSim
                 case 18211: return "施亞阿斯特(3轉)";
                 case 18212: return "施亞阿斯特(4轉)";
                 case 18214: return "施亞阿斯特(6轉)";
+                case 18300: return "閃耀弓手(1轉)";
+                case 18310: return "閃耀弓手(2轉)";
+                case 18311: return "閃耀弓手(3轉)";
+                case 18312: return "閃耀弓手(4轉)";
+                case 18314: return "閃耀弓手(6轉)";
+                case 18400: return "閃耀盜賊(1轉)";
+                case 18410: return "閃耀盜賊(2轉)";
+                case 18411: return "閃耀盜賊(3轉)";
+                case 18412: return "閃耀盜賊(4轉)";
+                case 18414: return "閃耀盜賊(6轉)";
+                case 18500: return "閃耀海盜(1轉)";
+                case 18510: return "閃耀海盜(2轉)";
+                case 18511: return "閃耀海盜(3轉)";
+                case 18512: return "閃耀海盜(4轉)";
+                case 18514: return "閃耀海盜(6轉)";
 
                 case 40000: return "5轉";
                 case 40001: return "5轉(劍士)";
@@ -1465,6 +1543,65 @@ namespace WzComparerR2.CharaSim
                 case 50007: return "6轉(HEXA屬性)";
             }
             return null;
+        }
+
+        public static string GetFifthJobName(int skillCode, List<int> jobId)
+        {
+            string jobName = "";
+            switch (jobId.Count)
+            {
+                case 0:
+                    jobName = GetJobName(skillCode / 10000);
+                    break;
+                case 1:
+                    if (jobId[0] == 0)
+                    {
+                        jobName = GetJobName(skillCode / 10000);
+                    }
+                    else
+                    {
+                        jobName = GetJobName(jobId[0]);
+                        jobName = jobName.Contains("(4") ? jobName.Replace("(4", "(5") : jobName + "(5轉)";
+                    }
+                    break;
+                default:
+                    bool isSameFaction = true;
+                    int faction = jobId[0] / 1000;
+                    if (faction == 5) faction = 1;
+                    foreach (int id in jobId.Skip(1))
+                    {
+                        if (id == 0) continue;
+                        isSameFaction = isSameFaction && (id / 1000 == faction);
+                    }
+                    if (isSameFaction)
+                    {
+                        switch (faction)
+                        {
+                            case 0: jobName = "5轉(冒險家)"; break;
+                            case 1:
+                            case 5: jobName = "5轉(皇家騎士團)"; break;
+                            case 2: jobName = "5轉(英雄)"; break;
+                            case 3: jobName = "5轉(末日反抗軍)"; break;
+                            case 4: jobName = "5轉(曉之陣)"; break;
+                            case 6: jobName = "5轉(超新星)"; break;
+                            case 10: jobName = "5轉(超越者)"; break;
+                            case 11: jobName = "5轉(達恩維爾)"; break;
+                            case 12: jobName = "5轉(動漫聯動)"; break;
+                            case 13: jobName = "5轉(怪物)"; break;
+                            case 14: jobName = "5轉(朋友世界)"; break;
+                            case 15: jobName = "5轉(雷普)"; break;
+                            case 16: jobName = "5轉(阿尼瑪)"; break;
+                            case 17: jobName = "5轉(江湖)"; break;
+                            case 18: jobName = "5轉(閃耀)"; break;
+                        }
+                    }
+                    else
+                    {
+                        jobName = GetJobName(skillCode / 10000);
+                    }
+                    break;
+            }
+            return jobName;
         }
 
         public static string ToCJKNumberExpr(long value)

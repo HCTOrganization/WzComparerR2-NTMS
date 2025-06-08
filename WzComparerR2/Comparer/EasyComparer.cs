@@ -126,6 +126,41 @@ namespace WzComparerR2.Comparer
                     this.WzNewOld[1] = fileOld.Node;
                     this.WzFileNewOld[0] = fileNew.Node.GetNodeWzFile();
                     this.WzFileNewOld[1] = fileOld.Node.GetNodeWzFile();
+
+                    StateInfo = "正在初始化5轉技能職業對應關係...";
+                    for (int i = 0; i < 2; i++)
+                    {
+                        Wz_Node vCoreData = PluginManager.FindWz("Etc\\VCore.img\\CoreData", WzFileNewOld[i]);
+                        if (vCoreData == null) break;
+
+                        foreach (Wz_Node data in vCoreData.Nodes)
+                        {
+                            Wz_Node connectSkill = data.FindNodeByPath("connectSkill").ResolveUol();
+                            Wz_Node jobIDValue = data.FindNodeByPath("job").ResolveUol();
+                            List<int> applicableJobID = new List<int>();
+                            foreach (Wz_Node jobID in jobIDValue.Nodes)
+                            {
+                                applicableJobID.Add(jobID.GetValueEx<int>(0));
+                            }
+                            if (connectSkill == null)
+                            {
+                                int skillIDValue = data.FindNodeByPath("spCoreOption\\effect\\skill_id").ResolveUol().GetValueEx<int>(0);
+                                if (!FifthJobSkillToJobID.ContainsKey(skillIDValue)) FifthJobSkillToJobID.Add(skillIDValue, [0]);
+                            }
+                            else
+                            {
+                                foreach (Wz_Node skillID in connectSkill.Nodes)
+                                {
+                                    int skillIDValue = skillID.GetValueEx<int>(0);
+                                    if (skillIDValue > 0 && !FifthJobSkillToJobID.ContainsKey(skillIDValue))
+                                    {
+                                        FifthJobSkillToJobID.Add(skillIDValue, applicableJobID);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     if (SkipKMSContent)
                     {
                         if (DownloadKMSContentDB)
@@ -200,39 +235,6 @@ namespace WzComparerR2.Comparer
                                     if (!KMSComponentDict.ContainsKey(item))
                                     {
                                         KMSComponentDict[item] = new List<string>();
-                                    }
-                                }
-                            }
-                        }
-                        StateInfo = "正在初始化5轉技能職業對應關係...";
-                        for (int i = 0; i < 2; i++)
-                        {
-                            Wz_Node vCoreData = PluginManager.FindWz("Etc\\VCore.img\\CoreData", WzFileNewOld[i]);
-                            if (vCoreData == null) break;
-
-                            foreach (Wz_Node data in vCoreData.Nodes)
-                            {
-                                Wz_Node connectSkill = data.FindNodeByPath("connectSkill").ResolveUol();
-                                Wz_Node jobIDValue = data.FindNodeByPath("job").ResolveUol();
-                                List<int> applicableJobID = new List<int>();
-                                foreach (Wz_Node jobID in jobIDValue.Nodes)
-                                {
-                                    applicableJobID.Add(jobID.GetValueEx<int>(0));
-                                }
-                                if (connectSkill == null)
-                                {
-                                    int skillIDValue = data.FindNodeByPath("spCoreOption\\effect\\skill_id").ResolveUol().GetValueEx<int>(0);
-                                    if (!FifthJobSkillToJobID.ContainsKey(skillIDValue)) FifthJobSkillToJobID.Add(skillIDValue, [0]);
-                                }
-                                else
-                                {
-                                    foreach (Wz_Node skillID in connectSkill.Nodes)
-                                    {
-                                        int skillIDValue = skillID.GetValueEx<int>(0);
-                                        if (skillIDValue > 0 && !FifthJobSkillToJobID.ContainsKey(skillIDValue))
-                                        {
-                                            FifthJobSkillToJobID.Add(skillIDValue, applicableJobID);
-                                        }
                                     }
                                 }
                             }
@@ -907,7 +909,7 @@ namespace WzComparerR2.Comparer
                 int picH = ShowObjectID ? 13 : 1;
                 if (ShowChangeType) GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
 
-                string categoryPath = (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其他");
+                string categoryPath = (int.Parse(skillID) / 100000 == 4000 && FifthJobSkillToJobID.ContainsKey(int.Parse(skillID))) ? (ItemStringHelper.GetFifthJobName(int.Parse(skillID), FifthJobSkillToJobID[int.Parse(skillID)])) : (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其他");
 
                 if (!Directory.Exists(Path.Combine(skillTooltipPath, categoryPath)))
                 {
