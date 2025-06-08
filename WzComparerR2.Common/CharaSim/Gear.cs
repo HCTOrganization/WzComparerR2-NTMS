@@ -573,6 +573,8 @@ namespace WzComparerR2.CharaSim
                     return GearType.tuner;
                 case 1214:
                     return GearType.breathShooter;
+                case 1215:
+                    return GearType.longSword;
                 case 1252:
                     return GearType.memorialStaff;
                 case 1259:
