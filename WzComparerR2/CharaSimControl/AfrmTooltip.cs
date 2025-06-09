@@ -128,6 +128,16 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
+        public async void QuickRefresh()
+        {
+            if (this.Bitmap != null)
+            {
+                this.SetBitmap(Bitmap);
+                this.CaptionRectangle = new Rectangle(0, 0, Bitmap.Width, Bitmap.Height);
+                base.Refresh();
+            }
+        }
+
         public async void PreRender()
         {
             AvatarBitmap = null;

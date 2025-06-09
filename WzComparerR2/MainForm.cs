@@ -3621,6 +3621,7 @@ namespace WzComparerR2
                 tooltipQuickView.Refresh();
                 tooltipQuickView.HideOnHover = false;
                 tooltipQuickView.Show();
+                if (Translator.IsTranslateEnabled) tooltipQuickView.QuickRefresh();
             }
         }
 
