@@ -163,9 +163,10 @@ namespace WzComparerR2.Comparer
 
                     if (SkipKMSContent)
                     {
+                        KMSContentID["Skill"] = new List<int>();
                         if (DownloadKMSContentDB)
                         {
-                            foreach (string item in new string[] { "Item", "Map", "Mob", "Npc" })
+                            foreach (string item in new string[] { "Item", "Map", "Mob", "Npc", "Skill" })
                             {
                                 StateInfo = string.Format("正在下載KMS的{0}資料庫...", item);
                                 var request = (HttpWebRequest)WebRequest.Create(string.Format("https://raw.githubusercontent.com/HikariCalyx/KMSContent/refs/heads/main/{0}ID.txt", item));
@@ -3086,7 +3087,7 @@ namespace WzComparerR2.Comparer
                     }
                     else
                     {
-                        return false;
+                        return KMSContentID["Skill"].Contains(skillID);
                     }
                 default:
                     return true;
