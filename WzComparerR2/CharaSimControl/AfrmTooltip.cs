@@ -132,9 +132,12 @@ namespace WzComparerR2.CharaSimControl
         {
             if (this.Bitmap != null)
             {
+                TranslateSemaphore.Wait();
+                Thread.Sleep(10);
                 this.SetBitmap(Bitmap);
                 this.CaptionRectangle = new Rectangle(0, 0, Bitmap.Width, Bitmap.Height);
                 base.Refresh();
+                TranslateSemaphore.Release();
             }
         }
 
