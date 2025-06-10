@@ -61,6 +61,7 @@ namespace WzComparerR2.CharaSimControl
         public bool AutoTitleWrap { get; set; }
         public int CosmeticHairColor { get; set; }
         public int CosmeticFaceColor { get; set; }
+        public bool CompareMode { get; set; } = false;
         private string titleLanguage = "";
 
         private bool isPostNEXTClient;
@@ -844,7 +845,18 @@ namespace WzComparerR2.CharaSimControl
             // 세트 아이템
             {
                 List<string> setList = new List<string>();
-                if (Gear.Props.TryGetValue(GearPropType.setItemID, out int setID) && CharaSimLoader.LoadedSetItems.TryGetValue(setID, out SetItem setItem)) setList.Add(setItem.SetItemName);
+                if (Gear.Props.TryGetValue(GearPropType.setItemID, out int setID))
+                {
+                    SetItem setItem;
+                    if (CompareMode)
+                    {
+                        setItem = CharaSimLoader.LoadSetItem(setID, this.SourceWzFile);
+                        if (setItem != null)
+                            setList.Add(setItem.SetItemName);
+                    }
+                    else if (CharaSimLoader.LoadedSetItems.TryGetValue(setID, out setItem))
+                        setList.Add(setItem.SetItemName);
+                } 
                 if (Gear.Props.TryGetValue(GearPropType.jokerToSetItem, out value) && value > 0) setList.Add("幸運道具");
 
                 var text = string.Join(", ", setList);
@@ -1744,7 +1756,12 @@ namespace WzComparerR2.CharaSimControl
             if (Gear.Props.TryGetValue(GearPropType.setItemID, out setID))
             {
                 SetItem setItem;
-                if (!CharaSimLoader.LoadedSetItems.TryGetValue(setID, out setItem))
+                if (CompareMode)
+                {
+                    setItem = CharaSimLoader.LoadSetItem(setID, this.SourceWzFile);
+                    if (setItem == null) return null;
+                }
+                else if (!CharaSimLoader.LoadedSetItems.TryGetValue(setID, out setItem))
                     return null;
 
                 TooltipRender renderer = this.SetItemRender;
