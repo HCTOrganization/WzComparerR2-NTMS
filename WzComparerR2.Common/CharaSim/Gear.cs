@@ -577,6 +577,8 @@ namespace WzComparerR2.CharaSim
                     return GearType.longSword;
                 case 1252:
                     return GearType.memorialStaff;
+                case 1253:
+                    return GearType.celestialLight;
                 case 1259:
                     return GearType.magicStick;
                 case 1403:

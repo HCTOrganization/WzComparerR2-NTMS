@@ -181,6 +181,10 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         memorialStaff = 1252,
         /// <summary>
+        /// Celestial Light 1253
+        /// </summary>
+        celestialLight = 1253,
+        /// <summary>
         /// 驯兽魔法棒 1259
         /// </summary>
         magicStick = 1259,
@@ -405,13 +409,13 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         yeouiGem = 135404,
         /// <summary>
-        /// Compass 135405x
+        /// Compass 135287
         /// </summary>
-        compass = 135405,
+        compass = 135287,
         /// <summary>
         /// Keir 135406x
         /// </summary>
-        keir = 135406,
+        keir = 135288,
         /// <summary>
         /// 手杖
         /// </summary>
@@ -517,10 +521,6 @@ namespace WzComparerR2.CharaSim
         /// 远古弓 159
         /// </summary>
         ancientBow = 159,
-        /// <summary>
-        /// Celestial Light 171
-        /// </summary>
-        celestialLight = 171,
         /// <summary>
         /// Gram 172
         /// </summary>
