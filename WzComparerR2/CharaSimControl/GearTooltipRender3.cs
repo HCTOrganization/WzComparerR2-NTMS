@@ -782,6 +782,38 @@ namespace WzComparerR2.CharaSimControl
                     GearGraphics.DrawString(g, $"#c{string.Join(", ", randomParts)}  此機器人首次裝備範例中其中一個圖片時就會決定外型。#", GearGraphics.EquipMDMoris9Font, null, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
                 }
             }
+            //Regular Cosmetic
+            if (Gear.type == GearType.body || Gear.type == GearType.head || Gear.type == GearType.face || Gear.type == GearType.face2 || Gear.type == GearType.hair || Gear.type == GearType.hair2 || Gear.type == GearType.hair3)
+            {
+                if (this.avatar == null)
+                {
+                    this.avatar = new AvatarCanvasManager();
+                }
+                if (Gear.type == GearType.body) this.avatar.AddBodyFromSkin4(Gear.ItemID);
+                if (Gear.type == GearType.head) this.avatar.AddBodyFromSkin4(Gear.ItemID - 10000);
+                else this.avatar.AddBodyFromSkin4(2015);
+                if (Gear.type == GearType.face || Gear.type == GearType.face2 || Gear.type == GearType.hair || Gear.type == GearType.hair2 || Gear.type == GearType.hair3) this.avatar.AddHairOrFace(Gear.ItemID);
+
+                this.avatar.AddGears([1042194, 1062153]);
+
+                var appearance = this.avatar.GetBitmapOrigin();
+                if (appearance.Bitmap != null)
+                {
+                    var imgrect = new Rectangle(Math.Max(appearance.Origin.X - 50, 0),
+                        Math.Max(appearance.Origin.Y - 100, 0),
+                        Math.Min(appearance.Bitmap.Width, appearance.Origin.X + 50) - Math.Max(appearance.Origin.X - 50, 0),
+                        Math.Min(appearance.Origin.Y, 100));
+                    g.DrawImage(appearance.Bitmap, 88 - Math.Min(appearance.Origin.X, 50), picH + Math.Max(80 - appearance.Origin.Y, 0), imgrect, GraphicsUnit.Pixel);
+                    Gear.AndroidBitmap = appearance.Bitmap;
+                    picH += appearance.Bitmap.Height;
+                    picH += 2;
+
+                    Gear.AndroidBitmap = appearance.Bitmap;
+                    picH += 30;
+                }
+
+                this.avatar.ClearCanvas();
+            }
             //MSN Cosmetic
             if ((Gear.type == GearType.face_n || Gear.type == GearType.hair_n) && Gear.Props.TryGetValue(GearPropType.cosmetic, out value) && value > 0)
             {
