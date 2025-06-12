@@ -240,22 +240,22 @@ namespace WzComparerR2.Comparer
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        foreach (string item in new string[] { "Item", "Map", "Mob", "Npc", "Skill" })
+                        else
                         {
-                            if (!KMSContentID.ContainsKey(item))
+                            foreach (string item in new string[] { "Item", "Map", "Mob", "Npc", "Skill" })
                             {
-                                KMSContentID[item] = new List<int>();
+                                if (!KMSContentID.ContainsKey(item))
+                                {
+                                    KMSContentID[item] = new List<int>();
+                                }
                             }
-                        }
-                        foreach (string item in new string[] { "Effect", "MapBack", "MapObj", "MapTile", "MapWorldMap" })
-                        {
-                            if (!KMSComponentDict.ContainsKey(item))
+                            foreach (string item in new string[] { "Effect", "MapBack", "MapObj", "MapTile", "MapWorldMap" })
                             {
-                                KMSComponentDict[item] = new List<string>();
+                                if (!KMSComponentDict.ContainsKey(item))
+                                {
+                                    KMSComponentDict[item] = new List<string>();
 
+                                }
                             }
                         }
                     }
