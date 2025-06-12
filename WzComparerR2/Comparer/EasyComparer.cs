@@ -241,6 +241,24 @@ namespace WzComparerR2.Comparer
                             }
                         }
                     }
+                    else
+                    {
+                        foreach (string item in new string[] { "Item", "Map", "Mob", "Npc", "Skill" })
+                        {
+                            if (!KMSContentID.ContainsKey(item))
+                            {
+                                KMSContentID[item] = new List<int>();
+                            }
+                        }
+                        foreach (string item in new string[] { "Effect", "MapBack", "MapObj", "MapTile", "MapWorldMap" })
+                        {
+                            if (!KMSComponentDict.ContainsKey(item))
+                            {
+                                KMSComponentDict[item] = new List<string>();
+
+                            }
+                        }
+                    }
                 }
 
 
