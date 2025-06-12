@@ -814,7 +814,7 @@
             this.superTabItem6.AttachedControl = this.superTabControlPanel6;
             this.superTabItem6.GlobalItem = false;
             this.superTabItem6.Name = "superTabItem6";
-            this.superTabItem6.Text = "マップ";
+            this.superTabItem6.Text = "地圖";
             // 
             // chkShowMiniMap
             // 
@@ -830,7 +830,7 @@
             this.chkShowMiniMap.Size = new System.Drawing.Size(145, 16);
             this.chkShowMiniMap.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowMiniMap.TabIndex = 1;
-            this.chkShowMiniMap.Text = "ミニマップを表示";
+            this.chkShowMiniMap.Text = "顯示小地圖";
             // 
             // chkShowMapObjectID
             // 
@@ -845,7 +845,7 @@
             this.chkShowMapObjectID.Size = new System.Drawing.Size(172, 16);
             this.chkShowMapObjectID.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowMapObjectID.TabIndex = 2;
-            this.chkShowMapObjectID.Text = "左上隅にIDを表示";
+            this.chkShowMapObjectID.Text = "左上方顯示ID";
             // 
             // chkShowMobNpcObjectID
             // 
@@ -860,7 +860,7 @@
             this.chkShowMobNpcObjectID.Size = new System.Drawing.Size(172, 16);
             this.chkShowMobNpcObjectID.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowMobNpcObjectID.TabIndex = 3;
-            this.chkShowMobNpcObjectID.Text = "モンスターとNPCにIDを表示";
+            this.chkShowMobNpcObjectID.Text = "顯示怪物和NPC的ID";
             // 
             // superTabControlPanel5
             // 
