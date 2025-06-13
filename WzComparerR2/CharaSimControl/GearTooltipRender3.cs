@@ -900,8 +900,6 @@ namespace WzComparerR2.CharaSimControl
                     hasOptionPart = true;
 
                     g.DrawImage(Resource.UIToolTipNew_img_Item_Equip_textIcon_set_guide, 16, picH - 2);
-                    SizeF SetEffectNameLength = TextRenderer.MeasureText(g, $"#$g{text}#".Replace("#c", ""), Translator.IsKoreanStringPresent($"#$g{text}#".Replace("#c", "")) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
-                    if (SetEffectNameLength.Width > 266) picH += 16;
                     GearGraphics.DrawString(g, $"#$g{text}#", Translator.IsKoreanStringPresent(text) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 308, ref picH, 16, alignment: Text.TextAlignment.Left);
                 }
             }
@@ -952,8 +950,6 @@ namespace WzComparerR2.CharaSimControl
                     hasOptionPart = true;
 
                     TextRenderer.DrawText(g, "可用技能", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
-                    SizeF SkillNameLength = TextRenderer.MeasureText(g, $"#$g{text}#".Replace("#c", ""), Translator.IsKoreanStringPresent($"#$g{text}#".Replace("#c", "")) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
-                    if (SkillNameLength.Width > 261) picH += 16;
                     GearGraphics.DrawString(g, $"#$g{text}#".Replace("#c", ""), Translator.IsKoreanStringPresent(text) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 308, ref picH, 16, alignment: Text.TextAlignment.Left);
                 }
             }
