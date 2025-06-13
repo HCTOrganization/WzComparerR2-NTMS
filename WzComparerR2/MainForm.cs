@@ -313,6 +313,9 @@ namespace WzComparerR2
                 case 3:
                     this.buttonItemMSN.Checked = true;
                     break;
+                case 4:
+                    this.buttonItemGMS.Checked = true;
+                    break;
             }
         }
 
@@ -2728,6 +2731,20 @@ namespace WzComparerR2
                     ngmProtocol = "msul";
                     gameCode = "106690@d811";
                     break;
+                case 4:
+                    foreach (Form form in Application.OpenForms)
+                    {
+                        if (form is FrmGMSDownloader && !form.IsDisposed)
+                        {
+                            form.Show();
+                            form.BringToFront();
+                            return;
+                        }
+                    }
+                    FrmGMSDownloader frm = new FrmGMSDownloader();
+                    frm.Owner = this;
+                    frm.Show();
+                    return;
             }
 
             if (!IsUriSchemeRegistered(ngmProtocol))
@@ -2776,6 +2793,10 @@ namespace WzComparerR2
                     ngmProtocol = "msul";
                     gameCode = "106690@d811";
                     break;
+                case 4:
+                    ngmProtocol = "nxl";
+                    gameCode = "10100";
+                    break;
             }
 
             if (!IsUriSchemeRegistered(ngmProtocol))
@@ -2791,10 +2812,10 @@ namespace WzComparerR2
                     Process.Start(new ProcessStartInfo
                     {
                         UseShellExecute = true,
-                        FileName = ngmProtocol + "://launch/ -mode:launch -game:'" + gameCode + "'",
+                        FileName = preferredRegion == 4 ? ngmProtocol + "://games/" + gameCode + "?partnerkey=3267" : ngmProtocol + "://launch/ -mode:launch -game:'" + gameCode + "'",
                     });
 #else
-                    Process.Start(ngmProtocol + "://launch/ -mode:launch -game:'" + gameCode + "'");
+                    Process.Start(preferredRegion == 4 ? ngmProtocol + "://games/" + gameCode + "?partnerkey=3267" : ngmProtocol + "://launch/ -mode:launch -game:'" + gameCode + "'");
 #endif
                 }
                 catch
@@ -2809,9 +2830,11 @@ namespace WzComparerR2
         {
             ConfigManager.Reload();
             WcR2Config.Default.PreferredClientRegion = 0;
+            this.buttonItemJMS.Checked = true;
             this.buttonItemKMS.Checked = false;
             this.buttonItemKMST.Checked = false;
             this.buttonItemMSN.Checked = false;
+            this.buttonItemGMS.Checked = false;
             ConfigManager.Save();
         }
 
@@ -2820,8 +2843,10 @@ namespace WzComparerR2
             ConfigManager.Reload();
             WcR2Config.Default.PreferredClientRegion = 1;
             this.buttonItemJMS.Checked = false;
+            this.buttonItemKMS.Checked = true;
             this.buttonItemKMST.Checked = false;
             this.buttonItemMSN.Checked = false;
+            this.buttonItemGMS.Checked = false;
             ConfigManager.Save();
         }
 
@@ -2831,7 +2856,9 @@ namespace WzComparerR2
             WcR2Config.Default.PreferredClientRegion = 2;
             this.buttonItemJMS.Checked = false;
             this.buttonItemKMS.Checked = false;
+            this.buttonItemKMST.Checked = true;
             this.buttonItemMSN.Checked = false;
+            this.buttonItemGMS.Checked = false;
             ConfigManager.Save();
         }
 
@@ -2842,6 +2869,20 @@ namespace WzComparerR2
             this.buttonItemJMS.Checked = false;
             this.buttonItemKMS.Checked = false;
             this.buttonItemKMST.Checked = false;
+            this.buttonItemMSN.Checked = true;
+            this.buttonItemGMS.Checked = false;
+            ConfigManager.Save();
+        }
+
+        private void buttonItemGMS_Click(object sender, EventArgs e)
+        {
+            ConfigManager.Reload();
+            WcR2Config.Default.PreferredClientRegion = 4;
+            this.buttonItemJMS.Checked = false;
+            this.buttonItemKMS.Checked = false;
+            this.buttonItemKMST.Checked = false;
+            this.buttonItemMSN.Checked = false;
+            this.buttonItemGMS.Checked = true;
             ConfigManager.Save();
         }
 
@@ -2867,6 +2908,10 @@ namespace WzComparerR2
                 case "gamania":
                     message = "下載或啟動遊戲需要 Gamania Games Manager，但它似乎尚未安裝。 \r\n\r\n是否要下載並安裝？";
                     url = "https://tw.beanfun.com/ggm/index.html";
+                    break;
+                case "nxl":
+                    message = "下載或啟動遊戲需要 Nexon Launcher，但它似乎尚未安裝。 \r\n\r\n是否要下載並安裝？";
+                    url = "https://download.nxfs.nexon.com/download-launcher?file=NexonLauncherSetup.exe";
                     break;
             }
             DialogResult ngmresult = MessageBoxEx.Show(message, "確認", MessageBoxButtons.YesNo);

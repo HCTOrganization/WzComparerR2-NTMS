@@ -101,6 +101,7 @@ namespace WzComparerR2
             this.buttonItemKMS = new DevComponents.DotNetBar.ButtonItem();
             this.buttonItemKMST = new DevComponents.DotNetBar.ButtonItem();
             this.buttonItemMSN = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonItemGMS = new DevComponents.DotNetBar.ButtonItem();
             this.ribbonBar4 = new DevComponents.DotNetBar.RibbonBar();
             this.itemContainer10 = new DevComponents.DotNetBar.ItemContainer();
             this.itemContainer8 = new DevComponents.DotNetBar.ItemContainer();
@@ -1192,6 +1193,7 @@ namespace WzComparerR2
             this.buttonItemJMS,
             this.buttonItemKMS,
             this.buttonItemKMST,
+            this.buttonItemGMS,
             this.buttonItemMSN});
             this.buttonItemGameStart.Text = "啟動遊戲";
             this.buttonItemGameStart.Click += new System.EventHandler(this.buttonGameStart_Click);
@@ -1227,6 +1229,14 @@ namespace WzComparerR2
             this.buttonItemMSN.Text = "MSN";
             this.buttonItemMSN.Tooltip = "MSN";
             this.buttonItemMSN.Click += new System.EventHandler(this.buttonItemMSN_Click);
+            // 
+            // buttonItemGMS
+            // 
+            this.buttonItemGMS.AutoCheckOnClick = true;
+            this.buttonItemGMS.Name = "buttonItemGMS";
+            this.buttonItemGMS.Text = "GMS";
+            this.buttonItemGMS.Tooltip = "GMS";
+            this.buttonItemGMS.Click += new System.EventHandler(this.buttonItemGMS_Click);
             // 
             // ribbonBar4
             // 
@@ -3666,6 +3676,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ButtonItem buttonItemKMS;
         private DevComponents.DotNetBar.ButtonItem buttonItemKMST;
         private DevComponents.DotNetBar.ButtonItem buttonItemMSN;
+        private DevComponents.DotNetBar.ButtonItem buttonItemGMS;
         private DevComponents.DotNetBar.ItemContainer itemContainer41;
         private DevComponents.DotNetBar.ButtonItem buttonItemLoadChara;
         private DevComponents.DotNetBar.ButtonItem buttonItemSaveChara;
