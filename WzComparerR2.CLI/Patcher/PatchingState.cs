@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace WzComparerR2.Patcher
+﻿namespace WzComparerR2.Patcher
 {
     public enum PatchingState
     {

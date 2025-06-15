@@ -29,6 +29,9 @@ namespace WzComparerR2.CLI
                     case "patch":
                         CliPatcherSession(args);
                         return;
+                    case "gms":
+                        GMSDownloaderSession(args);
+                        return;
                     default:
                         PrintUsage();
                         break;
@@ -129,6 +132,11 @@ namespace WzComparerR2.CLI
                             if (cki.Key != ConsoleKey.Y) return;
                             Console.WriteLine("");
                         }
+                        if (!Directory.Exists(gameDirectory))
+                        {
+                            Console.WriteLine("Error: This directory does not exist. ");
+                            return;
+                        }
                         if (!HasWritePermission(gameDirectory))
                         {
                             Console.WriteLine("Error: You do not have write permission to the specified game directory.");
@@ -153,6 +161,85 @@ namespace WzComparerR2.CLI
             }
         }
 
+        private static void GMSDownloaderSession(string[] args)
+        {
+            CliGMSDownloader downloader = new CliGMSDownloader();
+            if (args.Length < 2)
+            {
+                PrintUsage("gms");
+                return;
+            }
+            switch (args[1])
+            {
+                case "check":
+                    if (args.Length > 2 && args[2] == "--help")
+                    {
+                        PrintUsage("gms_check");
+                        return;
+                    }
+                    else
+                    {
+                        downloader.CheckUpdate();
+                        return;
+                    }
+                case "download":
+
+                    if (args.Length < 3)
+                    {
+                        PrintUsage("gms_download");
+                        return;
+                    }
+                    if (args[2] == "--help")
+                    {
+                        PrintUsage("gms_download");
+                        return;
+                    }
+                    else
+                    {
+                        string gameDirectory = args[2];
+                        if (gameDirectory.Contains("\""))
+                        {
+                            string[] gameDirParse = gameDirectory.Split('"');
+                            gameDirectory = gameDirParse[0];
+                        }
+                        if (!Directory.Exists(gameDirectory))
+                        {
+                            Console.WriteLine("This directory does not exist. It will be created. ");
+                            try
+                            {
+                                Directory.CreateDirectory(gameDirectory);
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Error: {ex.Message}");
+                                return;
+                            }
+                        }
+                        if (!HasWritePermission(gameDirectory))
+                        {
+                            Console.WriteLine("Error: You do not have write permission to the specified game directory.");
+                            Console.WriteLine("To proceed, please run WCR2CLI with Administrator privilege.");
+                            return;
+                        }
+                        try
+                        {
+                            downloader.applyPath = gameDirectory;
+                            downloader.CheckUpdate();
+                            downloader.DownloadClient(downloader.manifestUrl);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error: {ex.Message}");
+                            return;
+                        }
+                    }
+                    break;
+                default:
+                    PrintUsage("gms");
+                    return;
+            }
+        }
+
         static bool HasWritePermission(string directoryPath)
         {
             try
@@ -167,7 +254,7 @@ namespace WzComparerR2.CLI
             }
         }
 
-        private static void PrintUsage(string subarg="")
+        private static void PrintUsage(string subarg = "")
         {
             Console.WriteLine("Usage:");
             switch (subarg)
@@ -177,6 +264,7 @@ namespace WzComparerR2.CLI
                     Console.WriteLine("");
                     Console.WriteLine("Valid modes: ");
                     Console.WriteLine("    patch - Run the mini game patcher");
+                    Console.WriteLine("    gms - Run the GMS client helper");
                     break;
                 case "patch":
                     Console.WriteLine("    wcr2cli patch [option] [arguments]");
@@ -188,6 +276,17 @@ namespace WzComparerR2.CLI
                     Console.WriteLine("For usable arguments of every options, execute: ");
                     Console.WriteLine("    wcr2cli patch find --help");
                     Console.WriteLine("    wcr2cli patch apply --help");
+                    break;
+                case "gms":
+                    Console.WriteLine("    wcr2cli gms [option] [arguments]");
+                    Console.WriteLine("");
+                    Console.WriteLine("Valid options: ");
+                    Console.WriteLine("    check - Check latest version");
+                    Console.WriteLine("    download - Download latest version");
+                    Console.WriteLine("");
+                    Console.WriteLine("For usable arguments of every options, execute: ");
+                    Console.WriteLine("    wcr2cli gms check --help");
+                    Console.WriteLine("    wcr2cli gms download --help");
                     break;
                 case "find":
                     Console.WriteLine("    wcr2cli patch find [game_region] [version_parameters]");
@@ -220,6 +319,21 @@ namespace WzComparerR2.CLI
                     Console.WriteLine("Example:");
                     Console.WriteLine("");
                     Console.WriteLine("    wcr2cli patch apply E:\\Downloads\\00269to00270.patch \"N:\\Games\\MapleStory TW\" --immediate");
+                    break;
+                case "gms_check":
+                    Console.WriteLine("    wcr2cli gms check");
+                    Console.WriteLine("");
+                    Console.WriteLine("This command will check if an update can be found. All other arguments are omitted.");
+                    break;
+                case "gms_download":
+                    Console.WriteLine("    wcr2cli gms download [game_installation_path]");
+                    Console.WriteLine("");
+                    Console.WriteLine("The game installation path could be either absolute path or relative path.");
+                    Console.WriteLine("If the path contains spaces, the path must be wrapped by a pair of quotes.");
+                    Console.WriteLine("");
+                    Console.WriteLine("Example:");
+                    Console.WriteLine("");
+                    Console.WriteLine("    wcr2cli gms download \"E:\\Games\\MapleStory Global\\\"");
                     break;
             }
         }

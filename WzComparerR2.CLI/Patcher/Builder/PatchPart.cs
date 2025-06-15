@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace WzComparerR2.Patcher.Builder
+﻿namespace WzComparerR2.Patcher.Builder
 {
     public class PatchPart
     {

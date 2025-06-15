@@ -63,8 +63,6 @@ namespace WzComparerR2
 
                 this.lblUpdateDate.Text = releaseDate + " UTC";
                 this.lblLatestVer.Text = majorVersion + "." + minorVersion + "." + revision;
-                // AppendText(ChangeTitle + "\r\n", Color.Red);
-                // AppendText(Changelog, Color.Black);
                 this.richTextBoxEx1.SelectionStart = 0;
                 buttonX1.Enabled = true;
                 this.lblUpdateContent.Text = "可以下載";
@@ -140,7 +138,7 @@ namespace WzComparerR2
                 AppendStateText(String.Format("總大小: {0}\r\n", GetBothByteAndGBValue(manifest.total_uncompressed_size)), Color.Black);
                 if (manifest.total_uncompressed_size > RemainingDiskSpace(applyPath))
                 {
-                    AppendStateText("磁碟空間不足以完成下載\r\n", Color.Red);
+                    AppendStateText("磁碟空間不足以完成下載。終止中...\r\n", Color.Red);
                     this.lblUpdateContent.Text = LocalizedString_JP.FRMUPDATER_UPDATE_DOWNLOAD_FAIL;
                     return;
                 }
@@ -205,7 +203,7 @@ namespace WzComparerR2
             }
             finally
             {
-                AppendStateText("Completed\r\n", Color.Green);
+                AppendStateText("完了\r\n", Color.Green);
                 buttonX1.Enabled = true;
             }
         }
