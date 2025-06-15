@@ -815,19 +815,17 @@ namespace WzComparerR2.CharaSimControl
                 this.avatar.ClearCanvas();
             }
             //MSN Cosmetic
-            if ((Gear.type == GearType.face_n || Gear.type == GearType.hair_n || Gear.type == GearType.hair2_n) && Gear.Props.TryGetValue(GearPropType.cosmetic, out value) && value > 0)
+            if ((Gear.type == GearType.face_n || Gear.type == GearType.hair_n || Gear.type == GearType.head_n || Gear.type == GearType.hair2_n) && Gear.Props.TryGetValue(GearPropType.cosmetic, out value) && value >= 0)
             {
                 string colorName = "";
                 if (Gear.type == GearType.hair_n || Gear.type == GearType.hair2_n) colorName = AvatarCanvas.HairColor[this.CosmeticHairColor];
-                else if (Gear.type == GearType.face_n) colorName = AvatarCanvas.HairColor[this.CosmeticFaceColor];
-                GearGraphics.DrawString(g, $"顔色：#c{colorName}#", GearGraphics.EquipMDMoris9Font, null, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
+                else if (Gear.type == GearType.face_n) colorName = AvatarCanvas.FaceColor[this.CosmeticFaceColor];
+                if (Gear.type != GearType.head_n) GearGraphics.DrawString(g, $"顔色：#c{colorName}#", GearGraphics.EquipMDMoris9Font, null, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
                 TextRenderer.DrawText(g, "外型：", GearGraphics.EquipMDMoris9Font, new Point(15, picH + 2), Color.White, TextFormatFlags.NoPadding);
                 if (this.avatar == null)
                 {
                     this.avatar = new AvatarCanvasManager();
                 }
-
-                this.avatar.SetCosmeticColor(this.CosmeticHairColor, this.CosmeticFaceColor);
 
                 if (value < 1000)
                 {
@@ -835,6 +833,16 @@ namespace WzComparerR2.CharaSimControl
                 }
                 else
                 {
+                    switch (Gear.type)
+                    {
+                        case GearType.hair_n:
+                        case GearType.hair2_n:
+                            value = value + this.CosmeticHairColor;
+                            break;
+                        case GearType.face_n:
+                            value = value + this.CosmeticFaceColor * 100;
+                            break;
+                    }
                     this.avatar.AddBodyFromSkin4(2015);
                     this.avatar.AddHairOrFace((int)value);
                 }
