@@ -627,6 +627,7 @@ namespace WzComparerR2.CharaSim
                     case 1790:
                     case 1791:
                     case 1792:
+                    case 1793:
                         return (GearType)(code / 1000);
                     default:
                         return (GearType)(code / 100 * 10);
