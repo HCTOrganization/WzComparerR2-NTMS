@@ -204,7 +204,7 @@ namespace WzComparerR2.Comparer
                                     }
                                 }
                             }
-                            foreach (string item in new string[] { "Effect", "MapBack", "MapObj", "MapTile", "MapWorldMap" })
+                            foreach (string item in new string[] { "Effect", "MapBack", "MapObj", "MapTile", "MapWorldMap", "MobBossPattern" })
                             {
                                 StateInfo = string.Format("正在下載KMS的{0}資料庫...", item);
                                 var request = (HttpWebRequest)WebRequest.Create(string.Format("https://raw.githubusercontent.com/HikariCalyx/KMSContent/refs/heads/main/{0}ImgList.txt", item));
@@ -2969,7 +2969,25 @@ namespace WzComparerR2.Comparer
             else if (node.FullPathToFile.StartsWith("Mob"))
             {
                 string[] mobNodePath = node.FullPathToFile.Split('\\');
-                if (mobNodePath.Contains("BossPattern")) return true;
+                if (mobNodePath.Contains("BossPattern"))
+                {
+                    string bossPatternImgStr = mobNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                    if (bossPatternImgStr == null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        if (KMSComponentDict.ContainsKey("MobBossPattern"))
+                        {
+                            return KMSComponentDict["MobBossPattern"].Contains(bossPatternImgStr);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
                 string mobImgStr = mobNodePath.LastOrDefault(part => part.EndsWith(".img"));
                 if (mobImgStr == null)
                 {
