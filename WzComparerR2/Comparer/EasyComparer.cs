@@ -1725,6 +1725,9 @@ namespace WzComparerR2.Comparer
                 mapRenderNewOld[i].Enable22AniStyle = this.Enable22AniStyle;
                 mapRenderNewOld[i].ShowObjectID = this.ShowObjectID;
                 mapRenderNewOld[i].ShowMiniMap = true;
+                mapRenderNewOld[i].ShowMiniMapMob = true;
+                mapRenderNewOld[i].ShowMiniMapNpc = true;
+                mapRenderNewOld[i].ShowMiniMapPortal = true;
                 mapRenderNewOld[i].ShowMobNpcObjectID = this.ShowObjectID;
             }
 

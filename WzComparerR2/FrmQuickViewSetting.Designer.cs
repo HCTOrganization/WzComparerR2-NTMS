@@ -41,6 +41,9 @@
             this.chkShowMiniMap = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowMapObjectID = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowMobNpcObjectID = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowMiniMapMob = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowMiniMapNpc = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowMiniMapPortal = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX16 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX15 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX14 = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -801,6 +804,9 @@
             this.superTabControlPanel6.Controls.Add(this.chkShowMiniMap);
             this.superTabControlPanel6.Controls.Add(this.chkShowMapObjectID);
             this.superTabControlPanel6.Controls.Add(this.chkShowMobNpcObjectID);
+            this.superTabControlPanel6.Controls.Add(this.chkShowMiniMapMob);
+            this.superTabControlPanel6.Controls.Add(this.chkShowMiniMapNpc);
+            this.superTabControlPanel6.Controls.Add(this.chkShowMiniMapPortal);
             this.superTabControlPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControlPanel6.Location = new System.Drawing.Point(62, 0);
             this.superTabControlPanel6.Name = "superTabControlPanel6";
@@ -861,6 +867,53 @@
             this.chkShowMobNpcObjectID.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowMobNpcObjectID.TabIndex = 3;
             this.chkShowMobNpcObjectID.Text = "顯示怪物和NPC的ID";
+            // 
+            // chkShowMiniMapMob
+            // 
+            this.chkShowMiniMapMob.AutoSize = true;
+            this.chkShowMiniMapMob.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowMiniMapMob.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowMiniMapMob.Location = new System.Drawing.Point(13, 84);
+            this.chkShowMiniMapMob.Name = "chkShowMiniMapMob";
+            this.chkShowMiniMapMob.Size = new System.Drawing.Size(190, 16);
+            this.chkShowMiniMapMob.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowMiniMapMob.TabIndex = 4;
+            this.chkShowMiniMapMob.Text = "ミニマップにモンスターの出現場所を表示";
+            // 
+            // chkShowMiniMapNpc
+            // 
+            this.chkShowMiniMapNpc.AutoSize = true;
+            this.chkShowMiniMapNpc.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowMiniMapNpc.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowMiniMapNpc.Location = new System.Drawing.Point(30, 108);
+            this.chkShowMiniMapNpc.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.chkShowMiniMapNpc.Name = "chkShowMiniMapNpc";
+            this.chkShowMiniMapNpc.Size = new System.Drawing.Size(190, 16);
+            this.chkShowMiniMapNpc.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowMiniMapNpc.TabIndex = 5;
+            this.chkShowMiniMapNpc.Text = "ミニマップにNPCの位置を表示";
+            // 
+            // chkShowMiniMapPortal
+            // 
+            this.chkShowMiniMapPortal.AutoSize = true;
+            this.chkShowMiniMapPortal.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowMiniMapPortal.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowMiniMapPortal.Location = new System.Drawing.Point(30, 132);
+            this.chkShowMiniMapPortal.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.chkShowMiniMapPortal.Name = "chkShowMiniMapPortal";
+            this.chkShowMiniMapPortal.Size = new System.Drawing.Size(190, 16);
+            this.chkShowMiniMapPortal.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowMiniMapPortal.TabIndex = 6;
+            this.chkShowMiniMapPortal.Text = "ミニマップにポータルの場所を表示";
             // 
             // superTabControlPanel5
             // 
@@ -1060,6 +1113,9 @@
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMiniMap;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMapObjectID;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMobNpcObjectID;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMiniMapMob;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMiniMapNpc;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMiniMapPortal;
         private DevComponents.DotNetBar.Controls.ComboBoxEx comboBoxEx3;
         private DevComponents.DotNetBar.Controls.ComboBoxEx comboBoxEx4;
         private DevComponents.DotNetBar.LabelX labelX4;

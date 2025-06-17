@@ -296,6 +296,27 @@ namespace WzComparerR2
             set { chkCopyParsedSkillString.Checked = value; }
         }
 
+        
+        public bool Map_ShowMiniMapMob
+        {
+            get { return chkShowMiniMapMob.Checked; }
+            set { chkShowMiniMapMob.Checked = value; }
+        }
+
+        [Link]
+        public bool Map_ShowMiniMapNpc
+        {
+            get { return chkShowMiniMapNpc.Checked; }
+            set { chkShowMiniMapNpc.Checked = value; }
+        }
+
+        [Link]
+        public bool Map_ShowMiniMapPortal
+        {
+            get { return chkShowMiniMapPortal.Checked; }
+            set { chkShowMiniMapPortal.Checked = value; }
+        }
+
         public bool Enable22AniStyle
         {
             get { return chkEnable22AniStyle.Checked; }
@@ -344,6 +365,13 @@ namespace WzComparerR2
                 }
                 catch { }
             }
+        }
+
+        private void ChkShowMiniMap_CheckedChanged(object sender, System.EventArgs e)
+        {
+            this.chkShowMiniMapMob.Enabled = this.chkShowMiniMap.Checked;
+            this.chkShowMiniMapNpc.Enabled = this.chkShowMiniMap.Checked;
+            this.chkShowMiniMapPortal.Enabled = this.chkShowMiniMap.Checked;
         }
 
         private sealed class LinkAttribute : Attribute
