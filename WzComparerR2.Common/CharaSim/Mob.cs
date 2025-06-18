@@ -72,6 +72,7 @@ namespace WzComparerR2.CharaSim
         public bool PartyBonusMob { get; set; }
         public int WP { get; set; }
         public MobElemAttr ElemAttr { get; set; }
+        public long AttackPower { get; set; }
 
         public int? Link { get; set; }
         public bool Skeleton { get; set; }
@@ -179,6 +180,7 @@ namespace WzComparerR2.CharaSim
                                 mobInfo.Revive.Add(reviveNode.GetValue<int>());
                             }
                             break;
+                        case "attackPower": mobInfo.AttackPower = propNode.GetValueEx<long>(0) * 10000; break;
                     }
                 }
             }

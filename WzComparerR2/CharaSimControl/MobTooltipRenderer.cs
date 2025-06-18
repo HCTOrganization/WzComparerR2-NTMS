@@ -204,6 +204,10 @@ namespace WzComparerR2.CharaSimControl
             {
                 propBlocks.Add(PrepareText(g, GetElemAttrString(MobInfo.ElemAttr), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
             }
+            if (MobInfo.AttackPower > 0)
+            {
+                propBlocks.Add(PrepareText(g, "入場最低戰鬥力 (單人): " + ToCJKNumberExpr(MobInfo.AttackPower), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+            }
             if (MobInfo?.ID != null)
             {
                 var locNode = PluginBase.PluginManager.FindWz("Etc\\MobLocation.img\\" + MobInfo.ID.ToString());
