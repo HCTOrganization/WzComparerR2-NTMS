@@ -399,7 +399,7 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
-        public static void DrawPlainText(Graphics g, string s, Font font, Color color, int x, int x1, ref int y, int height, TextAlignment alignment = TextAlignment.Left)
+        public static void DrawPlainText(Graphics g, string s, Font font, Color color, int x, int x1, ref int y, int height, TextAlignment alignment = TextAlignment.Left, int strictlyAlignLeft = 0)
         {
             if (s == null)
                 return;
@@ -415,6 +415,7 @@ namespace WzComparerR2.CharaSimControl
                     r.WordWrapEnabled = true;
                 }
                 r.UseGDIRenderer = true;
+                r.StrictlyAlignLeft = strictlyAlignLeft;
                 r.DrawPlainText(g, s, font, color, x, x1, ref y, height, alignment);
             }
         }
