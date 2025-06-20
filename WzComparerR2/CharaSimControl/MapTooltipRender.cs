@@ -133,6 +133,11 @@ namespace WzComparerR2.CharaSimControl
             if (ShowMiniMap && Map.MiniMapNode != null)
             {
                 miniMap = BitmapOrigin.CreateFromNode(Map.MiniMapNode.FindNodeByPath("canvas"), PluginBase.PluginManager.FindWz).Bitmap;
+                if (IsPngCompletelyTransparent(miniMap))
+                {
+                    miniMap.Dispose();
+                    miniMap = null;
+                }
             }
 
             Rectangle barrierRect = barrierBlock?.Rectangle ?? new Rectangle();
@@ -411,6 +416,38 @@ namespace WzComparerR2.CharaSimControl
                 ret[1] = sr.MapName ?? "";
             }
             return ret;
+        }
+
+        private unsafe bool IsPngCompletelyTransparent(Bitmap bmp)
+        {
+            if (bmp == null) return true;
+            if ((bmp.PixelFormat & PixelFormat.Alpha) == 0)
+                return false;
+
+            Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+            BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+            try
+            {
+                byte* ptr = (byte*)data.Scan0;
+
+                for (int y = 0; y < data.Height; y++)
+                {
+                    byte* row = ptr + (y * data.Stride);
+                    for (int x = 0; x < data.Width; x++)
+                    {
+                        byte alpha = row[x * 4 + 3];
+                        if (alpha != 0)
+                            return false;
+                    }
+                }
+
+                return true;
+            }
+            finally
+            {
+                bmp.UnlockBits(data);
+            }
         }
 
         private string GetMapDesc(int mapID, int? linkID)
