@@ -3597,6 +3597,7 @@ namespace WzComparerR2
                     if (map != null)
                     {
                         fileName = "map_" + map.MapID + "_" + RemoveInvalidFileNameChars(sr.Name.Replace(" : ", ":")) + ".png";
+                        tooltipQuickView.NodeID = map.MapID;
                     }
                     break;
 
