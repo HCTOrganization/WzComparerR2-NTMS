@@ -298,6 +298,9 @@ namespace WzComparerR2
             this.itemContainer101 = new DevComponents.DotNetBar.ItemContainer();
             this.itemContainer102 = new DevComponents.DotNetBar.ItemContainer();
             this.itemContainer103 = new DevComponents.DotNetBar.ItemContainer();
+            this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsmi2CopyFullPath = new System.Windows.Forms.ToolStripMenuItem();
+            this.comboItem22 = new DevComponents.Editors.ComboItem();
             this.ribbonControl1.SuspendLayout();
             this.ribbonPanel1.SuspendLayout();
             this.ribbonPanel2.SuspendLayout();
@@ -1528,7 +1531,9 @@ namespace WzComparerR2
             this.comboBoxItem1.Items.AddRange(new object[] {
             this.comboItem10,
             this.comboItem11,
-            this.comboItem12});
+            this.comboItem12,
+            this.comboItem20,
+            this.comboItem22});
             this.comboBoxItem1.Name = "comboBoxItem1";
             this.comboBoxItem1.SelectedIndex = 0;
             // 
@@ -1542,7 +1547,14 @@ namespace WzComparerR2
             // 
             // comboItem12
             // 
-            this.comboItem12.Text = "IMG值";
+            this.comboItem12.Text = "IMG値";
+            // comboItem20
+            // 
+            this.comboItem20.Text = "節點,値";
+            // comboItem22
+            // 
+            this.comboItem22.Text = "節點路徑";
+            // 
             // 
             // itemContainer17
             // 
@@ -2267,9 +2279,9 @@ namespace WzComparerR2
             // 
             // 
             this.itemContainer36.TitleStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            //
+            // 
             // buttonItemExtractGifEx
-            //
+            // 
             this.buttonItemExtractGifEx.Name = "buttonItemExtractGifEx";
             this.buttonItemExtractGifEx.Text = "提取GifEx";
             this.buttonItemExtractGifEx.Tooltip = "提取選定節點的所有子節點的幀動畫，不使用序數節點名稱。";
@@ -2460,9 +2472,11 @@ namespace WzComparerR2
             this.tsmi2CollapseType,
             this.toolStripMenuItem3,
             this.tsmi2Prev,
-            this.tsmi2Next});
+            this.tsmi2Next,
+            this.toolStripMenuItem6,
+            this.tsmi2CopyFullPath});
             this.contextMenuStrip2.Name = "contextMenuStrip2";
-            this.contextMenuStrip2.Size = new System.Drawing.Size(196, 198);
+            this.contextMenuStrip2.Size = new System.Drawing.Size(196, 226);
             this.contextMenuStrip2.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip2_Opening);
             // 
             // tsmi2SaveAs
@@ -3447,6 +3461,18 @@ namespace WzComparerR2
             this.chkHashPngFileName.TabIndex = 9;
             this.chkHashPngFileName.Text = "ハッシュPNG名";
             //
+            // 
+            // toolStripMenuItem4
+            // 
+            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
+            this.toolStripMenuItem4.Size = new System.Drawing.Size(192, 6);
+            // 
+            // tsmi2CopyFullPath
+            // 
+            this.tsmi2CopyFullPath.Name = "tsmi2CopyFullPath";
+            this.tsmi2CopyFullPath.Size = new System.Drawing.Size(195, 22);
+            this.tsmi2CopyFullPath.Text = "複製完整路徑";
+            this.tsmi2CopyFullPath.Click += new System.EventHandler(this.tsmi2CopyFullPath_Click);
             // MainForm
             // 
             this.ClientSize = new System.Drawing.Size(750, 512);
@@ -3761,5 +3787,8 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ItemContainer itemContainer101;
         private DevComponents.DotNetBar.ItemContainer itemContainer102;
         private DevComponents.DotNetBar.ItemContainer itemContainer103;
+        private DevComponents.Editors.ComboItem comboItem22;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
+        private System.Windows.Forms.ToolStripMenuItem tsmi2CopyFullPath;
     }
 }
