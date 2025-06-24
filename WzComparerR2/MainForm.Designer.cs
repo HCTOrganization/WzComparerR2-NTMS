@@ -2123,6 +2123,7 @@ namespace WzComparerR2
             this.pictureBoxEx1.MouseDragEnabled = true;
             this.pictureBoxEx1.MouseDragSaveEnabled = true;
             this.pictureBoxEx1.Name = "pictureBoxEx1";
+            this.pictureBoxEx1.Padding = new System.Windows.Forms.Padding(0, 14, 0, 0);
             this.pictureBoxEx1.PictureName = null;
             this.pictureBoxEx1.ShowInfo = true;
             this.pictureBoxEx1.ShowPositionGridOnDrag = true;
