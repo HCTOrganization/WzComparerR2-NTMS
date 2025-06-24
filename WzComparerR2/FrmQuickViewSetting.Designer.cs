@@ -881,7 +881,7 @@
             this.chkShowMiniMapMob.Size = new System.Drawing.Size(190, 16);
             this.chkShowMiniMapMob.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowMiniMapMob.TabIndex = 4;
-            this.chkShowMiniMapMob.Text = "ミニマップにモンスターの出現場所を表示";
+            this.chkShowMiniMapMob.Text = "小地圖內顯示怪物刷新位置";
             // 
             // chkShowMiniMapNpc
             // 
@@ -891,13 +891,13 @@
             // 
             // 
             this.chkShowMiniMapNpc.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowMiniMapNpc.Location = new System.Drawing.Point(30, 108);
+            this.chkShowMiniMapNpc.Location = new System.Drawing.Point(13, 108);
             this.chkShowMiniMapNpc.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.chkShowMiniMapNpc.Name = "chkShowMiniMapNpc";
             this.chkShowMiniMapNpc.Size = new System.Drawing.Size(190, 16);
             this.chkShowMiniMapNpc.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowMiniMapNpc.TabIndex = 5;
-            this.chkShowMiniMapNpc.Text = "ミニマップにNPCの位置を表示";
+            this.chkShowMiniMapNpc.Text = "小地圖內顯示NPC位置";
             // 
             // chkShowMiniMapPortal
             // 
@@ -907,13 +907,13 @@
             // 
             // 
             this.chkShowMiniMapPortal.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowMiniMapPortal.Location = new System.Drawing.Point(30, 132);
+            this.chkShowMiniMapPortal.Location = new System.Drawing.Point(13, 132);
             this.chkShowMiniMapPortal.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.chkShowMiniMapPortal.Name = "chkShowMiniMapPortal";
             this.chkShowMiniMapPortal.Size = new System.Drawing.Size(190, 16);
             this.chkShowMiniMapPortal.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowMiniMapPortal.TabIndex = 6;
-            this.chkShowMiniMapPortal.Text = "ミニマップにポータルの場所を表示";
+            this.chkShowMiniMapPortal.Text = "小地圖內顯示傳送門位置";
             // 
             // superTabControlPanel5
             // 
