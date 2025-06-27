@@ -194,12 +194,12 @@ namespace WzComparerR2
                         }
                     }
                 }
-                this.lblUpdateContent.Text = LocalizedString_JP.FRMUPDATER_UPDATE_DOWNLOAD_FAIL;
+                this.lblUpdateContent.Text = "下載完成";
             }
             catch (Exception ex)
             {
                 AppendText(ex.Message + "\r\n", Color.Red);
-                this.lblUpdateContent.Text = "下載完成";
+                this.lblUpdateContent.Text = LocalizedString_JP.FRMUPDATER_UPDATE_DOWNLOAD_FAIL;
             }
             finally
             {
