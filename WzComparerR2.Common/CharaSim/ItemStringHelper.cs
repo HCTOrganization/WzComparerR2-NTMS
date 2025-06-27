@@ -959,6 +959,7 @@ namespace WzComparerR2.CharaSim
                 case 175: return "可裝備墨玄";
                 case 181: return "可裝備葉里";
                 case 182: return "可裝備施亞";
+                case 184: return "可裝備艾伊爾";
                 default: return null;
             }
         }
@@ -1502,7 +1503,7 @@ namespace WzComparerR2.CharaSim
 
                 case 18000: return "施亞阿斯特";
                 case 18001: return "葉里萊特";
-                case 18002:
+                case 18002: return "艾伊爾";
                 case 18003:
                 case 18004: return "閃耀";
                 case 18100: return "葉里萊特(1轉)";
@@ -1520,11 +1521,11 @@ namespace WzComparerR2.CharaSim
                 case 18311: return "閃耀弓手(3轉)";
                 case 18312: return "閃耀弓手(4轉)";
                 case 18314: return "閃耀弓手(6轉)";
-                case 18400: return "閃耀盜賊(1轉)";
-                case 18410: return "閃耀盜賊(2轉)";
-                case 18411: return "閃耀盜賊(3轉)";
-                case 18412: return "閃耀盜賊(4轉)";
-                case 18414: return "閃耀盜賊(6轉)";
+                case 18400: return "艾伊爾(1轉)";
+                case 18410: return "艾伊爾(2轉)";
+                case 18411: return "艾伊爾(3轉)";
+                case 18412: return "艾伊爾(4轉)";
+                case 18414: return "艾伊爾(6轉)";
                 case 18500: return "閃耀海盜(1轉)";
                 case 18510: return "閃耀海盜(2轉)";
                 case 18511: return "閃耀海盜(3轉)";
