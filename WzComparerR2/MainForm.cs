@@ -2168,56 +2168,244 @@ namespace WzComparerR2
             }
         }
 
-        private void tsmi1Export_Click(object sender, EventArgs e)
+        private async void tsmi1Export_Click(object sender, EventArgs e)
         {
-            Wz_Image img = advTree1.SelectedNode?.AsWzNode()?.GetValue<Wz_Image>();
-            if (img == null)
+            Wz_Node node = advTree1.SelectedNode?.AsWzNode();
+            Wz_Image img = node.GetValue<Wz_Image>();
+            if (img != null)
+            {
+                SaveFileDialog dlg = new SaveFileDialog();
+                dlg.DefaultExt = ".img";
+                dlg.FileName = img.Name;
+                dlg.Filter = "IMG (*.img)|*.img";
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    FileStream fs = null;
+                    try
+                    {
+                        fs = new FileStream(dlg.FileName, FileMode.Create, FileAccess.Write);
+                        var s = img.OpenRead();
+                        s.Position = 0;
+                        s.CopyTo(fs);
+                        fs.Close();
+                        labelItemStatus.Text = "已匯出: " + img.Name;
+                    }
+                    catch (Exception ex)
+                    {
+                        fs?.Close();
+                        ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                    }
+                }
+            }
+            else if (node != null)
+            {
+                FolderBrowserDialog dlg = new FolderBrowserDialog();
+                dlg.Description = "請選擇要匯出的資料夾。";
+                if (dlg.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+                string exportedFolder = dlg.SelectedPath;
+                if (!Directory.Exists(Path.Combine(exportedFolder, node.FullPathToFile)))
+                {
+                    Directory.CreateDirectory(Path.Combine(exportedFolder, node.FullPathToFile));
+                }
+                FrmWaiting WaitingForm = new FrmWaiting();
+                WaitingForm.UpdateMessage("匯出中");
+                WaitingForm.Show(this);
+                await Task.Run(() =>
+                {
+                    foreach (Wz_Node wz_Node in node.Nodes)
+                    {
+                        Wz_Image wzImage = wz_Node.GetValue<Wz_Image>();
+                        if (wzImage != null)
+                        {
+                            try
+                            {
+                                string fileName = Path.Combine(Path.Combine(exportedFolder, node.FullPathToFile), wzImage.Name);
+                                dumpImgToFile(wzImage, fileName, WaitingForm);
+                            }
+                            catch (Exception ex)
+                            {
+                                ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            recurseImgDirectory(wz_Node, exportedFolder, WaitingForm);
+                        }
+                    }
+                });
+                WaitingForm.Close();
+                labelItemStatus.Text = "已匯出: " + exportedFolder;
+            }
+            else
             {
                 MessageBoxEx.Show("選擇您想要匯出的 IMG。");
                 return;
             }
-            SaveFileDialog dlg = new SaveFileDialog();
-            dlg.DefaultExt = ".img";
-            dlg.FileName = img.Name;
-            dlg.Filter = "IMG (*.img)|*.img";
-            if (dlg.ShowDialog() == DialogResult.OK)
+        }
+
+        private void dumpImgToFile(Wz_Image img, string path, FrmWaiting frmWaiting)
+        {
+            if (img == null || string.IsNullOrEmpty(path))
             {
-                FileStream fs = null;
-                try
+                return;
+            }
+            try
+            {
+                frmWaiting.UpdateMessage("匯出中: " + img.Name);
+                using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write))
                 {
-                    fs = new FileStream(dlg.FileName, FileMode.Create, FileAccess.Write);
                     var s = img.OpenRead();
                     s.Position = 0;
                     s.CopyTo(fs);
-                    fs.Close();
-                    labelItemStatus.Text = "已匯出: " + img.Name;
                 }
-                catch (Exception ex)
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        private void recurseImgDirectory(Wz_Node node, string directory, FrmWaiting frmWaiting)
+        {
+            if (!Directory.Exists(Path.Combine(directory, node.FullPathToFile)))
+            {
+                Directory.CreateDirectory(Path.Combine(directory, node.FullPathToFile));
+            }
+            foreach (Wz_Node subNode in node.Nodes)
+            {
+                Wz_Image subImg = subNode.GetValue<Wz_Image>();
+                if (subImg != null)
                 {
-                    fs?.Close();
-                    MessageBoxEx.Show(ex.ToString(), LocalizedString_JP.COMMON_ERROR);
+                    string fileName = Path.Combine(Path.Combine(directory, node.FullPathToFile), subImg.Name);
+                    try
+                    {
+                        dumpImgToFile(subImg, fileName, frmWaiting);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+
+                    }
+                }
+                else
+                {
+                    recurseImgDirectory(subNode, directory, frmWaiting);
                 }
             }
         }
 
-        private void tsmi1DumpAsXml_Click(object sender, EventArgs e)
+        private async void tsmi1DumpAsXml_Click(object sender, EventArgs e)
         {
-            Wz_Image img = advTree1.SelectedNode?.AsWzNode()?.GetValue<Wz_Image>();
-            if (img == null)
+            Wz_Node node = advTree1.SelectedNode?.AsWzNode();
+            Wz_Image img = node.GetValue<Wz_Image>();
+            if (img != null)
             {
-                MessageBoxEx.Show("選擇您想要匯出的 XML。");
+                SaveFileDialog dlg = new SaveFileDialog();
+                dlg.DefaultExt = ".xml";
+                dlg.Filter = "XML (*.xml)|*.xml";
+                dlg.FileName = img.Node.FullPathToFile.Replace('\\', '.') + ".xml";
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    FileStream fs = null;
+                    try
+                    {
+                        fs = new FileStream(dlg.FileName, FileMode.Create, FileAccess.Write);
+                        var xsetting = new XmlWriterSettings()
+                        {
+                            CloseOutput = false,
+                            Indent = true,
+                            Encoding = Encoding.UTF8,
+                            CheckCharacters = true,
+                            NewLineChars = Environment.NewLine,
+                            NewLineOnAttributes = false,
+                        };
+                        var writer = XmlWriter.Create(fs, xsetting);
+                        writer.WriteStartDocument(true);
+                        img.Node.DumpAsXml(writer);
+                        writer.WriteEndDocument();
+                        writer.Close();
+
+                        labelItemStatus.Text = "已匯出: " + img.Name + "為 XML 檔案";
+                    }
+                    catch (Exception ex)
+                    {
+                        ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                    }
+                    finally
+                    {
+                        if (fs != null)
+                        {
+                            fs.Close();
+                        }
+                    }
+                }
+            }
+            else if (node != null)
+            {
+                FolderBrowserDialog dlg = new FolderBrowserDialog();
+                dlg.Description = "請選擇要匯出的資料夾。";
+                if (dlg.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+                string exportedFolder = dlg.SelectedPath;
+                if (!Directory.Exists(Path.Combine(exportedFolder, node.FullPathToFile)))
+                {
+                    Directory.CreateDirectory(Path.Combine(exportedFolder, node.FullPathToFile));
+                }
+                FrmWaiting WaitingForm = new FrmWaiting();
+                WaitingForm.UpdateMessage("匯出中");
+                WaitingForm.Show(this);
+
+                await Task.Run(() =>
+                {
+                    foreach (Wz_Node wz_Node in node.Nodes)
+                    {
+                        Wz_Image wzImage = wz_Node.GetValue<Wz_Image>();
+                        if (wzImage != null)
+                        {
+                            try
+                            {
+                                string fileName = Path.Combine(Path.Combine(exportedFolder, node.FullPathToFile), wzImage.Name + ".xml");
+                                dumpXmlToFile(wz_Node, fileName, WaitingForm);
+                            }
+                            catch (Exception ex)
+                            {
+                                ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            recurseXmlDirectory(wz_Node, exportedFolder, WaitingForm);
+                        }
+                    }
+                });
+                WaitingForm.Close();
+                labelItemStatus.Text = "已匯出: " + exportedFolder;
+            }
+            else
+            {
+                MessageBoxEx.Show("選擇您想要匯出的 IMG。");
                 return;
             }
-            SaveFileDialog dlg = new SaveFileDialog();
-            dlg.DefaultExt = ".xml";
-            dlg.Filter = "XML (*.xml)|*.xml";
-            dlg.FileName = img.Node.FullPathToFile.Replace('\\', '.') + ".xml";
-            if (dlg.ShowDialog() == DialogResult.OK)
+        }
+
+        private void dumpXmlToFile(Wz_Node node, string path, FrmWaiting frmWaiting)
+        {
+            if (node == null || string.IsNullOrEmpty(path))
             {
-                FileStream fs = null;
-                try
+                return;
+            }
+            try
+            {
+                frmWaiting.UpdateMessage("匯出中: " + node.GetValue<Wz_Image>().Name);
+                using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write))
                 {
-                    fs = new FileStream(dlg.FileName, FileMode.Create, FileAccess.Write);
                     var xsetting = new XmlWriterSettings()
                     {
                         CloseOutput = false,
@@ -2229,45 +2417,43 @@ namespace WzComparerR2
                     };
                     var writer = XmlWriter.Create(fs, xsetting);
                     writer.WriteStartDocument(true);
-                    img.Node.DumpAsXml(writer);
+                    node.DumpAsXml(writer);
                     writer.WriteEndDocument();
                     writer.Close();
-
-                    labelItemStatus.Text = "已匯出: " + img.Name + "為 XML";
                 }
-                catch (Exception ex)
-                {
-                    MessageBoxEx.Show(ex.ToString(), LocalizedString_JP.COMMON_ERROR);
-                }
-                finally
-                {
-                    if (fs != null)
-                    {
-                        fs.Close();
-                    }
-                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
         }
 
-        private void tsmi1CopyString_Click(object sender, EventArgs e)
+        private void recurseXmlDirectory(Wz_Node node, string directory, FrmWaiting frmWaiting)
         {
-            Wz_Image img = advTree1.SelectedNode?.AsWzNode()?.GetValue<Wz_Image>();
-            if (img == null)
+            if (!Directory.Exists(Path.Combine(directory, node.FullPathToFile)))
             {
-                MessageBoxEx.Show("選擇您想要匯出的 IMG。");
-                return;
+                Directory.CreateDirectory(Path.Combine(directory, node.FullPathToFile));
             }
-            Wz_File wzf = advTree1.SelectedNode.AsWzNode().GetNodeWzFile();
-            switch (wzf.Type)
+            foreach (Wz_Node subNode in node.Nodes)
             {
-                case Wz_Type.Character:
-                case Wz_Type.Item:
-                case Wz_Type.Map:
-                case Wz_Type.Mob:
-                case Wz_Type.Npc:
-                case Wz_Type.Skill:
-                default:
-                    break;
+                Wz_Image subImg = subNode.GetValue<Wz_Image>();
+                if (subImg != null)
+                {
+                    string fileName = Path.Combine(Path.Combine(directory, node.FullPathToFile), subImg.Name + ".xml");
+                    try
+                    {
+                        dumpXmlToFile(subNode, fileName, frmWaiting);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+
+                    }
+                }
+                else
+                {
+                    recurseXmlDirectory(subNode, directory, frmWaiting);
+                }
             }
         }
 
