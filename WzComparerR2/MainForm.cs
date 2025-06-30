@@ -2344,53 +2344,53 @@ namespace WzComparerR2
                     }
                 }
             }
-            else if (node != null)
-            {
-                FolderBrowserDialog dlg = new FolderBrowserDialog();
-                dlg.Description = "請選擇要匯出的資料夾。";
-                if (dlg.ShowDialog(this) != DialogResult.OK)
-                {
-                    return;
-                }
-                string exportedFolder = dlg.SelectedPath;
-                if (!Directory.Exists(Path.Combine(exportedFolder, node.FullPathToFile)))
-                {
-                    Directory.CreateDirectory(Path.Combine(exportedFolder, node.FullPathToFile));
-                }
-                FrmWaiting WaitingForm = new FrmWaiting();
-                WaitingForm.UpdateMessage("匯出中");
-                WaitingForm.Show(this);
+            // else if (node != null)
+            // {
+            //     FolderBrowserDialog dlg = new FolderBrowserDialog();
+            //     dlg.Description = "請選擇要匯出的資料夾。";
+            //     if (dlg.ShowDialog(this) != DialogResult.OK)
+            //     {
+            //         return;
+            //     }
+            //     string exportedFolder = dlg.SelectedPath;
+            //     if (!Directory.Exists(Path.Combine(exportedFolder, node.FullPathToFile)))
+            //     {
+            //         Directory.CreateDirectory(Path.Combine(exportedFolder, node.FullPathToFile));
+            //     }
+            //     FrmWaiting WaitingForm = new FrmWaiting();
+            //     WaitingForm.UpdateMessage("匯出中");
+            //     WaitingForm.Show(this);
 
-                await Task.Run(() =>
-                {
-                    foreach (Wz_Node wz_Node in node.Nodes)
-                    {
-                        Wz_Image wzImage = wz_Node.GetValue<Wz_Image>();
-                        if (wzImage != null)
-                        {
-                            try
-                            {
-                                string fileName = Path.Combine(Path.Combine(exportedFolder, node.FullPathToFile), wzImage.Name + ".xml");
-                                dumpXmlToFile(wz_Node, fileName, WaitingForm);
-                            }
-                            catch (Exception ex)
-                            {
-                                ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            recurseXmlDirectory(wz_Node, exportedFolder, WaitingForm);
-                        }
-                    }
-                });
-                WaitingForm.Close();
-                labelItemStatus.Text = "已匯出: " + exportedFolder;
-            }
+            //     await Task.Run(() =>
+            //     {
+            //         foreach (Wz_Node wz_Node in node.Nodes)
+            //         {
+            //             Wz_Image wzImage = wz_Node.GetValue<Wz_Image>();
+            //             if (wzImage != null)
+            //             {
+            //                 try
+            //                 {
+            //                     string fileName = Path.Combine(Path.Combine(exportedFolder, node.FullPathToFile), wzImage.Name + ".xml");
+            //                     dumpXmlToFile(wz_Node, fileName, WaitingForm);
+            //                 }
+            //                 catch (Exception ex)
+            //                 {
+            //                     ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+            //                     break;
+            //                 }
+            //             }
+            //             else
+            //             {
+            //                 recurseXmlDirectory(wz_Node, exportedFolder, WaitingForm);
+            //             }
+            //         }
+            //     });
+            //     WaitingForm.Close();
+            //     labelItemStatus.Text = "已匯出: " + exportedFolder;
+            // }
             else
             {
-                MessageBoxEx.Show("選擇您想要匯出的 IMG。");
+                MessageBoxEx.Show("暫未實現批量匯出 XML 檔案。");
                 return;
             }
         }
