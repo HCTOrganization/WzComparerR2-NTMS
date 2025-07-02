@@ -799,6 +799,7 @@ namespace WzComparerR2.Comparer
         private void SaveSkillTooltip(string skillTooltipPath)
         {
             SkillTooltipRender2[] skillRenderNewOld = new SkillTooltipRender2[2];
+            bool[] isSkillNull = new bool[2] { false, false };
             int count = 0;
             int allCount = OutputSkillTooltipIDs.Count;
             var skillTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
@@ -870,6 +871,7 @@ namespace WzComparerR2.Comparer
                     }
                     else
                     {
+                        isSkillNull[i] = true;
                         nullSkillIdx = i + 1;
                     }
                 }
@@ -903,14 +905,14 @@ namespace WzComparerR2.Comparer
 
                     case 1: // delete
                         skillType = "刪除";
-
+                        if (isSkillNull[1]) continue;
                         resultImage = skillRenderNewOld[1].Render();
                         g = Graphics.FromImage(resultImage);
                         break;
 
                     case 2: // add
                         skillType = "新增";
-
+                        if (isSkillNull[0]) continue;
                         resultImage = skillRenderNewOld[0].Render();
                         g = Graphics.FromImage(resultImage);
                         break;
@@ -990,6 +992,7 @@ namespace WzComparerR2.Comparer
         private void SaveItemTooltip(string itemTooltipPath)
         {
             ItemTooltipRender2[] itemRenderNewOld = new ItemTooltipRender2[2];
+            bool[] isItemNull = new bool[2] { false, false };
             int count = 0;
             int allCount = OutputItemTooltipIDs.Count;
             var itemTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
@@ -1094,6 +1097,7 @@ namespace WzComparerR2.Comparer
                     }
                     else
                     {
+                        isItemNull[i] = true;
                         nullItemIdx = i + 1;
                     }
                 }
@@ -1127,14 +1131,14 @@ namespace WzComparerR2.Comparer
 
                     case 1: // delete
                         itemType = "刪除";
-
+                        if (isItemNull[1]) continue;
                         resultImage = itemRenderNewOld[1].Render();
                         g = Graphics.FromImage(resultImage);
                         break;
 
                     case 2: // add
                         itemType = "新增";
-
+                        if (isItemNull[0]) continue;
                         resultImage = itemRenderNewOld[0].Render();
                         g = Graphics.FromImage(resultImage);
                         break;
@@ -1173,6 +1177,7 @@ namespace WzComparerR2.Comparer
         private void SaveGearTooltip(string gearTooltipPath)
         {
             GearTooltipRender2[] gearRenderNewOld = new GearTooltipRender2[2];
+            bool[] isGearNull = new bool[2] { false, false };
             int count = 0;
             int allCount = OutputGearTooltipIDs.Count;
             var gearTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
@@ -1362,6 +1367,7 @@ namespace WzComparerR2.Comparer
                     }
                     else
                     {
+                        isGearNull[i] = true;
                         nullEqpIdx = i + 1;
                     }
                 }
@@ -1395,7 +1401,7 @@ namespace WzComparerR2.Comparer
 
                     case 1: // delete
                         gearType = "刪除";
-
+                        if (isGearNull[1]) continue;
                         resultImage = gearRenderNewOld[1].Render();
                         if (resultImage == null) continue;
                         g = Graphics.FromImage(resultImage);
@@ -1403,7 +1409,7 @@ namespace WzComparerR2.Comparer
 
                     case 2: // add
                         gearType = "新增";
-
+                        if (isGearNull[0]) continue;
                         resultImage = gearRenderNewOld[0].Render();
                         if (resultImage == null) continue;
                         g = Graphics.FromImage(resultImage);
@@ -1442,6 +1448,7 @@ namespace WzComparerR2.Comparer
         private void SaveGearTooltip3(string gearTooltipPath)
         {
             GearTooltipRender3[] gearRenderNewOld = new GearTooltipRender3[2];
+            bool[] isGearNull = new bool[2] { false, false };
             int count = 0;
             int allCount = OutputGearTooltipIDs.Count;
             var gearTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
@@ -1629,6 +1636,7 @@ namespace WzComparerR2.Comparer
                     }
                     else
                     {
+                        isGearNull[i] = true;
                         nullEqpIdx = i + 1;
                     }
                 }
@@ -1662,7 +1670,7 @@ namespace WzComparerR2.Comparer
 
                     case 1: // delete
                         gearType = "刪除";
-
+                        if (isGearNull[1]) continue;
                         resultImage = gearRenderNewOld[1].Render();
                         if (resultImage == null) continue;
                         g = Graphics.FromImage(resultImage);
@@ -1670,7 +1678,7 @@ namespace WzComparerR2.Comparer
 
                     case 2: // add
                         gearType = "新增";
-
+                        if (isGearNull[0]) continue;
                         resultImage = gearRenderNewOld[0].Render();
                         if (resultImage == null) continue;
                         g = Graphics.FromImage(resultImage);
@@ -1709,6 +1717,7 @@ namespace WzComparerR2.Comparer
         private void SaveMapTooltip(string mapTooltipPath)
         {
             MapTooltipRenderer[] mapRenderNewOld = new MapTooltipRenderer[2];
+            bool[] isMapNull = new bool[2] { false, false };
             int count = 0;
             int allCount = OutputMapTooltipIDs.Count;
             var mapTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
@@ -1777,6 +1786,7 @@ namespace WzComparerR2.Comparer
                     }
                     else
                     {
+                        isMapNull[i] = true;
                         nullMapIdx = i + 1;
                     }
                 }
@@ -1810,7 +1820,7 @@ namespace WzComparerR2.Comparer
 
                     case 1: // delete
                         mapType = "刪除";
-
+                        if (isMapNull[1]) continue;
                         resultImage = mapRenderNewOld[1].Render();
                         if (resultImage == null) continue;
                         g = Graphics.FromImage(resultImage);
@@ -1818,7 +1828,7 @@ namespace WzComparerR2.Comparer
 
                     case 2: // add
                         mapType = "新增";
-
+                        if (isMapNull[0]) continue;
                         resultImage = mapRenderNewOld[0].Render();
                         if (resultImage == null) continue;
                         g = Graphics.FromImage(resultImage);
@@ -1852,6 +1862,7 @@ namespace WzComparerR2.Comparer
         private void SaveMobTooltip(string mobTooltipPath)
         {
             MobTooltipRenderer[] mobRenderNewOld = new MobTooltipRenderer[2];
+            bool[] isMobNull = new bool[2] { false, false };
             int count = 0;
             int allCount = OutputMobTooltipIDs.Count;
             var mobTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
@@ -1913,6 +1924,7 @@ namespace WzComparerR2.Comparer
                     }
                     else
                     {
+                        isMobNull[i] = true;
                         nullMobIdx = i + 1;
                     }
                 }
@@ -1946,7 +1958,7 @@ namespace WzComparerR2.Comparer
 
                     case 1: // delete
                         mobType = "刪除";
-
+                        if (isMobNull[1]) continue;
                         resultImage = mobRenderNewOld[1].Render();
                         if (resultImage == null) continue;
                         g = Graphics.FromImage(resultImage);
@@ -1954,7 +1966,7 @@ namespace WzComparerR2.Comparer
 
                     case 2: // add
                         mobType = "新增";
-
+                        if (isMobNull[0]) continue;
                         resultImage = mobRenderNewOld[0].Render();
                         if (resultImage == null) continue;
                         g = Graphics.FromImage(resultImage);
@@ -1988,6 +2000,7 @@ namespace WzComparerR2.Comparer
         private void SaveNpcTooltip(string npcTooltipPath)
         {
             NpcTooltipRenderer[] npcRenderNewOld = new NpcTooltipRenderer[2];
+            bool[] isNpcNull = new bool[2] { false, false };
             int count = 0;
             int allCount = OutputNpcTooltipIDs.Count;
             var npcTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
@@ -2049,6 +2062,7 @@ namespace WzComparerR2.Comparer
                     }
                     else
                     {
+                        isNpcNull[i] = true;
                         nullNpcIdx = i + 1;
                     }
                 }
@@ -2082,7 +2096,7 @@ namespace WzComparerR2.Comparer
 
                     case 1: // delete
                         npcType = "刪除";
-
+                        if (isNpcNull[1]) continue;
                         resultImage = npcRenderNewOld[1].Render();
                         if (resultImage == null) continue;
                         g = Graphics.FromImage(resultImage);
@@ -2090,7 +2104,7 @@ namespace WzComparerR2.Comparer
 
                     case 2: // add
                         npcType = "新增";
-
+                        if (isNpcNull[0]) continue;
                         resultImage = npcRenderNewOld[0].Render();
                         if (resultImage == null) continue;
                         g = Graphics.FromImage(resultImage);
@@ -2124,6 +2138,7 @@ namespace WzComparerR2.Comparer
         private void SaveCashTooltip(string itemTooltipPath)
         {
             CashPackageTooltipRender[] cashRenderNewOld = new CashPackageTooltipRender[2];
+            bool[] isCashNull = new bool[2] { false, false };
             int count = 0;
             int allCount = OutputCashTooltipIDs.Count;
             var itemTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
@@ -2190,6 +2205,7 @@ namespace WzComparerR2.Comparer
                     }
                     else
                     {
+                        isCashNull[i] = true;
                         nullItemIdx = i + 1;
                     }
                 }
@@ -2223,7 +2239,7 @@ namespace WzComparerR2.Comparer
 
                     case 1: // delete
                         itemType = "刪除";
-
+                        if (isCashNull[1]) continue;
                         resultImage = cashRenderNewOld[1].Render();
                         if (resultImage == null) continue;
                         g = Graphics.FromImage(resultImage);
@@ -2231,7 +2247,7 @@ namespace WzComparerR2.Comparer
 
                     case 2: // add
                         itemType = "新增";
-
+                        if (isCashNull[0]) continue;
                         resultImage = cashRenderNewOld[0].Render();
                         if (resultImage == null) continue;
                         g = Graphics.FromImage(resultImage);
