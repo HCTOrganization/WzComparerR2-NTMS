@@ -194,8 +194,6 @@ namespace WzComparerR2.CharaSimControl
             descRect.Offset(10, 10);
             mobRect.Offset(31, 12);
             npcRect.Offset(31, 12);
-
-            GearGraphics.DrawNewTooltipBack(g2, 0, 0, bmp2.Width, bmp2.Height);
             if (!Enable22AniStyle) g2.DrawImage(Resource.UIToolTip_img_Item_Frame2_cover, 3, 3);
             if (this.ShowObjectID)
             {
