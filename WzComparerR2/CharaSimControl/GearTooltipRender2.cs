@@ -655,6 +655,7 @@ namespace WzComparerR2.CharaSimControl
                 if (Gear.ToolTipPreview.Bitmap != null)
                 {
                     appearance = Gear.ToolTipPreview;
+                    Gear.AndroidBitmap = appearance.Bitmap;
                     g.DrawImage(appearance.Bitmap, (bitmap.Width - appearance.Bitmap.Width) / 2 + 13, picH);
                     picH += appearance.Bitmap.Height;
                 }
