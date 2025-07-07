@@ -720,7 +720,8 @@ namespace WzComparerR2
             }
             else if (node.Value is Wz_Video)
             {
-                var videoFrameData = this.pictureBoxEx1.LoadVideo(node.Value as Wz_Video);
+                var origin = node.FindNodeByPath("origin").GetValueEx<Wz_Vector>(null);
+                var videoFrameData = this.pictureBoxEx1.LoadVideo(node.Value as Wz_Video, origin);
 
                 if (videoFrameData != null)
                 {
@@ -1661,7 +1662,9 @@ namespace WzComparerR2
                 case Wz_Video video:
                     textBoxX1.Text = "數據長:  " + video.Length + " 位元組\r\n" +
                         "偏移量:  " + video.Offset;
-                    var videoFrameData = this.pictureBoxEx1.LoadVideo(video);
+                    if (this.pictureBoxEx1.ShowOverlayAni) break; // 애니메이션 중첩 중일때는 자동 video 미리보기 없음
+                    var origin = selectedNode.FindNodeByPath("origin").GetValueEx<Wz_Vector>(null);
+                    var videoFrameData = this.pictureBoxEx1.LoadVideo(video, origin);
                     pictureBoxEx1.PictureName = GetSelectedNodeImageName();
                     this.pictureBoxEx1.ShowAnimation(videoFrameData);
                     this.cmbItemAniNames.Items.Clear();
