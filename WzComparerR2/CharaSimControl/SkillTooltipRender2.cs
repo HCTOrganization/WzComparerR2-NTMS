@@ -87,6 +87,15 @@ namespace WzComparerR2.CharaSimControl
                 ridingGearOrigin.X = originBmp.Width;
             }
 
+            Point hexaSkillDescOrigin = Point.Empty;
+            Bitmap hexaSkillDescBmp = RenderHexaDesc(region);
+            if (Skill.Origin || Skill.Ascent)
+            {
+                totalSize.Width += hexaSkillDescBmp.Width;
+                totalSize.Height = Math.Max(picHeight, hexaSkillDescBmp.Height);
+                hexaSkillDescOrigin.X = originBmp.Width;
+            }
+
             Bitmap tooltip = new Bitmap(totalSize.Width, totalSize.Height);
             Graphics g = Graphics.FromImage(tooltip);
 
@@ -119,10 +128,19 @@ namespace WzComparerR2.CharaSimControl
                     new Rectangle(Point.Empty, ridingGearBmp.Size), GraphicsUnit.Pixel);
             }
 
+            if (hexaSkillDescBmp != null)
+            {
+                g.DrawImage(hexaSkillDescBmp, hexaSkillDescOrigin.X, hexaSkillDescOrigin.Y,
+                    new Rectangle(Point.Empty, hexaSkillDescBmp.Size), GraphicsUnit.Pixel);
+
+            }
+
             if (originBmp != null)
                 originBmp.Dispose();
             if (ridingGearBmp != null)
                 ridingGearBmp.Dispose();
+            if (hexaSkillDescBmp != null)
+                hexaSkillDescBmp.Dispose();
 
             g.Dispose();
             return tooltip;
@@ -555,6 +573,47 @@ namespace WzComparerR2.CharaSimControl
 
             renderer.TargetItem = gear;
             return renderer.Render();
+        }
+
+
+
+        private Bitmap RenderHexaDesc(CanvasRegion region)
+        {
+            Bitmap bitmap = new Bitmap(1, 1);
+            if (Skill.Origin)
+            {
+                bitmap = new Bitmap(430, 120);
+            }
+            else if (Skill.Ascent)
+            {
+                bitmap = new Bitmap(430, 300);
+            }
+            Graphics g = Graphics.FromImage(bitmap);
+            int picH = 13;
+            if (Skill.Origin && !Skill.Invisible)
+            {
+                string originSkillDesc = "起源技能會讓包含無法行動免疫的所有敵人呈現絕對無法行動的狀態，\n絕對無法行動的狀態的抵抗時間與其他無法行動狀態不一樣。";
+                string originSkillH = "攻擊命中時，連續10秒內敵人呈現絕對無法動彈的狀態。";
+                GearGraphics.DrawNewTooltipBack(g, 0, 0, bitmap.Width, 120);
+                GearGraphics.DrawPlainText(g, originSkillDesc, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
+                picH += 19;
+                DrawV6SkillDotline(g, region.SplitterX1, region.SplitterX2, picH);
+                picH += 16;
+                GearGraphics.DrawPlainText(g, originSkillH, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
+            }
+            else if (Skill.Ascent && !Skill.Invisible)
+            {
+                string ascentSkillDesc = "進階技能在Boss戰鬥中沒有冷卻時間，而是按照規定次數使用。只能在有最大HP上限最高的Boss怪物存在時才能使用。\r\n不會啟動追加攻擊以及效果，進階技能會優先攻擊最大HP上限最高的Boss\r\n怪物。\r\n並且攻擊反射、無敵狀態的敵人時也會使其受到傷害。\r\n\r\n以下效果不會影響進階技能的傷害。 \r\n- 裝備：帽子\r\n- 裝備：戒指\r\n- 條件觸發的被動效果\r\n- 主動技能的使用效果\r\n- 怪物的攻擊模式以及減益效果\r\n- 持續時間低於30分鐘的消耗品與商城道具";
+                string ascentSkillH = "在Boss戰鬥中最多可以使用3次\r\n在其他情況使用時冷卻時間為240秒";
+                GearGraphics.DrawNewTooltipBack(g, 0, 0, bitmap.Width, 300);
+                GearGraphics.DrawPlainText(g, ascentSkillDesc, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
+                picH += 16;
+                DrawV6SkillDotline(g, region.SplitterX1, region.SplitterX2, picH);
+                picH += 16;
+                GearGraphics.DrawPlainText(g, ascentSkillH, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
+            }
+            g.Dispose();
+            return bitmap;
         }
 
         private class CanvasRegion
