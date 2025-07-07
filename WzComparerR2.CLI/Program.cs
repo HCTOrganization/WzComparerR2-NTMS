@@ -291,7 +291,7 @@ namespace WzComparerR2.CLI
                 case "find":
                     Console.WriteLine("    wcr2cli patch find [game_region] [version_parameters]");
                     Console.WriteLine("");
-                    Console.WriteLine("Valid game regions: KMST, KMST-Minor, KMS, KMS-Minor, CMS, MSEA, TMS");
+                    Console.WriteLine("Valid game regions: KMST, KMST-Minor, KMS, KMS-Minor, CMS, MSEA, MSEA-ZIP, TMS");
                     Console.WriteLine("");
                     Console.WriteLine("Version Parameters instruction:");
                     Console.WriteLine("");
