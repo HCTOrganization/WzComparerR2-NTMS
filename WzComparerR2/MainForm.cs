@@ -2491,6 +2491,59 @@ namespace WzComparerR2
                 MessageBoxEx.Show("StringLinker更新失敗。", "錯誤");
             }
         }
+
+        private async void tsmi1SaveImgList_Click(object sender, EventArgs e)
+        {
+            Wz_Node node = advTree1.SelectedNode?.AsWzNode();
+            Wz_Image img = node.GetValue<Wz_Image>();
+            if (img != null)
+            {
+                MessageBoxEx.Show("選擇要匯出的目錄。");
+                return;
+            }
+            else if (node != null)
+            {
+                SaveFileDialog dlg = new SaveFileDialog();
+                dlg.DefaultExt = ".txt";
+                dlg.FileName = RemoveInvalidFileNameChars(node.FullPathToFile) + ".txt";
+                dlg.Filter = "TXT (*.txt)|*.txt";
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    StreamWriter sw = new StreamWriter(dlg.FileName);
+                    try
+                    {
+                        foreach (Wz_Node wz_Node in node.Nodes)
+                        {
+                            Wz_Image wzImage = wz_Node.GetValue<Wz_Image>();
+                            if (wzImage != null)
+                            {
+                                try
+                                {
+                                    sw.WriteLine(wzImage.Name);
+                                }
+                                catch (Exception ex)
+                                {
+                                    ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                                    break;
+                                }
+                            }
+                        }
+                        sw?.Close();
+                        labelItemStatus.Text = "已匯出: " + dlg.FileName;
+                    }
+                    catch (Exception ex)
+                    {
+                        sw?.Close();
+                        ToastNotification.Show(this, $"錯誤: {ex.Message}", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                    }
+                }
+            }
+            else
+            {
+                MessageBoxEx.Show("選擇要匯出的目錄。");
+                return;
+            }
+        }
         #endregion
 
         #region Tools菜单事件和方法

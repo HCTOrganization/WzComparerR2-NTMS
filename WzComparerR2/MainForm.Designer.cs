@@ -267,6 +267,7 @@ namespace WzComparerR2
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmi1Export = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmi1DumpAsXml = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmi1SaveImgList = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmi1UpdateStringLinker = new System.Windows.Forms.ToolStripMenuItem();
             this.nodeConnector1 = new DevComponents.AdvTree.NodeConnector();
@@ -3182,7 +3183,8 @@ namespace WzComparerR2
             this.tsmi1Sort,
             this.toolStripMenuItem4,
             this.tsmi1Export,
-            this.tsmi1DumpAsXml});
+            this.tsmi1DumpAsXml,
+            this.tsmi1SaveImgList});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(155, 76);
             // 
@@ -3227,6 +3229,13 @@ namespace WzComparerR2
             this.tsmi1UpdateStringLinker.Size = new System.Drawing.Size(154, 22);
             this.tsmi1UpdateStringLinker.Text = "更新字串表";
             this.tsmi1UpdateStringLinker.Click += new System.EventHandler(this.tsmi1UpdateStringLinker_Click); 
+            // 
+            // tsmi1SaveImgList
+            // 
+            this.tsmi1SaveImgList.Name = "tsmi1SaveImgList";
+            this.tsmi1SaveImgList.Size = new System.Drawing.Size(154, 22);
+            this.tsmi1SaveImgList.Text = "將IMG清單儲存為文本";
+            this.tsmi1SaveImgList.Click += new System.EventHandler(this.tsmi1SaveImgList_Click);
             // 
             // elementStyle1
             // 
@@ -3778,6 +3787,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ButtonItem buttonItemUpdate;
         private System.Windows.Forms.ToolStripMenuItem tsmi1DumpAsXml;
         private System.Windows.Forms.ToolStripMenuItem tsmi1UpdateStringLinker;
+        private System.Windows.Forms.ToolStripMenuItem tsmi1SaveImgList;
         private DevComponents.Editors.ComboItem comboItem18;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkResolvePngLink;
         private DevComponents.DotNetBar.ComboBoxItem cmbItemSkins;
