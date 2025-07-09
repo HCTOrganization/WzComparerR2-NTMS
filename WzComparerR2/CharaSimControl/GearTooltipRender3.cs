@@ -2072,6 +2072,11 @@ namespace WzComparerR2.CharaSimControl
                 tags.Add(ItemStringHelper.GetGearPropString3(GearPropType.accountShareTag, value)[0]);
             }
 
+            if (Gear.Props.TryGetValue(GearPropType.colorvar, out value) && value > 0)
+            {
+                tags.Add(ItemStringHelper.GetGearPropString(GearPropType.colorvar, value));
+            }
+
             // 모루
             if (Gear.Props.TryGetValue(GearPropType.noLookChange, out value) && value != 0)
             {
