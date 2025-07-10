@@ -89,7 +89,7 @@ namespace WzComparerR2.CharaSimControl
 
             Point hexaSkillDescOrigin = Point.Empty;
             Bitmap hexaSkillDescBmp = RenderHexaDesc(region);
-            if (Skill.Origin || Skill.Ascent)
+            if ((Skill.Origin || Skill.Ascent) && !Skill.Invisible)
             {
                 totalSize.Width += hexaSkillDescBmp.Width;
                 totalSize.Height = Math.Max(picHeight, hexaSkillDescBmp.Height);
