@@ -120,6 +120,7 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.onlyEquip: return value == 0 ? null : "只能單獨使用";
                 case GearPropType.notExtend: return value == 0 ? null : "無法延長有效時間。";
                 case GearPropType.accountSharableAfterExchange: return value == 0 ? null : "可交換1次\n(僅限在相同世界內的我的角色之間轉移)";
+                case GearPropType.noPrism: return value == 0 ? null : "無法使用棱鏡";
                 case GearPropType.mintable: return value == 0 ? null : "可鑄造";
                 case GearPropType.tradeAvailable:
                     switch (value)
@@ -375,6 +376,9 @@ namespace WzComparerR2.CharaSim
                     return res;
                 case GearPropType.noLookChange:
                     res[0] = value == 0 ? null : "#$r無法使用神秘鐵砧#";
+                    return res;
+                case GearPropType.noPrism:
+                    res[0] = value == 0 ? null : "#$r無法使用棱鏡#";
                     return res;
                 case GearPropType.mintable:
                     res[0] = value == 0 ? null : "#$r可鑄造#";

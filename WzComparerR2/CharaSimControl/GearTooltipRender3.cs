@@ -2179,6 +2179,18 @@ namespace WzComparerR2.CharaSimControl
             }
             tempTags.Clear();
 
+            // 프리즘 불가
+            if (Gear.Props.TryGetValue(GearPropType.noPrism, out value) && value != 0)
+            {
+                tags.Add(ItemStringHelper.GetGearPropString22(GearPropType.noPrism, value)[0]);
+            }
+
+            // 민팅
+            if (Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0)
+            {
+                tags.Add(ItemStringHelper.GetGearPropString22(GearPropType.mintable, value)[0]);
+            }
+
             return tags.Where(text => !string.IsNullOrEmpty(text)).ToList();
         }
 
