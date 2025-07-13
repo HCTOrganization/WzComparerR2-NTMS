@@ -261,7 +261,6 @@ namespace WzComparerR2.CharaSim
         //MSN exclusive stats
         blockUpgradeExtraOption,
         blockUpgradeStarforce,
-        blockUpgradeExtraOption,
         mintable,
         cosmetic,
 

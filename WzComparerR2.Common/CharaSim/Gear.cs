@@ -42,6 +42,7 @@ namespace WzComparerR2.CharaSim
         public bool CanPotential { get; internal set; }
         public string EpicHs { get; internal set; }
         public BitmapOrigin ToolTipPreview {  get; set; }
+        public Bitmap AndroidBitmap { get; set; }
         public string LabelGradeTooltip { get; internal set; }
 
         public bool FixLevel { get; internal set; }
