@@ -57,7 +57,7 @@ namespace WzComparerR2.AvatarCommon
             switch (this.Type)
             {
                 case 0:
-                    return "全色系";
+                    return "整體色系";
                 case 1:
                     return "紅色系";
                 case 2:

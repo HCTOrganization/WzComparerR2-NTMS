@@ -1155,7 +1155,7 @@ namespace WzComparerR2.Avatar.UI
                     }
 
                     var labelBrightness = btn.SubItems.OfType<LabelItem>().FirstOrDefault(Item => Item.Name.Contains("Brightness"));
-                    labelBrightness.Text = $"明度({(part.PrismData.Brightness > 100 ? "+" : "")}{part.PrismData.Brightness - 100})";
+                    labelBrightness.Text = $"亮度({(part.PrismData.Brightness > 100 ? "+" : "")}{part.PrismData.Brightness - 100})";
                 }
             }
         }
@@ -1213,7 +1213,7 @@ namespace WzComparerR2.Avatar.UI
                 }
                 if (part.HasPrism)
                 {
-                    text = string.Format("{0}\r\n{1}\r\n色相 {2}, 飽和度 {3}, 明度 {4}\r\n{5}+{6}h{7}s{8}v{9}",
+                    text = string.Format("{0}\r\n{1}\r\n色相 {2}, 飽和度 {3}, 亮度 {4}\r\n{5}+{6}h{7}s{8}v{9}",
                         sr.Name,
                         part.PrismData.GetColorType(),
                         part.PrismData.Hue,

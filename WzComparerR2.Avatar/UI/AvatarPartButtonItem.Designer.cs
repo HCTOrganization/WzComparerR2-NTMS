@@ -141,7 +141,7 @@
             this.rdoPrismType0.AutoCollapseOnClick = false;
             this.rdoPrismType0.CheckBoxStyle = DevComponents.DotNetBar.eCheckBoxStyle.RadioButton;
             this.rdoPrismType0.Name = "rdoPrismType0";
-            this.rdoPrismType0.Text = "全色系";
+            this.rdoPrismType0.Text = "整體色系";
             //
             // rdoPrismType1
             // 
@@ -231,7 +231,7 @@
             // 
             this.labelBrightness.AutoCollapseOnClick = false;
             this.labelBrightness.Name = "labelBrightness";
-            this.labelBrightness.Text = "明度";
+            this.labelBrightness.Text = "亮度";
             // 
             // AvatarPartButtonItem
             // 

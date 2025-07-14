@@ -76,7 +76,7 @@ namespace WzComparerR2.Avatar.UI
                 this.labelBrightness.Name = $"{ID}_labelBrightness";
                 this.labelHue.Text = $"色相({hue})";
                 this.labelSaturation.Text = $"飽和度({(saturation > 100 ? "+" : "")}{saturation - 100})";
-                this.labelBrightness.Text = $"明度({(brightness > 100 ? "+" : "")}{brightness - 100})";
+                this.labelBrightness.Text = $"亮度({(brightness > 100 ? "+" : "")}{brightness - 100})";
 
                 CheckBoxItem[] rdoPrismType = { this.rdoPrismType0, this.rdoPrismType1, this.rdoPrismType2, this.rdoPrismType3, this.rdoPrismType4, this.rdoPrismType5, this.rdoPrismType6 };
                 for (int i = 0; i < rdoPrismType.Length; i++)
@@ -136,7 +136,7 @@ namespace WzComparerR2.Avatar.UI
                 this.sliderBrightness.Value = brightness - 100;
                 this.labelHue.Text = $"色相({hue})";
                 this.labelSaturation.Text = $"飽和度({(saturation > 100 ? "+" : "")}{saturation - 100})";
-                this.labelBrightness.Text = $"明度({(brightness > 100 ? "+" : "")}{brightness - 100})";
+                this.labelBrightness.Text = $"亮度({(brightness > 100 ? "+" : "")}{brightness - 100})";
                 this.rdoPrismType0.Checked = true;
             }
         }
