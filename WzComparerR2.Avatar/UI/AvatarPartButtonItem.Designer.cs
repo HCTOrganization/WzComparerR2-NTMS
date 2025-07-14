@@ -219,7 +219,7 @@
             // 
             this.labelHue.AutoCollapseOnClick = false;
             this.labelHue.Name = "labelHue";
-            this.labelHue.Text = "色相";
+            this.labelHue.Text = "色調";
             // 
             // labelSaturation
             // 

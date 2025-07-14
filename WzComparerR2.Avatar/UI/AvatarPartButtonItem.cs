@@ -74,7 +74,7 @@ namespace WzComparerR2.Avatar.UI
                 this.labelHue.Name = $"{ID}_labelHue";
                 this.labelSaturation.Name = $"{ID}_labelSaturation";
                 this.labelBrightness.Name = $"{ID}_labelBrightness";
-                this.labelHue.Text = $"色相({hue})";
+                this.labelHue.Text = $"色調({hue})";
                 this.labelSaturation.Text = $"飽和度({(saturation > 100 ? "+" : "")}{saturation - 100})";
                 this.labelBrightness.Text = $"亮度({(brightness > 100 ? "+" : "")}{brightness - 100})";
 
@@ -134,7 +134,7 @@ namespace WzComparerR2.Avatar.UI
                 this.sliderHue.Value = hue;
                 this.sliderSaturation.Value = saturation - 100;
                 this.sliderBrightness.Value = brightness - 100;
-                this.labelHue.Text = $"色相({hue})";
+                this.labelHue.Text = $"色調({hue})";
                 this.labelSaturation.Text = $"飽和度({(saturation > 100 ? "+" : "")}{saturation - 100})";
                 this.labelBrightness.Text = $"亮度({(brightness > 100 ? "+" : "")}{brightness - 100})";
                 this.rdoPrismType0.Checked = true;
