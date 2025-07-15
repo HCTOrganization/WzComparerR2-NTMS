@@ -861,9 +861,10 @@ namespace WzComparerR2
         {
             FrmGifSetting frm = new FrmGifSetting();
             frm.Load(ImageHandlerConfig.Default);
+            bool isAlpha = (ImageHandlerConfig.Default.BackgroundType == ImageBackgroundType.Transparent);
             frm.FFmpegBinPathHint = FFmpegEncoder.DefaultExecutionFileName;
-            frm.FFmpegArgumentHint = FFmpegEncoder.DefaultArgumentFormat;
-            frm.FFmpegDefaultExtensionHint = FFmpegEncoder.DefaultOutputFileExtension;
+            frm.FFmpegArgumentHint = isAlpha ? FFmpegEncoder.DefaultArgumentWithAlphaFormat : FFmpegEncoder.DefaultArgumentFormat;
+            frm.FFmpegDefaultExtensionHint = isAlpha ? FFmpegEncoder.DefaultWithAlphaOutputFileExtension : FFmpegEncoder.DefaultOutputFileExtension;
             if (frm.ShowDialog() == DialogResult.OK)
             {
                 ConfigManager.Reload();

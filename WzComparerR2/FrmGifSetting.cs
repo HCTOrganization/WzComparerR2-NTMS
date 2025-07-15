@@ -234,6 +234,12 @@ namespace WzComparerR2
             BackgroundType = ImageBackgroundType.Color;
         }
 
+        private void checkBoxX1_CheckedChanged(object sender, EventArgs e)
+        {
+            this.FFmpegArgumentHint = checkBoxX1.Checked ? WzComparerR2.Encoders.FFmpegEncoder.DefaultArgumentWithAlphaFormat : WzComparerR2.Encoders.FFmpegEncoder.DefaultArgumentFormat;
+            this.FFmpegDefaultExtensionHint = checkBoxX1.Checked ? WzComparerR2.Encoders.FFmpegEncoder.DefaultWithAlphaOutputFileExtension : WzComparerR2.Encoders.FFmpegEncoder.DefaultOutputFileExtension;
+        }
+
         private void slider1_ValueChanged(object sender, EventArgs e)
         {
             var slider = sender as DevComponents.DotNetBar.Controls.Slider;

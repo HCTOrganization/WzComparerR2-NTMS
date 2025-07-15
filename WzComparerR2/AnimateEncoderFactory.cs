@@ -52,6 +52,7 @@ namespace WzComparerR2
                     encoder.FFmpegBinPath = config.FFmpegBinPath;
                     encoder.FFmpegArgumentFormat = config.FFmpegArgument;
                     encoder.OutputFileExtension = config.FFmpegOutputFileExtension;
+                    encoder.isAlphaEnabled = (config.BackgroundType == ImageBackgroundType.Transparent);
                 }
             });
 

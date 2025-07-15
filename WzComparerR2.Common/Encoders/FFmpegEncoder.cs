@@ -19,8 +19,10 @@ namespace WzComparerR2.Encoders
         /// Default ffmpeg argument format to encode mp4 with avc H.264 video format.
         /// </summary>
         public static readonly string DefaultArgumentFormat = @$"-y -f rawvideo -pixel_format bgra -s %w*%h -r 1000/%t -i ""%i"" -vf ""crop=trunc(iw/2)*2:trunc(ih/2)*2"" -vcodec libx264 -pix_fmt yuv420p ""%o""";
+        public static readonly string DefaultArgumentWithAlphaFormat = @$"-y -f rawvideo -pixel_format bgra -s %w*%h -r 1000/%t -i ""%i"" -vf ""crop=trunc(iw/2)*2:trunc(ih/2)*2"" -vcodec qtrle -pix_fmt argb ""%o""";
 
         public static readonly string DefaultOutputFileExtension = ".mp4";
+        public static readonly string DefaultWithAlphaOutputFileExtension = ".mov";
 
         public FFmpegEncoder()
         {
@@ -36,6 +38,7 @@ namespace WzComparerR2.Encoders
         private StringBuilder ffmpegStdout = new StringBuilder();
         private StringBuilder ffmpegStderr = new StringBuilder();
         private bool disposed;
+        public bool isAlphaEnabled { get; set; } = false;
 
         public override GifEncoderCompatibility Compatibility => new GifEncoderCompatibility()
         {
@@ -44,7 +47,7 @@ namespace WzComparerR2.Encoders
             MaxFrameDelay = int.MaxValue,
             FrameDelayStep = 1,
             AlphaSupportMode = AlphaSupportMode.NoAlpha,
-            DefaultExtension = string.IsNullOrEmpty(OutputFileExtension) ? DefaultOutputFileExtension : OutputFileExtension,
+            DefaultExtension = string.IsNullOrEmpty(OutputFileExtension) ? (isAlphaEnabled ? DefaultWithAlphaOutputFileExtension : DefaultOutputFileExtension) : OutputFileExtension,
             SupportedExtensions = new[] { ".*" },
         };
 
@@ -73,7 +76,7 @@ namespace WzComparerR2.Encoders
             ProcessStartInfo psi = new()
             {
                 FileName = string.IsNullOrEmpty(FFmpegBinPath) ? DefaultExecutionFileName : FFmpegBinPath,
-                Arguments = SubstituteParams(string.IsNullOrEmpty(FFmpegArgumentFormat) ? DefaultArgumentFormat : FFmpegArgumentFormat,
+                Arguments = SubstituteParams(string.IsNullOrEmpty(FFmpegArgumentFormat) ? (isAlphaEnabled ? DefaultArgumentWithAlphaFormat : DefaultArgumentFormat) : FFmpegArgumentFormat,
                     @$"\\.\pipe\{pipeName}", Width, Height, delay, FileName),
                 WorkingDirectory = Environment.CurrentDirectory,
                 UseShellExecute = false,
