@@ -80,7 +80,14 @@
             this.labelX12 = new DevComponents.DotNetBar.LabelX();
             this.textBoxX3 = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.labelX13 = new DevComponents.DotNetBar.LabelX();
-            this.btnDiscordPreset = new DevComponents.DotNetBar.ButtonX();
+            this.btnPreset = new DevComponents.DotNetBar.ButtonX();
+            this.btnDiscordPreset = new DevComponents.DotNetBar.ButtonItem();
+            this.btnNonTransparentMP4Preset = new DevComponents.DotNetBar.ButtonItem();
+            this.btnGreenBackdropMP4Preset = new DevComponents.DotNetBar.ButtonItem();
+            this.btnBlueBackdropMP4Preset = new DevComponents.DotNetBar.ButtonItem();
+            this.btnTransparentMOVPreset = new DevComponents.DotNetBar.ButtonItem();
+            this.btnTransparentWebMPreset = new DevComponents.DotNetBar.ButtonItem();
+            this.btnDefaultPreset = new DevComponents.DotNetBar.ButtonItem();
             this.panelExMosaic.SuspendLayout();
             this.panelExColor.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.integerInput1)).BeginInit();
@@ -118,15 +125,65 @@
             this.labelX1.TabIndex = 0;
             this.labelX1.Text = "背景色";
             //
+            // btnPreset
+            //
+            this.btnPreset.Location = new System.Drawing.Point(104, 7);
+            this.btnPreset.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnPreset.Size = new System.Drawing.Size(70, 23);
+            this.btnPreset.AutoExpandOnClick = true;
+            this.btnPreset.Name = "btnPreset";
+            this.btnPreset.TabIndex = 4;
+            this.btnPreset.Text = "預設";
+            this.btnPreset.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.btnDiscordPreset,
+            this.btnNonTransparentMP4Preset,
+            this.btnGreenBackdropMP4Preset,
+            this.btnBlueBackdropMP4Preset,
+            this.btnTransparentMOVPreset,
+            this.btnTransparentWebMPreset,
+            this.btnDefaultPreset});
+            //
             // btnDiscordPreset
             //
-            this.btnDiscordPreset.Location = new System.Drawing.Point(104, 7);
-            this.btnDiscordPreset.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
-            this.btnDiscordPreset.Size = new System.Drawing.Size(104, 23);
             this.btnDiscordPreset.Name = "btnDiscordPreset";
-            this.btnDiscordPreset.TabIndex = 4;
-            this.btnDiscordPreset.Text = "Discord預設";
-            this.btnDiscordPreset.Click += btnDiscordPreset_Click;
+            this.btnDiscordPreset.Text = "Discord用GIF";
+            this.btnDiscordPreset.Click += new System.EventHandler(this.btnDiscordPreset_Click);
+            //
+            // btnNonTransparentMP4Preset
+            //
+            this.btnNonTransparentMP4Preset.Name = "btnNonTransparentMP4Preset";
+            this.btnNonTransparentMP4Preset.Text = "非透明 MP4 (白色背景)";
+            this.btnNonTransparentMP4Preset.Click += new System.EventHandler(this.btnNonTransparentMP4Preset_Click);
+            //
+            // btnGreenBackdropMP4Preset
+            //
+            this.btnGreenBackdropMP4Preset.Name = "btnGreenBackdropMP4Preset";
+            this.btnGreenBackdropMP4Preset.Text = "綠幕 MP4 (用於影片編輯)";
+            this.btnGreenBackdropMP4Preset.Click += new System.EventHandler(this.btnGreenBackdropMP4Preset_Click);
+            //
+            // btnBlueBackdropMP4Preset
+            //
+            this.btnBlueBackdropMP4Preset.Name = "btnBlueBackdropMP4Preset";
+            this.btnBlueBackdropMP4Preset.Text = "藍幕 MP4 (用於影片編輯)";
+            this.btnBlueBackdropMP4Preset.Click += new System.EventHandler(this.btnBlueBackdropMP4Preset_Click);
+            //
+            // btnTransparentMOVPreset
+            //
+            this.btnTransparentMOVPreset.Name = "btnTransparentMOVPreset";
+            this.btnTransparentMOVPreset.Text = "透明 MOV (用於影片編輯)";
+            this.btnTransparentMOVPreset.Click += new System.EventHandler(this.btnTransparentMOVPreset_Click);
+            //
+            // btnTransparentWebMPreset
+            //
+            this.btnTransparentWebMPreset.Name = "btnTransparentWebMPreset";
+            this.btnTransparentWebMPreset.Text = "透明 WebM (用於線上分享)";
+            this.btnTransparentWebMPreset.Click += new System.EventHandler(this.btnTransparentWebMPreset_Click);
+            //
+            // btnDefaultPreset
+            //
+            this.btnDefaultPreset.Name = "btnDefaultPreset";
+            this.btnDefaultPreset.Text = "初始設定";
+            this.btnDefaultPreset.Click += new System.EventHandler(this.btnDefaultPreset_Click);
             // 
             // checkBoxX1
             // 
@@ -375,7 +432,7 @@
             this.panelExColor.Controls.Add(this.checkBoxX1);
             this.panelExColor.Controls.Add(this.labelX3);
             this.panelExColor.Controls.Add(this.slider1);
-            this.panelExColor.Controls.Add(this.btnDiscordPreset);
+            this.panelExColor.Controls.Add(this.btnPreset);
             this.panelExColor.DisabledBackColor = System.Drawing.Color.Empty;
             this.panelExColor.Enabled = false;
             this.panelExColor.Location = new System.Drawing.Point(80, 14);
@@ -871,6 +928,13 @@
         private DevComponents.DotNetBar.LabelX labelX12;
         private DevComponents.DotNetBar.Controls.TextBoxX textBoxX3;
         private DevComponents.DotNetBar.LabelX labelX13;
-        private DevComponents.DotNetBar.ButtonX btnDiscordPreset;
+        private DevComponents.DotNetBar.ButtonX btnPreset;
+        private DevComponents.DotNetBar.ButtonItem btnDiscordPreset;
+        private DevComponents.DotNetBar.ButtonItem btnNonTransparentMP4Preset;
+        private DevComponents.DotNetBar.ButtonItem btnGreenBackdropMP4Preset;
+        private DevComponents.DotNetBar.ButtonItem btnBlueBackdropMP4Preset;
+        private DevComponents.DotNetBar.ButtonItem btnTransparentMOVPreset;
+        private DevComponents.DotNetBar.ButtonItem btnTransparentWebMPreset;
+        private DevComponents.DotNetBar.ButtonItem btnDefaultPreset;
     }
 }
