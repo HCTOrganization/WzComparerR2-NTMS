@@ -259,8 +259,8 @@ namespace WzComparerR2
             GifEncoder = 3;
             BackgroundType = ImageBackgroundType.Color;
             BackgroundColor = Color.White;
-            textBoxX2.Clear();
-            textBoxX3.Clear();
+            FFmpegArgument = string.Empty;
+            FFmpegDefaultExtension = string.Empty;
             isFFmpegExist(sender, e);
         }
 
@@ -269,8 +269,8 @@ namespace WzComparerR2
             GifEncoder = 3;
             BackgroundType = ImageBackgroundType.Color;
             BackgroundColor = Color.FromArgb(0, 255, 0);
-            textBoxX2.Clear();
-            textBoxX3.Clear();
+            FFmpegArgument = string.Empty;
+            FFmpegDefaultExtension = string.Empty;
             isFFmpegExist(sender, e);
         }
 
@@ -279,8 +279,8 @@ namespace WzComparerR2
             GifEncoder = 3;
             BackgroundType = ImageBackgroundType.Color;
             BackgroundColor = Color.Blue;
-            textBoxX2.Clear();
-            textBoxX3.Clear();
+            FFmpegArgument = string.Empty;
+            FFmpegDefaultExtension = string.Empty;
             isFFmpegExist(sender, e);
         }
 
@@ -290,8 +290,8 @@ namespace WzComparerR2
             BackgroundType = ImageBackgroundType.Transparent;
             slider1.Value = 0;
             BackgroundColor = Color.White;
-            this.FFmpegArgument = @$"-y -f rawvideo -pixel_format bgra -s %w*%h -r 1000/%t -i ""%i"" -vf ""crop=trunc(iw/2)*2:trunc(ih/2)*2"" -vcodec qtrle -pix_fmt argb ""%o""";
-            this.FFmpegDefaultExtension = ".mov";
+            FFmpegArgument = @$"-y -f rawvideo -pixel_format bgra -s %w*%h -r 1000/%t -i ""%i"" -vf ""crop=trunc(iw/2)*2:trunc(ih/2)*2"" -vcodec qtrle -pix_fmt argb ""%o""";
+            FFmpegDefaultExtension = ".mov";
             isFFmpegExist(sender, e);
         }
 
@@ -301,8 +301,8 @@ namespace WzComparerR2
             BackgroundType = ImageBackgroundType.Transparent;
             slider1.Value = 0;
             BackgroundColor = Color.White;
-            this.FFmpegArgument = @$"-y -f rawvideo -pixel_format bgra -s %w*%h -r 1000/%t -i ""%i"" -vf ""crop=trunc(iw/2)*2:trunc(ih/2)*2"" -vcodec libvpx-vp9 -pix_fmt yuva420p ""%o""";
-            this.FFmpegDefaultExtension = ".webm";
+            FFmpegArgument = @$"-y -f rawvideo -pixel_format bgra -s %w*%h -r 1000/%t -i ""%i"" -vf ""crop=trunc(iw/2)*2:trunc(ih/2)*2"" -vcodec libvpx-vp9 -pix_fmt yuva420p ""%o""";
+            FFmpegDefaultExtension = ".webm";
             isFFmpegExist(sender, e);
         }
 
@@ -312,8 +312,8 @@ namespace WzComparerR2
             BackgroundType = ImageBackgroundType.Transparent;
             slider1.Value = 0;
             BackgroundColor = Color.White;
-            textBoxX2.Clear();
-            textBoxX3.Clear();
+            FFmpegArgument = string.Empty;
+            FFmpegDefaultExtension = string.Empty;
         }
 
         private void slider1_ValueChanged(object sender, EventArgs e)
