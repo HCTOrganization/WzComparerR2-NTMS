@@ -3555,7 +3555,7 @@ namespace WzComparerR2
                     }
                     catch (Exception ex)
                     {
-                        MessageBoxEx.Show("保存失敗\r\n" + ex.ToString(), "LocalizedString_JP.COMMON_ERROR");
+                        MessageBoxEx.Show("保存失敗\r\n" + ex.ToString(), LocalizedString_JP.COMMON_ERROR);
                     }
                 }
             }
