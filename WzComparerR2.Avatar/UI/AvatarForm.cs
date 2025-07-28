@@ -2709,6 +2709,14 @@ namespace WzComparerR2.Avatar.UI
             this.avatarContainer1.Invalidate();
         }
 
+        private void btnZoom_Click(object sender, EventArgs e)
+        {
+            if (this.avatar.Parts.Count(p => p != null) > 0)
+            {
+                this.avatarContainer1.ChangeScale();
+            }
+        }
+
         private void SaveGif(object sender, EventArgs e, bool isBodyPlayingChecked = true, bool isEmotionPlayingChecked = true, bool isTamingPlayingChecked = true, string outputFileName = null)
         { 
             bool bodyPlaying = isBodyPlayingChecked && cmbBodyFrame.Items.Count > 1;
