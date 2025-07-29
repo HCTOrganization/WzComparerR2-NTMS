@@ -830,7 +830,7 @@ namespace WzComparerR2.CharaSimControl
                 //}
                 else
                 {
-                    typeStr = "装備分類 : " + typeStr;
+                    typeStr = "裝備分類 : " + typeStr;
                 }
 
                 if (!Gear.Cash && (Gear.IsLeftWeapon(Gear.type) || Gear.type == GearType.katara))
