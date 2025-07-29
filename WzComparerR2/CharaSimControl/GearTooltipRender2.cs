@@ -440,6 +440,11 @@ namespace WzComparerR2.CharaSimControl
                     picH += 16;
                 }
             }
+            else if (Gear.Props.TryGetValue(GearPropType.magicLayerWz2, out value) && value > 0)
+            {
+                TextRenderer.DrawText(g, "襯料", GearGraphics.EquipDetailFont, new Point(261, picH), Color.FromArgb(82, 180, 189), TextFormatFlags.HorizontalCenter);
+                picH += 15;
+            }
 
             //额外属性
             var attrList = GetGearAttributeString();
@@ -579,6 +584,11 @@ namespace WzComparerR2.CharaSimControl
                 else if (Gear.Props.TryGetValue(GearPropType.limitedLabel, out value) && value > 0)
                 {
                     cashImg = Resource.CashShop_img_CashItem_label_15;
+                    cashOrigin = new Point(12, 12);
+                }
+                else if (Gear.Props.TryGetValue(GearPropType.magicLayerWz2, out value) && value > 0)
+                {
+                    cashImg = Resource.CashShop_img_CashItem_label_100;
                     cashOrigin = new Point(12, 12);
                 }
                 if (cashImg == null) //default cashImg
