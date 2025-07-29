@@ -3123,6 +3123,15 @@ namespace WzComparerR2.Comparer
                                         return false;
                                     }
                                 }
+                            case 800:
+                                if (Int32.TryParse(skillNodePath.Split('\\')[3], out int skillID))
+                                {
+                                    return isKMSSkillID(skillID);
+                                }
+                                else
+                                {
+                                    return false;
+                                }
                             default:
                                 return true;
                         }
@@ -3171,6 +3180,15 @@ namespace WzComparerR2.Comparer
                     else
                     {
                         return KMSContentID["Skill"].Contains(skillID);
+                    }
+                case 8:
+                    if (KMSContentID.ContainsKey("Skill"))
+                    {
+                        return KMSContentID["Skill"].Contains(skillID);
+                    }
+                    else
+                    {
+                        return false;
                     }
                 default:
                     return true;
