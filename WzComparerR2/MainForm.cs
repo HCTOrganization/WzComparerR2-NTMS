@@ -3966,9 +3966,9 @@ namespace WzComparerR2
                     break;
 
                 case Wz_Type.Mob:
+                    if (!selectedNode.FullPathToFile.Contains(".img")) return;
                     string[] mobNodePath = selectedNode.FullPathToFile.Split('\\');
                     string mobImgStr = mobNodePath.LastOrDefault(part => part.EndsWith(".img")).Replace(".img", String.Empty);
-                    if (String.IsNullOrEmpty(mobImgStr)) return;
                     if (!Int64.TryParse(mobImgStr, out _)) return; // Ignore Non-numeral img to prevent Auto Preview crash
                     if ((image = selectedNode.GetValue<Wz_Image>()) == null || !image.TryExtract())
                         return;
