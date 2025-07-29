@@ -44,6 +44,7 @@
             this.chkShowMiniMapMob = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowMiniMapNpc = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowMiniMapPortal = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowBgmName = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX16 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX15 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX14 = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -807,6 +808,7 @@
             this.superTabControlPanel6.Controls.Add(this.chkShowMiniMapMob);
             this.superTabControlPanel6.Controls.Add(this.chkShowMiniMapNpc);
             this.superTabControlPanel6.Controls.Add(this.chkShowMiniMapPortal);
+            this.superTabControlPanel6.Controls.Add(this.chkShowBgmName);
             this.superTabControlPanel6.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControlPanel6.Location = new System.Drawing.Point(62, 0);
             this.superTabControlPanel6.Name = "superTabControlPanel6";
@@ -914,6 +916,22 @@
             this.chkShowMiniMapPortal.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowMiniMapPortal.TabIndex = 6;
             this.chkShowMiniMapPortal.Text = "小地圖內顯示傳送門位置";
+            // 
+            // chkShowBgmName
+            // 
+            this.chkShowBgmName.AutoSize = true;
+            this.chkShowBgmName.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowBgmName.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowBgmName.Location = new System.Drawing.Point(13, 156);
+            this.chkShowBgmName.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.chkShowBgmName.Name = "chkShowBgmName";
+            this.chkShowBgmName.Size = new System.Drawing.Size(190, 16);
+            this.chkShowBgmName.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowBgmName.TabIndex = 7;
+            this.chkShowBgmName.Text = "顯示背景音樂名稱";
             // 
             // superTabControlPanel5
             // 
@@ -1116,6 +1134,7 @@
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMiniMapMob;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMiniMapNpc;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMiniMapPortal;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowBgmName;
         private DevComponents.DotNetBar.Controls.ComboBoxEx comboBoxEx3;
         private DevComponents.DotNetBar.Controls.ComboBoxEx comboBoxEx4;
         private DevComponents.DotNetBar.LabelX labelX4;

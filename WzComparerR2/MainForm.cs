@@ -275,6 +275,7 @@ namespace WzComparerR2
             tooltipQuickView.MapRender.ShowMiniMap = Setting.Map.ShowMiniMap;
             tooltipQuickView.MapRender.ShowObjectID = Setting.Map.ShowMapObjectID;
             tooltipQuickView.MapRender.ShowMobNpcObjectID = Setting.Map.ShowMobNpcObjectID;
+            tooltipQuickView.MapRender.ShowBgmName = Setting.Map.ShowBgmName;
             tooltipQuickView.MapRender.Enable22AniStyle = Setting.Enable22AniStyle;
             tooltipQuickView.MapRender.ShowMiniMapMob = Setting.Map.ShowMiniMapMob;
             tooltipQuickView.MapRender.ShowMiniMapNpc = Setting.Map.ShowMiniMapNpc;

@@ -273,6 +273,13 @@ namespace WzComparerR2
             set { chkShowMobNpcObjectID.Checked = value; }
         }
 
+        [Link]
+        public bool Map_ShowBgmName
+        {
+            get { return chkShowBgmName.Checked; }
+            set { chkShowBgmName.Checked = value; }
+        }
+
 
         public int PreferredStringCopyMethod
         {

@@ -49,5 +49,12 @@ namespace WzComparerR2.Config
             get { return (bool)this["showMiniMapPortal"]; }
             set { this["showMiniMapPortal"] = value; }
         }
+
+        [ConfigurationProperty("showBgmName", DefaultValue = true)]
+        public bool ShowBgmName
+        {
+            get { return (bool)this["showBgmName"]; }
+            set { this["showBgmName"] = value; }
+        }
     }
 }

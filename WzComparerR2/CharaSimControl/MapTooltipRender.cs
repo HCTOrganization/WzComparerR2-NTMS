@@ -24,6 +24,7 @@ namespace WzComparerR2.CharaSimControl
         public bool ShowMiniMapMob { get; set; }
         public bool ShowMiniMapNpc { get; set; }
         public bool ShowMiniMapPortal { get; set; }
+        public bool ShowBgmName { get; set; }
 
         public override object TargetItem
         {
@@ -88,8 +89,9 @@ namespace WzComparerR2.CharaSimControl
             }
 
             var mapDesc = GetMapDesc(Map.MapID, Map.Link);
-            if (!string.IsNullOrEmpty(mapDesc))
+            if (!string.IsNullOrEmpty(mapDesc) || !string.IsNullOrEmpty(Map.Bgm))
             {
+                mapDesc = (ShowBgmName ? string.Format("BGM: {0}\r\n\r\n", Map.Bgm) : "") + mapDesc;
                 var block = PrepareText(g, mapDesc, GearGraphics.ItemDetailFont, Brushes.White, 0, 0);
                 descBlock = block;
             }
