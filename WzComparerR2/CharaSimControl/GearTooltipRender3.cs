@@ -478,7 +478,7 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (Gear.Props.TryGetValue(GearPropType.magicLayerWz2, out value) && value > 0)
             {
-                TextRenderer.DrawText(g, "襯料", GearGraphics.EquipMDMoris9Font, new Point(width, picH), Color.FromArgb(82, 180, 189), TextFormatFlags.HorizontalCenter);
+                TextRenderer.DrawText(g, "內襯", GearGraphics.EquipMDMoris9Font, new Point(width, picH), Color.FromArgb(82, 180, 189), TextFormatFlags.HorizontalCenter);
                 picH += 16;
             }
 
