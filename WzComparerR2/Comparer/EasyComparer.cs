@@ -2805,18 +2805,18 @@ namespace WzComparerR2.Comparer
             }
             else
             {
-                sw.WriteLine("body { font-size:12px; background-color:#101010; color:#ffffff }");
+                sw.WriteLine("body { font-size:12px; background-color:#bbbbbb }");
                 sw.WriteLine("p.wzf { }");
-                sw.WriteLine("table, tr, th, td { border:2px solid #000000; border-collapse:collapse; }");
+                sw.WriteLine("table, tr, th, td { border:2px solid #ff8000; border-collapse:collapse; }");
                 sw.WriteLine("table { margin-bottom:16px; }");
                 sw.WriteLine("th { text-align:left; }");
-                sw.WriteLine("table.lst0 { background-color:#101010; }");
-                sw.WriteLine("table.lst0 a:link { color:#ffffff }");
-                sw.WriteLine("table.lst0 a:visited { color:#ffffff }");
-                sw.WriteLine("table.lst0 a:hover { color:#ffffff }");
-                sw.WriteLine("table.lst0 a:activated { color:#ffffff }");
-                sw.WriteLine("table.lst1 { background-color:#101010; color: #ffffff; }");
-                sw.WriteLine("table.lst2 { background-color:#101010; color: #ffffff; }");
+                sw.WriteLine("table.lst0 { }");
+                sw.WriteLine("table.lst0 a:link { }");
+                sw.WriteLine("table.lst0 a:visited { }");
+                sw.WriteLine("table.lst0 a:hover { }");
+                sw.WriteLine("table.lst0 a:activated { }");
+                sw.WriteLine("table.lst1 { }");
+                sw.WriteLine("table.lst2 { }");
                 sw.WriteLine("table.img tr.r0 { background-color:#CCCC00; color:#000000; }");
                 sw.WriteLine("table.img tr.r1 { background-color:#154211; }");
                 sw.WriteLine("table.img tr.r2 { background-color:#961e1e; }");
