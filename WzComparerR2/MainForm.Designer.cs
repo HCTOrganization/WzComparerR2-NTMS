@@ -2308,8 +2308,7 @@ namespace WzComparerR2
             this.itemContainer44.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.buttonDisableOverlayAni,
             this.buttonHitboxOverlay,
-            this.buttonOverlayExtractGifEx,
-            this.buttonLoadMultiFrameAniList});
+            this.buttonOverlayExtractGifEx});
             // 
             // 
             // 
@@ -2335,7 +2334,7 @@ namespace WzComparerR2
             this.buttonOverlayExtractGifEx.Tooltip = "透過在所有子節點上呼叫動畫來堆叠，而不是從0開始依序呼叫。";
             this.buttonOverlayExtractGifEx.Click += new System.EventHandler(this.buttonItemGif2_Click);
             // 
-            // buttonOverlayRect
+            // buttonLoadMultiFrameAniList
             // 
             this.buttonLoadMultiFrameAniList.Name = "buttonLoadMultiFrameAniList";
             this.buttonLoadMultiFrameAniList.Text = "載入多重幀";

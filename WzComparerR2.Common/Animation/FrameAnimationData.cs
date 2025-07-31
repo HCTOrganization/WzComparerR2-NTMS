@@ -1,5 +1,4 @@
-﻿using DevComponents.DotNetBar;
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -34,7 +33,7 @@ namespace WzComparerR2.Animation
             return bound ?? Rectangle.Empty;
         }
 
-        public static FrameAnimationData CreateFromNode(Wz_Node node, GraphicsDevice graphicsDevice, FrameAnimationCreatingOptions options, GlobalFindNodeFunction findNode)
+        public static FrameAnimationData CreateFromNode(Wz_Node node, GraphicsDevice graphicsDevice, FrameAnimationCreatingOptions options, GlobalFindNodeFunction findNode, bool loadTexture = true)
         {
             if (node == null)
                 return null;
@@ -43,7 +42,7 @@ namespace WzComparerR2.Animation
             {
                 foreach(var frameNode in node.Nodes)
                 {
-                    Frame frame = Frame.CreateFromNode(frameNode, graphicsDevice, findNode);
+                    Frame frame = Frame.CreateFromNode(frameNode, graphicsDevice, findNode, loadTexture);
                     if (frame != null)
                     {
                         anime.Frames.Add(frame);
@@ -58,7 +57,7 @@ namespace WzComparerR2.Animation
 
                     if (frameNode == null || frameNode.Value == null)
                         break;
-                    Frame frame = Frame.CreateFromNode(frameNode, graphicsDevice, findNode);
+                    Frame frame = Frame.CreateFromNode(frameNode, graphicsDevice, findNode, loadTexture);
 
                     if (frame == null)
                         break;
@@ -89,37 +88,49 @@ namespace WzComparerR2.Animation
                 return null;
         }
 
-        public static FrameAnimationData CreateRectData(Point lt, Point rb, int delay, GraphicsDevice graphicsDevice, Color fillColor, Color outlineColor)
+        public static FrameAnimationData CreateRectData(GraphicsDevice graphicsDevice, System.Drawing.Color baseColor, IEnumerable<TimelineData> alphaTimeline)
         {
             var thickness = 2;
-            var width = -lt.X + rb.X;
-            var height = -lt.Y + rb.Y;
 
-            if (width <= 0 || height <= 0)
-            {
-                MessageBoxEx.Show("您輸入的範圍無效。", "範圍設定錯誤");
-                return null;
-            }
-
-            using SpriteBatchEx spriteBatch = new SpriteBatchEx(graphicsDevice);
-            Rectangle rectangle = new Rectangle(0, 0, width, height);
-
-            RenderTarget2D renderTarget = new RenderTarget2D(graphicsDevice, width, height, false, SurfaceFormat.Bgra32, DepthFormat.None, 0, Microsoft.Xna.Framework.Graphics.RenderTargetUsage.DiscardContents);
-            graphicsDevice.SetRenderTarget(renderTarget);
-            graphicsDevice.Clear(Color.Transparent);
-
-            spriteBatch.Begin();
-
-            spriteBatch.FillRectangle(rectangle, fillColor);
-            spriteBatch.DrawThickRectangle(rectangle, outlineColor, thickness);
-
-            spriteBatch.End();
-            graphicsDevice.SetRenderTarget(null);
-
-            Point origin = new Point(-lt.X, -lt.Y);
-            var tmpFrame = new Frame((Texture2D)renderTarget, origin, 0, delay, true);
             var tmpFrameAnimationData = new FrameAnimationData();
-            tmpFrameAnimationData.Frames.Add(tmpFrame);
+            var outlineColor = baseColor.ToXnaColor();
+            foreach (var item in alphaTimeline)
+            {
+                var alpha = item.Alpha;
+                var length = item.Delay;
+                var lt = item.LT;
+                var rb = item.RB;
+                var width = -lt.X + rb.X;
+                var height = -lt.Y + rb.Y;
+                Point origin = new Point(-lt.X, -lt.Y);
+
+                if (length <= 0) continue;
+                if (width <= 0 || height <= 0)
+                {
+                    tmpFrameAnimationData.Frames.Add(new Frame(null, origin, 0, length, true));
+                    continue;
+                }
+
+                var fillColor = System.Drawing.Color.FromArgb((255 * alpha / 100), baseColor).ToXnaColor();
+
+                using SpriteBatchEx spriteBatch = new SpriteBatchEx(graphicsDevice);
+                Rectangle rectangle = new Rectangle(0, 0, width, height);
+
+                RenderTarget2D renderTarget = new RenderTarget2D(graphicsDevice, width, height, false, SurfaceFormat.Bgra32, DepthFormat.None, 0, Microsoft.Xna.Framework.Graphics.RenderTargetUsage.DiscardContents);
+                graphicsDevice.SetRenderTarget(renderTarget);
+                graphicsDevice.Clear(Color.Transparent);
+
+                spriteBatch.Begin();
+
+                spriteBatch.FillRectangle(rectangle, fillColor);
+                spriteBatch.DrawThickRectangle(rectangle, outlineColor, thickness);
+
+                spriteBatch.End();
+                graphicsDevice.SetRenderTarget(null);
+
+                var tmpFrame = new Frame((Texture2D)renderTarget, origin, 0, length, true);
+                tmpFrameAnimationData.Frames.Add(tmpFrame);
+            }
 
             if (tmpFrameAnimationData.Frames.Count > 0)
                 return tmpFrameAnimationData;
@@ -127,37 +138,48 @@ namespace WzComparerR2.Animation
                 return null;
         }
 
-        public static FrameAnimationData CreateCircleData(Point pos, int radius, int delay, GraphicsDevice graphicsDevice, Color fillColor, Color outlineColor)
+        public static FrameAnimationData CreateCircleData(GraphicsDevice graphicsDevice, int radius, System.Drawing.Color baseColor, IEnumerable<TimelineData> alphaTimeline)
         {
             int thickness = 2;
-            var x = pos.X;
-            var y = pos.Y;
 
-            if (radius <= 0)
-            {
-                MessageBoxEx.Show("您輸入的半徑不正確。", "範圍設定錯誤");
-                return null;
-            }
-
-            using var bmp = new System.Drawing.Bitmap(radius * 2, radius * 2);
-            using (var g = System.Drawing.Graphics.FromImage(bmp))
-            {
-                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                using (var brush = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(fillColor.A, fillColor.R, fillColor.G, fillColor.B)))
-                {
-                    g.FillEllipse(brush, 0, 0, radius * 2, radius * 2);
-                }
-                using (var pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(outlineColor.A, outlineColor.R, outlineColor.G, outlineColor.B), thickness))
-                {
-                    int inset = thickness / 2;
-                    g.DrawEllipse(pen, inset, inset, radius * 2 - thickness, radius * 2 - thickness);
-                }
-            }
-
-            Point origin = new Point(-x + radius, -y + radius);
-            var tmpFrame = new Frame(bmp.ToTexture(graphicsDevice), origin, 0, delay, true);
             var tmpFrameAnimationData = new FrameAnimationData();
-            tmpFrameAnimationData.Frames.Add(tmpFrame);
+            var outlineColor = baseColor;
+            foreach (var item in alphaTimeline)
+            {
+                var alpha = item.Alpha;
+                var length = item.Delay;
+                var pos = item.LT;
+                var x = pos.X;
+                var y = pos.Y;
+                Point origin = new Point(-x + radius, -y + radius);
+
+                if (length <= 0) continue;
+                if (radius <= 0)
+                {
+                    tmpFrameAnimationData.Frames.Add(new Frame(null, origin, 0, length, true));
+                    continue;
+                }
+
+                var fillColor = System.Drawing.Color.FromArgb((255 * alpha / 100), baseColor);
+
+                using var bmp = new System.Drawing.Bitmap(radius * 2, radius * 2);
+                using (var g = System.Drawing.Graphics.FromImage(bmp))
+                {
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    using (var brush = new System.Drawing.SolidBrush(fillColor))
+                    {
+                        g.FillEllipse(brush, 0, 0, radius * 2, radius * 2);
+                    }
+                    using (var pen = new System.Drawing.Pen(outlineColor, thickness))
+                    {
+                        int inset = thickness / 2;
+                        g.DrawEllipse(pen, inset, inset, radius * 2 - thickness, radius * 2 - thickness);
+                    }
+                }
+
+                var tmpFrame = new Frame(bmp.ToTexture(graphicsDevice), origin, 0, length, true);
+                tmpFrameAnimationData.Frames.Add(tmpFrame);
+            }
 
             if (tmpFrameAnimationData.Frames.Count > 0)
                 return tmpFrameAnimationData;
@@ -347,6 +369,11 @@ namespace WzComparerR2.Animation
                 newOrigin = new Point(frame2.Origin.X, frame2.Origin.Y);
                 return CopyTexture(graphicsDevice, texture2);
             }
+            else if (texture2 == null)
+            {
+                newOrigin = new Point(frame1.Origin.X, frame1.Origin.Y);
+                return CopyTexture(graphicsDevice, texture1);
+            }
 
             int dl = Math.Max(frame2.Origin.X - frame1.Origin.X, 0);
             int dt = Math.Max(frame2.Origin.Y - frame1.Origin.Y, 0);
@@ -469,6 +496,14 @@ namespace WzComparerR2.Animation
 
             end += result.Count - data.Frames.Count;
             data.Frames = result;
+        }
+
+        public struct TimelineData
+        {
+            public Point LT;
+            public Point RB;
+            public int Alpha;
+            public int Delay;
         }
     }
 
