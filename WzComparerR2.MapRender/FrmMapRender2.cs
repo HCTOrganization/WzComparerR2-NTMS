@@ -50,7 +50,9 @@ namespace WzComparerR2.MapRender
             this.patchVisibility.SkyWhaleVisible = false;
             this.patchVisibility.IlluminantClusterPathVisible = false;
             this.patchVisibility.SpringPortalPathVisible = false;
+            this.patchVisibility.PortalRangeVisible = false;
             this.patchVisibility.ObstacleAreaVisible = false;
+            this.patchVisibility.MobHitboxVisible = false;
             this.patchVisibility.CaptureRectVisible = false;
 
             var form = Form.FromHandle(this.Window.Handle) as Form;
@@ -249,7 +251,22 @@ namespace WzComparerR2.MapRender
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.ObjVisible = !this.patchVisibility.ObjVisible), KeyCode.D3, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.TileVisible = !this.patchVisibility.TileVisible), KeyCode.D4, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.NpcVisible = !this.patchVisibility.NpcVisible), KeyCode.D5, ModifierKeys.Control));
-            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.MobVisible = !this.patchVisibility.MobVisible), KeyCode.D6, ModifierKeys.Control));
+            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ =>
+            {
+                if (!this.patchVisibility.MobVisible)
+                {
+                    this.patchVisibility.MobVisible = true;
+                }
+                else if (!this.patchVisibility.MobHitboxVisible)
+                {
+                    this.patchVisibility.MobHitboxVisible = true;
+                }
+                else
+                {
+                    this.patchVisibility.MobVisible = false;
+                    this.patchVisibility.MobHitboxVisible = false;
+                }
+            }), KeyCode.D6, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ =>
             {
                 var visible = this.patchVisibility.FootHoldVisible;
@@ -258,6 +275,7 @@ namespace WzComparerR2.MapRender
                 this.patchVisibility.SkyWhaleVisible = !visible;
                 this.patchVisibility.IlluminantClusterPathVisible = !visible;
                 this.patchVisibility.SpringPortalPathVisible = !visible;
+                this.patchVisibility.PortalRangeVisible = !visible;
                 this.patchVisibility.ObstacleAreaVisible = !visible;
             }), KeyCode.D7, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ =>

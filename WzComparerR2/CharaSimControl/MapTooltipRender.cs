@@ -92,7 +92,7 @@ namespace WzComparerR2.CharaSimControl
             if (!string.IsNullOrEmpty(mapDesc) || !string.IsNullOrEmpty(Map.Bgm))
             {
                 mapDesc = (ShowBgmName ? string.Format("BGM: {0}\r\n\r\n", Map.Bgm) : "") + mapDesc;
-                var block = PrepareText(g, mapDesc, GearGraphics.ItemDetailFont, Brushes.White, 0, 0);
+                var block = PrepareText(g, mapDesc, Translator.IsKoreanStringPresent(mapDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, Brushes.White, 0, 0);
                 descBlock = block;
             }
 
@@ -115,7 +115,7 @@ namespace WzComparerR2.CharaSimControl
                 foreach (var npc in Map.Npcs)
                 {
                     string npcName = GetNpcName(npc);
-                    var block = PrepareText(g, npcName ?? "(null)", GearGraphics.ItemDetailFont, GearGraphics.Equip22BrushRare, 0, picY);
+                    var block = PrepareText(g, npcName ?? "(null)", Translator.IsKoreanStringPresent(npcName) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, GearGraphics.Equip22BrushRare, 0, picY);
                     npcBlocks.Add(block);
                     picY += 18;
                 }
