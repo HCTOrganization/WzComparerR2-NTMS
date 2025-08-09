@@ -985,22 +985,58 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        public static string GetExtraJobReqString(IEnumerable<int> specJobs)
+        public static string GetExtraJobReqString(IEnumerable<int> specJobs, bool isMsnMode)
         {
             List<string> extraJobNames = new List<string>();
-            foreach (int specJob in specJobs)
+            if (isMsnMode)
             {
-                switch (specJob)
+                if (string.Join(",", specJobs) == "11,12,13,14,15,51")
                 {
-                    case 1: extraJobNames.AddRange(new[] { "英雄", "聖騎士" }); break;
-                    case 2: extraJobNames.AddRange(new[] { "大魔導士", "主教" }); break;
-                    case 4: extraJobNames.Add("暗影神偷"); break;
-                    case 11: extraJobNames.Add("聖魂騎士"); break;
-                    case 12: extraJobNames.Add("烈焰巫師"); break;
-                    case 22: extraJobNames.Add("\r\n龍魔導士"); break;
-                    case 32: extraJobNames.Add("煉獄巫師"); break;
-                    case 172: extraJobNames.Add("琳恩"); break;
-                    default: extraJobNames.Add(specJob.ToString()); break;
+                    return "皇家騎士團職業";
+                }
+                else
+                {
+                    int classBranch = 0;
+                    int count = 0;
+                    foreach (int job in specJobs)
+                    {
+                        classBranch += job / 10;
+                        count++;
+                    }
+                    classBranch = classBranch / count;
+                    switch (classBranch)
+                    {
+                        case 0: return "冒險家職業";
+                        case 1: return "皇家騎士團職業";
+                        case 2: return "英雄團職業";
+                        case 3: return "末日反抗軍職業";
+                        case 4: return "曉之陣職業";
+                        case 6: return "超新星職業";
+                        case 12: return "動漫聯動職業";
+                        case 15: return "雷普職業";
+                        case 16: return "阿尼瑪職業";
+                        case 17: return "江湖職業";
+                        case 18: return "閃耀職業";
+
+                    }
+                }
+            }
+            else
+            {
+                foreach (int specJob in specJobs)
+                {
+                    switch (specJob)
+                    {
+                        case 1: extraJobNames.AddRange(new[] { "英雄", "聖騎士" }); break;
+                        case 2: extraJobNames.AddRange(new[] { "大魔導士", "主教" }); break;
+                        case 4: extraJobNames.Add("暗影神偷"); break;
+                        case 11: extraJobNames.Add("聖魂騎士"); break;
+                        case 12: extraJobNames.Add("烈焰巫師"); break;
+                        case 22: extraJobNames.Add("\r\n龍魔導士"); break;
+                        case 32: extraJobNames.Add("煉獄巫師"); break;
+                        case 172: extraJobNames.Add("琳恩"); break;
+                        default: extraJobNames.Add(specJob.ToString()); break;
+                    }
                 }
             }
             if (extraJobNames.Count == 0)

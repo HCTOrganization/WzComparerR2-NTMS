@@ -673,7 +673,7 @@ namespace WzComparerR2.CharaSimControl
             }
             if (extraReq == null && Gear.ReqSpecJobs.Count > 0)
             {
-                extraReq = ItemStringHelper.GetExtraJobReqString(Gear.ReqSpecJobs);
+                extraReq = ItemStringHelper.GetExtraJobReqString(Gear.ReqSpecJobs, isMsnClient);
             }
             TextRenderer.DrawText(g, "適用職業", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
             TextRenderer.DrawText(g, extraReq == null ? reqJobStr : extraReq.Replace("可裝備", "").Replace("職業群", "").Replace("職業", ""), GearGraphics.EquipMDMoris9Font, new Point(79, picH), Color.White, TextFormatFlags.NoPadding);

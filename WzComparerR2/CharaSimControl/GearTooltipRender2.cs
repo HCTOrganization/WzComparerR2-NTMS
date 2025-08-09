@@ -2084,7 +2084,7 @@ namespace WzComparerR2.CharaSimControl
         {
             int value;
             string extraReq;
-            if (Gear.ReqSpecJobs.Count > 0)
+            if (Gear.ReqSpecJobs.Count > 0 && Gear.type == GearType.shield)
             {
                 extraReq = "";
                 foreach (int jobCode in Gear.ReqSpecJobs)
