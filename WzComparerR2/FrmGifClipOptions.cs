@@ -141,7 +141,7 @@ namespace WzComparerR2
             var controls = GetInputGroup(isNew);
             var lbl = isNew ? this.lblDurationNew : this.lblDuration;
             int? duration = (controls[1].ValueObject as int?) - (controls[0].ValueObject as int?);
-            lbl.Text = $"{duration?.ToString() ?? "-"} ミリ秒";
+            lbl.Text = $"{duration?.ToString() ?? "-"} 毫秒";
         }
 
         private void onUpdateSizeAndScale(bool isNew, bool isBoundChanging = false, bool isOutSizeChanging = false, bool isScaleChanging = false)

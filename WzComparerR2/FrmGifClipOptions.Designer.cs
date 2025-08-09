@@ -878,7 +878,7 @@ namespace WzComparerR2
             // 
             this.chk768Preset.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.chk768Preset.AutoSize = true;
-            this.chk768Preset.Font = new System.Drawing.Font("MS PGothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.chk768Preset.Font = new System.Drawing.Font("SimSun", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.chk768Preset.Location = new System.Drawing.Point(199, 7);
             this.chk768Preset.Name = "chk768Preset";
             this.chk768Preset.Size = new System.Drawing.Size(120, 16);
@@ -896,7 +896,7 @@ namespace WzComparerR2
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.tableLayoutPanel2);
             this.DoubleBuffered = true;
-            this.Font = new System.Drawing.Font("MS PGothic", 9F);
+            this.Font = new System.Drawing.Font("SimSun", 9F);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
