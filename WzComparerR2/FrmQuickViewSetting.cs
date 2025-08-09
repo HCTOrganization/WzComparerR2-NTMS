@@ -330,6 +330,21 @@ namespace WzComparerR2
             set { chkEnable22AniStyle.Checked = value; }
         }
 
+        [Link]
+        public int Quest_DefaultState
+        {
+            get { return comboBoxExQuestState.SelectedIndex; }
+            set { comboBoxExQuestState.SelectedIndex = value; }
+        }
+
+        [Link]
+        public bool Quest_ShowID
+        {
+            get { return chkShowQuestObjectID.Checked; }
+            set { chkShowQuestObjectID.Checked = value; }
+        }
+
+
         public void Load(CharaSimConfig config)
         {
             this.PreferredStringCopyMethod = config.PreferredStringCopyMethod;

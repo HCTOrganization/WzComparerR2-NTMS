@@ -281,6 +281,9 @@ namespace WzComparerR2
             tooltipQuickView.MapRender.ShowMiniMapNpc = Setting.Map.ShowMiniMapNpc;
             tooltipQuickView.MapRender.ShowMiniMapPortal = Setting.Map.ShowMiniMapPortal;
 
+            tooltipQuickView.QuestRender.ShowObjectID = Setting.Quest.ShowID;
+            tooltipQuickView.QuestRender.DefaultState = Setting.Quest.DefaultState;
+
             tooltipQuickView.RecipeRender.ShowObjectID = Setting.Recipe.ShowID;
             tooltipQuickView.RecipeRender.Enable22AniStyle = Setting.Enable22AniStyle;
             GearGraphics.is22aniStyle = Setting.Enable22AniStyle;
@@ -2101,6 +2104,21 @@ namespace WzComparerR2
                     imagePath.Add(id);
                     addPath();
                     break;
+
+                case "QuestData":
+                    wzPath.Add("Quest");
+                    wzPath.Add("QuestData");
+                    wzPath.Add($"{id}.img");
+                    addPath();
+                    break;
+
+                case "QuestInfo.img":
+                    wzPath.Add("Quest");
+                    wzPath.Add("QuestInfo.img");
+                    wzPath.Add($"{id}");
+                    addPath();
+                    break;
+
                 default:
                     break;
             }
@@ -2531,9 +2549,10 @@ namespace WzComparerR2
             Wz_Node stringNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("String");
             Wz_Node itemNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Item");
             Wz_Node etcNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Etc");
+            Wz_Node questNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Quest");
 
             QueryPerformance.Start();
-            bool r = this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz()) && stringLinker.Update(stringNode, itemNode, etcNode); //reset(needed?) and update
+            bool r = this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz()) && stringLinker.Update(stringNode, itemNode, etcNode, questNode); //reset(needed?) and update
             QueryPerformance.End();
             if (r)
             {
@@ -2881,7 +2900,7 @@ namespace WzComparerR2
             QueryPerformance.Start();
             if (!this.stringLinker.HasValues)
             {
-                if (!this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz()))
+                if (!this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz()))
                 {
                     MessageBoxEx.Show("選擇 Base.wz。", LocalizedString_JP.COMMON_ERROR);
                     return;
@@ -2902,6 +2921,7 @@ namespace WzComparerR2
                     dicts.Add(stringLinker.StringMap);
                     dicts.Add(stringLinker.StringMob);
                     dicts.Add(stringLinker.StringNpc);
+                    dicts.Add(stringLinker.StringQuest);
                     dicts.Add(stringLinker.StringSkill);
                     dicts.Add(stringLinker.StringSetItem);
                     break;
@@ -2921,9 +2941,12 @@ namespace WzComparerR2
                     dicts.Add(stringLinker.StringNpc);
                     break;
                 case 6:
-                    dicts.Add(stringLinker.StringSkill);
+                    dicts.Add(stringLinker.StringQuest);
                     break;
                 case 7:
+                    dicts.Add(stringLinker.StringSkill);
+                    break;
+                case 8:
                     dicts.Add(stringLinker.StringSetItem);
                     break;
             }
@@ -2946,7 +2969,22 @@ namespace WzComparerR2
             finally
             {
                 listViewExString.EndUpdate();
+            }            
+        }
+
+        private bool TryLoadStringWz()
+        {
+            foreach (Wz_Structure wz in openedWz)
+            {
+                foreach (Wz_File file in wz.wz_files)
+                {
+                    if (file.Type == Wz_Type.String && this.stringLinker.Load(file, null, null, null))
+                    {
+                        return true;
+                    }
+                }
             }
+            return false;
         }
 
         private Wz_File findStringWz()
@@ -2986,6 +3024,21 @@ namespace WzComparerR2
                 foreach (Wz_File file in wz.wz_files)
                 {
                     if (file.Type == Wz_Type.Etc && file.Node.Nodes.Count > 0)
+                    {
+                        return file;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private Wz_File findQuestWz()
+        {
+            foreach (Wz_Structure wz in openedWz)
+            {
+                foreach (Wz_File file in wz.wz_files)
+                {
+                    if (file.Type == Wz_Type.Quest && file.Node.Nodes.Count > 0)
                     {
                         return file;
                     }
@@ -3056,13 +3109,14 @@ namespace WzComparerR2
             Wz_File stringWzFile = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("String").GetNodeWzFile();
             Wz_File itemWzFile = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Item").GetNodeWzFile();
             Wz_File etcWzFile = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Etc").GetNodeWzFile();
+            Wz_File questWzFile = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Quest").GetNodeWzFile();
             if (stringWzFile == null || itemWzFile == null || etcWzFile == null)
             {
                 MessageBoxEx.Show("請選擇 Base.wz。", LocalizedString_JP.COMMON_ERROR);
                 return;
             }
             QueryPerformance.Start();
-            bool r = stringLinker.Load(stringWzFile, itemWzFile, etcWzFile);
+            bool r = stringLinker.Load(stringWzFile, itemWzFile, etcWzFile, questWzFile);
             QueryPerformance.End();
             if (r)
             {
@@ -3870,7 +3924,7 @@ namespace WzComparerR2
 
             if (!this.stringLinker.HasValues)
             {
-                this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz());
+                this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
             }
 
             object obj = null;
@@ -4037,6 +4091,34 @@ namespace WzComparerR2
                     }
                     break;
 
+                case Wz_Type.Quest:
+                    Quest quest = null;
+                    if (!((image = selectedNode.GetValue<Wz_Image>()) == null || !image.TryExtract()))
+                        quest = Quest.CreateFromNode(image.Node, PluginManager.FindWz, PluginManager.FindWz);
+                    else if (quest == null)
+                    {
+                        Wz_Node questInfoNode = selectedNode;
+                        var m = Regex.Match(questInfoNode.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+)$");
+                        int questID = 0;
+                        if (m.Success && Int32.TryParse(m.Result("$1"), out questID))
+                        {
+                            quest = Quest.CreateFromNode(questInfoNode, PluginManager.FindWz, PluginManager.FindWz, fromInfoNode: questID);
+                        }
+                    }
+                    obj = quest;
+                    if (quest != null)
+                    {
+                        tooltipQuickView.NodeName = quest.Name;
+                        tooltipQuickView.Desc = string.Join("\r\n", quest.Desc);
+                        tooltipQuickView.Pdesc = quest.DemandBase;
+                        tooltipQuickView.Hdesc = quest.DemandSummary;
+                        tooltipQuickView.AutoDesc = quest.PlaceSummary;
+                        tooltipQuickView.DescLeftAlign = quest.Summary;
+                        fileName = "quest_" + quest.ID + "_" + RemoveInvalidFileNameChars(quest.Name) + ".png";
+                        quest.State = tooltipQuickView.QuestRender.DefaultState;
+                    }
+                    break;
+
                 case Wz_Type.Etc:
                     CharaSimLoader.LoadSetItemsIfEmpty();
                     Wz_Node setItemNode = selectedNode;
@@ -4061,14 +4143,32 @@ namespace WzComparerR2
             }
             if (obj != null)
             {
+                if (tooltipQuickView.TargetItem != null)
+                {
+                    switch (tooltipQuickView.TargetItem)
+                    {
+                        case Mob item:
+                            item.Dispose();
+                            break;
+                        case Npc item:
+                            item.Dispose();
+                            break;
+                        case Quest item:
+                            item.Dispose();
+                            break;
+                    }
+                }
                 tooltipQuickView.TargetItem = obj;
                 tooltipQuickView.ImageFileName = fileName;
-                tooltipQuickView.NodeName = sr.Name;
-                tooltipQuickView.Desc = sr.Desc;
-                tooltipQuickView.Pdesc = sr.Pdesc;
-                tooltipQuickView.AutoDesc = sr.AutoDesc;
-                tooltipQuickView.Hdesc = sr["h"];
-                tooltipQuickView.DescLeftAlign = sr["desc_leftalign"];
+                if (wzf.Type is not Wz_Type.Quest)
+                {
+                    tooltipQuickView.NodeName = sr.Name;
+                    tooltipQuickView.Desc = sr.Desc;
+                    tooltipQuickView.Pdesc = sr.Pdesc;
+                    tooltipQuickView.AutoDesc = sr.AutoDesc;
+                    tooltipQuickView.Hdesc = sr["h"];
+                    tooltipQuickView.DescLeftAlign = sr["desc_leftalign"];
+                }
                 tooltipQuickView.Refresh();
                 tooltipQuickView.HideOnHover = false;
                 tooltipQuickView.Show();
@@ -4135,25 +4235,7 @@ namespace WzComparerR2
             if (frm == null)
                 return;
 
-            switch (e.KeyCode)
-            {
-                case Keys.Escape:
-                    frm.Hide();
-                    return;
-                case Keys.Up:
-                    frm.Top -= 1;
-                    return;
-                case Keys.Down:
-                    frm.Top += 1;
-                    return;
-                case Keys.Left:
-                    frm.Left -= 1;
-                    return;
-                case Keys.Right:
-                    frm.Left += 1;
-                    return;
-            }
-
+            bool doMove = true;
             Skill skill = frm.TargetItem as Skill;
             if (skill != null)
             {
@@ -4162,23 +4244,80 @@ namespace WzComparerR2
                     case Keys.Oemplus:
                     case Keys.Add:
                         skill.Level += 1;
-                        break;
+                        frm.Refresh();
+                        return;
 
                     case Keys.OemMinus:
                     case Keys.Subtract:
                         skill.Level -= 1;
-                        break;
+                        frm.Refresh();
+                        return;
 
                     case Keys.OemOpenBrackets:
                         skill.Level -= this.skillInterval;
-                        break;
+                        frm.Refresh();
+                        return;
                     case Keys.OemCloseBrackets:
                         skill.Level += this.skillInterval;
-                        break;
-                    default:
+                        frm.Refresh();
                         return;
                 }
-                frm.Refresh();
+            }
+
+            Quest quest = frm.TargetItem as Quest;
+            if (quest != null)
+            {
+                switch (e.KeyCode)
+                {
+                    case Keys.Right:
+                        if (!e.Control)
+                        {
+                            quest.State += 1;
+                            doMove = false;
+                            frm.Refresh();
+                            return;
+                        }
+                        break;
+                    case Keys.Oemplus:
+                    case Keys.Add:
+                        quest.State += 1;
+                        frm.Refresh();
+                        return;
+
+                    case Keys.Left:
+                        if (!e.Control)
+                        {
+                            quest.State -= 1;
+                            doMove = false;
+                            frm.Refresh();
+                            return;
+                        }
+                        break;
+                    case Keys.OemMinus:
+                    case Keys.Subtract:
+                        quest.State -= 1;
+                        frm.Refresh();
+                        return;
+                }
+            }
+
+            switch (e.KeyCode)
+            {
+                case Keys.Escape:
+                    frm.Hide();
+                    return;
+                case Keys.Up:
+                    if (doMove) frm.Top -= 1;
+                    return;
+                case Keys.Down:
+                    if (doMove) frm.Top += 1;
+                    return;
+                case Keys.Left:
+                    if (doMove) frm.Left -= 1;
+                    return;
+                case Keys.Right:
+                    if (doMove) frm.Left += 1;
+                    return;
             }
         }
 
@@ -4399,6 +4538,7 @@ namespace WzComparerR2
                     comparer.OutputMobTooltip = chkOutputMobTooltip.Checked;
                     comparer.OutputNpcTooltip = chkOutputNpcTooltip.Checked;
                     comparer.OutputCashTooltip = chkOutputCashTooltip.Checked;
+                    comparer.OutputQuestTooltip = chkOutputQuestTooltip.Checked;
                     comparer.HashPngFileName = chkHashPngFileName.Checked;
                     comparer.ShowObjectID = chkShowObjectID.Checked;
                     comparer.ShowChangeType = chkShowChangeType.Checked;
@@ -4437,6 +4577,7 @@ namespace WzComparerR2
                                     chkOutputMapTooltip.Enabled = false;
                                     chkOutputMobTooltip.Enabled = false;
                                     chkOutputNpcTooltip.Enabled = false;
+                                    // chkOutputQuestTooltip.Enabled = false;
                                     // chkOutputCashTooltip.Enabled = false;
                                     chkShowObjectID.Enabled = false;
                                     chkShowChangeType.Enabled = false;
@@ -4501,6 +4642,7 @@ namespace WzComparerR2
                         chkOutputMapTooltip.Enabled = true;
                         chkOutputMobTooltip.Enabled = true;
                         chkOutputNpcTooltip.Enabled = true;
+                        // chkOutputQuestTooltip.Enabled = true;
                         // chkOutputCashTooltip.Enabled = true;
                         chkShowObjectID.Enabled = true;
                         chkShowChangeType.Enabled = true;
@@ -4575,7 +4717,7 @@ namespace WzComparerR2
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 if (!this.stringLinker.HasValues)
-                    this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz());
+                    this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
 
                 DBConnection conn = new DBConnection(this.stringLinker);
                 DataSet ds = conn.GenerateSkillTable();
@@ -4598,7 +4740,7 @@ namespace WzComparerR2
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 if (!this.stringLinker.HasValues)
-                    this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz());
+                    this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
 
                 DBConnection conn = new DBConnection(this.stringLinker);
                 conn.ExportSkillOption(dlg.SelectedPath);

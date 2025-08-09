@@ -92,5 +92,10 @@ namespace WzComparerR2.Config
             get { return (ConfigItem<bool>)this["Enable22AniStyle"]; }
             set { this["Enable22AniStyle"] = value; }
         }
+        [ConfigurationProperty("Quest")]
+        public CharaSimQuestConfig Quest
+        {
+            get { return (CharaSimQuestConfig)this["Quest"]; }
+        }
     }
 }

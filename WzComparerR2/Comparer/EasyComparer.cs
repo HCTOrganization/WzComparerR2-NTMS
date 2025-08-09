@@ -34,12 +34,14 @@ namespace WzComparerR2.Comparer
         private List<string> OutputMapTooltipIDs { get; set; } = new List<string>();
         private List<string> OutputMobTooltipIDs { get; set; } = new List<string>();
         private List<string> OutputNpcTooltipIDs { get; set; } = new List<string>();
+        private List<string> OutputQuestTooltipIDs { get; set; } = new List<string>();
         private Dictionary<string, List<string>> DiffCashTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffGearTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffItemTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffMapTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffMobTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffNpcTags { get; set; } = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<string>> DiffQuestTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffSkillTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<int>> KMSContentID { get; set; } = new Dictionary<string, List<int>>();
         private Dictionary<string, List<string>> KMSComponentDict { get; set; } = new Dictionary<string, List<string>>();
@@ -58,6 +60,7 @@ namespace WzComparerR2.Comparer
         public bool OutputMapTooltip { get; set; }
         public bool OutputMobTooltip { get; set; }
         public bool OutputNpcTooltip { get; set; }
+        public bool OutputQuestTooltip { get; set; }
         public bool OutputSkillTooltip { get; set; }
         public bool HashPngFileName { get; set; }
         public bool Enable22AniStyle { get; set; }

@@ -87,10 +87,12 @@
             this.superTabControlPanel4 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.superTabControlPanel5 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.superTabControlPanel6 = new DevComponents.DotNetBar.SuperTabControlPanel();
+            this.superTabControlPanel7 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.checkBoxX7 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.superTabItem4 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabItem5 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabItem6 = new DevComponents.DotNetBar.SuperTabItem();
+            this.superTabItem7 = new DevComponents.DotNetBar.SuperTabItem();
             this.panelEx1 = new DevComponents.DotNetBar.PanelEx();
             this.buttonX2 = new DevComponents.DotNetBar.ButtonX();
             this.buttonX1 = new DevComponents.DotNetBar.ButtonX();
@@ -99,6 +101,15 @@
             this.chkCopyParsedSkillString = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.superTabControlPanel5 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.superTabItem5 = new DevComponents.DotNetBar.SuperTabItem();
+            this.comboBoxEx3 = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.comboBoxEx4 = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.comboBoxExQuestState = new DevComponents.DotNetBar.Controls.ComboBoxEx();
+            this.comboItemQS0 = new DevComponents.Editors.ComboItem();
+            this.comboItemQS1 = new DevComponents.Editors.ComboItem();
+            this.comboItemQS2 = new DevComponents.Editors.ComboItem();
+            this.labelXQS = new DevComponents.DotNetBar.LabelX();
+            this.labelXQSHint = new DevComponents.DotNetBar.LabelX();
+            this.chkShowQuestObjectID = new DevComponents.DotNetBar.Controls.CheckBoxX();
             ((System.ComponentModel.ISupportInitialize)(this.superTabControl1)).BeginInit();
             this.superTabControl1.SuspendLayout();
             this.superTabControlPanel1.SuspendLayout();
@@ -107,6 +118,7 @@
             this.superTabControlPanel4.SuspendLayout();
             this.superTabControlPanel5.SuspendLayout();
             this.superTabControlPanel6.SuspendLayout();
+            this.superTabControlPanel7.SuspendLayout();
             this.panelEx1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -133,6 +145,7 @@
             this.superTabControl1.Controls.Add(this.superTabControlPanel3);
             this.superTabControl1.Controls.Add(this.superTabControlPanel4);
             this.superTabControl1.Controls.Add(this.superTabControlPanel6);
+            this.superTabControl1.Controls.Add(this.superTabControlPanel7);
             this.superTabControl1.Controls.Add(this.superTabControlPanel5);
             this.superTabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControl1.Location = new System.Drawing.Point(0, 0);
@@ -150,6 +163,7 @@
             this.superTabItem3,
             this.superTabItem4,
             this.superTabItem6,
+            this.superTabItem7,
             this.superTabItem5});
             this.superTabControl1.Text = "superTabControl1";
             // 
@@ -373,7 +387,7 @@
             this.comboBoxEx2.Name = "comboBoxEx2";
             this.comboBoxEx2.Size = new System.Drawing.Size(90, 19);
             this.comboBoxEx2.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.comboBoxEx2.TabIndex = 5;
+            this.comboBoxEx2.TabIndex = 9;
             // 
             // comboItem5
             // 
@@ -444,7 +458,7 @@
             this.comboBoxEx1.Name = "comboBoxEx1";
             this.comboBoxEx1.Size = new System.Drawing.Size(90, 19);
             this.comboBoxEx1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.comboBoxEx1.TabIndex = 2;
+            this.comboBoxEx1.TabIndex = 8;
             // 
             // comboItem1
             // 
@@ -678,7 +692,7 @@
             this.comboBoxEx3.Name = "comboBoxEx3";
             this.comboBoxEx3.Size = new System.Drawing.Size(104, 21);
             this.comboBoxEx3.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.comboBoxEx3.TabIndex = 7;
+            this.comboBoxEx3.TabIndex = 5;
             // 
             // comboBoxEx4
             // 
@@ -693,7 +707,7 @@
             this.comboBoxEx4.Name = "comboBoxEx4";
             this.comboBoxEx4.Size = new System.Drawing.Size(104, 21);
             this.comboBoxEx4.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.comboBoxEx4.TabIndex = 9;
+            this.comboBoxEx4.TabIndex = 6;
             // 
             // checkBoxX9
             // 
@@ -832,7 +846,7 @@
             // 
             // 
             this.chkShowMiniMap.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowMiniMap.Location = new System.Drawing.Point(15, 12);
+            this.chkShowMiniMap.Location = new System.Drawing.Point(13, 12);
             this.chkShowMiniMap.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.chkShowMiniMap.Name = "chkShowMiniMap";
             this.chkShowMiniMap.Size = new System.Drawing.Size(145, 16);
@@ -932,6 +946,104 @@
             this.chkShowBgmName.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowBgmName.TabIndex = 7;
             this.chkShowBgmName.Text = "顯示背景音樂名稱";
+            // 
+            // superTabControlPanel7
+            // 
+            this.superTabControlPanel7.Controls.Add(this.labelXQS);
+            this.superTabControlPanel7.Controls.Add(this.comboBoxExQuestState);
+            this.superTabControlPanel7.Controls.Add(this.labelXQSHint);
+            this.superTabControlPanel7.Controls.Add(this.chkShowQuestObjectID);
+            this.superTabControlPanel7.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.superTabControlPanel7.Location = new System.Drawing.Point(62, 0);
+            this.superTabControlPanel7.Name = "superTabControlPanel7";
+            this.superTabControlPanel7.Size = new System.Drawing.Size(242, 211);
+            this.superTabControlPanel7.TabIndex = 0;
+            this.superTabControlPanel7.TabItem = this.superTabItem7;
+            this.superTabControlPanel7.Visible = false;
+            // 
+            // superTabItem7
+            // 
+            this.superTabItem7.AttachedControl = this.superTabControlPanel7;
+            this.superTabItem7.GlobalItem = false;
+            this.superTabItem7.Name = "superTabItem7";
+            this.superTabItem7.Text = "任務";
+            // 
+            // labelQS
+            // 
+            this.labelXQS.AutoSize = true;
+            this.labelXQS.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelXQS.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelXQS.Location = new System.Drawing.Point(15, 12);
+            this.labelXQS.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.labelXQS.Name = "labelXQS";
+            this.labelXQS.Size = new System.Drawing.Size(89, 18);
+            this.labelXQS.TabIndex = 6;
+            this.labelXQS.Text = "任務狀態";
+            // 
+            // comboBoxExQuestState
+            // 
+            this.comboBoxExQuestState.DisplayMember = "Text";
+            this.comboBoxExQuestState.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.comboBoxExQuestState.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxExQuestState.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.comboBoxExQuestState.FormattingEnabled = true;
+            this.comboBoxExQuestState.Items.AddRange(new object[] {
+            this.comboItemQS0,
+            this.comboItemQS1,
+            this.comboItemQS2});
+            this.comboBoxExQuestState.ItemHeight = 15;
+            this.comboBoxExQuestState.Location = new System.Drawing.Point(100, 12);
+            this.comboBoxExQuestState.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.comboBoxExQuestState.Name = "comboBoxExQuestState";
+            this.comboBoxExQuestState.Size = new System.Drawing.Size(104, 21);
+            this.comboBoxExQuestState.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.comboBoxExQuestState.TabIndex = 1;
+            // 
+            // comboItemQS0
+            // 
+            this.comboItemQS0.Text = "0 (可開始)";
+            // 
+            // comboItemQS1
+            // 
+            this.comboItemQS1.Text = "1 (進行中)";
+            // 
+            // comboItemQS2
+            // 
+            this.comboItemQS2.Text = "2 (完成)";
+            // 
+            // labelXQSHint
+            // 
+            this.labelXQSHint.AutoSize = true;
+            this.labelXQSHint.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelXQSHint.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelXQSHint.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.labelXQSHint.Location = new System.Drawing.Point(15, 40);
+            this.labelXQSHint.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.labelXQSHint.Name = "labelXQSHint";
+            this.labelXQSHint.Size = new System.Drawing.Size(236, 30);
+            this.labelXQSHint.TabIndex = 2;
+            this.labelXQSHint.Text = "任務狀態改變：<b>- +</b>或<b>← →</b><br/>0: 可開始<br/>1: 進行中<br/>2: 完成";
+            // 
+            // chkShowQuestObjectID
+            // 
+            this.chkShowQuestObjectID.AutoSize = true;
+            this.chkShowQuestObjectID.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowQuestObjectID.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowQuestObjectID.Location = new System.Drawing.Point(13, 108);
+            this.chkShowQuestObjectID.Name = "chkShowQuestObjectID";
+            this.chkShowQuestObjectID.Size = new System.Drawing.Size(190, 16);
+            this.chkShowQuestObjectID.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowQuestObjectID.TabIndex = 2;
+            this.chkShowQuestObjectID.Text = "左上方顯示ID";
             // 
             // superTabControlPanel5
             // 
@@ -1064,6 +1176,8 @@
             this.superTabControlPanel5.PerformLayout();
             this.superTabControlPanel6.ResumeLayout(false);
             this.superTabControlPanel6.PerformLayout();
+            this.superTabControlPanel7.ResumeLayout(false);
+            this.superTabControlPanel7.PerformLayout();
             this.panelEx1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -1104,9 +1218,11 @@
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel4;
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel5;
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel6;
+        private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel7;
         private DevComponents.DotNetBar.SuperTabItem superTabItem4;
         private DevComponents.DotNetBar.SuperTabItem superTabItem5;
         private DevComponents.DotNetBar.SuperTabItem superTabItem6;
+        private DevComponents.DotNetBar.SuperTabItem superTabItem7;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX6;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX7;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX9;
@@ -1141,5 +1257,12 @@
 
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbPreferredStringCopyMethod;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkCopyParsedSkillString;
+        private DevComponents.DotNetBar.Controls.ComboBoxEx comboBoxExQuestState;
+        private DevComponents.Editors.ComboItem comboItemQS0;
+        private DevComponents.Editors.ComboItem comboItemQS1;
+        private DevComponents.Editors.ComboItem comboItemQS2;
+        private DevComponents.DotNetBar.LabelX labelXQS;
+        private DevComponents.DotNetBar.LabelX labelXQSHint;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowQuestObjectID;
     }
 }

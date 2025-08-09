@@ -24,6 +24,7 @@ namespace WzComparerR2.CharaSim
         public string ConsumableFrom { get; set; }
         public string EndUseDate { get; set; }
         public string SamplePath { get; set; }
+        public ItemType type { get; set; }
 
         public List<GearLevelInfo> Levels { get; internal set; }
 
@@ -51,6 +52,25 @@ namespace WzComparerR2.CharaSim
         public bool ShowCosmetic
         {
             get { return this.Specs.TryGetValue(ItemSpecType.cosmetic, out long value) && value > 0; }
+        }
+
+        public static ItemType GetItemType(int code)
+        {
+            switch (code / 1000000)
+            {
+                case 2:
+                    return ItemType.Consume;
+                case 3:
+                    return ItemType.Install;
+                case 4:
+                    return ItemType.Etc;
+                case 5:
+                    if (code / 10000 != 500)
+                        return ItemType.Cash;
+                    return ItemType.Pet;
+                default:
+                    return ItemType.Unknown;
+            }
         }
 
         public bool GetBooleanValue(ItemPropType type)
@@ -333,7 +353,17 @@ namespace WzComparerR2.CharaSim
                     }
                 }
             }
+            item.type = GetItemType(item.ItemID);
             return item;
+        }
+        public enum ItemType
+        {
+            Unknown = 0,
+            Consume = 200,
+            Install = 300,
+            Etc = 400,
+            Pet = 500,
+            Cash = 501,
         }
 
     }

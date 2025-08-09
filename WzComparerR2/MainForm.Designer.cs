@@ -120,6 +120,7 @@ namespace WzComparerR2
             this.comboItem19 = new DevComponents.Editors.ComboItem();
             this.comboItem20 = new DevComponents.Editors.ComboItem();
             this.comboItem21 = new DevComponents.Editors.ComboItem();
+            this.comboItemSearchQuest = new DevComponents.Editors.ComboItem();
             this.itemContainer12 = new DevComponents.DotNetBar.ItemContainer();
             this.checkBoxItemRegex2 = new DevComponents.DotNetBar.CheckBoxItem();
             this.buttonItemSearchString = new DevComponents.DotNetBar.ButtonItem();
@@ -233,6 +234,7 @@ namespace WzComparerR2
             this.chkOutputMapTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOutputMobTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOutputNpcTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkOutputQuestTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOutputSkillTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowObjectID = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowChangeType = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -301,6 +303,7 @@ namespace WzComparerR2
             this.itemContainer102 = new DevComponents.DotNetBar.ItemContainer();
             this.itemContainer103 = new DevComponents.DotNetBar.ItemContainer();
             this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
+            this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmi2CopyFullPath = new System.Windows.Forms.ToolStripMenuItem();
             this.comboItem22 = new DevComponents.Editors.ComboItem();
             this.ribbonControl1.SuspendLayout();
@@ -612,7 +615,7 @@ namespace WzComparerR2
             // 
             this.comboItem18.Text = "Dotum";
             // 
-            // comboItem19
+            // comboItem21
             // 
             this.comboItem21.Text = "Noto Sans TC";
             // 
@@ -1340,7 +1343,7 @@ namespace WzComparerR2
             // comboBoxItem2
             // 
             this.comboBoxItem2.ComboWidth = 72;
-            this.comboBoxItem2.DropDownHeight = 106;
+            this.comboBoxItem2.DropDownHeight = 144;
             this.comboBoxItem2.ItemHeight = 16;
             this.comboBoxItem2.Items.AddRange(new object[] {
             this.comboItem3,
@@ -1349,6 +1352,7 @@ namespace WzComparerR2
             this.comboItem6,
             this.comboItem7,
             this.comboItem8,
+            this.comboItemSearchQuest,
             this.comboItem9,
             this.comboItem19});
             this.comboBoxItem2.Name = "comboBoxItem2";
@@ -1377,6 +1381,10 @@ namespace WzComparerR2
             // comboItem8
             // 
             this.comboItem8.Text = "NPC";
+            // 
+            // comboItemSearchQuest
+            // 
+            this.comboItemSearchQuest.Text = "クエスト";
             // 
             // comboItem9
             // 
@@ -2659,6 +2667,7 @@ namespace WzComparerR2
             this.superTabControlPanel2.Controls.Add(this.chkOutputMapTooltip);
             this.superTabControlPanel2.Controls.Add(this.chkOutputMobTooltip);
             this.superTabControlPanel2.Controls.Add(this.chkOutputNpcTooltip);
+            this.superTabControlPanel2.Controls.Add(this.chkOutputQuestTooltip);
             this.superTabControlPanel2.Controls.Add(this.chkOutputSkillTooltip);
             this.superTabControlPanel2.Controls.Add(this.chkShowObjectID);
             this.superTabControlPanel2.Controls.Add(this.chkShowChangeType);
@@ -2801,17 +2810,32 @@ namespace WzComparerR2
             this.chkOutputNpcTooltip.TabIndex = 17;
             this.chkOutputNpcTooltip.Text = "NPC變更Tooltip";
             // 
+            // chkOutputQuestTooltip
+            // 
+            // 
+            // 
+            // 
+            this.chkOutputQuestTooltip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkOutputQuestTooltip.Location = new System.Drawing.Point(550, 223);
+            this.chkOutputQuestTooltip.Name = "chkOutputQuestTooltip";
+            this.chkOutputQuestTooltip.Size = new System.Drawing.Size(135, 23);
+            this.chkOutputQuestTooltip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.superTooltip1.SetSuperTooltip(this.chkOutputQuestTooltip, new DevComponents.DotNetBar.SuperTooltipInfo("クエスト比較の出力", "", "変更したクエストを自動で出力する機能です。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 70)));
+            this.chkOutputQuestTooltip.TabIndex = 18;
+            this.chkOutputQuestTooltip.Text = "クエスト比較の出力";
+            this.chkOutputQuestTooltip.Enabled = false;
+            // 
             // chkShowObjectID
             // 
             // 
             // 
             // 
             this.chkShowObjectID.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowObjectID.Location = new System.Drawing.Point(550, 223);
+            this.chkShowObjectID.Location = new System.Drawing.Point(550, 250);
             this.chkShowObjectID.Name = "chkShowObjectID";
             this.chkShowObjectID.Size = new System.Drawing.Size(135, 23);
             this.chkShowObjectID.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkShowObjectID.TabIndex = 18;
+            this.chkShowObjectID.TabIndex = 19;
             this.chkShowObjectID.Text = "左上方顯示ID";
             this.chkShowObjectID.Checked = true;
             // 
@@ -2821,11 +2845,11 @@ namespace WzComparerR2
             // 
             // 
             this.chkShowChangeType.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowChangeType.Location = new System.Drawing.Point(550, 250);
+            this.chkShowChangeType.Location = new System.Drawing.Point(550, 277);
             this.chkShowChangeType.Name = "chkShowChangeType";
             this.chkShowChangeType.Size = new System.Drawing.Size(135, 23);
             this.chkShowChangeType.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkShowChangeType.TabIndex = 19;
+            this.chkShowChangeType.TabIndex = 20;
             this.chkShowChangeType.Text = "左上方顯示變更類型";
             this.chkShowChangeType.Checked = true;
             // 
@@ -2835,11 +2859,11 @@ namespace WzComparerR2
             // 
             // 
             this.chkShowPrice.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowPrice.Location = new System.Drawing.Point(550, 277);
+            this.chkShowPrice.Location = new System.Drawing.Point(550, 304);
             this.chkShowPrice.Name = "chkShowPrice";
             this.chkShowPrice.Size = new System.Drawing.Size(135, 23);
             this.chkShowPrice.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkShowPrice.TabIndex = 20;
+            this.chkShowPrice.TabIndex = 21;
             this.chkShowPrice.Text = "顯示價格";
             this.chkShowPrice.Checked = true;
             // 
@@ -2849,12 +2873,12 @@ namespace WzComparerR2
             // 
             // 
             this.chkShowLinkedTamingMob.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowLinkedTamingMob.Location = new System.Drawing.Point(550, 304);
+            this.chkShowLinkedTamingMob.Location = new System.Drawing.Point(550, 331);
             this.chkShowLinkedTamingMob.Name = "chkShowLinkedTamingMob";
             this.chkShowLinkedTamingMob.Size = new System.Drawing.Size(135, 23);
             this.chkShowLinkedTamingMob.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.superTooltip1.SetSuperTooltip(this.chkShowLinkedTamingMob, new DevComponents.DotNetBar.SuperTooltipInfo("顯示關聯騎寵", "", "顯示和道具關聯的騎寵。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 70)));
-            this.chkShowLinkedTamingMob.TabIndex = 21;
+            this.chkShowLinkedTamingMob.TabIndex = 22;
             this.chkShowLinkedTamingMob.Text = "顯示關聯騎寵";
             this.chkShowLinkedTamingMob.Checked = false;
             // 
@@ -2864,12 +2888,12 @@ namespace WzComparerR2
             // 
             // 
             this.chkSkipKMSContent.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkSkipKMSContent.Location = new System.Drawing.Point(550, 331);
+            this.chkSkipKMSContent.Location = new System.Drawing.Point(550, 358);
             this.chkSkipKMSContent.Name = "chkSkipKMSContent";
             this.chkSkipKMSContent.Size = new System.Drawing.Size(185, 23);
             this.chkSkipKMSContent.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.superTooltip1.SetSuperTooltip(this.chkSkipKMSContent, new DevComponents.DotNetBar.SuperTooltipInfo("跳過KMS內容對比", "", "不對比KMS存在的內容。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 70)));
-            this.chkSkipKMSContent.TabIndex = 22;
+            this.chkSkipKMSContent.TabIndex = 23;
             this.chkSkipKMSContent.Text = "跳過KMS內容對比";
             this.chkSkipKMSContent.Checked = false;
             // 
@@ -3490,10 +3514,10 @@ namespace WzComparerR2
             this.chkHashPngFileName.Text = "ハッシュPNG名";
             //
             // 
-            // toolStripMenuItem4
+            // toolStripMenuItem7
             // 
-            this.toolStripMenuItem4.Name = "toolStripMenuItem4";
-            this.toolStripMenuItem4.Size = new System.Drawing.Size(192, 6);
+            this.toolStripMenuItem7.Name = "toolStripMenuItem7";
+            this.toolStripMenuItem7.Size = new System.Drawing.Size(192, 6);
             // 
             // tsmi2CopyFullPath
             // 
@@ -3802,6 +3826,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputMapTooltip;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputMobTooltip;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputNpcTooltip;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputQuestTooltip;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputSkillTooltip;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkHashPngFileName;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowObjectID;
@@ -3818,6 +3843,8 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ItemContainer itemContainer103;
         private DevComponents.Editors.ComboItem comboItem22;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem6;
+        private DevComponents.Editors.ComboItem comboItemSearchQuest;
+        private System.Windows.Forms.ToolStripSeparator toolStripMenuItem7;
         private System.Windows.Forms.ToolStripMenuItem tsmi2CopyFullPath;
         private DevComponents.DotNetBar.ColorPickerDropDown colorPickerPicBoxBgColor;
     }
