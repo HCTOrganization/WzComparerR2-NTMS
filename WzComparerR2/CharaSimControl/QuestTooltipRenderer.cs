@@ -312,15 +312,30 @@ namespace WzComparerR2.CharaSimControl
             var vcount = 0;
             var dx = 35;
             var dy = 50;
+            var baseX = 65;
             if (r.Exp > 0)
             {
                 var bmp = Resource.Quest_img_Main_questInfo_summary_reward_icon_exp;
-                g.DrawImage(bmp, 65 + dx * hcount++, h - 23);
+                g.DrawImage(bmp, baseX + dx * hcount, h - 23);
+                int expValueLength = TextRenderer.MeasureText($"{r.Exp.ToString("N0")}", GearGraphics.EquipMDMoris9Font).Width;
+                TextRenderer.DrawText(g, $"{r.Exp.ToString("N0")}", GearGraphics.EquipMDMoris9Font, new Point(baseX + dx * hcount, h - 4), ((SolidBrush)GearGraphics.WhiteBrush).Color, TextFormatFlags.NoPadding);
+                if (expValueLength > dx)
+                {
+                    baseX += expValueLength + 5;
+                }
+                else hcount++;
             }
             if (r.Meso > 0)
             {
                 var bmp = Resource.Quest_img_Main_questInfo_summary_reward_icon_meso;
-                g.DrawImage(bmp, 65 + dx * hcount++, h - 32);
+                g.DrawImage(bmp, baseX + dx * hcount, h - 32);
+                int mesoValueLength = TextRenderer.MeasureText($"{r.Meso.ToString("N0")}", GearGraphics.EquipMDMoris9Font).Width;
+                TextRenderer.DrawText(g, $"{r.Meso.ToString("N0")}", GearGraphics.EquipMDMoris9Font, new Point(baseX + dx * hcount, h - 4), ((SolidBrush)GearGraphics.WhiteBrush).Color, TextFormatFlags.NoPadding);
+                if (mesoValueLength > dx)
+                {
+                    baseX += mesoValueLength + 5;
+                }
+                else hcount++;
             }
             if (r.Items.Count > 0)
             {
@@ -329,11 +344,11 @@ namespace WzComparerR2.CharaSimControl
                     var bmp = GetIcon(item.ID, raw: true);
                     if (bmp.Bitmap != null)
                     {
-                        g.DrawImage(bmp.Bitmap, 64 + dx * hcount++ - bmp.Origin.X, h + dy * vcount - bmp.Origin.Y);
+                        g.DrawImage(bmp.Bitmap, baseX - 1 + dx * hcount++ - bmp.Origin.X, h + dy * vcount - bmp.Origin.Y);
                         bmp.Bitmap.Dispose();
                         if (item.ID >= 2000000)
                         {
-                            GearGraphics.DrawItemCountNumber(g, 65 + dx * (hcount - 1), h + dy * vcount - 12, item.Count.ToString());
+                            GearGraphics.DrawItemCountNumber(g, baseX + dx * (hcount - 1), h + dy * vcount - 12, item.Count.ToString());
                         }
                     }
                     if (hcount >= 6)
