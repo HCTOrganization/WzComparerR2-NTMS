@@ -2320,6 +2320,7 @@ namespace WzComparerR2.Comparer
                 questRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
                 questRenderNewOld[i].ShowObjectID = this.ShowObjectID;
                 questRenderNewOld[i].DefaultState = this.QuestState;
+                questRenderNewOld[i].CompareMode = true;
             }
 
             foreach (var questID in OutputQuestTooltipIDs)

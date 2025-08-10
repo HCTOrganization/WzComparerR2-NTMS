@@ -93,6 +93,9 @@ namespace WzComparerR2.CharaSimControl
         public int PreferredStringCopyMethod { get; set; }
         public bool CopyParsedSkillString { get; set; }
         
+        public event ObjectMouseEventHandler ObjectMouseMove;
+        public event EventHandler ObjectMouseLeave;
+
         public bool ShowID
         {
             get { return this.showID; }
@@ -157,6 +160,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 renderer = ItemRender;
                 ItemRender.Item = this.item as Item;
+                ItemRender.Enable22AniStyle = this.Enable22AniStyle;
             }
             else if (item is Gear)
             {
@@ -214,16 +218,19 @@ namespace WzComparerR2.CharaSimControl
             {
                 renderer = SkillRender;
                 SkillRender.Skill = this.item as Skill;
+                SkillRender.Enable22AniStyle = this.Enable22AniStyle;
             }
             else if (item is Recipe)
             {
                 renderer = RecipeRender;
                 RecipeRender.Recipe = this.item as Recipe;
+                RecipeRender.Enable22AniStyle = this.Enable22AniStyle;
             }
             else if (item is Map)
             {
                 renderer = MapRender;
                 MapRender.Map = this.item as Map;
+                MapRender.Enable22AniStyle = this.Enable22AniStyle;
             }
             else if (item is Mob)
             {
@@ -293,6 +300,45 @@ namespace WzComparerR2.CharaSimControl
             {
                 this.menu.Show(this, e.Location);
             }
+        }
+
+        public object GetPairByPoint(Point point)
+        {
+            Point p = point;
+            if ((this.QuestRender?.RewardRectnItems?.Count ?? 0) > 0)
+            {
+                foreach (var ri in this.QuestRender.RewardRectnItems)
+                {
+                    if (ri.Item1.Contains(p))
+                    {
+                        return ri.Item2;
+                    }
+                }
+            }
+            return null;
+        }
+
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+
+            object obj = GetPairByPoint(e.Location);
+            if (obj != null)
+                this.OnObjectMouseMove(new ObjectMouseEventArgs(e, obj));
+            else
+                this.OnObjectMouseLeave(EventArgs.Empty);
+        }
+
+        protected virtual void OnObjectMouseMove(ObjectMouseEventArgs e)
+        {
+            if (this.ObjectMouseMove != null)
+                this.ObjectMouseMove(this, e);
+        }
+
+        protected virtual void OnObjectMouseLeave(EventArgs e)
+        {
+            if (this.ObjectMouseLeave != null)
+                this.ObjectMouseLeave(this, e);
         }
 
         void tsmiCopy_Click(object sender, EventArgs e)
