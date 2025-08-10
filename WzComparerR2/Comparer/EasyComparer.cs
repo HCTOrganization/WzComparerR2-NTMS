@@ -2397,8 +2397,10 @@ namespace WzComparerR2.Comparer
                         {
                             int picHchange = ShowObjectID ? 13 : 1;
                             Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                            picHchange += questRenderNewOld[1].Margin_top;
                             GearGraphics.DrawPlainText(gNewOld[1], "變更前", questTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
                             picHchange = ShowObjectID ? 13 : 1;
+                            picHchange += questRenderNewOld[0].Margin_top;
                             GearGraphics.DrawPlainText(gNewOld[0], "變更後", questTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
                         }
                         resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
@@ -2435,6 +2437,17 @@ namespace WzComparerR2.Comparer
 
                 var questTypeTextInfo = g.MeasureString(questType, GearGraphics.ItemDetailFont);
                 int picH = ShowObjectID ? 13 : 1;
+                switch (nullQuestIdx)
+                {
+                    case 1:
+                        picH += questRenderNewOld[1].Margin_top;
+                        break;
+                    case 2:
+                        picH += questRenderNewOld[0].Margin_top;
+                        break;
+                    default:
+                        break;
+                }
                 if (ShowChangeType && nullQuestIdx != 0) GearGraphics.DrawPlainText(g, questType, questTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(questTypeTextInfo.Width) + 2, ref picH, 10);
 
                 string imageName = Path.Combine(questTooltipPath, "Quest_" + questID + "_" + QuestName + "_" + questType + ".png");
@@ -2656,38 +2669,24 @@ namespace WzComparerR2.Comparer
 
         private void GetQuestID(Wz_Node node)
         {
-            if (node == null) return;
-            Match match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestData\\(\d+).img\\name");
-            string tag = null;
+            if (node == null) return; // 변경은 확인하지 않음 // 추가,삭제만 확인
+
+            Match match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+)$");
+
             if (!match.Success)
             {
-                tag = node.Text;
-                match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestData\\(\d+).img\\.*");
-                if (!match.Success)
-                {
-                    match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+)\\name");
-                    if (!match.Success)
-                    {
-                        match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+)\\.*");
-                    }
-                }
+                match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestData\\(\d+).img$");
             }
 
             if (match.Success)
             {
-                string questID = match.Groups[1].ToString();
+                var questID = match.Groups[1].Value;
 
                 if (questID != null)
                 {
                     if (!OutputQuestTooltipIDs.Contains(questID))
                     {
                         OutputQuestTooltipIDs.Add(questID);
-                        DiffQuestTags[questID] = new List<string>();
-                    }
-
-                    if (tag != null && !DiffQuestTags[questID].Contains(tag))
-                    {
-                        DiffQuestTags[questID].Add(tag);
                     }
                 }
             }
