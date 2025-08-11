@@ -2671,7 +2671,17 @@ namespace WzComparerR2.Comparer
         {
             if (node == null) return; // 변경은 확인하지 않음 // 추가,삭제만 확인
 
-            Match match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+)$");
+            Match match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+)\\(QuestInfo|Check|Act)\\.*"); 
+
+            if (!match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+)$");
+            }
+
+            if (!match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestData\\(\d+).img\\(QuestInfo|Check|Act)\\.*");
+            }
 
             if (!match.Success)
             {

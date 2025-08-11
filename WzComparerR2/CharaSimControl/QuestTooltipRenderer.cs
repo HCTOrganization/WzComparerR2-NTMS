@@ -330,6 +330,7 @@ namespace WzComparerR2.CharaSimControl
                     var rectW = Math.Max(bmp.Width, 32);
                     var rectH = Math.Max(bmp.Height, 32);
                     this.RewardRectnItems.Add(new Tuple<Rectangle, object>(new Rectangle(x, y - rectH, rectW, rectH), new TooltipHelp("", r.ExpString, true)));
+                    hcount++;
                 }
                 else
                 {
@@ -353,6 +354,7 @@ namespace WzComparerR2.CharaSimControl
                     var rectW = Math.Max(bmp.Width, 32);
                     var rectH = Math.Max(bmp.Height, 32);
                     this.RewardRectnItems.Add(new Tuple<Rectangle, object>(new Rectangle(x, y - rectH, Math.Max(bmp.Width, 32), rectH), new TooltipHelp("", r.MesoString, true)));
+                    hcount++;
                 }
                 else
                 {
