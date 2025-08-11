@@ -71,7 +71,6 @@ namespace WzComparerR2.Comparer
         public bool ShowLinkedTamingMob { get; set; }
         public bool SkipKMSContent { get; set; }
         public bool DownloadKMSContentDB { get; set; }
-        public int QuestState { get; set; }
 
         public string StateInfo
         {
@@ -2319,7 +2318,6 @@ namespace WzComparerR2.Comparer
                 questRenderNewOld[i].StringLinker = new StringLinker();
                 questRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
                 questRenderNewOld[i].ShowObjectID = this.ShowObjectID;
-                questRenderNewOld[i].DefaultState = this.QuestState;
                 questRenderNewOld[i].CompareMode = true;
             }
 
@@ -2360,24 +2358,16 @@ namespace WzComparerR2.Comparer
                 // 變更前後のツールチップ画像の作成
                 for (int i = 0; i < 2; i++) // 0: New, 1: Old
                 {
-                    Quest quest = Quest.CreateFromNode(PluginManager.FindWz(questNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz);
+                    Quest quest = Quest.CreateFromNode(PluginManager.FindWz(questNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz) ?? Quest.CreateFromNode(PluginManager.FindWz(questNodePathLegacy, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz);
 
-                    if (quest != null)
+                    if (quest == null)
                     {
-                        questRenderNewOld[i].Quest = quest;
+                        isQuestNull[i] = true;
+                        nullQuestIdx = i + 1;
                     }
                     else
                     {
-                        quest = Quest.CreateFromNode(PluginManager.FindWz(questNodePathLegacy, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz);
-                        if (quest == null)
-                        {
-                            isQuestNull[i] = true;
-                            nullQuestIdx = i + 1;
-                        }
-                        else
-                        {
-                            questRenderNewOld[i].Quest = quest;
-                        }
+                        questRenderNewOld[i].Quest = quest;
                     }
                 }
 
@@ -2389,9 +2379,44 @@ namespace WzComparerR2.Comparer
                 {
                     case 0: // change
                         questType = "變更";
-
-                        Bitmap ImageNew = questRenderNewOld[0].Render();
-                        Bitmap ImageOld = questRenderNewOld[1].Render();
+                        List<Bitmap[]> ImageSetNewOld = new List<Bitmap[]>() { new Bitmap[3], new Bitmap[3] };
+                        Size[] sizeNewOld = new Size[2] { new Size(0, 0), new Size(0, 0) };
+                        for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                        {
+                            for (int j = 0; j <= 2; j++) 
+                            {
+                                questRenderNewOld[i].Quest.State = j;
+                                ImageSetNewOld[i][j] = questRenderNewOld[i].Render();
+                                sizeNewOld[i].Width += ImageSetNewOld[i][j]?.Width ?? 0;
+                                sizeNewOld[i].Height = Math.Max(ImageSetNewOld[i][j]?.Height ?? 0, sizeNewOld[i].Height);
+                            }
+                        }
+                        Bitmap ImageNew = new Bitmap(sizeNewOld[0].Width, sizeNewOld[0].Height);
+                        int x = 0;
+                        foreach (var img in ImageSetNewOld[0])
+                        {
+                            if (img != null)
+                            {
+                                using (Graphics g9 = Graphics.FromImage(ImageNew))
+                                {
+                                    g9.DrawImage(img, x, 0);
+                                }
+                            }
+                            x += img.Width;
+                        }
+                        Bitmap ImageOld = new Bitmap(sizeNewOld[1].Width, sizeNewOld[1].Height);
+                        x = 0;
+                        foreach (var img in ImageSetNewOld[1])
+                        {
+                            if (img != null)
+                            {
+                                using (Graphics g9 = Graphics.FromImage(ImageOld))
+                                {
+                                    g9.DrawImage(img, x, 0);
+                                }
+                            }
+                            x += img.Width;
+                        }
                         if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
                         if (ShowChangeType)
                         {
@@ -2413,7 +2438,28 @@ namespace WzComparerR2.Comparer
                     case 1: // delete
                         questType = "刪除";
                         if (isQuestNull[1]) continue;
-                        resultImage = questRenderNewOld[1].Render();
+                        Bitmap[] resultImageSetOld = new Bitmap[3];
+                        Size sizeOld = new Size(0, 0);
+                        for (int j = 0; j <= 2; j++)
+                        {
+                            questRenderNewOld[1].Quest.State = j;
+                            resultImageSetOld[j] = questRenderNewOld[1].Render();
+                            sizeOld.Width += resultImageSetOld[j]?.Width ?? 0;
+                            sizeOld.Height = Math.Max(resultImageSetOld[j]?.Height ?? 0, sizeOld.Height);
+                        }
+                        resultImage = new Bitmap(sizeOld.Width, sizeOld.Height);
+                        int xOld = 0;
+                        foreach (var img in resultImageSetOld)
+                        {
+                            if (img != null)
+                            {
+                                using (Graphics g9 = Graphics.FromImage(resultImage))
+                                {
+                                    g9.DrawImage(img, xOld, 0);
+                                }
+                            }
+                            xOld += img.Width;
+                        }
                         if (resultImage == null) continue;
                         g = Graphics.FromImage(resultImage);
                         break;
@@ -2421,7 +2467,28 @@ namespace WzComparerR2.Comparer
                     case 2: // add
                         questType = "新增";
                         if (isQuestNull[0]) continue;
-                        resultImage = questRenderNewOld[0].Render();
+                        Bitmap[] resultImageSetNew = new Bitmap[3];
+                        Size sizeNew = new Size(0, 0);
+                        for (int j = 0; j <= 2; j++)
+                        {
+                            questRenderNewOld[0].Quest.State = j;
+                            resultImageSetNew[j] = questRenderNewOld[0].Render();
+                            sizeNew.Width += resultImageSetNew[j]?.Width ?? 0;
+                            sizeNew.Height = Math.Max(resultImageSetNew[j]?.Height ?? 0, sizeNew.Height);
+                        }
+                        resultImage = new Bitmap(sizeNew.Width, sizeNew.Height);
+                        int xNew = 0;
+                        foreach (var img in resultImageSetNew)
+                        {
+                            if (img != null)
+                            {
+                                using (Graphics g9 = Graphics.FromImage(resultImage))
+                                {
+                                    g9.DrawImage(img, xNew, 0);
+                                }
+                            }
+                            xNew += img.Width;
+                        }
                         if (resultImage == null) continue;
                         g = Graphics.FromImage(resultImage);
                         break;
@@ -2671,7 +2738,7 @@ namespace WzComparerR2.Comparer
         {
             if (node == null) return; // 변경은 확인하지 않음 // 추가,삭제만 확인
 
-            Match match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+)\\(QuestInfo|Check|Act)\\.*"); 
+            Match match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+)\\.*"); 
 
             if (!match.Success)
             {
