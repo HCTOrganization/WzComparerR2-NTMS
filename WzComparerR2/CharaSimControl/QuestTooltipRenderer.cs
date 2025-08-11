@@ -10,6 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
+using WzComparerR2.AvatarCommon;
 using WzComparerR2.CharaSim;
 using WzComparerR2.Common;
 using WzComparerR2.PluginBase;
@@ -47,6 +48,7 @@ namespace WzComparerR2.CharaSimControl
         public Wz_File sourceWzFile { get; set; }
         public List<Tuple<Rectangle, object>> RewardRectnItems { get; set; }
         public Dictionary<string, Bitmap> ImageTable { get; set; }
+        private AvatarCanvasManager avatar { get; set; }
 
         public override object TargetItem
         {
@@ -141,6 +143,47 @@ namespace WzComparerR2.CharaSimControl
             BitmapOrigin npcImage = new BitmapOrigin();
             if (this.Quest.Check0Npc != null)
             {
+                if (this.Quest.Check0Npc.IsComponentNPC)
+                {
+                    if (this.avatar == null)
+                    {
+                        this.avatar = new AvatarCanvasManager();
+                    }
+
+                    foreach (var node in this.Quest.Check0Npc.Component.Nodes)
+                    {
+                        switch (node.Text)
+                        {
+                            case "skin":
+                                var skin = node.GetValueEx<int>(0);
+                                this.avatar.AddBodyFromSkin(skin);
+                                break;
+
+                            case "ear":
+                                var type = node.GetValueEx<int>(0);
+                                this.avatar.SetEarType(type);
+                                break;
+
+                            default:
+                                var gearID = node.GetValueEx<int>(0);
+                                this.avatar.AddGear(gearID);
+                                break;
+                        }
+                    }
+
+                    var img = this.avatar.GetBitmapOrigin();
+                    if (img.Bitmap != null)
+                    {
+                        if (this.Quest.Check0Npc.Default.Bitmap != null)
+                        {
+                            this.Quest.Check0Npc.Default.Bitmap.Dispose();
+                        }
+                        this.Quest.Check0Npc.Default = img;
+                    }
+
+                    this.avatar.ClearCanvas();
+                }
+
                 npcImage = this.Quest.Check0Npc.Default;
                 if (npcImage.Bitmap != null)
                 {
@@ -252,7 +295,7 @@ namespace WzComparerR2.CharaSimControl
             picH += 49;
 
             // 배경
-            Bitmap bg = new Bitmap(width + Margin_right, picH + Margin_top);
+            Bitmap bg = new Bitmap(width + Margin_right, Math.Max(picH + Margin_top, (108 + Margin_top) - npcImage.Origin.Y + (npcImage.Bitmap?.Height ?? 0)));
             using Graphics g2 = Graphics.FromImage(bg);
             g2.DrawImage(res["top"].Image, 0, Margin_top);
             FillRect(g2, res["center"], 0, 166 + Margin_top, bottomPoint + Margin_top);

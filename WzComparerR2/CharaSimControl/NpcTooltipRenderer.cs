@@ -101,6 +101,10 @@ namespace WzComparerR2.CharaSimControl
                 var img = this.avatar.GetBitmapOrigin();
                 if (img.Bitmap != null)
                 {
+                    if (NpcInfo.Default.Bitmap != null)
+                    {
+                        NpcInfo.Default.Bitmap.Dispose();
+                    }
                     NpcInfo.Default = img;
                     npcImg = img.Bitmap;
                     NpcInfo.AvatarBitmap = npcImg;
