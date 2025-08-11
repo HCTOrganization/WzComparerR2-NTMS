@@ -313,7 +313,7 @@ namespace WzComparerR2.CharaSimControl
             // ID 표시
             if (this.ShowObjectID)
             {
-                GearGraphics.DrawGearDetailNumber(g2, 3, 3 + Margin_top, this.Quest.ID.ToString(), true);
+                GearGraphics.DrawGearDetailNumber(g2, 3, 3 + Margin_top, $"{this.Quest.ID.ToString()}-{this.Quest.State}", true);
             }
             // 상태
             var stateText = new string[] { "可開始", "進行中", "完成" };
@@ -480,7 +480,7 @@ namespace WzComparerR2.CharaSimControl
                             StringLinker.StringEqp.TryGetValue(id, out sr);
                         }
                         var bmp = GetIconBitmap(id);
-                        var ret = $"#@{this.ImageTable.Count}/{bmp?.Width ?? 0}@";
+                        var ret = $"#@{this.ImageTable.Count}/{Math.Max(32, bmp?.Width ?? 0)}/{Math.Max(32, bmp?.Height ?? 0)}@";
                         this.ImageTable.Add(this.ImageTable.Count.ToString(), bmp);
                         return ret;
 
@@ -537,7 +537,7 @@ namespace WzComparerR2.CharaSimControl
 
                     case "f":
                         var bmp = GetIconByPath(info);
-                        var ret = $"#@{this.ImageTable.Count}/{bmp?.Width ?? 0}@";
+                        var ret = $"#@{this.ImageTable.Count}/{Math.Max(32, bmp?.Width ?? 0)}/{Math.Max(32, bmp?.Height ?? 0)}@";
                         this.ImageTable.Add(this.ImageTable.Count.ToString(), bmp);
                         return ret;
 

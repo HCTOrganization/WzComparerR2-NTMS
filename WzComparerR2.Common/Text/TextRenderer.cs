@@ -62,7 +62,7 @@ namespace WzComparerR2.Text
                     }
                     else
                     {
-                        runs.Add(new Run(sb.Length, 0) { ColorID = span.ColorID, FontID = span.FontID, ImageID = span.ImageID, ImageWidth = Math.Max(span.ImageWidth, 32) });
+                        runs.Add(new Run(sb.Length, 0) { ColorID = span.ColorID, FontID = span.FontID, ImageID = span.ImageID, ImageWidth = Math.Max(span.ImageWidth, 32), ImageHeight = Math.Max(span.ImageHeight, 32) });
                     }
                 }
                 else if (elem is LineBreak)
@@ -177,7 +177,7 @@ namespace WzComparerR2.Text
 
         protected abstract Rectangle[] MeasureChars(int startIndex, int length);
 
-        protected abstract void Flush(StringBuilder sb, int startIndex, int length, int x, int y, string ColorID, string FontID, string ImageID);
+        protected abstract void Flush(StringBuilder sb, int startIndex, int length, int x, int y, string ColorID, string FontID, string ImageID, int ImageHeight);
 
         private List<PositionedText> LayoutRuns(List<Run> runs, int width, ref int y, int lineHeight, TextAlignment alignment)
         {
@@ -191,7 +191,7 @@ namespace WzComparerR2.Text
             string fontID = null;
             List<PositionedText> result = new();
             int lastLineStartIndex = 0;
-            bool applyImageHeightOnThisLine = true;
+            int baseDrawY = drawY;
 
             bool hasContent() => start > -1 && end > start;
             void flush(bool isNewLine)
@@ -228,7 +228,7 @@ namespace WzComparerR2.Text
                     drawX = curX = 0;
                     drawY += lineHeight;
                     lastLineStartIndex = result.Count;
-                    applyImageHeightOnThisLine = true;
+                    baseDrawY = drawY;
                 }
                 else
                 {
@@ -369,15 +369,11 @@ namespace WzComparerR2.Text
 
                     if (run.IsImage)
                     {
-                        if (applyImageHeightOnThisLine)
+                        var dy = Math.Max(run.ImageHeight - lineHeight, 0);
+                        drawY = Math.Max(drawY, baseDrawY + dy);
+                        for (int i = lastLineStartIndex; i < result.Count; i++)
                         {
-                            applyImageHeightOnThisLine = false;
-                            var dy = Math.Max(32 - lineHeight, 0);
-                            drawY += dy;
-                            for (int i = lastLineStartIndex; i < result.Count; i++)
-                            {
-                                result[i].Y = drawY;
-                            }
+                            result[i].Y = drawY;
                         }
                         flush(false);
                         result.Add(new PositionedText()
@@ -388,7 +384,8 @@ namespace WzComparerR2.Text
                             Y = drawY,
                             ColorID = colorID,
                             FontID = fontID,
-                            ImageID = run.ImageID
+                            ImageID = run.ImageID,
+                            ImageHeight = run.ImageHeight
                         });
                         curX += run.Width;
                         drawX = curX;
@@ -410,7 +407,7 @@ namespace WzComparerR2.Text
         {
             foreach (PositionedText text in texts)
             {
-                this.Flush(sb, text.StartIndex, text.Length, text.X, text.Y, text.ColorID, text.FontID, text.ImageID);
+                this.Flush(sb, text.StartIndex, text.Length, text.X, text.Y, text.ColorID, text.FontID, text.ImageID, text.ImageHeight);
             }
         }
 
@@ -423,6 +420,7 @@ namespace WzComparerR2.Text
             public string ColorID;
             public string FontID;
             public string ImageID;
+            public int ImageHeight;
         }
     }
 
@@ -444,6 +442,7 @@ namespace WzComparerR2.Text
         public string FontID;
         public string ImageID;
         public int ImageWidth;
+        public int ImageHeight;
         public bool IsImage
         {
             get { return !string.IsNullOrEmpty(this.ImageID); }
