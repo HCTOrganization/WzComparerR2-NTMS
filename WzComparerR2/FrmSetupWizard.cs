@@ -665,7 +665,7 @@ namespace WzComparerR2
                     break;
                 case 8:
                 case 9:
-                    sb.AppendLine("    \"Authorization\": \"" + this.OpenAPIkey + "\"");
+                    sb.AppendLine("    \"Authorization\": \"Bearer " + this.OpenAPIkey + "\"");
                     break;
                 default:
                     return;
