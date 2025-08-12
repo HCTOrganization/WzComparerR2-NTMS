@@ -293,6 +293,7 @@ namespace WzComparerR2
 
             tooltipQuickView.QuestRender.ShowObjectID = Setting.Quest.ShowID;
             tooltipQuickView.QuestRender.DefaultState = Setting.Quest.DefaultState;
+            tooltipQuickView.QuestRender.ShowAllStates = Setting.Quest.ShowAllStates;
 
             tooltipQuickView.RecipeRender.ShowObjectID = Setting.Recipe.ShowID;
             tooltipQuickView.RecipeRender.Enable22AniStyle = Setting.Enable22AniStyle;
@@ -4275,7 +4276,7 @@ namespace WzComparerR2
             }
 
             Quest quest = frm.TargetItem as Quest;
-            if (quest != null)
+            if (quest != null && !frm.QuestRender.ShowAllStates)
             {
                 switch (e.KeyCode)
                 {
