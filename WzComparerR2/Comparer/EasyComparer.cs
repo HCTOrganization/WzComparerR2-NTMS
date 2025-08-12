@@ -2419,11 +2419,11 @@ namespace WzComparerR2.Comparer
                         if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
                         if (ShowChangeType)
                         {
-                            int picHchange = ShowObjectID ? 13 : 1;
+                            int picHchange = ShowObjectID ? 25 : 1;
                             Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
                             picHchange += questRenderNewOld[1].Margin_top;
                             GearGraphics.DrawPlainText(gNewOld[1], "變更前", questTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 13 : 1;
+                            picHchange = ShowObjectID ? 25 : 1;
                             picHchange += questRenderNewOld[0].Margin_top;
                             GearGraphics.DrawPlainText(gNewOld[0], "變更後", questTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
                         }
@@ -2502,7 +2502,7 @@ namespace WzComparerR2.Comparer
                 }
 
                 var questTypeTextInfo = g.MeasureString(questType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 13 : 1;
+                int picH = ShowObjectID ? 25 : 1;
                 switch (nullQuestIdx)
                 {
                     case 1:
