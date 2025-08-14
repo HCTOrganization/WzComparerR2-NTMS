@@ -4617,6 +4617,8 @@ namespace WzComparerR2
                             {
                                 case DialogResult.Yes:
                                     btnEasyCompare.Enabled = false;
+                                    btnPreset.Enabled = false;
+                                    clbRootNode.Enabled = false;
                                     cmbComparePng.Enabled = false;
                                     chkOutputPng.Enabled = false;
                                     chkResolvePngLink.Enabled = false;
@@ -4682,6 +4684,8 @@ namespace WzComparerR2
                         labelXComp1.Text = "比較已完成。時間經過：" + sw.Elapsed.ToString();
                         labelXComp2.Text = "";
                         btnEasyCompare.Enabled = true;
+                        btnPreset.Enabled = true;
+                        clbRootNode.Enabled = true;
                         cmbComparePng.Enabled = true;
                         chkOutputPng.Enabled = true;
                         chkResolvePngLink.Enabled = true;
@@ -4741,10 +4745,6 @@ namespace WzComparerR2
                 labelXComp2.Text = comp.StateDetail;
             }
         }
-        private void btnRootNode_Click(object sender, EventArgs e)
-        {
-            clbRootNode.Visible = !clbRootNode.Visible;
-        }
 
         void RunSetupWizard(bool isFirstRun=false)
         {
@@ -4764,6 +4764,114 @@ namespace WzComparerR2
         private void buttonItemAbout_Click(object sender, EventArgs e)
         {
             new FrmAbout().ShowDialog();
+        }
+
+        private void btnRootNode_Click(object sender, EventArgs e)
+        {
+            clbRootNode.Visible = !clbRootNode.Visible;
+        }
+
+        private void btnMusicChannel_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < clbRootNode.Items.Count; i++)
+            {
+                bool nodeOption = new string[] { "Effect", "Map", "Sound", "String", "UI" }.Contains(clbRootNode.Items[i].ToString());
+                clbRootNode.SetItemChecked(i, nodeOption);
+            }
+            chkOutputPng.Checked = true;
+            chkResolvePngLink.Checked = true;
+            chkOutputAddedImg.Checked = true;
+            chkOutputRemovedImg.Checked = true;
+            chkOutputSkillTooltip.Checked = false;
+            chkOutputEqpTooltip.Checked = false;
+            chkOutputItemTooltip.Checked = false;
+            chkOutputMapTooltip.Checked = true;
+            chkOutputMobTooltip.Checked = false;
+            chkOutputNpcTooltip.Checked = false;
+            chkOutputQuestTooltip.Checked = false;
+            chkOutputAchvTooltip.Checked = false;
+            chkShowObjectID.Checked = true;
+            chkShowChangeType.Checked = true;
+            chkShowPrice.Checked = true;
+            chkShowLinkedTamingMob.Checked = false;
+            chkSkipKMSContent.Checked = false;
+        }
+
+        private void btnSkillChangeInfo_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < clbRootNode.Items.Count; i++)
+            {
+                bool nodeOption = new string[] { "Skill", "String" }.Contains(clbRootNode.Items[i].ToString());
+                clbRootNode.SetItemChecked(i, nodeOption);
+            }
+            chkOutputPng.Checked = true;
+            chkResolvePngLink.Checked = true;
+            chkOutputAddedImg.Checked = true;
+            chkOutputRemovedImg.Checked = true;
+            chkOutputSkillTooltip.Checked = true;
+            chkOutputEqpTooltip.Checked = false;
+            chkOutputItemTooltip.Checked = false;
+            chkOutputMapTooltip.Checked = false;
+            chkOutputMobTooltip.Checked = false;
+            chkOutputNpcTooltip.Checked = false;
+            chkOutputQuestTooltip.Checked = false;
+            chkOutputAchvTooltip.Checked = false;
+            chkShowObjectID.Checked = true;
+            chkShowChangeType.Checked = true;
+            chkShowPrice.Checked = true;
+            chkShowLinkedTamingMob.Checked = false;
+            chkSkipKMSContent.Checked = false;
+        }
+
+        private void btnNewItemNews_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < clbRootNode.Items.Count; i++)
+            {
+                bool nodeOption = new string[] { "Character", "Effect", "Item", "Map", "String", "UI" }.Contains(clbRootNode.Items[i].ToString());
+                clbRootNode.SetItemChecked(i, nodeOption);
+            }
+            chkOutputPng.Checked = true;
+            chkResolvePngLink.Checked = true;
+            chkOutputAddedImg.Checked = true;
+            chkOutputRemovedImg.Checked = true;
+            chkOutputSkillTooltip.Checked = false;
+            chkOutputEqpTooltip.Checked = true;
+            chkOutputItemTooltip.Checked = true;
+            chkOutputMapTooltip.Checked = true;
+            chkOutputMobTooltip.Checked = false;
+            chkOutputNpcTooltip.Checked = false;
+            chkOutputQuestTooltip.Checked = false;
+            chkOutputAchvTooltip.Checked = false;
+            chkShowObjectID.Checked = true;
+            chkShowChangeType.Checked = true;
+            chkShowPrice.Checked = true;
+            chkShowLinkedTamingMob.Checked = false;
+            chkSkipKMSContent.Checked = false;
+        }
+
+        private void btnMapleWiki_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < clbRootNode.Items.Count; i++)
+            {
+                clbRootNode.SetItemChecked(i, true);
+            }
+            chkOutputPng.Checked = true;
+            chkResolvePngLink.Checked = true;
+            chkOutputAddedImg.Checked = true;
+            chkOutputRemovedImg.Checked = true;
+            chkOutputSkillTooltip.Checked = true;
+            chkOutputEqpTooltip.Checked = true;
+            chkOutputItemTooltip.Checked = true;
+            chkOutputMapTooltip.Checked = true;
+            chkOutputMobTooltip.Checked = true;
+            chkOutputNpcTooltip.Checked = true;
+            chkOutputQuestTooltip.Checked = true;
+            chkOutputAchvTooltip.Checked = true;
+            chkShowObjectID.Checked = true;
+            chkShowChangeType.Checked = true;
+            chkShowPrice.Checked = true;
+            chkShowLinkedTamingMob.Checked = true;
+            chkSkipKMSContent.Checked = false;
         }
 
         private void btnExportSkill_Click(object sender, EventArgs e)
