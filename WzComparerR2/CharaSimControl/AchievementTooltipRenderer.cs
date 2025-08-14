@@ -209,7 +209,7 @@ namespace WzComparerR2.CharaSimControl
                     }
                     icon.Bitmap.Dispose();
                 }
-                TextRenderer.DrawText(g, Compact(g, reward.Desc, 448), GearGraphics.EquipMDMoris9Font, new Point(104, picH + 28), ((SolidBrush)GearGraphics.AchievementRewardBrush).Color, TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, Compact(g, reward.Desc, 448), Translator.IsKoreanStringPresent(reward.Desc) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, new Point(104, picH + 28), ((SolidBrush)GearGraphics.AchievementRewardBrush).Color, TextFormatFlags.NoPadding);
             }
 
             // ID 표시

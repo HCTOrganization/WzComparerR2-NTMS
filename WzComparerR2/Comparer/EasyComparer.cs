@@ -126,7 +126,7 @@ namespace WzComparerR2.Comparer
                 WzFileComparer comparer = new WzFileComparer();
                 comparer.IgnoreWzFile = true;
 
-                if (OutputCashTooltip || OutputGearTooltip || OutputItemTooltip || OutputMapTooltip || OutputMobTooltip || OutputNpcTooltip || OutputSkillTooltip || OutputQuestTooltip || SkipKMSContent)
+                if (OutputCashTooltip || OutputGearTooltip || OutputItemTooltip || OutputMapTooltip || OutputMobTooltip || OutputNpcTooltip || OutputSkillTooltip || OutputQuestTooltip || OutputAchvTooltip || SkipKMSContent)
                 {
                     this.WzNewOld[0] = fileNew.Node;
                     this.WzNewOld[1] = fileOld.Node;
@@ -522,6 +522,7 @@ namespace WzComparerR2.Comparer
             string mobTooltipPath = Path.Combine(outputDir, "MobTooltips");
             string npcTooltipPath = Path.Combine(outputDir, "NpcTooltips");
             string questTooltipPath = Path.Combine(outputDir, "QuestTooltips");
+            string achvTooltipPath = Path.Combine(outputDir, "AchievementTooltips");
 
             FileStream htmlFile = null;
             StreamWriter sw = null;
