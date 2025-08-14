@@ -2128,7 +2128,7 @@ namespace WzComparerR2.CharaSimControl
             // 재발급 불가
             if (Gear.Props.TryGetValue(GearPropType.reissueBan, out value) && value != 0)
             {
-                tags.Add(ItemStringHelper.GetGearPropString22(GearPropType.reissueBan, value, 0)[0]);
+                tags.Add(ItemStringHelper.GetGearPropString3(GearPropType.reissueBan, value, 0)[0]);
             }
 
             // 중복 소지/장착
