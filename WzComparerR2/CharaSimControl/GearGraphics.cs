@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using CharaSimResource;
@@ -14,7 +16,6 @@ using TextFormatFlags = System.Windows.Forms.TextFormatFlags;
 using WzComparerR2.Text;
 using WzComparerR2.WzLib;
 using WzComparerR2.Common;
-using System.Text.RegularExpressions;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -69,9 +70,12 @@ namespace WzComparerR2.CharaSimControl
         public static Font EquipMDMoris9Font { get; private set; }
         public static Font EquipMDMoris9FontBold { get; private set; }
 
+        private static PrivateFontCollection _pfc = new PrivateFontCollection();
         public static Font ItemNameFont2 { get; private set; }
         public static Font ItemDetailFont2 { get; private set; }
         public static Font EquipDetailFont2 { get; private set; }
+        public static Font AchievementTitleFont { get; private set; }
+        public static Font KMSAchievementTitleFont { get; private set; }
 
         public static void SetFontFamily(string fontName)
         {
@@ -172,7 +176,21 @@ namespace WzComparerR2.CharaSimControl
                 EquipDetailFont2.Dispose();
                 EquipDetailFont2 = null;
             }
-            EquipDetailFont2 = new Font(fontName, 12f, GraphicsUnit.Pixel);
+            EquipDetailFont2 = new Font(fontName, 11f, GraphicsUnit.Pixel);
+
+            if (AchievementTitleFont != null)
+            {
+                AchievementTitleFont.Dispose();
+                AchievementTitleFont = null;
+            }
+            AchievementTitleFont = new Font(fontName, 16f, FontStyle.Bold, GraphicsUnit.Pixel);
+
+            if (KMSAchievementTitleFont != null)
+            {
+                KMSAchievementTitleFont.Dispose();
+                KMSAchievementTitleFont = null;
+            }
+            KMSAchievementTitleFont = new Font(fontName.StartsWith("Noto Sans") ? "Noto Sans KR" : "Dotum", 16f, FontStyle.Bold, GraphicsUnit.Pixel);
         }
 
         public static readonly Color GearBackColor = Color.FromArgb(204, 0, 51, 85);
@@ -306,6 +324,9 @@ namespace WzComparerR2.CharaSimControl
         public static readonly Brush QuestBrushMap = new SolidBrush(Color.FromArgb(221, 254, 1));
         public static readonly Brush QuestBrushItem = new SolidBrush(Color.FromArgb(204, 143, 255));
         public static readonly Brush QuestBrushEnd = new SolidBrush(Color.FromArgb(101, 117, 120));
+
+        public static readonly Brush AchievementPeriodBrush = new SolidBrush(Color.FromArgb(255, 255, 204));
+        public static readonly Brush AchievementRewardBrush = new SolidBrush(Color.FromArgb(221, 221, 221));
 
         public static readonly Brush BarrierArcBrush = new SolidBrush(Color.FromArgb(218, 161, 255));
         public static readonly Brush BarrierAutBrush = new SolidBrush(Color.FromArgb(218, 161, 255));

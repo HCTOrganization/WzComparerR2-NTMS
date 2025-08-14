@@ -43,6 +43,7 @@ namespace WzComparerR2.CharaSimControl
             this.HelpRender = new HelpTooltipRender();
             this.SetItemRender = new SetItemTooltipRender();
             this.SetItemRender3 = new SetItemTooltipRender3();
+            this.AchievementRender = new AchievementTooltipRenderer();
             this.SizeChanged += AfrmTooltip_SizeChanged;
 
             this.MouseClick += AfrmTooltip_MouseClick;
@@ -81,6 +82,7 @@ namespace WzComparerR2.CharaSimControl
         public HelpTooltipRender HelpRender { get; private set; }
         public SetItemTooltipRender SetItemRender { get; private set; }
         public SetItemTooltipRender3 SetItemRender3 { get; private set; }
+        public AchievementTooltipRenderer AchievementRender { get; private set; }
 
         public string ImageFileName { get; set; }
         public string NodeName { get; set; }
@@ -110,6 +112,7 @@ namespace WzComparerR2.CharaSimControl
                 this.QuestRender.ShowObjectID = value;
                 this.SkillRender.ShowObjectID = value;
                 this.RecipeRender.ShowObjectID = value;
+                this.AchievementRender.ShowObjectID = value;
             }
         }
 
@@ -265,6 +268,11 @@ namespace WzComparerR2.CharaSimControl
                     SetItemRender.SetItem = this.item as SetItem;
                 }
             }
+            else if (item is Achievement)
+            {
+                renderer = AchievementRender;
+                AchievementRender.Achievement = this.item as Achievement;
+            }
             else
             {
                 this.Bitmap = null;
@@ -311,6 +319,18 @@ namespace WzComparerR2.CharaSimControl
                     if ((this.QuestRender?.RewardRectnItems?.Count ?? 0) > 0)
                     {
                         foreach (var ri in this.QuestRender.RewardRectnItems)
+                        {
+                            if (ri.Item1.Contains(p))
+                            {
+                                return ri.Item2;
+                            }
+                        }
+                    }
+                    break;
+                case Achievement:
+                    if ((this.AchievementRender?.RewardRectnItems?.Count ?? 0) > 0)
+                    {
+                        foreach (var ri in this.AchievementRender.RewardRectnItems)
                         {
                             if (ri.Item1.Contains(p))
                             {
