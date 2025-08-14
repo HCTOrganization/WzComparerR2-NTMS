@@ -1939,6 +1939,10 @@ namespace WzComparerR2.CharaSimControl
             {
                 tags.Add(ItemStringHelper.GetGearPropString(GearPropType.cantRepair, value));
             }
+            if (Gear.Props.TryGetValue(GearPropType.reissueBan, out value) && value != 0)
+            {
+                tags.Add(ItemStringHelper.GetGearPropString(GearPropType.reissueBan, value));
+            }
             if (Gear.Props.TryGetValue(GearPropType.noLookChange, out value) && value != 0)
             {
                 if (Gear.type == GearType.medal)

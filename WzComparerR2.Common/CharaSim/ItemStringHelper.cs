@@ -146,6 +146,7 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.cantRepair: return value == 0 ? null : "無法修理";
                 case GearPropType.colorvar: return value == 0 ? null : "#c此裝備可以通過染色顏料進行染色。#";
                 case GearPropType.noLookChange: return value == 0 ? null : "無法使用神秘鐵砧";
+                case GearPropType.reissueBan: return value == 0 ? null : "無法重新發放";
 
                 case GearPropType.incAllStat_incMHP25: return "全部屬性：" + sign + value + ", 最大HP : " + sign + (value * 25);// check once Lv 250 set comes out in GMS
                 case GearPropType.incAllStat_incMHP50_incMMP50: return "全部屬性：" + sign + value + ", 最大HP / 最大MP : " + sign + (value * 50);
@@ -376,6 +377,9 @@ namespace WzComparerR2.CharaSim
                     return res;
                 case GearPropType.noLookChange:
                     res[0] = value == 0 ? null : "#$r無法使用神秘鐵砧#";
+                    return res;
+                case GearPropType.reissueBan:
+                    res[0] = value == 0 ? null : "#$r無法重新發放#";
                     return res;
                 case GearPropType.noPrism:
                     res[0] = value == 0 ? null : "#$r無法使用棱鏡#";
