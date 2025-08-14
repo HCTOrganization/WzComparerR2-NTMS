@@ -36,6 +36,7 @@ namespace WzComparerR2.Comparer
         private List<string> OutputMobTooltipIDs { get; set; } = new List<string>();
         private List<string> OutputNpcTooltipIDs { get; set; } = new List<string>();
         private List<string> OutputQuestTooltipIDs { get; set; } = new List<string>();
+        private List<string> OutputAchvTooltipIDs { get; set; } = new List<string>();
         private Dictionary<string, List<string>> DiffCashTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffGearTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffItemTags { get; set; } = new Dictionary<string, List<string>>();
@@ -44,6 +45,7 @@ namespace WzComparerR2.Comparer
         private Dictionary<string, List<string>> DiffNpcTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffQuestTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffSkillTags { get; set; } = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<string>> DiffAchvTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<int>> KMSContentID { get; set; } = new Dictionary<string, List<int>>();
         private Dictionary<string, List<string>> KMSComponentDict { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<int, List<int>> FifthJobSkillToJobID { get; set; } = new Dictionary<int, List<int>>();
@@ -72,6 +74,7 @@ namespace WzComparerR2.Comparer
         public bool ShowLinkedTamingMob { get; set; }
         public bool SkipKMSContent { get; set; }
         public bool DownloadKMSContentDB { get; set; }
+        public Dictionary<string, bool> selectedNodes { get; set; }
 
         public string StateInfo
         {
@@ -298,9 +301,10 @@ namespace WzComparerR2.Comparer
                     //输出概况
                     sw.WriteLine("<p class=\"wzf\">");
                     sw.WriteLine("<table>");
-                    sw.WriteLine("<tr><th>檔案名</th><th>新版本的大小</th><th>舊版本的大小</th><th>變更済み</th><th>新增</th><th>刪除されました</th></tr>");
+                    sw.WriteLine("<tr><th>檔案名</th><th>新版本的大小</th><th>舊版本的大小</th><th>變更</th><th>新增</th><th>刪除</th></tr>");
                     foreach (var wzType in wzTypeList)
                     {
+                        if (!selectedNodes[wzType.ToString()]) continue;
                         var vNodeNew = dictNew[wzType];
                         var vNodeOld = dictOld[wzType];
                         var cmp = comparer.Compare(vNodeNew, vNodeOld);
@@ -363,6 +367,7 @@ namespace WzComparerR2.Comparer
 
             foreach (var wzType in wzTypeList)
             {
+                if (!selectedNodes[wzType.ToString()]) continue;
                 var vNodeNew = dictNew[wzType];
                 var vNodeOld = dictOld[wzType];
                 var cmp = comparer.Compare(vNodeNew, vNodeOld);

@@ -297,7 +297,6 @@ namespace WzComparerR2
             this.dockSite3 = new DevComponents.DotNetBar.DockSite();
             this.dockContainerItem2 = new DevComponents.DotNetBar.DockContainerItem();
             this.panelDockContainer2 = new DevComponents.DotNetBar.PanelDockContainer();
-            this.chkHashPngFileName = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.btnItemOpenImg = new DevComponents.DotNetBar.ButtonItem();
             this.buttonItemSaveWithOptions = new DevComponents.DotNetBar.ButtonItem();
             this.itemContainer100 = new DevComponents.DotNetBar.ItemContainer();
@@ -308,6 +307,8 @@ namespace WzComparerR2
             this.toolStripMenuItem7 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmi2CopyFullPath = new System.Windows.Forms.ToolStripMenuItem();
             this.comboItem22 = new DevComponents.Editors.ComboItem();
+            this.btnRootNode = new DevComponents.DotNetBar.ButtonX();
+            this.clbRootNode = new System.Windows.Forms.CheckedListBox();
             this.ribbonControl1.SuspendLayout();
             this.ribbonPanel1.SuspendLayout();
             this.ribbonPanel2.SuspendLayout();
@@ -2666,7 +2667,6 @@ namespace WzComparerR2
             // 
             // superTabControlPanel2
             // 
-            //this.superTabControlPanel2.Controls.Add(this.chkHashPngFileName);
             this.superTabControlPanel2.Controls.Add(this.chkEnableDarkMode);
             this.superTabControlPanel2.Controls.Add(this.chkOutputCashTooltip);
             this.superTabControlPanel2.Controls.Add(this.chkOutputEqpTooltip);
@@ -2691,6 +2691,8 @@ namespace WzComparerR2
             this.superTabControlPanel2.Controls.Add(this.labelXComp2);
             this.superTabControlPanel2.Controls.Add(this.labelXComp1);
             this.superTabControlPanel2.Controls.Add(this.btnEasyCompare);
+            this.superTabControlPanel2.Controls.Add(this.btnRootNode);
+            this.superTabControlPanel2.Controls.Add(this.clbRootNode);
             this.superTabControlPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControlPanel2.Location = new System.Drawing.Point(0, 0);
             this.superTabControlPanel2.Name = "superTabControlPanel2";
@@ -3518,19 +3520,25 @@ namespace WzComparerR2
             this.panelDockContainer2.Style.GradientAngle = 90;
             this.panelDockContainer2.TabIndex = 2;
             // 
-            // chkHashPngFileName
+            // btnRootNode
+            // 
+            this.btnRootNode.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.btnRootNode.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnRootNode.Location = new System.Drawing.Point(105, 3);
+            this.btnRootNode.Name = "btnRootNode";
+            this.btnRootNode.Size = new System.Drawing.Size(100, 30);
+            this.btnRootNode.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.btnRootNode.TabIndex = 25;
+            this.btnRootNode.Text = "根節點 ▼";
+            this.btnRootNode.Click += new System.EventHandler(this.btnRootNode_Click);
             //
+            // clbRootNode
             //
-            //
-            //
-            this.chkHashPngFileName.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkHashPngFileName.Location = new System.Drawing.Point(328, 61);
-            this.chkHashPngFileName.Name = "chkHashPngFileName";
-            this.chkHashPngFileName.Size = new System.Drawing.Size(107, 23);
-            this.chkHashPngFileName.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.superTooltip1.SetSuperTooltip(this.chkHashPngFileName, new DevComponents.DotNetBar.SuperTooltipInfo("ハッシュPNG名", "", "PNGファイル名をMD5ハッシュとして出力します。\r\nパスが長すぎて 255 の制限を超えている場合は、\r\nこのオプションを有効にしてください。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 70)));
-            this.chkHashPngFileName.TabIndex = 9;
-            this.chkHashPngFileName.Text = "ハッシュPNG名";
+            this.clbRootNode.CheckOnClick = true;
+            this.clbRootNode.Location = new System.Drawing.Point(btnRootNode.Location.X, btnRootNode.Location.Y + btnRootNode.Size.Height);
+            this.clbRootNode.Size = new System.Drawing.Size(100, 250);
+            this.clbRootNode.Visible = false;
+            this.clbRootNode.BringToFront();
             //
             // 
             // toolStripMenuItem7
@@ -3588,7 +3596,6 @@ namespace WzComparerR2
             this.bar1.ResumeLayout(false);
             this.panelDockContainer1.ResumeLayout(false);
             this.ResumeLayout(false);
-
         }
 
         #endregion
@@ -3848,7 +3855,6 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputQuestTooltip;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputAchvTooltip;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputSkillTooltip;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkHashPngFileName;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowObjectID;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowChangeType;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowPrice;
@@ -3868,5 +3874,7 @@ namespace WzComparerR2
         private DevComponents.Editors.ComboItem comboItemSearchAchievement;
         private System.Windows.Forms.ToolStripMenuItem tsmi2CopyFullPath;
         private DevComponents.DotNetBar.ColorPickerDropDown colorPickerPicBoxBgColor;
+        private DevComponents.DotNetBar.ButtonX btnRootNode;
+        private System.Windows.Forms.CheckedListBox clbRootNode;
     }
 }
