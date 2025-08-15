@@ -50,6 +50,7 @@ namespace WzComparerR2.Comparer
         private Dictionary<string, List<string>> KMSComponentDict { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<int, List<int>> FifthJobSkillToJobID { get; set; } = new Dictionary<int, List<int>>();
         public Dictionary<string, string> FailToExportNodes { get; private set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> FailToExportTooltips { get; private set; } = new Dictionary<string, string>();
         public WzFileComparer Comparer { get; protected set; }
         private string stateInfo;
         private string stateDetail;
@@ -175,7 +176,7 @@ namespace WzComparerR2.Comparer
                         KMSContentID["Skill"] = new List<int>();
                         if (DownloadKMSContentDB)
                         {
-                            foreach (string item in new string[] { "Item", "Map", "Mob", "Npc", "Skill" })
+                            foreach (string item in new string[] { "Item", "Map", "Mob", "Npc", "Skill", "Achievement" })
                             {
                                 StateInfo = string.Format("正在下載KMS的{0}資料庫...", item);
                                 var request = (HttpWebRequest)WebRequest.Create(string.Format("https://raw.githubusercontent.com/HikariCalyx/KMSContent/refs/heads/main/{0}ID.txt", item));
@@ -251,7 +252,7 @@ namespace WzComparerR2.Comparer
                         }
                         else
                         {
-                            foreach (string item in new string[] { "Item", "Map", "Mob", "Npc", "Skill" })
+                            foreach (string item in new string[] { "Item", "Map", "Mob", "Npc", "Skill", "Achievement" })
                             {
                                 if (!KMSContentID.ContainsKey(item))
                                 {
@@ -852,129 +853,137 @@ namespace WzComparerR2.Comparer
 
             foreach (var skillID in OutputSkillTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} 技能: {2}", ++count, allCount, skillID);
-                StateDetail = "Skill 對比中...";
+                try
+                {
 
-                bool[] isSkillNull = new bool[2] { false, false };
+                    StateInfo = string.Format("{0}/{1} 技能: {2}", ++count, allCount, skillID);
+                    StateDetail = "Skill 對比中...";
 
-                if (SkipKMSContent && isKMSSkillID(Int32.Parse(skillID))) continue;
+                    bool[] isSkillNull = new bool[2] { false, false };
 
-                string skillType = "";
-                string skillNodePath = int.Parse(skillID) / 10000000 == 8 ? String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 100, skillID) : String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 10000, skillID);
-                if (int.Parse(skillID) / 10000 == 0) skillNodePath = String.Format(@"\000.img\skill\{0:D7}", skillID);
-                StringResult sr;
-                string skillName;
-                if (skillRenderNewOld[1].StringLinker == null || !skillRenderNewOld[1].StringLinker.StringSkill.TryGetValue(int.Parse(skillID), out sr))
-                {
-                    sr = new StringResultSkill();
-                    sr.Name = "未知的技能";
-                }
-                skillName = sr.Name;
-                if (skillRenderNewOld[0].StringLinker == null || !skillRenderNewOld[0].StringLinker.StringSkill.TryGetValue(int.Parse(skillID), out sr))
-                {
-                    sr = new StringResultSkill();
-                    sr.Name = "未知的技能";
-                }
-                if (skillName != sr.Name && skillName != "未知的技能" && sr.Name != "未知的技能")
-                {
-                    skillName += "_" + sr.Name;
-                }
-                else if (skillName == "未知的技能")
-                {
+                    if (SkipKMSContent && isKMSSkillID(Int32.Parse(skillID))) continue;
+
+                    string skillType = "";
+                    string skillNodePath = int.Parse(skillID) / 10000000 == 8 ? String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 100, skillID) : String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 10000, skillID);
+                    if (int.Parse(skillID) / 10000 == 0) skillNodePath = String.Format(@"\000.img\skill\{0:D7}", skillID);
+                    StringResult sr;
+                    string skillName;
+                    if (skillRenderNewOld[1].StringLinker == null || !skillRenderNewOld[1].StringLinker.StringSkill.TryGetValue(int.Parse(skillID), out sr))
+                    {
+                        sr = new StringResultSkill();
+                        sr.Name = "未知的技能";
+                    }
                     skillName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(skillName)) skillName = "未知的技能";
-                skillName = RemoveInvalidFileNameChars(skillName);
-                int nullSkillIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Skill skill = Skill.CreateFromNode(PluginManager.FindWz("Skill" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, WzFileNewOld[i]) ??
-                        (Skill.CreateFromNode(PluginManager.FindWz("Skill001" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, WzFileNewOld[i]) ??
-                        (Skill.CreateFromNode(PluginManager.FindWz("Skill002" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, WzFileNewOld[i]) ??
-                        Skill.CreateFromNode(PluginManager.FindWz("Skill003" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, WzFileNewOld[i])));
-
-                    if (skill != null)
+                    if (skillRenderNewOld[0].StringLinker == null || !skillRenderNewOld[0].StringLinker.StringSkill.TryGetValue(int.Parse(skillID), out sr))
                     {
-                        skill.Level = skill.MaxLevel;
-                        skillRenderNewOld[i].Skill = skill;
+                        sr = new StringResultSkill();
+                        sr.Name = "未知的技能";
                     }
-                    else
+                    if (skillName != sr.Name && skillName != "未知的技能" && sr.Name != "未知的技能")
                     {
-                        isSkillNull[i] = true;
-                        nullSkillIdx = i + 1;
+                        skillName += "_" + sr.Name;
                     }
-                }
+                    else if (skillName == "未知的技能")
+                    {
+                        skillName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(skillName)) skillName = "未知的技能";
+                    skillName = RemoveInvalidFileNameChars(skillName);
+                    int nullSkillIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Skill skill = Skill.CreateFromNode(PluginManager.FindWz("Skill" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, WzFileNewOld[i]) ??
+                            (Skill.CreateFromNode(PluginManager.FindWz("Skill001" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, WzFileNewOld[i]) ??
+                            (Skill.CreateFromNode(PluginManager.FindWz("Skill002" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, WzFileNewOld[i]) ??
+                            Skill.CreateFromNode(PluginManager.FindWz("Skill003" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, WzFileNewOld[i])));
 
-                switch (nullSkillIdx)
-                {
-                    case 0: // change
-                        skillType = "變更";
-
-                        Bitmap ImageNew = skillRenderNewOld[0].Render(true);
-                        Bitmap ImageOld = skillRenderNewOld[1].Render(true);
-                        if (ShowChangeType)
+                        if (skill != null)
                         {
-                            int picHchange = ShowObjectID ? 13 : 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 13 : 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            skill.Level = skill.MaxLevel;
+                            skillRenderNewOld[i].Skill = skill;
                         }
+                        else
+                        {
+                            isSkillNull[i] = true;
+                            nullSkillIdx = i + 1;
+                        }
+                    }
 
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    switch (nullSkillIdx)
+                    {
+                        case 0: // change
+                            skillType = "變更";
 
-                    case 1: // delete
-                        skillType = "刪除";
-                        if (isSkillNull[1]) continue;
-                        resultImage = skillRenderNewOld[1].Render();
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = skillRenderNewOld[0].Render(true);
+                            Bitmap ImageOld = skillRenderNewOld[1].Render(true);
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
 
-                    case 2: // add
-                        skillType = "新增";
-                        if (isSkillNull[0]) continue;
-                        resultImage = skillRenderNewOld[0].Render();
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    default:
-                        break;
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
+
+                        case 1: // delete
+                            skillType = "刪除";
+                            if (isSkillNull[1]) continue;
+                            resultImage = skillRenderNewOld[1].Render();
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            skillType = "新增";
+                            if (isSkillNull[0]) continue;
+                            resultImage = skillRenderNewOld[0].Render();
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var skillTypeTextInfo = g.MeasureString(skillType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullSkillIdx != 0) GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string categoryPath = (int.Parse(skillID) / 100000 == 4000 && FifthJobSkillToJobID.ContainsKey(int.Parse(skillID))) ? (ItemStringHelper.GetFifthJobName(int.Parse(skillID), FifthJobSkillToJobID[int.Parse(skillID)])) : (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "そ的他");
+
+                    if (!Directory.Exists(Path.Combine(skillTooltipPath, categoryPath)))
+                    {
+                        Directory.CreateDirectory(Path.Combine(skillTooltipPath, categoryPath));
+                    }
+
+                    string imageName = Path.Combine(skillTooltipPath, categoryPath, "技能_" + skillID + "_" + skillName + "_" + skillType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Skill Tooltip: " + skillID, ex.Message);
                 }
-
-                var skillTypeTextInfo = g.MeasureString(skillType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 13 : 1;
-                if (ShowChangeType && nullSkillIdx != 0) GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string categoryPath = (int.Parse(skillID) / 100000 == 4000 && FifthJobSkillToJobID.ContainsKey(int.Parse(skillID))) ? (ItemStringHelper.GetFifthJobName(int.Parse(skillID), FifthJobSkillToJobID[int.Parse(skillID)])) : (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其他");
-
-                if (!Directory.Exists(Path.Combine(skillTooltipPath, categoryPath)))
-                {
-                    Directory.CreateDirectory(Path.Combine(skillTooltipPath, categoryPath));
-                }
-
-                string imageName = Path.Combine(skillTooltipPath, categoryPath, "技能_" + skillID + "_" + skillName + "_" + skillType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputSkillTooltipIDs.Clear();
             DiffSkillTags.Clear();
@@ -1047,159 +1056,167 @@ namespace WzComparerR2.Comparer
 
             foreach (var itemID in OutputItemTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} 道具: {2}", ++count, allCount, itemID);
-                StateDetail = "Item 對比中...";
-                bool[] isItemNull = new bool[2] { false, false };
-                string itemType = "";
-                string itemNodePath = null;
-                string categoryPath = "";
+                try
+                {
+                    StateInfo = string.Format("{0}/{1} 道具: {2}", ++count, allCount, itemID);
+                    StateDetail = "Item 對比中...";
+                    bool[] isItemNull = new bool[2] { false, false };
+                    string itemType = "";
+                    string itemNodePath = null;
+                    string categoryPath = "";
 
-                if (!int.TryParse(itemID, out _)) continue;
-                if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(itemID)))) continue;
+                    if (!int.TryParse(itemID, out _)) continue;
+                    if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(itemID)))) continue;
 
-                if (itemID.StartsWith("03015")) // 判断开头是否是03015
-                {
-                    itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 100, itemID);
-                    categoryPath = "Chair_椅子";
-                }
-                else if (itemID.StartsWith("0301")) // 判断开头是否是0301
-                {
-                    itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 1000, itemID);
-                    categoryPath = "Chair_椅子";
-                }
-                else if (itemID.StartsWith("500")) // 判断开头是否是0500
-                {
-                    itemNodePath = String.Format(@"Item\Pet\{0:D}.img", itemID);
-                    categoryPath = "Pet_寵物";
-                }
-                else if (itemID.StartsWith("02")) // 判断第1位是否是02
-                {
-                    itemNodePath = String.Format(@"Item\Consume\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
-                    categoryPath = "Consumable_消耗品";
-                }
-                else if (itemID.StartsWith("03")) // 判断第1位是否是03
-                {
-                    itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
-                    categoryPath = "OtherSetup";
-                }
-                else if (itemID.StartsWith("04")) // 判断第1位是否是04
-                {
-                    itemNodePath = String.Format(@"Item\Etc\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
-                    categoryPath = "Etc_其他";
-                }
-                else if (itemID.StartsWith("05")) // 判断第1位是否是02
-                {
-                    itemNodePath = String.Format(@"Item\Cash\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
-                    categoryPath = "Cash_現金";
-                }
+                    if (itemID.StartsWith("03015")) // 判断开头是否是03015
+                    {
+                        itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 100, itemID);
+                        categoryPath = "Chair_椅子";
+                    }
+                    else if (itemID.StartsWith("0301")) // 判断开头是否是0301
+                    {
+                        itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 1000, itemID);
+                        categoryPath = "Chair_椅子";
+                    }
+                    else if (itemID.StartsWith("500")) // 判断开头是否是0500
+                    {
+                        itemNodePath = String.Format(@"Item\Pet\{0:D}.img", itemID);
+                        categoryPath = "Pet_寵物";
+                    }
+                    else if (itemID.StartsWith("02")) // 判断第1位是否是02
+                    {
+                        itemNodePath = String.Format(@"Item\Consume\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                        categoryPath = "Consumable_消耗品";
+                    }
+                    else if (itemID.StartsWith("03")) // 判断第1位是否是03
+                    {
+                        itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                        categoryPath = "OtherSetup";
+                    }
+                    else if (itemID.StartsWith("04")) // 判断第1位是否是04
+                    {
+                        itemNodePath = String.Format(@"Item\Etc\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                        categoryPath = "Etc_其他";
+                    }
+                    else if (itemID.StartsWith("05")) // 判断第1位是否是02
+                    {
+                        itemNodePath = String.Format(@"Item\Cash\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                        categoryPath = "Cash_現金";
+                    }
 
-                StringResult sr;
-                string ItemName;
-                if (itemRenderNewOld[1].StringLinker == null || !itemRenderNewOld[1].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的道具";
-                }
-                ItemName = sr.Name;
-                if (itemRenderNewOld[0].StringLinker == null || !itemRenderNewOld[0].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的道具";
-                }
-                if (ItemName != sr.Name && ItemName != "未知的道具" && sr.Name != "未知的道具")
-                {
-                    ItemName += "_" + sr.Name;
-                }
-                else if (ItemName == "未知的道具")
-                {
+                    StringResult sr;
+                    string ItemName;
+                    if (itemRenderNewOld[1].StringLinker == null || !itemRenderNewOld[1].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的道具";
+                    }
                     ItemName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(ItemName)) ItemName = "未知的道具";
-                ItemName = RemoveInvalidFileNameChars(ItemName);
-                int nullItemIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Item item = Item.CreateFromNode(PluginManager.FindWz(itemNodePath, WzFileNewOld[i]), PluginManager.FindWz);
-
-                    if (item != null)
+                    if (itemRenderNewOld[0].StringLinker == null || !itemRenderNewOld[0].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
                     {
-                        itemRenderNewOld[i].Item = item;
+                        sr = new StringResult();
+                        sr.Name = "未知的道具";
                     }
-                    else
+                    if (ItemName != sr.Name && ItemName != "未知的道具" && sr.Name != "未知的道具")
                     {
-                        isItemNull[i] = true;
-                        nullItemIdx = i + 1;
+                        ItemName += "_" + sr.Name;
                     }
-                }
+                    else if (ItemName == "未知的道具")
+                    {
+                        ItemName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(ItemName)) ItemName = "未知的道具";
+                    ItemName = RemoveInvalidFileNameChars(ItemName);
+                    int nullItemIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Item item = Item.CreateFromNode(PluginManager.FindWz(itemNodePath, WzFileNewOld[i]), PluginManager.FindWz);
 
-                switch (nullItemIdx)
-                {
-                    case 0: // change
-                        itemType = "變更";
-
-                        Bitmap ImageNew = itemRenderNewOld[0].Render();
-                        Bitmap ImageOld = itemRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                        if (item != null)
                         {
-                            int picHchange = ShowObjectID ? 13 : 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 13 : 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            itemRenderNewOld[i].Item = item;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            isItemNull[i] = true;
+                            nullItemIdx = i + 1;
+                        }
+                    }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                    case 1: // delete
-                        itemType = "刪除";
-                        if (isItemNull[1]) continue;
-                        resultImage = itemRenderNewOld[1].Render();
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                    switch (nullItemIdx)
+                    {
+                        case 0: // change
+                            itemType = "變更";
 
-                    case 2: // add
-                        itemType = "新增";
-                        if (isItemNull[0]) continue;
-                        resultImage = itemRenderNewOld[0].Render();
-                        g = Graphics.FromImage(resultImage);
-                        break;
 
-                    default:
-                        break;
+                            Bitmap ImageNew = itemRenderNewOld[0].Render();
+                            Bitmap ImageOld = itemRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
+
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
+
+                        case 1: // delete
+                            itemType = "刪除";
+                            if (isItemNull[1]) continue;
+                            resultImage = itemRenderNewOld[1].Render();
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            itemType = "新增";
+                            if (isItemNull[0]) continue;
+                            resultImage = itemRenderNewOld[0].Render();
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    if (!Directory.Exists(Path.Combine(itemTooltipPath, categoryPath)))
+                    {
+                        Directory.CreateDirectory(Path.Combine(itemTooltipPath, categoryPath));
+                    }
+
+                    var itemTypeTextInfo = g.MeasureString(itemType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullItemIdx != 0) GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(itemTooltipPath, categoryPath, "道具_" + itemID + "_" + ItemName + "_" + itemType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Item Tooltip: " + itemID, ex.Message);
                 }
-
-                if (!Directory.Exists(Path.Combine(itemTooltipPath, categoryPath)))
-                {
-                    Directory.CreateDirectory(Path.Combine(itemTooltipPath, categoryPath));
-                }
-
-                var itemTypeTextInfo = g.MeasureString(itemType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 13 : 1;
-                if (ShowChangeType && nullItemIdx != 0) GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(itemTooltipPath, categoryPath, "道具_" + itemID + "_" + ItemName + "_" + itemType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputItemTooltipIDs.Clear();
             DiffItemTags.Clear();
@@ -1232,247 +1249,254 @@ namespace WzComparerR2.Comparer
 
             foreach (var gearID in OutputGearTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} 裝備: {2}", ++count, allCount, gearID);
-                StateDetail = "Character 對比中...";
-                bool[] isGearNull = new bool[2] { false, false };
-                string gearType = "";
-                string gearNodePath = null;
-                string categoryPath = "";
+                try
+                {
+                    StateInfo = string.Format("{0}/{1} 裝備: {2}", ++count, allCount, gearID);
+                    StateDetail = "Character 對比中...";
+                    bool[] isGearNull = new bool[2] { false, false };
+                    string gearType = "";
+                    string gearNodePath = null;
+                    string categoryPath = "";
 
-                if (!int.TryParse(gearID, out _)) continue;
+                    if (!int.TryParse(gearID, out _)) continue;
 
-                if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(gearID)))) continue;
+                    if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(gearID)))) continue;
 
-                if (Regex.IsMatch(gearID, "^0101|^0102|^0103|^0112|^0113|^0114|^0115|^0116|^0118|^0119")) // 判断开头是否是0101~0103或0112~0116-0118~0119
-                {
-                    gearNodePath = String.Format(@"Character\Accessory\{0:D}.img", gearID);
-                    categoryPath = "Accessory_飾品";
-                }
-                else if (gearID.StartsWith("0100")) // 判断开头是否是0100
-                {
-                    gearNodePath = String.Format(@"Character\Cap\{0:D}.img", gearID);
-                    categoryPath = "Hat_帽子";
-                }
-                else if (gearID.StartsWith("0104")) // 判断开头是否是0104
-                {
-                    gearNodePath = String.Format(@"Character\Coat\{0:D}.img", gearID);
-                    categoryPath = "Top_上衣";
-                }
-                else if (gearID.StartsWith("0105")) // 判断开头是否是0104
-                {
-                    gearNodePath = String.Format(@"Character\Longcoat\{0:D}.img", gearID);
-                    categoryPath = "Overall_套服";
-                }
-                else if (gearID.StartsWith("0106")) // 判断开头是否是0106
-                {
-                    gearNodePath = String.Format(@"Character\Pants\{0:D}.img", gearID);
-                    categoryPath = "Bottom_褲裙";
-                }
-                else if (gearID.StartsWith("0107")) // 判断开头是否是0107
-                {
-                    gearNodePath = String.Format(@"Character\Shoes\{0:D}.img", gearID);
-                    categoryPath = "Shoes_鞋子";
-                }
-                else if (gearID.StartsWith("0108")) // 判断开头是否是0108
-                {
-                    gearNodePath = String.Format(@"Character\Glove\{0:D}.img", gearID);
-                    categoryPath = "Glove_手套";
-                }
-                else if (gearID.StartsWith("0109")) // 判断开头是否是0109
-                {
-                    gearNodePath = String.Format(@"Character\Shield\{0:D}.img", gearID);
-                    categoryPath = "Shield_盾";
-                }
-                else if (gearID.StartsWith("0110")) // 判断开头是否是0110
-                {
-                    gearNodePath = String.Format(@"Character\Cape\{0:D}.img", gearID);
-                    categoryPath = "Cape_披風";
-                }
-                else if (gearID.StartsWith("0111")) // 判断开头是否是0111
-                {
-                    gearNodePath = String.Format(@"Character\Ring\{0:D}.img", gearID);
-                    categoryPath = "Ring_戒指";
-                }
-                else if (gearID.StartsWith("0120") || gearID.StartsWith("120")) // 判断开头是否是0120
-                {
-                    gearNodePath = String.Format(@"Character\Totem\{0:D}.img", gearID);
-                    categoryPath = "Totem_圖騰";
-                }
-                else if (Regex.IsMatch(gearID, "^012[1-9]|^013|^014|^015|^0160|^0169|^0170")) // 判断开头是否是012~015、0160或0169-0179
-                {
-                    gearNodePath = String.Format(@"Character\Weapon\{0:D}.img", gearID);
-                    categoryPath = "Weapon_武器";
-                }
-                else if (Regex.IsMatch(gearID, "^0161|^0162|^0163|^0164|^0165"))// 判断开头是否是0161~0165
-                {
-                    gearNodePath = String.Format(@"Character\Mechanic\{0:D}.img", gearID);
-                    categoryPath = "MechanicPart_機甲部件";
-                }
-                else if (Regex.IsMatch(gearID, "^0166|^0167")) // 判断开头是否是0166或0167
-                {
-                    gearNodePath = String.Format(@"Character\Android\{0:D}.img", gearID);
-                    categoryPath = "Android_機器人";
-                }
-                else if (gearID.StartsWith("0168")) // 判断开头是否是0168
-                {
-                    gearNodePath = String.Format(@"Character\Bits\{0:D}.img", gearID);
-                    categoryPath = "Bits_拼圖";
-                }
-                else if (gearID.StartsWith("01712")) // 判断开头是否是01712
-                {
-                    gearNodePath = String.Format(@"Character\ArcaneForce\{0:D}.img", gearID);
-                    categoryPath = "Arcane_秘法";
-                }
-                else if (Regex.IsMatch(gearID, "^01713|^01714")) // 判断开头是否是01713或01714
-                {
-                    gearNodePath = String.Format(@"Character\AuthenticForce\{0:D}.img", gearID);
-                    categoryPath = "Authentic_真實";
-                }
-                else if (Regex.IsMatch(gearID, "^0178"))  // 判断开头是否是0178
-                {
-                    gearNodePath = String.Format(@"Character\Jewel\{0:D}.img", gearID);
-                    categoryPath = "Jewel_寶玉";
-                }
-                else if (Regex.IsMatch(gearID, "^0179"))  // 判断开头是否是0179
-                {
-                    gearNodePath = String.Format(@"Character\NT_Beauty\{0:D}.img", gearID);
-                    categoryPath = "MSN_Cosmetic_外形";
-                }
-                else if (gearID.StartsWith("018")) // 判断开头是否是018
-                {
-                    gearNodePath = String.Format(@"Character\PetEquip\{0:D}.img", gearID);
-                    categoryPath = "PetEquipment_寵物裝備";
-                }
-                else if (Regex.IsMatch(gearID, "^0194|^0195|^0196|^0197")) // 判断开头是否是0194~0197
-                {
-                    gearNodePath = String.Format(@"Character\Dragon\{0:D}.img", gearID);
-                    categoryPath = "EvanDragonEquip_龍魔裝備";
-                }
-                else if (Regex.IsMatch(gearID, "^0190|^0191|^0192|^0193|^0198")) // 判断开头是否是0190~0193或0198
-                {
-                    gearNodePath = String.Format(@"Character\TamingMob\{0:D}.img", gearID);
-                    categoryPath = "TamedMonster_馴服的怪物";
-                }
-                else if (Regex.IsMatch(gearID, "^0002|^0005")) // 判断开头是否是0002或0005
-                {
-                    gearNodePath = String.Format(@"Character\Face\{0:D}.img", gearID);
-                    categoryPath = "Cosmetic_外形";
-                }
-                else if (Regex.IsMatch(gearID, "^0003|^0004|^0006")) // 判断开头是否是0003、0004或0006
-                {
-                    gearNodePath = String.Format(@"Character\Hair\{0:D}.img", gearID);
-                    categoryPath = "Cosmetic_外形";
-                }
+                    if (Regex.IsMatch(gearID, "^0101|^0102|^0103|^0112|^0113|^0114|^0115|^0116|^0118|^0119")) // 判断开头是否是0101~0103或0112~0116-0118~0119
+                    {
+                        gearNodePath = String.Format(@"Character\Accessory\{0:D}.img", gearID);
+                        categoryPath = "Accessory_飾品";
+                    }
+                    else if (gearID.StartsWith("0100")) // 判断开头是否是0100
+                    {
+                        gearNodePath = String.Format(@"Character\Cap\{0:D}.img", gearID);
+                        categoryPath = "Hat_帽子";
+                    }
+                    else if (gearID.StartsWith("0104")) // 判断开头是否是0104
+                    {
+                        gearNodePath = String.Format(@"Character\Coat\{0:D}.img", gearID);
+                        categoryPath = "Top_上衣";
+                    }
+                    else if (gearID.StartsWith("0105")) // 判断开头是否是0104
+                    {
+                        gearNodePath = String.Format(@"Character\Longcoat\{0:D}.img", gearID);
+                        categoryPath = "Overall_套服";
+                    }
+                    else if (gearID.StartsWith("0106")) // 判断开头是否是0106
+                    {
+                        gearNodePath = String.Format(@"Character\Pants\{0:D}.img", gearID);
+                        categoryPath = "Bottom_褲裙";
+                    }
+                    else if (gearID.StartsWith("0107")) // 判断开头是否是0107
+                    {
+                        gearNodePath = String.Format(@"Character\Shoes\{0:D}.img", gearID);
+                        categoryPath = "Shoes_鞋子";
+                    }
+                    else if (gearID.StartsWith("0108")) // 判断开头是否是0108
+                    {
+                        gearNodePath = String.Format(@"Character\Glove\{0:D}.img", gearID);
+                        categoryPath = "Glove_手套";
+                    }
+                    else if (gearID.StartsWith("0109")) // 判断开头是否是0109
+                    {
+                        gearNodePath = String.Format(@"Character\Shield\{0:D}.img", gearID);
+                        categoryPath = "Shield_盾";
+                    }
+                    else if (gearID.StartsWith("0110")) // 判断开头是否是0110
+                    {
+                        gearNodePath = String.Format(@"Character\Cape\{0:D}.img", gearID);
+                        categoryPath = "Cape_披風";
+                    }
+                    else if (gearID.StartsWith("0111")) // 判断开头是否是0111
+                    {
+                        gearNodePath = String.Format(@"Character\Ring\{0:D}.img", gearID);
+                        categoryPath = "Ring_戒指";
+                    }
+                    else if (gearID.StartsWith("0120") || gearID.StartsWith("120")) // 判断开头是否是0120
+                    {
+                        gearNodePath = String.Format(@"Character\Totem\{0:D}.img", gearID);
+                        categoryPath = "Totem_圖騰";
+                    }
+                    else if (Regex.IsMatch(gearID, "^012[1-9]|^013|^014|^015|^0160|^0169|^0170")) // 判断开头是否是012~015、0160或0169-0179
+                    {
+                        gearNodePath = String.Format(@"Character\Weapon\{0:D}.img", gearID);
+                        categoryPath = "Weapon_武器";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0161|^0162|^0163|^0164|^0165"))// 判断开头是否是0161~0165
+                    {
+                        gearNodePath = String.Format(@"Character\Mechanic\{0:D}.img", gearID);
+                        categoryPath = "MechanicPart_機甲部件";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0166|^0167")) // 判断开头是否是0166或0167
+                    {
+                        gearNodePath = String.Format(@"Character\Android\{0:D}.img", gearID);
+                        categoryPath = "Android_機器人";
+                    }
+                    else if (gearID.StartsWith("0168")) // 判断开头是否是0168
+                    {
+                        gearNodePath = String.Format(@"Character\Bits\{0:D}.img", gearID);
+                        categoryPath = "Bits_拼圖";
+                    }
+                    else if (gearID.StartsWith("01712")) // 判断开头是否是01712
+                    {
+                        gearNodePath = String.Format(@"Character\ArcaneForce\{0:D}.img", gearID);
+                        categoryPath = "Arcane_秘法";
+                    }
+                    else if (Regex.IsMatch(gearID, "^01713|^01714")) // 判断开头是否是01713或01714
+                    {
+                        gearNodePath = String.Format(@"Character\AuthenticForce\{0:D}.img", gearID);
+                        categoryPath = "Authentic_真實";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0178"))  // 判断开头是否是0178
+                    {
+                        gearNodePath = String.Format(@"Character\Jewel\{0:D}.img", gearID);
+                        categoryPath = "Jewel_寶玉";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0179"))  // 判断开头是否是0179
+                    {
+                        gearNodePath = String.Format(@"Character\NT_Beauty\{0:D}.img", gearID);
+                        categoryPath = "MSN_Cosmetic_外形";
+                    }
+                    else if (gearID.StartsWith("018")) // 判断开头是否是018
+                    {
+                        gearNodePath = String.Format(@"Character\PetEquip\{0:D}.img", gearID);
+                        categoryPath = "PetEquipment_寵物裝備";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0194|^0195|^0196|^0197")) // 判断开头是否是0194~0197
+                    {
+                        gearNodePath = String.Format(@"Character\Dragon\{0:D}.img", gearID);
+                        categoryPath = "EvanDragonEquip_龍魔裝備";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0190|^0191|^0192|^0193|^0198")) // 判断开头是否是0190~0193或0198
+                    {
+                        gearNodePath = String.Format(@"Character\TamingMob\{0:D}.img", gearID);
+                        categoryPath = "TamedMonster_馴服的怪物";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0002|^0005")) // 判断开头是否是0002或0005
+                    {
+                        gearNodePath = String.Format(@"Character\Face\{0:D}.img", gearID);
+                        categoryPath = "Cosmetic_外形";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0003|^0004|^0006")) // 判断开头是否是0003、0004或0006
+                    {
+                        gearNodePath = String.Format(@"Character\Hair\{0:D}.img", gearID);
+                        categoryPath = "Cosmetic_外形";
+                    }
 
-                StringResult sr;
-                string EqpName;
-                if (gearRenderNewOld[1].StringLinker == null || !gearRenderNewOld[1].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的裝備";
-                }
-                EqpName = sr.Name;
-                if (gearRenderNewOld[0].StringLinker == null || !gearRenderNewOld[0].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的裝備";
-                }
-                if (EqpName != sr.Name && EqpName != "未知的裝備" && sr.Name != "未知的裝備")
-                {
-                    EqpName += "_" + sr.Name;
-                }
-                else if (EqpName == "未知的裝備")
-                {
+                    StringResult sr;
+                    string EqpName;
+                    if (gearRenderNewOld[1].StringLinker == null || !gearRenderNewOld[1].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的裝備";
+                    }
                     EqpName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(EqpName)) EqpName = "未知的裝備";
-                EqpName = RemoveInvalidFileNameChars(EqpName);
-                int nullEqpIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Gear gear = Gear.CreateFromNode(PluginManager.FindWz(gearNodePath, WzFileNewOld[i]), PluginManager.FindWz);
-
-                    if (gear != null)
+                    if (gearRenderNewOld[0].StringLinker == null || !gearRenderNewOld[0].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
                     {
-                        gearRenderNewOld[i].Gear = gear;
+                        sr = new StringResult();
+                        sr.Name = "未知的裝備";
                     }
-                    else
+                    if (EqpName != sr.Name && EqpName != "未知的裝備" && sr.Name != "未知的裝備")
                     {
-                        isGearNull[i] = true;
-                        nullEqpIdx = i + 1;
+                        EqpName += "_" + sr.Name;
                     }
-                }
+                    else if (EqpName == "未知的裝備")
+                    {
+                        EqpName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(EqpName)) EqpName = "未知的裝備";
+                    EqpName = RemoveInvalidFileNameChars(EqpName);
+                    int nullEqpIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Gear gear = Gear.CreateFromNode(PluginManager.FindWz(gearNodePath, WzFileNewOld[i]), PluginManager.FindWz);
 
-                switch (nullEqpIdx)
-                {
-                    case 0: // change
-                        gearType = "變更";
-
-                        Bitmap ImageNew = gearRenderNewOld[0].Render();
-                        Bitmap ImageOld = gearRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                        if (gear != null)
                         {
-                            int picHchange = ShowObjectID ? 13 : 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 13 : 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            gearRenderNewOld[i].Gear = gear;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            isGearNull[i] = true;
+                            nullEqpIdx = i + 1;
+                        }
+                    }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                    case 1: // delete
-                        gearType = "刪除";
-                        if (isGearNull[1]) continue;
-                        resultImage = gearRenderNewOld[1].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                    switch (nullEqpIdx)
+                    {
+                        case 0: // change
+                            gearType = "變更";
 
-                    case 2: // add
-                        gearType = "新增";
-                        if (isGearNull[0]) continue;
-                        resultImage = gearRenderNewOld[0].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = gearRenderNewOld[0].Render();
+                            Bitmap ImageOld = gearRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    default:
-                        break;
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
+
+                        case 1: // delete
+                            gearType = "刪除";
+                            if (isGearNull[1]) continue;
+                            resultImage = gearRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            gearType = "新增";
+                            if (isGearNull[0]) continue;
+                            resultImage = gearRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    if (!Directory.Exists(Path.Combine(gearTooltipPath, categoryPath)))
+                    {
+                        Directory.CreateDirectory(Path.Combine(gearTooltipPath, categoryPath));
+                    }
+
+                    var gearTypeTextInfo = g.MeasureString(gearType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullEqpIdx != 0) GearGraphics.DrawPlainText(g, gearType, gearTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(gearTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(gearTooltipPath, categoryPath, "裝備_" + gearID + "_" + EqpName + "_" + gearType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Gear Tooltip: " + gearID, ex.Message);
                 }
-
-                if (!Directory.Exists(Path.Combine(gearTooltipPath, categoryPath)))
-                {
-                    Directory.CreateDirectory(Path.Combine(gearTooltipPath, categoryPath));
-                }
-
-                var gearTypeTextInfo = g.MeasureString(gearType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 13 : 1;
-                if (ShowChangeType && nullEqpIdx != 0) GearGraphics.DrawPlainText(g, gearType, gearTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(gearTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(gearTooltipPath, categoryPath, "裝備_" + gearID + "_" + EqpName + "_" + gearType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputGearTooltipIDs.Clear();
             DiffGearTags.Clear();
@@ -1503,246 +1527,254 @@ namespace WzComparerR2.Comparer
 
             foreach (var gearID in OutputGearTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} 裝備: {2}", ++count, allCount, gearID);
-                StateDetail = "Character 對比中...";
-                bool[] isGearNull = new bool[2] { false, false };
-                string gearType = "";
-                string gearNodePath = null;
-                string categoryPath = "";
+                try
+                {
 
-                if (!int.TryParse(gearID, out _)) continue;
-                if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(gearID)))) continue;
+                    StateInfo = string.Format("{0}/{1} 裝備: {2}", ++count, allCount, gearID);
+                    StateDetail = "Character 變更点をツールチップ画像に出力中...";
+                    bool[] isGearNull = new bool[2] { false, false };
+                    string gearType = "";
+                    string gearNodePath = null;
+                    string categoryPath = "";
 
-                if (Regex.IsMatch(gearID, "^0101|^0102|^0103|^0112|^0113|^0114|^0115|^0116|^0118|^0119")) // 判断开头是否是0101~0103或0112~0116-0118~0119
-                {
-                    gearNodePath = String.Format(@"Character\Accessory\{0:D}.img", gearID);
-                    categoryPath = "Accessory_飾品";
-                }
-                else if (gearID.StartsWith("0100")) // 判断开头是否是0100
-                {
-                    gearNodePath = String.Format(@"Character\Cap\{0:D}.img", gearID);
-                    categoryPath = "Hat_帽子";
-                }
-                else if (gearID.StartsWith("0104")) // 判断开头是否是0104
-                {
-                    gearNodePath = String.Format(@"Character\Coat\{0:D}.img", gearID);
-                    categoryPath = "Top_上衣";
-                }
-                else if (gearID.StartsWith("0105")) // 判断开头是否是0104
-                {
-                    gearNodePath = String.Format(@"Character\Longcoat\{0:D}.img", gearID);
-                    categoryPath = "Overall_套服";
-                }
-                else if (gearID.StartsWith("0106")) // 判断开头是否是0106
-                {
-                    gearNodePath = String.Format(@"Character\Pants\{0:D}.img", gearID);
-                    categoryPath = "Bottom_褲裙";
-                }
-                else if (gearID.StartsWith("0107")) // 判断开头是否是0107
-                {
-                    gearNodePath = String.Format(@"Character\Shoes\{0:D}.img", gearID);
-                    categoryPath = "Shoes_鞋子";
-                }
-                else if (gearID.StartsWith("0108")) // 判断开头是否是0108
-                {
-                    gearNodePath = String.Format(@"Character\Glove\{0:D}.img", gearID);
-                    categoryPath = "Glove_手套";
-                }
-                else if (gearID.StartsWith("0109")) // 判断开头是否是0109
-                {
-                    gearNodePath = String.Format(@"Character\Shield\{0:D}.img", gearID);
-                    categoryPath = "Shield_盾";
-                }
-                else if (gearID.StartsWith("0110")) // 判断开头是否是0110
-                {
-                    gearNodePath = String.Format(@"Character\Cape\{0:D}.img", gearID);
-                    categoryPath = "Cape_披風";
-                }
-                else if (gearID.StartsWith("0111")) // 判断开头是否是0111
-                {
-                    gearNodePath = String.Format(@"Character\Ring\{0:D}.img", gearID);
-                    categoryPath = "Ring_戒指";
-                }
-                else if (gearID.StartsWith("0120") || gearID.StartsWith("120")) // 判断开头是否是0120
-                {
-                    gearNodePath = String.Format(@"Character\Totem\{0:D}.img", gearID);
-                    categoryPath = "Totem_圖騰";
-                }
-                else if (Regex.IsMatch(gearID, "^012[1-9]|^013|^014|^015|^0160|^0169|^0170")) // 判断开头是否是012~015、0160或0169-0179
-                {
-                    gearNodePath = String.Format(@"Character\Weapon\{0:D}.img", gearID);
-                    categoryPath = "Weapon_武器";
-                }
-                else if (Regex.IsMatch(gearID, "^0161|^0162|^0163|^0164|^0165"))// 判断开头是否是0161~0165
-                {
-                    gearNodePath = String.Format(@"Character\Mechanic\{0:D}.img", gearID);
-                    categoryPath = "MechanicPart_機甲部件";
-                }
-                else if (Regex.IsMatch(gearID, "^0166|^0167")) // 判断开头是否是0166或0167
-                {
-                    gearNodePath = String.Format(@"Character\Android\{0:D}.img", gearID);
-                    categoryPath = "Android_機器人";
-                }
-                else if (gearID.StartsWith("0168")) // 判断开头是否是0168
-                {
-                    gearNodePath = String.Format(@"Character\Bits\{0:D}.img", gearID);
-                    categoryPath = "Bits_拼圖";
-                }
-                else if (gearID.StartsWith("01712")) // 判断开头是否是01712
-                {
-                    gearNodePath = String.Format(@"Character\ArcaneForce\{0:D}.img", gearID);
-                    categoryPath = "Arcane_秘法";
-                }
-                else if (Regex.IsMatch(gearID, "^01713|^01714")) // 判断开头是否是01713或01714
-                {
-                    gearNodePath = String.Format(@"Character\AuthenticForce\{0:D}.img", gearID);
-                    categoryPath = "Authentic_真實";
-                }
-                else if (Regex.IsMatch(gearID, "^0178"))  // 判断开头是否是0178
-                {
-                    gearNodePath = String.Format(@"Character\Jewel\{0:D}.img", gearID);
-                    categoryPath = "Jewel_寶玉";
-                }
-                else if (Regex.IsMatch(gearID, "^0179"))  // 判断开头是否是0179
-                {
-                    gearNodePath = String.Format(@"Character\NT_Beauty\{0:D}.img", gearID);
-                    categoryPath = "MSN_Cosmetic_外形";
-                }
-                else if (gearID.StartsWith("018")) // 判断开头是否是018
-                {
-                    gearNodePath = String.Format(@"Character\PetEquip\{0:D}.img", gearID);
-                    categoryPath = "PetEquipment_寵物裝備";
-                }
-                else if (Regex.IsMatch(gearID, "^0194|^0195|^0196|^0197")) // 判断开头是否是0194~0197
-                {
-                    gearNodePath = String.Format(@"Character\Dragon\{0:D}.img", gearID);
-                    categoryPath = "EvanDragonEquip_龍魔裝備";
-                }
-                else if (Regex.IsMatch(gearID, "^0190|^0191|^0192|^0193|^0198")) // 判断开头是否是0190~0193或0198
-                {
-                    gearNodePath = String.Format(@"Character\TamingMob\{0:D}.img", gearID);
-                    categoryPath = "TamedMonster_馴服的怪物";
-                }
-                else if (Regex.IsMatch(gearID, "^0002|^0005")) // 判断开头是否是0002或0005
-                {
-                    gearNodePath = String.Format(@"Character\Face\{0:D}.img", gearID);
-                    categoryPath = "Cosmetic_外形";
-                }
-                else if (Regex.IsMatch(gearID, "^0003|^0004|^0006")) // 判断开头是否是0003、0004或0006
-                {
-                    gearNodePath = String.Format(@"Character\Hair\{0:D}.img", gearID);
-                    categoryPath = "Cosmetic_外形";
-                }
+                    if (!int.TryParse(gearID, out _)) continue;
+                    if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(gearID)))) continue;
 
-                StringResult sr;
-                string EqpName;
-                if (gearRenderNewOld[1].StringLinker == null || !gearRenderNewOld[1].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的裝備";
-                }
-                EqpName = sr.Name;
-                if (gearRenderNewOld[0].StringLinker == null || !gearRenderNewOld[0].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的裝備";
-                }
-                if (EqpName != sr.Name && EqpName != "未知的裝備" && sr.Name != "未知的裝備")
-                {
-                    EqpName += "_" + sr.Name;
-                }
-                else if (EqpName == "未知的裝備")
-                {
+                    if (Regex.IsMatch(gearID, "^0101|^0102|^0103|^0112|^0113|^0114|^0115|^0116|^0118|^0119")) // 判断开头是否是0101~0103或0112~0116-0118~0119
+                    {
+                        gearNodePath = String.Format(@"Character\Accessory\{0:D}.img", gearID);
+                        categoryPath = "Accessory_飾品";
+                    }
+                    else if (gearID.StartsWith("0100")) // 判断开头是否是0100
+                    {
+                        gearNodePath = String.Format(@"Character\Cap\{0:D}.img", gearID);
+                        categoryPath = "Hat_帽子";
+                    }
+                    else if (gearID.StartsWith("0104")) // 判断开头是否是0104
+                    {
+                        gearNodePath = String.Format(@"Character\Coat\{0:D}.img", gearID);
+                        categoryPath = "Top_上衣";
+                    }
+                    else if (gearID.StartsWith("0105")) // 判断开头是否是0104
+                    {
+                        gearNodePath = String.Format(@"Character\Longcoat\{0:D}.img", gearID);
+                        categoryPath = "Overall_套服";
+                    }
+                    else if (gearID.StartsWith("0106")) // 判断开头是否是0106
+                    {
+                        gearNodePath = String.Format(@"Character\Pants\{0:D}.img", gearID);
+                        categoryPath = "Bottom_褲裙";
+                    }
+                    else if (gearID.StartsWith("0107")) // 判断开头是否是0107
+                    {
+                        gearNodePath = String.Format(@"Character\Shoes\{0:D}.img", gearID);
+                        categoryPath = "Shoes_鞋子";
+                    }
+                    else if (gearID.StartsWith("0108")) // 判断开头是否是0108
+                    {
+                        gearNodePath = String.Format(@"Character\Glove\{0:D}.img", gearID);
+                        categoryPath = "Glove_手套";
+                    }
+                    else if (gearID.StartsWith("0109")) // 判断开头是否是0109
+                    {
+                        gearNodePath = String.Format(@"Character\Shield\{0:D}.img", gearID);
+                        categoryPath = "Shield_盾";
+                    }
+                    else if (gearID.StartsWith("0110")) // 判断开头是否是0110
+                    {
+                        gearNodePath = String.Format(@"Character\Cape\{0:D}.img", gearID);
+                        categoryPath = "Cape_披風";
+                    }
+                    else if (gearID.StartsWith("0111")) // 判断开头是否是0111
+                    {
+                        gearNodePath = String.Format(@"Character\Ring\{0:D}.img", gearID);
+                        categoryPath = "Ring_戒指";
+                    }
+                    else if (gearID.StartsWith("0120") || gearID.StartsWith("120")) // 判断开头是否是0120
+                    {
+                        gearNodePath = String.Format(@"Character\Totem\{0:D}.img", gearID);
+                        categoryPath = "Totem_圖騰";
+                    }
+                    else if (Regex.IsMatch(gearID, "^012[1-9]|^013|^014|^015|^0160|^0169|^0170")) // 判断开头是否是012~015、0160或0169-0179
+                    {
+                        gearNodePath = String.Format(@"Character\Weapon\{0:D}.img", gearID);
+                        categoryPath = "Weapon_武器";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0161|^0162|^0163|^0164|^0165"))// 判断开头是否是0161~0165
+                    {
+                        gearNodePath = String.Format(@"Character\Mechanic\{0:D}.img", gearID);
+                        categoryPath = "MechanicPart_機甲部件";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0166|^0167")) // 判断开头是否是0166或0167
+                    {
+                        gearNodePath = String.Format(@"Character\Android\{0:D}.img", gearID);
+                        categoryPath = "Android_機器人";
+                    }
+                    else if (gearID.StartsWith("0168")) // 判断开头是否是0168
+                    {
+                        gearNodePath = String.Format(@"Character\Bits\{0:D}.img", gearID);
+                        categoryPath = "Bits_拼圖";
+                    }
+                    else if (gearID.StartsWith("01712")) // 判断开头是否是01712
+                    {
+                        gearNodePath = String.Format(@"Character\ArcaneForce\{0:D}.img", gearID);
+                        categoryPath = "Arcane_秘法";
+                    }
+                    else if (Regex.IsMatch(gearID, "^01713|^01714")) // 判断开头是否是01713或01714
+                    {
+                        gearNodePath = String.Format(@"Character\AuthenticForce\{0:D}.img", gearID);
+                        categoryPath = "Authentic_真實";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0178"))  // 判断开头是否是0178
+                    {
+                        gearNodePath = String.Format(@"Character\Jewel\{0:D}.img", gearID);
+                        categoryPath = "Jewel_寶玉";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0179"))  // 判断开头是否是0179
+                    {
+                        gearNodePath = String.Format(@"Character\NT_Beauty\{0:D}.img", gearID);
+                        categoryPath = "MSN_Cosmetic_外形";
+                    }
+                    else if (gearID.StartsWith("018")) // 判断开头是否是018
+                    {
+                        gearNodePath = String.Format(@"Character\PetEquip\{0:D}.img", gearID);
+                        categoryPath = "PetEquipment_寵物裝備";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0194|^0195|^0196|^0197")) // 判断开头是否是0194~0197
+                    {
+                        gearNodePath = String.Format(@"Character\Dragon\{0:D}.img", gearID);
+                        categoryPath = "EvanDragonEquip_龍魔裝備";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0190|^0191|^0192|^0193|^0198")) // 判断开头是否是0190~0193或0198
+                    {
+                        gearNodePath = String.Format(@"Character\TamingMob\{0:D}.img", gearID);
+                        categoryPath = "TamedMonster_馴服的怪物";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0002|^0005")) // 判断开头是否是0002或0005
+                    {
+                        gearNodePath = String.Format(@"Character\Face\{0:D}.img", gearID);
+                        categoryPath = "Cosmetic_外形";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0003|^0004|^0006")) // 判断开头是否是0003、0004或0006
+                    {
+                        gearNodePath = String.Format(@"Character\Hair\{0:D}.img", gearID);
+                        categoryPath = "Cosmetic_外形";
+                    }
+
+                    StringResult sr;
+                    string EqpName;
+                    if (gearRenderNewOld[1].StringLinker == null || !gearRenderNewOld[1].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的裝備";
+                    }
                     EqpName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(EqpName)) EqpName = "未知的裝備";
-                EqpName = RemoveInvalidFileNameChars(EqpName);
-                int nullEqpIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Gear gear = Gear.CreateFromNode(PluginManager.FindWz(gearNodePath, WzFileNewOld[i]), PluginManager.FindWz);
-
-                    if (gear != null)
+                    if (gearRenderNewOld[0].StringLinker == null || !gearRenderNewOld[0].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
                     {
-                        gearRenderNewOld[i].Gear = gear;
+                        sr = new StringResult();
+                        sr.Name = "未知的裝備";
                     }
-                    else
+                    if (EqpName != sr.Name && EqpName != "未知的裝備" && sr.Name != "未知的裝備")
                     {
-                        isGearNull[i] = true;
-                        nullEqpIdx = i + 1;
+                        EqpName += "_" + sr.Name;
                     }
-                }
+                    else if (EqpName == "未知的裝備")
+                    {
+                        EqpName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(EqpName)) EqpName = "未知的裝備";
+                    EqpName = RemoveInvalidFileNameChars(EqpName);
+                    int nullEqpIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Gear gear = Gear.CreateFromNode(PluginManager.FindWz(gearNodePath, WzFileNewOld[i]), PluginManager.FindWz);
 
-                switch (nullEqpIdx)
-                {
-                    case 0: // change
-                        gearType = "變更";
-
-                        Bitmap ImageNew = gearRenderNewOld[0].Render();
-                        Bitmap ImageOld = gearRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                        if (gear != null)
                         {
-                            int picHchange = ShowObjectID ? 13 : 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 13 : 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            gearRenderNewOld[i].Gear = gear;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            isGearNull[i] = true;
+                            nullEqpIdx = i + 1;
+                        }
+                    }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                    case 1: // delete
-                        gearType = "刪除";
-                        if (isGearNull[1]) continue;
-                        resultImage = gearRenderNewOld[1].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                    switch (nullEqpIdx)
+                    {
+                        case 0: // change
+                            gearType = "變更";
 
-                    case 2: // add
-                        gearType = "新增";
-                        if (isGearNull[0]) continue;
-                        resultImage = gearRenderNewOld[0].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = gearRenderNewOld[0].Render();
+                            Bitmap ImageOld = gearRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    default:
-                        break;
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
+
+                        case 1: // delete
+                            gearType = "刪除";
+                            if (isGearNull[1]) continue;
+                            resultImage = gearRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            gearType = "新增";
+                            if (isGearNull[0]) continue;
+                            resultImage = gearRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    if (!Directory.Exists(Path.Combine(gearTooltipPath, categoryPath)))
+                    {
+                        Directory.CreateDirectory(Path.Combine(gearTooltipPath, categoryPath));
+                    }
+
+                    var gearTypeTextInfo = g.MeasureString(gearType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullEqpIdx != 0) GearGraphics.DrawPlainText(g, gearType, gearTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(gearTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(gearTooltipPath, categoryPath, "裝備_" + gearID + "_" + EqpName + "_" + gearType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportNodes.Add("Gear Tooltip 3: " + gearID, ex.Message);
                 }
-
-                if (!Directory.Exists(Path.Combine(gearTooltipPath, categoryPath)))
-                {
-                    Directory.CreateDirectory(Path.Combine(gearTooltipPath, categoryPath));
-                }
-
-                var gearTypeTextInfo = g.MeasureString(gearType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 13 : 1;
-                if (ShowChangeType && nullEqpIdx != 0) GearGraphics.DrawPlainText(g, gearType, gearTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(gearTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(gearTooltipPath, categoryPath, "裝備_" + gearID + "_" + EqpName + "_" + gearType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputGearTooltipIDs.Clear();
             DiffGearTags.Clear();
@@ -1776,119 +1808,126 @@ namespace WzComparerR2.Comparer
 
             foreach (var mapID in OutputMapTooltipIDs)
             {
-                if (!int.TryParse(mapID, out _)) continue;
-                StateInfo = string.Format("{0}/{1} 地圖: {2}", ++count, allCount, mapID);
-                StateDetail = "Map 對比中...";
-                bool[] isMapNull = new bool[2] { false, false };
-                string mapType = "";
-                string mapNodePath = String.Format(@"Map\Map\Map{0}\{1:D}.img", int.Parse(mapID) / 100000000, mapID);
+                try
+                {
+                    if (!int.TryParse(mapID, out _)) continue;
+                    StateInfo = string.Format("{0}/{1} 地圖: {2}", ++count, allCount, mapID);
+                    StateDetail = "Map 對比中...";
+                    bool[] isMapNull = new bool[2] { false, false };
+                    string mapType = "";
+                    string mapNodePath = String.Format(@"Map\Map\Map{0}\{1:D}.img", int.Parse(mapID) / 100000000, mapID);
 
-                if (SkipKMSContent && KMSContentID["Map"].Contains((Int32.Parse(mapID)))) continue;
+                    if (SkipKMSContent && KMSContentID["Map"].Contains((Int32.Parse(mapID)))) continue;
 
-                StringResult sr;
-                string MapName;
-                if (mapRenderNewOld[1].StringLinker == null || !mapRenderNewOld[1].StringLinker.StringMap.TryGetValue(int.Parse(mapID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的地圖";
-                }
-                MapName = sr.Name;
-                if (mapRenderNewOld[0].StringLinker == null || !mapRenderNewOld[0].StringLinker.StringMap.TryGetValue(int.Parse(mapID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的地圖";
-                }
-                if (MapName != sr.Name && MapName != "未知的地圖" && sr.Name != "未知的地圖")
-                {
-                    MapName += "_" + sr.Name;
-                }
-                else if (MapName == "未知的地圖")
-                {
+                    StringResult sr;
+                    string MapName;
+                    if (mapRenderNewOld[1].StringLinker == null || !mapRenderNewOld[1].StringLinker.StringMap.TryGetValue(int.Parse(mapID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的地圖";
+                    }
                     MapName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(MapName)) MapName = "未知的地圖";
-                MapName = RemoveInvalidFileNameChars(MapName);
-                int nullMapIdx = 0;
-
-                // 變更前後のツールチップ画像の作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Map map = Map.CreateFromNode(PluginManager.FindWz(mapNodePath, WzFileNewOld[i]), PluginManager.FindWz);
-
-                    if (map != null)
+                    if (mapRenderNewOld[0].StringLinker == null || !mapRenderNewOld[0].StringLinker.StringMap.TryGetValue(int.Parse(mapID), out sr))
                     {
-                        mapRenderNewOld[i].Map = map;
+                        sr = new StringResult();
+                        sr.Name = "未知的地圖";
                     }
-                    else
+                    if (MapName != sr.Name && MapName != "未知的地圖" && sr.Name != "未知的地圖")
                     {
-                        isMapNull[i] = true;
-                        nullMapIdx = i + 1;
+                        MapName += "_" + sr.Name;
                     }
-                }
+                    else if (MapName == "未知的地圖")
+                    {
+                        MapName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(MapName)) MapName = "未知的地圖";
+                    MapName = RemoveInvalidFileNameChars(MapName);
+                    int nullMapIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Map map = Map.CreateFromNode(PluginManager.FindWz(mapNodePath, WzFileNewOld[i]), PluginManager.FindWz);
 
-                switch (nullMapIdx)
-                {
-                    case 0: // change
-                        mapType = "變更";
-
-                        Bitmap ImageNew = mapRenderNewOld[0].Render();
-                        Bitmap ImageOld = mapRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                        if (map != null)
                         {
-                            int picHchange = ShowObjectID ? 13 : 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", mapTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 13 : 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", mapTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            mapRenderNewOld[i].Map = map;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            isMapNull[i] = true;
+                            nullMapIdx = i + 1;
+                        }
+                    }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                    case 1: // delete
-                        mapType = "刪除";
-                        if (isMapNull[1]) continue;
-                        resultImage = mapRenderNewOld[1].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                    switch (nullMapIdx)
+                    {
+                        case 0: // change
+                            mapType = "變更";
 
-                    case 2: // add
-                        mapType = "新增";
-                        if (isMapNull[0]) continue;
-                        resultImage = mapRenderNewOld[0].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = mapRenderNewOld[0].Render();
+                            Bitmap ImageOld = mapRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", mapTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", mapTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    default:
-                        break;
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
+
+                        case 1: // delete
+                            mapType = "刪除";
+                            if (isMapNull[1]) continue;
+                            resultImage = mapRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            mapType = "新增";
+                            if (isMapNull[0]) continue;
+                            resultImage = mapRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var mapTypeTextInfo = g.MeasureString(mapType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullMapIdx != 0) GearGraphics.DrawPlainText(g, mapType, mapTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(mapTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(mapTooltipPath, "地圖_" + mapID + "_" + MapName + "_" + mapType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Map Tooltip: " + mapID, ex.Message);
                 }
-
-                var mapTypeTextInfo = g.MeasureString(mapType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 13 : 1;
-                if (ShowChangeType && nullMapIdx != 0) GearGraphics.DrawPlainText(g, mapType, mapTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(mapTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(mapTooltipPath, "地圖_" + mapID + "_" + MapName + "_" + mapType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputMapTooltipIDs.Clear();
             DiffMapTags.Clear();
@@ -1916,119 +1955,127 @@ namespace WzComparerR2.Comparer
 
             foreach (var mobID in OutputMobTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} 怪物: {2}", ++count, allCount, mobID);
-                StateDetail = "Mob 對比中...";
+                try
+                {
 
-                bool[] isMobNull = new bool[2] { false, false };
-                string mobType = "";
-                string mobNodePath = String.Format(@"Mob\{0:D}.img", mobID);
+                    StateInfo = string.Format("{0}/{1} 怪物: {2}", ++count, allCount, mobID);
+                    StateDetail = "Mob 對比中...";
 
-                if (SkipKMSContent && KMSContentID["Mob"].Contains((Int32.Parse(mobID)))) continue;
+                    bool[] isMobNull = new bool[2] { false, false };
+                    string mobType = "";
+                    string mobNodePath = String.Format(@"Mob\{0:D}.img", mobID);
 
-                StringResult sr;
-                string MobName;
-                if (mobRenderNewOld[1].StringLinker == null || !mobRenderNewOld[1].StringLinker.StringMob.TryGetValue(int.Parse(mobID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的怪物";
-                }
-                MobName = sr.Name;
-                if (mobRenderNewOld[0].StringLinker == null || !mobRenderNewOld[0].StringLinker.StringMob.TryGetValue(int.Parse(mobID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的怪物";
-                }
-                if (MobName != sr.Name && MobName != "未知的怪物" && sr.Name != "未知的怪物")
-                {
-                    MobName += "_" + sr.Name;
-                }
-                else if (MobName == "未知的怪物")
-                {
+                    if (SkipKMSContent && KMSContentID["Mob"].Contains((Int32.Parse(mobID)))) continue;
+
+                    StringResult sr;
+                    string MobName;
+                    if (mobRenderNewOld[1].StringLinker == null || !mobRenderNewOld[1].StringLinker.StringMob.TryGetValue(int.Parse(mobID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的怪物";
+                    }
                     MobName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(MobName)) MobName = "未知的怪物";
-                MobName = RemoveInvalidFileNameChars(MobName);
-                int nullMobIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Mob mob = Mob.CreateFromNode(PluginManager.FindWz(mobNodePath, WzFileNewOld[i]), PluginManager.FindWz);
-
-                    if (mob != null)
+                    if (mobRenderNewOld[0].StringLinker == null || !mobRenderNewOld[0].StringLinker.StringMob.TryGetValue(int.Parse(mobID), out sr))
                     {
-                        mobRenderNewOld[i].MobInfo = mob;
+                        sr = new StringResult();
+                        sr.Name = "未知的怪物";
                     }
-                    else
+                    if (MobName != sr.Name && MobName != "未知的怪物" && sr.Name != "未知的怪物")
                     {
-                        isMobNull[i] = true;
-                        nullMobIdx = i + 1;
+                        MobName += "_" + sr.Name;
                     }
-                }
+                    else if (MobName == "未知的怪物")
+                    {
+                        MobName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(MobName)) MobName = "未知的怪物";
+                    MobName = RemoveInvalidFileNameChars(MobName);
+                    int nullMobIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Mob mob = Mob.CreateFromNode(PluginManager.FindWz(mobNodePath, WzFileNewOld[i]), PluginManager.FindWz);
 
-                switch (nullMobIdx)
-                {
-                    case 0: // change
-                        mobType = "變更";
-
-                        Bitmap ImageNew = mobRenderNewOld[0].Render();
-                        Bitmap ImageOld = mobRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                        if (mob != null)
                         {
-                            int picHchange = 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", mobTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", mobTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            mobRenderNewOld[i].MobInfo = mob;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            isMobNull[i] = true;
+                            nullMobIdx = i + 1;
+                        }
+                    }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                    case 1: // delete
-                        mobType = "刪除";
-                        if (isMobNull[1]) continue;
-                        resultImage = mobRenderNewOld[1].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                    switch (nullMobIdx)
+                    {
+                        case 0: // change
+                            mobType = "變更";
 
-                    case 2: // add
-                        mobType = "新增";
-                        if (isMobNull[0]) continue;
-                        resultImage = mobRenderNewOld[0].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = mobRenderNewOld[0].Render();
+                            Bitmap ImageOld = mobRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", mobTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", mobTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    default:
-                        break;
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
+
+                        case 1: // delete
+                            mobType = "刪除";
+                            if (isMobNull[1]) continue;
+                            resultImage = mobRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            mobType = "新增";
+                            if (isMobNull[0]) continue;
+                            resultImage = mobRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var mobTypeTextInfo = g.MeasureString(mobType, GearGraphics.ItemDetailFont);
+                    int picH = 1;
+                    if (ShowChangeType && nullMobIdx != 0) GearGraphics.DrawPlainText(g, mobType, mobTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(mobTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(mobTooltipPath, "怪物_" + mobID + "_" + MobName + "_" + mobType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Mob Tooltip: " + mobID, ex.Message);
                 }
-
-                var mobTypeTextInfo = g.MeasureString(mobType, GearGraphics.ItemDetailFont);
-                int picH = 1;
-                if (ShowChangeType && nullMobIdx != 0) GearGraphics.DrawPlainText(g, mobType, mobTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(mobTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(mobTooltipPath, "怪物_" + mobID + "_" + MobName + "_" + mobType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputMobTooltipIDs.Clear();
             DiffMobTags.Clear();
@@ -2056,118 +2103,125 @@ namespace WzComparerR2.Comparer
 
             foreach (var npcID in OutputNpcTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} NPC: {2}", ++count, allCount, npcID);
-                StateDetail = "Npc 對比中...";
-                bool[] isNpcNull = new bool[2] { false, false };
-                string npcType = "";
-                string npcNodePath = String.Format(@"Npc\{0:D}.img", npcID);
+                try
+                {
+                    StateInfo = string.Format("{0}/{1} NPC: {2}", ++count, allCount, npcID);
+                    StateDetail = "Npc 對比中...";
+                    bool[] isNpcNull = new bool[2] { false, false };
+                    string npcType = "";
+                    string npcNodePath = String.Format(@"Npc\{0:D}.img", npcID);
 
-                if (SkipKMSContent && KMSContentID["Npc"].Contains((Int32.Parse(npcID)))) continue;
+                    if (SkipKMSContent && KMSContentID["Npc"].Contains((Int32.Parse(npcID)))) continue;
 
-                StringResult sr;
-                string NpcName;
-                if (npcRenderNewOld[1].StringLinker == null || !npcRenderNewOld[1].StringLinker.StringNpc.TryGetValue(int.Parse(npcID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的NPC";
-                }
-                NpcName = sr.Name;
-                if (npcRenderNewOld[0].StringLinker == null || !npcRenderNewOld[0].StringLinker.StringNpc.TryGetValue(int.Parse(npcID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的NPC";
-                }
-                if (NpcName != sr.Name && NpcName != "未知的NPC" && sr.Name != "未知的NPC")
-                {
-                    NpcName += "_" + sr.Name;
-                }
-                else if (NpcName == "未知的NPC")
-                {
+                    StringResult sr;
+                    string NpcName;
+                    if (npcRenderNewOld[1].StringLinker == null || !npcRenderNewOld[1].StringLinker.StringNpc.TryGetValue(int.Parse(npcID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的NPC";
+                    }
                     NpcName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(NpcName)) NpcName = "未知的NPC";
-                NpcName = RemoveInvalidFileNameChars(NpcName);
-                int nullNpcIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Npc npc = Npc.CreateFromNode(PluginManager.FindWz(npcNodePath, WzFileNewOld[i]), PluginManager.FindWz);
-
-                    if (npc != null)
+                    if (npcRenderNewOld[0].StringLinker == null || !npcRenderNewOld[0].StringLinker.StringNpc.TryGetValue(int.Parse(npcID), out sr))
                     {
-                        npcRenderNewOld[i].NpcInfo = npc;
+                        sr = new StringResult();
+                        sr.Name = "未知的NPC";
                     }
-                    else
+                    if (NpcName != sr.Name && NpcName != "未知的NPC" && sr.Name != "未知的NPC")
                     {
-                        isNpcNull[i] = true;
-                        nullNpcIdx = i + 1;
+                        NpcName += "_" + sr.Name;
                     }
-                }
+                    else if (NpcName == "未知的NPC")
+                    {
+                        NpcName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(NpcName)) NpcName = "未知的NPC";
+                    NpcName = RemoveInvalidFileNameChars(NpcName);
+                    int nullNpcIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Npc npc = Npc.CreateFromNode(PluginManager.FindWz(npcNodePath, WzFileNewOld[i]), PluginManager.FindWz);
 
-                switch (nullNpcIdx)
-                {
-                    case 0: // change
-                        npcType = "變更";
-
-                        Bitmap ImageNew = npcRenderNewOld[0].Render();
-                        Bitmap ImageOld = npcRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                        if (npc != null)
                         {
-                            int picHchange = 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", npcTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", npcTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            npcRenderNewOld[i].NpcInfo = npc;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            isNpcNull[i] = true;
+                            nullNpcIdx = i + 1;
+                        }
+                    }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                    case 1: // delete
-                        npcType = "刪除";
-                        if (isNpcNull[1]) continue;
-                        resultImage = npcRenderNewOld[1].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                    switch (nullNpcIdx)
+                    {
+                        case 0: // change
+                            npcType = "變更";
 
-                    case 2: // add
-                        npcType = "新增";
-                        if (isNpcNull[0]) continue;
-                        resultImage = npcRenderNewOld[0].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = npcRenderNewOld[0].Render();
+                            Bitmap ImageOld = npcRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", npcTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", npcTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    default:
-                        break;
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
+
+                        case 1: // delete
+                            npcType = "刪除";
+                            if (isNpcNull[1]) continue;
+                            resultImage = npcRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            npcType = "新增";
+                            if (isNpcNull[0]) continue;
+                            resultImage = npcRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var npcTypeTextInfo = g.MeasureString(npcType, GearGraphics.ItemDetailFont);
+                    int picH = 1;
+                    if (ShowChangeType && nullNpcIdx != 0) GearGraphics.DrawPlainText(g, npcType, npcTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(npcTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(npcTooltipPath, "Npc_" + npcID + "_" + NpcName + "_" + npcType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("NPC Tooltip: " + npcID, ex.Message);
                 }
-
-                var npcTypeTextInfo = g.MeasureString(npcType, GearGraphics.ItemDetailFont);
-                int picH = 1;
-                if (ShowChangeType && nullNpcIdx != 0) GearGraphics.DrawPlainText(g, npcType, npcTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(npcTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(npcTooltipPath, "Npc_" + npcID + "_" + NpcName + "_" + npcType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputNpcTooltipIDs.Clear();
             DiffNpcTags.Clear();
@@ -2195,123 +2249,130 @@ namespace WzComparerR2.Comparer
 
             foreach (var itemID in OutputCashTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} 現金禮包: {2}", ++count, allCount, itemID);
-                StateDetail = "Item 對比中...";
-                bool[] isCashNull = new bool[2] { false, false };
-                string itemType = "";
-                string itemNodePath = null;
+                try
+                {
+                    StateInfo = string.Format("{0}/{1} 現金禮包: {2}", ++count, allCount, itemID);
+                    StateDetail = "Item 對比中...";
+                    bool[] isCashNull = new bool[2] { false, false };
+                    string itemType = "";
+                    string itemNodePath = null;
 
-                if (itemID.StartsWith("9")) // 判断第1位是否是09
-                {
-                    itemNodePath = String.Format(@"Item\Special\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
-                }
+                    if (itemID.StartsWith("9")) // 判断第1位是否是09
+                    {
+                        itemNodePath = String.Format(@"Item\Special\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                    }
 
-                if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(itemID)))) continue;
+                    if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(itemID)))) continue;
 
-                StringResult sr;
-                string ItemName;
-                if (cashRenderNewOld[1].StringLinker == null || !cashRenderNewOld[1].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的現金禮包";
-                }
-                ItemName = sr.Name;
-                if (cashRenderNewOld[0].StringLinker == null || !cashRenderNewOld[0].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的現金禮包";
-                }
-                if (ItemName != sr.Name && ItemName != "未知的現金禮包" && sr.Name != "未知的現金禮包")
-                {
-                    ItemName += "_" + sr.Name;
-                }
-                else if (ItemName == "未知的現金禮包")
-                {
+                    StringResult sr;
+                    string ItemName;
+                    if (cashRenderNewOld[1].StringLinker == null || !cashRenderNewOld[1].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的現金禮包";
+                    }
                     ItemName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(ItemName)) ItemName = "未知的現金禮包";
-                ItemName = RemoveInvalidFileNameChars(ItemName);
-                int nullItemIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    CashPackage item = CashPackage.CreateFromNode(PluginManager.FindWz(itemNodePath, WzFileNewOld[i]), PluginBase.PluginManager.FindWz(string.Format(@"Etc\CashPackage.img\{0}", itemID)), PluginManager.FindWz);
-
-                    if (item != null)
+                    if (cashRenderNewOld[0].StringLinker == null || !cashRenderNewOld[0].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
                     {
-                        cashRenderNewOld[i].CashPackage = item;
+                        sr = new StringResult();
+                        sr.Name = "未知的現金禮包";
                     }
-                    else
+                    if (ItemName != sr.Name && ItemName != "未知的現金禮包" && sr.Name != "未知的現金禮包")
                     {
-                        isCashNull[i] = true;
-                        nullItemIdx = i + 1;
+                        ItemName += "_" + sr.Name;
                     }
-                }
+                    else if (ItemName == "未知的現金禮包")
+                    {
+                        ItemName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(ItemName)) ItemName = "未知的現金禮包";
+                    ItemName = RemoveInvalidFileNameChars(ItemName);
+                    int nullItemIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        CashPackage item = CashPackage.CreateFromNode(PluginManager.FindWz(itemNodePath, WzFileNewOld[i]), PluginBase.PluginManager.FindWz(string.Format(@"Etc\CashPackage.img\{0}", itemID)), PluginManager.FindWz);
 
-                switch (nullItemIdx)
-                {
-                    case 0: // change
-                        itemType = "變更";
-
-                        Bitmap ImageNew = cashRenderNewOld[0].Render();
-                        Bitmap ImageOld = cashRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                        if (item != null)
                         {
-                            int picHchange = ShowObjectID ? 13 : 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 13 : 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            cashRenderNewOld[i].CashPackage = item;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            isCashNull[i] = true;
+                            nullItemIdx = i + 1;
+                        }
+                    }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                    case 1: // delete
-                        itemType = "刪除";
-                        if (isCashNull[1]) continue;
-                        resultImage = cashRenderNewOld[1].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                    switch (nullItemIdx)
+                    {
+                        case 0: // change
+                            itemType = "變更";
 
-                    case 2: // add
-                        itemType = "新增";
-                        if (isCashNull[0]) continue;
-                        resultImage = cashRenderNewOld[0].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = cashRenderNewOld[0].Render();
+                            Bitmap ImageOld = cashRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    default:
-                        break;
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
+
+                        case 1: // delete
+                            itemType = "刪除";
+                            if (isCashNull[1]) continue;
+                            resultImage = cashRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            itemType = "新增";
+                            if (isCashNull[0]) continue;
+                            resultImage = cashRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var itemTypeTextInfo = g.MeasureString(itemType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullItemIdx != 0) GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(itemTooltipPath, "Item_" + itemID + "_" + ItemName + "_" + itemType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Cash Tooltip: " + itemID, ex.Message);
                 }
-
-                var itemTypeTextInfo = g.MeasureString(itemType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 13 : 1;
-                if (ShowChangeType && nullItemIdx != 0) GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(itemTooltipPath, "Item_" + itemID + "_" + ItemName + "_" + itemType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputCashTooltipIDs.Clear();
             DiffCashTags.Clear();
@@ -2373,7 +2434,7 @@ namespace WzComparerR2.Comparer
                 QuestName = RemoveInvalidFileNameChars(QuestName);
                 int nullQuestIdx = 0;
 
-                // 變更前後のツールチップ画像の作成
+                // 變更前後的ツールチップ画像的作成
                 for (int i = 0; i < 2; i++) // 0: New, 1: Old
                 {
                     Quest quest = Quest.CreateFromNode(PluginManager.FindWz(questNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz) ?? Quest.CreateFromNode(PluginManager.FindWz(questNodePathLegacy, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, fromInfoNode: int.Parse(questID));
@@ -2678,7 +2739,7 @@ namespace WzComparerR2.Comparer
         {
             if (node == null) return; // 변경은 확인하지 않음 // 추가,삭제만 확인
 
-            Match match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+).*\\.*"); 
+            Match match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+).*\\.*");
 
             if (!match.Success)
             {
@@ -2732,117 +2793,128 @@ namespace WzComparerR2.Comparer
 
             foreach (var achvID in OutputAchvTooltipIDs)
             {
-                if (!int.TryParse(achvID, out _)) continue;
-                StateInfo = string.Format("{0}/{1} 業績: {2}", ++count, allCount, achvID);
-                StateDetail = "Achievement 変更点をツールチップ画像に出力中...";
-                bool[] isAchievementNull = new bool[2] { false, false };
-                string achvType = "";
-                string achvNodePath = String.Format(@"Achievement\AchievementData\{0:D}.img", achvID);
+                try
+                {
 
-                StringResult sr;
-                string AchievementName;
-                if (achvRenderNewOld[1].StringLinker == null || !achvRenderNewOld[1].StringLinker.StringAchievement.TryGetValue(int.Parse(achvID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知の業績";
-                }
-                AchievementName = sr.Name;
-                if (achvRenderNewOld[0].StringLinker == null || !achvRenderNewOld[0].StringLinker.StringAchievement.TryGetValue(int.Parse(achvID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知の業績";
-                }
-                if (AchievementName != sr.Name && AchievementName != "未知の業績" && sr.Name != "未知の業績")
-                {
-                    AchievementName += "_" + sr.Name;
-                }
-                else if (AchievementName == "未知の業績")
-                {
+                    if (!int.TryParse(achvID, out _)) continue;
+                    StateInfo = string.Format("{0}/{1} 成就: {2}", ++count, allCount, achvID);
+                    StateDetail = "Achievement 對比中...";
+                    bool[] isAchievementNull = new bool[2] { false, false };
+
+                    if (SkipKMSContent && KMSContentID["Achievement"].Contains((Int32.Parse(achvID)))) continue;
+
+                    string achvType = "";
+                    string achvNodePath = String.Format(@"Achievement\AchievementData\{0:D}.img", achvID);
+
+                    StringResult sr;
+                    string AchievementName;
+                    if (achvRenderNewOld[1].StringLinker == null || !achvRenderNewOld[1].StringLinker.StringAchievement.TryGetValue(int.Parse(achvID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的成就";
+                    }
                     AchievementName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(AchievementName)) AchievementName = "未知の業績";
-                AchievementName = RemoveInvalidFileNameChars(AchievementName);
-                int nullAchievementIdx = 0;
-
-                // 変更前後のツールチップ画像の作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Achievement achv = Achievement.CreateFromNode(PluginManager.FindWz($@"Etc\Achievement\AchievementData\{achvID}.img", WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz);
-
-                    if (achv == null)
+                    if (achvRenderNewOld[0].StringLinker == null || !achvRenderNewOld[0].StringLinker.StringAchievement.TryGetValue(int.Parse(achvID), out sr))
                     {
-                        isAchievementNull[i] = true;
-                        nullAchievementIdx = i + 1;
+                        sr = new StringResult();
+                        sr.Name = "未知的成就";
                     }
-                    else
+                    if (AchievementName != sr.Name && AchievementName != "未知的成就" && sr.Name != "未知的成就")
                     {
-                        achvRenderNewOld[i].Achievement = achv;
+                        AchievementName += "_" + sr.Name;
                     }
-                }
+                    else if (AchievementName == "未知的成就")
+                    {
+                        AchievementName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(AchievementName)) AchievementName = "未知的成就";
+                    AchievementName = RemoveInvalidFileNameChars(AchievementName);
+                    int nullAchievementIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Achievement achv = Achievement.CreateFromNode(PluginManager.FindWz($@"Etc\Achievement\AchievementData\{achvID}.img", WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz);
 
-                switch (nullAchievementIdx)
-                {
-                    case 0: // change
-                        achvType = "変更";
-
-                        Bitmap ImageNew = achvRenderNewOld[0].Render();
-                        Bitmap ImageOld = achvRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                        if (achv == null)
                         {
-                            int picHchange = ShowObjectID ? 13 : 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "変更前", achvTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 13 : 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "変更後", achvTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            isAchievementNull[i] = true;
+                            nullAchievementIdx = i + 1;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            achvRenderNewOld[i].Achievement = achv;
+                        }
+                    }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                    case 1: // delete
-                        achvType = "削除";
-                        if (isAchievementNull[1]) continue;
-                        resultImage = achvRenderNewOld[1].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                    switch (nullAchievementIdx)
+                    {
+                        case 0: // change
+                            achvType = "變更";
 
-                    case 2: // add
-                        achvType = "追加";
-                        if (isAchievementNull[0]) continue;
-                        resultImage = achvRenderNewOld[0].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = achvRenderNewOld[0].Render();
+                            Bitmap ImageOld = achvRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", achvTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", achvTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    default:
-                        break;
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
+
+                        case 1: // delete
+                            achvType = "刪除";
+                            if (isAchievementNull[1]) continue;
+                            resultImage = achvRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            achvType = "新增";
+                            if (isAchievementNull[0]) continue;
+                            resultImage = achvRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var achvTypeTextInfo = g.MeasureString(achvType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullAchievementIdx != 0) GearGraphics.DrawPlainText(g, achvType, achvTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(achvTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(achvTooltipPath, "成就_" + achvID + "_" + AchievementName + "_" + achvType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Achievement Tooltip: " + achvID, ex.Message);
                 }
-
-                var achvTypeTextInfo = g.MeasureString(achvType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 13 : 1;
-                if (ShowChangeType && nullAchievementIdx != 0) GearGraphics.DrawPlainText(g, achvType, achvTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(achvTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(achvTooltipPath, "業績_" + achvID + "_" + AchievementName + "_" + achvType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputAchvTooltipIDs.Clear();
             DiffAchvTags.Clear();
@@ -2884,7 +2956,7 @@ namespace WzComparerR2.Comparer
             }
         }
 
-        private void CompareImg(Wz_Image imgNew, Wz_Image imgOld, string imgName, string anchorName, string menuAnchorName, string outputDir, StreamWriter sw, int newNumber=0, int oldNumber=0)
+        private void CompareImg(Wz_Image imgNew, Wz_Image imgOld, string imgName, string anchorName, string menuAnchorName, string outputDir, StreamWriter sw, int newNumber = 0, int oldNumber = 0)
         {
             StateDetail = "IMG匯出中";
             if (!imgNew.TryExtract() || !imgOld.TryExtract())
@@ -3346,6 +3418,26 @@ namespace WzComparerR2.Comparer
                     return false;
                 }
             }
+            else if (node.FullPathToFile.StartsWith("Etc\\Achievement\\AchievementData"))
+            {
+                string[] achvNodePath = node.FullPathToFile.Split('\\');
+                string achvImgStr = achvNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                if (Int32.TryParse(achvImgStr.Replace(".img", ""), out int achvID))
+                {
+                    if (KMSContentID.ContainsKey("Achievement"))
+                    {
+                        return KMSContentID["Achievement"].Contains(achvID);
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
             else if (node.FullPathToFile.StartsWith("Item"))
             {
                 string[] itemNodePath = node.FullPathToFile.Split('\\');
@@ -3520,7 +3612,7 @@ namespace WzComparerR2.Comparer
                         {
                             case 0:
                                 return !(new int[] { 508, 570, 571, 572 }.Contains(baseSkillIDInt)); // ジェット
-                            case 4: // 暁の陣
+                            case 4: // 暁的陣
                             case 11: // ビーストテイマー
                             case 12: // アニメコラボ
                             case 17: // 江湖
@@ -3570,7 +3662,7 @@ namespace WzComparerR2.Comparer
             {
                 case 0:
                     return !(new int[] { 508, 570, 571, 572 }.Contains((int)skillID / 10000)); // ジェット
-                case 4: // 暁の陣
+                case 4: // 暁的陣
                 case 11: // ビーストテイマー
                 case 12: // アニメコラボ
                 case 17: // 江湖
