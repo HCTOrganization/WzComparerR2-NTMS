@@ -814,6 +814,14 @@ namespace WzComparerR2.Comparer
                 }
                 SaveQuestTooltip(questTooltipPath);
             }
+            if (OutputAchvTooltip && type.ToString() == "String" && OutputAchvTooltipIDs != null)
+            {
+                if (!Directory.Exists(achvTooltipPath))
+                {
+                    Directory.CreateDirectory(achvTooltipPath);
+                }
+                SaveAchvTooltip(achvTooltipPath);
+            }
         }
 
         // 變更された技能ツールチップ出力
@@ -2701,6 +2709,181 @@ namespace WzComparerR2.Comparer
             }
         }
 
+        private void SaveAchvTooltip(string achvTooltipPath)
+        {
+            AchievementTooltipRenderer[] achvRenderNewOld = new AchievementTooltipRenderer[2];
+            int count = 0;
+            int allCount = OutputAchvTooltipIDs.Count;
+            var achvTypeFont = new Font("MS Gothic", 11f, GraphicsUnit.Pixel);
+
+            for (int i = 0; i < 2; i++) // 0: New, 1: Old
+            {
+                this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
+                this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
+                this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
+
+                achvRenderNewOld[i] = new AchievementTooltipRenderer();
+                achvRenderNewOld[i].StringLinker = new StringLinker();
+                achvRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
+                achvRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                achvRenderNewOld[i].CompareMode = true;
+            }
+
+            foreach (var achvID in OutputAchvTooltipIDs)
+            {
+                if (!int.TryParse(achvID, out _)) continue;
+                StateInfo = string.Format("{0}/{1} 業績: {2}", ++count, allCount, achvID);
+                StateDetail = "Achievement 変更点をツールチップ画像に出力中...";
+                bool[] isAchievementNull = new bool[2] { false, false };
+                string achvType = "";
+                string achvNodePath = String.Format(@"Achievement\AchievementData\{0:D}.img", achvID);
+
+                StringResult sr;
+                string AchievementName;
+                if (achvRenderNewOld[1].StringLinker == null || !achvRenderNewOld[1].StringLinker.StringAchievement.TryGetValue(int.Parse(achvID), out sr))
+                {
+                    sr = new StringResult();
+                    sr.Name = "未知の業績";
+                }
+                AchievementName = sr.Name;
+                if (achvRenderNewOld[0].StringLinker == null || !achvRenderNewOld[0].StringLinker.StringAchievement.TryGetValue(int.Parse(achvID), out sr))
+                {
+                    sr = new StringResult();
+                    sr.Name = "未知の業績";
+                }
+                if (AchievementName != sr.Name && AchievementName != "未知の業績" && sr.Name != "未知の業績")
+                {
+                    AchievementName += "_" + sr.Name;
+                }
+                else if (AchievementName == "未知の業績")
+                {
+                    AchievementName = sr.Name;
+                }
+                if (String.IsNullOrEmpty(AchievementName)) AchievementName = "未知の業績";
+                AchievementName = RemoveInvalidFileNameChars(AchievementName);
+                int nullAchievementIdx = 0;
+
+                // 変更前後のツールチップ画像の作成
+                for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                {
+                    Achievement achv = Achievement.CreateFromNode(PluginManager.FindWz($@"Etc\Achievement\AchievementData\{achvID}.img", WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz);
+
+                    if (achv == null)
+                    {
+                        isAchievementNull[i] = true;
+                        nullAchievementIdx = i + 1;
+                    }
+                    else
+                    {
+                        achvRenderNewOld[i].Achievement = achv;
+                    }
+                }
+
+                // ツールチップ画像を合わせる
+                Bitmap resultImage = null;
+                Graphics g = null;
+
+                switch (nullAchievementIdx)
+                {
+                    case 0: // change
+                        achvType = "変更";
+
+                        Bitmap ImageNew = achvRenderNewOld[0].Render();
+                        Bitmap ImageOld = achvRenderNewOld[1].Render();
+                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                        if (ShowChangeType)
+                        {
+                            int picHchange = ShowObjectID ? 13 : 1;
+                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                            GearGraphics.DrawPlainText(gNewOld[1], "変更前", achvTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            picHchange = ShowObjectID ? 13 : 1;
+                            GearGraphics.DrawPlainText(gNewOld[0], "変更後", achvTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                        }
+                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                        g = Graphics.FromImage(resultImage);
+
+                        g.DrawImage(ImageOld, 0, 0);
+                        g.DrawImage(ImageNew, ImageOld.Width, 0);
+                        break;
+
+                    case 1: // delete
+                        achvType = "削除";
+                        if (isAchievementNull[1]) continue;
+                        resultImage = achvRenderNewOld[1].Render();
+                        if (resultImage == null) continue;
+                        g = Graphics.FromImage(resultImage);
+                        break;
+
+                    case 2: // add
+                        achvType = "追加";
+                        if (isAchievementNull[0]) continue;
+                        resultImage = achvRenderNewOld[0].Render();
+                        if (resultImage == null) continue;
+                        g = Graphics.FromImage(resultImage);
+                        break;
+
+                    default:
+                        break;
+                }
+
+                if (resultImage == null || g == null)
+                {
+                    continue;
+                }
+
+                var achvTypeTextInfo = g.MeasureString(achvType, GearGraphics.ItemDetailFont);
+                int picH = ShowObjectID ? 13 : 1;
+                if (ShowChangeType && nullAchievementIdx != 0) GearGraphics.DrawPlainText(g, achvType, achvTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(achvTypeTextInfo.Width) + 2, ref picH, 10);
+
+                string imageName = Path.Combine(achvTooltipPath, "業績_" + achvID + "_" + AchievementName + "_" + achvType + ".png");
+                if (!File.Exists(imageName))
+                {
+                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                }
+                resultImage.Dispose();
+                g.Dispose();
+            }
+            OutputAchvTooltipIDs.Clear();
+            DiffAchvTags.Clear();
+        }
+
+
+        private void GetAchvID(Wz_Node node)
+        {
+            if (node == null) return;
+
+            Match match = Regex.Match(node.FullPathToFile, @"^Etc\\Achievement\\AchievementData\\(\d+).img$");
+
+            if (!match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Etc\\Achievement\\AchievementData\\(\d+).img\\info\\(name|desc|difficulty|score|mainCategory).*$");
+            }
+
+            if (!match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Etc\\Achievement\\AchievementData\\(\d+).img\\mission\\\d+\\(name).*$");
+            }
+
+            if (!match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Etc\\Achievement\\AchievementData\\(\d+).img\\reward\\0\\(desc).*$");
+            }
+
+            if (match.Success)
+            {
+                var achvID = match.Groups[1].Value;
+
+                if (achvID != null)
+                {
+                    if (!OutputAchvTooltipIDs.Contains(achvID))
+                    {
+                        OutputAchvTooltipIDs.Add(achvID);
+                    }
+                }
+            }
+        }
+
         private void CompareImg(Wz_Image imgNew, Wz_Image imgOld, string imgName, string anchorName, string menuAnchorName, string outputDir, StreamWriter sw, int newNumber=0, int oldNumber=0)
         {
             StateDetail = "IMG匯出中";
@@ -2785,6 +2968,11 @@ namespace WzComparerR2.Comparer
                     GetQuestID(diff.NodeNew);
                     GetQuestID(diff.NodeOld);
                 }
+                if (OutputAchvTooltip && (outputDir.Contains("Etc") && imgName.Contains("Achievement") && !imgName.Contains("_Canvas")))
+                {
+                    GetAchvID(diff.NodeNew);
+                    GetAchvID(diff.NodeOld);
+                }
             }
             StateDetail = "匯出檔案中";
             bool noChange = diffList.Count <= 0;
@@ -2858,6 +3046,10 @@ namespace WzComparerR2.Comparer
                     if (OutputQuestTooltip && outputDir.Contains("Quest"))
                     {
                         GetQuestID(node);
+                    }
+                    if (OutputAchvTooltip && (outputDir.Contains("Etc") && imgName.Contains("Achievement") && !imgName.Contains("_Canvas")))
+                    {
+                        GetAchvID(node);
                     }
 
 

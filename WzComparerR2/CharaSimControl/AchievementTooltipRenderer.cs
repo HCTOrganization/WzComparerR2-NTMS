@@ -173,7 +173,7 @@ namespace WzComparerR2.CharaSimControl
                         sr.Name = "null";
                     }
                     return $"{sr.Name}({id:D5})";
-                }))}", 520), GearGraphics.EquipMDMoris9Font, null, 32, 550, ref picH, bg_pattern.Height, defaultColor: GearGraphics.GrayColor2);
+                }))}", 520), Translator.IsKoreanStringPresent(sr.Name) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, null, 32, 550, ref picH, bg_pattern.Height, defaultColor: GearGraphics.GrayColor2);
             }
 
             // hide
