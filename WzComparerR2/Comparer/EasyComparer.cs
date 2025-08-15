@@ -2401,130 +2401,137 @@ namespace WzComparerR2.Comparer
 
             foreach (var questID in OutputQuestTooltipIDs)
             {
-                if (!int.TryParse(questID, out _)) continue;
-                StateInfo = string.Format("{0}/{1} 任務: {2}", ++count, allCount, questID);
-                StateDetail = "Quest 對比中...";
-                bool[] isQuestNull = new bool[2] { false, false };
-                string questType = "";
-                string questNodePath = String.Format(@"Quest\QuestData\{0:D}.img", questID);
-                string questNodePathLegacy = String.Format(@"Quest\QuestInfo.img\{0:D}", questID);
+                try
+                {
+                    if (!int.TryParse(questID, out _)) continue;
+                    StateInfo = string.Format("{0}/{1} 任務: {2}", ++count, allCount, questID);
+                    StateDetail = "Quest 對比中...";
+                    bool[] isQuestNull = new bool[2] { false, false };
+                    string questType = "";
+                    string questNodePath = String.Format(@"Quest\QuestData\{0:D}.img", questID);
+                    string questNodePathLegacy = String.Format(@"Quest\QuestInfo.img\{0:D}", questID);
 
-                StringResult sr;
-                string QuestName;
-                if (questRenderNewOld[1].StringLinker == null || !questRenderNewOld[1].StringLinker.StringQuest.TryGetValue(int.Parse(questID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的任務";
-                }
-                QuestName = sr.Name;
-                if (questRenderNewOld[0].StringLinker == null || !questRenderNewOld[0].StringLinker.StringQuest.TryGetValue(int.Parse(questID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的任務";
-                }
-                if (QuestName != sr.Name && QuestName != "未知的任務" && sr.Name != "未知的任務")
-                {
-                    QuestName += "_" + sr.Name;
-                }
-                else if (QuestName == "未知的任務")
-                {
+                    StringResult sr;
+                    string QuestName;
+                    if (questRenderNewOld[1].StringLinker == null || !questRenderNewOld[1].StringLinker.StringQuest.TryGetValue(int.Parse(questID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的任務";
+                    }
                     QuestName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(QuestName)) QuestName = "未知的任務";
-                QuestName = RemoveInvalidFileNameChars(QuestName);
-                int nullQuestIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Quest quest = Quest.CreateFromNode(PluginManager.FindWz(questNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz) ?? Quest.CreateFromNode(PluginManager.FindWz(questNodePathLegacy, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, fromInfoNode: int.Parse(questID));
-                    if (quest == null)
+                    if (questRenderNewOld[0].StringLinker == null || !questRenderNewOld[0].StringLinker.StringQuest.TryGetValue(int.Parse(questID), out sr))
                     {
-                        isQuestNull[i] = true;
-                        nullQuestIdx = i + 1;
+                        sr = new StringResult();
+                        sr.Name = "未知的任務";
                     }
-                    else
+                    if (QuestName != sr.Name && QuestName != "未知的任務" && sr.Name != "未知的任務")
                     {
-                        questRenderNewOld[i].Quest = quest;
+                        QuestName += "_" + sr.Name;
                     }
-                }
+                    else if (QuestName == "未知的任務")
+                    {
+                        QuestName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(QuestName)) QuestName = "未知的任務";
+                    QuestName = RemoveInvalidFileNameChars(QuestName);
+                    int nullQuestIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
-
-                switch (nullQuestIdx)
-                {
-                    case 0: // change
-                        questType = "變更";
-
-                        Bitmap ImageNew = questRenderNewOld[0].Render();
-                        Bitmap ImageOld = questRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Quest quest = Quest.CreateFromNode(PluginManager.FindWz(questNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz) ?? Quest.CreateFromNode(PluginManager.FindWz(questNodePathLegacy, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, fromInfoNode: int.Parse(questID));
+                        if (quest == null)
                         {
-                            int picHchange = ShowObjectID ? 23 : 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            picHchange += questRenderNewOld[1].Margin_top;
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", questTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 23 : 1;
-                            picHchange += questRenderNewOld[0].Margin_top;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", questTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            isQuestNull[i] = true;
+                            nullQuestIdx = i + 1;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            questRenderNewOld[i].Quest = quest;
+                        }
+                    }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                    case 1: // delete
-                        questType = "刪除";
-                        if (isQuestNull[1]) continue;
-                        resultImage = questRenderNewOld[1].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                    switch (nullQuestIdx)
+                    {
+                        case 0: // change
+                            questType = "變更";
 
-                    case 2: // add
-                        questType = "新增";
-                        if (isQuestNull[0]) continue;
-                        resultImage = questRenderNewOld[0].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = questRenderNewOld[0].Render();
+                            Bitmap ImageOld = questRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 23 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                picHchange += questRenderNewOld[1].Margin_top;
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", questTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 23 : 1;
+                                picHchange += questRenderNewOld[0].Margin_top;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", questTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    default:
-                        break;
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
+
+                        case 1: // delete
+                            questType = "刪除";
+                            if (isQuestNull[1]) continue;
+                            resultImage = questRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            questType = "新增";
+                            if (isQuestNull[0]) continue;
+                            resultImage = questRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var questTypeTextInfo = g.MeasureString(questType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 23 : 1;
+                    switch (nullQuestIdx)
+                    {
+                        case 1:
+                            picH += questRenderNewOld[1].Margin_top;
+                            break;
+                        case 2:
+                            picH += questRenderNewOld[0].Margin_top;
+                            break;
+                        default:
+                            break;
+                    }
+                    if (ShowChangeType && nullQuestIdx != 0) GearGraphics.DrawPlainText(g, questType, questTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(questTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(questTooltipPath, "Quest_" + questID + "_" + QuestName + "_" + questType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Quest Tooltip: " + questID, ex.Message);
                 }
-
-                var questTypeTextInfo = g.MeasureString(questType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 23 : 1;
-                switch (nullQuestIdx)
-                {
-                    case 1:
-                        picH += questRenderNewOld[1].Margin_top;
-                        break;
-                    case 2:
-                        picH += questRenderNewOld[0].Margin_top;
-                        break;
-                    default:
-                        break;
-                }
-                if (ShowChangeType && nullQuestIdx != 0) GearGraphics.DrawPlainText(g, questType, questTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(questTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(questTooltipPath, "Quest_" + questID + "_" + QuestName + "_" + questType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputQuestTooltipIDs.Clear();
             DiffQuestTags.Clear();
