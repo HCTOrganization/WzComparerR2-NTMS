@@ -3962,6 +3962,7 @@ namespace WzComparerR2
             string fileName = null;
 
             StringResult sr = new StringResult();
+            string altAutoDesc = null;
             switch (wzf.Type)
             {
                 case Wz_Type.Character:
@@ -4175,11 +4176,17 @@ namespace WzComparerR2
                         if ((image = selectedNode.GetValue<Wz_Image>()) == null || !image.TryExtract())
                             return;
                         Achievement achievement = Achievement.CreateFromNode(image.Node, PluginManager.FindWz, PluginManager.FindWz);
-
+                        if (stringLinker == null || !stringLinker.StringAchievement.TryGetValue(achievement.ID, out sr))
+                        {
+                            sr = new StringResult();
+                            sr.Name = "未知的成就";
+                        }
                         obj = achievement;
                         if (achievement != null)
                         {
-                            fileName = achievement.ID + ".png";
+                            fileName = "achievement_" + achievement.ID + "_" + sr.Name + ".png";
+                            altAutoDesc = string.Join("\r\n", achievement.Missions);
+                            tooltipQuickView.NodeID = achievement.ID;
                         }
                     }
                     break;
@@ -4208,7 +4215,7 @@ namespace WzComparerR2
                     tooltipQuickView.NodeName = sr.Name;
                     tooltipQuickView.Desc = sr.Desc;
                     tooltipQuickView.Pdesc = sr.Pdesc;
-                    tooltipQuickView.AutoDesc = sr.AutoDesc;
+                    tooltipQuickView.AutoDesc = altAutoDesc ?? sr.AutoDesc;
                     tooltipQuickView.Hdesc = sr["h"];
                     tooltipQuickView.DescLeftAlign = sr["desc_leftalign"];
                 }
