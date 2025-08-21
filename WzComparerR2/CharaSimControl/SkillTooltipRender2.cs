@@ -240,6 +240,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 string hdesc = SummaryParser.GetSkillSummary(sr.Desc, Skill.Level, Skill.Common, SummaryParams.Default);
                 StringResult sr2 = null;
+                StringBuilder hdescAppend = new StringBuilder();
                 foreach (var kv in Skill.ReqSkill)
                 {
                     string skillName;
@@ -251,16 +252,17 @@ namespace WzComparerR2.CharaSimControl
                     {
                         skillName = kv.Key.ToString();
                     }
+                    hdescAppend.AppendLine($"\n必要技能: #c{skillName} {kv.Value}等級以上#");
                 }
                 if (isTranslateRequired)
                 {
                     string mergedDescString = Translator.MergeString(hdesc, Translator.TranslateString(hdesc), 2);
-                    mergedDescString += $"\n必要技能: #c{skillName} {kv.Value}等級以上#";
+                    mergedDescString += "\r\n" + hdescAppend.ToString();
                     GearGraphics.DrawString(g, mergedDescString, Translator.IsKoreanStringPresent(mergedDescString) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
                 else
                 {
-                    hdesc += $"\n必要技能: #c{skillName} {kv.Value}等級以上#";
+                    hdesc += "\r\n" + hdescAppend.ToString();
                     GearGraphics.DrawString(g, hdesc, Translator.IsKoreanStringPresent(hdesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
             }
