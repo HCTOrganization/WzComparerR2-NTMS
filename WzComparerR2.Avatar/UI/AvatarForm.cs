@@ -2578,6 +2578,9 @@ namespace WzComparerR2.Avatar.UI
                         break;
                 }
 
+                this.chkShowWeaponEffect.Checked = res.ShowWeaponEffect;
+                this.chkShowWeaponJumpEffect.Checked = res.ShowWeaponJumpEffect;
+
                 if (res.UnknownVer)
                 {
                     throw new Exception($"未知代碼版本。 (版本: {res.Version})");
