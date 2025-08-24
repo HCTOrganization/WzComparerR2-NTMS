@@ -3966,6 +3966,10 @@ namespace WzComparerR2
             switch (wzf.Type)
             {
                 case Wz_Type.Character:
+                    if (!selectedNode.FullPathToFile.Contains(".img")) return;
+                    string[] characterNodePath = selectedNode.FullPathToFile.Split('\\');
+                    string characterImgStr = characterNodePath.LastOrDefault(part => part.EndsWith(".img")).Replace(".img", String.Empty);
+                    if (!Int64.TryParse(characterImgStr, out _)) return; // Ignore Non-numeral img to prevent Auto Preview crash
                     if ((image = selectedNode.GetValue<Wz_Image>()) == null || !image.TryExtract())
                         return;
                     CharaSimLoader.LoadSetItemsIfEmpty();
