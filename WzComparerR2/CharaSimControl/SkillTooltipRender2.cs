@@ -240,29 +240,13 @@ namespace WzComparerR2.CharaSimControl
             {
                 string hdesc = SummaryParser.GetSkillSummary(sr.Desc, Skill.Level, Skill.Common, SummaryParams.Default);
                 StringResult sr2 = null;
-                StringBuilder hdescAppend = new StringBuilder();
-                foreach (var kv in Skill.ReqSkill)
-                {
-                    string skillName;
-                    if (this.StringLinker != null && this.StringLinker.StringSkill.TryGetValue(kv.Key, out sr2))
-                    {
-                        skillName = sr2.Name;
-                    }
-                    else
-                    {
-                        skillName = kv.Key.ToString();
-                    }
-                    hdescAppend.AppendLine($"\n必要技能: #c{skillName} {kv.Value}等級以上#");
-                }
                 if (isTranslateRequired)
                 {
                     string mergedDescString = Translator.MergeString(hdesc, Translator.TranslateString(hdesc), 2);
-                    mergedDescString += "\r\n" + hdescAppend.ToString();
                     GearGraphics.DrawString(g, mergedDescString, Translator.IsKoreanStringPresent(mergedDescString) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
                 else
                 {
-                    hdesc += "\r\n" + hdescAppend.ToString();
                     GearGraphics.DrawString(g, hdesc, Translator.IsKoreanStringPresent(hdesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
             }
@@ -513,6 +497,7 @@ namespace WzComparerR2.CharaSimControl
 
             if (ShowReqSkill && Skill.ReqSkill.Count > 0)
             {
+                List<string> skillDescExAppend = new List<string>();
                 foreach (var kv in Skill.ReqSkill)
                 {
                     string skillName;
@@ -524,8 +509,17 @@ namespace WzComparerR2.CharaSimControl
                     {
                         skillName = kv.Key.ToString();
                     }
-                    skillDescEx.Add("#c[必要技能] " + skillName + ": " + kv.Value + " 以上#");
+
+                    if (ShowObjectID)
+                    {
+                        skillDescExAppend.Add($"#c{skillName}({kv.Key}): {kv.Value}等級以上#");
+                    }
+                    else
+                    {
+                        skillDescExAppend.Add($"#c{skillName}: {kv.Value}等級以上#");
+                    }
                 }
+                skillDescEx.Add(string.Format("#c[必要技能] {0}", string.Join("，", skillDescExAppend)));
             }
 
             if (Skill.LT.X != 0 && ShowRangeCoordinates)
