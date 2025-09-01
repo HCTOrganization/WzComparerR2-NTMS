@@ -56,6 +56,17 @@ namespace WzComparerR2.AvatarCommon
         {
             int hairColor = 0;
             int faceColor = 0;
+            int mixColor = -1;
+            int mixRatio = -1;
+
+            // mix
+            if (id.ToString().Length == 8)
+            {
+                mixColor = (id / 100) % 10;
+                mixRatio = id % 100;
+                id /= 1000;
+            }
+
             if (cosmetic)
             {
                 if ((id + 9) / 10 == id / 10)
@@ -72,7 +83,12 @@ namespace WzComparerR2.AvatarCommon
                 PluginManager.FindWz($@"Character\Face\{id + faceColor:D8}.img");
             if (gearNode != null)
             {
-                this.canvas.AddPart(gearNode);
+                var part = this.canvas.AddPart(gearNode);
+                if (part != null && (mixColor >= 0 && mixColor < 8) && (mixRatio > 0 && mixRatio < 100))
+                {
+                    part.MixColor = mixColor;
+                    part.MixOpacity = mixRatio;
+                }
             }
         }
 
@@ -89,10 +105,26 @@ namespace WzComparerR2.AvatarCommon
 
         public void AddGear(int id)
         {
+            int mixColor = -1;
+            int mixRatio = -1;
+
+            // mix
+            if (id.ToString().Length == 8)
+            {
+                mixColor = (id / 100) % 10;
+                mixRatio = id % 100;
+                id /= 1000;
+            }
+
             var gearNode = FindNodeByGearID(id);
             if (gearNode != null)
             {
-                this.canvas.AddPart(gearNode);
+                var part = this.canvas.AddPart(gearNode);
+                if (part != null && (mixColor >= 0 && mixColor < 8) && (mixRatio > 0 && mixRatio < 100))
+                {
+                    part.MixColor = mixColor;
+                    part.MixOpacity = mixRatio;
+                }
             }
         }
 
