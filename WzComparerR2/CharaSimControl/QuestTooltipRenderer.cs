@@ -226,8 +226,9 @@ namespace WzComparerR2.CharaSimControl
                     picH += 35;
 
                     var targetText = string.Join(@"\n\n", targetr);
+                    bool hasIllu = targetText.Contains("#illu");
                     var replaced = ReplaceQuestString(targetText);
-                    GearGraphics.DrawString(g, replaced, Translator.IsKoreanStringPresent(replaced) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, questColorTable, questFontTable, this.ImageTable, 29, 293, ref picH, 18, alignment: Text.TextAlignment.Left, defaultColor: ((SolidBrush)GearGraphics.QuestBrushDefault).Color);
+                    GearGraphics.DrawString(g, replaced, Translator.IsKoreanStringPresent(replaced) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, questColorTable, questFontTable, this.ImageTable, hasIllu ? (left - 18) : left, 293, ref picH, 18, alignment: Text.TextAlignment.Left, defaultColor: ((SolidBrush)GearGraphics.QuestBrushDefault).Color);
                     ClearImageTable();
 
                     picH += 11;
@@ -243,26 +244,27 @@ namespace WzComparerR2.CharaSimControl
             var desc = this.Quest.Desc[state];
             if (!string.IsNullOrEmpty(desc))
             {
+                bool hasIllu = desc.Contains("#illu");
                 var replaced = ReplaceQuestString(desc);
                 string tReplaced = "";
                 switch (Translator.DefaultPreferredLayout)
                 {
                     case 1:
                         tReplaced = Translator.TranslateString(replaced) + "\r\n\r\n";
-                        GearGraphics.DrawString(g, tReplaced, Translator.IsKoreanStringPresent(tReplaced) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, questColorTable, questFontTable, this.ImageTable, 29, 293, ref picH, 18, alignment: Text.TextAlignment.Left, defaultColor: ((SolidBrush)GearGraphics.QuestBrushDefault).Color);
-                        GearGraphics.DrawString(g, replaced, Translator.IsKoreanStringPresent(replaced) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, questColorTable, questFontTable, this.ImageTable, 29, 293, ref picH, 18, alignment: Text.TextAlignment.Left, defaultColor: ((SolidBrush)GearGraphics.QuestBrushDefault).Color);
+                        GearGraphics.DrawString(g, tReplaced, Translator.IsKoreanStringPresent(tReplaced) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, questColorTable, questFontTable, this.ImageTable, hasIllu ? (left - 18) : left, 293, ref picH, 18, alignment: Text.TextAlignment.Left, defaultColor: ((SolidBrush)GearGraphics.QuestBrushDefault).Color);
+                        GearGraphics.DrawString(g, replaced, Translator.IsKoreanStringPresent(replaced) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, questColorTable, questFontTable, this.ImageTable, hasIllu ? (left - 18) : left, 293, ref picH, 18, alignment: Text.TextAlignment.Left, defaultColor: ((SolidBrush)GearGraphics.QuestBrushDefault).Color);
                         break;
                     case 2:
                         tReplaced = Translator.TranslateString(replaced) + "\r\n\r\n";
-                        GearGraphics.DrawString(g, replaced, Translator.IsKoreanStringPresent(replaced) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, questColorTable, questFontTable, this.ImageTable, 29, 293, ref picH, 18, alignment: Text.TextAlignment.Left, defaultColor: ((SolidBrush)GearGraphics.QuestBrushDefault).Color);
-                        GearGraphics.DrawString(g, tReplaced, Translator.IsKoreanStringPresent(tReplaced) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, questColorTable, questFontTable, this.ImageTable, 29, 293, ref picH, 18, alignment: Text.TextAlignment.Left, defaultColor: ((SolidBrush)GearGraphics.QuestBrushDefault).Color);
+                        GearGraphics.DrawString(g, replaced, Translator.IsKoreanStringPresent(replaced) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, questColorTable, questFontTable, this.ImageTable, hasIllu ? (left - 18) : left, 293, ref picH, 18, alignment: Text.TextAlignment.Left, defaultColor: ((SolidBrush)GearGraphics.QuestBrushDefault).Color);
+                        GearGraphics.DrawString(g, tReplaced, Translator.IsKoreanStringPresent(tReplaced) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, questColorTable, questFontTable, this.ImageTable, hasIllu ? (left - 18) : left, 293, ref picH, 18, alignment: Text.TextAlignment.Left, defaultColor: ((SolidBrush)GearGraphics.QuestBrushDefault).Color);
                         break;
                     case 3:
                         tReplaced = Translator.TranslateString(replaced) + "\r\n\r\n";
-                        GearGraphics.DrawString(g, tReplaced, Translator.IsKoreanStringPresent(tReplaced) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, questColorTable, questFontTable, this.ImageTable, 29, 293, ref picH, 18, alignment: Text.TextAlignment.Left, defaultColor: ((SolidBrush)GearGraphics.QuestBrushDefault).Color);
+                        GearGraphics.DrawString(g, tReplaced, Translator.IsKoreanStringPresent(tReplaced) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, questColorTable, questFontTable, this.ImageTable, hasIllu ? (left - 18) : left, 293, ref picH, 18, alignment: Text.TextAlignment.Left, defaultColor: ((SolidBrush)GearGraphics.QuestBrushDefault).Color);
                         break;
                     default:
-                        GearGraphics.DrawString(g, replaced, Translator.IsKoreanStringPresent(replaced) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, questColorTable, questFontTable, this.ImageTable, 29, 293, ref picH, 18, alignment: Text.TextAlignment.Left, defaultColor: ((SolidBrush)GearGraphics.QuestBrushDefault).Color);
+                        GearGraphics.DrawString(g, replaced, Translator.IsKoreanStringPresent(replaced) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, questColorTable, questFontTable, this.ImageTable, hasIllu ? (left - 18) : left, 293, ref picH, 18, alignment: Text.TextAlignment.Left, defaultColor: ((SolidBrush)GearGraphics.QuestBrushDefault).Color);
                         break;
                 }
                 ClearImageTable();
@@ -515,7 +517,7 @@ namespace WzComparerR2.CharaSimControl
 
         private string ReplaceQuestString(string text)
         {
-            text = Regex.Replace(text, @$"#(p|o|m|t|q|a{this.Quest.ID}|i|v|y)\s*(\d{{1,9}}).*?#", match => // id should be less than 1,000,000,000
+            text = Regex.Replace(text, @$"#(p|o|m|t|q|a{this.Quest.ID}|i|v|y|illu)\s*(\d{{1,9}}).*?#", match => // id should be less than 1,000,000,000
             {
                 string tag = match.Groups[1].Value;
                 if (!int.TryParse(match.Groups[2].Value, out int id)) id = -1;
@@ -558,6 +560,16 @@ namespace WzComparerR2.CharaSimControl
                         this.ImageTable.Add(this.ImageTable.Count.ToString(), bmp);
                         return ret;
 
+                    case "illu":
+                        var bmpIllu = GetIconByPath($@"Etc\illustration.img\{id}\0");
+                        if (bmpIllu != null)
+                        {
+                            var retIllu = $"#@{this.ImageTable.Count}/{bmpIllu?.Width ?? 0}/{bmpIllu?.Height ?? 0}@";
+                            this.ImageTable.Add(this.ImageTable.Count.ToString(), bmpIllu);
+                            return retIllu;
+                        }
+                        else return id.ToString();
+
                     case "y":
                         StringLinker.StringQuest.TryGetValue(id, out sr);
                         return $"{sr?.Name ?? id.ToString()}";
@@ -574,7 +586,7 @@ namespace WzComparerR2.CharaSimControl
                         return id.ToString();
                 }
             });
-            text = Regex.Replace(text, @"#(questorder|j|c|R|x|MD|M|u|fs|fn|f|a|W|o9101069f|DL)(.+?)#", match =>
+            text = Regex.Replace(text, @"#(questorder|j|c|R|x|MD|M|u|fs|fn|fc|f|a|W|o9101069f|DL|h0)(.+?)#", match =>
             {
                 string tag = match.Groups[1].Value;
                 string info = match.Groups[2].Value;
@@ -601,6 +613,9 @@ namespace WzComparerR2.CharaSimControl
 
                     case "u":
                         return "未完";
+
+                    case "h0":
+                        return "플레이어";
 
                     case "o9101069f":
                         Wz_Node stringNodeMF = PluginManager.FindWz($@"String\MobFilter.img\{info}", this.SourceWzFile);
@@ -631,6 +646,7 @@ namespace WzComparerR2.CharaSimControl
                         this.ImageTable.Add(this.ImageTable.Count.ToString(), bmp);
                         return ret;
 
+                    case "fc":
                     case "fs":
                     case "fn":
                         return "";
@@ -647,9 +663,14 @@ namespace WzComparerR2.CharaSimControl
             // 미사용 태그
             text = text.Replace("#b", ""); // 파란색
             text = text.Replace("#k", ""); // 기본색
+            text = text.Replace("#kk", "");
+            text = text.Replace("#K", "");
             text = text.Replace("#r", ""); // 빨간색
+            text = text.Replace("#g", "");
+            text = text.Replace("#l", "");
             text = text.Replace("#eqp#", "");
             text = text.Replace("#e", "");
+            text = text.Replace("#E", "");
             text = text.Replace("#n", " ");
 
             return text;
