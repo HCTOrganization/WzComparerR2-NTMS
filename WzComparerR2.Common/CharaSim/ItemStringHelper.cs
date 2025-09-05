@@ -307,7 +307,7 @@ namespace WzComparerR2.CharaSim
                     return res;
                 case GearPropType.incBDR:
                 case GearPropType.bdR:
-                    res[0] = "BOSS傷害";
+                    res[0] = "BOSS怪物傷害";
                     res[1] = "+" + value + "%";
                     return res;
                 case GearPropType.incIMDR:

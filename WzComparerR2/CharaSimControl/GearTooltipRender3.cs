@@ -675,7 +675,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 extraReq = ItemStringHelper.GetExtraJobReqString(Gear.ReqSpecJobs, isMsnClient);
             }
-            TextRenderer.DrawText(g, "適用職業", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
+            TextRenderer.DrawText(g, "裝備職業", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
             TextRenderer.DrawText(g, extraReq == null ? reqJobStr : extraReq.Replace("可裝備", "").Replace("職業群", "").Replace("職業", ""), GearGraphics.EquipMDMoris9Font, new Point(79, picH), Color.White, TextFormatFlags.NoPadding);
             picH += 16;
             if (!string.IsNullOrEmpty(extraReq))
@@ -693,7 +693,7 @@ namespace WzComparerR2.CharaSimControl
             bool moveX = false;
             if (finalReqLevel > 0)
             {
-                TextRenderer.DrawText(g, "需求等級", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, "要求等級", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
                 if (reduceReq > 0)
                 {
                     GearGraphics.DrawString(g, $"Lv. {finalReqLevel} #$g({value2} #$b- {reduceReq}#)#", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 244, ref picH, 16);
@@ -987,7 +987,7 @@ namespace WzComparerR2.CharaSimControl
                     hasThirdContents = true;
                     hasOptionPart = true;
 
-                    TextRenderer.DrawText(g, "可用技能", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
+                    TextRenderer.DrawText(g, "可使用技能", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
                     GearGraphics.DrawString(g, $"#$g{text}#".Replace("#c", ""), Translator.IsKoreanStringPresent(text) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 308, ref picH, 16, alignment: Text.TextAlignment.Left);
                 }
             }
