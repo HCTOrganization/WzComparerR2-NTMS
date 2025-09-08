@@ -274,11 +274,11 @@ namespace WzComparerR2.CharaSimControl
             {
                 if (doHighlight && DiffSkillTags.ContainsKey(skillIDstr) && DiffSkillTags[skillIDstr].Contains("isSequenceOn"))
                 {
-                    GearGraphics.DrawString(g, "#$g可登入技能順序#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
+                    GearGraphics.DrawString(g, "#$g可登錄技能連招#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
                 else
                 {
-                    GearGraphics.DrawString(g, "#c可登入技能順序#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
+                    GearGraphics.DrawString(g, "#c可登錄技能連招#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
             }
             if (Skill.IsPetAutoBuff)
