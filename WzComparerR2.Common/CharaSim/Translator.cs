@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using WzComparerR2.Config;
 using System.Security.Cryptography;
+using WzComparerR2.WzLib;
 
 namespace WzComparerR2.CharaSim
 {
@@ -417,6 +418,23 @@ namespace WzComparerR2.CharaSim
             translatedText = ConvHTMLTagToHashTag(translatedText);
             CacheTranslationResult(orgText, translatedText);
             return translatedText;
+        }
+
+        public static bool TryCheckStringIndex(int objectID, string indexType, out string translateResult)
+        {
+            string targetLanguage = DefaultDesiredLanguage;
+            string typeIndex = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache", String.Format("{0}_{1}.csv", indexType, targetLanguage));
+            if (File.Exists(typeIndex))
+            {
+                CsvLookup csvLookup = new CsvLookup(typeIndex);
+                translateResult = csvLookup.GetNameById(objectID);
+                return (!String.IsNullOrEmpty(translateResult));
+            }
+            else
+            {
+                translateResult = "";
+                return false;
+            }
         }
 
         public static string ConvHashTagToHTMLTag(string orgText)
@@ -917,6 +935,52 @@ namespace WzComparerR2.CharaSim
                 return sb.ToString();
             }
         }
+
+        public class SkillRecord
+        {
+            public int ID { get; set; }
+            public string Name { get; set; }
+        }
+
+        public sealed class RecordMap : ClassMap<SkillRecord>
+        {
+            public RecordMap()
+            {
+                Map(m => m.ID).Name("skillID");
+                Map(m => m.Name).Name("skillName");
+            }
+        }
+
+        public class CsvLookup
+        {
+            private readonly Dictionary<int, string> _idNameDict;
+
+            public CsvLookup(string csvPath)
+            {
+                _idNameDict = new Dictionary<int, string>();
+
+                using (var reader = new StreamReader(csvPath))
+                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+                {
+                    csv.Context.RegisterClassMap<RecordMap>();
+                    var records = csv.GetRecords<SkillRecord>();
+
+                    foreach (var record in records)
+                    {
+                        if (!_idNameDict.ContainsKey(record.ID))
+                        {
+                            _idNameDict[record.ID] = record.Name;
+                        }
+                    }
+                }
+            }
+
+            public string GetNameById(int id)
+            {
+                return _idNameDict.TryGetValue(id, out var name) ? name : null;
+            }
+        }
+
 
         #region Global Settings
         public static string ExchangeTable { get; set; }
