@@ -3093,7 +3093,7 @@ namespace WzComparerR2
             this.labelX2.Name = "labelX2";
             this.labelX2.Size = new System.Drawing.Size(44, 16);
             this.labelX2.TabIndex = 2;
-            this.labelX2.Text = "點擊「匯出技能」按鈕並決定儲存位置後，程式將自動產生技能名稱緩存，\r\n以確保翻譯功能準確翻譯。\r\n生成過程將自動判斷客戶端的語言。\r\n\r\n啟用翻譯功能後，程式將檢查所需語言中該技能的官方名稱。\r\n如果官方名稱存在，則使用它；\r\n如果不存在，則根據原始語言進行翻譯。";
+            this.labelX2.Text = "點擊「匯出技能」按鈕並決定儲存位置後，程式將自動產生技能名稱快取，\r\n以確保翻譯功能準確翻譯。\r\n生成過程將自動判斷客戶端的語言。\r\n\r\n啟用翻譯功能後，程式將檢查所需語言中該技能的官方名稱。\r\n如果官方名稱存在，則使用它；\r\n如果不存在，則根據原始語言進行翻譯。";
             // 
             // superTabItem3
             // 
