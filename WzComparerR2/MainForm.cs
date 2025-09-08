@@ -4904,6 +4904,38 @@ namespace WzComparerR2
                     sw.Close();
                     fs.Dispose();
                 }
+                stringLinker.StringMob.TryGetValue(100000, out var sr);
+                if (sr != null)
+                {
+                    string langcode = "qps-ploc";
+                    switch (sr.Name)
+                    {
+                        case "Snail":
+                            langcode = "en";
+                            break;
+                        case "蜗牛":
+                            langcode = "zh-CN";
+                            break;
+                        case "달팽이":
+                            langcode = "ko";
+                            break;
+                        case "嫩寶":
+                            langcode = "zh-TW";
+                            break;
+                        case "デンデン":
+                            langcode = "ja";
+                            break;
+                    }
+                    if (Directory.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache")))
+                    {
+                        Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache"));
+                    }
+                    if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache", String.Format("ms_skill_{0}.csv", langcode))))
+                    {
+                        File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache", String.Format("ms_skill_{0}.csv", langcode)));
+                    }
+                    File.Copy(Path.Combine(dlg.SelectedPath, "ms_skill.csv"), Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache", String.Format("ms_skill_{0}.csv", langcode)));
+                }
                 MessageBoxEx.Show("匯出完成。");
             }
         }

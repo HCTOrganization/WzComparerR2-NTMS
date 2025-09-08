@@ -248,6 +248,7 @@ namespace WzComparerR2
             this.chkOutputRemovedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOutputAddedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.labelX1 = new DevComponents.DotNetBar.LabelX();
+            this.labelX2 = new DevComponents.DotNetBar.LabelX();
             this.chkOutputPng = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.cmbComparePng = new DevComponents.DotNetBar.Controls.ComboBoxEx();
             this.labelXComp2 = new DevComponents.DotNetBar.LabelX();
@@ -3049,6 +3050,7 @@ namespace WzComparerR2
             // 
             this.superTabControlPanel3.Controls.Add(this.btnExportSkillOption);
             this.superTabControlPanel3.Controls.Add(this.btnExportSkill);
+            this.superTabControlPanel3.Controls.Add(this.labelX2);
             this.superTabControlPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControlPanel3.Location = new System.Drawing.Point(0, 0);
             this.superTabControlPanel3.Name = "superTabControlPanel3";
@@ -3079,6 +3081,19 @@ namespace WzComparerR2
             this.btnExportSkill.TabIndex = 0;
             this.btnExportSkill.Text = "匯出技能";
             this.btnExportSkill.Click += new System.EventHandler(this.btnExportSkill_Click);
+            // 
+            // labelX2
+            // 
+            this.labelX2.AutoSize = true;
+            // 
+            // 
+            // 
+            this.labelX2.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelX2.Location = new System.Drawing.Point(24, 39);
+            this.labelX2.Name = "labelX2";
+            this.labelX2.Size = new System.Drawing.Size(44, 16);
+            this.labelX2.TabIndex = 2;
+            this.labelX2.Text = "點擊「匯出技能」按鈕並決定儲存位置後，程式將自動產生技能名稱緩存，\r\n以確保翻譯功能準確翻譯。\r\n生成過程將自動判斷客戶端的語言。\r\n\r\n啟用翻譯功能後，程式將檢查所需語言中該技能的官方名稱。\r\n如果官方名稱存在，則使用它；\r\n如果不存在，則根據原始語言進行翻譯。";
             // 
             // superTabItem3
             // 
@@ -3851,6 +3866,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ButtonX btnExportSkillOption;
         private DevComponents.DotNetBar.ButtonX btnExportSkill;
         private DevComponents.DotNetBar.LabelX labelX1;
+        private DevComponents.DotNetBar.LabelX labelX2;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputPng;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbComparePng;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputRemovedImg;
