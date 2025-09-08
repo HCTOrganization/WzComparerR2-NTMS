@@ -16,7 +16,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using WzComparerR2.Config;
 using System.Security.Cryptography;
-using WzComparerR2.WzLib;
 
 namespace WzComparerR2.CharaSim
 {
