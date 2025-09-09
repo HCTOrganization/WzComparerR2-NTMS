@@ -733,7 +733,7 @@ namespace WzComparerR2.CharaSimControl
                 picH -= 2;
                 TextRenderer.DrawText(g, "外型：", GearGraphics.EquipMDMoris9Font, new Point(15, picH + 2), Color.White, TextFormatFlags.NoPadding);
 
-                Wz_Node android = PluginBase.PluginManager.FindWz(string.Format("Etc/Android/{0:D4}.img", value));
+                Wz_Node android = PluginBase.PluginManager.FindWz(string.Format("Etc/Android/{0:D4}.img", value)) ?? PluginBase.PluginManager.FindWz("Etc/Android/0001.img");
                 Wz_Node costume = android?.Nodes["costume"];
                 Wz_Node basic = android?.Nodes["basic"];
 
