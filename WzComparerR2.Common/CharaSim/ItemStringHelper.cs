@@ -358,7 +358,7 @@ namespace WzComparerR2.CharaSim
                     res[0] = value == 0 ? null : "#$r專屬道具#";
                     return res;
                 case GearPropType.onlyEquip:
-                    res[0] = value == 0 ? null : "#$r只能單獨使用#";
+                    res[0] = value == 0 ? null : "#$r不可重複裝備#";
                     return res;
                 case GearPropType.equipTradeBlock:
                     res[0] = value == 0 ? null : "#$r裝備時不可交換#";
@@ -438,7 +438,7 @@ namespace WzComparerR2.CharaSim
                     res[0] = $"#$d卓越強化 : 無# (最大{value}次)";
                     return res;
                 case GearPropType.CuttableCount:
-                    res[0] = $" #$r(可使用剪刀次数: {value} / {value})#";
+                    res[0] = $" #$r(剪刀剩餘使用次數：{value}/{value})#";
                     return res;
 
                 case GearPropType.incEXPr:

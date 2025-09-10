@@ -677,7 +677,7 @@ namespace WzComparerR2.CharaSimControl
                 extraReq = ItemStringHelper.GetExtraJobReqString(Gear.ReqSpecJobs, isMsnClient);
             }
             TextRenderer.DrawText(g, "裝備職業", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
-            TextRenderer.DrawText(g, extraReq == null ? reqJobStr : extraReq.Replace("可裝備", "").Replace("職業群", "").Replace("職業", ""), GearGraphics.EquipMDMoris9Font, new Point(79, picH), Color.White, TextFormatFlags.NoPadding);
+            TextRenderer.DrawText(g, extraReq == null ? reqJobStr : extraReq.Replace("可裝備", "").Replace("職業群", "").Replace("職業", ""), GearGraphics.EquipMDMoris9Font, new Point(100, picH), Color.White, TextFormatFlags.NoPadding);
             picH += 16;
             if (!string.IsNullOrEmpty(extraReq))
             {
@@ -697,11 +697,11 @@ namespace WzComparerR2.CharaSimControl
                 TextRenderer.DrawText(g, "要求等級", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
                 if (reduceReq > 0)
                 {
-                    GearGraphics.DrawString(g, $"Lv. {finalReqLevel} #$g({value2} #$b- {reduceReq}#)#", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 244, ref picH, 16);
+                    GearGraphics.DrawString(g, $"Lv.{finalReqLevel} #$g({value2} #$b- {reduceReq}#)#", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 244, ref picH, 16);
                 }
                 else
                 {
-                    GearGraphics.DrawString(g, $"Lv. {finalReqLevel}", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 244, ref picH, 16);
+                    GearGraphics.DrawString(g, $"Lv.{finalReqLevel}", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 244, ref picH, 16);
                 }
                 moveX = true;
             }
@@ -1562,7 +1562,7 @@ namespace WzComparerR2.CharaSimControl
                     cantEnhanceList.Add("附加屬性");
                 if (cantEnhanceList.Count > 0)
                 {
-                    GearGraphics.DrawString(g, $"#$d{string.Join(", ", cantEnhanceList)} 無法強化#", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                    GearGraphics.DrawString(g, $"#$d#{string.Join(", ", cantEnhanceList)} 無法強化#", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
                 }
 
                 switch (enhance_starForce)
@@ -1586,7 +1586,7 @@ namespace WzComparerR2.CharaSimControl
                         //text = $"#$d強化卷軸強化 : 無法強化#";
                         break;
                     case 1:
-                        text = $"#$d卷軸 強化 無# (剩餘{tuc}次，可修復0次)";
+                        text = $"#$d卷軸 強化 無 (剩餘{tuc}次，可修復0次)";
                         break;
                     case 2:
                         text = $"#$s卷軸 強化 {Gear.ScrollUp}次# (剩餘{tuc}次，可修復0次)";
@@ -2374,11 +2374,11 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (Gear.IsSubWeapon(Gear.type) || Gear.type == GearType.shield)
             {
-                categories.Add("補助武器");
+                categories.Add("輔助武器");
             }
             else if (Gear.IsEmblem(Gear.type))
             {
-                categories.Add("紋章/能源");
+                categories.Add("徽章/能源");
             }
             else if (Gear.IsArmor(Gear.type))
             {
