@@ -641,7 +641,7 @@ namespace WzComparerR2.CharaSimControl
                 switch (reqJob)
                 {
                     case -1: reqJobStr = "初心者"; break;
-                    case 0: reqJobStr = "共通"; break;
+                    case 0: reqJobStr = "共用"; break;
                 }
             }
             else
@@ -1557,12 +1557,12 @@ namespace WzComparerR2.CharaSimControl
                 if (enhance_starForce == 0)
                     cantEnhanceList.Add("星力");
                 if (enhance_scroll == 0)
-                    cantEnhanceList.Add("強化卷軸");
+                    cantEnhanceList.Add("卷軸");
                 if (enhance_bonusStat == 0)
-                    cantEnhanceList.Add("追加屬性");
+                    cantEnhanceList.Add("附加屬性");
                 if (cantEnhanceList.Count > 0)
                 {
-                    GearGraphics.DrawString(g, $"#$d無法強化{string.Join(", ", cantEnhanceList)}#", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                    GearGraphics.DrawString(g, $"#$d{string.Join(", ", cantEnhanceList)} 無法強化#", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
                 }
 
                 switch (enhance_starForce)
@@ -1586,15 +1586,15 @@ namespace WzComparerR2.CharaSimControl
                         //text = $"#$d強化卷軸強化 : 無法強化#";
                         break;
                     case 1:
-                        text = $"#$d強化卷軸強化 : 無# (剩餘{tuc}次，可修復0次)";
+                        text = $"#$d卷軸 強化 無# (剩餘{tuc}次，可修復0次)";
                         break;
                     case 2:
-                        text = $"#$s強化卷軸強化 : {Gear.ScrollUp}回# (剩餘{tuc}次，可修復0次)";
+                        text = $"#$s卷軸 強化 {Gear.ScrollUp}次# (剩餘{tuc}次，可修復0次)";
                         break;
                 }
                 if (!string.IsNullOrEmpty(text))
                     GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
-                GearGraphics.DrawString(g, $"#$d白金鐵槌强化次數 : #0", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                // GearGraphics.DrawString(g, $"#$d白金鐵槌強化次數 : #0", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
 
                 /*
                 switch (enhance_bonusStat)
@@ -1610,7 +1610,7 @@ namespace WzComparerR2.CharaSimControl
                     GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
                 */
 
-                GearGraphics.DrawString(g, "#$d可按下NPC/採集鍵查看詳細的增援訊息#", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                GearGraphics.DrawString(g, "#$d可透過NPC/採集鍵查看強化資訊詳細內容。#", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
                 picH += 4;
 
 
@@ -1672,12 +1672,12 @@ namespace WzComparerR2.CharaSimControl
                 switch (enhance_addiPotential)
                 {
                     case 0:
-                        text = $"#${GetPotentialColorTag(GearGrade.C)}附加潛能 : 無法強化#";
+                        text = $"#${GetPotentialColorTag(GearGrade.C)}附加潛在能力 : 無法強化#";
                         g.DrawImage(GetPotentialGradeIcon(GearGrade.C), 15, picH);
                         GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, itemPotentialColorTable, 30, 305, ref picH, 16);
                         break;
                     case 1:
-                        text = $"#${GetPotentialColorTag(Gear.Grade)}附加潛能  : {GetPotentialString((int)Gear.Grade)}#";
+                        text = $"#${GetPotentialColorTag(Gear.Grade)}附加潛在能力  : {GetPotentialString((int)Gear.Grade)}#";
                         g.DrawImage(GetPotentialGradeIcon(Gear.Grade), 15, picH);
                         GearGraphics.DrawString(g, text, GearGraphics.EquipMDMoris9Font, itemPotentialColorTable, 30, 305, ref picH, 16);
 
@@ -1722,7 +1722,7 @@ namespace WzComparerR2.CharaSimControl
                 hasThirdContents = true;
 
                 GearGraphics.DrawString(g, $"#$d強化卷軸強化 : 無# (剩餘{tuc}次，可修復0次)", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
-                GearGraphics.DrawString(g, "白金鐵槌强化次數 : 0", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
+                // GearGraphics.DrawString(g, "白金鐵槌強化次數 : 0", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16);
                 picH += 4;
             }
 

@@ -391,10 +391,10 @@ namespace WzComparerR2.CharaSim
                     switch (value)
                     {
                         case 1:
-                            res[0] = "#$g若使用 #c宿命剪刀，該道具可進行一次交易#";
+                            res[0] = "#$g若使用宿命剪刀，該道具可進行一次交易！#";
                             return res;
                         case 2:
-                            res[0] = "#$g若使用 #c白金神奇剪刀，該道具可進行一次交易#";
+                            res[0] = "#$g若使用白金神奇剪刀，該道具可進行一次交易！#";
                             return res;
                         default: return res;
                     }
