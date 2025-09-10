@@ -239,6 +239,7 @@ namespace WzComparerR2.CharaSimControl
                 { "$s", ((SolidBrush)GearGraphics.Equip22BrushScroll).Color },
                 { "$g", ((SolidBrush)GearGraphics.Equip22BrushGray).Color },
                 { "$d", ((SolidBrush)GearGraphics.Equip22BrushDarkGray).Color },
+                { "$z", ((SolidBrush)GearGraphics.GreenBrush2).Color },
             };
             var itemPotentialColorTable = new Dictionary<string, Color>()
             {
@@ -1259,8 +1260,8 @@ namespace WzComparerR2.CharaSimControl
             {
                 hasThirdContents = true;
 
-                TextRenderer.DrawText(g, "傷害上限", GearGraphics.EquipMDMoris9Font, new Point(15, picH), Color.White, TextFormatFlags.NoPadding);
-                GearGraphics.DrawString(g, ItemStringHelper.ToCJKNumberExpr(value), GearGraphics.EquipMDMoris9Font, equip22ColorTable, 122, 280, ref picH, 16, alignment: Text.TextAlignment.Left);
+                TextRenderer.DrawText(g, "傷害上限", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.GreenBrush2).Color, TextFormatFlags.NoPadding);
+                GearGraphics.DrawString(g, $"#$z{ItemStringHelper.ToCJKNumberExpr(value)}#", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 280, ref picH, 16, alignment: Text.TextAlignment.Left);
             }
             // 반지스킬
             int ringOpt, ringOptLv;
