@@ -677,12 +677,7 @@ namespace WzComparerR2.CharaSimControl
                 extraReq = ItemStringHelper.GetExtraJobReqString(Gear.ReqSpecJobs, isMsnClient);
             }
             TextRenderer.DrawText(g, "裝備職業", GearGraphics.EquipMDMoris9Font, new Point(15, picH), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
-            TextRenderer.DrawText(g, extraReq == null ? reqJobStr : extraReq.Replace("可裝備", "").Replace("職業群", "").Replace("職業", ""), GearGraphics.EquipMDMoris9Font, new Point(100, picH), Color.White, TextFormatFlags.NoPadding);
-            picH += 16;
-            if (!string.IsNullOrEmpty(extraReq))
-            {
-                if (extraReq.Contains("\r\n")) picH += 16;
-            }
+            GearGraphics.DrawString(g, (extraReq == null ? reqJobStr : extraReq).Replace("可裝備", "").Replace("職業群", "").Replace("職業", "").Trim(), GearGraphics.EquipMDMoris9Font, equip22ColorTable, 100, 308, ref picH, 16);
 
             // 요구 레벨
             this.Gear.Props.TryGetValue(GearPropType.reqLevel, out value2);
