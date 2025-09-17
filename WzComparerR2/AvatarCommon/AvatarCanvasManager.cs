@@ -271,7 +271,7 @@ namespace WzComparerR2.AvatarCommon
             {
                 return "blink";
             }
-            else return this.canvas.Emotions.FirstOrDefault("");
+            else return this.canvas.Emotions.FirstOrDefault();
         }
 
         public void ClearCanvas()
