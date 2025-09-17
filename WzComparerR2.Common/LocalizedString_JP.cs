@@ -32,7 +32,7 @@ namespace WzComparerR2
         public static string FRMUPDATER_UPDATE_DOWNLOAD_FAIL = "下載失敗";
 
         public static string MAINFORM_OPENWZDLG_TITLE = "選擇 WZ 檔";
-        public static string MAINFORM_OPENWZDLG_FILTER = "新楓之谷資源檔案 (Base.wz; *.wz; *.ms)|*.wz;*.ms";
+        public static string MAINFORM_OPENWZDLG_FILTER = "新楓之谷資源檔案 (Base.wz; *.wz; *.ms; *.mn)|*.wz;*.ms;*.mn";
         public static string MAINFORM_OPENWZDLG_ALREADYOPENED = "該 WZ 檔案已開啟。";
         public static string MAINFORM_CLOSEWZDLG_FILENOTSELECTED = "未選擇您要關閉的 WZ 檔案。";
         public static string MAINFORM_COMMON_FILENOTFOUND = "未找到檔案。";
