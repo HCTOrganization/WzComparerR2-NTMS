@@ -389,7 +389,7 @@ namespace WzComparerR2.CharaSimControl
                 Wz_Node skillNode = PluginBase.PluginManager.FindWz(string.Format(@"Skill\{0}.img\skill\{1}", Skill.AddAttackToolTipDescSkill / 10000, Skill.AddAttackToolTipDescSkill));
                 if (skillNode != null)
                 {
-                    Skill skill = Skill.CreateFromNode(skillNode, PluginBase.PluginManager.FindWz);
+                    Skill skill = Skill.CreateFromNode(skillNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
                     icon = skill.Icon;
                 }
                 if (icon.Bitmap != null)
@@ -422,7 +422,7 @@ namespace WzComparerR2.CharaSimControl
                 Wz_Node skillNode = PluginBase.PluginManager.FindWz(string.Format(@"Skill\{0}.img\skill\{1}", Skill.AssistSkillLink / 10000, Skill.AssistSkillLink));
                 if (skillNode != null)
                 {
-                    Skill skill = Skill.CreateFromNode(skillNode, PluginBase.PluginManager.FindWz);
+                    Skill skill = Skill.CreateFromNode(skillNode, PluginBase.PluginManager.FindWz, PluginBase.PluginManager.FindWz);
                     icon = skill.Icon;
                 }
                 if (icon.Bitmap != null)

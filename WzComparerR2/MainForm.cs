@@ -1193,7 +1193,7 @@ namespace WzComparerR2
             try
             {
                 string[] msFileExtensions = { "*.ms", "*.mn" };
-                if (msFileExtensions.Any(ext => string.Equals(Path.GetExtension(wzFilePath), ext, StringComparison.OrdinalIgnoreCase)))
+                if (msFileExtensions.Any(ext => string.Equals(Path.GetExtension(wzFilePath), Path.GetExtension(ext), StringComparison.OrdinalIgnoreCase)))
                 {
                     wz.LoadMsFile(wzFilePath);
                 }
@@ -4053,7 +4053,7 @@ namespace WzComparerR2
                     }
                     else if (Regex.IsMatch(skillNode.FullPathToFile, @"^Skill\d*\\\d+.img\\skill\\\d+$"))
                     {
-                        Skill skill = Skill.CreateFromNode(skillNode, PluginManager.FindWz);
+                        Skill skill = Skill.CreateFromNode(skillNode, PluginManager.FindWz, PluginManager.FindWz);
                         if (stringLinker == null || !stringLinker.StringSkill.TryGetValue(skill.SkillID, out sr))
                         {
                             sr = new StringResultSkill();
