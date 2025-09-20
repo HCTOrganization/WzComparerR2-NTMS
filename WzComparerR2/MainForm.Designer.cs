@@ -244,6 +244,7 @@ namespace WzComparerR2
             this.chkShowPrice = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowLinkedTamingMob = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkSkipKMSContent = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkSkipGodChangseopDuplicatedNodes = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.superTooltip1 = new DevComponents.DotNetBar.SuperTooltip();
             this.chkOutputRemovedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOutputAddedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -2689,6 +2690,7 @@ namespace WzComparerR2
             this.superTabControlPanel2.Controls.Add(this.chkShowPrice);
             this.superTabControlPanel2.Controls.Add(this.chkShowLinkedTamingMob);
             this.superTabControlPanel2.Controls.Add(this.chkSkipKMSContent);
+            this.superTabControlPanel2.Controls.Add(this.chkSkipGodChangseopDuplicatedNodes);
             this.superTabControlPanel2.Controls.Add(this.chkResolvePngLink);
             this.superTabControlPanel2.Controls.Add(this.chkOutputRemovedImg);
             this.superTabControlPanel2.Controls.Add(this.chkOutputAddedImg);
@@ -2925,6 +2927,21 @@ namespace WzComparerR2
             this.chkSkipKMSContent.TabIndex = 24;
             this.chkSkipKMSContent.Text = "跳過KMS內容對比";
             this.chkSkipKMSContent.Checked = false;
+            // 
+            // chkSkipGodChangseopDuplicatedNodes
+            // 
+            // 
+            // 
+            // 
+            this.chkSkipGodChangseopDuplicatedNodes.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkSkipGodChangseopDuplicatedNodes.Location = new System.Drawing.Point(550, 412);
+            this.chkSkipGodChangseopDuplicatedNodes.Name = "chkSkipGodChangseopDuplicatedNodes";
+            this.chkSkipGodChangseopDuplicatedNodes.Size = new System.Drawing.Size(185, 25);
+            this.chkSkipGodChangseopDuplicatedNodes.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.superTooltip1.SetSuperTooltip(this.chkSkipGodChangseopDuplicatedNodes, new DevComponents.DotNetBar.SuperTooltipInfo("跳過神昌燮的重複節點", "", "跳過由神昌燮建立的以「_.img」結尾的重複節點。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 110)));
+            this.chkSkipGodChangseopDuplicatedNodes.TabIndex = 25;
+            this.chkSkipGodChangseopDuplicatedNodes.Text = "跳過神昌燮的重複節點";
+            this.chkSkipGodChangseopDuplicatedNodes.Checked = true;
             // 
             // chkOutputRemovedImg
             // 
@@ -3924,6 +3941,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowPrice;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowLinkedTamingMob;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkSkipKMSContent;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkSkipGodChangseopDuplicatedNodes;
         private DevComponents.Editors.ComboItem comboItem19;
         private DevComponents.Editors.ComboItem comboItem20;
         private DevComponents.Editors.ComboItem comboItem21;

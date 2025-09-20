@@ -4612,6 +4612,7 @@ namespace WzComparerR2
                     comparer.ShowPrice = chkShowPrice.Checked;
                     comparer.ShowLinkedTamingMob = chkShowLinkedTamingMob.Checked;
                     comparer.SkipKMSContent = chkSkipKMSContent.Checked;
+                    comparer.SkipGodChangseopDuplicatedNodes = chkSkipGodChangseopDuplicatedNodes.Checked;
                     comparer.Enable22AniStyle = GearGraphics.is22aniStyle;
                     comparer.StateInfoChanged += new EventHandler(comparer_StateInfoChanged);
                     comparer.StateDetailChanged += new EventHandler(comparer_StateDetailChanged);
@@ -4654,6 +4655,7 @@ namespace WzComparerR2
                                     chkShowPrice.Enabled = false;
                                     chkShowLinkedTamingMob.Enabled = false;
                                     chkSkipKMSContent.Enabled = false;
+                                    chkSkipGodChangseopDuplicatedNodes.Enabled = false;
                                     if (chkSkipKMSContent.Checked)
                                     {
                                         switch (MessageBoxEx.Show(this, "是否要下載 KMS 內容資料庫？ \r\n\r\n如果選擇“No”，則只跳過 KMS 技能。", "WZ比較", MessageBoxButtons.YesNo))
@@ -4721,6 +4723,7 @@ namespace WzComparerR2
                         chkShowPrice.Enabled = true;
                         chkShowLinkedTamingMob.Enabled = true;
                         chkSkipKMSContent.Enabled = true;
+                        chkSkipGodChangseopDuplicatedNodes.Enabled = true;
                         if (comparer.FailToExportNodes.Count > 0 || comparer.FailToExportTooltips.Count > 0)
                         {
                             string failData = Newtonsoft.Json.JsonConvert.SerializeObject(comparer.FailToExportNodes, Newtonsoft.Json.Formatting.Indented) + "\r\n" + Newtonsoft.Json.JsonConvert.SerializeObject(comparer.FailToExportTooltips, Newtonsoft.Json.Formatting.Indented);
