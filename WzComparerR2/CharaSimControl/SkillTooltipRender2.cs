@@ -406,7 +406,7 @@ namespace WzComparerR2.CharaSimControl
                     skillName = Skill.AddAttackToolTipDescSkill.ToString();
                 }
                 picH += 10;
-                GearGraphics.DrawString(g, skillName, GearGraphics.ItemDetailFont, region.LinkedSkillNameLeft, region.TextRight, ref picH, 16);
+                GearGraphics.DrawString(g, skillName, Translator.IsKoreanStringPresent(skillName) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, region.LinkedSkillNameLeft, region.TextRight, ref picH, 16);
                 picH += 6;
                 picH += 13;
             }
@@ -439,7 +439,7 @@ namespace WzComparerR2.CharaSimControl
                     skillName = Skill.AssistSkillLink.ToString();
                 }
                 picH += 10;
-                GearGraphics.DrawString(g, skillName, GearGraphics.ItemDetailFont, region.LinkedSkillNameLeft, region.TextRight, ref picH, 16);
+                GearGraphics.DrawString(g, skillName, Translator.IsKoreanStringPresent(skillName) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, region.LinkedSkillNameLeft, region.TextRight, ref picH, 16);
                 picH += 6;
                 picH += 13;
             }
