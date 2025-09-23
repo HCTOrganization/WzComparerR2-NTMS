@@ -579,6 +579,7 @@ namespace WzComparerR2.Comparer
                 StringBuilder[] sb = { new StringBuilder(), new StringBuilder(), new StringBuilder() };
                 int[] count = new int[6];
                 List<CompareDifference> kmsContent = new List<CompareDifference> { };
+                List<CompareDifference> godChangseopNode = new List<CompareDifference> { };
                 string[] diffStr = { "變更", "新增", "刪除" };
                 foreach (CompareDifference diff in diffLst)
                 {
@@ -595,6 +596,7 @@ namespace WzComparerR2.Comparer
                             }
                             if (SkipGodChangseopDuplicatedNodes && (isGodChangseopNode(diff.NodeNew) || isGodChangseopNode(diff.NodeOld)))
                             {
+                                godChangseopNode.Add(diff);
                                 continue;
                             }
                             detail = string.Format("<a name=\"m_{1}_{2}\" href=\"#a_{1}_{2}\">{0}</a>", diff.NodeNew.FullPathToFile, idx, count[idx]);
@@ -608,6 +610,7 @@ namespace WzComparerR2.Comparer
                             }
                             if (SkipGodChangseopDuplicatedNodes && isGodChangseopNode(diff.NodeNew))
                             {
+                                godChangseopNode.Add(diff);
                                 continue;
                             }
                             if (this.OutputAddedImg)
@@ -628,6 +631,7 @@ namespace WzComparerR2.Comparer
                             }
                             if (SkipGodChangseopDuplicatedNodes && isGodChangseopNode(diff.NodeOld))
                             {
+                                godChangseopNode.Add(diff);
                                 continue;
                             }
                             if (this.OutputRemovedImg)
@@ -669,6 +673,12 @@ namespace WzComparerR2.Comparer
                     if (kmsContent.Contains(diff))
                     {
                         StateInfo = string.Format("{0}/{1} 變更: {2}", count[0], count[3], "KMS內容");
+                        count[0]++;
+                        continue;
+                    }
+                    if (godChangseopNode.Contains(diff))
+                    {
+                        StateInfo = string.Format("{0}/{1} 変更: {2}", count[0], count[3], "神昌燮的重複節點");
                         count[0]++;
                         continue;
                     }
@@ -3683,6 +3693,7 @@ namespace WzComparerR2.Comparer
                 return false;
             string[] nodePath = node.FullPathToFile.Split('\\');
             string imgStr = nodePath.LastOrDefault(part => part.EndsWith(".img"));
+            if (string.IsNullOrEmpty(imgStr)) return false;
             return imgStr.EndsWith("_.img");
         }
         private bool isKMSSkillID(int skillID)

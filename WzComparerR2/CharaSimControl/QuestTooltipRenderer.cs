@@ -529,8 +529,16 @@ namespace WzComparerR2.CharaSimControl
                         return $"#$p{sr?.Name ?? id.ToString()}#";
 
                     case "o":
-                        StringLinker.StringMob.TryGetValue(id, out sr);
-                        return $"#$o{sr?.Name ?? id.ToString()}#";
+                        if (id >= 100000000)
+                        {
+                            StringLinker.StringMap.TryGetValue(id, out sr);
+                            return $"#$m{sr?.MapName ?? id.ToString()}#";
+                        }
+                        else
+                        {
+                            StringLinker.StringMob.TryGetValue(id, out sr);
+                            return $"#$o{sr?.Name ?? id.ToString()}#";
+                        }
 
                     case "m":
                         StringLinker.StringMap.TryGetValue(id, out sr);
