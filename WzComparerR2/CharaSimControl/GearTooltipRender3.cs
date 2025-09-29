@@ -2383,6 +2383,14 @@ namespace WzComparerR2.CharaSimControl
             {
                 categories.Add("飾品");
             }
+            else if (Gear.IsMechanicGear(Gear.type))
+            {
+                categories.Add("機甲戰神裝備");
+            }
+            else if (Gear.IsDragonGear(Gear.type))
+            {
+                categories.Add("龍使者裝備");
+            }
 
             var text = ItemStringHelper.GetGearTypeString(Gear.type);
             if (!string.IsNullOrEmpty(text))

@@ -634,11 +634,11 @@ namespace WzComparerR2.CharaSim
                 case GearType.dragonTail: return "龍使者尾巴";
                 case GearType.glove: return "手套";
                 case GearType.longcoat: return "套服";
-                case GearType.machineEngine: return "機甲戰神引擎";
-                case GearType.machineArms: return "機甲戰神手臂";
-                case GearType.machineLegs: return "機甲戰神腿部";
-                case GearType.machineBody: return "機甲戰神身軀";
-                case GearType.machineTransistors: return "機甲戰神晶體管";
+                case GearType.machineEngine: return "引擎";
+                case GearType.machineArms: return "手臂";
+                case GearType.machineLegs: return "腿部";
+                case GearType.machineBody: return "身軀";
+                case GearType.machineTransistors: return "晶體管";
                 case GearType.pants: return "褲/裙";
                 case GearType.ring: return "戒指";
                 case GearType.shield: return "盾牌";
