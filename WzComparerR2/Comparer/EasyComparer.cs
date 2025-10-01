@@ -561,7 +561,7 @@ namespace WzComparerR2.Comparer
                     string.Join("<br/>", fileOld.SelectMany(wzf => GetFileInfo(wzf, ewzf => ewzf.Header.FileSize.ToString("N0")))),
                     string.Join("<br/>", fileOld.Select(wzf => wzf.GetMergedVersion()))
                     );
-                sw.WriteLine("<tr><td>現在時間</td><td colspan='3'>{0:M-d-yyyy HH:mm:ss.fff}</td></tr>", DateTime.Now);
+                sw.WriteLine("<tr><td>現在時間</td><td colspan='3'>{0:yyyy年 M月 d日 HH:mm:ss.fff}</td></tr>", DateTime.Now);
                 sw.WriteLine("<tr><td>選項</td><td colspan='3'>{0}</td></tr>", string.Join("<br/>", new[] {
                     this.OutputPng ? "- 輸出PNG和音訊" : null,
                     this.OutputAddedImg ? "- 新增的檔案" : null,
@@ -1827,6 +1827,7 @@ namespace WzComparerR2.Comparer
                 mapRenderNewOld[i].ShowMiniMapMob = true;
                 mapRenderNewOld[i].ShowMiniMapNpc = true;
                 mapRenderNewOld[i].ShowMiniMapPortal = true;
+                mapRenderNewOld[i].ShowBgmName = true;
                 mapRenderNewOld[i].ShowMobNpcObjectID = this.ShowObjectID;
             }
 
