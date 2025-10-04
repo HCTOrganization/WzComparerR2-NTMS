@@ -29,7 +29,6 @@ namespace WzComparerR2.Config
             this.OpenAISystemMessage = "";
             this.LMTemperature = 0.7;
             this.MaximumToken = -1;
-            this.IgnoreArticles = true;
         }
 
         /// <summary>
