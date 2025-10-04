@@ -29,6 +29,7 @@ namespace WzComparerR2.Config
             this.OpenAISystemMessage = "";
             this.LMTemperature = 0.7;
             this.MaximumToken = -1;
+            this.IgnoreArticles = true;
         }
 
         /// <summary>
@@ -327,6 +328,13 @@ namespace WzComparerR2.Config
         public PatcherSettingCollection PatcherSettings
         {
             get { return (PatcherSettingCollection)this["patcherSettings"]; }
+        }
+
+        [ConfigurationProperty("ignoreArticles")]
+        public ConfigItem<bool> IgnoreArticles
+        {
+            get { return (ConfigItem<bool>)this["ignoreArticles"]; }
+            set { this["ignoreArticles"] = value; }
         }
     }
 }

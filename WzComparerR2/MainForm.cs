@@ -236,7 +236,7 @@ namespace WzComparerR2
             labelItemAutoSaveFolder.Text = ImageHandlerConfig.Default.AutoSavePictureFolder;
             buttonItemAutoSave.Checked = ImageHandlerConfig.Default.AutoSaveEnabled;
             comboBoxItemLanguage.SelectedIndex = Clamp(CharaSimConfig.Default.SelectedFontIndex, 0, comboBoxItemLanguage.Items.Count);
-
+            buttonItemIgnoreArticles.Checked = WcR2Config.Default.IgnoreArticles;
 
             //更新界面颜色
             styleManager1.ManagerStyle = WcR2Config.Default.MainStyle;
@@ -3021,7 +3021,7 @@ namespace WzComparerR2
             try
             {
                 listViewExString.Items.Clear();
-                IEnumerable<KeyValuePair<int, StringResult>> results = searchStringLinker(dicts, textBoxItemSearchString.Text, checkBoxItemExact2.Checked, checkBoxItemRegex2.Checked);
+                IEnumerable<KeyValuePair<int, StringResult>> results = searchStringLinker(dicts, textBoxItemSearchString.Text, checkBoxItemExact2.Checked, checkBoxItemRegex2.Checked, buttonItemIgnoreArticles.Checked);
                 foreach (KeyValuePair<int, StringResult> kv in results)
                 {
                     string[] item = new string[] { kv.Key.ToString(), kv.Value.Name, kv.Value.Desc, kv.Value.FullPath };
@@ -3113,16 +3113,35 @@ namespace WzComparerR2
             return null;
         }
 
-        private IEnumerable<KeyValuePair<int, StringResult>> searchStringLinker(IEnumerable<Dictionary<int, StringResult>> dicts, string key, bool exact, bool isRegex)
+        private IEnumerable<KeyValuePair<int, StringResult>> searchStringLinker(IEnumerable<Dictionary<int, StringResult>> dicts, string key, bool exact, bool isRegex, bool ignoreArticles)
         {
             string fullWidthKey = Translator.FullWidthKatakana(key); 
-            string[] match = (key + " " + fullWidthKey).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] match = (key).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] match2 = (fullWidthKey).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] articles = { "a", "an", "the" };
+            if (ignoreArticles)
+            {
+                match = match.Where(word => !articles.Contains(word.ToLower())).ToArray();
+                match2 = match2.Where(word => !articles.Contains(word.ToLower())).ToArray();
+            }
             Regex re = null;
             Regex fullWidthRe = null;
             if (isRegex)
             {
-                re = new Regex(key, RegexOptions.IgnoreCase);
-                fullWidthRe = new Regex(fullWidthKey, RegexOptions.IgnoreCase);
+                if (ignoreArticles)
+                {
+                    string pattern = string.Join(@"\s+(?:a|an|the)?\s*", match.Select(Regex.Escape));
+                    string fullWidthPattern = string.Join(@"\s+(?:a|an|the)?\s*", match2.Select(Regex.Escape));
+                    pattern = $@"\b{pattern}\b";
+                    fullWidthPattern = $@"\b{fullWidthPattern}\b";
+                    re = new Regex(pattern, RegexOptions.IgnoreCase);
+                    fullWidthRe = new Regex(fullWidthPattern, RegexOptions.IgnoreCase);
+                }
+                else
+                {
+                    re = new Regex(key, RegexOptions.IgnoreCase);
+                    fullWidthRe = new Regex(fullWidthKey, RegexOptions.IgnoreCase);
+                }
             }
 
             foreach (Dictionary<int, StringResult> dict in dicts)
@@ -3145,7 +3164,7 @@ namespace WzComparerR2
                     {
                         string id = kv.Key.ToString();
                         bool r = true;
-                        foreach (string str in match)
+                        foreach (string str in (match.Concat(match2).ToArray()))
                         {
                             if (!(id.Contains(str) || (!string.IsNullOrEmpty(kv.Value.Name) && kv.Value.Name.Contains(str)) || (!string.IsNullOrEmpty(kv.Value.Name) && Translator.FullWidthKatakana(kv.Value.Name).Contains(str))))
                             {
@@ -3199,6 +3218,13 @@ namespace WzComparerR2
         {
             stringLinker.Clear();
             labelItemStatus.Text = "字串表連結已被重置。";
+        }
+
+        private void buttonItemIgnoreArticles_Click(object sender, EventArgs e)
+        {
+            ConfigManager.Reload();
+            WcR2Config.Default.IgnoreArticles = buttonItemIgnoreArticles.Checked;
+            ConfigManager.Save();
         }
 
         private void buttonItemPatcher_Click(object sender, EventArgs e)
