@@ -935,6 +935,37 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+        public static Dictionary<string, string> loadDict(string jsonFilePath)
+        {
+            var result = new Dictionary<string, string>();
+            if (File.Exists(jsonFilePath))
+            {
+                try
+                {
+                    JObject jsonObj = JObject.Parse(File.ReadAllText(jsonFilePath));
+                    foreach (var pair in jsonObj)
+                    {
+                        result[pair.Key] = pair.Value.ToString();
+                    }
+                }
+                catch
+                {
+                    return result;
+                }
+            }
+            return result;
+        }
+
+        public static void saveDict(string jsonFilePath, Dictionary<string, string> dict)
+        {
+            JObject jsonObj = new JObject();
+            foreach (var pair in dict)
+            {
+                jsonObj[pair.Key] = pair.Value;
+            }
+            File.WriteAllText(jsonFilePath, jsonObj.ToString());
+        }
+
         public class SkillRecord
         {
             public int ID { get; set; }
