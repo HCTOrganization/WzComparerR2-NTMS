@@ -2073,6 +2073,11 @@ namespace WzComparerR2.Avatar.UI
 
         private void btnCustomPreset_Click(object sender, EventArgs e)
         {
+            if (PluginManager.FindWz(Wz_Type.Base) == null)
+            {
+                ToastNotification.Show(this, $"エラー: Base.wz ファイルを開けませんでした。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                return;
+            }
             string avatarPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images");
             if (LoadAvatarForm.Instance == null)
             {

@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Windows.Forms;
+using WzComparerR2.CharaSim;
 using WzComparerR2.PluginBase;
 using WzComparerR2.WzLib;
-using WzComparerR2.CharaSim;
 namespace WzComparerR2.Avatar.UI
 {
     public partial class LoadAvatarForm : DevComponents.DotNetBar.Office2007Form
@@ -89,6 +90,16 @@ namespace WzComparerR2.Avatar.UI
 
             for (int index = 0; index < _files.Count; index++)
             {
+                if (!File.Exists(_files[index]))
+                {
+                    string originalCode = AvatarForm.Instance.GetAllPartsTag();
+                    string md5 = Path.GetFileName(_files[index]).Replace(".png", "");
+                    string pendingCode = presetDict[md5];
+                    AvatarForm.Instance.LoadCode(pendingCode, 0);
+                    AvatarForm.Instance.SavePreset(pendingCode, md5);
+                    AvatarForm.Instance.LoadCode(originalCode, 0);
+                }
+
                 Image image = Image.FromFile(_files[index]);
                 LoadAvatarForm.ImageList.Add(image);
                 LoadAvatarForm.Instance.dataGridViewX1.Rows[rowIndex].Cells[columnIndex].Value = image;
@@ -112,6 +123,11 @@ namespace WzComparerR2.Avatar.UI
             string[] files = Directory.GetFiles(avatarPath);
             foreach (string file in files)
             {
+                if (!file.Contains(","))
+                {
+                    File.Delete(file);
+                    continue;
+                }
                 string avatarCode = Path.GetFileName(file).Replace(".png", "").Replace("×", "*");
                 string newFileName = GenerateMD5(avatarCode);
                 string newFilePath = Path.Combine(avatarPath, newFileName + ".png");
