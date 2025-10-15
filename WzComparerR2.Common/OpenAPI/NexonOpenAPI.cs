@@ -162,7 +162,7 @@ namespace WzComparerR2.OpenAPI
                     serviceBackend = "https://tw-event.beanfun.com/MapleStory/api/UnionWebRank/GetRank";
                     break;
                 case "MSN":
-                    serviceBackend = "https://msu.io/maplestoryn/api/gateway/msn/ranking/by-name?characterName=" + Uri.EscapeDataString(characterName);
+                    serviceBackend = "https://msu.io/maplestoryn/api/msn/ranking/by-name?characterName=" + Uri.EscapeDataString(characterName);
                     break;
             }
             try
