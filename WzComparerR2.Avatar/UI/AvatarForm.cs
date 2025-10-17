@@ -2470,7 +2470,7 @@ namespace WzComparerR2.Avatar.UI
                             }
                             else
                             {
-                                if (Regex.IsMatch(avatarCode, @"^[0-9A-Fa-f]*$"))
+                                if (Regex.IsMatch(avatarCode.Replace("0x", ""), @"^[0-9A-Fa-f]*$"))
                                 {
                                     await Type4(avatarCode);
                                 }
