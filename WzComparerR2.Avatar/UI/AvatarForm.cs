@@ -2075,7 +2075,7 @@ namespace WzComparerR2.Avatar.UI
         {
             if (PluginManager.FindWz(Wz_Type.Base) == null)
             {
-                ToastNotification.Show(this, $"エラー: Base.wz ファイルを開けませんでした。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                ToastNotification.Show(this, $"錯誤: 未開啟 Base.wz。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
                 return;
             }
             string avatarPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images");
@@ -2378,6 +2378,26 @@ namespace WzComparerR2.Avatar.UI
                             ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
                         }
                         break;
+                    case 3: // CMS
+                        this.API = new NexonOpenAPI("-", "KMS");
+                        try
+                        {
+                            ToastNotification.Show(this, $"在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
+                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "CMS");
+                            if (string.IsNullOrEmpty(avatarCode))
+                            {
+                                ToastNotification.Show(this, $"找不到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            }
+                            else
+                            {
+                                await Type3(avatarCode);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
+                        }
+                        break;
                     case 4: // GMS-NA
                         this.API = new NexonOpenAPI("-", "KMS");
                         try
@@ -2450,7 +2470,14 @@ namespace WzComparerR2.Avatar.UI
                             }
                             else
                             {
-                                await Type4(avatarCode);
+                                if (Regex.IsMatch(avatarCode, @"^[0-9A-Fa-f]*$"))
+                                {
+                                    await Type4(avatarCode);
+                                }
+                                else
+                                {
+                                    await Type3(avatarCode);
+                                }
                             }
                         }
                         catch (Exception ex)

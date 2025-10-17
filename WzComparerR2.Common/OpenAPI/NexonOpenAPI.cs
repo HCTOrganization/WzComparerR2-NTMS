@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -136,6 +138,7 @@ namespace WzComparerR2.OpenAPI
         public async Task<string> GetAvatarCode(string characterName, string region)
         {
             string serviceBackend = "";
+            string secondaryServiceBackend = "https://api.hikaricalyx.com/WcR2-NTMS/v1/GetAvatar";
             string avatarCode = "";
             string jmsBaseUrl = "https://maplestory.nexon.co.jp";
             string b64CharName = Uri.EscapeDataString(Convert.ToBase64String(Encoding.UTF8.GetBytes(characterName)));
@@ -143,6 +146,8 @@ namespace WzComparerR2.OpenAPI
             {
                 default:
                     return avatarCode;
+                case "CMS":
+                    break;
                 case "KMS":
                     serviceBackend = "https://maple.dakgg.io/api/v1/bypass/characters/" + Uri.EscapeDataString(characterName); // Used Maple GG API
                     break;
@@ -278,15 +283,57 @@ namespace WzComparerR2.OpenAPI
                         var json = await response.Content.ReadAsStringAsync();
                         using JsonDocument doc = JsonDocument.Parse(json);
                         JsonElement root = doc.RootElement;
-                        if (root.TryGetProperty("Data", out JsonElement dataElement) &&
-                            dataElement.TryGetProperty("CharacterLookCipherText", out JsonElement characterLookCipherText))
+                        if (root.TryGetProperty("Data", out JsonElement dataElement))
                         {
-                            avatarCode = characterLookCipherText.GetString();
+                            try
+                            {
+                                dataElement.TryGetProperty("CharacterLookCipherText", out JsonElement characterLookCipherText);
+                                avatarCode = characterLookCipherText.GetString();
+                            }
+                            catch
+                            {
+                                avatarCode = "";
+                            }
                         }
                     }
                     else
                     {
                         avatarCode = "";
+                    }
+                    if (string.IsNullOrEmpty(avatarCode))
+                    {
+                        string client_checksum = ChecksumCalculation();
+                        client.DefaultRequestHeaders.Add("Checksum", client_checksum);
+                        string jsonPayload2 = $"{{\"ign\":\"{characterName}\",\"region\":\"TerryMS_Island\"}}";
+                        var content2 = new StringContent(jsonPayload2, Encoding.UTF8, "application/json");
+                        var response2 = await client.PostAsync(secondaryServiceBackend, content2);
+                        if (response2.IsSuccessStatusCode)
+                        {
+                            var json2 = await response2.Content.ReadAsStringAsync();
+                            using JsonDocument doc2 = JsonDocument.Parse(json2);
+                            JsonElement root2 = doc2.RootElement;
+                            if (root2.TryGetProperty("status", out JsonElement resultStatus))
+                            {
+                                switch (resultStatus.GetString())
+                                {
+                                    case "Ok":
+                                        if (root2.TryGetProperty("avatarCode", out JsonElement avatarCodeElement2))
+                                        {
+                                            avatarCode = avatarCodeElement2.GetString();
+                                        }
+                                        break;
+                                    case "Fail":
+                                        if (root2.TryGetProperty("reason_nt", out JsonElement messageElement))
+                                        {
+                                            System.Windows.Forms.Clipboard.SetText(client_checksum);
+                                            throw new Exception(messageElement.GetString());
+                                        }
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
                     }
                 }
                 else if (region == "MSN")
@@ -301,6 +348,43 @@ namespace WzComparerR2.OpenAPI
                         rankingData.TryGetProperty("imageUrl", out JsonElement imageUrl))
                     {
                         avatarCode = imageUrl.GetString().Replace("https://market-static.msu.io/msu/platform/charimages/transient/", "").Replace(".png", "");
+                    }
+                }
+                else if (region == "CMS")
+                {
+                    var client = new HttpClient();
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
+                    string client_checksum = ChecksumCalculation();
+                    client.DefaultRequestHeaders.Add("Checksum", client_checksum);
+                    string jsonPayload = $"{{\"ign\":\"{characterName}\",\"region\":\"TerryMS_Continent\"}}";
+                    var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(secondaryServiceBackend, content);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json = await response.Content.ReadAsStringAsync();
+                        using JsonDocument doc = JsonDocument.Parse(json);
+                        JsonElement root = doc.RootElement;
+                        if (root.TryGetProperty("status", out JsonElement resultStatus))
+                        {
+                            switch (resultStatus.GetString())
+                            {
+                                case "Ok":
+                                    if (root.TryGetProperty("avatarCode", out JsonElement avatarCodeElement2))
+                                    {
+                                        avatarCode = avatarCodeElement2.GetString();
+                                    }
+                                    break;
+                                case "Fail":
+                                    if (root.TryGetProperty("reason_nt", out JsonElement messageElement))
+                                    {
+                                        System.Windows.Forms.Clipboard.SetText(client_checksum);
+                                        throw new Exception(messageElement.GetString());
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
                     }
                 }
             }
@@ -628,6 +712,19 @@ namespace WzComparerR2.OpenAPI
             result.SetProperties();
 
             return;
+        }
+
+        private static string ChecksumCalculation()
+        {
+            string exePath = Assembly.GetExecutingAssembly().Location;
+            string sha256checksum;
+            using (FileStream stream = File.OpenRead(exePath))
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] hash = sha256.ComputeHash(stream);
+                sha256checksum = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            }
+            return sha256checksum;
         }
     }
 
