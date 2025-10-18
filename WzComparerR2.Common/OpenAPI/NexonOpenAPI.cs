@@ -13,6 +13,7 @@ using HtmlAgilityPack;
 using System.Net; 
 using KMS = MapleStory.OpenAPI.KMS;
 using MSEA = MapleStory.OpenAPI.MSEA;
+using TMS = MapleStory.OpenAPI.TMS;
 using MapleStory.OpenAPI.Common;
 using System.Net.Http;
 using System.Linq;
@@ -47,6 +48,14 @@ namespace WzComparerR2.OpenAPI
                     }
                     break;
 
+                case "TMS":
+                    this.region = 2;
+                    if (API_TMS == null)
+                    {
+                        API_TMS = new TMS.MapleStoryAPI(apiKey);
+                    }
+                    break;
+
                 default:
                     break;
             }
@@ -56,6 +65,7 @@ namespace WzComparerR2.OpenAPI
         private int region;
         private KMS.MapleStoryAPI API_KMS;
         private MSEA.MapleStoryAPI API_MSEA;
+        private TMS.MapleStoryAPI API_TMS;
 
         public bool CheckSameAPIKey(string apiKey)
         {
@@ -70,6 +80,8 @@ namespace WzComparerR2.OpenAPI
                     return this.region == 0;
                 case "MSEA":
                     return this.region == 1;
+                case "TMS":
+                    return this.region == 2;
                 default:
                     return false;
             }
@@ -88,6 +100,10 @@ namespace WzComparerR2.OpenAPI
 
                     case 1:
                         character = await API_MSEA.GetCharacter(characterName);
+                        return character.OCID;
+
+                    case 2:
+                        character = await API_TMS.GetCharacter(characterName);
                         return character.OCID;
 
                     default:
@@ -410,6 +426,10 @@ namespace WzComparerR2.OpenAPI
                     case 1:
                         basic = await API_MSEA.GetCharacterBasic(ocid);
                         break;
+
+                    case 2:
+                        basic = await API_TMS.GetCharacterBasic(ocid);
+                        break;
                 }
                 var m = Regex.Match(basic.CharacterImage, @"look/([A-Z]+)$");
                 if (m.Success)
@@ -535,6 +555,10 @@ namespace WzComparerR2.OpenAPI
                     case 1:
                         item = await API_MSEA.GetCharacterItemEquipment(ocid);
                         break;
+
+                    case 2:
+                        item = await API_TMS.GetCharacterItemEquipment(ocid);
+                        break;
                 }
                 result.Preset = item.PresetNo ?? 0;
 
@@ -575,6 +599,10 @@ namespace WzComparerR2.OpenAPI
 
                     case 1:
                         item = await API_MSEA.GetCharacterCashItemEquipment(ocid);
+                        break;
+
+                    case 2:
+                        item = await API_TMS.GetCharacterCashItemEquipment(ocid);
                         break;
                 }
                 result.CashPreset = item.PresetNo ?? 0;
@@ -623,6 +651,10 @@ namespace WzComparerR2.OpenAPI
 
                     case 1:
                         item = await API_MSEA.GetCharacterBeautyEquipment(ocid);
+                        break;
+
+                    case 2:
+                        item = await API_TMS.GetCharacterBeautyEquipment(ocid);
                         break;
                 }
                 result.Gender = item.CharacterGender == "남" ? 0 : 1;
@@ -680,6 +712,9 @@ namespace WzComparerR2.OpenAPI
                         break;
                     case 1:
                         basic = await API_MSEA.GetCharacterBasic(ocid);
+                        break;
+                    case 2:
+                        basic = await API_TMS.GetCharacterBasic(ocid);
                         break;
                 }
                 var m = Regex.Match(basic.CharacterImage, @"look/([A-Z]+)$");
