@@ -491,7 +491,12 @@ namespace WzComparerR2.CharaSimControl
             {
                 foreach (string action in Skill.Action)
                 {
-                    skillDescEx.Add("#c[技能延遲] " + action + ": " + CharaSimLoader.GetActionDelay(action, this.wzNode) + " ms#");
+                    string colortag = "";
+                    if (doHighlight && DiffSkillTags[Skill.SkillID.ToString()].Contains(action))
+                    {
+                        colortag = "#$g";
+                    }
+                    skillDescEx.Add("#c[技能延遲] " + colortag + action + ": " + CharaSimLoader.GetActionDelay(action) + " ms#");
                 }
             }
 

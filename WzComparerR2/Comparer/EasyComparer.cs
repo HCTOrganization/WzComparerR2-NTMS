@@ -28,15 +28,15 @@ namespace WzComparerR2.Comparer
         private Wz_File[] ItemWzNewOld { get; set; } = new Wz_File[2];
         private Wz_File[] EtcWzNewOld { get; set; } = new Wz_File[2];
         private Wz_File[] QuestWzNewOld { get; set; } = new Wz_File[2];
-        private List<string> OutputSkillTooltipIDs { get; set; } = new List<string>();
-        private List<string> OutputCashTooltipIDs { get; set; } = new List<string>();
-        private List<string> OutputGearTooltipIDs { get; set; } = new List<string>();
-        private List<string> OutputItemTooltipIDs { get; set; } = new List<string>();
-        private List<string> OutputMapTooltipIDs { get; set; } = new List<string>();
-        private List<string> OutputMobTooltipIDs { get; set; } = new List<string>();
-        private List<string> OutputNpcTooltipIDs { get; set; } = new List<string>();
-        private List<string> OutputQuestTooltipIDs { get; set; } = new List<string>();
-        private List<string> OutputAchvTooltipIDs { get; set; } = new List<string>();
+        private HashSet<string> OutputSkillTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputCashTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputGearTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputItemTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputMapTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputMobTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputNpcTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputQuestTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputAchvTooltipIDs { get; set; } = new HashSet<string>();
         private Dictionary<string, List<string>> DiffCashTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffGearTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffItemTags { get; set; } = new Dictionary<string, List<string>>();
@@ -51,6 +51,7 @@ namespace WzComparerR2.Comparer
         private Dictionary<int, List<int>> FifthJobSkillToJobID { get; set; } = new Dictionary<int, List<int>>();
         public Dictionary<string, string> FailToExportNodes { get; private set; } = new Dictionary<string, string>();
         public Dictionary<string, string> FailToExportTooltips { get; private set; } = new Dictionary<string, string>();
+        private Dictionary<string, HashSet<int>> ChangedActions { get; set; } = new Dictionary<string, HashSet<int>>();
         public WzFileComparer Comparer { get; protected set; }
         private string stateInfo;
         private string stateDetail;
@@ -306,7 +307,10 @@ namespace WzComparerR2.Comparer
                     sw.WriteLine("<tr><th>檔案名</th><th>新版本的大小</th><th>舊版本的大小</th><th>變更</th><th>新增</th><th>刪除</th></tr>");
                     foreach (var wzType in wzTypeList)
                     {
-                        if (!selectedNodes[wzType.ToString()]) continue;
+                        if (!selectedNodes[wzType.ToString()])
+                        {
+                            if (!(wzType is Wz_Type.Character && OutputSkillTooltip)) continue;
+                        }
                         var vNodeNew = dictNew[wzType];
                         var vNodeOld = dictOld[wzType];
                         var cmp = comparer.Compare(vNodeNew, vNodeOld);
@@ -369,7 +373,10 @@ namespace WzComparerR2.Comparer
 
             foreach (var wzType in wzTypeList)
             {
-                if (!selectedNodes[wzType.ToString()]) continue;
+                if (!selectedNodes[wzType.ToString()])
+                {
+                    if (!(wzType is Wz_Type.Character && OutputSkillTooltip)) continue;
+                }
                 var vNodeNew = dictNew[wzType];
                 var vNodeOld = dictOld[wzType];
                 var cmp = comparer.Compare(vNodeNew, vNodeOld);
@@ -583,6 +590,11 @@ namespace WzComparerR2.Comparer
                 string[] diffStr = { "變更", "新增", "刪除" };
                 foreach (CompareDifference diff in diffLst)
                 {
+                    if (!selectedNodes["Character"] && OutputSkillTooltip)
+                    {
+                        if (!(diff.NodeNew != null && diff.NodeNew.FullPathToFile.StartsWith("Character\\00002000.img")) && (diff.NodeNew != null && diff.NodeNew.FullPathToFile.StartsWith("Character"))) continue;
+                        if (!(diff.NodeOld != null && diff.NodeOld.FullPathToFile.StartsWith("Character\\00002000.img")) && (diff.NodeOld != null && diff.NodeOld.FullPathToFile.StartsWith("Character"))) continue;
+                    }
                     int idx = -1;
                     string detail = null;
                     switch (diff.DifferenceType)
@@ -670,6 +682,11 @@ namespace WzComparerR2.Comparer
 
                 foreach (CompareDifference diff in diffLst)
                 {
+                    if (!selectedNodes["Character"] && OutputSkillTooltip)
+                    {
+                        if (!(diff.NodeNew != null && diff.NodeNew.FullPathToFile.StartsWith("Character\\00002000.img")) && (diff.NodeNew != null && diff.NodeNew.FullPathToFile.StartsWith("Character"))) continue;
+                        if (!(diff.NodeOld != null && diff.NodeOld.FullPathToFile.StartsWith("Character\\00002000.img")) && (diff.NodeOld != null && diff.NodeOld.FullPathToFile.StartsWith("Character"))) continue;
+                    }
                     if (kmsContent.Contains(diff))
                     {
                         StateInfo = string.Format("{0}/{1} 變更: {2}", count[0], count[3], "KMS內容");
@@ -849,9 +866,63 @@ namespace WzComparerR2.Comparer
             }
         }
 
-        // 變更された技能ツールチップ出力
+        // 변경된 스킬 툴팁 출력
+        private void UpdateActionChanges()
+        {
+            if (ChangedActions.Count <= 0) return;
+
+            StateInfo = $"正在整理{ChangedActions.Count}個技能延遲變更點...";
+            StateDetail = "Skill 對比中...";
+
+            for (int i = 0; i < 2; i++) // 0: New, 1: Old
+            {
+                var skill_wz = PluginManager.FindWz(Wz_Type.Skill, WzFileNewOld[i]);
+                foreach (var skill_img in skill_wz?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+                {
+                    if (!Regex.Match(skill_img.Text, @"^\d+[.]img$").Success) continue;
+
+                    var skill_node = skill_img.FindNodeByPath("skill", true);
+                    foreach (var skill in skill_node?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+                    {
+                        if (!int.TryParse(skill.Text, out int skill_id)) continue;
+
+                        var action_node = skill.FindNodeByPath("action");
+                        foreach (var action in action_node?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+                        {
+                            var action_str = action.GetValueEx<string>(null);
+                            if (ChangedActions.ContainsKey(action_str))
+                            {
+                                ChangedActions[action_str].Add(skill_id);
+                            }
+                        }
+                    }
+                }
+            }
+            foreach (var kv in ChangedActions)
+            {
+                var action = kv.Key;
+                var ids = kv.Value;
+                foreach (var id in ids)
+                {
+                    if (!OutputSkillTooltipIDs.Contains(id.ToString()))
+                    {
+                        OutputSkillTooltipIDs.Add(id.ToString());
+                        DiffSkillTags[id.ToString()] = new List<string>();
+                    }
+
+                    if (!DiffSkillTags[id.ToString()].Contains(action))
+                    {
+                        DiffSkillTags[id.ToString()].Add(action);
+                    }
+                }
+            }
+            ChangedActions.Clear();
+        }
+
+        // 変更されたスキルツールチップ出力
         private void SaveSkillTooltip(string skillTooltipPath)
         {
+            UpdateActionChanges();
             SkillTooltipRender2[] skillRenderNewOld = new SkillTooltipRender2[2];
             int count = 0;
             int allCount = OutputSkillTooltipIDs.Count;
@@ -2635,6 +2706,25 @@ namespace WzComparerR2.Comparer
             }
         }
 
+        private void GetActionChanges(Wz_Node node, bool change)
+        {
+            if (node == null) return;
+
+            Match match = Regex.Match(node.FullPathToFile, @"^Character\\00002000.img\\([^\\]+)\\\d+\\delay");
+            if (match.Success)
+            {
+                string action = match.Groups[1].ToString();
+
+                if (!string.IsNullOrEmpty(action))
+                {
+                    if (!ChangedActions.ContainsKey(action))
+                    {
+                        ChangedActions[action] = new HashSet<int>();
+                    }
+                }
+            }
+        }
+
         //異なるCharacterノードからGearIDを取得する
         private void GetGearID(Wz_Node node)
         {
@@ -3025,10 +3115,18 @@ namespace WzComparerR2.Comparer
                 count[idx]++;
 
                 // 변경된 스킬 툴팁 출력
-                if (OutputSkillTooltip && (outputDir.Contains("Skill") || outputDir.Contains("String")))
+                if (OutputSkillTooltip)
                 {
-                    GetSkillID(diff.NodeNew, idx == 0 ? true : false);
-                    GetSkillID(diff.NodeOld, idx == 0 ? true : false);
+                    if (imgName.StartsWith("Skill") || imgName.StartsWith("String"))
+                    {
+                        GetSkillID(diff.NodeNew, idx == 0 ? true : false);
+                        GetSkillID(diff.NodeOld, idx == 0 ? true : false);
+                    }
+                    if (imgName.StartsWith("Character\\00002000.img"))
+                    {
+                        GetActionChanges(diff.NodeNew, idx == 0 ? true : false);
+                        GetActionChanges(diff.NodeOld, idx == 0 ? true : false);
+                    }
                 }
                 // 變更的道具Tooltip处理
                 if (OutputItemTooltip && (outputDir.Contains("Item") || outputDir.Contains("String")))
@@ -3123,9 +3221,16 @@ namespace WzComparerR2.Comparer
                     sw.WriteLine("</tr>");
 
                     // 변경된 스킬 툴팁 출력
-                    if (OutputSkillTooltip && (outputDir.Contains("Skill") || outputDir.Contains("String")))
+                    if (OutputSkillTooltip)
                     {
-                        GetSkillID(node, idx == 0 ? true : false);
+                        if (imgName.StartsWith("Skill") || imgName.StartsWith("String"))
+                        {
+                            GetSkillID(node, idx == 0 ? true : false);
+                        }
+                        if (imgName.StartsWith("Character\\00002000.img"))
+                        {
+                            GetActionChanges(node, idx == 0 ? true : false);
+                        }
                     }
                     if (OutputItemTooltip && outputDir.Contains("Item"))
                     {
