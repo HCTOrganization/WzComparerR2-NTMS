@@ -106,6 +106,11 @@ namespace WzComparerR2.Avatar.UI
             this.btnNezukoKamado = new DevComponents.DotNetBar.ButtonItem();
             this.btnZenitsuAgatsuma = new DevComponents.DotNetBar.ButtonItem();
             this.btnInosukeHashibira = new DevComponents.DotNetBar.ButtonItem();
+            this.btnFrieren = new DevComponents.DotNetBar.ButtonItem();
+            this.btnFern = new DevComponents.DotNetBar.ButtonItem();
+            this.btnStark = new DevComponents.DotNetBar.ButtonItem();
+            this.btnHimmel = new DevComponents.DotNetBar.ButtonItem();
+            this.btnÜbel = new DevComponents.DotNetBar.ButtonItem();
             this.btnLaraTheSheep = new DevComponents.DotNetBar.ButtonItem();
             this.btnCustomPreset = new DevComponents.DotNetBar.ButtonItem();
             this.Separator1 = new DevComponents.DotNetBar.Separator();
@@ -801,7 +806,12 @@ namespace WzComparerR2.Avatar.UI
             this.btnTanjiroKamado,
             this.btnNezukoKamado,
             this.btnZenitsuAgatsuma,
-            this.btnInosukeHashibira});
+            this.btnInosukeHashibira,
+            this.btnFrieren,
+            this.btnFern,
+            this.btnStark,
+            this.btnHimmel,
+            this.btnÜbel});
             this.btnCharac.Tooltip = "初始化";
             // 
             // 
@@ -962,6 +972,42 @@ namespace WzComparerR2.Avatar.UI
             this.btnInosukeHashibira.Name = "btnInosukeHashibira";
             this.btnInosukeHashibira.Text = "嘴平伊之助";
             this.btnInosukeHashibira.Click += new System.EventHandler(this.btnInosukeHashibira_Click);
+            // 
+            // 
+            // btnFrieren
+            // 
+            this.btnFrieren.Name = "btnFrieren";
+            this.btnFrieren.Text = "芙莉蓮";
+            this.btnFrieren.Click += new System.EventHandler(this.btnFrieren_Click);
+            // 
+            // 
+            // btnFern
+            // 
+            this.btnFern.Name = "btnFern";
+            this.btnFern.Text = "費倫";
+            this.btnFern.Click += new System.EventHandler(this.btnFern_Click);
+            // 
+            // 
+            // btnStark
+            // 
+            this.btnStark.Name = "btnStark";
+            this.btnStark.Text = "修塔爾克";
+            this.btnStark.Click += new System.EventHandler(this.btnStark_Click);
+            // 
+            // 
+            // btnHimmel
+            // 
+            this.btnHimmel.Name = "btnHimmel";
+            this.btnHimmel.Text = "欣梅爾";
+            this.btnHimmel.Click += new System.EventHandler(this.btnHimmel_Click);
+            // 
+            // 
+            // btnÜbel
+            // 
+            this.btnÜbel.Name = "btnÜbel";
+            this.btnÜbel.Text = "尤蓓爾";
+            this.btnÜbel.Click += new System.EventHandler(this.btnÜbel_Click);
+            //
             // btnAPI
             // 
             this.btnAPI.Name = "btnAPI";
@@ -1191,6 +1237,11 @@ namespace WzComparerR2.Avatar.UI
         private DevComponents.DotNetBar.ButtonItem btnNezukoKamado;
         private DevComponents.DotNetBar.ButtonItem btnZenitsuAgatsuma;
         private DevComponents.DotNetBar.ButtonItem btnInosukeHashibira;
+        private DevComponents.DotNetBar.ButtonItem btnFrieren;
+        private DevComponents.DotNetBar.ButtonItem btnFern;
+        private DevComponents.DotNetBar.ButtonItem btnStark;
+        private DevComponents.DotNetBar.ButtonItem btnHimmel;
+        private DevComponents.DotNetBar.ButtonItem btnÜbel;
         private DevComponents.DotNetBar.ButtonItem btnLaraTheSheep;
         private DevComponents.DotNetBar.ButtonItem btnCustomPreset;
         private DevComponents.DotNetBar.ButtonItem btnAPI;
