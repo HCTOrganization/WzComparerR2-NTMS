@@ -2258,7 +2258,7 @@ namespace WzComparerR2.Avatar.UI
             switch (MessageBoxEx.Show("要呼出作者的菈菈紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
             {
                 case DialogResult.Yes:
-                    LoadCode("2000,12000,51484,61183,1003968,1052667,1072867,1082552,1703113", 0);
+                    LoadCode("2000,12000,51484,61183,1003968,1052667,1072867,1082552,1113329,1703113", 0);
                     return;
 
                 case DialogResult.No:
