@@ -53,7 +53,7 @@
             this.clbJobName.FormattingEnabled = true;
             this.clbJobName.Location = new System.Drawing.Point(10, 30);
             this.clbJobName.Name = "clbJobName";
-            this.clbJobName.Font = new System.Drawing.Font("MS Gothic", 12F);
+            this.clbJobName.Font = new System.Drawing.Font("SimSun", 12F);
             this.clbJobName.Size = new System.Drawing.Size(430, 522);
             this.clbJobName.TabIndex = 1;
             // 
