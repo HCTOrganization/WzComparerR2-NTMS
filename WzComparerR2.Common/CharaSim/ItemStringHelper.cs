@@ -1233,7 +1233,7 @@ namespace WzComparerR2.CharaSim
                 case 1110: return "聖魂劍士(2轉)";
                 case 1111: return "聖魂劍士(3轉)";
                 case 1112: return "聖魂劍士(4轉)";
-                case 1114: return "聖魂劍士((6轉)";
+                case 1114: return "聖魂劍士(6轉)";
                 case 1200: return "烈焰巫師(1轉)";
                 case 1210: return "烈焰巫師(2轉)";
                 case 1211: return "烈焰巫師(3轉)";
