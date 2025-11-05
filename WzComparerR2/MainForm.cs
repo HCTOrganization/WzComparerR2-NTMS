@@ -5016,6 +5016,7 @@ namespace WzComparerR2
                 ToastNotification.Show(this, $"錯誤：使用此功能前僅可開啟一個 Base.wz。", null, 4000, eToastGlowColor.Red, eToastPosition.TopCenter);
                 return;
             }
+            
             using (FrmSkillTooltipExport frm = new FrmSkillTooltipExport())
             {
                 frm.skillNode = PluginManager.FindWz(Wz_Type.Skill);
@@ -5024,151 +5025,159 @@ namespace WzComparerR2
                     var Setting = CharaSimConfig.Default;
                     List<int> selectedJob = frm.SelectedJobCodes;
                     string exportedFolder = frm.ExportFolderPath;
-                    FrmWaiting WaitingForm = new FrmWaiting();
-                    WaitingForm.UpdateMessage("匯出中");
-                    WaitingForm.Show(this);
-                    await Task.Run(() =>
+                    labelX2.Text = "匯出中";
+                    System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+                    try
                     {
-                        if (!this.stringLinker.HasValues)
-                            this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
-
-                        // Initialize VCore Dictionary
-                        Dictionary<int, List<int>> FifthJobSkillToJobID = new Dictionary<int, List<int>>();
-                        Wz_Node vCoreData = PluginManager.FindWz("Etc\\VCore.img\\CoreData", PluginManager.FindWz(Wz_Type.Base).GetNodeWzFile());
-                        if (vCoreData != null)
+                        sw.Start();
+                        btnSkillTooltipExport.Enabled = false;
+                        await Task.Run(() =>
                         {
-                            foreach (Wz_Node data in vCoreData.Nodes)
+                            if (!this.stringLinker.HasValues)
+                                this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
+
+                            // Initialize VCore Dictionary
+                            Dictionary<int, List<int>> FifthJobSkillToJobID = new Dictionary<int, List<int>>();
+                            Wz_Node vCoreData = PluginManager.FindWz("Etc\\VCore.img\\CoreData", PluginManager.FindWz(Wz_Type.Base).GetNodeWzFile());
+                            if (vCoreData != null)
                             {
-                                Wz_Node connectSkill = data.FindNodeByPath("connectSkill").ResolveUol();
-                                Wz_Node jobIDValue = data.FindNodeByPath("job").ResolveUol();
-                                List<int> applicableJobID = new List<int>();
-                                foreach (Wz_Node jobID in jobIDValue.Nodes)
+                                foreach (Wz_Node data in vCoreData.Nodes)
                                 {
-                                    applicableJobID.Add(jobID.GetValueEx<int>(0));
-                                }
-                                if (connectSkill == null)
-                                {
-                                    int skillIDValue = data.FindNodeByPath("spCoreOption\\effect\\skill_id").ResolveUol().GetValueEx<int>(0);
-                                    if (!FifthJobSkillToJobID.ContainsKey(skillIDValue)) FifthJobSkillToJobID.Add(skillIDValue, [0]);
-                                }
-                                else
-                                {
-                                    foreach (Wz_Node skillID in connectSkill.Nodes)
+                                    Wz_Node connectSkill = data.FindNodeByPath("connectSkill").ResolveUol();
+                                    Wz_Node jobIDValue = data.FindNodeByPath("job").ResolveUol();
+                                    List<int> applicableJobID = new List<int>();
+                                    foreach (Wz_Node jobID in jobIDValue.Nodes)
                                     {
-                                        int skillIDValue = skillID.GetValueEx<int>(0);
-                                        if (skillIDValue > 0 && !FifthJobSkillToJobID.ContainsKey(skillIDValue))
+                                        applicableJobID.Add(jobID.GetValueEx<int>(0));
+                                    }
+                                    if (connectSkill == null)
+                                    {
+                                        int skillIDValue = data.FindNodeByPath("spCoreOption\\effect\\skill_id").ResolveUol().GetValueEx<int>(0);
+                                        if (!FifthJobSkillToJobID.ContainsKey(skillIDValue)) FifthJobSkillToJobID.Add(skillIDValue, [0]);
+                                    }
+                                    else
+                                    {
+                                        foreach (Wz_Node skillID in connectSkill.Nodes)
                                         {
-                                            FifthJobSkillToJobID.Add(skillIDValue, applicableJobID);
+                                            int skillIDValue = skillID.GetValueEx<int>(0);
+                                            if (skillIDValue > 0 && !FifthJobSkillToJobID.ContainsKey(skillIDValue))
+                                            {
+                                                FifthJobSkillToJobID.Add(skillIDValue, applicableJobID);
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                        SkillTooltipRender2 tooltip = new SkillTooltipRender2();
-                        tooltip.StringLinker = this.stringLinker;
-                        tooltip.ShowObjectID = Setting.Skill.ShowID;
-                        tooltip.ShowDelay = Setting.Skill.ShowDelay;
-                        tooltip.IgnoreEvalError = Setting.Skill.IgnoreEvalError;
-                        tooltip.Enable22AniStyle = Setting.Enable22AniStyle;
-                        foreach (var i in selectedJob)
-                        {
-                            var jobImg = PluginManager.FindWz($"Skill\\{i:D3}.img\\skill", PluginManager.FindWz(Wz_Type.Base).GetNodeWzFile());
-                            if (jobImg == null)
+                            SkillTooltipRender2 tooltip = new SkillTooltipRender2();
+                            tooltip.StringLinker = this.stringLinker;
+                            tooltip.ShowObjectID = Setting.Skill.ShowID;
+                            tooltip.ShowDelay = Setting.Skill.ShowDelay;
+                            tooltip.IgnoreEvalError = Setting.Skill.IgnoreEvalError;
+                            tooltip.Enable22AniStyle = Setting.Enable22AniStyle;
+                            foreach (var i in selectedJob)
                             {
-                                continue;
-                            }
-                            foreach (var j in jobImg.Nodes)
-                            {
-                                StringResult sr;
-                                string skillName;
-                                if (tooltip.StringLinker == null || !tooltip.StringLinker.StringSkill.TryGetValue(int.Parse(j.Text), out sr))
-                                {
-                                    sr = new StringResultSkill();
-                                    sr.Name = "未知的技能";
-                                }
-                                skillName = sr.Name;
-                                WaitingForm.UpdateMessage(string.Format("{0}\r\n{1}\r\n\r\n匯出中", j.Text, skillName));
-                                Skill skill = Skill.CreateFromNode(j, PluginManager.FindWz, PluginManager.FindWz);
-                                if (skill != null)
-                                {
-                                    skill.Level = skill.MaxLevel;
-                                    tooltip.Skill = skill;
-                                }
-                                else
+                                var jobImg = PluginManager.FindWz($"Skill\\{i:D3}.img\\skill", PluginManager.FindWz(Wz_Type.Base).GetNodeWzFile());
+                                if (jobImg == null)
                                 {
                                     continue;
                                 }
-                                Bitmap resultImage = tooltip.Render();
-                                string categoryPath = "";
-                                if (FifthJobSkillToJobID.ContainsKey(int.Parse(j.Text)))
+                                foreach (var j in jobImg.Nodes)
                                 {
-                                    categoryPath = ItemStringHelper.GetFifthJobName(int.Parse(j.Text), FifthJobSkillToJobID[int.Parse(j.Text)]);
-                                }
-                                else
-                                {
-                                    categoryPath = ItemStringHelper.GetJobName(i) ?? "其它";
-                                }
-                                if (!Directory.Exists(Path.Combine(exportedFolder, categoryPath)))
-                                {
-                                    Directory.CreateDirectory(Path.Combine(exportedFolder, categoryPath));
-                                }
-                                string imageName = Path.Combine(exportedFolder, categoryPath, "skill_" + j.Text + "_" + RemoveInvalidFileNameChars(skillName) + ".png");
-                                if (!File.Exists(imageName))
-                                {
-                                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                                }
-                                resultImage.Dispose();
-                            }
-                            if (FifthJobSkillToJobID.Count > 0)
-                            {
-                                foreach (var kvp in FifthJobSkillToJobID)
-                                {
-                                    if (kvp.Value.Contains(i))
+                                    StringResult sr;
+                                    string skillName;
+                                    if (tooltip.StringLinker == null || !tooltip.StringLinker.StringSkill.TryGetValue(int.Parse(j.Text), out sr))
                                     {
-                                        var skillNode = PluginManager.FindWz($"Skill\\{kvp.Key / 10000}.img\\skill\\{kvp.Key}", PluginManager.FindWz(Wz_Type.Base).GetNodeWzFile());
-                                        if (skillNode == null)
+                                        sr = new StringResultSkill();
+                                        sr.Name = "未知的技能";
+                                    }
+                                    skillName = sr.Name;
+                                    labelX2.Text = string.Format("匯出中：{0} - {1}", j.Text, skillName);
+                                    Skill skill = Skill.CreateFromNode(j, PluginManager.FindWz, PluginManager.FindWz);
+                                    if (skill != null)
+                                    {
+                                        skill.Level = skill.MaxLevel;
+                                        tooltip.Skill = skill;
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
+                                    Bitmap resultImage = tooltip.Render();
+                                    string categoryPath = "";
+                                    if (FifthJobSkillToJobID.ContainsKey(int.Parse(j.Text)))
+                                    {
+                                        categoryPath = ItemStringHelper.GetFifthJobName(int.Parse(j.Text), FifthJobSkillToJobID[int.Parse(j.Text)]);
+                                    }
+                                    else
+                                    {
+                                        categoryPath = ItemStringHelper.GetJobName(i) ?? "其它";
+                                    }
+                                    if (!Directory.Exists(Path.Combine(exportedFolder, categoryPath)))
+                                    {
+                                        Directory.CreateDirectory(Path.Combine(exportedFolder, categoryPath));
+                                    }
+                                    string imageName = Path.Combine(exportedFolder, categoryPath, "skill_" + j.Text + "_" + RemoveInvalidFileNameChars(skillName) + ".png");
+                                    if (File.Exists(imageName)) File.Delete(imageName);
+                                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                                    resultImage.Dispose();
+                                }
+                                if (FifthJobSkillToJobID.Count > 0)
+                                {
+                                    foreach (var kvp in FifthJobSkillToJobID)
+                                    {
+                                        if (kvp.Value.Contains(i))
                                         {
-                                            continue;
-                                        }
-                                        StringResult sr;
-                                        string skillName;
-                                        if (tooltip.StringLinker == null || !tooltip.StringLinker.StringSkill.TryGetValue(int.Parse(skillNode.Text), out sr))
-                                        {
-                                            sr = new StringResultSkill();
-                                            sr.Name = "未知的技能";
-                                        }
-                                        skillName = sr.Name;
-                                        WaitingForm.UpdateMessage(string.Format("{0}\r\n{1}\r\n\r\n匯出中", skillNode.Text, skillName));
-                                        Skill skill = Skill.CreateFromNode(skillNode, PluginManager.FindWz, PluginManager.FindWz);
-                                        if (skill != null)
-                                        {
-                                            skill.Level = skill.MaxLevel;
-                                            tooltip.Skill = skill;
-                                        }
-                                        else
-                                        {
-                                            continue;
-                                        }
-                                        Bitmap resultImage = tooltip.Render();
-                                        string categoryPath = ItemStringHelper.GetFifthJobName(kvp.Key, kvp.Value) ?? "其它";
-                                        if (!Directory.Exists(Path.Combine(exportedFolder, categoryPath)))
-                                        {
-                                            Directory.CreateDirectory(Path.Combine(exportedFolder, categoryPath));
-                                        }
-                                        string imageName = Path.Combine(exportedFolder, categoryPath, "skill_" + skillNode.Text + "_" + RemoveInvalidFileNameChars(skillName) + ".png");
-                                        if (!File.Exists(imageName))
-                                        {
+                                            var skillNode = PluginManager.FindWz($"Skill\\{kvp.Key / 10000}.img\\skill\\{kvp.Key}", PluginManager.FindWz(Wz_Type.Base).GetNodeWzFile());
+                                            if (skillNode == null)
+                                            {
+                                                continue;
+                                            }
+                                            StringResult sr;
+                                            string skillName;
+                                            if (tooltip.StringLinker == null || !tooltip.StringLinker.StringSkill.TryGetValue(int.Parse(skillNode.Text), out sr))
+                                            {
+                                                sr = new StringResultSkill();
+                                                sr.Name = "未知的技能";
+                                            }
+                                            skillName = sr.Name;
+                                            labelX2.Text = string.Format("匯出中：{0} - {1}", skillNode.Text, skillName);
+                                            Skill skill = Skill.CreateFromNode(skillNode, PluginManager.FindWz, PluginManager.FindWz);
+                                            if (skill != null)
+                                            {
+                                                skill.Level = skill.MaxLevel;
+                                                tooltip.Skill = skill;
+                                            }
+                                            else
+                                            {
+                                                continue;
+                                            }
+                                            Bitmap resultImage = tooltip.Render();
+                                            string categoryPath = ItemStringHelper.GetFifthJobName(kvp.Key, kvp.Value) ?? "其它";
+                                            if (!Directory.Exists(Path.Combine(exportedFolder, categoryPath)))
+                                            {
+                                                Directory.CreateDirectory(Path.Combine(exportedFolder, categoryPath));
+                                            }
+                                            string imageName = Path.Combine(exportedFolder, categoryPath, "skill_" + skillNode.Text + "_" + RemoveInvalidFileNameChars(skillName) + ".png");
+                                            if (File.Exists(imageName)) File.Delete(imageName);
                                             resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                                            resultImage.Dispose();
                                         }
-                                        resultImage.Dispose();
                                     }
                                 }
                             }
-                        }
-                    });
-                    WaitingForm.Close();
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBoxEx.Show(ex.ToString(), LocalizedString_JP.COMMON_ERROR);
+                    }
+                    finally
+                    {
+                        sw.Stop();
+                        btnSkillTooltipExport.Enabled = true;
+                        labelX2.Text = "匯出完成。時間經過：" + sw.Elapsed.ToString();
+                    }
                     labelItemStatus.Text = "匯出完成: " + exportedFolder;
-
                 }
             }
         }
