@@ -30,6 +30,7 @@
         {
             this.lblSelectJobIntro = new DevComponents.DotNetBar.LabelX();
             this.clbJobName = new System.Windows.Forms.CheckedListBox();
+            this.btnSort = new DevComponents.DotNetBar.ButtonX();
             this.btnSelectAll = new DevComponents.DotNetBar.ButtonX();
             this.btnReverseSelect = new DevComponents.DotNetBar.ButtonX();
             this.btnExport = new DevComponents.DotNetBar.ButtonX();
@@ -42,7 +43,7 @@
             // 
             // 
             this.lblSelectJobIntro.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.lblSelectJobIntro.Location = new System.Drawing.Point(10, 10);
+            this.lblSelectJobIntro.Location = new System.Drawing.Point(10, 7);
             this.lblSelectJobIntro.Name = "lblSelectJobIntro";
             this.lblSelectJobIntro.Size = new System.Drawing.Size(222, 16);
             this.lblSelectJobIntro.TabIndex = 0;
@@ -57,12 +58,24 @@
             this.clbJobName.Size = new System.Drawing.Size(430, 522);
             this.clbJobName.TabIndex = 1;
             // 
+            // btnSort
+            // 
+            this.btnSort.Location = new System.Drawing.Point(339, 5);
+            this.btnSort.Name = "btnSort";
+            this.btnSort.Size = new System.Drawing.Size(100, 20);
+            this.btnSort.TabIndex = 2;
+            this.btnSort.Text = "初始順序";
+            this.btnSort.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnSort.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.btnSort.Click += new System.EventHandler(this.btnSort_Click);
+            // 
+            // 
             // btnSelectAll
             // 
             this.btnSelectAll.Location = new System.Drawing.Point(10, 550);
             this.btnSelectAll.Name = "btnSelectAll";
             this.btnSelectAll.Size = new System.Drawing.Size(100, 35);
-            this.btnSelectAll.TabIndex = 2;
+            this.btnSelectAll.TabIndex = 3;
             this.btnSelectAll.Text = "全選/全不選";
             this.btnSelectAll.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
             this.btnSelectAll.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -73,7 +86,7 @@
             this.btnReverseSelect.Location = new System.Drawing.Point(174, 550);
             this.btnReverseSelect.Name = "btnReverseSelect";
             this.btnReverseSelect.Size = new System.Drawing.Size(100, 35);
-            this.btnReverseSelect.TabIndex = 3;
+            this.btnReverseSelect.TabIndex = 4;
             this.btnReverseSelect.Text = "反選";
             this.btnReverseSelect.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
             this.btnReverseSelect.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -84,7 +97,7 @@
             this.btnExport.Location = new System.Drawing.Point(338, 550);
             this.btnExport.Name = "btnExport";
             this.btnExport.Size = new System.Drawing.Size(100, 35);
-            this.btnExport.TabIndex = 4;
+            this.btnExport.TabIndex = 5;
             this.btnExport.Text = "匯出";
             this.btnExport.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
             this.btnExport.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -98,6 +111,7 @@
             this.Controls.Add(this.btnExport);
             this.Controls.Add(this.btnReverseSelect);
             this.Controls.Add(this.btnSelectAll);
+            this.Controls.Add(this.btnSort);
             this.Controls.Add(this.clbJobName);
             this.Controls.Add(this.lblSelectJobIntro);
             this.DoubleBuffered = true;
@@ -117,6 +131,7 @@
         
         private DevComponents.DotNetBar.LabelX lblSelectJobIntro;
         private System.Windows.Forms.CheckedListBox clbJobName;
+        private DevComponents.DotNetBar.ButtonX btnSort;
         private DevComponents.DotNetBar.ButtonX btnSelectAll;
         private DevComponents.DotNetBar.ButtonX btnReverseSelect;
         private DevComponents.DotNetBar.ButtonX btnExport;
