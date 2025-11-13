@@ -34,9 +34,9 @@ namespace WzComparerR2
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
             this.Font = new Font(new FontFamily("SimSun"), 9f);
 #endif
-
-            var downloaderSession = new DownloaderSession();
-            Task.Run(() => this.ExecuteUpdateAsync(downloaderSession, downloaderSession.CancellationToken));
+            this.richTextBoxEx1.AppendText("要下載 GMS，您需要更新清單檔案。您可以在我們 Discord 伺服器的 #gamepatch-feed 頻道中找到該清單載點。\r\n\r\n點擊「下載」按鈕後，請貼上此清單載點。");
+            //var downloaderSession = new DownloaderSession();
+            //Task.Run(() => this.ExecuteUpdateAsync(downloaderSession, downloaderSession.CancellationToken));
         }
 
 
@@ -58,7 +58,7 @@ namespace WzComparerR2
                 string majorVersion = UpdateContent.SelectToken("majorVersion").ToString();
                 string minorVersion = UpdateContent.SelectToken("minorVersion").ToString();
                 string revision = UpdateContent.SelectToken("revision").ToString();
-                string releaseDate = UpdateContent.SelectToken("releaseDate").ToString(); 
+                string releaseDate = UpdateContent.SelectToken("releaseDate").ToString();
                 manifestUrl = UpdateContent.SelectToken("manifestUrl").ToString();
 
                 this.lblUpdateDate.Text = releaseDate + " UTC";
@@ -144,7 +144,7 @@ namespace WzComparerR2
                 }
                 Encoding fileNameEnc = manifest.filepath_encoding == "utf16" ? Encoding.Unicode : Encoding.UTF8;
 
-                foreach (var kv in manifest.files)
+                Parallel.ForEach(manifest.files, new ParallelOptions { MaxDegreeOfParallelism = 20 }, kv =>
                 {
                     string fileName = new StreamReader(new MemoryStream(Convert.FromBase64String(kv.Key))).ReadToEnd();
                     string fullFileName = Path.Combine(applyPath, "appdata", fileName);
@@ -161,6 +161,10 @@ namespace WzComparerR2
                         if (!File.Exists(fullFileName) || new FileInfo(fullFileName).Length != kv.Value.fsize)
                         {
                             AppendStateText(String.Format("正在下載檔案: {0}...", fullFileName), Color.Black);
+                            if (!Directory.Exists(Path.GetDirectoryName(fullFileName)))
+                            {
+                                Directory.CreateDirectory(Path.GetDirectoryName(fullFileName));
+                            }
                             using (var fs = File.Create(fullFileName))
                             {
                                 for (int p = 0; p < kv.Value.objects.Length; p++)
@@ -194,6 +198,7 @@ namespace WzComparerR2
                         }
                     }
                 }
+                );
                 this.lblUpdateContent.Text = "下載完成";
             }
             catch (Exception ex)
@@ -238,6 +243,21 @@ namespace WzComparerR2
         private void buttonX1_Click(object sender, EventArgs e)
         {
             downloaderSession = new DownloaderSession();
+            string manifestUrl = "";
+            using (FrmGMSManifest frmManifest = new FrmGMSManifest())
+            {
+                if (frmManifest.ShowDialog() == DialogResult.OK)
+                {
+                    manifestUrl = frmManifest.ManifestUrl;
+                }
+                else return;
+            }
+            if (!manifestUrl.StartsWith(manifestBaseUrl))
+            {
+                this.richTextBoxEx1.Clear();
+                this.richTextBoxEx1.AppendText("無效的清單URL。\r\n");
+                return;
+            }
             FolderBrowserDialog dlg = new FolderBrowserDialog();
             dlg.Description = "請選擇GMS安裝資料夾。";
             if (dlg.ShowDialog(this) == DialogResult.OK)
@@ -263,7 +283,6 @@ namespace WzComparerR2
                         return;
                 }
             }
-            this.lblUpdateContent.Text = LocalizedString_JP.FRMUPDATER_UPDATE_DOWNLOADING;
             buttonX1.Enabled = false;
             this.richTextBoxEx1.Clear();
             Task.Run(() => this.DownloadClientAsync(manifestUrl, downloaderSession, downloaderSession.CancellationToken));

@@ -196,7 +196,13 @@ namespace WzComparerR2.CLI
                     }
                     else
                     {
-                        string gameDirectory = args[2];
+                        string manifestUrl = args[2];
+                        string gameDirectory = args[3];
+                        if (!manifestUrl.StartsWith("http://download2.nexon.net/Game/nxl/games/10100/"))
+                        {
+                            Console.WriteLine("Error: Manifest URL is invalid.");
+                            return;
+                        }
                         if (gameDirectory.Contains("\""))
                         {
                             string[] gameDirParse = gameDirectory.Split('"');
@@ -224,8 +230,7 @@ namespace WzComparerR2.CLI
                         try
                         {
                             downloader.applyPath = gameDirectory;
-                            downloader.CheckUpdate();
-                            downloader.DownloadClient(downloader.manifestUrl);
+                            downloader.DownloadClient(manifestUrl);
                         }
                         catch (Exception ex)
                         {
@@ -326,14 +331,14 @@ namespace WzComparerR2.CLI
                     Console.WriteLine("This command will check if an update can be found. All other arguments are omitted.");
                     break;
                 case "gms_download":
-                    Console.WriteLine("    wcr2cli gms download [game_installation_path]");
+                    Console.WriteLine("    wcr2cli gms download [manifest_url] [game_installation_path]");
                     Console.WriteLine("");
                     Console.WriteLine("The game installation path could be either absolute path or relative path.");
                     Console.WriteLine("If the path contains spaces, the path must be wrapped by a pair of quotes.");
                     Console.WriteLine("");
                     Console.WriteLine("Example:");
                     Console.WriteLine("");
-                    Console.WriteLine("    wcr2cli gms download \"E:\\Games\\MapleStory Global\\\"");
+                    Console.WriteLine("    wcr2cli gms download http://download2.nexon.net/Game/nxl/games/10100/10100.pub264_1_1_1b7389b8e39f0cee4ef77d2a7af3562d.manifest.hash \"E:\\Games\\MapleStory Global\\\"");
                     break;
             }
         }

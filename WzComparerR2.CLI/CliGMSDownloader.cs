@@ -6,6 +6,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Net;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace WzComparerR2.CLI
 {
@@ -42,12 +44,15 @@ namespace WzComparerR2.CLI
 
         public void DownloadClient(string url)
         {
+            Mutex mutex = new Mutex(false, "WzComparerR2.CLI.GMSDownloader");
             void AppendStateText(string text, ConsoleColor color = ConsoleColor.White)
             {
                 var currentColor = Console.ForegroundColor;
                 Console.ForegroundColor = color;
                 Console.Write(text);
+                mutex.WaitOne();
                 File.AppendAllText(Path.Combine(applyPath, $"gmsdownloader_{DateTime.Now:yyyyMMdd_HHmmssfff}.log"), text, Encoding.UTF8);
+                mutex.ReleaseMutex();
                 Console.ForegroundColor = currentColor;
             }
 
@@ -106,7 +111,7 @@ namespace WzComparerR2.CLI
                 }
                 Encoding fileNameEnc = manifest.filepath_encoding == "utf16" ? Encoding.Unicode : Encoding.UTF8;
 
-                foreach (var kv in manifest.files)
+                Parallel.ForEach(manifest.files, new ParallelOptions { MaxDegreeOfParallelism = 20 }, kv =>
                 {
                     string fileName = new StreamReader(new MemoryStream(Convert.FromBase64String(kv.Key))).ReadToEnd();
                     string fullFileName = Path.Combine(applyPath, "appdata", fileName);
@@ -123,6 +128,10 @@ namespace WzComparerR2.CLI
                         if (!File.Exists(fullFileName) || new FileInfo(fullFileName).Length != kv.Value.fsize)
                         {
                             AppendStateText(String.Format("Downloading file: {0}...", fullFileName));
+                            if (!Directory.Exists(Path.GetDirectoryName(fullFileName)))
+                            {
+                                Directory.CreateDirectory(Path.GetDirectoryName(fullFileName));
+                            }
                             using (var fs = File.Create(fullFileName))
                             {
                                 for (int p = 0; p < kv.Value.objects.Length; p++)
@@ -156,6 +165,7 @@ namespace WzComparerR2.CLI
                         }
                     }
                 }
+                );
             }
             catch (Exception ex)
             {

@@ -130,7 +130,6 @@
             this.buttonX1.Size = new System.Drawing.Size(85, 23);
             this.buttonX1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonX1.TabIndex = 8;
-            this.buttonX1.Enabled = false;
             this.buttonX1.Text = "下載";
             this.buttonX1.Click += new System.EventHandler(this.buttonX1_Click);
             // 
@@ -141,11 +140,11 @@
             // 
             this.richTextBoxEx1.BackgroundStyle.Class = "RichTextBoxBorder";
             this.richTextBoxEx1.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.richTextBoxEx1.Location = new System.Drawing.Point(12, 81);
+            this.richTextBoxEx1.Location = new System.Drawing.Point(12, 6);
             this.richTextBoxEx1.Name = "richTextBoxEx1";
             this.richTextBoxEx1.Rtf = "{\\rtf1\\ansi\\ansicpg936\\deff0\\deflang1033\\deflangfe1042{\\fonttbl{\\f0\\fnil\\fcharset" +
     "129 \\\'b5\\\'b8\\\'bf\\\'f2;}}\r\n\\viewkind4\\uc1\\pard\\lang1042\\f0\\fs18\\par\r\n}\r\n";
-            this.richTextBoxEx1.Size = new System.Drawing.Size(280, 100);
+            this.richTextBoxEx1.Size = new System.Drawing.Size(280, 175);
             this.richTextBoxEx1.ReadOnly = true;
             this.richTextBoxEx1.TabIndex = 9;
             // 
@@ -162,11 +161,11 @@
             this.ClientSize = new System.Drawing.Size(304, 221);
             this.Controls.Add(this.richTextBoxEx1);
             this.Controls.Add(this.buttonX1);
-            this.Controls.Add(this.lblUpdateContent);
-            this.Controls.Add(this.lblUpdateDate);
-            this.Controls.Add(this.lblLatestVer);
-            this.Controls.Add(this.labelX3);
-            this.Controls.Add(this.labelX2);
+            // this.Controls.Add(this.lblUpdateContent);
+            // this.Controls.Add(this.lblUpdateDate);
+            // this.Controls.Add(this.lblLatestVer);
+            // this.Controls.Add(this.labelX3);
+            // this.Controls.Add(this.labelX2);
             this.Controls.Add(this.labelX1);
             this.DoubleBuffered = true;
             this.Font = new System.Drawing.Font(LocalizedString_JP.DEFAULT_MONOSPACE_FONT, 9F);
