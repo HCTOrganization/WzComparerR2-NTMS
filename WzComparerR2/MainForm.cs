@@ -58,7 +58,7 @@ namespace WzComparerR2
             loadUIState();
         }
 
-        List<Wz_Structure> openedWz;
+        public List<Wz_Structure> openedWz;
         StringLinker stringLinker;
         HistoryList<Node> historyNodeList;
         bool historySelecting;
@@ -1272,6 +1272,7 @@ namespace WzComparerR2
             catch (FileNotFoundException)
             {
                 MessageBoxEx.Show(LocalizedString_JP.MAINFORM_COMMON_FILENOTFOUND, LocalizedString_JP.COMMON_ERROR);
+                WcR2Config.Default.RecentDocuments.Remove(wzFilePath);
             }
             catch (Exception ex)
             {
@@ -3238,7 +3239,8 @@ namespace WzComparerR2
                     return;
                 }
             }
-            FrmPatcher patcher = new FrmPatcher();
+
+            FrmPatcher patcher = new FrmPatcher(this);
             var config = WcR2Config.Default;
             var defaultEnc = config?.WzEncoding?.Value ?? 0;
             if (defaultEnc != 0)

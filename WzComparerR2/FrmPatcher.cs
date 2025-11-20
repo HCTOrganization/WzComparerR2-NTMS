@@ -21,9 +21,10 @@ namespace WzComparerR2
 {
     public partial class FrmPatcher : DevComponents.DotNetBar.Office2007Form
     {
-        public FrmPatcher()
+        public FrmPatcher(MainForm mainForm)
         {
             InitializeComponent();
+            this._mainFormReference = mainForm;
             this.FormClosing += new FormClosingEventHandler(FrmPatcher_FormClosing);
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
@@ -60,6 +61,8 @@ namespace WzComparerR2
             }
             cmbComparePng.SelectedItem = WzPngComparison.SizeAndDataLength;
         }
+
+        private MainForm _mainFormReference;
 
         SortedDictionary<string, long> patchedFileSizes = new SortedDictionary<string, long>();
         List<string> patchedFileIndex = new List<string>();
@@ -262,6 +265,17 @@ namespace WzComparerR2
 
         private void buttonXPatch_Click(object sender, EventArgs e)
         {
+            foreach (var openedWzStructure in _mainFormReference.openedWz)
+            {
+                foreach (var wzFile in openedWzStructure.wz_files)
+                {
+                    if (wzFile.FileStream.Name.StartsWith(txtMSFolder.Text, StringComparison.OrdinalIgnoreCase))
+                    {
+                        MessageBoxEx.Show("請在執行更新前關閉當前正在開啟的WZ檔案。", "錯誤", MessageBoxButtons.OK);
+                        return;
+                    }
+                }
+            }
             if (!File.Exists(txtMSFolder.Text + "//MapleStory.exe") && !File.Exists(txtMSFolder.Text + "//MapleStoryT.exe"))
             {
                 DialogResult PatcherPromptResult = MessageBoxEx.Show("所選資料夾似乎不是有效的新楓之谷安裝資料夾。 \r\n您還想繼續嗎？", "警告", MessageBoxButtons.YesNo);
@@ -792,7 +806,7 @@ namespace WzComparerR2
             }
         }
 
-        static bool HasWritePermission(string directoryPath)
+        private static bool HasWritePermission(string directoryPath)
         {
             try
             {
