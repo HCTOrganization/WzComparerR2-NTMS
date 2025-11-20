@@ -1111,30 +1111,35 @@ namespace WzComparerR2.CharaSimControl
             }
 
             // JMS exclusive pricing display
-            if (!isMsnClient)
+            if (ShowSoldPrice && !isMsnClient && !item.Cash)
             {
-                if (!item.GetBooleanValue(ItemPropType.quest) && !item.GetBooleanValue(ItemPropType.notSale) && (item.Props.TryGetValue(ItemPropType.price, out value) && value > 0) && ShowSoldPrice)
+                if (!item.GetBooleanValue(ItemPropType.quest) && !item.GetBooleanValue(ItemPropType.notSale) && (item.Props.TryGetValue(ItemPropType.price, out value) && value > 0))
                 {
                     picH += 16;
                     GearGraphics.DrawString(g, "\r\n · 出售價格：" + value + "楓幣", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
                 }
 
-                if (item.GetBooleanValue(ItemPropType.autoPrice) && ShowSoldPrice && item.Level <= 250)
+                if (item.GetBooleanValue(ItemPropType.autoPrice) && item.Level <= 250)
                 {
                     picH += 16;
                     GearGraphics.DrawString(g, "\r\n · 出售價格：" + (item.Level * 2) + "楓幣", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
                 }
+            }
 
-                if (item.Cash && ShowCashPurchasePrice)
+            if (ShowCashPurchasePrice && !isMsnClient && item.Cash)
+            {
+                Commodity commodityPackage = new Commodity();
+                if (CharaSimLoader.LoadedCommoditiesByItemId.ContainsKey(item.ItemID))
                 {
-                    Commodity commodityPackage = new Commodity();
-                    if (CharaSimLoader.LoadedCommoditiesByItemId.ContainsKey(item.ItemID))
+                    commodityPackage = CharaSimLoader.LoadedCommoditiesByItemId[item.ItemID];
+                    if (commodityPackage.Price > 0)
                     {
-                        commodityPackage = CharaSimLoader.LoadedCommoditiesByItemId[item.ItemID];
-                        if (commodityPackage.Price > 0)
+                        picH += 16;
+                        GearGraphics.DrawString(g, "\r\n · 購買價格：" + commodityPackage.Price + "點", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                        if (Translator.DefaultDesiredCurrency != "none")
                         {
                             picH += 16;
-                            GearGraphics.DrawString(g, "\r\n · 購買價格：" + commodityPackage.Price + "點", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                            
                             if (Translator.DefaultDesiredCurrency != "none")
                             {
                                 string exchangedPrice = Translator.GetConvertedCurrency(commodityPackage.Price, titleLanguage);

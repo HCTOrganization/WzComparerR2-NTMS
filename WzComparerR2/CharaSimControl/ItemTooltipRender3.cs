@@ -1219,21 +1219,21 @@ namespace WzComparerR2.CharaSimControl
             }
 
             // soldToNpcPrice
-            if (ShowSoldPrice && !isMsnClient)
+            if (ShowSoldPrice && !isMsnClient && !item.Cash)
             {
-                if (!item.GetBooleanValue(ItemPropType.quest) && !item.GetBooleanValue(ItemPropType.notSale) && (item.Props.TryGetValue(ItemPropType.price, out value) && value > 0) && ShowSoldPrice)
+                if (!item.GetBooleanValue(ItemPropType.quest) && !item.GetBooleanValue(ItemPropType.notSale) && (item.Props.TryGetValue(ItemPropType.price, out value) && value > 0))
                 {
                     tags.Add(string.Format(" · 出售價格：{0} 楓幣", ItemStringHelper.ToCJKNumberExpr(value)));
                 }
 
-                if (item.GetBooleanValue(ItemPropType.autoPrice) && ShowSoldPrice && item.Level <= 250)
+                if (item.GetBooleanValue(ItemPropType.autoPrice) && item.Level <= 250)
                 {
                     tags.Add(string.Format(" · 販売価額：{0} 楓幣", ItemStringHelper.ToCJKNumberExpr(item.Level * 2)));
                 }
             }
 
             // purchasePrice
-            if (item.Cash && ShowCashPurchasePrice)
+            if (ShowCashPurchasePrice && !isMsnClient && item.Cash)
             {
                 Commodity commodityPackage = new Commodity();
                 if (CharaSimLoader.LoadedCommoditiesByItemId.ContainsKey(item.ItemID))
