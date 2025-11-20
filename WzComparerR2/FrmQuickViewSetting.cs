@@ -253,6 +253,13 @@ namespace WzComparerR2
         }
 
         [Link]
+        public bool Item_UseAssembleUI
+        {
+            get { return chkUseAssembleUI.Checked; }
+            set { chkUseAssembleUI.Checked = value; }
+        }
+
+        [Link]
         public bool Map_ShowMiniMap
         {
             get { return chkShowMiniMap.Checked; }

@@ -77,6 +77,10 @@ namespace WzComparerR2.CharaSim
         {
             return this.Props.TryGetValue(type, out long value) && value != 0;
         }
+        public bool IsPet
+        {
+            get { return this.type == ItemType.Pet; }
+        }
 
         public static Item CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
         {

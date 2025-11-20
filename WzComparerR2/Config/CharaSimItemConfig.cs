@@ -70,5 +70,12 @@ namespace WzComparerR2.Config
             get { return (int)this["cosmeticFaceColor"]; }
             set { this["cosmeticFaceColor"] = value; }
         }
+
+        [ConfigurationProperty("useAssembleUI", DefaultValue = true)]
+        public bool UseAssembleUI
+        {
+            get { return (bool)this["useAssembleUI"]; }
+            set { this["useAssembleUI"] = value; }
+        }
     }
 }
