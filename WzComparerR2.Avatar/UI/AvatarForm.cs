@@ -706,6 +706,26 @@ namespace WzComparerR2.Avatar.UI
             cmbEmotion.SelectedIndex = emotionIdx + 1;
         }
 
+        /// <summary>
+        /// Emotion을 선택된 프레임으로 고정합니다.
+        /// </summary>
+        /// <param name="emotionName">고정할 Emotion의 이름</param>
+        /// <param name="idx">고정할 프레임 번호</param>
+        private void FixEmotion(string emotionName, int Idx)
+        {
+            this.SelectEmotion(emotionName);
+
+            if (this.chkEmotionPlay.Checked)
+            {
+                this.chkEmotionPlay.Checked = false;
+            }
+
+            if (Idx >= 0)
+            {
+                this.cmbEmotionFrame.SelectedIndex = Idx;
+            }
+        }
+
         #region 同步界面
         private void FillBodyAction()
         {
@@ -2755,34 +2775,22 @@ namespace WzComparerR2.Avatar.UI
                     $"{res.Ring1},{res.Ring2},{res.Ring3},{res.Ring4}";
                 LoadCode(code, 0);
 
+                this.SuspendUpdateDisplay();
                 var curAction = this.cmbActionBody.SelectedItem.ToString();
+                var hand = 1;
                 switch (res.WeaponMotionType)
                 {
                     case 0:
                     case 1: // 한손
+                        this.cmbWeaponType.SelectedIndex = this.cmbWeaponType.Items.Count > 0 ? 0 : -1;
+                        break;
+
+                    case 2: // 두손
+                        hand = 2;
+                        this.cmbWeaponType.SelectedIndex = this.cmbWeaponType.Items.Count > 0 ? 0 : -1;
+                        break;
+
                     case 3: // 건
-                        if (Regex.Match(curAction, @"^walk").Success)
-                        {
-                            for (int i = 0; i < this.cmbActionBody.Items.Count; i++)
-                            {
-                                if ((this.cmbActionBody.Items[i] as ComboItem).Text == "walk1")
-                                {
-                                    this.cmbActionBody.SelectedIndex = i;
-                                    break;
-                                }
-                            }
-                        }
-                        else if (Regex.Match(curAction, @"^stand").Success)
-                        {
-                            for (int i = 0; i < this.cmbActionBody.Items.Count; i++)
-                            {
-                                if ((this.cmbActionBody.Items[i] as ComboItem).Text == "stand1")
-                                {
-                                    this.cmbActionBody.SelectedIndex = i;
-                                    break;
-                                }
-                            }
-                        }
                         if (res.WeaponMotionType == 3)
                         {
                             for (int i = 0; i < this.cmbWeaponType.Items.Count; i++)
@@ -2796,36 +2804,70 @@ namespace WzComparerR2.Avatar.UI
                         }
                         break;
 
-                    case 2: // 두손
-                        if (Regex.Match(curAction, @"^walk").Success)
-                        {
-                            for (int i = 0; i < this.cmbActionBody.Items.Count; i++)
-                            {
-                                if ((this.cmbActionBody.Items[i] as ComboItem).Text == "walk2")
-                                {
-                                    this.cmbActionBody.SelectedIndex = i;
-                                    break;
-                                }
-                            }
-                        }
-                        else if (Regex.Match(curAction, @"^stand").Success)
-                        {
-                            for (int i = 0; i < this.cmbActionBody.Items.Count; i++)
-                            {
-                                if ((this.cmbActionBody.Items[i] as ComboItem).Text == "stand2")
-                                {
-                                    this.cmbActionBody.SelectedIndex = i;
-                                    break;
-                                }
-                            }
-                        }
-                        break;
                     default:
                         break;
+                }
+                if (Regex.Match(curAction, @"^walk").Success)
+                {
+                    for (int i = 0; i < this.cmbActionBody.Items.Count; i++)
+                    {
+                        if ((this.cmbActionBody.Items[i] as ComboItem).Text == $"walk{hand}")
+                        {
+                            this.cmbActionBody.SelectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+                else if (Regex.Match(curAction, @"^stand").Success)
+                {
+                    for (int i = 0; i < this.cmbActionBody.Items.Count; i++)
+                    {
+                        if ((this.cmbActionBody.Items[i] as ComboItem).Text == $"stand{hand}")
+                        {
+                            this.cmbActionBody.SelectedIndex = i;
+                            break;
+                        }
+                    }
                 }
 
                 this.chkShowWeaponEffect.Checked = res.ShowWeaponEffect;
                 this.chkShowWeaponJumpEffect.Checked = res.ShowWeaponJumpEffect;
+                foreach (var item in this.itemPanel1.Items)
+                {
+                    if (item is AvatarPartButtonItem button && button.Tag is AvatarPart part)
+                    {
+                        if (part != null && part == this.avatar.Cape)
+                        {
+                            if (part.EffectVisible != res.ShowCapeEffect)
+                            {
+                                button.chkShowEffect.Checked = res.ShowCapeEffect;
+                                part.EffectVisible = res.ShowCapeEffect;
+                                this.avatar.EffectVisibles[11] = res.ShowCapeEffect;
+                            }
+                        }
+                    }
+                }
+
+                // 표정 얼굴장식
+                if (!string.IsNullOrEmpty(res.EmotionFaceAcc))
+                {
+                    Wz_Node infoRootNode = PluginManager.FindWz($@"Etc\EmotionFaceAccInfo.img");
+                    Wz_Node infoNode = infoRootNode?.FindNodeByPath($@"{res.EmotionFaceAcc}\fixedEmotion") ?? null;
+                    var fixedEmotion = infoNode.GetValueEx<string>("");
+                    if (!string.IsNullOrEmpty(fixedEmotion))
+                    {
+                        var info = fixedEmotion.Split('/');
+                        var emotionName = info[0];
+                        var faceFrame = 0;
+                        if (info.Length > 1)
+                        {
+                            int.TryParse(info[1], out faceFrame);
+                        }
+
+                        this.FixEmotion(emotionName, faceFrame);
+                    }
+                }
+                this.ResumeUpdateDisplay();
 
                 if (res.UnknownVer)
                 {

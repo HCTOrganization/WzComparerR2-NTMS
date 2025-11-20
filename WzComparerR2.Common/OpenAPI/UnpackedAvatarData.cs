@@ -269,6 +269,17 @@ namespace WzComparerR2.OpenAPI
             return ret;
         }
 
+        public string GetEmotionFaceAcc()
+        {
+            var id = GetValue("emotionFaceAccID");
+            if (id == -1) return "";
+
+            var ret = "101";
+            ret += GetValue("emotionFaceAccGender");
+            ret += id.ToString().PadLeft(3, '0');
+            return ret;
+        }
+
         public byte GetEarType()
         {
             return (byte)GetValue("earType");
@@ -324,11 +335,13 @@ namespace WzComparerR2.OpenAPI
             switch (this.EventJob)
             {
                 case 1:
-                    return "?";
+                    return "ピンクビーン";
                 case 2:
-                    return "?";
+                    return "イェティ";
                 case 3:
-                    return "카마도 탄지로";
+                    return "竈門炭治郎";
+                case 4:
+                    return "サイタマ";
                 default:
                     return null;
             }
@@ -426,6 +439,7 @@ namespace WzComparerR2.OpenAPI
             Shield = GetShield();
             CashWeapon = GetCashWeapon();
             Weapon = GetWeapon();
+            EmotionFaceAcc = GetEmotionFaceAcc();
 
             Ring1 = GetRing(1);
             Ring2 = GetRing(2);
@@ -479,6 +493,7 @@ namespace WzComparerR2.OpenAPI
         public string Ring2 { get; set; }
         public string Ring3 { get; set; }
         public string Ring4 { get; set; }
+        public string EmotionFaceAcc { get; set; }
         public byte EarType { get; set; }
         public byte JobWingTailType { get; set; }
         public byte JobWingTailTypeDetail { get; set; }
