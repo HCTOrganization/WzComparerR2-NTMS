@@ -738,44 +738,6 @@ namespace WzComparerR2.CharaSimControl
             // 펫 명령어
             if (item.IsPet)
             {
-                string petSkillDesc = isMsnClient ? "\n#c技能：撿拾NESO" : "\n#c技能：撿拾楓幣";
-                if (item.Props.TryGetValue(ItemPropType.pickupItem, out value) && value > 0)
-                {
-                    petSkillDesc += ", 撿取道具";
-                }
-                if (item.Props.TryGetValue(ItemPropType.longRange, out value) && value > 0)
-                {
-                    petSkillDesc += ", 擴大移動範圍";
-                }
-                if (item.Props.TryGetValue(ItemPropType.sweepForDrop, out value) && value > 0)
-                {
-                    petSkillDesc += ", 自動撿取";
-                }
-                if (item.Props.TryGetValue(ItemPropType.pickupAll, out value) && value > 0)
-                {
-                    petSkillDesc += ", 撿取沒有所有權的道具和楓幣";
-                }
-                if (item.Props.TryGetValue(ItemPropType.consumeHP, out value) && value > 0)
-                {
-                    petSkillDesc += ", 補充HP藥水";
-                }
-                if (item.Props.TryGetValue(ItemPropType.consumeMP, out value) && value > 0)
-                {
-                    petSkillDesc += ", 補充MP藥水";
-                }
-                if (item.Props.TryGetValue(ItemPropType.autoBuff, out value) && value > 0)
-                {
-                    petSkillDesc += ", 自動使用加持技能";
-                }
-                if (item.Props.TryGetValue(ItemPropType.giantPet, out value) && value > 0)
-                {
-                    petSkillDesc += ", 寵物巨人技能";
-                }
-                if (item.Props.TryGetValue(ItemPropType.consumeCure, out value) && value > 0)
-                {
-                    petSkillDesc += ", 自動使用萬病治療藥";
-                }
-                GearGraphics.DrawString(g, petSkillDesc, GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
                 Wz_Node petDialog = PluginManager.FindWz("String\\PetDialog.img\\" + item.ItemID, this.SourceWzFile);
                 Dictionary<string, int> commandLev = new Dictionary<string, int>();
                 foreach (Wz_Node commandNode in PluginManager.FindWz("Item\\Pet\\" + item.ItemID + ".img\\interact", this.SourceWzFile).Nodes)
@@ -797,14 +759,14 @@ namespace WzComparerR2.CharaSimControl
                 GearGraphics.DrawString(g, "#c[可使用的指令]#", GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
                 foreach (int l0 in commandLev.Values.OrderBy(i => i).Distinct())
                 {
-                        if (Translator.IsKoreanStringPresent(string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))))
-                        {
-                            GearGraphics.DrawString(g, $"#cLv. {10} 以上： {string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))}#", GearGraphics.KMSItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
-                        }
-                        else
-                        {
-                            GearGraphics.DrawString(g, $"#cLv. {10} 以上： {string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))}#", GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
-                        }
+                    if (Translator.IsKoreanStringPresent(string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))))
+                    {
+                        GearGraphics.DrawString(g, $"#cLv. {10} 以上： {string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))}#", GearGraphics.KMSItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
+                    }
+                    else
+                    {
+                        GearGraphics.DrawString(g, $"#cLv. {10} 以上： {string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))}#", GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
+                    }
                 }
                 GearGraphics.DrawString(g, "#cTip. 當寵物等級達15級，可讓牠說出特定的內容。寵物說的話不會讓其他玩家看到。#", GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
                 GearGraphics.DrawString(g, "#c例) /寵物 [内容]#", GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
@@ -1157,15 +1119,28 @@ namespace WzComparerR2.CharaSimControl
             {
                 var count = 1;
                 ItemPropType[] petSkills = [ItemPropType.pickupItem, ItemPropType.longRange, ItemPropType.sweepForDrop, ItemPropType.pickupAll, ItemPropType.consumeHP, ItemPropType.consumeMP,
-                    ItemPropType.autoBuff, ItemPropType.giantPet];
+                    ItemPropType.autoBuff, ItemPropType.giantPet, ItemPropType.consumeCure];
+                List<string> petSkillNames = new List<string> { isMsnClient ? "撿拾NESO" : "撿拾楓幣" };
                 foreach (var petSkill in petSkills)
                 {
                     if (item.Props.TryGetValue(petSkill, out value) && value > 0)
                     {
                         count++;
+                        switch (petSkill)
+                        {
+                            case ItemPropType.pickupItem: petSkillNames.Add("撿取道具"); break;
+                            case ItemPropType.longRange: petSkillNames.Add("擴大移動範圍"); break;
+                            case ItemPropType.sweepForDrop: petSkillNames.Add("自動撿取"); break;
+                            case ItemPropType.pickupAll: petSkillNames.Add("撿取沒有所有權的道具和楓幣"); break;
+                            case ItemPropType.consumeHP: petSkillNames.Add("補充HP藥水"); break;
+                            case ItemPropType.consumeMP: petSkillNames.Add("補充MP藥水"); break;
+                            case ItemPropType.autoBuff: petSkillNames.Add("自動使用加持技能"); break;
+                            case ItemPropType.giantPet: petSkillNames.Add("寵物巨人技能"); break;
+                            case ItemPropType.consumeCure: petSkillNames.Add("自動使用萬病治療藥"); break;
+                        }
                     }
                 }
-                tags.Add($"#c擁有{count}項技能（可透過右鍵滑鼠查看）#");
+                tags.Add($"#c擁有{count}項技能：{string.Join("、", petSkillNames)}#");
 
                 if (item.Props.TryGetValue(ItemPropType.noScroll, out value) && value > 0)
                 {

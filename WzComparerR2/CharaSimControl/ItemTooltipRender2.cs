@@ -809,7 +809,7 @@ namespace WzComparerR2.CharaSimControl
             }
             if (item.Props.TryGetValue(ItemPropType.noRevive, out value) && value > 0)
             {
-                GearGraphics.DrawString(g, "#c生命之水無法使用。#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
+                GearGraphics.DrawString(g, "#c生命之水無法使用#", GearGraphics.ItemDetailFont, 100, right, ref picH, 16);
             }
 
             if (item.ItemID / 10000 == 500)
