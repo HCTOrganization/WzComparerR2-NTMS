@@ -283,6 +283,15 @@ namespace WzComparerR2.CharaSim
                     }
                 }
             }
+            
+            if (item.Icon.Bitmap == null)
+            {
+                item.Icon = new BitmapOrigin(item.IconRaw.Bitmap, item.IconRaw.Origin);
+            }
+            else if (item.IconRaw.Bitmap == null)
+            {
+                item.IconRaw = new BitmapOrigin(item.Icon.Bitmap, item.Icon.Origin);
+            }
 
             // MSEA v241 chair
             Wz_Node customChairNode = node.FindNodeByPath("info\\customChair\\self");
