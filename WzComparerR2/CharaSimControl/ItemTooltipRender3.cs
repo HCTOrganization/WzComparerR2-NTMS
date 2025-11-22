@@ -784,10 +784,10 @@ namespace WzComparerR2.CharaSimControl
                 }
                 else if (item.DamageSkinID != null)
                 {
-                    Wz_Node sampleNode = PluginManager.FindWz($@"Etc\DamageSkin.img\{item.DamageSkinID}\sample", this.SourceWzFile);
-                    if (sampleNode != null)
+                    DamageSkin damageSkin = DamageSkin.CreateFromNode(PluginManager.FindWz($@"Etc\DamageSkin.img\{item.DamageSkinID}", this.SourceWzFile), PluginManager.FindWz);
+                    if (damageSkin != null)
                     {
-                        BitmapOrigin sample = BitmapOrigin.CreateFromNode(sampleNode, PluginManager.FindWz, this.SourceWzFile);
+                        BitmapOrigin sample = damageSkin.Sample;
                         g.DrawImage(sample.Bitmap, (tooltip.Width - sample.Bitmap.Width) / 2, picH);
                         picH += sample.Bitmap.Height;
                         picH += 2;
