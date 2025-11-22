@@ -161,6 +161,9 @@ namespace WzComparerR2.CharaSimControl
                             this.damageSkin.BigDigit[character].Bitmap.Height));
                         break;
 
+                    case "万":
+                    case "萬":
+                    case "만":
                     case ".":
                         totalWidth += isCritical ?
                             (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(0).Value.Bitmap.Width :
