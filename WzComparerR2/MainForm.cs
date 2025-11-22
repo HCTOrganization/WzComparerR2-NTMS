@@ -290,6 +290,11 @@ namespace WzComparerR2
             tooltipQuickView.ItemRender.CosmeticHairColor = Setting.Item.CosmeticHairColor;
             tooltipQuickView.ItemRender.CosmeticFaceColor = Setting.Item.CosmeticFaceColor;
             tooltipQuickView.ItemRender.Enable22AniStyle = Setting.Enable22AniStyle;
+            tooltipQuickView.ItemRender.ShowDamageSkin = Setting.DamageSkin.ShowDamageSkin;
+            tooltipQuickView.ItemRender.ShowDamageSkinID = Setting.DamageSkin.ShowDamageSkinID;
+            tooltipQuickView.ItemRender.UseMiniSizeDamageSkin = Setting.DamageSkin.UseMiniSize;
+            tooltipQuickView.ItemRender.AlwaysUseMseaFormatDamageSkin = Setting.DamageSkin.AlwaysUseMseaFormat;
+            tooltipQuickView.ItemRender.DamageSkinNumber = Setting.DamageSkin.DamageSkinNumber;
             tooltipQuickView.ItemRender3.ShowObjectID = Setting.Item.ShowID;
             tooltipQuickView.ItemRender3.LinkRecipeInfo = Setting.Item.LinkRecipeInfo;
             tooltipQuickView.ItemRender3.LinkRecipeItem = Setting.Item.LinkRecipeItem;
@@ -300,6 +305,11 @@ namespace WzComparerR2
             tooltipQuickView.ItemRender3.ShowLinkedTamingMob = Setting.Item.ShowLinkedTamingMob;
             tooltipQuickView.ItemRender3.CosmeticHairColor = Setting.Item.CosmeticHairColor;
             tooltipQuickView.ItemRender3.CosmeticFaceColor = Setting.Item.CosmeticFaceColor;
+            tooltipQuickView.ItemRender3.ShowDamageSkin = Setting.DamageSkin.ShowDamageSkin;
+            tooltipQuickView.ItemRender3.ShowDamageSkinID = Setting.DamageSkin.ShowDamageSkinID;
+            tooltipQuickView.ItemRender3.UseMiniSizeDamageSkin = Setting.DamageSkin.UseMiniSize;
+            tooltipQuickView.ItemRender3.AlwaysUseMseaFormatDamageSkin = Setting.DamageSkin.AlwaysUseMseaFormat;
+            tooltipQuickView.ItemRender3.DamageSkinNumber = Setting.DamageSkin.DamageSkinNumber;
             tooltipQuickView.EnableAssembleTooltip = Setting.Item.UseAssembleUI;
             tooltipQuickView.MapRender.ShowMiniMap = Setting.Map.ShowMiniMap;
             tooltipQuickView.MapRender.ShowObjectID = Setting.Map.ShowMapObjectID;
@@ -4684,6 +4694,10 @@ namespace WzComparerR2
                     comparer.SkipKMSContent = chkSkipKMSContent.Checked;
                     comparer.SkipGodChangseopDuplicatedNodes = chkSkipGodChangseopDuplicatedNodes.Checked;
                     comparer.Enable22AniStyle = GearGraphics.is22aniStyle;
+                    comparer.ShowDamageSkin = CharaSimConfig.Default.DamageSkin.ShowDamageSkin;
+                    comparer.UseMiniSizeDamageSkin = CharaSimConfig.Default.DamageSkin.UseMiniSize;
+                    comparer.AlwaysUseMseaFormatDamageSkin = CharaSimConfig.Default.DamageSkin.AlwaysUseMseaFormat;
+                    comparer.DamageSkinNumber = CharaSimConfig.Default.DamageSkin.DamageSkinNumber;
                     comparer.StateInfoChanged += new EventHandler(comparer_StateInfoChanged);
                     comparer.StateDetailChanged += new EventHandler(comparer_StateDetailChanged);
                     try

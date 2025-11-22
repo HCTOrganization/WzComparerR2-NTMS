@@ -51,6 +51,11 @@ namespace WzComparerR2.CharaSimControl
         public bool ShowSoldPrice { get; set; }
         public bool ShowCashPurchasePrice { get; set; }
         public bool Enable22AniStyle { get; set; }
+        public bool ShowDamageSkin { get; set; }
+        public bool ShowDamageSkinID { get; set; }
+        public bool UseMiniSizeDamageSkin { get; set; }
+        public bool AlwaysUseMseaFormatDamageSkin { get; set; }
+        public long DamageSkinNumber { get; set; }
         public CashPackage CashPackage { get; set; }
         private bool WillDrawNickTag { get; set; }
         private Wz_Node NickResNode {  get; set; }
@@ -59,6 +64,7 @@ namespace WzComparerR2.CharaSimControl
         public TooltipRender LinkRecipeInfoRender { get; set; }
         public TooltipRender LinkRecipeGearRender { get; set; }
         public TooltipRender LinkRecipeItemRender { get; set; }
+        public TooltipRender LinkDamageSkinRender { get; set; }
         public TooltipRender SetItemRender { get; set; }
         public TooltipRender CashPackageRender { get; set; }
         private AvatarCanvasManager avatar { get; set; }
@@ -228,6 +234,17 @@ namespace WzComparerR2.CharaSimControl
                     setItemBmp = RenderSetItem(setItem);
                 }
             }
+
+            if (this.item.DamageSkinID != null && ShowDamageSkin)
+            {
+                DamageSkin damageSkin = DamageSkin.CreateFromNode(PluginManager.FindWz($@"Etc\DamageSkin.img\{item.DamageSkinID}", this.SourceWzFile), PluginManager.FindWz);
+                if (damageSkin != null)
+                {
+                    setItemBmp = RenderDamageSkin(damageSkin);
+                }
+
+            }
+
 
             //计算布局
             Size totalSize = new Size(itemBmp.Width, picHeight);
@@ -1220,6 +1237,22 @@ namespace WzComparerR2.CharaSimControl
             }
 
             return tags;
+        }
+        private Bitmap RenderDamageSkin(DamageSkin damageSkin)
+        {
+            TooltipRender renderer = this.LinkDamageSkinRender;
+            if (renderer == null)
+            {
+                DamageSkinTooltipRenderer defaultRenderer = new DamageSkinTooltipRenderer();
+                defaultRenderer.StringLinker = this.StringLinker;
+                defaultRenderer.ShowObjectID = this.ShowDamageSkinID;
+                defaultRenderer.UseMiniSize = this.UseMiniSizeDamageSkin;
+                defaultRenderer.AlwaysUseMseaFormat = this.AlwaysUseMseaFormatDamageSkin;
+                defaultRenderer.DamageSkinNumber = this.DamageSkinNumber;
+                renderer = defaultRenderer;
+            }
+            renderer.TargetItem = damageSkin;
+            return renderer.Render();
         }
 
         private Bitmap RenderLinkRecipeInfo(Recipe recipe)

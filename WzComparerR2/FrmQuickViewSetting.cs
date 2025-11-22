@@ -260,6 +260,41 @@ namespace WzComparerR2
         }
 
         [Link]
+        public bool DamageSkin_ShowDamageSkinID
+        {
+            get { return chkShowDamageSkinID.Checked; }
+            set { chkShowDamageSkinID.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_ShowDamageSkin
+        {
+            get { return chkShowDamageSkin.Checked; }
+            set { chkShowDamageSkin.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_UseMiniSize
+        {
+            get { return chkUseMiniSize.Checked; }
+            set { chkUseMiniSize.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_AlwaysUseMseaFormat
+        {
+            get { return chkAlwaysUseMseaFormat.Checked; }
+            set { chkAlwaysUseMseaFormat.Checked = value; }
+        }
+
+        [Link]
+        public long DamageSkin_DamageSkinNumber
+        {
+            get { return long.TryParse(txtDamageSkinNumber.Text, out long val) ? val : 0; }
+            set { txtDamageSkinNumber.Text = value.ToString(); }
+        }
+
+        [Link]
         public bool Map_ShowMiniMap
         {
             get { return chkShowMiniMap.Checked; }
@@ -415,6 +450,20 @@ namespace WzComparerR2
             this.comboBoxExQuestState.Enabled = !this.chkQAS.Checked;
             this.labelXQS.Enabled = !this.chkQAS.Checked;
             this.labelXQSHint.Enabled = !this.chkQAS.Checked;
+        }
+
+        private void txtDamageSkinNumber_TextChanged(object sender, EventArgs e)
+        {
+            this.buttonX1.Enabled = !(string.IsNullOrEmpty(txtDamageSkinNumber.Text) || txtDamageSkinNumber.Text == "0");
+
+            string digitsOnly = new string(txtDamageSkinNumber.Text.Where(char.IsDigit).ToArray());
+
+            if (txtDamageSkinNumber.Text != digitsOnly)
+            {
+                int cursorPos = txtDamageSkinNumber.SelectionStart;
+                txtDamageSkinNumber.Text = digitsOnly;
+                txtDamageSkinNumber.SelectionStart = Math.Min(cursorPos, txtDamageSkinNumber.Text.Length);
+            }
         }
 
         private sealed class LinkAttribute : Attribute

@@ -1655,16 +1655,33 @@ namespace WzComparerR2.CharaSim
 
         public static string ToCJKNumberExpr(long value)
         {
-            var sb = new StringBuilder(16);
+            var sb = new StringBuilder(32);
             bool firstPart = true;
             if (value < 0)
             {
                 sb.Append("-");
                 value = -value; // just ignore the exception -2147483648
             }
+            if (value >= 1_0000_0000_0000_0000)
+            {
+                long part = value / 1_0000_0000_0000_0000;
+                sb.Append(firstPart ? null : " ");
+                sb.AppendFormat("{0}京", part); // Korean: 교, Chinese+Japanese: 京; English: Q
+                value -= part * 1_0000_0000_0000_0000;
+                firstPart = false;
+            }
+            if (value >= 1_0000_0000_0000)
+            {
+                long part = value / 1_0000_0000_0000;
+                sb.Append(firstPart ? null : " ");
+                sb.AppendFormat("{0}兆", part); // Korean: 조, Chinese+Japanese: 兆; English: T
+                value -= part * 1_0000_0000_0000;
+                firstPart = false;
+            }
             if (value >= 1_0000_0000)
             {
                 long part = value / 1_0000_0000;
+                sb.Append(firstPart ? null : " ");
                 sb.AppendFormat("{0}億", part); // Korean: 억, TradChinese+Japanese: 億, SimpChinese: 亿
                 value -= part * 1_0000_0000;
                 firstPart = false;
@@ -1681,6 +1698,99 @@ namespace WzComparerR2.CharaSim
             {
                 sb.Append(firstPart ? null : " ");
                 sb.AppendFormat("{0}", value);
+            }
+
+            return sb.Length > 0 ? sb.ToString() : "0";
+        }
+
+        public static string ToThousandsNumberExpr(long value, bool isMsea = false)
+        {
+            var sb = new StringBuilder(32);
+            bool firstPart = true;
+            if (isMsea)
+            {
+                if (value < 0)
+                {
+                    sb.Append("-");
+                    value = -value; // just ignore the exception -2147483648
+                }
+                if (value >= 1_0000_0000_0000_0000)
+                {
+                    long part = value / 1_0000_0000_0000_0000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}Q", part);
+                    value -= part * 1_0000_0000_0000_0000;
+                    firstPart = false;
+                }
+                if (value >= 1_000_000_000_000)
+                {
+                    long part = value / 1_000_000_000_000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}T", part);
+                    value -= part * 1_000_000_000_000;
+                    firstPart = false;
+                }
+                if (value >= 1_000_000_000)
+                {
+                    long part = value / 1_000_000_000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}B", part);
+                    value -= part * 1_000_000_000;
+                    firstPart = false;
+                }
+                if (value >= 1_000_000)
+                {
+                    long part = value / 1_000_000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}M", part);
+                    value -= part * 1_000_000;
+                    firstPart = false;
+                }
+                if (value >= 1_000)
+                {
+                    long part = value / 1_000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}K", part);
+                    value -= part * 1_000;
+                    firstPart = false;
+                }
+                if (value > 0)
+                {
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}", value);
+                }
+            }
+            else
+            {
+                if (value < 0)
+                {
+                    sb.Append("-");
+                    value = -value; // just ignore the exception -2147483648
+                }
+                /* if (value >= 1_000_000_000_000) // For future proofing
+                {
+                    double part = Math.Round((double)value / 1_000_000_000_000, 1);
+                    sb.AppendFormat("{0}T", part);
+                } */
+                if (value >= 1_000_000_000)
+                {
+                    double part = Math.Round((double)value / 1_000_000_000, 1);
+                    sb.AppendFormat("{0}B", part);
+                }
+                else if (value >= 1_000_000)
+                {
+                    double part = Math.Round((double)value / 1_000_000, 1);
+                    sb.AppendFormat("{0}M", part);
+                }
+                else if (value >= 1_000)
+                {
+                    double part = Math.Round((double)value / 1_000, 1);
+                    sb.AppendFormat("{0}K", part);
+                }
+                else if (value > 0)
+                {
+                    sb.AppendFormat("{0}", value);
+                }
             }
 
             return sb.Length > 0 ? sb.ToString() : "0";

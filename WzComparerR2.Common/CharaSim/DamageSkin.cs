@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
 using WzComparerR2.WzLib;
+using System.Linq;
 
 namespace WzComparerR2.CharaSim
 {
@@ -19,6 +20,14 @@ namespace WzComparerR2.CharaSim
             MiniCriticalUnit = new Dictionary<string, BitmapOrigin>();
             BigCriticalUnit = new Dictionary<string, BitmapOrigin>();
             EtcBitmap = new Dictionary<string, BitmapOrigin>();
+            MiniDigitSpacing = 0;
+            BigDigitSpacing = 0;
+            MiniCriticalDigitSpacing = 0;
+            BigCriticalDigitSpacing = 0;
+            MiniUnitSpacing = 0;
+            BigUnitSpacing = 0;
+            MiniCriticalUnitSpacing = 0;
+            BigCriticalUnitSpacing = 0;
         }
 
         public int DamageSkinID { get; set; }
@@ -51,6 +60,8 @@ namespace WzComparerR2.CharaSim
 
             DamageSkin damageSkin = new DamageSkin();
 
+            damageSkin.DamageSkinID = Convert.ToInt32(damageSkinNode.Text);
+
             foreach (Wz_Node subNode in damageSkinNode.Nodes)
             {
                 switch (subNode.Text)
@@ -75,7 +86,14 @@ namespace WzComparerR2.CharaSim
                                         }
                                         else if (digitNode.Nodes.Count > 1)
                                         {
-                                            damageSkin.MiniDigit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(digitNode.Nodes[0], findNode));
+                                            foreach (Wz_Node node in digitNode.Nodes)
+                                            {
+                                                if (node.Value is Wz_Uol || node.Value is Wz_Png)
+                                                {
+                                                    damageSkin.MiniDigit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(node, findNode));
+                                                    break;
+                                                }
+                                            }
                                         }
                                         else if (digitNode.Text == "numberSpace")
                                         {
@@ -92,7 +110,14 @@ namespace WzComparerR2.CharaSim
                                         }
                                         else if (digitNode.Nodes.Count > 1)
                                         {
-                                            damageSkin.BigDigit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(digitNode.Nodes[0], findNode));
+                                            foreach (Wz_Node node in digitNode.Nodes)
+                                            {
+                                                if (node.Value is Wz_Uol || node.Value is Wz_Png)
+                                                {
+                                                    damageSkin.BigDigit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(node, findNode));
+                                                    break;
+                                                }
+                                            }
                                         }
                                         else if (digitNode.Text == "numberSpace")
                                         {
@@ -109,7 +134,14 @@ namespace WzComparerR2.CharaSim
                                         }
                                         else if (digitNode.Nodes.Count > 1)
                                         {
-                                            damageSkin.MiniCriticalDigit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(digitNode.Nodes[0], findNode));
+                                            foreach (Wz_Node node in digitNode.Nodes)
+                                            {
+                                                if (node.Value is Wz_Uol || node.Value is Wz_Png)
+                                                {
+                                                    damageSkin.MiniCriticalDigit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(node, findNode));
+                                                    break;
+                                                }
+                                            }
                                         }
                                         else if (digitNode.Text == "numberSpace")
                                         {
@@ -126,7 +158,14 @@ namespace WzComparerR2.CharaSim
                                         }
                                         else if (digitNode.Nodes.Count > 1)
                                         {
-                                            damageSkin.BigCriticalDigit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(digitNode.Nodes[0], findNode));
+                                            foreach (Wz_Node node in digitNode.Nodes)
+                                            {
+                                                if (node.Value is Wz_Uol || node.Value is Wz_Png)
+                                                {
+                                                    damageSkin.BigCriticalDigit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(node, findNode));
+                                                    break;
+                                                }
+                                            }
                                         }
                                         else if (digitNode.Text == "numberSpace")
                                         {
@@ -148,7 +187,14 @@ namespace WzComparerR2.CharaSim
                                                     }
                                                     else if (digitNode.Nodes.Count > 1)
                                                     {
-                                                        damageSkin.MiniUnit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(digitNode.Nodes[0], findNode));
+                                                        foreach (Wz_Node node in digitNode.Nodes)
+                                                        {
+                                                            if (node.Value is Wz_Uol || node.Value is Wz_Png)
+                                                            {
+                                                                damageSkin.MiniUnit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(node, findNode));
+                                                                break;
+                                                            }
+                                                        }
                                                     }
                                                     else if (digitNode.Text == "numberSpace")
                                                     {
@@ -165,7 +211,14 @@ namespace WzComparerR2.CharaSim
                                                     }
                                                     else if (digitNode.Nodes.Count > 1)
                                                     {
-                                                        damageSkin.BigUnit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(digitNode.Nodes[0], findNode));
+                                                        foreach (Wz_Node node in digitNode.Nodes)
+                                                        {
+                                                            if (node.Value is Wz_Uol || node.Value is Wz_Png)
+                                                            {
+                                                                damageSkin.BigUnit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(node, findNode));
+                                                                break;
+                                                            }
+                                                        }
                                                     }
                                                     else if (digitNode.Text == "numberSpace")
                                                     {
@@ -182,7 +235,14 @@ namespace WzComparerR2.CharaSim
                                                     }
                                                     else if (digitNode.Nodes.Count > 1)
                                                     {
-                                                        damageSkin.MiniCriticalUnit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(digitNode.Nodes[0], findNode));
+                                                        foreach (Wz_Node node in digitNode.Nodes)
+                                                        {
+                                                            if (node.Value is Wz_Uol || node.Value is Wz_Png)
+                                                            {
+                                                                damageSkin.MiniCriticalUnit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(node, findNode));
+                                                                break;
+                                                            }
+                                                        }
                                                     }
                                                     else if (digitNode.Text == "numberSpace")
                                                     {
@@ -199,7 +259,14 @@ namespace WzComparerR2.CharaSim
                                                     }
                                                     else if (digitNode.Nodes.Count > 1)
                                                     {
-                                                        damageSkin.BigCriticalUnit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(digitNode.Nodes[0], findNode));
+                                                        foreach (Wz_Node node in digitNode.Nodes)
+                                                        {
+                                                            if (node.Value is Wz_Uol || node.Value is Wz_Png)
+                                                            {
+                                                                damageSkin.BigCriticalUnit.Add(digitNode.Text, BitmapOrigin.CreateFromNode(node, findNode));
+                                                                break;
+                                                            }
+                                                        }
                                                     }
                                                     else if (digitNode.Text == "numberSpace")
                                                     {

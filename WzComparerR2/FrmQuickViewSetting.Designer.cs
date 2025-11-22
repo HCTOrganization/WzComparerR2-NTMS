@@ -1,4 +1,7 @@
-﻿namespace WzComparerR2
+﻿using System;
+using System.Linq;
+
+namespace WzComparerR2
 {
     partial class FrmQuickViewSetting
     {
@@ -88,11 +91,19 @@
             this.superTabControlPanel5 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.superTabControlPanel6 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.superTabControlPanel7 = new DevComponents.DotNetBar.SuperTabControlPanel();
+            this.superTabControlPanel8 = new DevComponents.DotNetBar.SuperTabControlPanel();
+            this.chkShowDamageSkinID = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowDamageSkin = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkUseMiniSize = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkAlwaysUseMseaFormat = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.lblDamageSkinNumber = new DevComponents.DotNetBar.LabelX();
+            this.txtDamageSkinNumber = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.checkBoxX7 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.superTabItem4 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabItem5 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabItem6 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabItem7 = new DevComponents.DotNetBar.SuperTabItem();
+            this.superTabItem8 = new DevComponents.DotNetBar.SuperTabItem();
             this.panelEx1 = new DevComponents.DotNetBar.PanelEx();
             this.buttonX2 = new DevComponents.DotNetBar.ButtonX();
             this.buttonX1 = new DevComponents.DotNetBar.ButtonX();
@@ -121,6 +132,7 @@
             this.superTabControlPanel5.SuspendLayout();
             this.superTabControlPanel6.SuspendLayout();
             this.superTabControlPanel7.SuspendLayout();
+            this.superTabControlPanel8.SuspendLayout();
             this.panelEx1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -146,6 +158,7 @@
             this.superTabControl1.Controls.Add(this.superTabControlPanel2);
             this.superTabControl1.Controls.Add(this.superTabControlPanel3);
             this.superTabControl1.Controls.Add(this.superTabControlPanel4);
+            this.superTabControl1.Controls.Add(this.superTabControlPanel8);
             this.superTabControl1.Controls.Add(this.superTabControlPanel6);
             this.superTabControl1.Controls.Add(this.superTabControlPanel7);
             this.superTabControl1.Controls.Add(this.superTabControlPanel5);
@@ -164,6 +177,7 @@
             this.superTabItem2,
             this.superTabItem3,
             this.superTabItem4,
+            this.superTabItem8,
             this.superTabItem6,
             this.superTabItem7,
             this.superTabItem5});
@@ -1081,6 +1095,118 @@
             this.chkShowQuestObjectID.TabIndex = 4;
             this.chkShowQuestObjectID.Text = "左上方顯示ID";
             // 
+            // superTabControlPanel8
+            // 
+            this.superTabControlPanel8.Controls.Add(this.txtDamageSkinNumber);
+            this.superTabControlPanel8.Controls.Add(this.lblDamageSkinNumber);
+            this.superTabControlPanel8.Controls.Add(this.chkAlwaysUseMseaFormat);
+            this.superTabControlPanel8.Controls.Add(this.chkUseMiniSize);
+            this.superTabControlPanel8.Controls.Add(this.chkShowDamageSkin);
+            this.superTabControlPanel8.Controls.Add(this.chkShowDamageSkinID);
+            this.superTabControlPanel8.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.superTabControlPanel8.Location = new System.Drawing.Point(62, 0);
+            this.superTabControlPanel8.Name = "superTabControlPanel8";
+            this.superTabControlPanel8.Size = new System.Drawing.Size(242, 211);
+            this.superTabControlPanel8.TabIndex = 0;
+            this.superTabControlPanel8.TabItem = this.superTabItem8;
+            this.superTabControlPanel8.Visible = false;
+            // 
+            // superTabItem8
+            // 
+            this.superTabItem8.AttachedControl = this.superTabControlPanel8;
+            this.superTabItem8.GlobalItem = false;
+            this.superTabItem8.Name = "superTabItem8";
+            this.superTabItem8.Text = "傷害字型";
+            // 
+            // txtDamageSkinNumber
+            // 
+            // 
+            // 
+            // 
+            this.txtDamageSkinNumber.Border.Class = "TextBoxBorder";
+            this.txtDamageSkinNumber.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtDamageSkinNumber.Location = new System.Drawing.Point(86, 106);
+            this.txtDamageSkinNumber.Name = "txtDamageSkinNumber";
+            this.txtDamageSkinNumber.Size = new System.Drawing.Size(160, 23);
+            this.txtDamageSkinNumber.WatermarkText = "1234567890";
+            this.txtDamageSkinNumber.MaxLength = 18;
+            this.txtDamageSkinNumber.TextChanged += new System.EventHandler(this.txtDamageSkinNumber_TextChanged);
+            this.txtDamageSkinNumber.TabIndex = 6;
+            // 
+            // lblDamageSkinNumber
+            // 
+            this.lblDamageSkinNumber.AutoSize = true;
+            this.lblDamageSkinNumber.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.lblDamageSkinNumber.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.lblDamageSkinNumber.Location = new System.Drawing.Point(13, 107);
+            this.lblDamageSkinNumber.Name = "lblDamageSkinNumber";
+            this.lblDamageSkinNumber.Size = new System.Drawing.Size(87, 16);
+            this.lblDamageSkinNumber.TabIndex = 5;
+            this.lblDamageSkinNumber.Text = "傷害数字";
+            // 
+            // chkAlwaysUseMseaFormat
+            // 
+            this.chkAlwaysUseMseaFormat.AutoSize = true;
+            this.chkAlwaysUseMseaFormat.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkAlwaysUseMseaFormat.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkAlwaysUseMseaFormat.Location = new System.Drawing.Point(13, 84);
+            this.chkAlwaysUseMseaFormat.Name = "chkAlwaysUseMseaFormat";
+            this.chkAlwaysUseMseaFormat.Size = new System.Drawing.Size(133, 16);
+            this.chkAlwaysUseMseaFormat.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkAlwaysUseMseaFormat.TabIndex = 4;
+            this.chkAlwaysUseMseaFormat.Text = "套用MSEA的千位分隔符 (GMS限定)";
+            // 
+            // chkUseMiniSize
+            // 
+            this.chkUseMiniSize.AutoSize = true;
+            this.chkUseMiniSize.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkUseMiniSize.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkUseMiniSize.Location = new System.Drawing.Point(13, 60);
+            this.chkUseMiniSize.Name = "chkUseMiniSize";
+            this.chkUseMiniSize.Size = new System.Drawing.Size(145, 16);
+            this.chkUseMiniSize.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkUseMiniSize.TabIndex = 3;
+            this.chkUseMiniSize.Text = "使用迷你尺寸傷害字型";
+            // 
+            // chkShowDamageSkin
+            // 
+            this.chkShowDamageSkin.AutoSize = true;
+            this.chkShowDamageSkin.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowDamageSkin.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowDamageSkin.Location = new System.Drawing.Point(13, 36);
+            this.chkShowDamageSkin.Name = "chkShowDamageSkin";
+            this.chkShowDamageSkin.Size = new System.Drawing.Size(172, 16);
+            this.chkShowDamageSkin.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowDamageSkin.TabIndex = 2;
+            this.chkShowDamageSkin.Text = "預覽傷害字型";
+            // 
+            // chkShowDamageSkinID
+            // 
+            this.chkShowDamageSkinID.AutoSize = true;
+            this.chkShowDamageSkinID.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowDamageSkinID.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowDamageSkinID.Location = new System.Drawing.Point(13, 12);
+            this.chkShowDamageSkinID.Name = "chkShowDamageSkinID";
+            this.chkShowDamageSkinID.Size = new System.Drawing.Size(117, 16);
+            this.chkShowDamageSkinID.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowDamageSkinID.TabIndex = 1;
+            this.chkShowDamageSkinID.Text = "左上方顯示ID";
+            // 
             // superTabControlPanel5
             // 
             this.superTabControlPanel5.Controls.Add(this.chkEnable22AniStyle);
@@ -1216,7 +1342,6 @@
             this.superTabControlPanel7.PerformLayout();
             this.panelEx1.ResumeLayout(false);
             this.ResumeLayout(false);
-
         }
 
         #endregion
@@ -1255,10 +1380,12 @@
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel5;
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel6;
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel7;
+        private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel8;
         private DevComponents.DotNetBar.SuperTabItem superTabItem4;
         private DevComponents.DotNetBar.SuperTabItem superTabItem5;
         private DevComponents.DotNetBar.SuperTabItem superTabItem6;
         private DevComponents.DotNetBar.SuperTabItem superTabItem7;
+        private DevComponents.DotNetBar.SuperTabItem superTabItem8;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX6;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX7;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX9;
@@ -1278,6 +1405,12 @@
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX22;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX23;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnable22AniStyle;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowDamageSkinID;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowDamageSkin;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkUseMiniSize;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkAlwaysUseMseaFormat;
+        private DevComponents.DotNetBar.LabelX lblDamageSkinNumber;
+        private DevComponents.DotNetBar.Controls.TextBoxX txtDamageSkinNumber;
         private DevComponents.DotNetBar.LabelX labelX14;
         private DevComponents.DotNetBar.LabelX labelX15;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowMiniMap;
