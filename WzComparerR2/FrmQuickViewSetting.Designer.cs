@@ -1145,7 +1145,7 @@ namespace WzComparerR2
             this.lblDamageSkinNumber.Name = "lblDamageSkinNumber";
             this.lblDamageSkinNumber.Size = new System.Drawing.Size(87, 16);
             this.lblDamageSkinNumber.TabIndex = 5;
-            this.lblDamageSkinNumber.Text = "傷害数字";
+            this.lblDamageSkinNumber.Text = "傷害數字";
             // 
             // chkAlwaysUseMseaFormat
             // 
