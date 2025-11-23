@@ -11,6 +11,7 @@ using SharpDX.XAudio2;
 using System.Threading.Tasks;
 using System.Threading;
 using WzComparerR2.Properties;
+using System.IO;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -21,7 +22,7 @@ namespace WzComparerR2.CharaSimControl
             this.menu = new ContextMenuStrip();
             this.menu.Items.Add(new ToolStripMenuItem("複製到剪貼簿", null, tsmiCopy_Click));
             this.menu.Items.Add(new ToolStripMenuItem("保存PNG", null, tsmiSave_Click));
-            this.menu.Items.Add(new ToolStripMenuItem("保存紙娃娃", null, tsmiAvatarSave_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("保存樣本", null, tsmiSampleAssetSave_Click));
             this.menu.Items.Add(new ToolStripSeparator());
             this.menu.Items.Add(new ToolStripMenuItem("複製文字", null, tsmiCopyText_Click));
             this.menu.Items.Add(new ToolStripMenuItem("複製譯文", null, tsmiCopyTranslate_Click));
@@ -60,6 +61,9 @@ namespace WzComparerR2.CharaSimControl
         public bool EnableAssembleTooltip { get; set; }
 
         private Bitmap AvatarBitmap;
+        private Bitmap SampleBitmap;
+        private Bitmap DamageSkinSampleNonCriticalBitmap;
+        private Bitmap DamageSkinSampleCriticalBitmap;
         private FrmWaiting WaitingForm = new FrmWaiting();
         private static readonly SemaphoreSlim TranslateSemaphore = new SemaphoreSlim(1, 1);
 
@@ -308,7 +312,16 @@ namespace WzComparerR2.CharaSimControl
             {
                 this.Bitmap = renderer.Render();
             }
-            if (item is Item) AvatarBitmap = (this.TargetItem as Item).AvatarBitmap;
+            if (item is Item)
+            {
+                AvatarBitmap = (this.TargetItem as Item).AvatarBitmap;
+                SampleBitmap = (this.TargetItem as Item).Sample.Bitmap;
+                if ((this.TargetItem as Item).DamageSkinID != null)
+                {
+                    DamageSkinSampleNonCriticalBitmap = (this.TargetItem as Item).DamageSkinSampleNonCriticalBitmap;
+                    DamageSkinSampleCriticalBitmap = (this.TargetItem as Item).DamageSkinSampleCriticalBitmap;
+                }
+            }
             if (item is Gear) AvatarBitmap = (this.TargetItem as Gear).AndroidBitmap;
             if (item is Npc) AvatarBitmap = (this.TargetItem as Npc).AvatarBitmap;
         }
@@ -607,9 +620,24 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
-        void tsmiAvatarSave_Click(object sender, EventArgs e)
+        void tsmiSampleAssetSave_Click(object sender, EventArgs e)
         {
-            if (this.AvatarBitmap != null && this.item != null)
+            if (this.DamageSkinSampleNonCriticalBitmap != null && this.DamageSkinSampleCriticalBitmap != null && this.item != null)
+            {
+                using (FolderBrowserDialog dlg = new FolderBrowserDialog())
+                {
+                    dlg.Description = "請選擇存放傷害字型樣本的目標資料夾。";
+                    string fileName1 = this.ImageFileName.Replace("item", "DamageSkinSample");
+                    string fileName2 = this.ImageFileName.Replace("item", "DamageSkinCriticalSample");
+
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        this.DamageSkinSampleNonCriticalBitmap.Save(Path.Combine(dlg.SelectedPath, fileName1), System.Drawing.Imaging.ImageFormat.Png);
+                        this.DamageSkinSampleCriticalBitmap.Save(Path.Combine(dlg.SelectedPath, fileName2), System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                }
+            }
+            else if (this.AvatarBitmap != null && this.item != null)
             {
                 using (SaveFileDialog dlg = new SaveFileDialog())
                 {
@@ -619,6 +647,19 @@ namespace WzComparerR2.CharaSimControl
                     if (dlg.ShowDialog() == DialogResult.OK)
                     {
                         this.AvatarBitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                }
+            }
+            else if (this.SampleBitmap != null && this.item != null)
+            {
+                using (SaveFileDialog dlg = new SaveFileDialog())
+                {
+                    dlg.Filter = "PNG (*.png)|*.png|*.*|*.*";
+                    dlg.FileName = this.ImageFileName.Replace("eqp", "sample").Replace("item", "sample");
+
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        this.SampleBitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
                     }
                 }
             }

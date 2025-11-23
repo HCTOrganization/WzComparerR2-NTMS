@@ -34,6 +34,8 @@ namespace WzComparerR2.CharaSim
         public List<int> AddTooltips { get; internal set; } // Additional Tooltips
         public List<int> Recipes { get; private set; }
         public Bitmap AvatarBitmap { get; set; }
+        public Bitmap DamageSkinSampleNonCriticalBitmap { get; set; }
+        public Bitmap DamageSkinSampleCriticalBitmap { get; set; }
         public bool Cash
         {
             get { return GetBooleanValue(ItemPropType.cash); }

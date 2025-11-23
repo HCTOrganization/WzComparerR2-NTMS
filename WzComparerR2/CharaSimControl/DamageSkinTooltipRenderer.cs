@@ -38,6 +38,8 @@ namespace WzComparerR2.CharaSimControl
         public bool UseMiniSize { get; set; } = false;
         public bool AlwaysUseMseaFormat { get; set; } = false;
         public long DamageSkinNumber { get; set; } = 1234567890;
+        public Bitmap customSampleNonCritical { get; private set; }
+        public Bitmap customSampleCritical { get; private set; }
 
         public override Bitmap Render()
         {
@@ -48,8 +50,8 @@ namespace WzComparerR2.CharaSimControl
                 return null;
             }
 
-            Bitmap customSampleNonCritical = GetCustomSample(DamageSkinNumber, UseMiniSize, false);
-            Bitmap customSampleCritical = GetCustomSample(DamageSkinNumber, UseMiniSize, true);
+            customSampleNonCritical = GetCustomSample(DamageSkinNumber, UseMiniSize, false);
+            customSampleCritical = GetCustomSample(DamageSkinNumber, UseMiniSize, true);
             Bitmap extraBitmap = null;
             // Bitmap extraBitmap = GetExtraEffect(Math.Max(customSampleCritical.Width, customSampleNonCritical.Width));
 
@@ -88,7 +90,7 @@ namespace WzComparerR2.CharaSimControl
             return tooltip;
         }
 
-        private Bitmap GetCustomSample(long inputNumber, bool useMiniSize, bool isCritical)
+        public Bitmap GetCustomSample(long inputNumber, bool useMiniSize, bool isCritical)
         {
             string numberStr = "";
             switch (damageSkin.CustomType)

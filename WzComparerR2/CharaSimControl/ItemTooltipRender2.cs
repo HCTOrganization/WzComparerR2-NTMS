@@ -1250,6 +1250,9 @@ namespace WzComparerR2.CharaSimControl
                 defaultRenderer.AlwaysUseMseaFormat = this.AlwaysUseMseaFormatDamageSkin;
                 defaultRenderer.DamageSkinNumber = this.DamageSkinNumber;
                 renderer = defaultRenderer;
+                defaultRenderer.DamageSkin = damageSkin;
+                item.DamageSkinSampleNonCriticalBitmap = defaultRenderer.GetCustomSample(this.DamageSkinNumber, this.UseMiniSizeDamageSkin, false);
+                item.DamageSkinSampleCriticalBitmap = defaultRenderer.GetCustomSample(this.DamageSkinNumber, this.UseMiniSizeDamageSkin, true);
             }
             renderer.TargetItem = damageSkin;
             return renderer.Render();
