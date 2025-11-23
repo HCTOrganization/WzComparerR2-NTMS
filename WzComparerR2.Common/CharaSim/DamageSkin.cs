@@ -72,6 +72,9 @@ namespace WzComparerR2.CharaSim
                     case "extractID":
                         damageSkin.ExtractItemID = subNode.GetValue<int>();
                         break;
+                    case "sample":
+                        damageSkin.Sample = BitmapOrigin.CreateFromNode(subNode, findNode);
+                        break;
                     case "effect":
                         foreach (Wz_Node effectNode in subNode.Nodes)
                         {
@@ -279,9 +282,6 @@ namespace WzComparerR2.CharaSim
                                                 break;
                                         }
                                     }
-                                    break;
-                                case "sample":
-                                    damageSkin.Sample = BitmapOrigin.CreateFromNode(effectNode, findNode);
                                     break;
                             }
                         }
