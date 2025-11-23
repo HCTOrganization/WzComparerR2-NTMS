@@ -1670,6 +1670,9 @@ namespace WzComparerR2.CharaSim
                 string digits = value.ToString();
                 int len = digits.Length;
 
+                bool blockHasValue = false;
+                int zeroCount = 0;
+
                 for (int i = 0; i < len; i++)
                 {
                     int posFromRight = len - i - 1;
@@ -1677,13 +1680,35 @@ namespace WzComparerR2.CharaSim
                     int bigUnitIndex = posFromRight / 4;
 
                     char d = digits[i];
-                    sb.Append(d);
 
-                    if (smallUnitIndex > 0)
-                        sb.Append(smallUnits[smallUnitIndex]);
+                    if (d == '0')
+                    {
+                        zeroCount++;
+                    }
+                    else
+                    {
+                        if (zeroCount > 0 && zeroCount <= 3)
+                        {
+                            sb.Append('0');
+                        }
 
-                    if (smallUnitIndex == 0 && bigUnitIndex > 0 && bigUnitIndex < bigUnits.Length)
-                        sb.Append(bigUnits[bigUnitIndex]);
+                        zeroCount = 0;
+
+                        sb.Append(d);
+                        if (smallUnitIndex > 0)
+                            sb.Append(smallUnits[smallUnitIndex]);
+
+                        blockHasValue = true;
+                    }
+
+                    if (smallUnitIndex == 0)
+                    {
+                        if (blockHasValue && bigUnitIndex > 0 && bigUnitIndex < bigUnits.Length)
+                            sb.Append(bigUnits[bigUnitIndex]);
+
+                        blockHasValue = false;
+                        zeroCount = 0;
+                    }
                 }
             }
             else
