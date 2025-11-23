@@ -95,6 +95,9 @@ namespace WzComparerR2.CharaSimControl
             string numberStr = "";
             switch (damageSkin.CustomType)
             {
+                case "hangul": // CJK Detailed
+                    numberStr = ItemStringHelper.ToCJKNumberExpr(inputNumber, true);
+                    break;
                 case "hangulUnit": // CJK
                     numberStr = ItemStringHelper.ToCJKNumberExpr(inputNumber);
                     break;
@@ -163,109 +166,138 @@ namespace WzComparerR2.CharaSimControl
                             this.damageSkin.BigDigit[character].Bitmap.Height));
                         break;
 
+                    case "十":
+                    case "십":
+                    case ".":
+                        if (this.damageSkin.BigUnit.ContainsKey("0"))
+                        {
+                            totalWidth += isCritical ?
+                                (useMiniSize ? this.damageSkin.MiniCriticalUnit["0"].Bitmap.Width :
+                                this.damageSkin.BigCriticalUnit["0"].Bitmap.Width) :
+                                (useMiniSize ? this.damageSkin.MiniUnit["0"].Bitmap.Width :
+                                this.damageSkin.BigUnit["0"].Bitmap.Width);
+                            totalWidth += unitSpacing;
+                            maxHeight = Math.Max(maxHeight, isCritical ?
+                                (useMiniSize ? this.damageSkin.MiniCriticalUnit["0"].Bitmap.Height :
+                                this.damageSkin.BigCriticalUnit["0"].Bitmap.Height) :
+                                (useMiniSize ? this.damageSkin.MiniUnit["0"].Bitmap.Height :
+                                this.damageSkin.BigUnit["0"].Bitmap.Height));
+                        }
+                        break;
+
+                    case "百":
+                    case "백":
+                    case "K":
+                        if (this.damageSkin.BigUnit.ContainsKey("1"))
+                        {
+                            totalWidth += isCritical ?
+                                (useMiniSize ? this.damageSkin.MiniCriticalUnit["1"].Bitmap.Width :
+                                this.damageSkin.BigCriticalUnit["1"].Bitmap.Width) :
+                                (useMiniSize ? this.damageSkin.MiniUnit["1"].Bitmap.Width :
+                                this.damageSkin.BigUnit["1"].Bitmap.Width);
+                            totalWidth += unitSpacing;
+                            maxHeight = Math.Max(maxHeight, isCritical ?
+                                (useMiniSize ? this.damageSkin.MiniCriticalUnit["1"].Bitmap.Height :
+                                this.damageSkin.BigCriticalUnit["1"].Bitmap.Height) :
+                                (useMiniSize ? this.damageSkin.MiniUnit["1"].Bitmap.Height :
+                                this.damageSkin.BigUnit["1"].Bitmap.Height));
+                        }
+                        break;
+
+                    case "千":
+                    case "천":
+                    case "M":
+                        if (this.damageSkin.BigUnit.ContainsKey("2"))
+                        {
+                            totalWidth += isCritical ?
+                                (useMiniSize ? this.damageSkin.MiniCriticalUnit["2"].Bitmap.Width :
+                                this.damageSkin.BigCriticalUnit["2"].Bitmap.Width) :
+                                (useMiniSize ? this.damageSkin.MiniUnit["2"].Bitmap.Width :
+                                this.damageSkin.BigUnit["2"].Bitmap.Width);
+                            totalWidth += unitSpacing;
+                            maxHeight = Math.Max(maxHeight, isCritical ?
+                                (useMiniSize ? this.damageSkin.MiniCriticalUnit["2"].Bitmap.Height :
+                                this.damageSkin.BigCriticalUnit["2"].Bitmap.Height) :
+                                (useMiniSize ? this.damageSkin.MiniUnit["2"].Bitmap.Height :
+                                this.damageSkin.BigUnit["2"].Bitmap.Height));
+                        }
+                        break;
+
                     case "万":
                     case "萬":
                     case "만":
-                    case ".":
-                        totalWidth += isCritical ?
-                            (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(0).Value.Bitmap.Width :
-                            this.damageSkin.BigCriticalUnit.ElementAt(0).Value.Bitmap.Width) :
-                            (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(0).Value.Bitmap.Width :
-                            this.damageSkin.BigUnit.ElementAt(0).Value.Bitmap.Width);
-                        totalWidth += unitSpacing;
-                        maxHeight = Math.Max(maxHeight, isCritical ?
-                            (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(0).Value.Bitmap.Height :
-                            this.damageSkin.BigCriticalUnit.ElementAt(0).Value.Bitmap.Height) :
-                            (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(0).Value.Bitmap.Height :
-                            this.damageSkin.BigUnit.ElementAt(0).Value.Bitmap.Height));
+                    case "B":
+                        if (this.damageSkin.BigUnit.ContainsKey("3"))
+                        {
+                            totalWidth += isCritical ?
+                                (useMiniSize ? this.damageSkin.MiniCriticalUnit["3"].Bitmap.Width :
+                                this.damageSkin.BigCriticalUnit["3"].Bitmap.Width) :
+                                (useMiniSize ? this.damageSkin.MiniUnit["3"].Bitmap.Width :
+                                this.damageSkin.BigUnit["3"].Bitmap.Width);
+                            totalWidth += unitSpacing;
+                            maxHeight = Math.Max(maxHeight, isCritical ?
+                                (useMiniSize ? this.damageSkin.MiniCriticalUnit["3"].Bitmap.Height :
+                                this.damageSkin.BigCriticalUnit["3"].Bitmap.Height) :
+                                (useMiniSize ? this.damageSkin.MiniUnit["3"].Bitmap.Height :
+                                this.damageSkin.BigUnit["3"].Bitmap.Height));
+                        }
                         break;
 
                     case "億":
                     case "亿":
                     case "억":
-                    case "K":
-                        totalWidth += isCritical ?
-                            (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(1).Value.Bitmap.Width :
-                            this.damageSkin.BigCriticalUnit.ElementAt(1).Value.Bitmap.Width) :
-                            (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(1).Value.Bitmap.Width :
-                            this.damageSkin.BigUnit.ElementAt(1).Value.Bitmap.Width);
-                        totalWidth += unitSpacing;
-                        maxHeight = Math.Max(maxHeight, isCritical ?
-                            (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(1).Value.Bitmap.Height :
-                            this.damageSkin.BigCriticalUnit.ElementAt(1).Value.Bitmap.Height) :
-                            (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(1).Value.Bitmap.Height :
-                            this.damageSkin.BigUnit.ElementAt(1).Value.Bitmap.Height));
+                    case "T":
+                        if (this.damageSkin.BigUnit.ContainsKey("4"))
+                        {
+                            totalWidth += isCritical ?
+                                (useMiniSize ? this.damageSkin.MiniCriticalUnit["4"].Bitmap.Width :
+                                this.damageSkin.BigCriticalUnit["4"].Bitmap.Width) :
+                                (useMiniSize ? this.damageSkin.MiniUnit["4"].Bitmap.Width :
+                                this.damageSkin.BigUnit["4"].Bitmap.Width);
+                            totalWidth += unitSpacing;
+                            maxHeight = Math.Max(maxHeight, isCritical ?
+                                (useMiniSize ? this.damageSkin.MiniCriticalUnit["4"].Bitmap.Height :
+                                this.damageSkin.BigCriticalUnit["4"].Bitmap.Height) :
+                                (useMiniSize ? this.damageSkin.MiniUnit["4"].Bitmap.Height :
+                                this.damageSkin.BigUnit["4"].Bitmap.Height));
+                        }
                         break;
+
 
                     case "兆":
                     case "조":
-                    case "M":
-                        if (this.damageSkin.BigUnit.Count >= 3)
+                    case "Q":
+                        if (this.damageSkin.BigUnit.ContainsKey("5"))
                         {
                             totalWidth += isCritical ?
-                                (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(2).Value.Bitmap.Width :
-                                this.damageSkin.BigCriticalUnit.ElementAt(2).Value.Bitmap.Width) :
-                                (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(2).Value.Bitmap.Width :
-                                this.damageSkin.BigUnit.ElementAt(2).Value.Bitmap.Width);
+                                (useMiniSize ? this.damageSkin.MiniCriticalUnit["5"].Bitmap.Width :
+                                this.damageSkin.BigCriticalUnit["5"].Bitmap.Width) :
+                                (useMiniSize ? this.damageSkin.MiniUnit["5"].Bitmap.Width :
+                                this.damageSkin.BigUnit["5"].Bitmap.Width);
                             totalWidth += unitSpacing;
                             maxHeight = Math.Max(maxHeight, isCritical ?
-                                (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(2).Value.Bitmap.Height :
-                                this.damageSkin.BigCriticalUnit.ElementAt(2).Value.Bitmap.Height) :
-                                (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(2).Value.Bitmap.Height :
-                                this.damageSkin.BigUnit.ElementAt(2).Value.Bitmap.Height));
+                                (useMiniSize ? this.damageSkin.MiniCriticalUnit["5"].Bitmap.Height :
+                                this.damageSkin.BigCriticalUnit["5"].Bitmap.Height) :
+                                (useMiniSize ? this.damageSkin.MiniUnit["5"].Bitmap.Height :
+                                this.damageSkin.BigUnit["5"].Bitmap.Height));
                         }
                         break;
 
                     case "京":
                     case "교":
-                    case "B":
-                        if (this.damageSkin.BigUnit.Count >= 4)
+                        if (this.damageSkin.BigUnit.ContainsKey("6"))
                         {
                             totalWidth += isCritical ?
-                                (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(3).Value.Bitmap.Width :
-                                this.damageSkin.BigCriticalUnit.ElementAt(3).Value.Bitmap.Width) :
-                                (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(3).Value.Bitmap.Width :
-                                this.damageSkin.BigUnit.ElementAt(3).Value.Bitmap.Width);
+                                (useMiniSize ? this.damageSkin.MiniCriticalUnit["6"].Bitmap.Width :
+                                this.damageSkin.BigCriticalUnit["6"].Bitmap.Width) :
+                                (useMiniSize ? this.damageSkin.MiniUnit["6"].Bitmap.Width :
+                                this.damageSkin.BigUnit["6"].Bitmap.Width);
                             totalWidth += unitSpacing;
                             maxHeight = Math.Max(maxHeight, isCritical ?
-                                (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(3).Value.Bitmap.Height :
-                                this.damageSkin.BigCriticalUnit.ElementAt(3).Value.Bitmap.Height) :
-                                (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(3).Value.Bitmap.Height :
-                                this.damageSkin.BigUnit.ElementAt(3).Value.Bitmap.Height));
-                        }
-                        break;
-
-                    case "T":
-                        if (this.damageSkin.BigUnit.Count >= 5)
-                        {
-                            totalWidth += isCritical ?
-                                (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(4).Value.Bitmap.Width :
-                                this.damageSkin.BigCriticalUnit.ElementAt(4).Value.Bitmap.Width) :
-                                (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(4).Value.Bitmap.Width :
-                                this.damageSkin.BigUnit.ElementAt(4).Value.Bitmap.Width);
-                            totalWidth += unitSpacing;
-                            maxHeight = Math.Max(maxHeight, isCritical ?
-                                (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(4).Value.Bitmap.Height :
-                                this.damageSkin.BigCriticalUnit.ElementAt(4).Value.Bitmap.Height) :
-                                (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(4).Value.Bitmap.Height :
-                                this.damageSkin.BigUnit.ElementAt(4).Value.Bitmap.Height));
-                        }
-                        break;
-
-                    case "Q":
-                        if (this.damageSkin.BigUnit.Count >= 6)
-                        {
-                            totalWidth += isCritical ?
-                                (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(5).Value.Bitmap.Width :
-                                this.damageSkin.BigCriticalUnit.ElementAt(5).Value.Bitmap.Width) :
-                                (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(5).Value.Bitmap.Width :
-                                this.damageSkin.BigUnit.ElementAt(5).Value.Bitmap.Width);
-                            totalWidth += unitSpacing;
-                            maxHeight = Math.Max(maxHeight, isCritical ?
-                                (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(5).Value.Bitmap.Height :
-                                this.damageSkin.BigCriticalUnit.ElementAt(5).Value.Bitmap.Height) :
-                                (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(5).Value.Bitmap.Height :
-                                this.damageSkin.BigUnit.ElementAt(5).Value.Bitmap.Height));
+                                (useMiniSize ? this.damageSkin.MiniCriticalUnit["6"].Bitmap.Height :
+                                this.damageSkin.BigCriticalUnit["6"].Bitmap.Height) :
+                                (useMiniSize ? this.damageSkin.MiniUnit["6"].Bitmap.Height :
+                                this.damageSkin.BigUnit["6"].Bitmap.Height));
                         }
                         break;
                 }
@@ -306,40 +338,95 @@ namespace WzComparerR2.CharaSimControl
                             g.DrawImage(charBitmap, offsetX, maxHeight - charBitmap.Height);
                             offsetX += charBitmap.Width + digitSpacing;
                             break;
+
+                        case "十":
+                        case "십":
+                        case ".":
+                            if (this.damageSkin.BigUnit.ContainsKey("0"))
+                            {
+                                charBitmap = isCritical ?
+                                    (useMiniSize ? this.damageSkin.MiniCriticalUnit["0"].Bitmap :
+                                    this.damageSkin.BigCriticalUnit["0"].Bitmap) :
+                                    (useMiniSize ? this.damageSkin.MiniUnit["0"].Bitmap :
+                                    this.damageSkin.BigUnit["0"].Bitmap);
+                                g.DrawImage(charBitmap, offsetX, maxHeight - charBitmap.Height);
+                                offsetX += charBitmap.Width + unitSpacing;
+                            }
+                            break;
+
+                        case "百":
+                        case "백":
+                        case "K":
+                            if (this.damageSkin.BigUnit.ContainsKey("1"))
+                            {
+                                charBitmap = isCritical ?
+                                    (useMiniSize ? this.damageSkin.MiniCriticalUnit["1"].Bitmap :
+                                    this.damageSkin.BigCriticalUnit["1"].Bitmap) :
+                                    (useMiniSize ? this.damageSkin.MiniUnit["1"].Bitmap :
+                                    this.damageSkin.BigUnit["1"].Bitmap);
+                                g.DrawImage(charBitmap, offsetX, maxHeight - charBitmap.Height);
+                                offsetX += charBitmap.Width + unitSpacing;
+                            }
+                            break;
+
+                        case "千":
+                        case "천":
+                        case "M":
+                            if (this.damageSkin.BigUnit.ContainsKey("2"))
+                            {
+                                charBitmap = isCritical ?
+                                    (useMiniSize ? this.damageSkin.MiniCriticalUnit["2"].Bitmap :
+                                    this.damageSkin.BigCriticalUnit["2"].Bitmap) :
+                                    (useMiniSize ? this.damageSkin.MiniUnit["2"].Bitmap :
+                                    this.damageSkin.BigUnit["2"].Bitmap);
+                                g.DrawImage(charBitmap, offsetX, maxHeight - charBitmap.Height);
+                                offsetX += charBitmap.Width + unitSpacing;
+                            }
+                            break;
+
                         case "万":
                         case "萬":
                         case "만":
-                        case ".":
-                            charBitmap = isCritical ?
-                                (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(0).Value.Bitmap :
-                                this.damageSkin.BigCriticalUnit.ElementAt(0).Value.Bitmap) :
-                                (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(0).Value.Bitmap :
-                                this.damageSkin.BigUnit.ElementAt(0).Value.Bitmap);
-                            g.DrawImage(charBitmap, offsetX, maxHeight - charBitmap.Height);
-                            offsetX += charBitmap.Width + unitSpacing;
+                        case "B":
+                            if (this.damageSkin.BigUnit.ContainsKey("3"))
+                            {
+                                charBitmap = isCritical ?
+                                    (useMiniSize ? this.damageSkin.MiniCriticalUnit["3"].Bitmap :
+                                    this.damageSkin.BigCriticalUnit["3"].Bitmap) :
+                                    (useMiniSize ? this.damageSkin.MiniUnit["3"].Bitmap :
+                                    this.damageSkin.BigUnit["3"].Bitmap);
+                                g.DrawImage(charBitmap, offsetX, maxHeight - charBitmap.Height);
+                                offsetX += charBitmap.Width + unitSpacing;
+                            }
                             break;
+
                         case "億":
                         case "亿":
                         case "억":
-                        case "K":
-                            charBitmap = isCritical ?
-                                (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(1).Value.Bitmap :
-                                this.damageSkin.BigCriticalUnit.ElementAt(1).Value.Bitmap) :
-                                (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(1).Value.Bitmap :
-                                this.damageSkin.BigUnit.ElementAt(1).Value.Bitmap);
-                            g.DrawImage(charBitmap, offsetX, maxHeight - charBitmap.Height);
-                            offsetX += charBitmap.Width + unitSpacing;
-                            break;
-                        case "兆":
-                        case "조":
-                        case "M":
-                            if (this.damageSkin.BigUnit.Count >= 3)
+                        case "T":
+                            if (this.damageSkin.BigUnit.ContainsKey("4"))
                             {
                                 charBitmap = isCritical ?
-                                    (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(2).Value.Bitmap :
-                                    this.damageSkin.BigCriticalUnit.ElementAt(2).Value.Bitmap) :
-                                    (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(2).Value.Bitmap :
-                                    this.damageSkin.BigUnit.ElementAt(2).Value.Bitmap);
+                                    (useMiniSize ? this.damageSkin.MiniCriticalUnit["4"].Bitmap :
+                                    this.damageSkin.BigCriticalUnit["4"].Bitmap) :
+                                    (useMiniSize ? this.damageSkin.MiniUnit["4"].Bitmap :
+                                    this.damageSkin.BigUnit["4"].Bitmap);
+                                g.DrawImage(charBitmap, offsetX, maxHeight - charBitmap.Height);
+                                offsetX += charBitmap.Width + unitSpacing;
+                            }
+                            break;
+
+
+                        case "兆":
+                        case "조":
+                        case "Q":
+                            if (this.damageSkin.BigUnit.ContainsKey("5"))
+                            {
+                                charBitmap = isCritical ?
+                                    (useMiniSize ? this.damageSkin.MiniCriticalUnit["5"].Bitmap :
+                                    this.damageSkin.BigCriticalUnit["5"].Bitmap) :
+                                    (useMiniSize ? this.damageSkin.MiniUnit["5"].Bitmap :
+                                    this.damageSkin.BigUnit["5"].Bitmap);
                                 g.DrawImage(charBitmap, offsetX, maxHeight - charBitmap.Height);
                                 offsetX += charBitmap.Width + unitSpacing;
                             }
@@ -347,40 +434,13 @@ namespace WzComparerR2.CharaSimControl
 
                         case "京":
                         case "교":
-                        case "B":
-                            if (this.damageSkin.BigUnit.Count >= 4)
+                            if (this.damageSkin.BigUnit.ContainsKey("6"))
                             {
                                 charBitmap = isCritical ?
-                                    (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(3).Value.Bitmap :
-                                    this.damageSkin.BigCriticalUnit.ElementAt(3).Value.Bitmap) :
-                                    (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(3).Value.Bitmap :
-                                    this.damageSkin.BigUnit.ElementAt(3).Value.Bitmap);
-                                g.DrawImage(charBitmap, offsetX, maxHeight - charBitmap.Height);
-                                offsetX += charBitmap.Width + unitSpacing;
-                            }
-                            break;
-
-                        case "T":
-                            if (this.damageSkin.BigUnit.Count >= 5)
-                            {
-                                charBitmap = isCritical ?
-                                    (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(4).Value.Bitmap :
-                                    this.damageSkin.BigCriticalUnit.ElementAt(4).Value.Bitmap) :
-                                    (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(4).Value.Bitmap :
-                                    this.damageSkin.BigUnit.ElementAt(4).Value.Bitmap);
-                                g.DrawImage(charBitmap, offsetX, maxHeight - charBitmap.Height);
-                                offsetX += charBitmap.Width + unitSpacing;
-                            }
-                            break;
-
-                        case "Q":
-                            if (this.damageSkin.BigUnit.Count >= 6)
-                            {
-                                charBitmap = isCritical ?
-                                    (useMiniSize ? this.damageSkin.MiniCriticalUnit.ElementAt(5).Value.Bitmap :
-                                    this.damageSkin.BigCriticalUnit.ElementAt(5).Value.Bitmap) :
-                                    (useMiniSize ? this.damageSkin.MiniUnit.ElementAt(5).Value.Bitmap :
-                                    this.damageSkin.BigUnit.ElementAt(5).Value.Bitmap);
+                                    (useMiniSize ? this.damageSkin.MiniCriticalUnit["6"].Bitmap :
+                                    this.damageSkin.BigCriticalUnit["6"].Bitmap) :
+                                    (useMiniSize ? this.damageSkin.MiniUnit["6"].Bitmap :
+                                    this.damageSkin.BigUnit["6"].Bitmap);
                                 g.DrawImage(charBitmap, offsetX, maxHeight - charBitmap.Height);
                                 offsetX += charBitmap.Width + unitSpacing;
                             }

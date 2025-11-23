@@ -1653,7 +1653,7 @@ namespace WzComparerR2.CharaSim
             return jobName;
         }
 
-        public static string ToCJKNumberExpr(long value)
+        public static string ToCJKNumberExpr(long value, bool detailedExpr = false)
         {
             var sb = new StringBuilder(32);
             bool firstPart = true;
@@ -1662,42 +1662,69 @@ namespace WzComparerR2.CharaSim
                 sb.Append("-");
                 value = -value; // just ignore the exception -2147483648
             }
-            if (value >= 1_0000_0000_0000_0000)
+            if (detailedExpr)
             {
-                long part = value / 1_0000_0000_0000_0000;
-                sb.Append(firstPart ? null : " ");
-                sb.AppendFormat("{0}京", part); // Korean: 교, Chinese+Japanese: 京; English: Q
-                value -= part * 1_0000_0000_0000_0000;
-                firstPart = false;
+                string[] smallUnits = { "", "十", "百", "千" }; // Korean: 십, 백, 천; Chinese+Japanese: 十, 百, 千
+                string[] bigUnits = { "", "萬", "億", "兆", "京" }; // Korean: 만, 억, 조, 경; TradChinese: 萬, 億, 兆, 京; SimpChinese: 万, 亿, 兆, 京; Japanese: 万, 億, 兆, 京;
+
+                string digits = value.ToString();
+                int len = digits.Length;
+
+                for (int i = 0; i < len; i++)
+                {
+                    int posFromRight = len - i - 1;
+                    int smallUnitIndex = posFromRight % 4;
+                    int bigUnitIndex = posFromRight / 4;
+
+                    char d = digits[i];
+                    sb.Append(d);
+
+                    if (smallUnitIndex > 0)
+                        sb.Append(smallUnits[smallUnitIndex]);
+
+                    if (smallUnitIndex == 0 && bigUnitIndex > 0 && bigUnitIndex < bigUnits.Length)
+                        sb.Append(bigUnits[bigUnitIndex]);
+                }
             }
-            if (value >= 1_0000_0000_0000)
+            else
             {
-                long part = value / 1_0000_0000_0000;
-                sb.Append(firstPart ? null : " ");
-                sb.AppendFormat("{0}兆", part); // Korean: 조, Chinese+Japanese: 兆; English: T
-                value -= part * 1_0000_0000_0000;
-                firstPart = false;
-            }
-            if (value >= 1_0000_0000)
-            {
-                long part = value / 1_0000_0000;
-                sb.Append(firstPart ? null : " ");
-                sb.AppendFormat("{0}億", part); // Korean: 억, TradChinese+Japanese: 億, SimpChinese: 亿
-                value -= part * 1_0000_0000;
-                firstPart = false;
-            }
-            if (value >= 1_0000)
-            {
-                long part = value / 1_0000;
-                sb.Append(firstPart ? null : " ");
-                sb.AppendFormat("{0}萬", part); // Korean: 만, TradChinese: 萬, SimpChinese+Japanese: 万
-                value -= part * 1_0000;
-                firstPart = false;
-            }
-            if (value > 0)
-            {
-                sb.Append(firstPart ? null : " ");
-                sb.AppendFormat("{0}", value);
+                if (value >= 1_0000_0000_0000_0000)
+                {
+                    long part = value / 1_0000_0000_0000_0000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}京", part); // Korean: 교, Chinese+Japanese: 京; English: Q
+                    value -= part * 1_0000_0000_0000_0000;
+                    firstPart = false;
+                }
+                if (value >= 1_0000_0000_0000)
+                {
+                    long part = value / 1_0000_0000_0000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}兆", part); // Korean: 조, Chinese+Japanese: 兆; English: T
+                    value -= part * 1_0000_0000_0000;
+                    firstPart = false;
+                }
+                if (value >= 1_0000_0000)
+                {
+                    long part = value / 1_0000_0000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}億", part); // Korean: 억, TradChinese+Japanese: 億, SimpChinese: 亿
+                    value -= part * 1_0000_0000;
+                    firstPart = false;
+                }
+                if (value >= 1_0000)
+                {
+                    long part = value / 1_0000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}萬", part); // Korean: 만, TradChinese: 萬, SimpChinese+Japanese: 万
+                    value -= part * 1_0000;
+                    firstPart = false;
+                }
+                if (value > 0)
+                {
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}", value);
+                }
             }
 
             return sb.Length > 0 ? sb.ToString() : "0";
