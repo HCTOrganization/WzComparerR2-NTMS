@@ -438,14 +438,16 @@ namespace WzComparerR2
             }
         }
 
-        private void ChkShowMiniMap_CheckedChanged(object sender, System.EventArgs e)
+        private void chkEnable22AniStyle_CheckedChanged(object sender, EventArgs e)
         {
-            this.chkShowMiniMapMob.Enabled = this.chkShowMiniMap.Checked;
-            this.chkShowMiniMapNpc.Enabled = this.chkShowMiniMap.Checked;
-            this.chkShowMiniMapPortal.Enabled = this.chkShowMiniMap.Checked;
+            this.chkUseAssembleUI.Enabled = chkEnable22AniStyle.Checked;
+            if (!chkEnable22AniStyle.Checked)
+            {
+                this.chkUseAssembleUI.Checked = false;
+            }
         }
 
-        private void ChkQAS_CheckedChanged(object sender, System.EventArgs e)
+        private void ChkQAS_CheckedChanged(object sender, EventArgs e)
         {
             this.comboBoxExQuestState.Enabled = !this.chkQAS.Checked;
             this.labelXQS.Enabled = !this.chkQAS.Checked;

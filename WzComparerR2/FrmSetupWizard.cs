@@ -727,6 +727,7 @@ namespace WzComparerR2
                 mainconfig.PreferredLayout = 0;
             }
             characonfig.Enable22AniStyle = this.Enable22AniStyle;
+            characonfig.Item.UseAssembleUI = this.Enable22AniStyle;
             characonfig.AutoQuickView = this.EnableAutoPreview;
             characonfig.Gear.ShowID = this.ShowObjectID;
             characonfig.Item.ShowID = this.ShowObjectID;

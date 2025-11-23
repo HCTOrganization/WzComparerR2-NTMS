@@ -1281,6 +1281,7 @@ namespace WzComparerR2
             this.chkEnable22AniStyle.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.chkEnable22AniStyle.Location = new System.Drawing.Point(13, 60);
             this.chkEnable22AniStyle.Name = "chkEnable22AniStyle";
+            this.chkEnable22AniStyle.CheckedChanged += new System.EventHandler(this.chkEnable22AniStyle_CheckedChanged);
             this.chkEnable22AniStyle.Size = new System.Drawing.Size(145, 16);
             this.chkEnable22AniStyle.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkEnable22AniStyle.TabIndex = 4;
