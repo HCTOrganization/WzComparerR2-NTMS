@@ -1717,7 +1717,7 @@ namespace WzComparerR2.CharaSim
                 {
                     long part = value / 1_0000_0000_0000_0000;
                     sb.Append(firstPart ? null : " ");
-                    sb.AppendFormat("{0}京", part); // Korean: 교, Chinese+Japanese: 京; English: Q
+                    sb.AppendFormat("{0}京", part); // Korean: 경, Chinese+Japanese: 京; English: Q
                     value -= part * 1_0000_0000_0000_0000;
                     firstPart = false;
                 }
