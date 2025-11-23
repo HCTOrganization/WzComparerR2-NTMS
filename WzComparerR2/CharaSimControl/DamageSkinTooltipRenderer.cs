@@ -38,8 +38,6 @@ namespace WzComparerR2.CharaSimControl
         public bool UseMiniSize { get; set; } = false;
         public bool AlwaysUseMseaFormat { get; set; } = false;
         public long DamageSkinNumber { get; set; } = 1234567890;
-        public Bitmap customSampleNonCritical { get; private set; }
-        public Bitmap customSampleCritical { get; private set; }
 
         public override Bitmap Render()
         {
@@ -50,10 +48,10 @@ namespace WzComparerR2.CharaSimControl
                 return null;
             }
 
-            customSampleNonCritical = GetCustomSample(DamageSkinNumber, UseMiniSize, false);
-            customSampleCritical = GetCustomSample(DamageSkinNumber, UseMiniSize, true);
+            Bitmap customSampleNonCritical = GetCustomSample(DamageSkinNumber, UseMiniSize, false);
+            Bitmap customSampleCritical = GetCustomSample(DamageSkinNumber, UseMiniSize, true);
             Bitmap extraBitmap = null;
-            // Bitmap extraBitmap = GetExtraEffect(Math.Max(customSampleCritical.Width, customSampleNonCritical.Width));
+            extraBitmap = GetExtraEffect();
 
             int previewWidth = Math.Max(customSampleNonCritical.Width, customSampleCritical.Width);
             int previewHeight = customSampleNonCritical.Height + customSampleCritical.Height;
@@ -113,9 +111,9 @@ namespace WzComparerR2.CharaSimControl
             }
 
             Bitmap criticalSign = null;
-            if (this.damageSkin.BigCriticalUnit.TryGetValue("effect3", out BitmapOrigin criticalSignOrigin))
+            if (this.damageSkin.BigCriticalDigit.ContainsKey("effect3"))
             {
-                criticalSign = criticalSignOrigin.Bitmap;
+                criticalSign = this.damageSkin.BigCriticalDigit["effect3"].Bitmap;
             }
 
             int totalWidth = 0;
@@ -451,67 +449,40 @@ namespace WzComparerR2.CharaSimControl
             return finalBitmap;
         }
 
-        private Bitmap GetExtraEffect(int maxWidth)
+        public Bitmap GetExtraEffect()
         {
-            BitmapOrigin[] bitmapOrigins = new BitmapOrigin[5];
-            if (!this.damageSkin.MiniDigit.TryGetValue("Miss", out bitmapOrigins[0]) &&
-                !this.damageSkin.MiniDigit.TryGetValue("guard", out bitmapOrigins[1]) &&
-                !this.damageSkin.MiniDigit.TryGetValue("resist", out bitmapOrigins[2]) &&
-                !this.damageSkin.MiniDigit.TryGetValue("shoot", out bitmapOrigins[3]) &&
-                !this.damageSkin.MiniDigit.TryGetValue("counter", out bitmapOrigins[4]))
-            {
-                return null;
-            }
 
             Bitmap[] originalBitmaps = new Bitmap[5]
             {
-                bitmapOrigins[0].Bitmap,
-                bitmapOrigins[1].Bitmap,
-                bitmapOrigins[2].Bitmap,
-                bitmapOrigins[3].Bitmap,
-                bitmapOrigins[4].Bitmap
+                this.damageSkin.MiniDigit.ContainsKey("Miss") ? this.damageSkin.MiniDigit?["Miss"].Bitmap : null,
+                this.damageSkin.MiniDigit.ContainsKey("guard") ? this.damageSkin.MiniDigit?["guard"].Bitmap : null,
+                this.damageSkin.MiniDigit.ContainsKey("resist") ? this.damageSkin.MiniDigit?["resist"].Bitmap : null,
+                this.damageSkin.MiniDigit.ContainsKey("shot") ? this.damageSkin.MiniDigit?["shot"].Bitmap : null,
+                this.damageSkin.MiniDigit.ContainsKey("counter") ? this.damageSkin.MiniDigit?["counter"].Bitmap : null
             };
             
 
-            int row = 0;
-            int[] rowWidths = new int[5] { 0, 0, 0, 0, 0 };
-            int[] rowHeights = new int[5] { 0, 0, 0, 0, 0 };
-            int[] objectIndices = new int[5] { -1, -1, -1, -1, -1 };
+            int width = 0;
+            int height = 0;
 
             foreach (var bo in originalBitmaps)
             {
-                objectIndices[row]++;
-                int currentIndex = originalBitmaps.ToList<Bitmap>().IndexOf(bo);
-                rowWidths[row] += bo.Width;
-                if (rowWidths[row] > maxWidth)
-                {
-                    if (currentIndex > 0)
-                    {
-                        rowWidths[row] -= bo.Width;
-                        row += 1;
-                        rowWidths[row] += bo.Width;
-                        rowHeights[row] = Math.Max(rowHeights[row], bo.Height);
-                        continue;
-                    }
-                }
-                rowHeights[row] = Math.Max(rowHeights[row], bo.Height);
+                if (bo == null) continue;
+                width += bo.Width;
+                height = Math.Max(height, bo.Height);
             }
 
-            Bitmap bitmap = new Bitmap(rowWidths.Sum(), rowHeights.Sum());
+            Bitmap bitmap = new Bitmap(width, height);
 
             using (Graphics g = Graphics.FromImage(bitmap))
             {
                 g.Clear(Color.Transparent);
                 int offsetX = 0;
-                int bitmapIndex = 0;
-                for (int i = 0; i < row; i++)
+                for (int j = 0; j < originalBitmaps.Count(); j++)
                 {
-                    for (int j = 0; j < objectIndices[i]; j++)
-                    {
-                        g.DrawImage(originalBitmaps[bitmapIndex], offsetX, rowHeights.Take(row).Sum() + rowHeights[i] - originalBitmaps[bitmapIndex].Height);
-                        offsetX += originalBitmaps[bitmapIndex].Width;
-                    }
-                    offsetX = 0;
+                    if (originalBitmaps[j] == null) continue;
+                    g.DrawImage(originalBitmaps[j], offsetX, height - originalBitmaps[j].Height);
+                    offsetX += originalBitmaps[j].Width;
                 }
             }
 

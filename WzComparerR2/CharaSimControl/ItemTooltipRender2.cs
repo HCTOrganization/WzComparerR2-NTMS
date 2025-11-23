@@ -1253,6 +1253,7 @@ namespace WzComparerR2.CharaSimControl
                 defaultRenderer.DamageSkin = damageSkin;
                 item.DamageSkinSampleNonCriticalBitmap = defaultRenderer.GetCustomSample(this.DamageSkinNumber, this.UseMiniSizeDamageSkin, false);
                 item.DamageSkinSampleCriticalBitmap = defaultRenderer.GetCustomSample(this.DamageSkinNumber, this.UseMiniSizeDamageSkin, true);
+                item.DamageSkinExtraBitmap = defaultRenderer.GetExtraEffect();
             }
             renderer.TargetItem = damageSkin;
             return renderer.Render();

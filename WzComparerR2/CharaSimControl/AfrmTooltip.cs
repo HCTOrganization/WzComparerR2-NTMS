@@ -64,6 +64,7 @@ namespace WzComparerR2.CharaSimControl
         private Bitmap SampleBitmap;
         private Bitmap DamageSkinSampleNonCriticalBitmap;
         private Bitmap DamageSkinSampleCriticalBitmap;
+        private Bitmap DamageSkinExtraBitmap;
         private FrmWaiting WaitingForm = new FrmWaiting();
         private static readonly SemaphoreSlim TranslateSemaphore = new SemaphoreSlim(1, 1);
 
@@ -320,6 +321,7 @@ namespace WzComparerR2.CharaSimControl
                 {
                     DamageSkinSampleNonCriticalBitmap = (this.TargetItem as Item).DamageSkinSampleNonCriticalBitmap;
                     DamageSkinSampleCriticalBitmap = (this.TargetItem as Item).DamageSkinSampleCriticalBitmap;
+                    DamageSkinExtraBitmap = (this.TargetItem as Item).DamageSkinExtraBitmap;
                 }
             }
             if (item is Gear) AvatarBitmap = (this.TargetItem as Gear).AndroidBitmap;
@@ -629,11 +631,16 @@ namespace WzComparerR2.CharaSimControl
                     dlg.Description = "請選擇存放傷害字型樣本的目標資料夾。";
                     string fileName1 = this.ImageFileName.Replace("item", "DamageSkinSample");
                     string fileName2 = this.ImageFileName.Replace("item", "DamageSkinCriticalSample");
+                    string fileName3 = this.ImageFileName.Replace("item", "DamageSkinExtraEffectSample");
 
                     if (dlg.ShowDialog() == DialogResult.OK)
                     {
                         this.DamageSkinSampleNonCriticalBitmap.Save(Path.Combine(dlg.SelectedPath, fileName1), System.Drawing.Imaging.ImageFormat.Png);
                         this.DamageSkinSampleCriticalBitmap.Save(Path.Combine(dlg.SelectedPath, fileName2), System.Drawing.Imaging.ImageFormat.Png);
+                        if (this.DamageSkinExtraBitmap != null)
+                        {
+                            this.DamageSkinExtraBitmap.Save(Path.Combine(dlg.SelectedPath, fileName3), System.Drawing.Imaging.ImageFormat.Png);
+                        }
                     }
                 }
             }

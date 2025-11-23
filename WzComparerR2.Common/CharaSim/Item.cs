@@ -36,6 +36,7 @@ namespace WzComparerR2.CharaSim
         public Bitmap AvatarBitmap { get; set; }
         public Bitmap DamageSkinSampleNonCriticalBitmap { get; set; }
         public Bitmap DamageSkinSampleCriticalBitmap { get; set; }
+        public Bitmap DamageSkinExtraBitmap { get; set; }
         public bool Cash
         {
             get { return GetBooleanValue(ItemPropType.cash); }
