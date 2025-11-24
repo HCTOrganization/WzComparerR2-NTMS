@@ -18,6 +18,7 @@ namespace WzComparerR2.CharaSim
         public int SkillEffectAfter { get; set; }
         public int Range { get; set; }
         public string FamiliarAttribute { get; set; }
+        public BitmapOrigin FamiliarCover { get; set; }
 
         public static Familiar CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
         {
@@ -72,6 +73,12 @@ namespace WzComparerR2.CharaSim
                             break;
                     }
                 }
+            }
+
+            Wz_Node standNode = node.FindNodeByPath("stand\\0").ResolveUol();
+            if (standNode != null)
+            {
+                familiar.FamiliarCover = BitmapOrigin.CreateFromNode(standNode, findNode);
             }
 
             return familiar;

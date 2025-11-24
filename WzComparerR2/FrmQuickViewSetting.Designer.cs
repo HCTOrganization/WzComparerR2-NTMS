@@ -92,10 +92,12 @@ namespace WzComparerR2
             this.superTabControlPanel6 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.superTabControlPanel7 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.superTabControlPanel8 = new DevComponents.DotNetBar.SuperTabControlPanel();
+            this.superTabControlPanel9 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.chkShowDamageSkinID = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowDamageSkin = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkUseMiniSize = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkAlwaysUseMseaFormat = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkAllowFamiliarOutOfBounds = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.lblDamageSkinNumber = new DevComponents.DotNetBar.LabelX();
             this.txtDamageSkinNumber = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.checkBoxX7 = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -104,6 +106,7 @@ namespace WzComparerR2
             this.superTabItem6 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabItem7 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabItem8 = new DevComponents.DotNetBar.SuperTabItem();
+            this.superTabItem9 = new DevComponents.DotNetBar.SuperTabItem();
             this.panelEx1 = new DevComponents.DotNetBar.PanelEx();
             this.buttonX2 = new DevComponents.DotNetBar.ButtonX();
             this.buttonX1 = new DevComponents.DotNetBar.ButtonX();
@@ -133,6 +136,7 @@ namespace WzComparerR2
             this.superTabControlPanel6.SuspendLayout();
             this.superTabControlPanel7.SuspendLayout();
             this.superTabControlPanel8.SuspendLayout();
+            this.superTabControlPanel9.SuspendLayout();
             this.panelEx1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -158,6 +162,7 @@ namespace WzComparerR2
             this.superTabControl1.Controls.Add(this.superTabControlPanel2);
             this.superTabControl1.Controls.Add(this.superTabControlPanel3);
             this.superTabControl1.Controls.Add(this.superTabControlPanel4);
+            this.superTabControl1.Controls.Add(this.superTabControlPanel9);
             this.superTabControl1.Controls.Add(this.superTabControlPanel8);
             this.superTabControl1.Controls.Add(this.superTabControlPanel6);
             this.superTabControl1.Controls.Add(this.superTabControlPanel7);
@@ -177,6 +182,7 @@ namespace WzComparerR2
             this.superTabItem2,
             this.superTabItem3,
             this.superTabItem4,
+            this.superTabItem9,
             this.superTabItem8,
             this.superTabItem6,
             this.superTabItem7,
@@ -1206,6 +1212,39 @@ namespace WzComparerR2
             this.chkShowDamageSkinID.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowDamageSkinID.TabIndex = 1;
             this.chkShowDamageSkinID.Text = "左上方顯示ID";
+            //
+            // superTabControlPanel9
+            //
+            this.superTabControlPanel9.Controls.Add(this.chkAllowFamiliarOutOfBounds);
+            this.superTabControlPanel9.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.superTabControlPanel9.Location = new System.Drawing.Point(62, 0);
+            this.superTabControlPanel9.Name = "superTabControlPanel9";
+            this.superTabControlPanel9.Size = new System.Drawing.Size(242, 211);
+            this.superTabControlPanel9.TabIndex = 0;
+            this.superTabControlPanel9.TabItem = this.superTabItem9;
+            this.superTabControlPanel9.Visible = false;
+            // 
+            // superTabItem9
+            // 
+            this.superTabItem9.AttachedControl = this.superTabControlPanel9;
+            this.superTabItem9.GlobalItem = false;
+            this.superTabItem9.Name = "superTabItem9";
+            this.superTabItem9.Text = "萌獸";
+            // 
+            // chkAllowFamiliarOutOfBounds
+            // 
+            this.chkAllowFamiliarOutOfBounds.AutoSize = true;
+            this.chkAllowFamiliarOutOfBounds.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkAllowFamiliarOutOfBounds.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkAllowFamiliarOutOfBounds.Location = new System.Drawing.Point(13, 12);
+            this.chkAllowFamiliarOutOfBounds.Name = "chkAllowFamiliarOutOfBounds";
+            this.chkAllowFamiliarOutOfBounds.Size = new System.Drawing.Size(117, 16);
+            this.chkAllowFamiliarOutOfBounds.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkAllowFamiliarOutOfBounds.TabIndex = 1;
+            this.chkAllowFamiliarOutOfBounds.Text = "允許怪物出框顯示";
             // 
             // superTabControlPanel5
             // 
@@ -1341,6 +1380,10 @@ namespace WzComparerR2
             this.superTabControlPanel6.PerformLayout();
             this.superTabControlPanel7.ResumeLayout(false);
             this.superTabControlPanel7.PerformLayout();
+            this.superTabControlPanel8.ResumeLayout(false);
+            this.superTabControlPanel8.PerformLayout();
+            this.superTabControlPanel9.ResumeLayout(false);
+            this.superTabControlPanel9.PerformLayout();
             this.panelEx1.ResumeLayout(false);
             this.ResumeLayout(false);
         }
@@ -1382,11 +1425,13 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel6;
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel7;
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel8;
+        private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel9;
         private DevComponents.DotNetBar.SuperTabItem superTabItem4;
         private DevComponents.DotNetBar.SuperTabItem superTabItem5;
         private DevComponents.DotNetBar.SuperTabItem superTabItem6;
         private DevComponents.DotNetBar.SuperTabItem superTabItem7;
         private DevComponents.DotNetBar.SuperTabItem superTabItem8;
+        private DevComponents.DotNetBar.SuperTabItem superTabItem9;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX6;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX7;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX9;
@@ -1410,6 +1455,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowDamageSkin;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkUseMiniSize;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkAlwaysUseMseaFormat;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkAllowFamiliarOutOfBounds;
         private DevComponents.DotNetBar.LabelX lblDamageSkinNumber;
         private DevComponents.DotNetBar.Controls.TextBoxX txtDamageSkinNumber;
         private DevComponents.DotNetBar.LabelX labelX14;

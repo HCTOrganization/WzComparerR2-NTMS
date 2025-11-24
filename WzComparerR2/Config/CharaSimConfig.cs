@@ -42,6 +42,12 @@ namespace WzComparerR2.Config
             get { return (CharaSimDamageSkinConfig)this["damageSkin"]; }
         }
 
+        [ConfigurationProperty("familiar")]
+        public CharaSimFamiliarConfig Familiar
+        {
+            get { return (CharaSimFamiliarConfig)this["familiar"]; }
+        }
+
         [ConfigurationProperty("gear")]
         public CharaSimGearConfig Gear
         {

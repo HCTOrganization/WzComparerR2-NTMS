@@ -55,6 +55,7 @@ namespace WzComparerR2.CharaSimControl
         public bool ShowDamageSkinID { get; set; }
         public bool UseMiniSizeDamageSkin { get; set; }
         public bool AlwaysUseMseaFormatDamageSkin { get; set; }
+        public bool AllowFamiliarOutOfBounds { get; set; }
         public long DamageSkinNumber { get; set; }
         public CashPackage CashPackage { get; set; }
         private bool WillDrawNickTag { get; set; }
@@ -1276,6 +1277,7 @@ namespace WzComparerR2.CharaSimControl
                 FamiliarTooltipRenderer defaultRenderer = new FamiliarTooltipRenderer();
                 defaultRenderer.StringLinker = this.StringLinker;
                 defaultRenderer.ShowObjectID = this.ShowObjectID;
+                defaultRenderer.AllowOutOfBounds = this.AllowFamiliarOutOfBounds;
                 defaultRenderer.ItemID = this.item.ItemID;
                 renderer = defaultRenderer;
             }
