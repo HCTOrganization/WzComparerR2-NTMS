@@ -700,7 +700,7 @@ namespace WzComparerR2.Comparer
                     }
                     if (godChangseopNode.Contains(diff))
                     {
-                        StateInfo = string.Format("{0}/{1} 変更: {2}", count[0], count[3], "神昌燮的重複節點");
+                        StateInfo = string.Format("{0}/{1} 變更: {2}", count[0], count[3], "神昌燮的重複節點");
                         count[0]++;
                         continue;
                     }
@@ -931,7 +931,7 @@ namespace WzComparerR2.Comparer
             ChangedActions.Clear();
         }
 
-        // 変更されたスキルツールチップ出力
+        // 變更されたスキルツールチップ出力
         private void SaveSkillTooltip(string skillTooltipPath)
         {
             UpdateActionChanges();
@@ -1139,9 +1139,11 @@ namespace WzComparerR2.Comparer
         private void SaveItemTooltip(string itemTooltipPath)
         {
             ItemTooltipRender2[] itemRenderNewOld = new ItemTooltipRender2[2];
+            DamageSkinTooltipRenderer[] damageSkinRenderNewOld = new DamageSkinTooltipRenderer[2];
             int count = 0;
             int allCount = OutputItemTooltipIDs.Count;
             var itemTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
+            bool isDamageSkin = false;
 
             for (int i = 0; i < 2; i++) // 0: New, 1: Old
             {
@@ -1164,6 +1166,9 @@ namespace WzComparerR2.Comparer
                 itemRenderNewOld[i].AlwaysUseMseaFormatDamageSkin = this.AlwaysUseMseaFormatDamageSkin;
                 itemRenderNewOld[i].DamageSkinNumber = this.DamageSkinNumber;
                 itemRenderNewOld[i].CompareMode = true;
+
+                damageSkinRenderNewOld[i] = new DamageSkinTooltipRenderer();
+                damageSkinRenderNewOld[i].AlwaysUseMseaFormat = this.AlwaysUseMseaFormatDamageSkin;
             }
 
             foreach (var itemID in OutputItemTooltipIDs)
@@ -1249,11 +1254,19 @@ namespace WzComparerR2.Comparer
                         if (item != null)
                         {
                             itemRenderNewOld[i].Item = item;
+                            isDamageSkin = (item.DamageSkinID != null);
                         }
                         else
                         {
                             isItemNull[i] = true;
                             nullItemIdx = i + 1;
+                        }
+
+                        if (isDamageSkin)
+                        {
+                            DamageSkin damageSkin = DamageSkin.CreateFromNode(PluginManager.FindWz($@"Etc\DamageSkin.img\{item.DamageSkinID}", WzFileNewOld[i]), PluginManager.FindWz);
+                            damageSkinRenderNewOld[i].DamageSkin = damageSkin;
+                            categoryPath = "DamageSkin_傷害字型";
                         }
                     }
 
@@ -1283,6 +1296,32 @@ namespace WzComparerR2.Comparer
 
                             g.DrawImage(ImageOld, 0, 0);
                             g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            if (isDamageSkin)
+                            {
+                                Bitmap[] nonCriticalDmgMiniSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, false), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, false) };
+                                Bitmap[] nonCriticalDmgBigSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, false), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, false) };
+                                Bitmap[] criticalDmgMiniSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, true), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, true) };
+                                Bitmap[] criticalDmgBigSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, true), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, true) };
+                                Bitmap[] extraDmgSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetExtraEffect(), damageSkinRenderNewOld[1].GetExtraEffect() };
+                                Dictionary<int, string> dmgSampleDesc = new Dictionary<int, string>()
+                                {
+                                    { 0, "變更後" },
+                                    { 1, "變更前" }
+                                };
+                                for (int i = 0; i < 2; i++)
+                                {
+                                    string sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_NonCritical" + dmgSampleDesc[i] + ".png");
+                                    nonCriticalDmgMiniSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png); 
+                                    sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_nonCritical" + dmgSampleDesc[i] + ".png");
+                                    nonCriticalDmgBigSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_Critical" + dmgSampleDesc[i] + ".png");
+                                    criticalDmgMiniSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_Critical" + dmgSampleDesc[i] + ".png");
+                                    criticalDmgBigSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_extra" + dmgSampleDesc[i] + ".png");
+                                    extraDmgSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                }
+                            }
                             break;
 
                         case 1: // delete
@@ -1290,6 +1329,24 @@ namespace WzComparerR2.Comparer
                             if (isItemNull[1]) continue;
                             resultImage = itemRenderNewOld[1].Render();
                             g = Graphics.FromImage(resultImage);
+                            if (isDamageSkin)
+                            {
+                                Bitmap nonCriticalDmgMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, false);
+                                Bitmap nonCriticalBigMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, false);
+                                Bitmap criticalDmgMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, true);
+                                Bitmap criticalBigMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, true);
+                                Bitmap extraDmgSample = damageSkinRenderNewOld[1].GetExtraEffect(); 
+                                string sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_NonCritical_" + itemType + ".png");
+                                nonCriticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_nonCritical_" + itemType + ".png");
+                                nonCriticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_Critical_" + itemType + ".png");
+                                criticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_Critical_" + itemType + ".png");
+                                criticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_extra_" + itemType + ".png");
+                                extraDmgSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                            }
                             break;
 
                         case 2: // add
@@ -1297,6 +1354,24 @@ namespace WzComparerR2.Comparer
                             if (isItemNull[0]) continue;
                             resultImage = itemRenderNewOld[0].Render();
                             g = Graphics.FromImage(resultImage);
+                            if (isDamageSkin)
+                            {
+                                Bitmap nonCriticalDmgMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, false);
+                                Bitmap nonCriticalBigMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, false);
+                                Bitmap criticalDmgMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, true);
+                                Bitmap criticalBigMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, true);
+                                Bitmap extraDmgSample = damageSkinRenderNewOld[0].GetExtraEffect();
+                                string sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_NonCritical_" + itemType + ".png");
+                                nonCriticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_nonCritical_" + itemType + ".png");
+                                nonCriticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_Critical_" + itemType + ".png");
+                                criticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_Critical_" + itemType + ".png");
+                                criticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_extra_" + itemType + ".png");
+                                extraDmgSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                            }
                             break;
 
                         default:
@@ -1337,9 +1412,11 @@ namespace WzComparerR2.Comparer
         private void SaveItemTooltip3(string itemTooltipPath)
         {
             ItemTooltipRender3[] itemRenderNewOld = new ItemTooltipRender3[2];
+            DamageSkinTooltipRenderer[] damageSkinRenderNewOld = new DamageSkinTooltipRenderer[2];
             int count = 0;
             int allCount = OutputItemTooltipIDs.Count;
             var itemTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
+            bool isDamageSkin = false;
 
             for (int i = 0; i < 2; i++) // 0: New, 1: Old
             {
@@ -1361,6 +1438,9 @@ namespace WzComparerR2.Comparer
                 itemRenderNewOld[i].AlwaysUseMseaFormatDamageSkin = this.AlwaysUseMseaFormatDamageSkin;
                 itemRenderNewOld[i].DamageSkinNumber = this.DamageSkinNumber;
                 itemRenderNewOld[i].CompareMode = true;
+
+                damageSkinRenderNewOld[i] = new DamageSkinTooltipRenderer();
+                damageSkinRenderNewOld[i].AlwaysUseMseaFormat = this.AlwaysUseMseaFormatDamageSkin;
             }
 
             foreach (var itemID in OutputItemTooltipIDs)
@@ -1446,11 +1526,19 @@ namespace WzComparerR2.Comparer
                         if (item != null)
                         {
                             itemRenderNewOld[i].Item = item;
+                            isDamageSkin = (item.DamageSkinID != null);
                         }
                         else
                         {
                             isItemNull[i] = true;
                             nullItemIdx = i + 1;
+                        }
+
+                        if (isDamageSkin)
+                        {
+                            DamageSkin damageSkin = DamageSkin.CreateFromNode(PluginManager.FindWz($@"Etc\DamageSkin.img\{item.DamageSkinID}", WzFileNewOld[i]), PluginManager.FindWz);
+                            damageSkinRenderNewOld[i].DamageSkin = damageSkin;
+                            categoryPath = "DamageSkin_傷害字型";
                         }
                     }
 
@@ -1480,6 +1568,32 @@ namespace WzComparerR2.Comparer
 
                             g.DrawImage(ImageOld, 0, 0);
                             g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            if (isDamageSkin)
+                            {
+                                Bitmap[] nonCriticalDmgMiniSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, false), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, false) };
+                                Bitmap[] nonCriticalDmgBigSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, false), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, false) };
+                                Bitmap[] criticalDmgMiniSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, true), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, true) };
+                                Bitmap[] criticalDmgBigSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, true), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, true) };
+                                Bitmap[] extraDmgSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetExtraEffect(), damageSkinRenderNewOld[1].GetExtraEffect() };
+                                Dictionary<int, string> dmgSampleDesc = new Dictionary<int, string>()
+                                {
+                                    { 0, "變更後" },
+                                    { 1, "變更前" }
+                                };
+                                for (int i = 0; i < 2; i++)
+                                {
+                                    string sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_NonCritical" + dmgSampleDesc[i] + ".png");
+                                    nonCriticalDmgMiniSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_nonCritical" + dmgSampleDesc[i] + ".png");
+                                    nonCriticalDmgBigSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_Critical" + dmgSampleDesc[i] + ".png");
+                                    criticalDmgMiniSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_Critical" + dmgSampleDesc[i] + ".png");
+                                    criticalDmgBigSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_extra" + dmgSampleDesc[i] + ".png");
+                                    extraDmgSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                }
+                            }
                             break;
 
                         case 1: // delete
@@ -1487,6 +1601,24 @@ namespace WzComparerR2.Comparer
                             if (isItemNull[1]) continue;
                             resultImage = itemRenderNewOld[1].Render();
                             g = Graphics.FromImage(resultImage);
+                            if (isDamageSkin)
+                            {
+                                Bitmap nonCriticalDmgMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, false);
+                                Bitmap nonCriticalBigMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, false);
+                                Bitmap criticalDmgMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, true);
+                                Bitmap criticalBigMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, true);
+                                Bitmap extraDmgSample = damageSkinRenderNewOld[1].GetExtraEffect();
+                                string sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_NonCritical_" + itemType + ".png");
+                                nonCriticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_nonCritical_" + itemType + ".png");
+                                nonCriticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_Critical_" + itemType + ".png");
+                                criticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_Critical_" + itemType + ".png");
+                                criticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_extra_" + itemType + ".png");
+                                extraDmgSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                            }
                             break;
 
                         case 2: // add
@@ -1494,6 +1626,24 @@ namespace WzComparerR2.Comparer
                             if (isItemNull[0]) continue;
                             resultImage = itemRenderNewOld[0].Render();
                             g = Graphics.FromImage(resultImage);
+                            if (isDamageSkin)
+                            {
+                                Bitmap nonCriticalDmgMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, false);
+                                Bitmap nonCriticalBigMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, false);
+                                Bitmap criticalDmgMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, true);
+                                Bitmap criticalBigMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, true);
+                                Bitmap extraDmgSample = damageSkinRenderNewOld[0].GetExtraEffect();
+                                string sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_NonCritical_" + itemType + ".png");
+                                nonCriticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_nonCritical_" + itemType + ".png");
+                                nonCriticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_Critical_" + itemType + ".png");
+                                criticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_Critical_" + itemType + ".png");
+                                criticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                sampleName = Path.Combine(itemTooltipPath, "DamageSkinSample", itemID + "_" + ItemName + "_extra_" + itemType + ".png");
+                                extraDmgSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                            }
                             break;
 
                         default:
@@ -1532,7 +1682,7 @@ namespace WzComparerR2.Comparer
         }
 
 
-        // 変更された装備ツールチップ出力
+        // 變更された装備ツールチップ出力
         private void SaveGearTooltip(string gearTooltipPath)
         {
             GearTooltipRender2[] gearRenderNewOld = new GearTooltipRender2[2];
