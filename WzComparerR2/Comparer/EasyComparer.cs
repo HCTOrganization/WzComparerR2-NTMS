@@ -1144,6 +1144,7 @@ namespace WzComparerR2.Comparer
             int allCount = OutputItemTooltipIDs.Count;
             var itemTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
             bool isDamageSkin = false;
+            bool isFamiliar = false;
 
             for (int i = 0; i < 2; i++) // 0: New, 1: Old
             {
@@ -1255,6 +1256,7 @@ namespace WzComparerR2.Comparer
                         {
                             itemRenderNewOld[i].Item = item;
                             isDamageSkin = (item.DamageSkinID != null);
+                            isFamiliar = (item.FamiliarID != null);
                         }
                         else
                         {
@@ -1267,6 +1269,11 @@ namespace WzComparerR2.Comparer
                             DamageSkin damageSkin = DamageSkin.CreateFromNode(PluginManager.FindWz($@"Etc\DamageSkin.img\{item.DamageSkinID}", WzFileNewOld[i]), PluginManager.FindWz);
                             damageSkinRenderNewOld[i].DamageSkin = damageSkin;
                             categoryPath = "DamageSkin_傷害字型";
+                        }
+
+                        if (isFamiliar)
+                        {
+                            categoryPath = "Familiar_萌獸";
                         }
                     }
 
@@ -1417,6 +1424,7 @@ namespace WzComparerR2.Comparer
             int allCount = OutputItemTooltipIDs.Count;
             var itemTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
             bool isDamageSkin = false;
+            bool isFamiliar = false;
 
             for (int i = 0; i < 2; i++) // 0: New, 1: Old
             {
@@ -1539,6 +1547,11 @@ namespace WzComparerR2.Comparer
                             DamageSkin damageSkin = DamageSkin.CreateFromNode(PluginManager.FindWz($@"Etc\DamageSkin.img\{item.DamageSkinID}", WzFileNewOld[i]), PluginManager.FindWz);
                             damageSkinRenderNewOld[i].DamageSkin = damageSkin;
                             categoryPath = "DamageSkin_傷害字型";
+                        }
+
+                        if (isFamiliar)
+                        {
+                            categoryPath = "Familiar_萌獸";
                         }
                     }
 

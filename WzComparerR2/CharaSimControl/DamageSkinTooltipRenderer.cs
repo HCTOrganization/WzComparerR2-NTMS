@@ -42,8 +42,6 @@ namespace WzComparerR2.CharaSimControl
 
         public override Bitmap Render()
         {
-            this.ShowObjectID = true;
-
             if (this.damageSkin == null)
             {
                 return null;

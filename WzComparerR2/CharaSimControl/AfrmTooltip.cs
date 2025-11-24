@@ -46,6 +46,8 @@ namespace WzComparerR2.CharaSimControl
             this.SetItemRender = new SetItemTooltipRender();
             this.SetItemRender3 = new SetItemTooltipRender3();
             this.AchievementRender = new AchievementTooltipRenderer();
+            this.FamiliarRender = new FamiliarTooltipRenderer(); // used in CMS/TMS
+            // this.FamiliarRender2 = new FamiliarTooltipRender2(); // used in GMS/JMS
             this.SizeChanged += AfrmTooltip_SizeChanged;
 
             this.MouseClick += AfrmTooltip_MouseClick;
@@ -91,6 +93,7 @@ namespace WzComparerR2.CharaSimControl
         public SetItemTooltipRender SetItemRender { get; private set; }
         public SetItemTooltipRender3 SetItemRender3 { get; private set; }
         public AchievementTooltipRenderer AchievementRender { get; private set; }
+        public FamiliarTooltipRenderer FamiliarRender { get; private set; }
 
         public string ImageFileName { get; set; }
         public string NodeName { get; set; }
@@ -121,6 +124,7 @@ namespace WzComparerR2.CharaSimControl
                 this.SkillRender.ShowObjectID = value;
                 this.RecipeRender.ShowObjectID = value;
                 this.AchievementRender.ShowObjectID = value;
+                this.FamiliarRender.ShowObjectID = value;
             }
         }
 
@@ -232,6 +236,11 @@ namespace WzComparerR2.CharaSimControl
                     //g.AdditionalOptions[1] = Potential.LoadFromWz(32086, 10);
                     //g.AdditionalOptions[2] = Potential.LoadFromWz(32086, 10);
                 }
+            }
+            else if (item is Familiar)
+            {
+                renderer = FamiliarRender;
+                FamiliarRender.Familiar = this.item as Familiar;
             }
             else if (item is Skill)
             {

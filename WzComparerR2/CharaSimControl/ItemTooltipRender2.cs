@@ -67,6 +67,7 @@ namespace WzComparerR2.CharaSimControl
         public TooltipRender LinkDamageSkinRender { get; set; }
         public TooltipRender SetItemRender { get; set; }
         public TooltipRender CashPackageRender { get; set; }
+        public TooltipRender FamiliarRender { get; set; }
         private AvatarCanvasManager avatar { get; set; }
         private string titleLanguage = "";
 
@@ -242,7 +243,15 @@ namespace WzComparerR2.CharaSimControl
                 {
                     setItemBmp = RenderDamageSkin(damageSkin);
                 }
+            }
 
+            if (this.item.FamiliarID != null)
+            {
+                Familiar familiar = Familiar.CreateFromNode(PluginManager.FindWz($@"Character\Familiar\{item.FamiliarID}.img", this.SourceWzFile), PluginManager.FindWz);
+                if (familiar != null)
+                {
+                    return RenderFamiliar(familiar);
+                }
             }
 
 
@@ -1256,6 +1265,21 @@ namespace WzComparerR2.CharaSimControl
                 item.DamageSkinExtraBitmap = defaultRenderer.GetExtraEffect();
             }
             renderer.TargetItem = damageSkin;
+            return renderer.Render();
+        }
+
+        private Bitmap RenderFamiliar(Familiar familiar)
+        {
+            TooltipRender renderer = this.FamiliarRender;
+            if (renderer == null)
+            {
+                FamiliarTooltipRenderer defaultRenderer = new FamiliarTooltipRenderer();
+                defaultRenderer.StringLinker = this.StringLinker;
+                defaultRenderer.ShowObjectID = this.ShowObjectID;
+                defaultRenderer.ItemID = this.item.ItemID;
+                renderer = defaultRenderer;
+            }
+            renderer.TargetItem = familiar;
             return renderer.Render();
         }
 
