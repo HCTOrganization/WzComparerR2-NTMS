@@ -4715,6 +4715,7 @@ namespace WzComparerR2
                     comparer.SkipKMSContent = chkSkipKMSContent.Checked;
                     comparer.SkipGodChangseopDuplicatedNodes = chkSkipGodChangseopDuplicatedNodes.Checked;
                     comparer.Enable22AniStyle = GearGraphics.is22aniStyle;
+                    comparer.EnableAssembleTooltip = CharaSimConfig.Default.Item.UseAssembleUI;
                     comparer.ShowDamageSkin = CharaSimConfig.Default.DamageSkin.ShowDamageSkin;
                     comparer.UseMiniSizeDamageSkin = CharaSimConfig.Default.DamageSkin.UseMiniSize;
                     comparer.AlwaysUseMseaFormatDamageSkin = CharaSimConfig.Default.DamageSkin.AlwaysUseMseaFormat;
