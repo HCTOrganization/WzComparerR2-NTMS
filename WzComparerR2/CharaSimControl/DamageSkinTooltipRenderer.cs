@@ -105,7 +105,14 @@ namespace WzComparerR2.CharaSimControl
                     numberStr = ItemStringHelper.ToThousandsNumberExpr(inputNumber, true);
                     break;
                 default:
-                    numberStr = inputNumber.ToString();
+                    if (this.DamageSkin.MiniUnit.Count > 0) // Default to CJK format when units are available
+                    {
+                        numberStr = ItemStringHelper.ToCJKNumberExpr(inputNumber);
+                    }
+                    else
+                    {
+                        numberStr = inputNumber.ToString();
+                    }
                     break;
             }
 
