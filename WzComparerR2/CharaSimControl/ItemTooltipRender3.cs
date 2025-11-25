@@ -55,6 +55,7 @@ namespace WzComparerR2.CharaSimControl
         public bool UseMiniSizeDamageSkin { get; set; }
         public bool AlwaysUseMseaFormatDamageSkin { get; set; }
         public bool AllowFamiliarOutOfBounds { get; set; }
+        public bool UseCTFamiliarRender { get; set; }
         public long DamageSkinNumber { get; set; }
         public int CosmeticHairColor { get; set; }
         public int CosmeticFaceColor { get; set; }
@@ -252,7 +253,7 @@ namespace WzComparerR2.CharaSimControl
                 Familiar familiar = Familiar.CreateFromNode(PluginManager.FindWz($@"Character\Familiar\{item.FamiliarID}.img", this.SourceWzFile), PluginManager.FindWz);
                 if (familiar != null)
                 {
-                    return RenderFamiliar(familiar);
+                    return UseCTFamiliarRender ? RenderCTFamiliar(familiar) : RenderGJFamiliar(familiar);
                 }
             }
 
@@ -1343,7 +1344,7 @@ namespace WzComparerR2.CharaSimControl
             return renderer.Render();
         }
 
-        private Bitmap RenderFamiliar(Familiar familiar)
+        private Bitmap RenderCTFamiliar(Familiar familiar)
         {
             TooltipRender renderer = this.FamiliarRender;
             if (renderer == null)
@@ -1353,6 +1354,23 @@ namespace WzComparerR2.CharaSimControl
                 defaultRenderer.ShowObjectID = this.ShowObjectID;
                 defaultRenderer.AllowOutOfBounds = this.AllowFamiliarOutOfBounds;
                 defaultRenderer.ItemID = this.item.ItemID;
+                renderer = defaultRenderer;
+            }
+            renderer.TargetItem = familiar;
+            return renderer.Render();
+        }
+
+        private Bitmap RenderGJFamiliar(Familiar familiar)
+        {
+            TooltipRender renderer = this.FamiliarRender;
+            if (renderer == null)
+            {
+                FamiliarTooltipRenderer2 defaultRenderer = new FamiliarTooltipRenderer2();
+                defaultRenderer.StringLinker = this.StringLinker;
+                defaultRenderer.ShowObjectID = this.ShowObjectID;
+                defaultRenderer.AllowOutOfBounds = this.AllowFamiliarOutOfBounds;
+                defaultRenderer.ItemID = this.item.ItemID;
+                defaultRenderer.UseAssembleUI = true;
                 renderer = defaultRenderer;
             }
             renderer.TargetItem = familiar;

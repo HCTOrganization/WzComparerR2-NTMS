@@ -76,6 +76,8 @@ namespace WzComparerR2.CharaSimControl
         public static Font EquipDetailFont2 { get; private set; }
         public static Font AchievementTitleFont { get; private set; }
         public static Font KMSAchievementTitleFont { get; private set; }
+        public static Font FamiliarNameFont { get; private set; }
+        public static Font FamiliarLevelFont { get; private set; }
 
         public static void SetFontFamily(string fontName)
         {
@@ -191,6 +193,18 @@ namespace WzComparerR2.CharaSimControl
                 KMSAchievementTitleFont = null;
             }
             KMSAchievementTitleFont = new Font(fontName.StartsWith("Noto Sans") ? "Noto Sans KR" : "Dotum", 16f, FontStyle.Bold, GraphicsUnit.Pixel);
+            if (FamiliarNameFont != null)
+            {
+                FamiliarNameFont.Dispose();
+                FamiliarNameFont = null;
+            }
+            FamiliarNameFont = new Font(fontName, 12f, GraphicsUnit.Pixel);
+            if (FamiliarLevelFont != null)
+            {
+                FamiliarLevelFont.Dispose();
+                FamiliarLevelFont = null;
+            }
+            FamiliarLevelFont = new Font(fontName, 13f, GraphicsUnit.Pixel);
         }
 
         public static readonly Color GearBackColor = Color.FromArgb(204, 0, 51, 85);

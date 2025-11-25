@@ -8,6 +8,8 @@ namespace WzComparerR2.CharaSim
     {
         public Familiar()
         {
+            FamiliarAttribute = "N";
+            FamiliarCategory = 1;
         }
 
         public int FamiliarID { get; set; }

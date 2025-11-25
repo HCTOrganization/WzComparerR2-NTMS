@@ -296,6 +296,7 @@ namespace WzComparerR2
             tooltipQuickView.ItemRender.AlwaysUseMseaFormatDamageSkin = Setting.DamageSkin.AlwaysUseMseaFormat;
             tooltipQuickView.ItemRender.DamageSkinNumber = Setting.DamageSkin.DamageSkinNumber;
             tooltipQuickView.ItemRender.AllowFamiliarOutOfBounds = Setting.Familiar.AllowOutOfBounds;
+            tooltipQuickView.ItemRender.UseCTFamiliarRender = Setting.Familiar.UseCTFamiliarUI;
             tooltipQuickView.ItemRender3.ShowObjectID = Setting.Item.ShowID;
             tooltipQuickView.ItemRender3.LinkRecipeInfo = Setting.Item.LinkRecipeInfo;
             tooltipQuickView.ItemRender3.LinkRecipeItem = Setting.Item.LinkRecipeItem;
@@ -312,7 +313,10 @@ namespace WzComparerR2
             tooltipQuickView.ItemRender3.AlwaysUseMseaFormatDamageSkin = Setting.DamageSkin.AlwaysUseMseaFormat;
             tooltipQuickView.ItemRender3.DamageSkinNumber = Setting.DamageSkin.DamageSkinNumber;
             tooltipQuickView.ItemRender3.AllowFamiliarOutOfBounds = Setting.Familiar.AllowOutOfBounds;
+            tooltipQuickView.ItemRender3.UseCTFamiliarRender = Setting.Familiar.UseCTFamiliarUI;
+            tooltipQuickView.UseCTFamiliarUI = Setting.Familiar.UseCTFamiliarUI;
             tooltipQuickView.FamiliarRender.AllowOutOfBounds = Setting.Familiar.AllowOutOfBounds;
+            tooltipQuickView.FamiliarRender2.AllowOutOfBounds = Setting.Familiar.AllowOutOfBounds;
             tooltipQuickView.EnableAssembleTooltip = Setting.Item.UseAssembleUI;
             tooltipQuickView.MapRender.ShowMiniMap = Setting.Map.ShowMiniMap;
             tooltipQuickView.MapRender.ShowObjectID = Setting.Map.ShowMapObjectID;

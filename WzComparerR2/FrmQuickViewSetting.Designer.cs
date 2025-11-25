@@ -98,6 +98,7 @@ namespace WzComparerR2
             this.chkUseMiniSize = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkAlwaysUseMseaFormat = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkAllowFamiliarOutOfBounds = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkUseCTFamiliarUI = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.lblDamageSkinNumber = new DevComponents.DotNetBar.LabelX();
             this.txtDamageSkinNumber = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.checkBoxX7 = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -1215,6 +1216,7 @@ namespace WzComparerR2
             //
             // superTabControlPanel9
             //
+            this.superTabControlPanel9.Controls.Add(this.chkUseCTFamiliarUI);
             this.superTabControlPanel9.Controls.Add(this.chkAllowFamiliarOutOfBounds);
             this.superTabControlPanel9.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControlPanel9.Location = new System.Drawing.Point(62, 0);
@@ -1230,6 +1232,21 @@ namespace WzComparerR2
             this.superTabItem9.GlobalItem = false;
             this.superTabItem9.Name = "superTabItem9";
             this.superTabItem9.Text = "萌獸";
+            // 
+            // chkUseCTFamiliarUI
+            // 
+            this.chkUseCTFamiliarUI.AutoSize = true;
+            this.chkUseCTFamiliarUI.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkUseCTFamiliarUI.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkUseCTFamiliarUI.Location = new System.Drawing.Point(13, 36);
+            this.chkUseCTFamiliarUI.Name = "chkUseCTFamiliarUI";
+            this.chkUseCTFamiliarUI.Size = new System.Drawing.Size(172, 16);
+            this.chkUseCTFamiliarUI.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkUseCTFamiliarUI.TabIndex = 2;
+            this.chkUseCTFamiliarUI.Text = "使用CMS/TMS樣式的UI";
             // 
             // chkAllowFamiliarOutOfBounds
             // 
@@ -1456,6 +1473,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX chkUseMiniSize;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkAlwaysUseMseaFormat;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkAllowFamiliarOutOfBounds;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkUseCTFamiliarUI;
         private DevComponents.DotNetBar.LabelX lblDamageSkinNumber;
         private DevComponents.DotNetBar.Controls.TextBoxX txtDamageSkinNumber;
         private DevComponents.DotNetBar.LabelX labelX14;
