@@ -42,7 +42,7 @@ namespace WzComparerR2.CharaSimControl
                 return null;
             }
 
-            Bitmap baseFamiliar = GeneratePreAssembleFamiliarCard();
+            Bitmap baseFamiliar = this.UseAssembleUI ? GeneratePostAssembleFamiliarCard() : GeneratePreAssembleFamiliarCard();
 
             Bitmap tooltip = new Bitmap(baseFamiliar.Width + 26, baseFamiliar.Height + 23);
 
@@ -267,6 +267,127 @@ namespace WzComparerR2.CharaSimControl
             new Point(335, 96), // Devil
             new Point(335, 97), // Undead
             new Point(334, 96) // Machine
+        };
+
+        private Bitmap GeneratePostAssembleFamiliarCard()
+        {
+            // Get Mob image and name
+            Mob mob = Mob.CreateFromNode(PluginManager.FindWz($@"Mob\{familiar.MobID.ToString().PadLeft(7, '0')}.img", this.SourceWzFile), PluginManager.FindWz);
+
+            Point alignOrigin = new Point(201, 221);
+            Point mobOrigin = new Point(0, 0);
+            int mobXoffset = 0;
+            int mobYoffset = 0;
+            int tDelta = 0;
+            int bDelta = 0;
+            int lDelta = 0;
+            int rDelta = 0;
+            if (familiar.FamiliarCover.Bitmap != null)
+            {
+                mobOrigin = familiar.FamiliarCover.Origin;
+            }
+            else
+            {
+                mobOrigin = mob.Default.Origin;
+            }
+
+            Bitmap mobImg = Resize(familiar.FamiliarCover.Bitmap ?? mob.Default.Bitmap, alignOrigin, mobOrigin, out mobXoffset, out mobYoffset, out tDelta, out bDelta, out lDelta, out rDelta);
+
+            Bitmap tooltip = new Bitmap(Resource.Familiar2025__InfoWnd_back.Width + lDelta + rDelta, Resource.Familiar2025__InfoWnd_back.Height + tDelta + bDelta);
+
+            using (Graphics g = Graphics.FromImage(tooltip))
+            {
+                g.DrawImage(Resource.Familiar2025__InfoWnd_back, lDelta, tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_back.Width, Resource.Familiar2025__InfoWnd_back.Height), GraphicsUnit.Pixel);
+                g.DrawImage(Resource.Familiar2025__InfoWnd_gradeSide_backgrnd, 2 + lDelta, 2 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_gradeSide_backgrnd.Width, Resource.Familiar2025__InfoWnd_gradeSide_backgrnd.Height), GraphicsUnit.Pixel);
+                g.DrawImage(Resource.Familiar2025__InfoWnd_back_familiar, 12 + lDelta, 47 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_back_familiar.Width, Resource.Familiar2025__InfoWnd_back_familiar.Height), GraphicsUnit.Pixel);
+
+                // Mob Placement here
+                g.DrawImage(mobImg, mobXoffset + lDelta, mobYoffset + tDelta, new Rectangle(0, 0, mobImg.Width, mobImg.Height), GraphicsUnit.Pixel);
+
+                // Name tag placement here
+                g.DrawImage(Resource.Familiar2025__InfoWnd_gradeName__0, 14 + lDelta, 14 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_gradeName__0.Width, Resource.Familiar2025__InfoWnd_gradeName__0.Height), GraphicsUnit.Pixel);
+                g.DrawImage(Resource.Familiar2025__InfoWnd_back_spec, 22 + lDelta, 223 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_back_spec.Width, Resource.Familiar2025__InfoWnd_back_spec.Height), GraphicsUnit.Pixel);
+                g.DrawImage(Resource.Familiar2025__InfoWnd_attribute_base, 315 + lDelta, 61 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_attribute_base.Width, Resource.Familiar2025__InfoWnd_attribute_base.Height), GraphicsUnit.Pixel);
+                g.DrawImage(Resource.Familiar2025__InfoWnd_attribute_base, 315 + lDelta, 92 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_attribute_base.Width, Resource.Familiar2025__InfoWnd_attribute_base.Height), GraphicsUnit.Pixel);
+
+                g.DrawImage(Resource.Familiar2025__InfoWnd_gradeJewel_info_common, 93 + lDelta, 249 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_gradeJewel_info_common.Width, Resource.Familiar2025__InfoWnd_gradeJewel_info_common.Height), GraphicsUnit.Pixel);
+                g.DrawImage(Resource.Familiar2025__InfoWnd_button_Potential_normal_0, 13 + lDelta, 274 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_button_Potential_normal_0.Width, Resource.Familiar2025__InfoWnd_button_Potential_normal_0.Height), GraphicsUnit.Pixel);
+                
+                // Draw Name
+                List<TextBlock> titleBlocks = new List<TextBlock>();
+                string mobName = GetMobName(mob.ID);
+                var block = PrepareText(g, mobName ?? "(null)", GearGraphics.FamiliarNameFont, Brushes.White, 0, 0);
+                titleBlocks.Add(block);
+
+                foreach (var item in titleBlocks)
+                {
+                    DrawText(g, item, new Point(27 + lDelta, 23 + tDelta));
+                }
+
+                // Draw 1 at Level, ATT, DEF
+                g.DrawString("1", GearGraphics.FamiliarLevelFont, Brushes.White, new Point(43 + lDelta, 227 + tDelta));
+                g.DrawString("1", GearGraphics.FamiliarLevelFont, Brushes.White, new Point(285 + lDelta, 226 + tDelta));
+                g.DrawString("1", GearGraphics.FamiliarLevelFont, Brushes.White, new Point(332 + lDelta, 226 + tDelta));
+
+                // Draw Attribute
+                Bitmap fAttribute = PostAssembleAttribute[familiar.FamiliarAttribute];
+                Point attrPoint = PostAssembleAttributeOffsets[familiar.FamiliarAttribute];
+                g.DrawImage(fAttribute, attrPoint.X + lDelta, attrPoint.Y + tDelta, new Rectangle(0, 0, fAttribute.Width, fAttribute.Height), GraphicsUnit.Pixel);
+
+                // Draw Category
+                Bitmap fCategory = PostAssembleCategory[familiar.FamiliarCategory];
+                Point catPoint = PostAssembleCategoryOffsets[familiar.FamiliarCategory];
+                g.DrawImage(fCategory, catPoint.X + lDelta, catPoint.Y + tDelta, new Rectangle(0, 0, fCategory.Width, fCategory.Height), GraphicsUnit.Pixel);
+            }
+            return tooltip;
+        }
+
+        private Dictionary<string, Bitmap> PostAssembleAttribute = new Dictionary<string, Bitmap>()
+        {
+            { "D", Resource.Familiar2025__InfoWnd_attribute_AttrVariation_Dark },
+            { "F", Resource.Familiar2025__InfoWnd_attribute_AttrVariation_Fire },
+            { "H", Resource.Familiar2025__InfoWnd_attribute_AttrVariation_Holy },
+            { "I", Resource.Familiar2025__InfoWnd_attribute_AttrVariation_Ice },
+            { "L", Resource.Familiar2025__InfoWnd_attribute_AttrVariation_Lighting },
+            { "N", Resource.Familiar2025__InfoWnd_attribute_AttrVariation_Fire },
+            { "P", Resource.Familiar2025__InfoWnd_attribute_AttrVariation_Poison }
+        };
+
+        private Dictionary<string, Point> PostAssembleAttributeOffsets = new Dictionary<string, Point>()
+        {
+            { "D", new Point(325, 65) },
+            { "F", new Point(328, 65) },
+            { "H", new Point(323, 62) },
+            { "I", new Point(325, 65) },
+            { "L", new Point(327, 66) },
+            { "N", new Point(328, 65) },
+            { "P", new Point(327, 64) }
+        };
+
+        private List<Bitmap> PostAssembleCategory = new List<Bitmap>()
+        {
+            Resource.Familiar2025__InfoWnd_kind_KindVariation_Human,
+            Resource.Familiar2025__InfoWnd_kind_KindVariation_Beast,
+            Resource.Familiar2025__InfoWnd_kind_KindVariation_Plant,
+            Resource.Familiar2025__InfoWnd_kind_KindVariation_Fish,
+            Resource.Familiar2025__InfoWnd_kind_KindVariation_Reptile,
+            Resource.Familiar2025__InfoWnd_kind_KindVariation_Nymph,
+            Resource.Familiar2025__InfoWnd_kind_KindVariation_Devil,
+            Resource.Familiar2025__InfoWnd_kind_KindVariation_Undead,
+            Resource.Familiar2025__InfoWnd_kind_KindVariation_Machine
+        };
+
+        private List<Point> PostAssembleCategoryOffsets = new List<Point>()
+        {
+            new Point(327, 95), // Human
+            new Point(326, 97), // Beast
+            new Point(327, 98), // Plant
+            new Point(327, 95), // Fish
+            new Point(326, 97), // Reptile
+            new Point(326, 97), // Nymph
+            new Point(326, 96), // Devil
+            new Point(326, 97), // Undead
+            new Point(325, 96) // Machine
         };
     }
 }
