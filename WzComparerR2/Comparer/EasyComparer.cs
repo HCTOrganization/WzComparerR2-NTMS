@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Net;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
-using WzComparerR2.WzLib;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms.VisualStyles;
+using WzComparerR2.CharaSim;
+using WzComparerR2.CharaSimControl;
 using WzComparerR2.Common;
 using WzComparerR2.PluginBase;
-using WzComparerR2.CharaSimControl;
-using WzComparerR2.CharaSim;
-using System.Text.RegularExpressions;
-using System.Drawing.Imaging;
+using WzComparerR2.WzLib;
 
 namespace WzComparerR2.Comparer
 {
@@ -52,6 +55,7 @@ namespace WzComparerR2.Comparer
         public Dictionary<string, string> FailToExportNodes { get; private set; } = new Dictionary<string, string>();
         public Dictionary<string, string> FailToExportTooltips { get; private set; } = new Dictionary<string, string>();
         private Dictionary<string, HashSet<int>> ChangedActions { get; set; } = new Dictionary<string, HashSet<int>>();
+        private DiscordService DiscordSvc = new DiscordService();
         public WzFileComparer Comparer { get; protected set; }
         private string stateInfo;
         private string stateDetail;
@@ -84,6 +88,7 @@ namespace WzComparerR2.Comparer
         public long DamageSkinNumber { get; set; }
         public bool AllowFamiliarOutOfBounds { get; set; }
         public bool UseCTFamiliarUI { get; set; }
+        public bool PostChangesToDiscord { get; set; }
         public Dictionary<string, bool> selectedNodes { get; set; }
 
         public string StateInfo
@@ -130,6 +135,8 @@ namespace WzComparerR2.Comparer
 
         public void EasyCompareWzFiles(Wz_File fileNew, Wz_File fileOld, string outputDir, StreamWriter index = null)
         {
+            ReportVersionToDiscord(string.Format("{0} -> {1}", fileOld.Header.WzVersion, fileNew.Header.WzVersion));
+
             StateInfo = "比較中...";
 
             if ((fileNew.Type == Wz_Type.Base || fileOld.Type == Wz_Type.Base) && index == null) //至少有一个base 拆分对比
@@ -1085,6 +1092,7 @@ namespace WzComparerR2.Comparer
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的技能變更。 \r\n職業：`{0}`\r\n變更類型：{1}\r\n技能名稱：`{2}`\r\nID：`{3}`", categoryPath, skillType, skillName, skillID));
                     }
                     resultImage.Dispose();
                     g.Dispose();
@@ -1328,7 +1336,7 @@ namespace WzComparerR2.Comparer
                                 for (int i = 0; i < 2; i++)
                                 {
                                     string sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_NonCritical" + dmgSampleDesc[i] + ".png");
-                                    nonCriticalDmgMiniSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png); 
+                                    nonCriticalDmgMiniSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
                                     sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_nonCritical" + dmgSampleDesc[i] + ".png");
                                     nonCriticalDmgBigSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
                                     sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_Critical" + dmgSampleDesc[i] + ".png");
@@ -1352,7 +1360,7 @@ namespace WzComparerR2.Comparer
                                 Bitmap nonCriticalBigMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, false);
                                 Bitmap criticalDmgMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, true);
                                 Bitmap criticalBigMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, true);
-                                Bitmap extraDmgSample = damageSkinRenderNewOld[1].GetExtraEffect(); 
+                                Bitmap extraDmgSample = damageSkinRenderNewOld[1].GetExtraEffect();
                                 string sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_NonCritical_" + itemType + ".png");
                                 nonCriticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
                                 sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_nonCritical_" + itemType + ".png");
@@ -1413,6 +1421,7 @@ namespace WzComparerR2.Comparer
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的道具變更。 \r\n道具類型：`{0}`\r\n變更類型：{1}\r\n道具名稱：`{2}`\r\nID：`{3}`", categoryPath, itemType, ItemName, itemID));
                     }
                     resultImage.Dispose();
                     g.Dispose();
@@ -1700,6 +1709,7 @@ namespace WzComparerR2.Comparer
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的道具變更。 \r\n道具類型：`{0}`\r\n變更類型：{1}\r\n道具名稱：`{2}`\r\nID：`{3}`", categoryPath, itemType, ItemName, itemID));
                     }
                     resultImage.Dispose();
                     g.Dispose();
@@ -1981,6 +1991,7 @@ namespace WzComparerR2.Comparer
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的裝備變更。 \r\n裝備類型：`{0}`\r\n變更類型：{1}\r\n裝備名稱：`{2}`\r\nID：`{3}`", categoryPath, gearType, EqpName, gearID));
                     }
                     resultImage.Dispose();
                     g.Dispose();
@@ -2259,6 +2270,7 @@ namespace WzComparerR2.Comparer
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的裝備變更。 \r\n裝備類型：`{0}`\r\n變更類型：{1}\r\n裝備名稱：`{2}`\r\nID：`{3}`", categoryPath, gearType, EqpName, gearID));
                     }
                     resultImage.Dispose();
                     g.Dispose();
@@ -2413,6 +2425,7 @@ namespace WzComparerR2.Comparer
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的地圖變更。 \r\n變更類型：{0}\r\n地圖名稱：`{1}`\r\nID：`{2}`", mapType, MapName, mapID));
                     }
                     resultImage.Dispose();
                     g.Dispose();
@@ -2561,6 +2574,7 @@ namespace WzComparerR2.Comparer
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的怪物變更。 \r\n變更類型：{0}\r\n怪物名稱：`{1}`\r\nID：`{2}`", mobType, MobName, mobID));
                     }
                     resultImage.Dispose();
                     g.Dispose();
@@ -2707,6 +2721,7 @@ namespace WzComparerR2.Comparer
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的NPC變更。 \r\n變更類型：{0}\r\nNPC名稱：`{1}`\r\nID：`{2}`", npcType, NpcName, npcID));
                     }
                     resultImage.Dispose();
                     g.Dispose();
@@ -3017,6 +3032,7 @@ namespace WzComparerR2.Comparer
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的任務變更。 \r\n變更類型：{0}\r\n任務名稱：`{1}`\r\n任務ID：`{2}`", questType, QuestName, questID));
                     }
                     resultImage.Dispose();
                     g.Dispose();
@@ -3426,6 +3442,7 @@ namespace WzComparerR2.Comparer
                     if (!File.Exists(imageName))
                     {
                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的成就變更。 \r\n變更類型：{0}\r\n成就名稱：`{1}`\r\n成就ID：`{2}`", achvType, AchievementName, achvID));
                     }
                     resultImage.Dispose();
                     g.Dispose();
@@ -4253,6 +4270,39 @@ namespace WzComparerR2.Comparer
                     }
                 default:
                     return true;
+            }
+        }
+
+        private void ReportVersionToDiscord(string version)
+        {
+            if (PostChangesToDiscord)
+            {
+                Thread t = new Thread(() =>
+                {
+                    Task.Run(async () =>
+                    {
+                        await DiscordSvc.InitializeAsync();
+                        await DiscordSvc.BroadcastMessageAsync("目前正在進行 WZ 版本比較。請等待結果公佈。 \r\n版本：" + version);
+                    }).GetAwaiter().GetResult();
+                });
+
+                t.Start();
+            }
+        }
+
+        private void SendImage(string imagePath, string description)
+        {
+            if (PostChangesToDiscord)
+            {
+                Thread t = new Thread(() =>
+                {
+                    Task.Run(async () =>
+                    {
+                        await DiscordSvc.InitializeAsync();
+                        await DiscordSvc.BroadcastImageAsync(imagePath, description);
+                    });
+                });
+                t.Start();
             }
         }
     }

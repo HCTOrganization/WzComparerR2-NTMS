@@ -192,6 +192,18 @@ namespace WzComparerR2
             set { txtSecretkey.Text = value;}
         }
 
+        public string DiscordBotToken
+        {
+            get { return txtDiscordBotToken.Text; }
+            set { txtDiscordBotToken.Text = value; }
+        }
+
+        public string DiscordChannelID
+        {
+            get { return txtDiscordChannelID.Text; }
+            set { txtDiscordChannelID.Text = value; }
+        }
+
         public int PreferredLayout
         {
             get
@@ -572,6 +584,8 @@ namespace WzComparerR2
             this.PreferredLayout = config.PreferredLayout;
             this.DetectCurrency = config.DetectCurrency;
             this.DesiredCurrency = config.DesiredCurrency;
+            this.DiscordBotToken = config.DiscordBotToken;
+            this.DiscordChannelID = config.DiscordChannelID;
         }
 
         public void Save(WcR2Config config)
@@ -596,6 +610,8 @@ namespace WzComparerR2
             config.PreferredLayout = this.PreferredLayout;
             config.DetectCurrency = this.DetectCurrency;
             config.DesiredCurrency = this.DesiredCurrency;
+            config.DiscordBotToken = this.DiscordBotToken;
+            config.DiscordChannelID = this.DiscordChannelID;
         }
     }
 }

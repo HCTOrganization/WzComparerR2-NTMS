@@ -246,6 +246,7 @@ namespace WzComparerR2
             this.chkShowLinkedTamingMob = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkSkipKMSContent = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkSkipGodChangseopDuplicatedNodes = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkPostChangesToDiscord = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.superTooltip1 = new DevComponents.DotNetBar.SuperTooltip();
             this.chkOutputRemovedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOutputAddedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -2710,6 +2711,7 @@ namespace WzComparerR2
             this.superTabControlPanel2.Controls.Add(this.chkShowLinkedTamingMob);
             this.superTabControlPanel2.Controls.Add(this.chkSkipKMSContent);
             this.superTabControlPanel2.Controls.Add(this.chkSkipGodChangseopDuplicatedNodes);
+            this.superTabControlPanel2.Controls.Add(this.chkPostChangesToDiscord);
             this.superTabControlPanel2.Controls.Add(this.chkResolvePngLink);
             this.superTabControlPanel2.Controls.Add(this.chkOutputRemovedImg);
             this.superTabControlPanel2.Controls.Add(this.chkOutputAddedImg);
@@ -2961,6 +2963,20 @@ namespace WzComparerR2
             this.chkSkipGodChangseopDuplicatedNodes.TabIndex = 25;
             this.chkSkipGodChangseopDuplicatedNodes.Text = "跳過神昌燮的重複節點";
             this.chkSkipGodChangseopDuplicatedNodes.Checked = true;
+            // 
+            // chkPostChangesToDiscord
+            // 
+            // 
+            // 
+            // 
+            this.chkPostChangesToDiscord.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkPostChangesToDiscord.Location = new System.Drawing.Point(550, 439);
+            this.chkPostChangesToDiscord.Name = "chkPostChangesToDiscord";
+            this.chkPostChangesToDiscord.Size = new System.Drawing.Size(185, 25);
+            this.chkPostChangesToDiscord.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkPostChangesToDiscord.TabIndex = 26;
+            this.chkPostChangesToDiscord.Text = "將變更發佈到 Discord";
+            this.chkPostChangesToDiscord.Checked = true;
             // 
             // chkOutputRemovedImg
             // 
@@ -3976,6 +3992,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowLinkedTamingMob;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkSkipKMSContent;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkSkipGodChangseopDuplicatedNodes;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkPostChangesToDiscord;
         private DevComponents.Editors.ComboItem comboItem19;
         private DevComponents.Editors.ComboItem comboItem20;
         private DevComponents.Editors.ComboItem comboItem21;

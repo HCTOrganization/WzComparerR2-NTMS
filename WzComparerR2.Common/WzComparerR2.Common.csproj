@@ -33,6 +33,7 @@
     <PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
     <PackageReference Include="MonoGame.Framework.WindowsDX" Version="$(MonogameFrameworkVersion)" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+	<PackageReference Include="Discord.Net" Version="3.18.0" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="ImageManipulation">

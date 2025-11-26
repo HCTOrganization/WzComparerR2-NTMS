@@ -335,5 +335,27 @@ namespace WzComparerR2.Config
             get { return (ConfigItem<bool>)this["ignoreArticles"]; }
             set { this["ignoreArticles"] = value; }
         }
+
+        /// <summary>
+        /// Discord Bot Token Configuration
+        /// </summary>
+        [ConfigurationProperty("DiscordBotToken")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> DiscordBotToken
+        {
+            get { return (ConfigItem<string>)this["DiscordBotToken"]; }
+            set { this["DiscordBotToken"] = value; }
+        }
+
+        /// <summary>
+        /// Discord Channel ID Configuration
+        /// </summary>
+        [ConfigurationProperty("DiscordChannelID")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> DiscordChannelID
+        {
+            get { return (ConfigItem<string>)this["DiscordChannelID"]; }
+            set { this["DiscordChannelID"] = value; }
+        }
     }
 }

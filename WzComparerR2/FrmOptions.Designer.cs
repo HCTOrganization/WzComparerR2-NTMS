@@ -33,9 +33,11 @@
             this.buttonX2 = new DevComponents.DotNetBar.ButtonX();
             this.buttonX1 = new DevComponents.DotNetBar.ButtonX();
             this.txtAPIkey = new DevComponents.DotNetBar.Controls.TextBoxX();
+            this.txtDiscordBotToken = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.txtOpenAIBackend = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.txtOpenAISystemMessage = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.txtSecretkey = new DevComponents.DotNetBar.Controls.TextBoxX();
+            this.txtDiscordChannelID = new DevComponents.DotNetBar.Controls.TextBoxX();
             this.txtLMTemperature = new DevComponents.Editors.DoubleInput();
             this.txtMaximumToken = new DevComponents.Editors.IntegerInput();
             this.buttonXCheck = new DevComponents.DotNetBar.ButtonX();
@@ -77,8 +79,13 @@
             this.labelX13 = new DevComponents.DotNetBar.LabelX();
             this.labelX14 = new DevComponents.DotNetBar.LabelX();
             this.labelX15 = new DevComponents.DotNetBar.LabelX();
+            this.lblDiscordBotToken = new DevComponents.DotNetBar.LabelX();
+            this.lblDiscordChannelID = new DevComponents.DotNetBar.LabelX();
+            this.lblTurnOffRPC = new DevComponents.DotNetBar.LabelX();
             this.superTabItem4 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabControlPanel4 = new DevComponents.DotNetBar.SuperTabControlPanel();
+            this.superTabItem5 = new DevComponents.DotNetBar.SuperTabItem();
+            this.superTabControlPanel5 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.panelEx1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.superTabControl1)).BeginInit();
             this.superTabControl1.SuspendLayout();
@@ -86,6 +93,7 @@
             this.superTabControlPanel2.SuspendLayout();
             this.superTabControlPanel3.SuspendLayout();
             this.superTabControlPanel4.SuspendLayout();
+            this.superTabControlPanel5.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelEx1
@@ -228,7 +236,7 @@
             this.buttonXCheck.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
             this.buttonXCheck.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonXCheck.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
-            this.buttonXCheck.Location = new System.Drawing.Point(263, 13);
+            this.buttonXCheck.Location = new System.Drawing.Point(288, 13);
             this.buttonXCheck.Name = "buttonXCheck";
             this.buttonXCheck.Size = new System.Drawing.Size(55, 19);
             this.buttonXCheck.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -254,7 +262,7 @@
             this.buttonXCheck3.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
             this.buttonXCheck3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonXCheck3.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
-            this.buttonXCheck3.Location = new System.Drawing.Point(263, 40);
+            this.buttonXCheck3.Location = new System.Drawing.Point(288, 40);
             this.buttonXCheck3.Name = "buttonXCheck3";
             this.buttonXCheck3.Size = new System.Drawing.Size(55, 19);
             this.buttonXCheck3.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -297,6 +305,7 @@
             this.superTabControl1.Controls.Add(this.superTabControlPanel2);
             this.superTabControl1.Controls.Add(this.superTabControlPanel3);
             this.superTabControl1.Controls.Add(this.superTabControlPanel4);
+            this.superTabControl1.Controls.Add(this.superTabControlPanel5);
             this.superTabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControl1.Location = new System.Drawing.Point(0, 0);
             this.superTabControl1.Name = "superTabControl1";
@@ -311,7 +320,8 @@
             this.superTabItem1,
             this.superTabItem2,
             this.superTabItem3,
-            this.superTabItem4});
+            this.superTabItem4,
+            this.superTabItem5});
             this.superTabControl1.Text = "superTabControl1";
             // 
             // superTabControlPanel1
@@ -817,6 +827,91 @@
             this.superTabItem4.Name = "superTabItem4";
             this.superTabItem4.Text = "API金鑰";
             // 
+            // superTabItem5
+            // 
+            this.superTabItem5.AttachedControl = this.superTabControlPanel5;
+            this.superTabItem5.GlobalItem = false;
+            this.superTabItem5.Name = "superTabItem5";
+            this.superTabItem5.Text = "Discord";
+            // 
+            // superTabControlPanel5
+            // 
+            this.superTabControlPanel5.Controls.Add(this.txtDiscordBotToken);
+            this.superTabControlPanel5.Controls.Add(this.txtDiscordChannelID);
+            this.superTabControlPanel5.Controls.Add(this.lblDiscordBotToken);
+            this.superTabControlPanel5.Controls.Add(this.lblDiscordChannelID);
+            this.superTabControlPanel5.Controls.Add(this.lblTurnOffRPC);
+            this.superTabControlPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.superTabControlPanel5.Location = new System.Drawing.Point(49, 0);
+            this.superTabControlPanel5.Name = "superTabControlPanel5";
+            this.superTabControlPanel5.Size = new System.Drawing.Size(351, 171);
+            this.superTabControlPanel5.TabIndex = 1;
+            this.superTabControlPanel5.TabItem = this.superTabItem5;
+            this.superTabControlPanel5.Visible = false;
+            // 
+            // txtDiscordBotToken
+            // 
+            // 
+            // 
+            // 
+            this.txtDiscordBotToken.Border.Class = "TextBoxBorder";
+            this.txtDiscordBotToken.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtDiscordBotToken.Location = new System.Drawing.Point(75, 13);
+            this.txtDiscordBotToken.Name = "txtDiscordBotToken";
+            this.txtDiscordBotToken.Size = new System.Drawing.Size(245, 23);
+            this.txtDiscordBotToken.TabIndex = 1;
+            // 
+            // txtDiscordChannelID
+            // 
+            this.txtDiscordChannelID.Border.Class = "TextBoxBorder";
+            this.txtDiscordChannelID.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtDiscordChannelID.Location = new System.Drawing.Point(14, 67);
+            this.txtDiscordChannelID.Name = "txtDiscordChannelID";
+            this.txtDiscordChannelID.Multiline = true;
+            this.txtDiscordChannelID.Font = new System.Drawing.Font("SimSun", 9F);
+            this.txtDiscordChannelID.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtDiscordChannelID.Size = new System.Drawing.Size(306, 60);
+            this.txtDiscordChannelID.TabIndex = 2;
+            // 
+            // lblDiscordBotToken
+            // 
+            this.lblDiscordBotToken.AutoSize = true;
+            this.lblDiscordBotToken.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.lblDiscordBotToken.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.lblDiscordBotToken.Location = new System.Drawing.Point(14, 15);
+            this.lblDiscordBotToken.Name = "lblDiscordBotToken";
+            this.lblDiscordBotToken.TabIndex = 9;
+            this.lblDiscordBotToken.Text = "Bot Token";
+            // 
+            // lblDiscordChannelID
+            // 
+            this.lblDiscordChannelID.AutoSize = true;
+            this.lblDiscordChannelID.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.lblDiscordChannelID.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.lblDiscordChannelID.Location = new System.Drawing.Point(14, 42);
+            this.lblDiscordChannelID.Name = "lblDiscordChannelID";
+            this.lblDiscordChannelID.TabIndex = 9;
+            this.lblDiscordChannelID.Text = "頻道 ID (每行一個)";
+            // 
+            // lblTurnOffRPC
+            // 
+            this.lblTurnOffRPC.AutoSize = true;
+            this.lblTurnOffRPC.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.lblTurnOffRPC.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.lblTurnOffRPC.Location = new System.Drawing.Point(14, 132);
+            this.lblTurnOffRPC.Name = "lblTurnOffRPC";
+            this.lblTurnOffRPC.TabIndex = 9;
+            this.lblTurnOffRPC.Text = "若要關閉 Discord RPC，請在網路記錄器中執行\r\n「/discord off」。";
+            // 
             // FrmOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -838,6 +933,12 @@
             this.superTabControlPanel1.PerformLayout();
             this.superTabControlPanel2.ResumeLayout(false);
             this.superTabControlPanel2.PerformLayout();
+            this.superTabControlPanel3.ResumeLayout(false);
+            this.superTabControlPanel3.PerformLayout();
+            this.superTabControlPanel4.ResumeLayout(false);
+            this.superTabControlPanel4.PerformLayout();
+            this.superTabControlPanel5.ResumeLayout(false);
+            this.superTabControlPanel5.PerformLayout();
             this.ResumeLayout(false);
         }
 
@@ -845,10 +946,11 @@
 
         private DevComponents.DotNetBar.PanelEx panelEx1;
         private DevComponents.DotNetBar.Controls.TextBoxX txtAPIkey;
-        private DevComponents.DotNetBar.Controls.TextBoxX txtNxAPIkey;
+        private DevComponents.DotNetBar.Controls.TextBoxX txtDiscordBotToken;
         private DevComponents.DotNetBar.Controls.TextBoxX txtOpenAIBackend;
         private DevComponents.DotNetBar.Controls.TextBoxX txtOpenAISystemMessage;
         private DevComponents.DotNetBar.Controls.TextBoxX txtSecretkey;
+        private DevComponents.DotNetBar.Controls.TextBoxX txtDiscordChannelID;
         private DevComponents.Editors.DoubleInput txtLMTemperature;
         private DevComponents.Editors.IntegerInput txtMaximumToken;
         private DevComponents.DotNetBar.SuperTabControl superTabControl1;
@@ -856,10 +958,12 @@
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel2;
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel3;
         private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel4;
+        private DevComponents.DotNetBar.SuperTabControlPanel superTabControlPanel5;
         private DevComponents.DotNetBar.SuperTabItem superTabItem1;
         private DevComponents.DotNetBar.SuperTabItem superTabItem2;
         private DevComponents.DotNetBar.SuperTabItem superTabItem3;
         private DevComponents.DotNetBar.SuperTabItem superTabItem4;
+        private DevComponents.DotNetBar.SuperTabItem superTabItem5;
         private DevComponents.DotNetBar.ButtonX buttonX3;
         private DevComponents.DotNetBar.ButtonX buttonX2;
         private DevComponents.DotNetBar.ButtonX buttonX1;
@@ -895,5 +999,8 @@
         private DevComponents.DotNetBar.LabelX labelX13;
         private DevComponents.DotNetBar.LabelX labelX14;
         private DevComponents.DotNetBar.LabelX labelX15;
+        private DevComponents.DotNetBar.LabelX lblDiscordBotToken;
+        private DevComponents.DotNetBar.LabelX lblDiscordChannelID;
+        private DevComponents.DotNetBar.LabelX lblTurnOffRPC;
     }
 }
