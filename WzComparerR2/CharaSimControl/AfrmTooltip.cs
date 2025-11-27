@@ -68,6 +68,7 @@ namespace WzComparerR2.CharaSimControl
         private Bitmap DamageSkinSampleNonCriticalBitmap;
         private Bitmap DamageSkinSampleCriticalBitmap;
         private Bitmap DamageSkinExtraBitmap;
+        private Bitmap DamageSkinUnitBitmap;
         private FrmWaiting WaitingForm = new FrmWaiting();
         private static readonly SemaphoreSlim TranslateSemaphore = new SemaphoreSlim(1, 1);
 
@@ -342,6 +343,7 @@ namespace WzComparerR2.CharaSimControl
                     DamageSkinSampleNonCriticalBitmap = (this.TargetItem as Item).DamageSkinSampleNonCriticalBitmap;
                     DamageSkinSampleCriticalBitmap = (this.TargetItem as Item).DamageSkinSampleCriticalBitmap;
                     DamageSkinExtraBitmap = (this.TargetItem as Item).DamageSkinExtraBitmap;
+                    DamageSkinUnitBitmap = (this.TargetItem as Item).DamageSkinUnitBitmap;
                 }
             }
             if (item is Gear) AvatarBitmap = (this.TargetItem as Gear).AndroidBitmap;
@@ -652,6 +654,7 @@ namespace WzComparerR2.CharaSimControl
                     string fileName1 = this.ImageFileName.Replace("item", "DamageSkinSample");
                     string fileName2 = this.ImageFileName.Replace("item", "DamageSkinCriticalSample");
                     string fileName3 = this.ImageFileName.Replace("item", "DamageSkinExtraEffectSample");
+                    string fileName4 = this.ImageFileName.Replace("item", "DamageSkinUnitSample");
 
                     if (dlg.ShowDialog() == DialogResult.OK)
                     {
@@ -660,6 +663,10 @@ namespace WzComparerR2.CharaSimControl
                         if (this.DamageSkinExtraBitmap != null)
                         {
                             this.DamageSkinExtraBitmap.Save(Path.Combine(dlg.SelectedPath, fileName3), System.Drawing.Imaging.ImageFormat.Png);
+                        }
+                        if (this.DamageSkinUnitBitmap != null)
+                        {
+                            this.DamageSkinUnitBitmap.Save(Path.Combine(dlg.SelectedPath, fileName4), System.Drawing.Imaging.ImageFormat.Png);
                         }
                     }
                 }

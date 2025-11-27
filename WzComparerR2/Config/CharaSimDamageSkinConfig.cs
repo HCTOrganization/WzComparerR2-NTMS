@@ -36,6 +36,13 @@ namespace WzComparerR2.Config
             set { this["alwaysUseMseaFormat"] = value; }
         }
 
+        [ConfigurationProperty("displayUnitOnSingleLine", DefaultValue = false)]
+        public bool DisplayUnitOnSingleLine
+        {
+            get { return (bool)this["displayUnitOnSingleLine"]; }
+            set { this["displayUnitOnSingleLine"] = value; }
+        }
+
         [ConfigurationProperty("damageSkinNumber", DefaultValue = (long)1234567890)]
         public long DamageSkinNumber
         {

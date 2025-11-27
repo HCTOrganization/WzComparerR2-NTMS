@@ -288,6 +288,13 @@ namespace WzComparerR2
         }
 
         [Link]
+        public bool DamageSkin_DisplayUnitOnSingleLine
+        {
+            get { return chkDisplayUnitOnSingleLine.Checked; }
+            set { chkDisplayUnitOnSingleLine.Checked = value; }
+        }
+
+        [Link]
         public long DamageSkin_DamageSkinNumber
         {
             get { return long.TryParse(txtDamageSkinNumber.Text, out long val) ? val : 0; }

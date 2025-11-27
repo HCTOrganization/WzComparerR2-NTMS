@@ -34,11 +34,10 @@ namespace WzComparerR2.CharaSimControl
             set { this.damageSkin = value as DamageSkin; }
         }
 
-        public string CJKUnitSampleNumber { get; set; }
-        public string ThousandsUnitSampleNumber { get; set; }
-        public bool UseMiniSize { get; set; } = false;
-        public bool AlwaysUseMseaFormat { get; set; } = false;
-        public long DamageSkinNumber { get; set; } = 1234567890;
+        public bool UseMiniSize { get; set; }
+        public bool AlwaysUseMseaFormat { get; set; }
+        public bool DisplayUnitOnSingleLine { get; set; }
+        public long DamageSkinNumber { get; set; }
 
         public override Bitmap Render()
         {
@@ -49,8 +48,8 @@ namespace WzComparerR2.CharaSimControl
 
             Bitmap customSampleNonCritical = GetCustomSample(DamageSkinNumber, UseMiniSize, false);
             Bitmap customSampleCritical = GetCustomSample(DamageSkinNumber, UseMiniSize, true);
-            Bitmap extraBitmap = null;
-            extraBitmap = GetExtraEffect();
+            Bitmap extraBitmap = GetExtraEffect();
+            Bitmap unitBitmap = null;
 
             int previewWidth = Math.Max(customSampleNonCritical.Width, customSampleCritical.Width);
             int previewHeight = customSampleNonCritical.Height + customSampleCritical.Height;
@@ -59,6 +58,15 @@ namespace WzComparerR2.CharaSimControl
             {
                 previewWidth = Math.Max(previewWidth, extraBitmap.Width);
                 previewHeight += extraBitmap.Height;
+                if (DisplayUnitOnSingleLine)
+                {
+                    unitBitmap = GetUnit();
+                    if (unitBitmap != null)
+                    {
+                        previewWidth = Math.Max(previewWidth, unitBitmap.Width);
+                        previewHeight += unitBitmap.Height;
+                    }
+                }
             }
 
             int picH = 10;
@@ -73,12 +81,23 @@ namespace WzComparerR2.CharaSimControl
                 GearGraphics.DrawGearDetailNumber(g, 3, 3, $"{this.damageSkin.DamageSkinID.ToString()}", true);
             }
 
-            g.DrawImage(customSampleNonCritical, 10, 10, new Rectangle(0, 0, customSampleNonCritical.Width, customSampleNonCritical.Height), GraphicsUnit.Pixel);
-            g.DrawImage(customSampleCritical, 10, 15 + customSampleNonCritical.Height, new Rectangle(0, 0, customSampleCritical.Width, customSampleCritical.Height), GraphicsUnit.Pixel);
-            
+            g.DrawImage(customSampleNonCritical, 10, picH, new Rectangle(0, 0, customSampleNonCritical.Width, customSampleNonCritical.Height), GraphicsUnit.Pixel);
+
+            picH += customSampleNonCritical.Height + 5;
+
+            g.DrawImage(customSampleCritical, 10, picH, new Rectangle(0, 0, customSampleCritical.Width, customSampleCritical.Height), GraphicsUnit.Pixel);
+
+            picH += customSampleCritical.Height + 5;
+
+            if (unitBitmap != null)
+            {
+                g.DrawImage(unitBitmap, 10, picH, new Rectangle(0, 0, unitBitmap.Width, unitBitmap.Height), GraphicsUnit.Pixel);
+                picH += unitBitmap.Height + 5;
+            }
+
             if (extraBitmap != null)
             {
-                g.DrawImage(extraBitmap, 10, 15 + customSampleNonCritical.Height + customSampleCritical.Height, new Rectangle(0, 0, extraBitmap.Width, extraBitmap.Height), GraphicsUnit.Pixel);
+                g.DrawImage(extraBitmap, 10, picH, new Rectangle(0, 0, extraBitmap.Width, extraBitmap.Height), GraphicsUnit.Pixel);
             }
 
             customSampleNonCritical.Dispose();
@@ -90,31 +109,39 @@ namespace WzComparerR2.CharaSimControl
         public Bitmap GetCustomSample(long inputNumber, bool useMiniSize, bool isCritical)
         {
             string numberStr = "";
-            switch (damageSkin.CustomType)
+            if (DisplayUnitOnSingleLine)
             {
-                case "hangul": // CJK Detailed
-                    numberStr = ItemStringHelper.ToCJKNumberExpr(inputNumber, true);
-                    break;
-                case "hangulUnit": // CJK
-                    numberStr = ItemStringHelper.ToCJKNumberExpr(inputNumber);
-                    break;
-                case "glUnit": // GMS
-                    numberStr = ItemStringHelper.ToThousandsNumberExpr(inputNumber, this.AlwaysUseMseaFormat);
-                    break;
-                case "glUnit2": // MSEA
-                    numberStr = ItemStringHelper.ToThousandsNumberExpr(inputNumber, true);
-                    break;
-                default:
-                    if (this.DamageSkin.MiniUnit.Count > 0) // Default to CJK format when units are available
-                    {
-                        numberStr = ItemStringHelper.ToCJKNumberExpr(inputNumber);
-                    }
-                    else
-                    {
-                        numberStr = inputNumber.ToString();
-                    }
-                    break;
+                numberStr = inputNumber.ToString();
             }
+            else
+            {
+                switch (damageSkin.CustomType)
+                {
+                    case "hangul": // CJK Detailed
+                        numberStr = ItemStringHelper.ToCJKNumberExpr(inputNumber, true);
+                        break;
+                    case "hangulUnit": // CJK
+                        numberStr = ItemStringHelper.ToCJKNumberExpr(inputNumber);
+                        break;
+                    case "glUnit": // GMS
+                        numberStr = ItemStringHelper.ToThousandsNumberExpr(inputNumber, this.AlwaysUseMseaFormat);
+                        break;
+                    case "glUnit2": // MSEA
+                        numberStr = ItemStringHelper.ToThousandsNumberExpr(inputNumber, true);
+                        break;
+                    default:
+                        if (this.DamageSkin.MiniUnit.Count > 0) // Default to CJK format when units are available
+                        {
+                            numberStr = ItemStringHelper.ToCJKNumberExpr(inputNumber);
+                        }
+                        else
+                        {
+                            numberStr = inputNumber.ToString();
+                        }
+                        break;
+                }
+            }
+
 
             Bitmap criticalSign = null;
             if (this.damageSkin.BigCriticalDigit.ContainsKey("effect3"))
@@ -501,6 +528,85 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
             return finalBitmap;
+        }
+
+        public Bitmap GetUnit()
+        {
+            Bitmap unitBitmap = null;
+
+            int width = 0;
+            int height = 0;
+
+            if (damageSkin.BigUnit.Count > 0)
+            {
+                if (UseMiniSize)
+                {
+                    foreach (var unit in damageSkin.MiniUnit.Values)
+                    {
+                        width += unit.Bitmap.Width;
+                        height = Math.Max(height, unit.Bitmap.Height);
+                        width += this.damageSkin.MiniUnitSpacing;
+                    }
+                    foreach (var unit in damageSkin.MiniCriticalUnit.Values)
+                    {
+                        width += unit.Bitmap.Width;
+                        height = Math.Max(height, unit.Bitmap.Height);
+                        width += this.damageSkin.MiniCriticalUnitSpacing;
+                    }
+                    unitBitmap = new Bitmap(width, height);
+                    using (Graphics g = Graphics.FromImage(unitBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        int offsetX = 0;
+                        foreach (var unit in damageSkin.MiniUnit.Values)
+                        {
+                            g.DrawImage(unit.Bitmap, offsetX, height - unit.Bitmap.Height);
+                            offsetX += unit.Bitmap.Width;
+                            offsetX += this.damageSkin.MiniUnitSpacing;
+                        }
+                        foreach (var unit in damageSkin.MiniCriticalUnit.Values)
+                        {
+                            g.DrawImage(unit.Bitmap, offsetX, height - unit.Bitmap.Height);
+                            offsetX += unit.Bitmap.Width;
+                            offsetX += this.damageSkin.MiniCriticalUnitSpacing;
+                        }
+                    }
+                }
+                else
+                {
+                    foreach (var unit in damageSkin.BigUnit.Values)
+                    {
+                        width += unit.Bitmap.Width;
+                        height = Math.Max(height, unit.Bitmap.Height);
+                        width += this.damageSkin.BigUnitSpacing;
+                    }
+                    foreach (var unit in damageSkin.BigCriticalUnit.Values)
+                    {
+                        width += unit.Bitmap.Width;
+                        height = Math.Max(height, unit.Bitmap.Height);
+                        width += this.damageSkin.BigCriticalUnitSpacing;
+                    }
+                    unitBitmap = new Bitmap(width, height);
+                    using (Graphics g = Graphics.FromImage(unitBitmap))
+                    {
+                        g.Clear(Color.Transparent);
+                        int offsetX = 0;
+                        foreach (var unit in damageSkin.BigUnit.Values)
+                        {
+                            g.DrawImage(unit.Bitmap, offsetX, height - unit.Bitmap.Height);
+                            offsetX += unit.Bitmap.Width;
+                            offsetX += this.damageSkin.BigUnitSpacing;
+                        }
+                        foreach (var unit in damageSkin.BigCriticalUnit.Values)
+                        {
+                            g.DrawImage(unit.Bitmap, offsetX, height - unit.Bitmap.Height);
+                            offsetX += unit.Bitmap.Width;
+                            offsetX += this.damageSkin.BigCriticalUnitSpacing;
+                        }
+                    }
+                }
+            }
+            return unitBitmap;
         }
 
         public Bitmap GetExtraEffect()

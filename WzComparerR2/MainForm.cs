@@ -296,6 +296,7 @@ namespace WzComparerR2
             tooltipQuickView.ItemRender.ShowDamageSkinID = Setting.DamageSkin.ShowDamageSkinID;
             tooltipQuickView.ItemRender.UseMiniSizeDamageSkin = Setting.DamageSkin.UseMiniSize;
             tooltipQuickView.ItemRender.AlwaysUseMseaFormatDamageSkin = Setting.DamageSkin.AlwaysUseMseaFormat;
+            tooltipQuickView.ItemRender.DisplayUnitOnSingleLine = Setting.DamageSkin.DisplayUnitOnSingleLine;
             tooltipQuickView.ItemRender.DamageSkinNumber = Setting.DamageSkin.DamageSkinNumber;
             tooltipQuickView.ItemRender.AllowFamiliarOutOfBounds = Setting.Familiar.AllowOutOfBounds;
             tooltipQuickView.ItemRender.UseCTFamiliarRender = Setting.Familiar.UseCTFamiliarUI;
@@ -313,6 +314,7 @@ namespace WzComparerR2
             tooltipQuickView.ItemRender3.ShowDamageSkinID = Setting.DamageSkin.ShowDamageSkinID;
             tooltipQuickView.ItemRender3.UseMiniSizeDamageSkin = Setting.DamageSkin.UseMiniSize;
             tooltipQuickView.ItemRender3.AlwaysUseMseaFormatDamageSkin = Setting.DamageSkin.AlwaysUseMseaFormat;
+            tooltipQuickView.ItemRender3.DisplayUnitOnSingleLine = Setting.DamageSkin.DisplayUnitOnSingleLine;
             tooltipQuickView.ItemRender3.DamageSkinNumber = Setting.DamageSkin.DamageSkinNumber;
             tooltipQuickView.ItemRender3.AllowFamiliarOutOfBounds = Setting.Familiar.AllowOutOfBounds;
             tooltipQuickView.ItemRender3.UseCTFamiliarRender = Setting.Familiar.UseCTFamiliarUI;
@@ -4733,6 +4735,7 @@ namespace WzComparerR2
                     comparer.ShowDamageSkin = CharaSimConfig.Default.DamageSkin.ShowDamageSkin;
                     comparer.UseMiniSizeDamageSkin = CharaSimConfig.Default.DamageSkin.UseMiniSize;
                     comparer.AlwaysUseMseaFormatDamageSkin = CharaSimConfig.Default.DamageSkin.AlwaysUseMseaFormat;
+                    comparer.DisplayDamageSkinUnitOnSingleLine = CharaSimConfig.Default.DamageSkin.DisplayUnitOnSingleLine;
                     comparer.DamageSkinNumber = CharaSimConfig.Default.DamageSkin.DamageSkinNumber;
                     comparer.AllowFamiliarOutOfBounds = CharaSimConfig.Default.Familiar.AllowOutOfBounds;
                     comparer.UseCTFamiliarUI = CharaSimConfig.Default.Familiar.UseCTFamiliarUI;
