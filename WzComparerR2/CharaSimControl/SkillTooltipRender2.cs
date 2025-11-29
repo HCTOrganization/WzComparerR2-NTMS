@@ -617,7 +617,7 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (Skill.Ascent && !Skill.Invisible)
             {
-                string ascentSkillDesc = "進階技能在Boss戰鬥中沒有冷卻時間，而是按照規定次數使用。只能在有最大HP上限最高的Boss怪物存在時才能使用。\r\n不會啟動追加攻擊以及效果，進階技能會優先攻擊最大HP上限最高的Boss\r\n怪物。\r\n並且攻擊反射、無敵狀態的敵人時也會使其受到傷害。\r\n\r\n以下效果不會影響進階技能的傷害。 \r\n- 裝備：帽子\r\n- 裝備：戒指\r\n- 條件觸發的被動效果\r\n- 主動技能的使用效果\r\n- 怪物的攻擊模式以及減益效果\r\n- 持續時間低於30分鐘的消耗品與商城道具";
+                string ascentSkillDesc = "上升技能在Boss戰鬥中沒有冷卻時間，而是按照規定次數使用。只能在有最大HP上限最高的Boss怪物存在時才能使用。\r\n不會啟動追加攻擊以及效果，上升技能會優先攻擊最大HP上限最高的Boss\r\n怪物。\r\n並且攻擊反射、無敵狀態的敵人時也會使其受到傷害。\r\n\r\n以下效果不會影響上升技能的傷害。 \r\n- 裝備：帽子\r\n- 裝備：戒指\r\n- 條件觸發的被動效果\r\n- 主動技能的使用效果\r\n- 怪物的攻擊模式以及減益效果\r\n- 持續時間低於30分鐘的消耗品與商城道具";
                 string ascentSkillH = "在Boss戰鬥中最多可以使用3次\r\n在其他情況使用時冷卻時間為240秒";
                 GearGraphics.DrawNewTooltipBack(g, 0, 0, bitmap.Width, 300);
                 GearGraphics.DrawPlainText(g, ascentSkillDesc, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
