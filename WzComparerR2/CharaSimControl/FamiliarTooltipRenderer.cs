@@ -4,13 +4,13 @@ using System.Drawing;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Resource = CharaSimResource.Resource;
 using WzComparerR2.AvatarCommon;
 using WzComparerR2.CharaSim;
 using WzComparerR2.Common;
 using WzComparerR2.PluginBase;
 using WzComparerR2.WzLib;
 using static WzComparerR2.CharaSimControl.RenderHelper;
+using Resource = CharaSimResource.Resource;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -95,18 +95,23 @@ namespace WzComparerR2.CharaSimControl
                     default:
                     case 0:
                         g.DrawImage(Resource.UIFamiliar_img_jewel_normal_5, 30 + lDelta, 27 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_normal_5.Width, Resource.UIFamiliar_img_jewel_normal_5.Height), GraphicsUnit.Pixel);
+                        g.DrawImage(Resource.UIFamiliar_img_jewel_normal_0, 38 + lDelta, 25 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_normal_0.Width, Resource.UIFamiliar_img_jewel_normal_0.Height), GraphicsUnit.Pixel);
                         break;
                     case 1:
                         g.DrawImage(Resource.UIFamiliar_img_jewel_rare_5, 30 + lDelta, 27 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_rare_5.Width, Resource.UIFamiliar_img_jewel_rare_5.Height), GraphicsUnit.Pixel);
+                        g.DrawImage(Resource.UIFamiliar_img_jewel_rare_0, 38 + lDelta, 25 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_rare_0.Width, Resource.UIFamiliar_img_jewel_rare_0.Height), GraphicsUnit.Pixel);
                         break;
                     case 2:
                         g.DrawImage(Resource.UIFamiliar_img_jewel_epic_5, 30 + lDelta, 27 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_epic_5.Width, Resource.UIFamiliar_img_jewel_epic_5.Height), GraphicsUnit.Pixel);
+                        g.DrawImage(Resource.UIFamiliar_img_jewel_epic_0, 38 + lDelta, 25 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_epic_0.Width, Resource.UIFamiliar_img_jewel_epic_0.Height), GraphicsUnit.Pixel);
                         break;
                     case 3:
                         g.DrawImage(Resource.UIFamiliar_img_jewel_unique_5, 30 + lDelta, 27 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_unique_5.Width, Resource.UIFamiliar_img_jewel_unique_5.Height), GraphicsUnit.Pixel);
+                        g.DrawImage(Resource.UIFamiliar_img_jewel_unique_0, 38 + lDelta, 25 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_unique_0.Width, Resource.UIFamiliar_img_jewel_unique_0.Height), GraphicsUnit.Pixel);
                         break;
                     case 4:
                         g.DrawImage(Resource.UIFamiliar_img_jewel_legendary_5, 30 + lDelta, 27 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_legendary_5.Width, Resource.UIFamiliar_img_jewel_legendary_5.Height), GraphicsUnit.Pixel);
+                        g.DrawImage(Resource.UIFamiliar_img_jewel_legendary_0, 38 + lDelta, 25 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_legendary_0.Width, Resource.UIFamiliar_img_jewel_legendary_0.Height), GraphicsUnit.Pixel);
                         break;
                 }
 
@@ -126,6 +131,26 @@ namespace WzComparerR2.CharaSimControl
                     DrawText(g, item, new Point(31 + lDelta + titleXoffset, 222 + tDelta + titleYoffset));
                 }
 
+                // Draw Skill
+                string skillName = GetFamiliarSkillName(this.familiar.SkillID);
+                if (!string.IsNullOrEmpty(skillName))
+                {
+                    List<TextBlock> skillBlocks = new List<TextBlock>();
+                    block = PrepareText(g, skillName, GearGraphics.LevelBoldFont, Brushes.White, 0, 0);
+                    skillBlocks.Add(block);
+
+                    Rectangle skillRect = Measure(skillBlocks);
+
+                    int skillXoffset = Resource.UIFamiliar_img_familiarCard_name.Width >= Resource.UIFamiliar_img_familiarCard_name.Width ? (Resource.UIFamiliar_img_familiarCard_name.Width - skillRect.Width) / 2 : 0;
+                    int skillYoffset = Resource.UIFamiliar_img_familiarCard_name.Height + 1;
+
+                    foreach (var item in skillBlocks)
+                    {
+                        DrawText(g, item, new Point(31 + lDelta + skillXoffset, 222 + tDelta + skillYoffset));
+                    }
+
+                }
+
 
                 // Layout
                 if (this.ShowObjectID)
@@ -140,6 +165,24 @@ namespace WzComparerR2.CharaSimControl
             bool isTranslateRequired = Translator.IsTranslateEnabled;
             StringResult sr;
             if (this.StringLinker == null || !this.StringLinker.StringMob.TryGetValue(mobID, out sr))
+            {
+                return null;
+            }
+            if (isTranslateRequired)
+            {
+                return Translator.MergeString(sr.Name, Translator.TranslateString(sr.Name, true), 1, false, true);
+            }
+            else
+            {
+                return sr.Name;
+            }
+        }
+
+        private string GetFamiliarSkillName(int skillID)
+        {
+            bool isTranslateRequired = Translator.IsTranslateEnabled;
+            StringResult sr;
+            if (this.StringLinker == null || !this.StringLinker.StringFamiliarSkill.TryGetValue(skillID, out sr))
             {
                 return null;
             }

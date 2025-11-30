@@ -14,6 +14,7 @@ namespace WzComparerR2.Common
             stringMap = new Dictionary<int, StringResult>();
             stringMob = new Dictionary<int, StringResult>();
             stringNpc = new Dictionary<int, StringResult>();
+            stringFamiliarSkill = new Dictionary<int, StringResult>();
             stringSkill = new Dictionary<int, StringResult>();
             stringSkill2 = new Dictionary<string, StringResult>();
             stringSetItem = new Dictionary<int, StringResult>();
@@ -134,6 +135,51 @@ namespace WzComparerR2.Common
 
                                     AddAllValue(strResult, linkNode);
                                     stringItem[id] = strResult;
+                                }
+                            }
+                        }
+                        break;
+                    case "Familiar.img":
+                    case "FamiliarSkill.img":
+                        if (!image.TryExtract()) break;
+                        foreach (Wz_Node tree0 in image.Node.Nodes)
+                        {
+                            if (tree0.Text == "skill")
+                            {
+                                foreach (Wz_Node tree1 in tree0.Nodes)
+                                {
+                                    Wz_Node test_tree = TryLocateUolNode(tree1);
+                                    if (Int32.TryParse(tree1.Text, out id) && tree1.ResolveUol() is Wz_Node linkNode)
+                                    {
+                                        StringResult strResult = null;
+                                        if (update)
+                                        {
+                                            try { strResult = stringFamiliarSkill[id]; }
+                                            catch { }
+                                        }
+                                        if (strResult == null) strResult = new StringResult();
+
+                                        strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;
+                                        strResult.Desc = GetDefaultString(linkNode, "desc") ?? strResult.Desc;
+                                        if (tree1.FullPath == test_tree.FullPath)
+                                        {
+                                            if (tree1.FullPath == test_tree.FullPath)
+                                            {
+                                                strResult.FullPath = tree1.FullPath;
+                                            }
+                                            else
+                                            {
+                                                strResult.FullPath = tree1.FullPath + " -> " + test_tree.FullPath;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            strResult.FullPath = tree1.FullPath + " -> " + test_tree.FullPath;
+                                        }
+
+                                        AddAllValue(strResult, linkNode);
+                                        stringFamiliarSkill[id] = strResult;
+                                    }
                                 }
                             }
                         }
@@ -533,6 +579,7 @@ namespace WzComparerR2.Common
             stringMob.Clear();
             stringMap.Clear();
             stringNpc.Clear();
+            stringFamiliarSkill.Clear();
             stringSkill.Clear();
             stringSkill2.Clear();
             stringSetItem.Clear();
@@ -545,7 +592,7 @@ namespace WzComparerR2.Common
             get
             {
                 return (stringEqp.Count + stringItem.Count + stringMap.Count +
-                    stringMob.Count + stringNpc.Count + stringSkill.Count + stringSetItem.Count + stringQuest.Count + stringAchievement.Count > 0);
+                    stringMob.Count + stringNpc.Count + stringFamiliarSkill.Count + stringSkill.Count + stringSetItem.Count + stringQuest.Count + stringAchievement.Count > 0);
             }
         }
 
@@ -554,6 +601,7 @@ namespace WzComparerR2.Common
         private Dictionary<int, StringResult> stringMap;
         private Dictionary<int, StringResult> stringMob;
         private Dictionary<int, StringResult> stringNpc;
+        private Dictionary<int, StringResult> stringFamiliarSkill;
         private Dictionary<int, StringResult> stringSkill;
         private Dictionary<string, StringResult> stringSkill2;
         private Dictionary<int, StringResult> stringSetItem;
@@ -622,6 +670,11 @@ namespace WzComparerR2.Common
         public Dictionary<int, StringResult> StringNpc
         {
             get { return stringNpc; }
+        }
+
+        public Dictionary<int, StringResult> StringFamiliarSkill
+        {
+            get { return stringFamiliarSkill; }
         }
 
         public Dictionary<int, StringResult> StringSkill
