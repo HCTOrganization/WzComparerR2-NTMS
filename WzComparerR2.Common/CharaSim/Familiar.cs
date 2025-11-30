@@ -36,6 +36,13 @@ namespace WzComparerR2.CharaSim
             Familiar familiar = new Familiar();
 
             familiar.FamiliarID = familiarID;
+
+            Wz_Node standNode = node.FindNodeByPath("stand\\0").ResolveUol();
+            if (standNode != null)
+            {
+                familiar.FamiliarCover = BitmapOrigin.CreateFromNode(standNode, findNode);
+            }
+
             Wz_Node infoNode = node.FindNodeByPath("info").ResolveUol();
 
             if (infoNode != null)
@@ -73,14 +80,11 @@ namespace WzComparerR2.CharaSim
                                 }
                             }
                             break;
+                        case "portrait":
+                            familiar.FamiliarCover = BitmapOrigin.CreateFromNode(subNode, findNode);
+                            break;
                     }
                 }
-            }
-
-            Wz_Node standNode = node.FindNodeByPath("stand\\0").ResolveUol();
-            if (standNode != null)
-            {
-                familiar.FamiliarCover = BitmapOrigin.CreateFromNode(standNode, findNode);
             }
 
             return familiar;
