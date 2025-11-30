@@ -37,6 +37,7 @@ namespace WzComparerR2.CharaSimControl
         }
 
         public int? ItemID { get; set; }
+        public int FamiliarTier { get; set; }
         public bool AllowOutOfBounds { get; set; }
 
         public override Bitmap Render()
@@ -81,8 +82,33 @@ namespace WzComparerR2.CharaSimControl
 
                 g.DrawImage(mobImg, mobXoffset + lDelta, mobYoffset + tDelta, new Rectangle(0, 0, mobImg.Width, mobImg.Height), GraphicsUnit.Pixel);
 
+                if (this.FamiliarTier == 4)
+                {
+                    // draw Legendary bezel
+                    g.DrawImage(Resource.UIFamiliar_img_familiarCard_legendary, 35 + lDelta, 24 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_familiarCard_legendary.Width, Resource.UIFamiliar_img_familiarCard_legendary.Height), GraphicsUnit.Pixel);
+                }
+
                 g.DrawImage(Resource.UIFamiliar_img_jewel_backgrnd, 25 + lDelta, 21 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_backgrnd.Width, Resource.UIFamiliar_img_jewel_backgrnd.Height), GraphicsUnit.Pixel);
-                g.DrawImage(Resource.UIFamiliar_img_jewel_normal_5, 30 + lDelta, 27 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_normal_5.Width, Resource.UIFamiliar_img_jewel_normal_5.Height), GraphicsUnit.Pixel);
+
+                switch (this.FamiliarTier)
+                {
+                    default:
+                    case 0:
+                        g.DrawImage(Resource.UIFamiliar_img_jewel_normal_5, 30 + lDelta, 27 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_normal_5.Width, Resource.UIFamiliar_img_jewel_normal_5.Height), GraphicsUnit.Pixel);
+                        break;
+                    case 1:
+                        g.DrawImage(Resource.UIFamiliar_img_jewel_rare_5, 30 + lDelta, 27 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_rare_5.Width, Resource.UIFamiliar_img_jewel_rare_5.Height), GraphicsUnit.Pixel);
+                        break;
+                    case 2:
+                        g.DrawImage(Resource.UIFamiliar_img_jewel_epic_5, 30 + lDelta, 27 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_epic_5.Width, Resource.UIFamiliar_img_jewel_epic_5.Height), GraphicsUnit.Pixel);
+                        break;
+                    case 3:
+                        g.DrawImage(Resource.UIFamiliar_img_jewel_unique_5, 30 + lDelta, 27 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_unique_5.Width, Resource.UIFamiliar_img_jewel_unique_5.Height), GraphicsUnit.Pixel);
+                        break;
+                    case 4:
+                        g.DrawImage(Resource.UIFamiliar_img_jewel_legendary_5, 30 + lDelta, 27 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_jewel_legendary_5.Width, Resource.UIFamiliar_img_jewel_legendary_5.Height), GraphicsUnit.Pixel);
+                        break;
+                }
 
                 // Pre-Drawing
                 List<TextBlock> titleBlocks = new List<TextBlock>();

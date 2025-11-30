@@ -17,11 +17,13 @@ namespace WzComparerR2.CharaSim
             this.CoreSpecs = new Dictionary<ItemCoreSpecType, Wz_Node>();
             this.AddTooltips = new List<int>();
             this.Recipes = new List<int>();
+            this.Grade = 0;
         }
 
         public int Level { get; set; }
         public int? DamageSkinID { get; set; }
         public int? FamiliarID { get; set; }
+        public int Grade { get; set; }
         public string ConsumableFrom { get; set; }
         public string EndUseDate { get; set; }
         public string SamplePath { get; set; }
@@ -146,6 +148,10 @@ namespace WzComparerR2.CharaSim
 
                         case "familiarID":
                             item.FamiliarID = Convert.ToInt32(subNode.Value);
+                            break;
+
+                        case "grade":
+                            item.Grade = Convert.ToInt32(subNode.Value);
                             break;
 
                         case "consumableFrom":
