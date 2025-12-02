@@ -600,7 +600,7 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (Skill.Ascent)
             {
-                bitmap = new Bitmap(430, 300);
+                bitmap = new Bitmap(430, 324);
             }
             Graphics g = Graphics.FromImage(bitmap);
             int picH = 13;
@@ -617,9 +617,9 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (Skill.Ascent && !Skill.Invisible)
             {
-                string ascentSkillDesc = "上升技能在Boss戰鬥中沒有冷卻時間，而是按照規定次數使用。只能在有最大HP上限最高的Boss怪物存在時才能使用。\r\n不會啟動追加攻擊以及效果，上升技能會優先攻擊最大HP上限最高的Boss\r\n怪物。\r\n並且攻擊反射、無敵狀態的敵人時也會使其受到傷害。\r\n\r\n以下效果不會影響上升技能的傷害。 \r\n- 裝備：帽子\r\n- 裝備：戒指\r\n- 條件觸發的被動效果\r\n- 主動技能的使用效果\r\n- 怪物的攻擊模式以及減益效果\r\n- 持續時間低於30分鐘的消耗品與商城道具";
-                string ascentSkillH = "在Boss戰鬥中最多可以使用3次\r\n在其他情況使用時冷卻時間為240秒";
-                GearGraphics.DrawNewTooltipBack(g, 0, 0, bitmap.Width, 300);
+                string ascentSkillDesc = "上升技能可在Boss戰中無冷卻使用指定次數，且僅在場上存在最大HP的Boss怪物時可使用。\r\n直接攻擊命中時不會觸發追加攻擊與效果。\r\n上升技能會優先攻擊最大HP的Boss怪物，並能對攻擊反射或攻擊無效狀態的敵人造成傷害。\r\n上升技能於10級、20級、30級時的無視怪物防禦率與Boss怪物傷害增加效果將與基本效果相加計算。\r\n\r\n以下效果變動不會影響提升技能的傷害：\r\n-裝備：帽子\r\n-裝備：戒指\r\n-條件觸發的被動技能效果\r\n-主動技能的使用效果\r\n-怪物屬性\r\n-怪物模式、減益效果\r\n-持續時間少於30分鐘的消耗或現金道具";
+                string ascentSkillH = "在Boss戰中可使用3次；其他地圖中使用時冷卻時間240秒。";
+                GearGraphics.DrawNewTooltipBack(g, 0, 0, bitmap.Width, 324);
                 GearGraphics.DrawPlainText(g, ascentSkillDesc, GearGraphics.ItemDetailFont, Color.FromArgb(175, 173, 255), region.LevelDescLeft, region.TextRight, ref picH, 16);
                 picH += 16;
                 DrawV6SkillDotline(g, region.SplitterX1, region.SplitterX2, picH);
