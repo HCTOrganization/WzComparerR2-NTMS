@@ -2123,7 +2123,7 @@ namespace WzComparerR2.Comparer
                 {
 
                     StateInfo = string.Format("{0}/{1} 裝備: {2}", ++count, allCount, gearID);
-                    StateDetail = "Character 變更点をツールチップ画像に出力中...";
+                    StateDetail = "Character 對比中...";
                     bool[] isGearNull = new bool[2] { false, false };
                     string gearType = "";
                     string gearNodePath = null;
