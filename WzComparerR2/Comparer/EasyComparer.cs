@@ -1279,7 +1279,7 @@ namespace WzComparerR2.Comparer
 
                             if (isDamageSkin)
                             {
-                                DamageSkin damageSkin = DamageSkin.CreateFromNode(PluginManager.FindWz($@"Etc\DamageSkin.img\{item.DamageSkinID}", WzFileNewOld[i]), PluginManager.FindWz);
+                                DamageSkin damageSkin = DamageSkin.CreateFromNode(PluginManager.FindWz($@"Etc\DamageSkin.img\{item.DamageSkinID}", WzFileNewOld[i]), PluginManager.FindWz) ?? DamageSkin.CreateFromNode(PluginManager.FindWz($@"Effect\DamageSkin.img\{item.DamageSkinID}", WzFileNewOld[i]), PluginManager.FindWz);
                                 damageSkinRenderNewOld[i].DamageSkin = damageSkin;
                                 categoryPath = "DamageSkin_傷害字型";
 
@@ -1611,7 +1611,7 @@ namespace WzComparerR2.Comparer
 
                             if (isDamageSkin)
                             {
-                                DamageSkin damageSkin = DamageSkin.CreateFromNode(PluginManager.FindWz($@"Etc\DamageSkin.img\{item.DamageSkinID}", WzFileNewOld[i]), PluginManager.FindWz);
+                                DamageSkin damageSkin = DamageSkin.CreateFromNode(PluginManager.FindWz($@"Etc\DamageSkin.img\{item.DamageSkinID}", WzFileNewOld[i]), PluginManager.FindWz) ?? DamageSkin.CreateFromNode(PluginManager.FindWz($@"Effect\DamageSkin.img\{item.DamageSkinID}", WzFileNewOld[i]), PluginManager.FindWz);
                                 damageSkinRenderNewOld[i].DamageSkin = damageSkin;
                                 categoryPath = "DamageSkin_傷害字型";
 
