@@ -247,6 +247,7 @@ namespace WzComparerR2.CharaSimControl
                 {
                     renderer = FamiliarRender;
                     FamiliarRender.Familiar = this.item as Familiar;
+                    FamiliarRender.UseAssembleUI = EnableAssembleTooltip;
                 }
                 else
                 {

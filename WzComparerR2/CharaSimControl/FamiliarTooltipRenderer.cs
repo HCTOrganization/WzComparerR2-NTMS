@@ -39,6 +39,7 @@ namespace WzComparerR2.CharaSimControl
         public int? ItemID { get; set; }
         public int FamiliarTier { get; set; }
         public bool AllowOutOfBounds { get; set; }
+        public bool UseAssembleUI { get; set; }
 
         public override Bitmap Render()
         {
@@ -46,7 +47,11 @@ namespace WzComparerR2.CharaSimControl
             {
                 return null;
             }
+            return UseAssembleUI ? GeneratePostAssembleFamiliarCard() : GeneratePreAssembleFamiliarCard();
+        }
 
+        private Bitmap GeneratePreAssembleFamiliarCard()
+        {
             Bitmap baseTooltip = Resource.UIFamiliar_img_familiarCard_backgrnd;
 
             // Get Mob image and name
@@ -160,6 +165,13 @@ namespace WzComparerR2.CharaSimControl
             }
             return tooltip;
         }
+
+        private Bitmap GeneratePostAssembleFamiliarCard()
+        {
+            // To be implemented on Jan 7, 2026
+            return GeneratePreAssembleFamiliarCard();
+        }
+
         private string GetMobName(int mobID)
         {
             bool isTranslateRequired = Translator.IsTranslateEnabled;
