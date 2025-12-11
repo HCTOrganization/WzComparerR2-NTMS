@@ -4270,6 +4270,7 @@ namespace WzComparerR2
                         tooltipQuickView.Hdesc = quest.DemandSummary;
                         tooltipQuickView.AutoDesc = quest.PlaceSummary;
                         tooltipQuickView.DescLeftAlign = quest.Summary;
+                        tooltipQuickView.NodeID = quest.ID;
                         fileName = "quest_" + quest.ID + "_" + RemoveInvalidFileNameChars(quest.Name) + ".png";
                         quest.State = tooltipQuickView.QuestRender.DefaultState;
                     }
