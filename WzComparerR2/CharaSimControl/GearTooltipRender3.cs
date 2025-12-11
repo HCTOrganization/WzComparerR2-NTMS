@@ -1794,7 +1794,7 @@ namespace WzComparerR2.CharaSimControl
                 if (!Gear.GetBooleanValue(GearPropType.notSale) && (Gear.Props.TryGetValue(GearPropType.price, out value) && value > 0) && (!Gear.Cash) && ShowSoldPrice)
                 {
                     picH += 7;
-                    GearGraphics.DrawString(g, "· 出售價格：" + value + "楓幣", GearGraphics.EquipDetailFont, 13, 244, ref picH, 16);
+                    GearGraphics.DrawString(g, " · 出售價格：" + value + " 楓幣", GearGraphics.ItemDetailFont, 13, 244, ref picH, 16);
                     picH += 16;
                 }
 
@@ -1807,11 +1807,11 @@ namespace WzComparerR2.CharaSimControl
                         if (commodityPackage.Price > 0)
                         {
                             picH += 16;
-                            GearGraphics.DrawString(g, "· 購買價格：" + commodityPackage.Price + "點數", GearGraphics.EquipDetailFont, 13, 244, ref picH, 16);
+                            GearGraphics.DrawString(g, " · 購買價格：" + commodityPackage.Price + " 點數", GearGraphics.ItemDetailFont, 13, 244, ref picH, 16);
                             if (Translator.DefaultDesiredCurrency != "none")
                             {
                                 string exchangedPrice = Translator.GetConvertedCurrency(commodityPackage.Price, titleLanguage);
-                                GearGraphics.DrawString(g, "    " + exchangedPrice, GearGraphics.EquipDetailFont, 13, 244, ref picH, 16);
+                                GearGraphics.DrawString(g, "    " + exchangedPrice, GearGraphics.ItemDetailFont, 13, 244, ref picH, 16);
                             }
                         }
                     }
