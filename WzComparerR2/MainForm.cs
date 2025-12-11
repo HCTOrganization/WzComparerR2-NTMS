@@ -546,6 +546,35 @@ namespace WzComparerR2
                     buttonItem.Checked = (buttonItem.Tag as eStyle?) == styleManager1.ManagerStyle;
                 }
             }
+
+            if (styleManager1.ManagerStyle == eStyle.VisualStudio2012Dark)
+            {
+                this.elementStyle1.TextColor = System.Drawing.Color.LightGray;
+                this.elementStyle2.TextColor = System.Drawing.Color.LightGray;
+                this.elementStyle3.TextColor = System.Drawing.Color.LightGray;
+                this.listViewExWzDetail.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.listViewExWzDetail.ForeColor = System.Drawing.Color.LightGray;
+                this.listViewExWzDetail.GridLines = false;
+                this.listViewExString.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.listViewExString.ForeColor = System.Drawing.Color.LightGray;
+                this.listViewExString.GridLines = false;
+                this.pictureBoxEx1.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.pictureBoxEx1.PictureBoxInfoText = Microsoft.Xna.Framework.Color.LightGray;
+            }
+            else
+            {
+                this.elementStyle1.TextColor = System.Drawing.SystemColors.ControlText;
+                this.elementStyle2.TextColor = System.Drawing.SystemColors.ControlText;
+                this.elementStyle3.TextColor = System.Drawing.SystemColors.ControlText;
+                this.listViewExWzDetail.BackColor = System.Drawing.Color.White;
+                this.listViewExWzDetail.ForeColor = System.Drawing.Color.Black;
+                this.listViewExWzDetail.GridLines = true;
+                this.listViewExString.BackColor = System.Drawing.Color.White;
+                this.listViewExString.ForeColor = System.Drawing.Color.Black;
+                this.listViewExString.GridLines = true;
+                this.pictureBoxEx1.BackColor = System.Drawing.Color.White;
+                this.pictureBoxEx1.PictureBoxInfoText = Microsoft.Xna.Framework.Color.Black;
+            }
         }
 
         private void styleColorPicker_SelectedColorChanged(object sender, EventArgs e)

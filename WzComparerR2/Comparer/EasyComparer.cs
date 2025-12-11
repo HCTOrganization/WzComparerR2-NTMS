@@ -10,7 +10,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms.VisualStyles;
 using WzComparerR2.CharaSim;
 using WzComparerR2.CharaSimControl;
 using WzComparerR2.Common;
@@ -4319,6 +4318,7 @@ namespace WzComparerR2.Comparer
             if (string.IsNullOrEmpty(imgStr)) return false;
             return imgStr.EndsWith("_.img");
         }
+
         private bool isKMSSkillID(int skillID)
         {
             switch (skillID / 10000000)

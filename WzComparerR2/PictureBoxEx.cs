@@ -31,6 +31,7 @@ namespace WzComparerR2
 
         public bool AutoAdjustPosition { get; set; }
         public string PictureName { get; set; }
+        public Color PictureBoxInfoText { get; set; } = Color.Black;
         public bool ShowInfo { get; set; }
 
         public override System.Drawing.Font Font
@@ -987,7 +988,7 @@ namespace WzComparerR2
             {
                 UpdateInfoText();
                 sprite.Begin();
-                sprite.DrawStringEx(this.XnaFont, this.sbInfo, Vector2.Zero, Color.Black);
+                sprite.DrawStringEx(this.XnaFont, this.sbInfo, Vector2.Zero, PictureBoxInfoText);
                 sprite.End();
             }
         }

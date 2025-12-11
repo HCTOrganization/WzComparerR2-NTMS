@@ -1929,7 +1929,6 @@ namespace WzComparerR2
             this.labelItem8.BorderSide = DevComponents.DotNetBar.eBorderSide.Bottom;
             this.labelItem8.BorderType = DevComponents.DotNetBar.eBorderType.Etched;
             this.labelItem8.CanCustomize = false;
-            this.labelItem8.ForeColor = System.Drawing.SystemColors.ControlText;
             this.labelItem8.Name = "labelItem8";
             this.labelItem8.PaddingBottom = 2;
             this.labelItem8.PaddingTop = 2;
