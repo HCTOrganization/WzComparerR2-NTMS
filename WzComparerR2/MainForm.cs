@@ -560,6 +560,7 @@ namespace WzComparerR2
                 this.listViewExString.GridLines = false;
                 this.pictureBoxEx1.BackColor = System.Drawing.Color.FromArgb(-13816528);
                 this.pictureBoxEx1.PictureBoxInfoText = Microsoft.Xna.Framework.Color.LightGray;
+                this.chkEnableDarkMode.Checked = true;
             }
             else
             {
@@ -574,6 +575,7 @@ namespace WzComparerR2
                 this.listViewExString.GridLines = true;
                 this.pictureBoxEx1.BackColor = System.Drawing.Color.White;
                 this.pictureBoxEx1.PictureBoxInfoText = Microsoft.Xna.Framework.Color.Black;
+                this.chkEnableDarkMode.Checked = false;
             }
         }
 
