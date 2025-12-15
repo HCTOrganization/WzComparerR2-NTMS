@@ -616,6 +616,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.hair:
                 case GearType.hair2:
                 case GearType.hair3:
+                case GearType.hair4:
                 case GearType.hair_n:
                 case GearType.hair2_n: return "紙娃娃(髮型)";
                 case GearType.faceAccessory: return "臉飾";
