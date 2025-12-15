@@ -13,9 +13,9 @@ using WzComparerR2.WzLib;
 
 namespace WzComparerR2.CharaSimControl
 {
-    public class DamageSkinTooltipRenderer : TooltipRender
+    public class DamageSkinTooltipRender : TooltipRender
     {
-        public DamageSkinTooltipRenderer()
+        public DamageSkinTooltipRender()
         {
         }
 

@@ -46,8 +46,8 @@ namespace WzComparerR2.CharaSimControl
             this.SetItemRender = new SetItemTooltipRender();
             this.SetItemRender3 = new SetItemTooltipRender3();
             this.AchievementRender = new AchievementTooltipRenderer();
-            this.FamiliarRender = new FamiliarTooltipRenderer(); // used in CMS/TMS
-            this.FamiliarRender2 = new FamiliarTooltipRenderer2(); // used in GMS/JMS
+            this.FamiliarRender = new FamiliarTooltipRender(); // used in CMS/TMS
+            this.FamiliarRender2 = new FamiliarTooltipRender2(); // used in GMS/JMS
             this.SizeChanged += AfrmTooltip_SizeChanged;
 
             this.MouseClick += AfrmTooltip_MouseClick;
@@ -95,8 +95,8 @@ namespace WzComparerR2.CharaSimControl
         public SetItemTooltipRender SetItemRender { get; private set; }
         public SetItemTooltipRender3 SetItemRender3 { get; private set; }
         public AchievementTooltipRenderer AchievementRender { get; private set; }
-        public FamiliarTooltipRenderer FamiliarRender { get; private set; }
-        public FamiliarTooltipRenderer2 FamiliarRender2 { get; private set; }
+        public FamiliarTooltipRender FamiliarRender { get; private set; }
+        public FamiliarTooltipRender2 FamiliarRender2 { get; private set; }
 
         public string ImageFileName { get; set; }
         public string NodeName { get; set; }

@@ -1150,7 +1150,7 @@ namespace WzComparerR2.Comparer
         private void SaveItemTooltip(string itemTooltipPath)
         {
             ItemTooltipRender2[] itemRenderNewOld = new ItemTooltipRender2[2];
-            DamageSkinTooltipRenderer[] damageSkinRenderNewOld = new DamageSkinTooltipRenderer[2];
+            DamageSkinTooltipRender[] damageSkinRenderNewOld = new DamageSkinTooltipRender[2];
             int count = 0;
             int allCount = OutputItemTooltipIDs.Count;
             var itemTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
@@ -1180,7 +1180,7 @@ namespace WzComparerR2.Comparer
                 itemRenderNewOld[i].DamageSkinNumber = this.DamageSkinNumber;
                 itemRenderNewOld[i].CompareMode = true;
 
-                damageSkinRenderNewOld[i] = new DamageSkinTooltipRenderer();
+                damageSkinRenderNewOld[i] = new DamageSkinTooltipRender();
                 damageSkinRenderNewOld[i].AlwaysUseMseaFormat = this.AlwaysUseMseaFormatDamageSkin;
                 damageSkinRenderNewOld[i].DisplayUnitOnSingleLine = this.DisplayDamageSkinUnitOnSingleLine;
             }
@@ -1483,7 +1483,7 @@ namespace WzComparerR2.Comparer
         private void SaveItemTooltip3(string itemTooltipPath)
         {
             ItemTooltipRender3[] itemRenderNewOld = new ItemTooltipRender3[2];
-            DamageSkinTooltipRenderer[] damageSkinRenderNewOld = new DamageSkinTooltipRenderer[2];
+            DamageSkinTooltipRender[] damageSkinRenderNewOld = new DamageSkinTooltipRender[2];
             int count = 0;
             int allCount = OutputItemTooltipIDs.Count;
             var itemTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
@@ -1512,7 +1512,7 @@ namespace WzComparerR2.Comparer
                 itemRenderNewOld[i].DamageSkinNumber = this.DamageSkinNumber;
                 itemRenderNewOld[i].CompareMode = true;
 
-                damageSkinRenderNewOld[i] = new DamageSkinTooltipRenderer();
+                damageSkinRenderNewOld[i] = new DamageSkinTooltipRender();
                 damageSkinRenderNewOld[i].AlwaysUseMseaFormat = this.AlwaysUseMseaFormatDamageSkin;
                 damageSkinRenderNewOld[i].DisplayUnitOnSingleLine = this.DisplayDamageSkinUnitOnSingleLine;
             }

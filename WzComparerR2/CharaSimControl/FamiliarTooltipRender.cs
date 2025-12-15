@@ -14,11 +14,11 @@ using Resource = CharaSimResource.Resource;
 
 namespace WzComparerR2.CharaSimControl
 {
-    public class FamiliarTooltipRenderer : TooltipRender
+    public class FamiliarTooltipRender : TooltipRender
     {
         // This class is for CMS/TMS version Familiar UI only.
         // For GMS/JMS version, check FamiliarTooltipRenderer2.
-        public FamiliarTooltipRenderer()
+        public FamiliarTooltipRender()
         {
         }
 

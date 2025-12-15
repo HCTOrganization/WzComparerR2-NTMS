@@ -1329,7 +1329,7 @@ namespace WzComparerR2.CharaSimControl
             TooltipRender renderer = this.LinkDamageSkinRender;
             if (renderer == null)
             {
-                DamageSkinTooltipRenderer defaultRenderer = new DamageSkinTooltipRenderer();
+                DamageSkinTooltipRender defaultRenderer = new DamageSkinTooltipRender();
                 defaultRenderer.StringLinker = this.StringLinker;
                 defaultRenderer.ShowObjectID = this.ShowDamageSkinID;
                 defaultRenderer.UseMiniSize = this.UseMiniSizeDamageSkin;
@@ -1355,7 +1355,7 @@ namespace WzComparerR2.CharaSimControl
             TooltipRender renderer = this.FamiliarRender;
             if (renderer == null)
             {
-                FamiliarTooltipRenderer defaultRenderer = new FamiliarTooltipRenderer();
+                FamiliarTooltipRender defaultRenderer = new FamiliarTooltipRender();
                 defaultRenderer.StringLinker = this.StringLinker;
                 defaultRenderer.ShowObjectID = this.ShowObjectID;
                 defaultRenderer.AllowOutOfBounds = this.AllowFamiliarOutOfBounds;
@@ -1373,7 +1373,7 @@ namespace WzComparerR2.CharaSimControl
             TooltipRender renderer = this.FamiliarRender;
             if (renderer == null)
             {
-                FamiliarTooltipRenderer2 defaultRenderer = new FamiliarTooltipRenderer2();
+                FamiliarTooltipRender2 defaultRenderer = new FamiliarTooltipRender2();
                 defaultRenderer.StringLinker = this.StringLinker;
                 defaultRenderer.ShowObjectID = this.ShowObjectID;
                 defaultRenderer.AllowOutOfBounds = this.AllowFamiliarOutOfBounds;
