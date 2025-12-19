@@ -860,10 +860,10 @@ namespace WzComparerR2.CharaSimControl
                     //return "미완";
 
                     case "u":
-                        return "未完";
+                        return "未完成";
 
                     case "h0":
-                        return "プレイヤー";
+                        return "玩家";
 
                     case "o9101069f":
                         Wz_Node stringNodeMF = PluginManager.FindWz($@"String\MobFilter.img\{info}");
@@ -874,12 +874,12 @@ namespace WzComparerR2.CharaSimControl
                         return $"#$o{sr?.Name ?? "9101069"}#";
 
                     case "M":
-                        return "モンスター";
+                        return "怪物";
 
                     case "MD":
                         Wz_Node stringNode = PluginManager.FindWz($@"String\mirrorDungeon.img\{info}\name");
                         var retMD = stringNode.GetValueEx<string>(null);
-                        return retMD ?? "鏡の世界";
+                        return retMD ?? "鏡子世界";
 
                     case "fc":
                     case "fs":
