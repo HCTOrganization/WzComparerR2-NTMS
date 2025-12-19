@@ -56,6 +56,7 @@
             this.clbJobName.Name = "clbJobName";
             this.clbJobName.Font = new System.Drawing.Font("SimSun", 12F);
             this.clbJobName.Size = new System.Drawing.Size(430, 522);
+            this.clbJobName.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.clbJobName.TabIndex = 1;
             // 
             // btnSort

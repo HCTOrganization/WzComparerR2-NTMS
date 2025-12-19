@@ -3624,6 +3624,7 @@ namespace WzComparerR2
             this.clbRootNode.Location = new System.Drawing.Point(btnRootNode.Location.X, btnRootNode.Location.Y + btnRootNode.Size.Height);
             this.clbRootNode.Size = new System.Drawing.Size(100, 250);
             this.clbRootNode.Visible = false;
+            this.clbRootNode.BorderStyle = BorderStyle.FixedSingle;
             this.clbRootNode.BringToFront();
             // 
             // btnPreset

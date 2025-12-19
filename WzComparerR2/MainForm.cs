@@ -561,6 +561,8 @@ namespace WzComparerR2
                 this.pictureBoxEx1.BackColor = System.Drawing.Color.FromArgb(-13816528);
                 this.pictureBoxEx1.PictureBoxInfoText = Microsoft.Xna.Framework.Color.LightGray;
                 this.chkEnableDarkMode.Checked = true;
+                this.clbRootNode.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.clbRootNode.ForeColor = System.Drawing.Color.LightGray;
             }
             else
             {
@@ -576,6 +578,8 @@ namespace WzComparerR2
                 this.pictureBoxEx1.BackColor = System.Drawing.Color.White;
                 this.pictureBoxEx1.PictureBoxInfoText = Microsoft.Xna.Framework.Color.Black;
                 this.chkEnableDarkMode.Checked = false;
+                this.clbRootNode.BackColor = System.Drawing.Color.White;
+                this.clbRootNode.ForeColor = System.Drawing.Color.Black;
             }
         }
 
@@ -5130,8 +5134,7 @@ namespace WzComparerR2
                 ToastNotification.Show(this, $"錯誤：使用此功能前僅可開啟一個 Base.wz。", null, 4000, eToastGlowColor.Red, eToastPosition.TopCenter);
                 return;
             }
-            
-            using (FrmSkillTooltipExport frm = new FrmSkillTooltipExport())
+            using (FrmSkillTooltipExport frm = new FrmSkillTooltipExport(styleManager1.ManagerStyle == eStyle.VisualStudio2012Dark))
             {
                 frm.skillNode = PluginManager.FindWz(Wz_Type.Skill);
                 if (frm.ShowDialog() == DialogResult.OK)
