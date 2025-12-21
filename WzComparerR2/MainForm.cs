@@ -5155,7 +5155,7 @@ namespace WzComparerR2
 
                             // Initialize VCore Dictionary
                             Dictionary<int, List<int>> FifthJobSkillToJobID = new Dictionary<int, List<int>>();
-                            Wz_Node vCoreData = PluginManager.FindWz("Etc\\VCore.img\\CoreData", PluginManager.FindWz(Wz_Type.Base).GetNodeWzFile());
+                            Wz_Node vCoreData = PluginManager.FindWz("Etc\\VcoreNew.img\\vSkill\\CoreData", PluginManager.FindWz(Wz_Type.Base).GetNodeWzFile()) ?? PluginManager.FindWz("Etc\\VCore.img\\CoreData", PluginManager.FindWz(Wz_Type.Base).GetNodeWzFile());
                             if (vCoreData != null)
                             {
                                 foreach (Wz_Node data in vCoreData.Nodes)
@@ -5193,7 +5193,7 @@ namespace WzComparerR2
                             tooltip.Enable22AniStyle = Setting.Enable22AniStyle;
                             foreach (var i in selectedJob)
                             {
-                                var jobImg = PluginManager.FindWz($"Skill\\{i:D3}.img\\skill", PluginManager.FindWz(Wz_Type.Base).GetNodeWzFile());
+                                var jobImg = PluginManager.FindWz($"Skill\\{i:D3}.img\\skill");
                                 if (jobImg == null)
                                 {
                                     continue;
@@ -5244,7 +5244,7 @@ namespace WzComparerR2
                                     {
                                         if (kvp.Value.Contains(i))
                                         {
-                                            var skillNode = PluginManager.FindWz($"Skill\\{kvp.Key / 10000}.img\\skill\\{kvp.Key}", PluginManager.FindWz(Wz_Type.Base).GetNodeWzFile());
+                                            var skillNode = PluginManager.FindWz($"Skill\\{kvp.Key / 10000}.img\\skill\\{kvp.Key}");
                                             if (skillNode == null)
                                             {
                                                 continue;
