@@ -743,6 +743,27 @@ namespace WzComparerR2.CharaSimControl
                         }
                     }
                 }
+                else if (this.item is Npc)
+                {
+                    if ((this.TargetItem as Npc).Illustration2Bitmaps.Count == 0)
+                    {
+                        return;
+                    }
+                    using (FolderBrowserDialog dlg = new FolderBrowserDialog())
+                    {
+                        dlg.Description = "請選擇存放NPC立繪的目標資料夾。";
+                        if (dlg.ShowDialog() == DialogResult.OK)
+                        {
+                            int idx = 1;
+                            foreach (var ib in (this.TargetItem as Npc).Illustration2Bitmaps)
+                            {
+                                string fileName = this.ImageFileName.Replace("npc", "npcillust").Replace(".png", $" ({idx}).png");
+                                ib.Save(Path.Combine(dlg.SelectedPath, fileName), System.Drawing.Imaging.ImageFormat.Png);
+                                idx++;
+                            }
+                        }
+                    }
+                }
                 else if (this.SampleBitmap != null)
                 {
                     using (SaveFileDialog dlg = new SaveFileDialog())

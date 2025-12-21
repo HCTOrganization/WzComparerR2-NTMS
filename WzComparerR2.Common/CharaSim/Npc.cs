@@ -13,6 +13,7 @@ namespace WzComparerR2.CharaSim
         {
             this.ID = -1;
             //this.Animates = new LifeAnimateCollection();
+            this.Illustration2Bitmaps = new List<Bitmap>();
         }
 
         public int ID { get; set; }
@@ -22,6 +23,7 @@ namespace WzComparerR2.CharaSim
 
         public BitmapOrigin Default { get; set; }
         public Bitmap AvatarBitmap { get; set; }
+        public List<Bitmap> Illustration2Bitmaps { get; set; }
 
         public Wz_Node Component { get; set; }
 
@@ -59,6 +61,38 @@ namespace WzComparerR2.CharaSim
                         case "link": npcInfo.Link = propNode.GetValueEx<int>(0); break;
                         case "component": npcInfo.Component = propNode; break;
                         case "default": npcInfo.Default = BitmapOrigin.CreateFromNode(propNode, findNode); break;
+                        case "illustration2":
+                            foreach (var imgNode in propNode.Nodes)
+                            {
+                                switch (imgNode.Text)
+                                {
+                                    case "base":
+                                        var bmpOrigin = BitmapOrigin.CreateFromNode(imgNode, findNode);
+                                        if (bmpOrigin.Bitmap != null && bmpOrigin.Bitmap.Size != new Size(1, 1))
+                                        {
+                                            npcInfo.Illustration2Bitmaps.Add(bmpOrigin.Bitmap);
+                                        }
+                                        break;
+                                    case "face":
+                                        foreach (var faceNode in imgNode.Nodes)
+                                        {
+                                            try
+                                            {
+                                                var faceBmpOrigin = BitmapOrigin.CreateFromNode(faceNode, findNode);
+                                                if (faceBmpOrigin.Bitmap != null && faceBmpOrigin.Bitmap.Size != new Size(1, 1))
+                                                {
+                                                    npcInfo.Illustration2Bitmaps.Add(faceBmpOrigin.Bitmap);
+                                                }
+                                            }
+                                            catch
+                                            {
+                                                continue;
+                                            }
+                                        }
+                                        break;
+                                }
+                            }
+                            break;
                     }
                 }
             }
