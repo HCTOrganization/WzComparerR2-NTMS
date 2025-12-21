@@ -1580,6 +1580,20 @@ namespace WzComparerR2
                 }
             }
 
+            if (selectedNode.FullPathToFile.Contains("Sound"))
+            {
+                this.advTree1.ContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+                this.toolStripMenuItem5,
+                this.tsmi1ExportSound});
+            }
+            else if (this.advTree1.ContextMenuStrip.Items.Contains(this.tsmi1ExportSound))
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    this.advTree1.ContextMenuStrip.Items.RemoveAt(this.advTree1.ContextMenuStrip.Items.Count - 1);
+                }
+            }
+
             listViewExWzDetail.BeginUpdate();
             listViewExWzDetail.Items.Clear();
 
@@ -2699,6 +2713,121 @@ namespace WzComparerR2
             else
             {
                 MessageBoxEx.Show("StringLinker更新失敗。", "錯誤");
+            }
+        }
+
+        private async void tsmi1ExportSound_Click(object sender, EventArgs e)
+        {
+            Wz_Node soundNode = advTree1.SelectedNode?.AsWzNode();
+            if (soundNode != null && soundNode.Value is Wz_Image)
+            {
+                FolderBrowserDialog dlg = new FolderBrowserDialog();
+                dlg.Description = "請選擇要匯出的資料夾。";
+                if (dlg.ShowDialog(this) != DialogResult.OK)
+                {
+                    return;
+                }
+                string exportedFolder = Path.Combine(dlg.SelectedPath, soundNode.FullPathToFile);
+                if (!Directory.Exists(exportedFolder))
+                {
+                    Directory.CreateDirectory(exportedFolder);
+                }
+                FrmWaiting WaitingForm = new FrmWaiting();
+                WaitingForm.UpdateMessage("匯出中");
+                WaitingForm.Show(this);
+                await Task.Run(() =>
+                {
+                    BatchExportSound(soundNode.GetValue<Wz_Image>().Node, exportedFolder, WaitingForm);
+                });
+                WaitingForm.Close();
+                labelItemStatus.Text = "匯出完成至: " + exportedFolder;
+            }
+            else
+            {
+                using (FrmSoundExport frm = new FrmSoundExport(styleManager1.ManagerStyle == eStyle.VisualStudio2012Dark))
+                {
+                    foreach (var img in soundNode.Nodes)
+                    {
+                        frm.AddSoundEntry(img.Text);
+                    }
+                    if (frm.ShowDialog() == DialogResult.OK)
+                    {
+                        string exportedFolder = Path.Combine(frm.ExportFolderPath, soundNode.FullPathToFile);
+                        if (!Directory.Exists(exportedFolder))
+                        {
+                            Directory.CreateDirectory(exportedFolder);
+                        }
+                        FrmWaiting WaitingForm = new FrmWaiting();
+                        WaitingForm.UpdateMessage("匯出中");
+                        WaitingForm.Show(this);
+                        await Task.Run(() =>
+                        {
+                            foreach (var img in soundNode.Nodes)
+                            {
+                                if (!frm.SelectedSoundCodes.Contains(img.Text))
+                                {
+                                    continue;
+                                }
+                                Wz_Image image = img.GetValue<Wz_Image>();
+                                if (image.TryExtract())
+                                {
+                                    if (!Directory.Exists(Path.Combine(exportedFolder, img.Text)))
+                                    {
+                                        Directory.CreateDirectory(Path.Combine(exportedFolder, img.Text));
+                                    }
+                                    BatchExportSound(image.Node, Path.Combine(exportedFolder, img.Text), WaitingForm);
+                                }
+                            }
+                        });
+                        WaitingForm.Close();
+                        labelItemStatus.Text = "匯出完成至: " + exportedFolder;
+                    }
+                }
+            }
+        }
+
+        private void BatchExportSound(Wz_Node node, string path, FrmWaiting waiting)
+        {
+            foreach (Wz_Node child in node.Nodes)
+            {
+                if (child.Value is Wz_Sound sound)
+                {
+                    string soundName = child.Text;
+                    waiting.UpdateMessage($"匯出中: {soundName}");
+                    byte[] soundData = sound.ExtractSound();
+                    if (soundData == null || soundData.Length <= 0)
+                    {
+                        continue;
+                    }
+                    switch (sound.SoundType)
+                    {
+                        case Wz_SoundType.Mp3: soundName += ".mp3"; break;
+                        case Wz_SoundType.Pcm: soundName += ".wav"; break;
+                    }
+
+                    FileStream fs = null;
+                    try
+                    {
+                        fs = new FileStream(Path.Combine(path, RemoveInvalidFileNameChars(soundName)), FileMode.Create, FileAccess.Write);
+                        fs.Write(soundData, 0, soundData.Length);
+                    }
+                    catch
+                    {
+                    }
+                    finally
+                    {
+                        fs?.Close();
+                    }
+                }
+                else if (child.Value == null && child.Nodes.Count > 0)
+                {
+                    string subDirPath = Path.Combine(path, RemoveInvalidFileNameChars(child.Text));
+                    if (!Directory.Exists(subDirPath))
+                    {
+                        Directory.CreateDirectory(subDirPath);
+                    }
+                    BatchExportSound(child, subDirPath, waiting);
+                }
             }
         }
 

@@ -279,6 +279,7 @@ namespace WzComparerR2
             this.tsmi1SaveImgList = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem5 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmi1UpdateStringLinker = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmi1ExportSound = new System.Windows.Forms.ToolStripMenuItem();
             this.nodeConnector1 = new DevComponents.AdvTree.NodeConnector();
             this.elementStyle1 = new DevComponents.DotNetBar.ElementStyle();
             this.listViewExString = new DevComponents.DotNetBar.Controls.ListViewEx();
@@ -3358,7 +3359,14 @@ namespace WzComparerR2
             this.tsmi1UpdateStringLinker.Name = "tsmi1UpdateStringLinker";
             this.tsmi1UpdateStringLinker.Size = new System.Drawing.Size(154, 22);
             this.tsmi1UpdateStringLinker.Text = "更新字串表";
-            this.tsmi1UpdateStringLinker.Click += new System.EventHandler(this.tsmi1UpdateStringLinker_Click); 
+            this.tsmi1UpdateStringLinker.Click += new System.EventHandler(this.tsmi1UpdateStringLinker_Click);
+            //
+            // tsmi1ExportSound
+            // 
+            this.tsmi1ExportSound.Name = "tsmi1ExportSound";
+            this.tsmi1ExportSound.Size = new System.Drawing.Size(154, 22);
+            this.tsmi1ExportSound.Text = "匯出音訊";
+            this.tsmi1ExportSound.Click += new System.EventHandler(this.tsmi1ExportSound_Click);
             // 
             // tsmi1SaveImgList
             // 
@@ -3966,6 +3974,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ButtonItem buttonItemUpdate;
         private System.Windows.Forms.ToolStripMenuItem tsmi1DumpAsXml;
         private System.Windows.Forms.ToolStripMenuItem tsmi1UpdateStringLinker;
+        private System.Windows.Forms.ToolStripMenuItem tsmi1ExportSound;
         private System.Windows.Forms.ToolStripMenuItem tsmi1SaveImgList;
         private DevComponents.Editors.ComboItem comboItem18;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkResolvePngLink;
