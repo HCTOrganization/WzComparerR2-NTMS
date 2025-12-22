@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -290,7 +291,14 @@ namespace WzComparerR2.CharaSim
             {
                 if (sr.SkillH.Count > 0)
                 {
-                    h = sr.SkillH[0];
+                    if (sr.SkillExtraH.Count > 0)
+                    {
+                        h = level < sr.SkillExtraH.Keys.Min() ? sr.SkillH[0] : sr.SkillExtraH[sr.SkillExtraH.Keys.Where(k => k <= level).Max()];
+                    }
+                    else
+                    {
+                        h = sr.SkillExtraH.ContainsKey(level) ? sr.SkillExtraH[level] : sr.SkillH[0];
+                    }
                 }
 
                 if (doHighlight && DiffSkillTags != null && skillID != null)

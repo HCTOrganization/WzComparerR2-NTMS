@@ -336,6 +336,25 @@ namespace WzComparerR2.Common
                             }
                             else if (!update) strResult.SkillhcH.Add(h);
 
+                            // Precaution for GMS modifying it into Level 4 Link Skill
+                            for (int i = 3; i <= 99; i++)
+                            {
+                                string hi = GetDefaultString(linkNode, "h_" + i);
+                                if (string.IsNullOrEmpty(hi))
+                                    continue;
+                                else
+                                {
+                                    if (update && strResult.SkillExtraH.ContainsKey(i))
+                                    {
+                                        strResult.SkillExtraH[i] = hi;
+                                    }
+                                    else
+                                    {
+                                        strResult.SkillExtraH.Add(i, hi);
+                                    }
+                                }
+                            }
+
                             if (strResult.SkillH.Count > 0 && strResult.SkillH.Last() == null)
                             {
                                 strResult.SkillH.RemoveAt(strResult.SkillH.Count - 1);
