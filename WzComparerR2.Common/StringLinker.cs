@@ -337,7 +337,7 @@ namespace WzComparerR2.Common
                             else if (!update) strResult.SkillhcH.Add(h);
 
                             // Precaution for GMS modifying it into Level 4 Link Skill
-                            for (int i = 3; i <= 4; i++)
+                            for (int i = 3; i <= 99; i++)
                             {
                                 string hi = GetDefaultString(linkNode, "h_" + i);
                                 if (string.IsNullOrEmpty(hi))
