@@ -15,12 +15,30 @@ namespace WzComparerR2.CharaSim
             //this.Animates = new LifeAnimateCollection();
             this.Illustration2Bitmaps = new List<Bitmap>();
             this.Illustration2BaseBitmap = null;
+            this.illustIndex = 0;
         }
 
         public int ID { get; set; }
         public bool Shop { get; set; }
 
         public int? Link { get; set; }
+        private int illustIndex;
+
+        public int IllustIndex
+        {
+            get { return illustIndex; }
+            set
+            {
+                if (this.Illustration2Bitmaps.Count == 0)
+                {
+                    illustIndex = 0;
+                }
+                else
+                {
+                    illustIndex = Math.Max(0, Math.Min(value, this.Illustration2Bitmaps.Count - 1));
+                }
+            }
+        }
 
         public BitmapOrigin Default { get; set; }
         public Bitmap AvatarBitmap { get; set; }

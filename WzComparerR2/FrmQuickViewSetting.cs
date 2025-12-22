@@ -343,6 +343,13 @@ namespace WzComparerR2
             set { chkShowBgmName.Checked = value; }
         }
 
+        [Link]
+        public bool Npc_ShowAllIllustAtOnce
+        {
+            get { return chkShowAllIllustAtOnce.Checked; }
+            set { chkShowAllIllustAtOnce.Checked = value; }
+        }
+
 
         public int PreferredStringCopyMethod
         {
