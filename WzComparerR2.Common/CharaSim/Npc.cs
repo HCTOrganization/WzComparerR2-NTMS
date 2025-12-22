@@ -14,6 +14,7 @@ namespace WzComparerR2.CharaSim
             this.ID = -1;
             //this.Animates = new LifeAnimateCollection();
             this.Illustration2Bitmaps = new List<Bitmap>();
+            this.Illustration2BaseBitmap = null;
         }
 
         public int ID { get; set; }
@@ -24,6 +25,7 @@ namespace WzComparerR2.CharaSim
         public BitmapOrigin Default { get; set; }
         public Bitmap AvatarBitmap { get; set; }
         public List<Bitmap> Illustration2Bitmaps { get; set; }
+        public Bitmap Illustration2BaseBitmap { get; set; }
 
         public Wz_Node Component { get; set; }
 
@@ -50,6 +52,8 @@ namespace WzComparerR2.CharaSim
             npcInfo.ID = npcID;
             Wz_Node infoNode = node.FindNodeByPath("info").ResolveUol();
 
+            Point baseOrigin = Point.Empty;
+
             //加载基础属性
             if (infoNode != null)
             {
@@ -70,7 +74,8 @@ namespace WzComparerR2.CharaSim
                                         var bmpOrigin = BitmapOrigin.CreateFromNode(imgNode, findNode);
                                         if (bmpOrigin.Bitmap != null && bmpOrigin.Bitmap.Size != new Size(1, 1))
                                         {
-                                            npcInfo.Illustration2Bitmaps.Add(bmpOrigin.Bitmap);
+                                            npcInfo.Illustration2BaseBitmap = bmpOrigin.Bitmap;
+                                            baseOrigin = bmpOrigin.Origin;
                                         }
                                         break;
                                     case "face":
@@ -81,7 +86,20 @@ namespace WzComparerR2.CharaSim
                                                 var faceBmpOrigin = BitmapOrigin.CreateFromNode(faceNode, findNode);
                                                 if (faceBmpOrigin.Bitmap != null && faceBmpOrigin.Bitmap.Size != new Size(1, 1))
                                                 {
-                                                    npcInfo.Illustration2Bitmaps.Add(faceBmpOrigin.Bitmap);
+                                                    if (baseOrigin != Point.Empty)
+                                                    {
+                                                        Bitmap combinedBmp = new Bitmap(npcInfo.Illustration2BaseBitmap.Width, npcInfo.Illustration2BaseBitmap.Height);
+                                                        using (Graphics g = Graphics.FromImage(combinedBmp))
+                                                        {
+                                                            g.DrawImageUnscaled(npcInfo.Illustration2BaseBitmap, 0, 0);
+                                                            g.DrawImageUnscaled(faceBmpOrigin.Bitmap, baseOrigin.X - faceBmpOrigin.Origin.X, baseOrigin.Y - faceBmpOrigin.Origin.Y);
+                                                        }
+                                                        npcInfo.Illustration2Bitmaps.Add(combinedBmp);
+                                                    }
+                                                    else
+                                                    {
+                                                        npcInfo.Illustration2Bitmaps.Add(faceBmpOrigin.Bitmap);
+                                                    }
                                                 }
                                             }
                                             catch
