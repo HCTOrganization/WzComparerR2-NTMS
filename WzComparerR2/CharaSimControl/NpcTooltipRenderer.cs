@@ -183,6 +183,8 @@ namespace WzComparerR2.CharaSimControl
                 g2.DrawImage(bmp, 0, 0);
                 g2.DrawImage(illustration2Tooltip, illustration2Origin);
                 g2.Dispose();
+                bmp.Dispose();
+                illustration2Tooltip.Dispose();
                 return newTooltip;
             }
             else
@@ -208,6 +210,7 @@ namespace WzComparerR2.CharaSimControl
                 int currentLineWidth = 0;
                 int currentLineHeight = 0;
                 int lineCount = 0;
+                List<int> maxLineHeights = new List<int>();
                 foreach (var bmp in bitmaps)
                 {
                     if (bmp != null)
@@ -219,6 +222,8 @@ namespace WzComparerR2.CharaSimControl
                     {
                         width = Math.Max(width, currentLineWidth);
                         height += currentLineHeight + margin;
+
+                        maxLineHeights.Add(currentLineHeight + margin);
                         currentLineWidth = 0;
                         currentLineHeight = 0;
                         lineCount++;
@@ -230,6 +235,7 @@ namespace WzComparerR2.CharaSimControl
                     height += currentLineHeight + margin;
                     currentLineWidth = 0;
                 }
+                maxLineHeights.Add(currentLineHeight + margin);
                 Bitmap result = new Bitmap(width + 30, height + 30, PixelFormat.Format32bppArgb);
                 using (Graphics g = Graphics.FromImage(result))
                 {
@@ -237,20 +243,21 @@ namespace WzComparerR2.CharaSimControl
 
                     int x = 15;
                     int y = 15;
-                    int maxLineHeight = 0;
+                    int row = 0;
+                    int maxLineHeight = maxLineHeights[0];
                     foreach (var bmp in bitmaps)
                     {
                         if (bmp != null)
                         {
-                            maxLineHeight = Math.Max(maxLineHeight, bmp.Height);
                             g.DrawImage(bmp, x, y + maxLineHeight - bmp.Height);
                             x += bmp.Width + margin;
                         }
                         if (bitmaps.IndexOf(bmp) % perLineCount == perLineCount - 1)
                         {
                             x = 15;
-                            y += maxLineHeight + margin;
-                            maxLineHeight = 0;
+                            y += maxLineHeight;
+                            if (++row <= maxLineHeights.Count - 1)
+                                maxLineHeight = maxLineHeights[row];
                         }
                     }
 
