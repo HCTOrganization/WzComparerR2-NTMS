@@ -290,7 +290,7 @@ namespace WzComparerR2.CharaSim
             {
                 if (sr.SkillH.Count > 0)
                 {
-                    h = sr.SkillH[0];
+                    h = sr.SkillExtraH.ContainsKey(level) ? sr.SkillExtraH[level] : sr.SkillH[0];
                 }
 
                 if (doHighlight && DiffSkillTags != null && skillID != null)
