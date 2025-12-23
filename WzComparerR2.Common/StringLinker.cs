@@ -294,20 +294,7 @@ namespace WzComparerR2.Common
                             {
                                 continue;
                             }
-                            StringResult strResult = null;
-                            if (update)
-                            {
-                                try
-                                {
-                                    if (tree.Text.Length >= 7 && Int32.TryParse(tree.Text, out id))
-                                    {
-                                        strResult = stringSkill[id];
-                                    }
-                                    strResult = stringSkill2[tree.Text];
-                                }
-                                catch { }
-                            }
-                            if (strResult == null) strResult = new StringResultSkill();
+                            StringResultSkill strResult = new StringResultSkill();
 
                             strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;//?? GetDefaultString(tree, "bookName");
                             strResult.Desc = GetDefaultString(linkNode, "desc") ?? strResult.Desc;
@@ -336,25 +323,6 @@ namespace WzComparerR2.Common
                             }
                             else if (!update) strResult.SkillhcH.Add(h);
 
-                            // Precaution for GMS modifying it into Level 4 Link Skill
-                            for (int i = 3; i <= 99; i++)
-                            {
-                                string hi = GetDefaultString(linkNode, "h_" + i);
-                                if (string.IsNullOrEmpty(hi))
-                                    continue;
-                                else
-                                {
-                                    if (update && strResult.SkillExtraH.ContainsKey(i))
-                                    {
-                                        strResult.SkillExtraH[i] = hi;
-                                    }
-                                    else
-                                    {
-                                        strResult.SkillExtraH.Add(i, hi);
-                                    }
-                                }
-                            }
-
                             if (strResult.SkillH.Count > 0 && strResult.SkillH.Last() == null)
                             {
                                 strResult.SkillH.RemoveAt(strResult.SkillH.Count - 1);
@@ -372,6 +340,18 @@ namespace WzComparerR2.Common
                                     }
                                     strResult.SkillH.Add(hi);
                                 }
+                            }
+                            // KMST1196, add h_ prefix strings
+                            foreach (Wz_Node child in linkNode.Nodes)
+                            {
+                                if (child.Text.StartsWith("h_") && int.TryParse(child.Text.Substring(2), out int level) && level > 0 && child.Value != null)
+                                {
+                                    strResult.SkillExtraH.Add(new KeyValuePair<int, string>(level, child.GetValue<string>()));
+                                }
+                            }
+                            if (strResult.SkillExtraH.Count > 1)
+                            {
+                                strResult.SkillExtraH.Sort((left, right) => left.Key.CompareTo(right.Key));
                             }
                             strResult.SkillH.TrimExcess();
                             strResult.SkillpH.TrimExcess();

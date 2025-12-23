@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -233,14 +232,14 @@ namespace WzComparerR2.CharaSim
             return false;
         }
 
-        public static string GetSkillSummary(Skill skill, StringResult sr, SummaryParams param)
+        public static string GetSkillSummary(Skill skill, StringResultSkill sr, SummaryParams param)
         {
             if (skill == null)
                 return null;
             return GetSkillSummary(skill, skill.Level, sr, param);
         }
 
-        public static string GetSkillSummary(Skill skill, int level, StringResult sr, SummaryParams param, SkillSummaryOptions options = default, bool doHighlight = false, string skillID = null, Dictionary<string, List<string>> DiffSkillTags = null)
+        public static string GetSkillSummary(Skill skill, int level, StringResultSkill sr, SummaryParams param, SkillSummaryOptions options = default, bool doHighlight = false, string skillID = null, Dictionary<string, List<string>> DiffSkillTags = null)
         {
             if (skill == null || sr == null)
                 return null;
@@ -248,8 +247,9 @@ namespace WzComparerR2.CharaSim
             string h = null;
             if (skill.PreBBSkill) //用level声明的技能
             {
-                string hs;
-                if (skill.Level == level && skill.Common.TryGetValue("hs", out hs))
+                string hsSummary;
+                if (skill.Level == level && skill.Common.TryGetValue("hs", out string hs)
+                    && (hsSummary = sr[hs]) != null) // fix for skill 170001005, 170011005
                 {
                     h = sr[hs];
                 }
@@ -291,16 +291,20 @@ namespace WzComparerR2.CharaSim
             {
                 if (sr.SkillH.Count > 0)
                 {
-                    if (sr.SkillExtraH.Count > 0)
+                    h = sr.SkillH[0];
+                }
+                if (sr.SkillExtraH.Count > 0)
+                {
+                    // SkillExtraH is always sorted
+                    foreach (var kv in sr.SkillExtraH)
                     {
-                        h = level < sr.SkillExtraH.Keys.Min() ? sr.SkillH[0] : sr.SkillExtraH[sr.SkillExtraH.Keys.Where(k => k <= level).Max()];
-                    }
-                    else
-                    {
-                        h = sr.SkillExtraH.ContainsKey(level) ? sr.SkillExtraH[level] : sr.SkillH[0];
+                        if (level < kv.Key)
+                        {
+                            break;
+                        }
+                        h = kv.Value;
                     }
                 }
-
                 if (doHighlight && DiffSkillTags != null && skillID != null)
                 {
                     if (DiffSkillTags.ContainsKey(skillID))

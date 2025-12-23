@@ -20,26 +20,6 @@ namespace WzComparerR2.Common
 
         private List<KeyValuePair<string, string>> allValues;
 
-        public virtual List<string> SkillH
-        {
-            get { return null; }
-        }
-
-        public virtual List<string> SkillpH
-        {
-            get { return null; }
-        }
-
-        public virtual List<string> SkillhcH
-        {
-            get { return null; }
-        }
-
-        public virtual Dictionary<int, string> SkillExtraH
-        {
-            get { return null; }
-        }
-
         public string this[string key]
         {
             get
@@ -88,25 +68,25 @@ namespace WzComparerR2.Common
             this.skillH = new List<string>();
             this.skillpH = new List<string>();
             this.skillhcH = new List<string>();
-            this.skillExtraH = new Dictionary<int, string>();
+            this.skillExtraH = new List<KeyValuePair<int, string>>();
         }
 
-        public override List<string> SkillH
+        public List<string> SkillH
         {
             get { return this.skillH; }
         }
 
-        public override List<string> SkillpH
+        public List<string> SkillpH
         {
             get { return this.skillpH; }
         }
 
-        public override List<string> SkillhcH
+        public List<string> SkillhcH
         {
             get { return this.skillhcH; }
         }
 
-        public override Dictionary<int, string> SkillExtraH
+        public List<KeyValuePair<int, string>> SkillExtraH
         {
             get { return this.skillExtraH; }
         }
@@ -114,6 +94,6 @@ namespace WzComparerR2.Common
         private readonly List<string> skillH;
         private readonly List<string> skillpH;
         private readonly List<string> skillhcH;
-        private readonly Dictionary<int, string> skillExtraH;
+        private readonly List<KeyValuePair<int, string>> skillExtraH;
     }
 }
