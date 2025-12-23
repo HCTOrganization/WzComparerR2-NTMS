@@ -837,7 +837,7 @@ namespace WzComparerR2.CharaSimControl
                             StringLinker.StringEqp.TryGetValue(id, out sr);
                             itemIconPrefix = "[[File:Eqp ";
                         }
-                        return isMapleWiki ? itemIconPrefix + $"{sr?.Name ?? id.ToString()}.png]] {{{{QuestTextHighlight|item|{sr?.Name ?? id.ToString()}}}}}" : $"{sr?.Name ?? id.ToString()}";
+                        return isMapleWiki ? itemIconPrefix + $"{sr?.Name ?? id.ToString()}.png]] " : $"{sr?.Name ?? id.ToString()}";
 
                     case "y":
                         StringLinker.StringQuest.TryGetValue(id, out sr);
