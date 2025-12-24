@@ -515,7 +515,7 @@ namespace WzComparerR2.CharaSimControl
                 case 2:
                     if (this.item is Quest)
                     {
-                        int check0npcID = (this.item as Quest).Check0Npc.ID;
+                        int check0npcID = (this.item as Quest).Check0Npc != null ? (this.item as Quest).Check0Npc.ID : 0;
                         int check1npcID = (this.item as Quest).Check1NpcID;
                         string check0npcName = "(null)";
                         string check1npcName = "(null)";
