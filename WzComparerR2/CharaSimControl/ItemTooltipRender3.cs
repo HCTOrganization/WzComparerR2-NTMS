@@ -817,11 +817,14 @@ namespace WzComparerR2.CharaSimControl
                     if (damageSkin != null)
                     {
                         BitmapOrigin sample = damageSkin.Sample;
-                        g.DrawImage(sample.Bitmap, (tooltip.Width - sample.Bitmap.Width) / 2, picH);
-                        picH += sample.Bitmap.Height;
-                        picH += 2;
+                        if (sample.Bitmap != null)
+                        {
+                            g.DrawImage(sample.Bitmap, (tooltip.Width - sample.Bitmap.Width) / 2, picH);
+                            picH += sample.Bitmap.Height;
+                            picH += 2;
 
-                        this.ItemSample = new Bitmap(sample.Bitmap);
+                            this.ItemSample = new Bitmap(sample.Bitmap);
+                        }
                     }
                 }
                 else if (this.item.Specs.TryGetValue(ItemSpecType.cosmetic, out value) && value > 0)
