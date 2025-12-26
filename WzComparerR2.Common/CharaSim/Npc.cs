@@ -154,6 +154,11 @@ namespace WzComparerR2.CharaSim
                                         break;
                                 }
                             }
+
+                            if (npcInfo.Illustration2Bitmaps.Count == 0)
+                            {
+                                npcInfo.Illustration2Bitmaps.Add(npcInfo.Illustration2BaseBitmap);
+                            }
                             break;
                     }
                 }
