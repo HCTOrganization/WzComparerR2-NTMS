@@ -330,6 +330,7 @@ namespace WzComparerR2
             tooltipQuickView.MapRender.ShowMiniMapMob = Setting.Map.ShowMiniMapMob;
             tooltipQuickView.MapRender.ShowMiniMapNpc = Setting.Map.ShowMiniMapNpc;
             tooltipQuickView.MapRender.ShowMiniMapPortal = Setting.Map.ShowMiniMapPortal;
+            tooltipQuickView.MobRender.MaxWidth = Screen.PrimaryScreen.Bounds.Width;
             tooltipQuickView.NpcRender.ShowAllIllustAtOnce = Setting.Npc.ShowAllIllustAtOnce;
             tooltipQuickView.QuestRender.ShowObjectID = Setting.Quest.ShowID;
             tooltipQuickView.QuestRender.DefaultState = Setting.Quest.DefaultState;
@@ -2209,6 +2210,17 @@ namespace WzComparerR2
                 case "Mob.img":
                     wzPath.Add("Mob");
                     wzPath.Add(id.PadLeft(7, '0') + ".img");
+                    addPath();
+                    //Add special mobs
+                    foreach (var i in new string[] { "AbyssExpeditionMob", "MExplorerMob", "QuestCountGroup", "RoguelikeMob" })
+                    {
+                        wzPath.Clear();
+                        wzPath.AddRange(new string[] { "Mob", i, id.PadLeft(7, '0') + ".img" });
+                        addPath();
+                    }
+                    //Redmoon
+                    wzPath.Clear();
+                    wzPath.AddRange(new string[] { "Mob", "RoguelikeMob", "Redmoon", id.PadLeft(7, '0') + ".img" });
                     addPath();
                     break;
 

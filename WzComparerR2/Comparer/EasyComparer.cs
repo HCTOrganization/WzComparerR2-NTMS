@@ -2546,6 +2546,7 @@ namespace WzComparerR2.Comparer
                 mobRenderNewOld[i].StringLinker = new StringLinker();
                 mobRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
                 mobRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                mobRenderNewOld[i].MaxWidth = 3840;
             }
 
             foreach (var mobID in OutputMobTooltipIDs)
@@ -2558,7 +2559,15 @@ namespace WzComparerR2.Comparer
 
                     bool[] isMobNull = new bool[2] { false, false };
                     string mobType = "";
-                    string mobNodePath = String.Format(@"Mob\{0:D}.img", mobID);
+                    List<string> mobNodePaths = new List<string>()
+                    {
+                        String.Format(@"Mob\{0:D7}.img", mobID),
+                        String.Format(@"Mob\AbyssExpeditionMob\{0:D7}.img", mobID),
+                        String.Format(@"Mob\MExplorerMob\{0:D7}.img", mobID),
+                        String.Format(@"Mob\QuestCountGroup\{0:D7}.img", mobID),
+                        String.Format(@"Mob\RoguelikeMob\{0:D7}.img", mobID),
+                        String.Format(@"Mob\RoguelikeMob\Redmoon\{0:D7}.img", mobID)
+                    };
 
                     if (SkipKMSContent && KMSContentID["Mob"].Contains((Int32.Parse(mobID)))) continue;
 
@@ -2590,7 +2599,12 @@ namespace WzComparerR2.Comparer
                     // 變更前後的ツールチップ画像的作成
                     for (int i = 0; i < 2; i++) // 0: New, 1: Old
                     {
-                        Mob mob = Mob.CreateFromNode(PluginManager.FindWz(mobNodePath, WzFileNewOld[i]), PluginManager.FindWz);
+                        Mob mob = null;
+                        foreach (var path in mobNodePaths)
+                        {
+                            mob = Mob.CreateFromNode(PluginManager.FindWz(path, WzFileNewOld[i]), PluginManager.FindWz);
+                            if (mob != null) break;
+                        }
 
                         if (mob != null)
                         {
