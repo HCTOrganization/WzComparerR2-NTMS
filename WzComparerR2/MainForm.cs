@@ -1274,12 +1274,12 @@ namespace WzComparerR2
                 dlg.Filter = LocalizedString_JP.MAINFORM_OPENWZDLG_FILTER;
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
-                    openWz(dlg.FileName);
+                    Task.Run(() => openWz(dlg.FileName));
                 }
             }
         }
 
-        private void openWz(string wzFilePath)
+        private async void openWz(string wzFilePath)
         {
             foreach (Wz_Structure wzs in openedWz)
             {
@@ -1287,7 +1287,7 @@ namespace WzComparerR2
                 {
                     if (string.Compare(wz_f.Header.FileName, wzFilePath, true) == 0)
                     {
-                        MessageBoxEx.Show(LocalizedString_JP.MAINFORM_OPENWZDLG_ALREADYOPENED, LocalizedString_JP.COMMON_ERROR);
+                        MessageBoxEx.Show(this, LocalizedString_JP.MAINFORM_OPENWZDLG_ALREADYOPENED, LocalizedString_JP.COMMON_ERROR);
                         return;
                     }
                 }
@@ -1295,9 +1295,17 @@ namespace WzComparerR2
 
             Wz_Structure wz = new Wz_Structure();
             QueryPerformance.Start();
+            labelItemStatus.Text = $"載入中: {wzFilePath}";
             advTree1.BeginUpdate();
             try
             {
+                btnItemOpenWz.Enabled = false;
+                btnItemOpenImg.Enabled = false;
+                buttonItemClose.Enabled = false;
+                buttonItemCloseAll.Enabled = false;
+                buttonItemSearchWz.Enabled = false;
+                buttonItemSearchString.Enabled = false;
+                galleryContainerRecent.Enabled = false;
                 string[] msFileExtensions = { ".ms", ".mn" };
                 if (msFileExtensions.Any(ext => string.Equals(Path.GetExtension(wzFilePath), ext, StringComparison.OrdinalIgnoreCase)))
                 {
@@ -1335,8 +1343,12 @@ namespace WzComparerR2
                 advTree1.Nodes.Add(node);
                 this.openedWz.Add(wz);
                 OnWzOpened(new WzStructureEventArgs(wz)); //触发事件
+                if (!this.stringLinker.HasValues)
+                {
+                    this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
+                }
                 QueryPerformance.End();
-                labelItemStatus.Text = "檔案已載入。時間經過：" + (Math.Round(QueryPerformance.GetLastInterval(), 4) * 1000) + "毫秒，" + wz.img_number + " IMG";
+                labelItemStatus.Text = (this.stringLinker.HasValues ? "檔案已載入。時間經過：" : "檔案已載入，但字串表未能載入。時間經過：") + (Math.Round(QueryPerformance.GetLastInterval(), 4) * 1000) + "毫秒，" + wz.img_number + " IMG";
 
                 ConfigManager.Reload();
                 WcR2Config.Default.RecentDocuments.Remove(wzFilePath);
@@ -1346,16 +1358,23 @@ namespace WzComparerR2
             }
             catch (FileNotFoundException)
             {
-                MessageBoxEx.Show(LocalizedString_JP.MAINFORM_COMMON_FILENOTFOUND, LocalizedString_JP.COMMON_ERROR);
+                MessageBoxEx.Show(this, LocalizedString_JP.MAINFORM_COMMON_FILENOTFOUND, LocalizedString_JP.COMMON_ERROR);
                 WcR2Config.Default.RecentDocuments.Remove(wzFilePath);
             }
             catch (Exception ex)
             {
-                MessageBoxEx.Show(ex.ToString(), LocalizedString_JP.COMMON_ERROR);
+                MessageBoxEx.Show(this, ex.ToString(), LocalizedString_JP.COMMON_ERROR);
                 wz.Clear();
             }
             finally
             {
+                btnItemOpenWz.Enabled = true;
+                btnItemOpenImg.Enabled = true;
+                buttonItemClose.Enabled = true;
+                buttonItemCloseAll.Enabled = true;
+                buttonItemSearchWz.Enabled = true;
+                buttonItemSearchString.Enabled = true;
+                galleryContainerRecent.Enabled = true;
                 advTree1.EndUpdate();
             }
         }
@@ -1368,12 +1387,12 @@ namespace WzComparerR2
                 dlg.Filter = "*.img;Data.wz (Minor修正檔)|*.img;Data.wz|*.wz|*.wz";
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
-                    openImg(dlg.FileName);
+                    Task.Run(() => openImg(dlg.FileName));
                 }
             }
         }
 
-        private void openImg(string imgFileName)
+        private async void openImg(string imgFileName)
         {
             foreach (Wz_Structure wzs in openedWz)
             {
@@ -1389,9 +1408,17 @@ namespace WzComparerR2
 
             Wz_Structure wz = new Wz_Structure();
             var sw = Stopwatch.StartNew();
+            labelItemStatus.Text = $"載入中: {imgFileName}";
             advTree1.BeginUpdate();
             try
             {
+                btnItemOpenWz.Enabled = false;
+                btnItemOpenImg.Enabled = false;
+                buttonItemClose.Enabled = false;
+                buttonItemCloseAll.Enabled = false;
+                buttonItemSearchWz.Enabled = false;
+                buttonItemSearchString.Enabled = false;
+                galleryContainerRecent.Enabled = false;
                 wz.LoadImg(imgFileName);
 
                 Node node = createNode(wz.WzNode);
@@ -1414,6 +1441,13 @@ namespace WzComparerR2
             }
             finally
             {
+                btnItemOpenWz.Enabled = true;
+                btnItemOpenImg.Enabled = true;
+                buttonItemClose.Enabled = true;
+                buttonItemCloseAll.Enabled = true;
+                buttonItemSearchWz.Enabled = true;
+                buttonItemSearchString.Enabled = true;
+                galleryContainerRecent.Enabled = true;
                 advTree1.EndUpdate();
             }
         }
@@ -1519,7 +1553,7 @@ namespace WzComparerR2
             string path;
             if (btnItem == null || (path = btnItem.Tag as string) == null)
                 return;
-            openWz(path);
+            Task.Run(() => openWz(path));
         }
         #endregion
 
@@ -1553,7 +1587,7 @@ namespace WzComparerR2
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
                 foreach (string file in files)
                 {
-                    openWz(file);
+                    Task.Run(() => openWz(file));
                 }
             }
         }
