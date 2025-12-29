@@ -35,6 +35,7 @@ namespace WzComparerR2
             this.superTabControlPanel1 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.chkEnable22AniStyle = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowAllIllustAtOnce = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowAllSubMobAtOnce = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX23 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX22 = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX21 = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -1283,6 +1284,7 @@ namespace WzComparerR2
             // 
             // superTabControlPanel5
             // 
+            this.superTabControlPanel5.Controls.Add(this.chkShowAllSubMobAtOnce);
             this.superTabControlPanel5.Controls.Add(this.chkShowAllIllustAtOnce);
             this.superTabControlPanel5.Controls.Add(this.chkEnable22AniStyle);
             this.superTabControlPanel5.Controls.Add(this.chkCopyParsedSkillString);
@@ -1376,6 +1378,21 @@ namespace WzComparerR2
             this.chkShowAllIllustAtOnce.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowAllIllustAtOnce.TabIndex = 5;
             this.chkShowAllIllustAtOnce.Text = "顯示全部NPC立繪";
+            // 
+            // chkShowAllSubMobAtOnce
+            // 
+            this.chkShowAllSubMobAtOnce.AutoSize = true;
+            this.chkShowAllSubMobAtOnce.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowAllSubMobAtOnce.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowAllSubMobAtOnce.Location = new System.Drawing.Point(13, 108);
+            this.chkShowAllSubMobAtOnce.Name = "chkShowAllSubMobAtOnce";
+            this.chkShowAllSubMobAtOnce.Size = new System.Drawing.Size(145, 16);
+            this.chkShowAllSubMobAtOnce.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowAllSubMobAtOnce.TabIndex = 6;
+            this.chkShowAllSubMobAtOnce.Text = "顯示全部任務怪物組的怪物";
             // 
             // buttonX2
             // 
@@ -1502,6 +1519,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX22;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX23;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnable22AniStyle;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowAllSubMobAtOnce;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowAllIllustAtOnce;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowDamageSkinID;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowDamageSkin;

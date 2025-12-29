@@ -14,6 +14,7 @@ namespace WzComparerR2.CharaSim
             this.ElemAttr = new MobElemAttr(null);
             this.Revive = new List<int>();
             this.QuestCountGroupMobID = new List<int>();
+            this.mobGroupIndex = 0;
             //this.Animates = new LifeAnimateCollection();
 
             this.FirstAttack = false;
@@ -21,6 +22,9 @@ namespace WzComparerR2.CharaSim
             this.DamagedByMob = false;
             this.IgnoreMoveImpact = false;
             this.IgnoreMovable = false;
+            this.IsQuestCountGroupMob = false;
+            this.LvOptimum = false;
+            this.Filters = 0;
         }
 
         public int ID { get; set; }
@@ -71,10 +75,30 @@ namespace WzComparerR2.CharaSim
         public bool OnlyNormalAttack { get; set; }
         public bool OnlyHittedByCommonAttack { get; set; }
         public bool PartyBonusMob { get; set; }
+
+        public bool IsQuestCountGroupMob { get; set; }
+        public bool LvOptimum { get; set; }
         public int WP { get; set; }
         public MobElemAttr ElemAttr { get; set; }
         public long AttackPower { get; set; }
         public List<int> QuestCountGroupMobID { get; set; }
+        private int mobGroupIndex;
+        public int MobGroupIndex
+        {
+            get { return mobGroupIndex; }
+            set
+            {
+                if (this.QuestCountGroupMobID.Count == 0)
+                {
+                    mobGroupIndex = 0;
+                }
+                else
+                {
+                    mobGroupIndex = Math.Max(0, Math.Min(value, this.QuestCountGroupMobID.Count - 1));
+                }
+            }
+        }
+        public int Filters { get; set; }
 
         public int? Link { get; set; }
         public bool Skeleton { get; set; }
@@ -110,9 +134,25 @@ namespace WzComparerR2.CharaSim
             {
                 if (infoNode.FullPathToFile.Contains("QuestCountGroup"))
                 {
+                    mobInfo.IsQuestCountGroupMob = true;
                     foreach (var propNode in infoNode.Nodes)
                     {
-                        mobInfo.QuestCountGroupMobID.Add(propNode.GetValueEx<int>(0));
+                        switch (propNode.Text)
+                        {
+                            case "changeableMob": mobInfo.ChangeableMob = propNode.GetValueEx<int>(0) != 0; break;
+                            case "changeableMobs":
+                                foreach (var subNode in propNode.Nodes)
+                                {
+                                    if (subNode.Text.StartsWith("changeableMob"))
+                                    {
+                                        mobInfo.ChangeableMob = subNode.GetValueEx<int>(0) != 0;
+                                    }
+                                }
+                                break;
+                            case "lvOptimum": mobInfo.LvOptimum = propNode.GetValueEx<int>(0) != 0; break;
+                            case "filters": mobInfo.Filters = propNode.GetValueEx<int>(0); break;
+                            default: mobInfo.QuestCountGroupMobID.Add(propNode.GetValueEx<int>(0)); break;
+                        }
                     }
                 }
                 else
@@ -172,6 +212,17 @@ namespace WzComparerR2.CharaSim
                             case "onlyNormalAttack": mobInfo.OnlyNormalAttack = propNode.GetValueEx<int>(0) != 0; break;
                             case "onlyHittedByCommonAttack": mobInfo.OnlyHittedByCommonAttack = propNode.GetValueEx<int>(0) != 0; break;
                             case "elemAttr": mobInfo.ElemAttr = new MobElemAttr(propNode.GetValueEx<string>(null)); break;
+
+                            case "lvOptimum": mobInfo.LvOptimum = propNode.GetValueEx<int>(0) != 0; break;
+                            case "changeableMobs":
+                                foreach (var subNode in propNode.Nodes)
+                                {
+                                    if (subNode.Text.StartsWith("changeableMob"))
+                                    {
+                                        mobInfo.ChangeableMob = propNode.GetValueEx<int>(0) != 0;
+                                    }
+                                }
+                                break;
 
                             case "link": mobInfo.Link = propNode.GetValueEx<int>(0); break;
                             case "skeleton": mobInfo.Skeleton = propNode.GetValueEx<int>(0) != 0; break;

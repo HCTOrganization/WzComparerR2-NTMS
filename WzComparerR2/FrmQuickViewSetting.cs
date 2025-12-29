@@ -344,6 +344,13 @@ namespace WzComparerR2
         }
 
         [Link]
+        public bool Mob_ShowAllSubMobAtOnce
+        {
+            get { return chkShowAllSubMobAtOnce.Checked; }
+            set { chkShowAllSubMobAtOnce.Checked = value; }
+        }
+
+        [Link]
         public bool Npc_ShowAllIllustAtOnce
         {
             get { return chkShowAllIllustAtOnce.Checked; }

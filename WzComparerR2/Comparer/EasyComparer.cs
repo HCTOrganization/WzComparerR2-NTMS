@@ -2546,6 +2546,7 @@ namespace WzComparerR2.Comparer
                 mobRenderNewOld[i].StringLinker = new StringLinker();
                 mobRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
                 mobRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                mobRenderNewOld[i].ShowAllSubMobAtOnce = true;
                 mobRenderNewOld[i].MaxWidth = 3840;
             }
 

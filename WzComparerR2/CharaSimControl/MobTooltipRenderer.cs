@@ -29,6 +29,7 @@ namespace WzComparerR2.CharaSimControl
 
         public Mob MobInfo { get; set; }
         public int MaxWidth { get; set; }
+        public bool ShowAllSubMobAtOnce { get; set; }
         private AvatarCanvasManager avatar { get; set; }
         public override Bitmap Render()
         {
@@ -58,14 +59,37 @@ namespace WzComparerR2.CharaSimControl
             int picY = 0;
 
             StringBuilder sbExt = new StringBuilder();
-            if (MobInfo.QuestCountGroupMobID.Count > 0)
+            if (MobInfo.IsQuestCountGroupMob)
             {
-                sbExt.Append($"[任務怪物組: {MobInfo.QuestCountGroupMobID.Count}隻] ");
+                if (MobInfo.LvOptimum)
+                {
+                    sbExt.Append($"[任務怪物組: 自身角色等級±20以內的怪物] ");
+                }
+                else if (MobInfo.ChangeableMob)
+                {
+                    sbExt.Append($"[任務怪物組: 特殊] ");
+                }
+                else if (MobInfo.Filters != 0)
+                {
+                    switch (MobInfo.Filters)
+                    {
+                        case -10: sbExt.Append($"[任務怪物組: 奧術之力/真實之力地區怪物] "); break;
+                        default: sbExt.Append($"[任務怪物組: 特殊] "); break;
+                    }
+                }
+                else
+                {
+                    sbExt.Append($"[任務怪物組: {MobInfo.QuestCountGroupMobID.Count}隻] ");
+                }
                 if (sbExt.Length > 1)
                 {
                     sbExt.Remove(sbExt.Length - 1, 1);
                     propBlocks.Add(PrepareText(g, sbExt.ToString(), GearGraphics.ItemDetailFont, Brushes.GreenYellow, 0, picY));
                     picY += 16;
+                }
+                if (!ShowAllSubMobAtOnce && !MobInfo.LvOptimum && !MobInfo.ChangeableMob && !(MobInfo.Filters != 0))
+                {
+                    propBlocks.Add(PrepareText(g, "請使用 [-] / [+] 切換。", GearGraphics.ItemDetailFont, Brushes.White, 0, picY));
                 }
                 Bitmap[] subMobBmps = new Bitmap[MobInfo.QuestCountGroupMobID.Count];
                 MobTooltipRenderer subRenderer = new MobTooltipRenderer();
@@ -84,60 +108,76 @@ namespace WzComparerR2.CharaSimControl
                         continue;
                     }
                 }
-                Size fullBitmapSize = new Size(0, 0);
-                int maxHeightPerLine = 0;
-                int currentItem = 0;
-                int currentWidth = 0;
-                foreach (Bitmap i in subMobBmps)
+                if (ShowAllSubMobAtOnce)
                 {
-                    if (i != null)
-                    {
-                        currentWidth += i.Width;
-                        maxHeightPerLine = Math.Max(maxHeightPerLine, i.Height);
-                        if (currentWidth > this.MaxWidth)
-                        {
-                            currentWidth -= i.Width;
-                            fullBitmapSize.Width = Math.Max(fullBitmapSize.Width, currentWidth);
-                            fullBitmapSize.Height += maxHeightPerLine;
-                            currentWidth = 0;
-                            maxHeightPerLine = 0;
-                        }
-                        currentItem++;
-                        if (currentItem == subMobBmps.Count())
-                        {
-                            fullBitmapSize.Width = Math.Max(fullBitmapSize.Width, currentWidth);
-                            fullBitmapSize.Height += maxHeightPerLine;
-                            maxHeightPerLine = 0;
-                            currentItem = 0;
-                        }
-                    }
-                }
-                maxHeightPerLine = 0;
-                currentItem = 1;
-                subMobBmpTooltip = new Bitmap(fullBitmapSize.Width, fullBitmapSize.Height);
-                using (Graphics subG = Graphics.FromImage(subMobBmpTooltip))
-                {
-                    int subH = 0;
-                    int subW = 0;
+                    Size fullBitmapSize = new Size(0, 0);
+                    int maxHeightPerLine = 0;
+                    int currentItem = 0;
+                    int currentWidth = 0;
                     foreach (Bitmap i in subMobBmps)
                     {
                         if (i != null)
                         {
-                            if (subW + i.Width > this.MaxWidth)
+                            currentWidth += i.Width;
+                            maxHeightPerLine = Math.Max(maxHeightPerLine, i.Height);
+                            if (currentWidth > this.MaxWidth)
                             {
-                                subH += maxHeightPerLine;
-                                subW = 0;
+                                currentWidth -= i.Width;
+                                fullBitmapSize.Width = Math.Max(fullBitmapSize.Width, currentWidth);
+                                fullBitmapSize.Height += maxHeightPerLine;
+                                currentWidth = 0;
                                 maxHeightPerLine = 0;
                             }
-                            using (Graphics subG2 = Graphics.FromImage(i))
-                            {
-                                GearGraphics.DrawGearDetailNumber(subG2, 3, 3, currentItem.ToString(), true);
-                            }
-                            subG.DrawImage(i, subW, subH, new Rectangle(0, 0, i.Width, i.Height), GraphicsUnit.Pixel);
-                            subW += i.Width;
-                            maxHeightPerLine = Math.Max(maxHeightPerLine, i.Height);
                             currentItem++;
+                            if (currentItem == subMobBmps.Count())
+                            {
+                                fullBitmapSize.Width = Math.Max(fullBitmapSize.Width, currentWidth);
+                                fullBitmapSize.Height += maxHeightPerLine;
+                                maxHeightPerLine = 0;
+                                currentItem = 0;
+                            }
                         }
+                    }
+                    maxHeightPerLine = 0;
+                    currentItem = 1;
+                    subMobBmpTooltip = new Bitmap(fullBitmapSize.Width, fullBitmapSize.Height);
+                    using (Graphics subG = Graphics.FromImage(subMobBmpTooltip))
+                    {
+                        int subH = 0;
+                        int subW = 0;
+                        foreach (Bitmap i in subMobBmps)
+                        {
+                            if (i != null)
+                            {
+                                if (subW + i.Width > this.MaxWidth)
+                                {
+                                    subH += maxHeightPerLine;
+                                    subW = 0;
+                                    maxHeightPerLine = 0;
+                                }
+                                using (Graphics subG2 = Graphics.FromImage(i))
+                                {
+                                    GearGraphics.DrawGearDetailNumber(subG2, 3, 3, currentItem.ToString(), true);
+                                }
+                                subG.DrawImage(i, subW, subH, new Rectangle(0, 0, i.Width, i.Height), GraphicsUnit.Pixel);
+                                subW += i.Width;
+                                maxHeightPerLine = Math.Max(maxHeightPerLine, i.Height);
+                                currentItem++;
+                            }
+                        }
+                    }
+                }
+                else if (subMobBmps.Count() > 0)
+                {
+                    if (subMobBmps[MobInfo.MobGroupIndex] != null)
+                    {
+                        using (Graphics subG = Graphics.FromImage(subMobBmps[MobInfo.MobGroupIndex]))
+                        {
+                            var labelFont = new Font("MS Gothic", 12f, GraphicsUnit.Pixel);
+                            int picH = 2;
+                            GearGraphics.DrawPlainText(subG, $"{MobInfo.MobGroupIndex + 1} / {subMobBmps.Count()}", labelFont, Color.FromArgb(255, 255, 255), 2, 130, ref picH, 13);
+                        }
+                        subMobBmpTooltip = subMobBmps[MobInfo.MobGroupIndex];
                     }
                 }
             }
