@@ -705,7 +705,7 @@ namespace WzComparerR2.CharaSimControl
             if (gender < 2)
             {
                 TextRenderer.DrawText(g, "適用性別", GearGraphics.EquipMDMoris9Font, new Point(moveX ? 15 + 217 : 15, picH - (moveX ? 16 : 0)), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
-                TextRenderer.DrawText(g, gender == 0 ? "男" : "女", GearGraphics.EquipMDMoris9Font, new Point(moveX ? 79 + 217 : 79, picH - (moveX ? 16 : 0)), Color.White, TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, gender == 0 ? "男" : "女", GearGraphics.EquipMDMoris9Font, new Point(moveX ? 100 + 217 : 100, picH - (moveX ? 16 : 0)), Color.White, TextFormatFlags.NoPadding);
                 if (!moveX) picH += 16;
             }
 
@@ -1450,6 +1450,11 @@ namespace WzComparerR2.CharaSimControl
                 if (texts.Count > 0 && Gear.Cash)
                 {
                     AddLines(0, 7, ref picH, condition: secondLineNeeded);
+
+                    if (Gear.Props.TryGetValue(GearPropType.colorvar, out value) && value > 0)
+                    {
+                        GearGraphics.DrawString(g, $"{ItemStringHelper.GetGearPropString(GearPropType.colorvar, value)}", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
+                    }
                     secondLineNeeded = false;
                     hasThirdContents = true;
                     hasDescPart = true;
@@ -1460,7 +1465,7 @@ namespace WzComparerR2.CharaSimControl
                     {
                         textList.Add(text);
                     }
-                    GearGraphics.DrawString(g, $"裝備時可獲得僅限1次{string.Join("、", textList)}的經驗值。(超過每日限制、最大值時除外)", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
+                    GearGraphics.DrawString(g, $"裝備時僅限1次{string.Join("、", textList)}\r\n#$d每日限制、超過上限時除外#", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
                     picH += 16;
                 }
             }
@@ -2106,7 +2111,7 @@ namespace WzComparerR2.CharaSimControl
                 tags.Add(ItemStringHelper.GetGearPropString3(GearPropType.accountShareTag, value)[0]);
             }
 
-            if (Gear.Props.TryGetValue(GearPropType.colorvar, out value) && value > 0)
+            if (Gear.Props.TryGetValue(GearPropType.colorvar, out value) && value > 0 && !Gear.Cash)
             {
                 tags.Add(ItemStringHelper.GetGearPropString(GearPropType.colorvar, value));
             }

@@ -3202,6 +3202,7 @@ namespace WzComparerR2
         {
             if (e.KeyCode == Keys.Enter)
             {
+                if (!buttonItemSearchWz.Enabled) return;
                 buttonItemSearchWz_Click(buttonItemSearchWz, EventArgs.Empty);
             }
         }
@@ -3436,6 +3437,7 @@ namespace WzComparerR2
         {
             if (e.KeyCode == Keys.Enter)
             {
+                if (!buttonItemSearchString.Enabled) return;
                 buttonItemSearchString_Click(buttonItemSearchString, EventArgs.Empty);
             }
         }

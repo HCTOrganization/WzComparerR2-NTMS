@@ -144,7 +144,7 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.abilityTimeLimited: return value == 0 ? null : "期間限定能力值";
                 case GearPropType.blockGoldHammer: return value == 0 ? null : "無法使用黄金鐵鎚";
                 case GearPropType.cantRepair: return value == 0 ? null : "無法修理";
-                case GearPropType.colorvar: return value == 0 ? null : "#c此裝備可以通過染色顏料進行染色。#";
+                case GearPropType.colorvar: return value == 0 ? null : "#c此裝備可進行染色。#";
                 case GearPropType.noLookChange: return value == 0 ? null : "無法使用神秘鐵砧";
                 case GearPropType.reissueBan: return value == 0 ? null : "無法重新發放";
 
