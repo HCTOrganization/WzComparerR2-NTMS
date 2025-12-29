@@ -106,6 +106,7 @@ namespace WzComparerR2.CharaSimControl
         public string AutoDesc { get; set; }
         public string Hdesc { get; set; }
         public string DescLeftAlign { get; set; }
+        public string QuestCategory { get; set; }
         public string QuestAvailable { get; set; }
         public string QuestProgress { get; set; }
         public string QuestComplete { get; set; }
@@ -444,6 +445,9 @@ namespace WzComparerR2.CharaSimControl
             if (String.IsNullOrEmpty(this.AutoDesc)) this.AutoDesc = "";
             if (String.IsNullOrEmpty(this.Hdesc)) this.Hdesc = "";
             if (String.IsNullOrEmpty(this.DescLeftAlign)) this.DescLeftAlign = "";
+            if (String.IsNullOrEmpty(this.QuestAvailable)) this.QuestAvailable = "";
+            if (String.IsNullOrEmpty(this.QuestProgress)) this.QuestProgress = "";
+            if (String.IsNullOrEmpty(this.QuestComplete)) this.QuestComplete = "";
             if (this.CopyParsedSkillString && item is Skill) this.Hdesc = this.SkillRender.ParsedHdesc;
 
             if (this.item is Quest)
@@ -471,6 +475,9 @@ namespace WzComparerR2.CharaSimControl
                     if (!String.IsNullOrEmpty(this.AutoDesc)) sb.AppendLine(this.AutoDesc);
                     if (!String.IsNullOrEmpty(this.Hdesc)) sb.AppendLine(this.Hdesc);
                     if (!String.IsNullOrEmpty(this.DescLeftAlign)) sb.AppendLine(this.DescLeftAlign);
+                    if (!String.IsNullOrEmpty(this.QuestAvailable)) sb.AppendLine(this.QuestAvailable);
+                    if (!String.IsNullOrEmpty(this.QuestProgress)) sb.AppendLine(this.QuestProgress);
+                    if (!String.IsNullOrEmpty(this.QuestComplete)) sb.AppendLine(this.QuestComplete);
                     break;
                 case 1:
                     if ((this.Desc + this.Pdesc + this.AutoDesc).Contains("\\n"))
@@ -517,8 +524,8 @@ namespace WzComparerR2.CharaSimControl
                     {
                         int check0npcID = (this.item as Quest).Check0Npc != null ? (this.item as Quest).Check0Npc.ID : 0;
                         int check1npcID = (this.item as Quest).Check1NpcID;
-                        string check0npcName = "(null)";
-                        string check1npcName = "(null)";
+                        string check0npcName = "";
+                        string check1npcName = "";
                         if (StringLinker.StringNpc.TryGetValue(check0npcID, out StringResult sr))
                         {
                             check0npcName = sr?.Name;
@@ -530,20 +537,20 @@ namespace WzComparerR2.CharaSimControl
                         sb.AppendLine($"{{{{DISPLAYTITLE|{this.NodeName}}}}}");
                         sb.AppendLine($"{{{{Quest<!--{this.NodeID}-->");
                         sb.AppendLine($"|name={this.NodeName}");
-                        sb.AppendLine($"|npc={check0npcName}");
-                        sb.AppendLine((check0npcName == "(null)") ? "|npcimg=" : $"|npcimg=[[File:NPC {check0npcName}.png]]");
+                        sb.AppendLine((check0npcName == "") ? "|npc=" : $"|npc=[[{check0npcName}]]");
+                        sb.AppendLine((check0npcName == "") ? "|npcimg=" : $"|npcimg=[[File:NPC {check0npcName}.png]]");
                         sb.AppendLine($"|repeat=");
                         sb.AppendLine($"|req=");
                         sb.AppendLine($"|cat=");
-                        sb.AppendLine($"|type=");
-                        sb.AppendLine(string.IsNullOrEmpty(this.QuestAvailable) ? $"|avail={this.Desc}" : $"|avail={this.QuestAvailable}");
+                        sb.AppendLine($"|type={this.QuestCategory}");
+                        sb.AppendLine($"|avail={this.QuestAvailable}");
                         sb.AppendLine($"|prog={this.QuestProgress}");
                         sb.AppendLine($"|comp={this.QuestComplete}");
-                        sb.AppendLine($"|pro={this.Hdesc}");
-                        sb.AppendLine($"|reward={this.Pdesc}");
+                        sb.AppendLine($"|pro=");
+                        sb.AppendLine($"|reward=");
                         sb.AppendLine($"|select=");
                         sb.AppendLine($"|prob=");
-                        sb.AppendLine($"|nextquest={this.AutoDesc}");
+                        sb.AppendLine($"|nextquest=");
                         sb.AppendLine($"}}}}");
                     }
                     else
