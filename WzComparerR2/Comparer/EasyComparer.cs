@@ -90,6 +90,7 @@ namespace WzComparerR2.Comparer
         public bool UseCTFamiliarUI { get; set; }
         public bool PostChangesToDiscord { get; set; }
         public bool EnableWorldArchive { get; set; }
+        public bool EnableMonsterBook { get; set; }
         public Dictionary<string, bool> selectedNodes { get; set; }
 
         public string StateInfo
@@ -2549,6 +2550,7 @@ namespace WzComparerR2.Comparer
                 mobRenderNewOld[i].ShowObjectID = this.ShowObjectID;
                 mobRenderNewOld[i].ShowAllSubMobAtOnce = true;
                 mobRenderNewOld[i].EnableWorldArchive = this.EnableWorldArchive;
+                mobRenderNewOld[i].EnableMonsterBook = this.EnableMonsterBook;
                 mobRenderNewOld[i].MaxWidth = 3840;
             }
 

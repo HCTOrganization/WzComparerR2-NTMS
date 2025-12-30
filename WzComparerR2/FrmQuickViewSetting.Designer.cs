@@ -34,6 +34,7 @@ namespace WzComparerR2
             this.superTabControl1 = new DevComponents.DotNetBar.SuperTabControl();
             this.superTabControlPanel1 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.chkEnable22AniStyle = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkEnableMonsterBook = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkEnableWorldArchive = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowAllIllustAtOnce = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowAllSubMobAtOnce = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -178,7 +179,7 @@ namespace WzComparerR2
             this.superTabControl1.ReorderTabsEnabled = true;
             this.superTabControl1.SelectedTabFont = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Bold);
             this.superTabControl1.SelectedTabIndex = 0;
-            this.superTabControl1.Size = new System.Drawing.Size(344, 251);
+            this.superTabControl1.Size = new System.Drawing.Size(344, 271);
             this.superTabControl1.TabAlignment = DevComponents.DotNetBar.eTabStripAlignment.Left;
             this.superTabControl1.TabFont = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.superTabControl1.TabIndex = 0;
@@ -1288,6 +1289,7 @@ namespace WzComparerR2
             this.superTabControlPanel5.Controls.Add(this.chkShowAllSubMobAtOnce);
             this.superTabControlPanel5.Controls.Add(this.chkShowAllIllustAtOnce);
             this.superTabControlPanel5.Controls.Add(this.chkEnable22AniStyle);
+            this.superTabControlPanel5.Controls.Add(this.chkEnableMonsterBook);
             this.superTabControlPanel5.Controls.Add(this.chkEnableWorldArchive);
             this.superTabControlPanel5.Controls.Add(this.chkCopyParsedSkillString);
             this.superTabControlPanel5.Controls.Add(this.labelX4);
@@ -1410,6 +1412,24 @@ namespace WzComparerR2
             this.chkEnableWorldArchive.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkEnableWorldArchive.TabIndex = 7;
             this.chkEnableWorldArchive.Text = "啟用世界檔案";
+            this.chkEnableWorldArchive.CheckedChanged += chkEnableWorldArchive_CheckedChanged;
+            // 
+            // chkEnableMonsterBook
+            // 
+            this.chkEnableMonsterBook.AutoSize = true;
+            this.chkEnableMonsterBook.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkEnableMonsterBook.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkEnableMonsterBook.Location = new System.Drawing.Point(13, 156);
+            this.chkEnableMonsterBook.Name = "chkEnableMonsterBook";
+            this.chkEnableMonsterBook.Size = new System.Drawing.Size(145, 16);
+            this.chkEnableMonsterBook.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkEnableMonsterBook.TabIndex = 8;
+            this.chkEnableMonsterBook.Text = "啟用怪物圖鑒説明";
+            this.chkEnableMonsterBook.Click += chkEnableMonsterBook_Click;
+            this.chkEnableMonsterBook.CheckedChanged += chkEnableMonsterBook_CheckedChanged;
             // 
             // buttonX2
             // 
@@ -1439,7 +1459,7 @@ namespace WzComparerR2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(344, 281);
+            this.ClientSize = new System.Drawing.Size(344, 301);
             this.Controls.Add(this.superTabControl1);
             this.Controls.Add(this.panelEx1);
             this.DoubleBuffered = true;
@@ -1536,6 +1556,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX22;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX23;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnable22AniStyle;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableMonsterBook;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableWorldArchive;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowAllSubMobAtOnce;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowAllIllustAtOnce;

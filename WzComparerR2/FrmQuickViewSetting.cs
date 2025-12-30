@@ -351,6 +351,13 @@ namespace WzComparerR2
         }
 
         [Link]
+        public bool Mob_EnableMonsterBook
+        {
+            get { return chkEnableMonsterBook.Checked; }
+            set { chkEnableMonsterBook.Checked = value; }
+        }
+
+        [Link]
         public bool Npc_ShowAllIllustAtOnce
         {
             get { return chkShowAllIllustAtOnce.Checked; }
@@ -435,6 +442,8 @@ namespace WzComparerR2
             set { chkQAS.Checked = value; }
         }
 
+        private DialogResult enableMonsterBookConfirmation = DialogResult.Yes;
+
 
         public void Load(CharaSimConfig config)
         {
@@ -494,6 +503,33 @@ namespace WzComparerR2
             this.comboBoxExQuestState.Enabled = !this.chkQAS.Checked;
             this.labelXQS.Enabled = !this.chkQAS.Checked;
             this.labelXQSHint.Enabled = !this.chkQAS.Checked;
+        }
+
+        private void chkEnableWorldArchive_CheckedChanged(object sender, EventArgs e)
+        {
+            this.chkEnableMonsterBook.Enabled = chkEnableWorldArchive.Checked;
+        }
+
+        private void chkEnableMonsterBook_Click(object sender, EventArgs e)
+        {
+            if (!this.chkEnableMonsterBook.Checked)
+            {
+                this.enableMonsterBookConfirmation = DevComponents.DotNetBar.MessageBoxEx.Show(this, "怪物圖鑑中的資訊已過時，與目前版本不符。 \r\n是否仍要啟用此功能？", "警告", MessageBoxButtons.YesNo);
+            }
+        }
+
+        private void chkEnableMonsterBook_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.chkEnableMonsterBook.Checked)
+            {
+                switch (this.enableMonsterBookConfirmation)
+                {
+                    case DialogResult.Yes: return;
+                    default:
+                        this.chkEnableMonsterBook.Checked = false;
+                        return;
+                }
+            }
         }
 
         private void txtDamageSkinNumber_TextChanged(object sender, EventArgs e)

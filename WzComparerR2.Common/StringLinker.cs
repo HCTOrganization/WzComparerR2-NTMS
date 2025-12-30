@@ -22,6 +22,7 @@ namespace WzComparerR2.Common
             stringAchievement = new Dictionary<int, StringResult>();
             stringWorldArchiveMob = new Dictionary<int, StringResult>();
             stringWorldArchiveNpc = new Dictionary<int, StringResult>();
+            stringMonsterBook = new Dictionary<int, StringResult>();
         }
 
         public bool Update(Wz_Node stringNode, Wz_Node itemNode, Wz_Node etcNode, Wz_Node questNode)
@@ -216,22 +217,26 @@ namespace WzComparerR2.Common
                             }
                         }
                         break;
-                    // Disabled for now
-                    // case "MonsterBook.img":
-                    //     if (!image.TryExtract()) break;
-                    //     foreach (Wz_Node tree in image.Node.Nodes)
-                    //     {
-                    //         if (Int32.TryParse(tree.Text, out id))
-                    //         {
-                    //             if (stringMob.ContainsKey(id))
-                    //             {
-                    //                 Wz_Node messageNode = tree.FindNodeByPath("episode");
-                    //                 if (messageNode != null)
-                    //                     stringMob[id].Desc = messageNode.Value.ToString();
-                    //             }
-                    //         }
-                    //     }
-                    //     break;
+                    case "MonsterBook.img":
+                        if (!image.TryExtract()) break;
+                        foreach (Wz_Node tree in image.Node.Nodes)
+                        {
+                            if (Int32.TryParse(tree.Text, out id))
+                            {
+                                if (stringMob.ContainsKey(id))
+                                {
+                                    Wz_Node messageNode = tree.FindNodeByPath("episode");
+                                    if (messageNode != null)
+                                    {
+                                        StringResult mbSr = new StringResult();
+                                        mbSr.Name = stringMob[id].Name;
+                                        mbSr.Desc = messageNode.Value.ToString();
+                                        stringMonsterBook.Add(id, mbSr);
+                                    }
+                                }
+                            }
+                        }
+                        break;
                     case "Npc.img":
                         if (!image.TryExtract()) break;
                         foreach (Wz_Node tree in image.Node.Nodes)
@@ -704,6 +709,7 @@ namespace WzComparerR2.Common
             stringAchievement.Clear();
             stringWorldArchiveMob.Clear();
             stringWorldArchiveNpc.Clear();
+            stringMonsterBook.Clear();
         }
 
         public bool HasValues
@@ -728,6 +734,7 @@ namespace WzComparerR2.Common
         private Dictionary<int, StringResult> stringAchievement;
         private Dictionary<int, StringResult> stringWorldArchiveMob;
         private Dictionary<int, StringResult> stringWorldArchiveNpc;
+        private Dictionary<int, StringResult> stringMonsterBook;
 
         private string GetDefaultString(Wz_Node node, string searchNodeText)
         {
@@ -831,6 +838,11 @@ namespace WzComparerR2.Common
         public Dictionary<int, StringResult> StringWorldArchiveNpc
         {
             get { return stringWorldArchiveNpc; }
+        }
+
+        public Dictionary<int, StringResult> StringMonsterBook
+        {
+            get { return stringMonsterBook; }
         }
     }
 }

@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Drawing;
 using System.Windows.Forms;
-using Resource = CharaSimResource.Resource;
-using WzComparerR2.Common;
 using WzComparerR2.CharaSim;
+using WzComparerR2.Common;
 using WzComparerR2.WzLib;
-using System.Text.RegularExpressions;
-using System.Linq;
+using Resource = CharaSimResource.Resource;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -238,11 +235,10 @@ namespace WzComparerR2.CharaSimControl
             if (sr.Desc != null)
             {
                 string hdesc = SummaryParser.GetSkillSummary(sr.Desc, Skill.Level, Skill.Common, SummaryParams.Default);
-                StringResult sr2 = null;
                 if (isTranslateRequired)
                 {
                     string mergedDescString = Translator.MergeString(hdesc, Translator.TranslateString(hdesc), 2);
-                    foreach (var i in mergedDescString.Split(new string[] { "\r\n" },StringSplitOptions.None))
+                    foreach (var i in mergedDescString.Split(new string[] { "\r\n" }, StringSplitOptions.None))
                     {
                         GearGraphics.DrawString(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                     }

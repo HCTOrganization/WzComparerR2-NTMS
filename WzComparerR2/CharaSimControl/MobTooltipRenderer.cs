@@ -31,6 +31,7 @@ namespace WzComparerR2.CharaSimControl
         public int MaxWidth { get; set; }
         public bool ShowAllSubMobAtOnce { get; set; }
         public bool EnableWorldArchive { get; set; }
+        public bool EnableMonsterBook { get; set; }
         private AvatarCanvasManager avatar { get; set; }
         private WorldArchiveTooltipRender WorldArchiveRender { get; set; }
 
@@ -504,11 +505,13 @@ namespace WzComparerR2.CharaSimControl
                     DrawText(g, item, textRect.Location);
                 }
             }
+            string monsterBookDesc = EnableMonsterBook ? GetMobDesc(MobInfo.ID) : null;
             string worldArchiveDesc = GetWorldArchiveDesc(MobInfo.ID);
-            if (!string.IsNullOrEmpty(worldArchiveDesc) && EnableWorldArchive)
+            if (!string.IsNullOrEmpty(worldArchiveDesc) || !string.IsNullOrEmpty(monsterBookDesc) && EnableWorldArchive)
             {
                 WorldArchiveRender = new WorldArchiveTooltipRender();
                 WorldArchiveRender.WorldArchiveMessage = worldArchiveDesc;
+                WorldArchiveRender.MonsterBookMessage = monsterBookDesc;
                 Bitmap waBitmap = WorldArchiveRender.Render();
                 Bitmap appendWaBitmap = new Bitmap(baseBmp.Width + waBitmap.Width, Math.Max(baseBmp.Height, waBitmap.Height));
                 using (g = Graphics.FromImage(appendWaBitmap))
@@ -549,6 +552,19 @@ namespace WzComparerR2.CharaSimControl
             else
             {
                 return sr.Name;
+            }
+        }
+
+        private string GetMobDesc(int mobID)
+        {
+            StringResult sr;
+            if (this.StringLinker == null || !this.StringLinker.StringMonsterBook.TryGetValue(mobID, out sr))
+            {
+                return null;
+            }
+            else
+            {
+                return sr.Desc;
             }
         }
 

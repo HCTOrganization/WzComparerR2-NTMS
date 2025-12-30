@@ -333,6 +333,7 @@ namespace WzComparerR2
             tooltipQuickView.MobRender.MaxWidth = Screen.PrimaryScreen.Bounds.Width;
             tooltipQuickView.MobRender.ShowAllSubMobAtOnce = Setting.Mob.ShowAllSubMobAtOnce;
             tooltipQuickView.MobRender.EnableWorldArchive = Setting.Misc.EnableWorldArchive;
+            tooltipQuickView.MobRender.EnableMonsterBook = Setting.Mob.EnableMonsterBook;
             tooltipQuickView.NpcRender.ShowAllIllustAtOnce = Setting.Npc.ShowAllIllustAtOnce;
             tooltipQuickView.NpcRender.EnableWorldArchive = Setting.Misc.EnableWorldArchive;
             tooltipQuickView.QuestRender.ShowObjectID = Setting.Quest.ShowID;
@@ -4554,6 +4555,7 @@ namespace WzComparerR2
             if (obj != null)
             {
                 StringResult waSr = new StringResult();
+                StringResult mbSr = new StringResult();
                 if (tooltipQuickView.TargetItem != null)
                 {
                     switch (tooltipQuickView.TargetItem)
@@ -4562,6 +4564,13 @@ namespace WzComparerR2
                             if (stringLinker == null || !stringLinker.StringWorldArchiveMob.TryGetValue(item.ID, out waSr))
                             {
                                 waSr = new StringResult();
+                            }
+                            if (CharaSimConfig.Default.Mob.EnableMonsterBook)
+                            {
+                                if (stringLinker == null || !stringLinker.StringMonsterBook.TryGetValue(item.ID, out mbSr))
+                                {
+                                    mbSr = new StringResult();
+                                }
                             }
                             item.Dispose();
                             break;
@@ -4582,7 +4591,7 @@ namespace WzComparerR2
                 if (wzf.Type is not Wz_Type.Quest)
                 {
                     tooltipQuickView.NodeName = sr.Name;
-                    tooltipQuickView.Desc = sr.Desc;
+                    tooltipQuickView.Desc = sr.Desc ?? mbSr.Desc;
                     tooltipQuickView.Pdesc = sr.Pdesc ?? waSr.Desc;
                     tooltipQuickView.AutoDesc = altAutoDesc ?? sr.AutoDesc;
                     tooltipQuickView.Hdesc = sr["h"];
@@ -5024,6 +5033,7 @@ namespace WzComparerR2
                     comparer.AllowFamiliarOutOfBounds = CharaSimConfig.Default.Familiar.AllowOutOfBounds;
                     comparer.UseCTFamiliarUI = CharaSimConfig.Default.Familiar.UseCTFamiliarUI;
                     comparer.EnableWorldArchive = CharaSimConfig.Default.Misc.EnableWorldArchive;
+                    comparer.EnableMonsterBook = CharaSimConfig.Default.Mob.EnableMonsterBook;
                     comparer.StateInfoChanged += new EventHandler(comparer_StateInfoChanged);
                     comparer.StateDetailChanged += new EventHandler(comparer_StateDetailChanged);
                     try
