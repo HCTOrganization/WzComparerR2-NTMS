@@ -332,7 +332,9 @@ namespace WzComparerR2
             tooltipQuickView.MapRender.ShowMiniMapPortal = Setting.Map.ShowMiniMapPortal;
             tooltipQuickView.MobRender.MaxWidth = Screen.PrimaryScreen.Bounds.Width;
             tooltipQuickView.MobRender.ShowAllSubMobAtOnce = Setting.Mob.ShowAllSubMobAtOnce;
+            tooltipQuickView.MobRender.EnableWorldArchive = Setting.Misc.EnableWorldArchive;
             tooltipQuickView.NpcRender.ShowAllIllustAtOnce = Setting.Npc.ShowAllIllustAtOnce;
+            tooltipQuickView.NpcRender.EnableWorldArchive = Setting.Misc.EnableWorldArchive;
             tooltipQuickView.QuestRender.ShowObjectID = Setting.Quest.ShowID;
             tooltipQuickView.QuestRender.DefaultState = Setting.Quest.DefaultState;
             tooltipQuickView.QuestRender.ShowAllStates = Setting.Quest.ShowAllStates;
@@ -4551,14 +4553,23 @@ namespace WzComparerR2
             }
             if (obj != null)
             {
+                StringResult waSr = new StringResult();
                 if (tooltipQuickView.TargetItem != null)
                 {
                     switch (tooltipQuickView.TargetItem)
                     {
                         case Mob item:
+                            if (stringLinker == null || !stringLinker.StringWorldArchiveMob.TryGetValue(item.ID, out waSr))
+                            {
+                                waSr = new StringResult();
+                            }
                             item.Dispose();
                             break;
                         case Npc item:
+                            if (stringLinker == null || !stringLinker.StringWorldArchiveNpc.TryGetValue(item.ID, out waSr))
+                            {
+                                waSr = new StringResult();
+                            }
                             item.Dispose();
                             break;
                         case Quest item:
@@ -4572,7 +4583,7 @@ namespace WzComparerR2
                 {
                     tooltipQuickView.NodeName = sr.Name;
                     tooltipQuickView.Desc = sr.Desc;
-                    tooltipQuickView.Pdesc = sr.Pdesc;
+                    tooltipQuickView.Pdesc = sr.Pdesc ?? waSr.Desc;
                     tooltipQuickView.AutoDesc = altAutoDesc ?? sr.AutoDesc;
                     tooltipQuickView.Hdesc = sr["h"];
                     tooltipQuickView.DescLeftAlign = sr["desc_leftalign"];
@@ -5012,6 +5023,7 @@ namespace WzComparerR2
                     comparer.DamageSkinNumber = CharaSimConfig.Default.DamageSkin.DamageSkinNumber;
                     comparer.AllowFamiliarOutOfBounds = CharaSimConfig.Default.Familiar.AllowOutOfBounds;
                     comparer.UseCTFamiliarUI = CharaSimConfig.Default.Familiar.UseCTFamiliarUI;
+                    comparer.EnableWorldArchive = CharaSimConfig.Default.Misc.EnableWorldArchive;
                     comparer.StateInfoChanged += new EventHandler(comparer_StateInfoChanged);
                     comparer.StateDetailChanged += new EventHandler(comparer_StateDetailChanged);
                     try

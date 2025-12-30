@@ -30,7 +30,10 @@ namespace WzComparerR2.CharaSimControl
         public Mob MobInfo { get; set; }
         public int MaxWidth { get; set; }
         public bool ShowAllSubMobAtOnce { get; set; }
+        public bool EnableWorldArchive { get; set; }
         private AvatarCanvasManager avatar { get; set; }
+        private WorldArchiveTooltipRender WorldArchiveRender { get; set; }
+
         public override Bitmap Render()
         {
             if (MobInfo == null)
@@ -104,6 +107,7 @@ namespace WzComparerR2.CharaSimControl
                     {
                         Mob subMobInfo = Mob.CreateFromNode(PluginManager.FindWz(string.Format(@"Mob\{0:D7}.img", MobInfo.QuestCountGroupMobID[i]), this.SourceWzFile), PluginManager.FindWz);
                         subRenderer.MobInfo = subMobInfo;
+                        subRenderer.EnableWorldArchive = false;
                         subMobBmps[i] = subRenderer.Render();
                     }
                     catch
@@ -484,6 +488,7 @@ namespace WzComparerR2.CharaSimControl
                 {
                     DrawText(g, item, titleRect.Location);
                 }
+                //Attempt Draw Mob Icon
                 if (mobIcon != null)
                 {
                     g.DrawImage(mobIcon, titleRect.Location.X - mobIcon.Width - 4, titleRect.Y - (mobIcon.Height - titleRect.Height) / 2, new Rectangle(0, 0, mobIcon.Width, mobIcon.Height), GraphicsUnit.Pixel);
@@ -498,7 +503,20 @@ namespace WzComparerR2.CharaSimControl
                 {
                     DrawText(g, item, textRect.Location);
                 }
-                //Attempt Draw Mob Icon
+            }
+            string worldArchiveDesc = GetWorldArchiveDesc(MobInfo.ID);
+            if (!string.IsNullOrEmpty(worldArchiveDesc) && EnableWorldArchive)
+            {
+                WorldArchiveRender = new WorldArchiveTooltipRender();
+                WorldArchiveRender.WorldArchiveMessage = worldArchiveDesc;
+                Bitmap waBitmap = WorldArchiveRender.Render();
+                Bitmap appendWaBitmap = new Bitmap(baseBmp.Width + waBitmap.Width, Math.Max(baseBmp.Height, waBitmap.Height));
+                using (g = Graphics.FromImage(appendWaBitmap))
+                {
+                    g.DrawImage(baseBmp, 0, 0, new Rectangle(0, 0, baseBmp.Width, baseBmp.Height), GraphicsUnit.Pixel);
+                    g.DrawImage(waBitmap, baseBmp.Width, 0, new Rectangle(0, 0, waBitmap.Width, waBitmap.Height), GraphicsUnit.Pixel);
+                }
+                baseBmp = appendWaBitmap;
             }
             if (subMobBmpTooltip != null)
             {
@@ -538,6 +556,16 @@ namespace WzComparerR2.CharaSimControl
         {
             BitmapOrigin mobIconOrigin = BitmapOrigin.CreateFromNode(PluginManager.FindWz($@"UI\UIWindow2.img\MobGage\Mob\{mobID.ToString()}", this.SourceWzFile), PluginManager.FindWz);
             return mobIconOrigin.Bitmap;
+        }
+
+        private string GetWorldArchiveDesc(int mobID)
+        {
+            StringResult sr;
+            if (this.StringLinker == null || !this.StringLinker.StringWorldArchiveMob.TryGetValue(mobID, out sr))
+            {
+                return null;
+            }
+            return sr.Desc;
         }
 
         private string GetElemAttrString(MobElemAttr elemAttr)

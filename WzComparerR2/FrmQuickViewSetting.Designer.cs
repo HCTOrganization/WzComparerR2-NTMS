@@ -34,6 +34,7 @@ namespace WzComparerR2
             this.superTabControl1 = new DevComponents.DotNetBar.SuperTabControl();
             this.superTabControlPanel1 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.chkEnable22AniStyle = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkEnableWorldArchive = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowAllIllustAtOnce = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowAllSubMobAtOnce = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.checkBoxX23 = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -1287,6 +1288,7 @@ namespace WzComparerR2
             this.superTabControlPanel5.Controls.Add(this.chkShowAllSubMobAtOnce);
             this.superTabControlPanel5.Controls.Add(this.chkShowAllIllustAtOnce);
             this.superTabControlPanel5.Controls.Add(this.chkEnable22AniStyle);
+            this.superTabControlPanel5.Controls.Add(this.chkEnableWorldArchive);
             this.superTabControlPanel5.Controls.Add(this.chkCopyParsedSkillString);
             this.superTabControlPanel5.Controls.Add(this.labelX4);
             this.superTabControlPanel5.Controls.Add(this.cmbPreferredStringCopyMethod);
@@ -1393,6 +1395,21 @@ namespace WzComparerR2
             this.chkShowAllSubMobAtOnce.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkShowAllSubMobAtOnce.TabIndex = 6;
             this.chkShowAllSubMobAtOnce.Text = "顯示全部任務怪物組的怪物";
+            // 
+            // chkEnableWorldArchive
+            // 
+            this.chkEnableWorldArchive.AutoSize = true;
+            this.chkEnableWorldArchive.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkEnableWorldArchive.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkEnableWorldArchive.Location = new System.Drawing.Point(13, 132);
+            this.chkEnableWorldArchive.Name = "chkEnableWorldArchive";
+            this.chkEnableWorldArchive.Size = new System.Drawing.Size(145, 16);
+            this.chkEnableWorldArchive.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkEnableWorldArchive.TabIndex = 7;
+            this.chkEnableWorldArchive.Text = "啟用世界檔案";
             // 
             // buttonX2
             // 
@@ -1519,6 +1536,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX22;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX23;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnable22AniStyle;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableWorldArchive;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowAllSubMobAtOnce;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowAllIllustAtOnce;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowDamageSkinID;
