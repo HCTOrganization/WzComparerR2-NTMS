@@ -242,11 +242,17 @@ namespace WzComparerR2.CharaSimControl
                 if (isTranslateRequired)
                 {
                     string mergedDescString = Translator.MergeString(hdesc, Translator.TranslateString(hdesc), 2);
-                    GearGraphics.DrawString(g, mergedDescString, Translator.IsKoreanStringPresent(mergedDescString) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
+                    foreach (var i in mergedDescString.Split(new string[] { "\r\n" },StringSplitOptions.None))
+                    {
+                        GearGraphics.DrawString(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
+                    }
                 }
                 else
                 {
-                    GearGraphics.DrawString(g, hdesc, Translator.IsKoreanStringPresent(hdesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
+                    foreach (var i in hdesc.Split(new string[] { "\r\n" }, StringSplitOptions.None))
+                    {
+                        GearGraphics.DrawString(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
+                    }
                 }
             }
             if (Skill.TimeLimited)
@@ -273,22 +279,22 @@ namespace WzComparerR2.CharaSimControl
             {
                 if (doHighlight && DiffSkillTags.ContainsKey(skillIDstr) && DiffSkillTags[skillIDstr].Contains("isSequenceOn"))
                 {
-                    GearGraphics.DrawString(g, "#$g可登錄技能連招#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
+                    GearGraphics.DrawString(g, "#$g可登錄技能連招#", GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
                 else
                 {
-                    GearGraphics.DrawString(g, "#c可登錄技能連招#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
+                    GearGraphics.DrawString(g, "#c可登錄技能連招#", GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
             }
             if (Skill.IsPetAutoBuff)
             {
                 if (doHighlight && DiffSkillTags.ContainsKey(skillIDstr) && DiffSkillTags[skillIDstr].Contains("isPetAutoBuff"))
                 {
-                    GearGraphics.DrawString(g, "#$g可登入寵物Buff自動技能#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
+                    GearGraphics.DrawString(g, "#$g可登入寵物Buff自動技能#", GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
                 else
                 {
-                    GearGraphics.DrawString(g, "#c可登入寵物Buff自動技能#", GearGraphics.ItemDetailFont2, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
+                    GearGraphics.DrawString(g, "#c可登入寵物Buff自動技能#", GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, Skill.Icon.Bitmap == null ? region.LevelDescLeft : region.SkillDescLeft, region.TextRight, ref picH, 16);
                 }
             }
             /*if (Skill.ReqLevel > 0)
@@ -340,11 +346,17 @@ namespace WzComparerR2.CharaSimControl
                     if (isTranslateRequired)
                     {
                         string mergedhStr = Translator.MergeString(hStr, Translator.TranslateString(hStr), 2);
-                        GearGraphics.DrawString(g, mergedhStr, Translator.IsKoreanStringPresent(mergedhStr) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                        foreach (var i in mergedhStr.Split(new string[] { "\r\n" }, StringSplitOptions.None))
+                        {
+                            GearGraphics.DrawString(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                        }
                     }
                     else
                     {
-                        GearGraphics.DrawString(g, hStr, Translator.IsKoreanStringPresent(hStr) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                        foreach (var i in hStr.Split(new string[] { "\r\n" }, StringSplitOptions.None))
+                        {
+                            GearGraphics.DrawString(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                        }
                     }
                 }
             }
@@ -367,11 +379,17 @@ namespace WzComparerR2.CharaSimControl
                     if (isTranslateRequired)
                     {
                         string mergedhStr = Translator.MergeString(hStr, Translator.TranslateString(hStr), 2);
-                        GearGraphics.DrawString(g, mergedhStr, Translator.IsKoreanStringPresent(mergedhStr) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                        foreach (var i in mergedhStr.Split(new string[] { "\r\n" }, StringSplitOptions.None))
+                        {
+                            GearGraphics.DrawString(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                        }
                     }
                     else
                     {
-                        GearGraphics.DrawString(g, hStr, Translator.IsKoreanStringPresent(hStr) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                        foreach (var i in hStr.Split(new string[] { "\r\n" }, StringSplitOptions.None))
+                        {
+                            GearGraphics.DrawString(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, v6SkillSummaryFontColorTable, region.LevelDescLeft, region.TextRight, ref picH, 16);
+                        }
                     }
                 }
             }
