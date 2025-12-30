@@ -1317,15 +1317,27 @@ namespace WzComparerR2.CharaSimControl
                 hasThirdContents = true;
                 hasDescPart = true;
 
+                string finalDesc = sr.Desc + sr.Desc.Trim();
+
+                if (!string.IsNullOrEmpty(Gear.AuthenticDesc))
+                {
+                    finalDesc = Gear.AuthenticDesc.Replace("#c", "#$d") + Environment.NewLine + finalDesc;
+                }
+
                 if (isTranslateRequired)
                 {
-                    string translatedDesc = Translator.MergeString(sr.Desc.Trim(), Translator.TranslateString(sr.Desc).Replace("#", " #").Trim(), 2);
-                    GearGraphics.DrawString(g, translatedDesc, Translator.IsKoreanStringPresent(translatedDesc) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
+                    string translatedDesc = Translator.MergeString(finalDesc, Translator.TranslateString(finalDesc).Replace("#", " #").Trim(), 2);
+                    foreach (var i in translatedDesc.Split(new String[] { "\r\n" }, StringSplitOptions.None))
+                    {
+                        GearGraphics.DrawString(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
+                    }
                 }
                 else
                 {
-
-                    GearGraphics.DrawString(g, sr.Desc.Trim(), Translator.IsKoreanStringPresent(sr.Desc) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
+                    foreach (var i in finalDesc.Split(new String[] { "\r\n" }, StringSplitOptions.None))
+                    {
+                        GearGraphics.DrawString(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipMDMoris9Font, equip22ColorTable, 15, 305, ref picH, 16, strictlyAlignLeft: 1);
+                    }
                 }
             }
 

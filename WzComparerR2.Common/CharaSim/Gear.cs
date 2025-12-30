@@ -19,6 +19,7 @@ namespace WzComparerR2.CharaSim
             Options = new Potential[3];
             AdditionalOptions = new Potential[3];
             Additions = new List<Addition>();
+            AuthenticDesc = "";
         }
         public GearGrade Grade { get; set; }
         public GearGrade AdditionGrade { get; set; }
@@ -55,6 +56,7 @@ namespace WzComparerR2.CharaSim
         public Dictionary<GearPropType, float> VariableStat { get; private set; }
         public Dictionary<GearPropType, int> AbilityTimeLimited { get; private set; }
         public List<int> ReqSpecJobs { get; private set; }
+        public string AuthenticDesc { get; private set; }
 
         /// <summary>
         /// 获取或设置装备的标准属性。
@@ -1136,6 +1138,17 @@ namespace WzComparerR2.CharaSim
 
                         case "limitedLabelGradeTooltip":
                             gear.LabelGradeTooltip = Convert.ToString(subNode.Value);
+                            break;
+
+                        case "specificTarget_bdR":
+                        case "specificTarget_expR":
+                            foreach (Wz_Node specificTargetNode in subNode.Nodes)
+                            {
+                                switch (specificTargetNode.Text)
+                                {
+                                    case "desc": gear.AuthenticDesc = Convert.ToString(specificTargetNode.Value); break;
+                                }
+                            }
                             break;
 
                         default:

@@ -1483,14 +1483,27 @@ namespace WzComparerR2.CharaSimControl
                 }
                 if (!string.IsNullOrEmpty(sr.Desc))
                 {
+                    string finalDesc = sr.Desc.Trim();
+
+                    if (!string.IsNullOrEmpty(Gear.AuthenticDesc))
+                    {
+                        finalDesc = Gear.AuthenticDesc + Environment.NewLine + finalDesc;
+                    }
+
                     if (isTranslateRequired)
                     {
-                        string translatedDesc = Translator.MergeString(sr.Desc.Replace("#", " #"), Translator.TranslateString(sr.Desc).Replace("#", " #"), 2);
-                        GearGraphics.DrawString(g, translatedDesc, Translator.IsKoreanStringPresent(translatedDesc) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipDetailFont2, orange2FontColorTable, 10, 243, ref picH, 15);
+                        string translatedDesc = Translator.MergeString(finalDesc, Translator.TranslateString(finalDesc), 2);
+                        foreach (var i in translatedDesc.Split(new String[] { "\r\n" }, StringSplitOptions.None))
+                        {
+                            GearGraphics.DrawString(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipDetailFont2, orange2FontColorTable, 10, 243, ref picH, 15);
+                        }
                     }
                     else
                     {
-                        GearGraphics.DrawString(g, sr.Desc.Replace("#", " #"), Translator.IsKoreanStringPresent(sr.Desc) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipDetailFont, orange2FontColorTable, 10, 243, ref picH, 15);
+                        foreach (var i in finalDesc.Split(new String[] { "\r\n" }, StringSplitOptions.None))
+                        {
+                            GearGraphics.DrawString(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont2 : GearGraphics.EquipDetailFont2, orange2FontColorTable, 10, 243, ref picH, 15);
+                        }
                     }
                 }
                 if (!string.IsNullOrEmpty(levelDesc))
