@@ -750,23 +750,57 @@ namespace WzComparerR2.CharaSimControl
                         }
                     }
                 }
+                else if (this.item is Mob)
+                {
+                    Bitmap waBitmap = GetWorldArchiveMobIllust(NodeID);
+                    if (waBitmap == null) return;
+                    using (SaveFileDialog dlg = new SaveFileDialog())
+                    {
+                        dlg.Filter = "PNG (*.png)|*.png|*.*|*.*";
+                        dlg.FileName = this.ImageFileName.Replace("mob", "worldArchive");
+
+                        if (dlg.ShowDialog() == DialogResult.OK)
+                        {
+                            waBitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                        }
+                    }
+                }
                 else if (this.item is Npc)
                 {
-                    if ((this.TargetItem as Npc).Illustration2Bitmaps.Count == 0)
+                    Bitmap waBitmap = GetWorldArchiveNpcIllust(NodeID);
+                    if ((this.TargetItem as Npc).Illustration2Bitmaps.Count == 0 && waBitmap == null)
                     {
                         return;
                     }
-                    using (FolderBrowserDialog dlg = new FolderBrowserDialog())
+                    if ((this.TargetItem as Npc).Illustration2Bitmaps.Count > 0)
                     {
-                        dlg.Description = "請選擇存放NPC立繪的目標資料夾。";
-                        if (dlg.ShowDialog() == DialogResult.OK)
+                        using (FolderBrowserDialog dlg = new FolderBrowserDialog())
                         {
-                            int idx = 1;
-                            foreach (var ib in (this.TargetItem as Npc).Illustration2Bitmaps)
+                            dlg.Description = "請選擇存放NPC立繪的目標資料夾。";
+                            if (dlg.ShowDialog() == DialogResult.OK)
                             {
-                                string fileName = this.ImageFileName.Replace("npc", "npcillust").Replace(".png", $" ({idx}).png");
-                                ib.Save(Path.Combine(dlg.SelectedPath, fileName), System.Drawing.Imaging.ImageFormat.Png);
-                                idx++;
+                                int idx = 1;
+                                foreach (var ib in (this.TargetItem as Npc).Illustration2Bitmaps)
+                                {
+                                    string fileName = this.ImageFileName.Replace("npc", "npcillust").Replace(".png", $" ({idx}).png");
+                                    ib.Save(Path.Combine(dlg.SelectedPath, fileName), System.Drawing.Imaging.ImageFormat.Png);
+                                    idx++;
+                                }
+                                string fileName2 = this.ImageFileName.Replace("npc", "worldArchive");
+                                if (waBitmap != null) waBitmap.Save(Path.Combine(dlg.SelectedPath, fileName2), System.Drawing.Imaging.ImageFormat.Png);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        using (SaveFileDialog dlg = new SaveFileDialog())
+                        {
+                            dlg.Filter = "PNG (*.png)|*.png|*.*|*.*";
+                            dlg.FileName = this.ImageFileName.Replace("npc", "worldArchive");
+
+                            if (dlg.ShowDialog() == DialogResult.OK)
+                            {
+                                waBitmap.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
                             }
                         }
                     }
@@ -791,6 +825,18 @@ namespace WzComparerR2.CharaSimControl
         {
             if (this.Bitmap != null)
                 this.SetClientSizeCore(this.Bitmap.Width, this.Bitmap.Height);
+        }
+
+        private Bitmap GetWorldArchiveMobIllust(int objectID)
+        {
+            BitmapOrigin waBitmap = BitmapOrigin.CreateFromNode(PluginManager.FindWz(@$"UI\UIworldArchive.img\image\mob\{objectID}"), PluginManager.FindWz);
+            return waBitmap.Bitmap;
+        }
+
+        private Bitmap GetWorldArchiveNpcIllust(int objectID)
+        {
+            BitmapOrigin waBitmap = BitmapOrigin.CreateFromNode(PluginManager.FindWz(@$"UI\UIworldArchive.img\illust\npc\{objectID}"), PluginManager.FindWz);
+            return waBitmap.Bitmap;
         }
 
         private string ReplaceQuestString(string text, Quest quest)

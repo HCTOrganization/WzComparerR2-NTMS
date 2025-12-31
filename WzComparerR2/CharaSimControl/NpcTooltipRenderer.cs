@@ -199,6 +199,7 @@ namespace WzComparerR2.CharaSimControl
                 WorldArchiveRender = new WorldArchiveTooltipRender();
                 WorldArchiveRender.WorldArchiveMessage = worldArchiveDesc;
                 WorldArchiveRender.NpcQuoteMessage = npcQuoteMessage;
+                WorldArchiveRender.NpcID = NpcInfo.ID;
                 Bitmap waBitmap = WorldArchiveRender.Render();
                 Bitmap appendWaBitmap = new Bitmap(bmp.Width + waBitmap.Width, Math.Max(bmp.Height, waBitmap.Height));
                 using (g = Graphics.FromImage(appendWaBitmap))
