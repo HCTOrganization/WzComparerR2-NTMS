@@ -15,6 +15,7 @@ namespace WzComparerR2.Common
             stringMob = new Dictionary<int, StringResult>();
             stringNpc = new Dictionary<int, StringResult>();
             stringFamiliarSkill = new Dictionary<int, StringResult>();
+            stringRoguelikeSkill = new Dictionary<int, StringResult>();
             stringSkill = new Dictionary<int, StringResult>();
             stringSkill2 = new Dictionary<string, StringResult>();
             stringSetItem = new Dictionary<int, StringResult>();
@@ -305,6 +306,89 @@ namespace WzComparerR2.Common
                                     AddAllValue(strResult, linkNode);
                                     stringMap[id] = strResult;
                                 }
+                            }
+                        }
+                        break;
+                    case "Roguelike.img":
+                        if (!image.TryExtract()) break;
+                        foreach (Wz_Node tree in image.Node.Nodes)
+                        {
+                            switch (tree.Text)
+                            {
+                                case "artifact":
+                                    foreach (Wz_Node artifactNode in tree.Nodes)
+                                    {
+                                        Wz_Node test_tree = TryLocateUolNode(artifactNode);
+                                        if (Int32.TryParse(artifactNode.Text, out id) && artifactNode.ResolveUol() is Wz_Node linkNode)
+                                        {
+                                            StringResult strResult = null;
+                                            if (update)
+                                            {
+                                                try { strResult = stringItem[id]; }
+                                                catch { }
+                                            }
+                                            if (strResult == null) strResult = new StringResult();
+
+                                            strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;
+                                            strResult.Desc = GetDefaultString(linkNode, "desc") ?? strResult.Desc;
+                                            if (artifactNode.FullPath == test_tree.FullPath)
+                                            {
+                                                if (artifactNode.FullPath == test_tree.FullPath)
+                                                {
+                                                    strResult.FullPath = artifactNode.FullPath;
+                                                }
+                                                else
+                                                {
+                                                    strResult.FullPath = artifactNode.FullPath + " -> " + test_tree.FullPath;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                strResult.FullPath = artifactNode.FullPath + " -> " + test_tree.FullPath;
+                                            }
+
+                                            AddAllValue(strResult, linkNode);
+                                            stringItem[id] = strResult;
+                                        }
+                                    }
+                                    break;
+                                case "skill":
+                                    foreach (Wz_Node skillNode in tree.Nodes)
+                                    {
+                                        Wz_Node test_tree = TryLocateUolNode(skillNode);
+                                        if (Int32.TryParse(skillNode.Text, out id) && skillNode.ResolveUol() is Wz_Node linkNode)
+                                        {
+                                            StringResultSkill strResult = new StringResultSkill();
+
+                                            strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;
+                                            strResult.Desc = GetDefaultString(linkNode, "desc") ?? strResult.Desc;
+                                            var h = GetDefaultString(linkNode, "h");
+                                            if (update && h != null)
+                                            {
+                                                strResult.SkillH.Clear();
+                                            }
+                                            strResult.SkillH.Add(h);
+
+                                            if (skillNode.FullPath == test_tree.FullPath)
+                                            {
+                                                if (skillNode.FullPath == test_tree.FullPath)
+                                                {
+                                                    strResult.FullPath = skillNode.FullPath;
+                                                }
+                                                else
+                                                {
+                                                    strResult.FullPath = skillNode.FullPath + " -> " + test_tree.FullPath;
+                                                }
+                                            }
+                                            else
+                                            {
+                                                strResult.FullPath = skillNode.FullPath + " -> " + test_tree.FullPath;
+                                            }
+                                            AddAllValue(strResult, linkNode);
+                                            stringRoguelikeSkill[id] = strResult;
+                                        }
+                                    }
+                                    break;
                             }
                         }
                         break;
@@ -702,6 +786,7 @@ namespace WzComparerR2.Common
             stringMap.Clear();
             stringNpc.Clear();
             stringFamiliarSkill.Clear();
+            stringRoguelikeSkill.Clear();
             stringSkill.Clear();
             stringSkill2.Clear();
             stringSetItem.Clear();
@@ -727,6 +812,7 @@ namespace WzComparerR2.Common
         private Dictionary<int, StringResult> stringMob;
         private Dictionary<int, StringResult> stringNpc;
         private Dictionary<int, StringResult> stringFamiliarSkill;
+        private Dictionary<int, StringResult> stringRoguelikeSkill;
         private Dictionary<int, StringResult> stringSkill;
         private Dictionary<string, StringResult> stringSkill2;
         private Dictionary<int, StringResult> stringSetItem;
@@ -803,6 +889,11 @@ namespace WzComparerR2.Common
         public Dictionary<int, StringResult> StringFamiliarSkill
         {
             get { return stringFamiliarSkill; }
+        }
+
+        public Dictionary<int, StringResult> StringRoguelikeSkill
+        {
+            get { return stringRoguelikeSkill; }
         }
 
         public Dictionary<int, StringResult> StringSkill

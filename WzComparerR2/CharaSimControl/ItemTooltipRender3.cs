@@ -1137,6 +1137,10 @@ namespace WzComparerR2.CharaSimControl
 
             // desc_leftalign
             string descLeftAlign = sr["desc_leftalign"];
+            if (!string.IsNullOrEmpty(sr["h"]))
+            {
+                descLeftAlign = SummaryParser.GetSkillSummary(sr["h"], 1, item.OverseasConstants, SummaryParams.Default);
+            }
             if (!string.IsNullOrEmpty(descLeftAlign))
             {
                 tags.Add(descLeftAlign);

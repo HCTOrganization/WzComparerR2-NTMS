@@ -17,6 +17,7 @@ namespace WzComparerR2.CharaSim
             this.CoreSpecs = new Dictionary<ItemCoreSpecType, Wz_Node>();
             this.AddTooltips = new List<int>();
             this.Recipes = new List<int>();
+            this.overseasConstants = new Dictionary<string, string>();
             this.Grade = 0;
         }
 
@@ -27,6 +28,7 @@ namespace WzComparerR2.CharaSim
         public string ConsumableFrom { get; set; }
         public string EndUseDate { get; set; }
         public string SamplePath { get; set; }
+        internal Dictionary<string, string> overseasConstants;
         public ItemType type { get; set; }
 
         public List<GearLevelInfo> Levels { get; internal set; }
@@ -34,6 +36,10 @@ namespace WzComparerR2.CharaSim
         public Dictionary<ItemPropType, long> Props { get; private set; }
         public Dictionary<ItemSpecType, long> Specs { get; private set; }
         public Dictionary<ItemCoreSpecType, Wz_Node> CoreSpecs { get; private set; }
+        public Dictionary<string, string> OverseasConstants
+        {
+            get { return overseasConstants; }
+        }
         public List<int> AddTooltips { get; internal set; } // Additional Tooltips
         public List<int> Recipes { get; private set; }
         public Bitmap AvatarBitmap { get; set; }
@@ -320,6 +326,18 @@ namespace WzComparerR2.CharaSim
                                 }
                             }
                             break;
+                    }
+                }
+            }
+
+            Wz_Node buffConstantsNode = node.FindNodeByPath("buff\\constants").ResolveUol();
+            if (buffConstantsNode != null)
+            {
+                foreach (Wz_Node constantsNode in buffConstantsNode.Nodes)
+                {
+                    if (constantsNode.Value != null && !(constantsNode.Value is Wz_Vector))
+                    {
+                        item.overseasConstants[constantsNode.Text] = constantsNode.Value.ToString();
                     }
                 }
             }
