@@ -365,6 +365,13 @@ namespace WzComparerR2
         }
 
         [Link]
+        public bool Npc_ShowNpcQuotes
+        {
+            get { return chkShowNpcQuotes.Checked; }
+            set { chkShowNpcQuotes.Checked = value; }
+        }
+
+        [Link]
         public bool Misc_EnableWorldArchive
         {
             get { return chkEnableWorldArchive.Checked; }
@@ -508,6 +515,7 @@ namespace WzComparerR2
         private void chkEnableWorldArchive_CheckedChanged(object sender, EventArgs e)
         {
             this.chkEnableMonsterBook.Enabled = chkEnableWorldArchive.Checked;
+            this.chkShowNpcQuotes.Enabled = chkEnableWorldArchive.Checked;
         }
 
         private void chkEnableMonsterBook_Click(object sender, EventArgs e)

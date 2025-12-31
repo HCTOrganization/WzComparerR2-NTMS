@@ -15,10 +15,11 @@ namespace WzComparerR2.CharaSimControl
 
         public string WorldArchiveMessage { get; set; }
         public string MonsterBookMessage { get; set; }
+        public string NpcQuoteMessage { get; set; }
 
         public override Bitmap Render()
         {
-            if (string.IsNullOrEmpty(WorldArchiveMessage) && string.IsNullOrEmpty(MonsterBookMessage))
+            if (string.IsNullOrEmpty(WorldArchiveMessage) && string.IsNullOrEmpty(MonsterBookMessage) && string.IsNullOrEmpty(NpcQuoteMessage))
                 return null;
 
             bool isTranslateEnabled = Translator.IsTranslateEnabled;
@@ -26,6 +27,12 @@ namespace WzComparerR2.CharaSimControl
             {
                 WorldArchiveMessage = Translator.MergeString(WorldArchiveMessage, Translator.TranslateString(WorldArchiveMessage), 2);
                 MonsterBookMessage = Translator.MergeString(MonsterBookMessage, Translator.TranslateString(MonsterBookMessage), 2);
+                NpcQuoteMessage = Translator.MergeString(NpcQuoteMessage, Translator.TranslateString(NpcQuoteMessage), 1);
+            }
+
+            if (string.IsNullOrEmpty(WorldArchiveMessage) && !string.IsNullOrEmpty(NpcQuoteMessage))
+            {
+                WorldArchiveMessage = "(無資料)";
             }
 
             int height = 30;
@@ -48,6 +55,23 @@ namespace WzComparerR2.CharaSimControl
                     foreach (var i in SplitLine(MonsterBookMessage))
                     {
                         GearGraphics.DrawPlainText(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, Color.White, 13, 272, ref height, 16);
+                    }
+                }
+                if (!string.IsNullOrEmpty(WorldArchiveMessage) && !string.IsNullOrEmpty(NpcQuoteMessage))
+                    height += 15;
+                if (!string.IsNullOrEmpty(NpcQuoteMessage))
+                {
+                    GearGraphics.DrawPlainText(g, "該NPC的對話内容", GearGraphics.ItemDetailFont, Color.White, 13, 272, ref height, 16);
+                    height += 4;
+                    foreach (var i in SplitLine(NpcQuoteMessage))
+                    {
+                        switch (i.Trim())
+                        {
+                            case "": break;
+                            default:
+                                GearGraphics.DrawPlainText(g, "·" + i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, Color.White, 13, 272, ref height, 16);
+                                break;
+                        }
                     }
                 }
             }
@@ -84,13 +108,36 @@ namespace WzComparerR2.CharaSimControl
                         GearGraphics.DrawPlainText(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, Color.White, 13, 272, ref picH, 16);
                     }
                 }
+                if (!string.IsNullOrEmpty(WorldArchiveMessage) && !string.IsNullOrEmpty(NpcQuoteMessage))
+                {
+                    g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                    picH += 3;
+                    DrawV6SkillDotline(g, 12, 288, picH);
+                    picH += 12;
+                    g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+                }
+                if (!string.IsNullOrEmpty(NpcQuoteMessage))
+                {
+                    GearGraphics.DrawPlainText(g, "該NPC的對話内容", GearGraphics.ItemDetailFont, Color.FromArgb(204, 255, 0), 13, 272, ref picH, 16);
+                    picH += 4;
+                    foreach (var i in SplitLine(NpcQuoteMessage))
+                    {
+                        switch (i.Trim())
+                        {
+                            case "": break;
+                            default:
+                                GearGraphics.DrawPlainText(g, "·" + i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, Color.White, 13, 272, ref picH, 16);
+                                break;
+                        }
+                    }
+                }
             }
             return bmp2;
         }
 
         private string[] SplitLine(string orgText)
         {
-            return orgText.Split(new string[] { "\r\n", "\\r\\n", "\\r", "\\n" }, StringSplitOptions.None);
+            return orgText.Split(new string[] { "\r\n", "\\r\\n", "\\r", "\\n", "\r", "\n" }, StringSplitOptions.None);
         }
 
         private void DrawV6SkillDotline(Graphics g, int x1, int x2, int y)

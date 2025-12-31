@@ -91,6 +91,7 @@ namespace WzComparerR2.Comparer
         public bool PostChangesToDiscord { get; set; }
         public bool EnableWorldArchive { get; set; }
         public bool EnableMonsterBook { get; set; }
+        public bool ShowNpcQuotes { get; set; }
         public Dictionary<string, bool> selectedNodes { get; set; }
 
         public string StateInfo
@@ -2725,6 +2726,7 @@ namespace WzComparerR2.Comparer
                 npcRenderNewOld[i].ShowObjectID = this.ShowObjectID;
                 npcRenderNewOld[i].ShowAllIllustAtOnce = true;
                 npcRenderNewOld[i].EnableWorldArchive = this.EnableWorldArchive;
+                npcRenderNewOld[i].ShowNpcQuotes = this.ShowNpcQuotes;
             }
 
             if (this.EnableWorldArchive)

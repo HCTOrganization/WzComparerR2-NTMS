@@ -34,6 +34,7 @@ namespace WzComparerR2
             this.superTabControl1 = new DevComponents.DotNetBar.SuperTabControl();
             this.superTabControlPanel1 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.chkEnable22AniStyle = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowNpcQuotes = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkEnableMonsterBook = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkEnableWorldArchive = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowAllIllustAtOnce = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -1289,6 +1290,7 @@ namespace WzComparerR2
             this.superTabControlPanel5.Controls.Add(this.chkShowAllSubMobAtOnce);
             this.superTabControlPanel5.Controls.Add(this.chkShowAllIllustAtOnce);
             this.superTabControlPanel5.Controls.Add(this.chkEnable22AniStyle);
+            this.superTabControlPanel5.Controls.Add(this.chkShowNpcQuotes);
             this.superTabControlPanel5.Controls.Add(this.chkEnableMonsterBook);
             this.superTabControlPanel5.Controls.Add(this.chkEnableWorldArchive);
             this.superTabControlPanel5.Controls.Add(this.chkCopyParsedSkillString);
@@ -1431,6 +1433,21 @@ namespace WzComparerR2
             this.chkEnableMonsterBook.Click += chkEnableMonsterBook_Click;
             this.chkEnableMonsterBook.CheckedChanged += chkEnableMonsterBook_CheckedChanged;
             // 
+            // chkShowNpcQuotes
+            // 
+            this.chkShowNpcQuotes.AutoSize = true;
+            this.chkShowNpcQuotes.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowNpcQuotes.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowNpcQuotes.Location = new System.Drawing.Point(13, 180);
+            this.chkShowNpcQuotes.Name = "chkShowNpcQuotes";
+            this.chkShowNpcQuotes.Size = new System.Drawing.Size(145, 16);
+            this.chkShowNpcQuotes.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowNpcQuotes.TabIndex = 9;
+            this.chkShowNpcQuotes.Text = "顯示NPC對話內容";
+            // 
             // buttonX2
             // 
             this.buttonX2.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
@@ -1556,6 +1573,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX22;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX23;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnable22AniStyle;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowNpcQuotes;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableMonsterBook;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableWorldArchive;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowAllSubMobAtOnce;

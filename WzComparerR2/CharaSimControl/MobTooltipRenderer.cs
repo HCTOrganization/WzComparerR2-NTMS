@@ -506,7 +506,7 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
             string monsterBookDesc = EnableMonsterBook ? GetMobDesc(MobInfo.ID) : null;
-            string worldArchiveDesc = GetWorldArchiveDesc(MobInfo.ID);
+            string worldArchiveDesc = EnableWorldArchive ? GetWorldArchiveDesc(MobInfo.ID) : null;
             if (!string.IsNullOrEmpty(worldArchiveDesc) || !string.IsNullOrEmpty(monsterBookDesc) && EnableWorldArchive)
             {
                 WorldArchiveRender = new WorldArchiveTooltipRender();
