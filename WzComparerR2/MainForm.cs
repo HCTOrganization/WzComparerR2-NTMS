@@ -2270,6 +2270,7 @@ namespace WzComparerR2
                     break;
 
                 case "Roguelike.img":
+                case "Redmoon.img":
                     switch (pathArray[1])
                     {
                         case "artifact":

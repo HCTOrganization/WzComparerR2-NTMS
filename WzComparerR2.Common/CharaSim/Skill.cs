@@ -19,6 +19,7 @@ namespace WzComparerR2.CharaSim
             this.ReqSkill = new Dictionary<int, int>();
             this.Action = new List<string>();
             this.IsRoguelikeSkill = false;
+            this.IsRedmoon = false;
         }
 
         private int level;
@@ -75,6 +76,7 @@ namespace WzComparerR2.CharaSim
         public bool IsPetAutoBuff { get; set; }
         public bool IsSequenceOn { get; set; }
         public bool IsRoguelikeSkill { get; set; }
+        public bool IsRedmoon { get; set; }
         public bool DisableNextLevelInfo { get; set; }
         public int MasterLevel { get; set; }
         public Dictionary<int, int> ReqSkill { get; private set; }
@@ -109,6 +111,7 @@ namespace WzComparerR2.CharaSim
                 if (!(m.Success && Int32.TryParse(m.Result("$1"), out skillID)))
                     return null;
                 skill.IsRoguelikeSkill = true;
+                if (node.FullPathToFile.Contains("Redmoon")) skill.IsRedmoon = true;
             }
             skill.SkillID = skillID;
 

@@ -478,7 +478,7 @@ namespace WzComparerR2.CharaSimControl
                 }
                 if (Skill.IsRoguelikeSkill)
                 {
-                    attr.Add("Roguelike技能");
+                    attr.Add("Roguelike技能: " + (Skill.IsRedmoon ? "紅月之森" : "法老王的寶物"));
                 }
                 if (Skill.Invisible)
                 {

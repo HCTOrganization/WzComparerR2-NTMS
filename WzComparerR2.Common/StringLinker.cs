@@ -310,6 +310,7 @@ namespace WzComparerR2.Common
                         }
                         break;
                     case "Roguelike.img":
+                    case "Redmoon.img":
                         if (!image.TryExtract()) break;
                         foreach (Wz_Node tree in image.Node.Nodes)
                         {
