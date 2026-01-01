@@ -2282,7 +2282,7 @@ namespace WzComparerR2
                             addPath();
                             break;
                         case "skill":
-                            foreach (var i in new string[] { "Buff", "Skill" })
+                            foreach (var i in new string[] { "Skill", "Buff" })
                             {
                                 wzPath.Clear();
                                 wzPath.AddRange(new string[] { "Skill", "Roguelike", i, id + ".img" });
