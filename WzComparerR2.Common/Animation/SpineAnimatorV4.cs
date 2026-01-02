@@ -163,8 +163,6 @@ namespace WzComparerR2.Animation
                     // ignore, don't know how it works
                 }
             }
-            bound.minX += skeleton.X;
-            bound.minY += skeleton.Y;
         }
 
         public override object Clone()
