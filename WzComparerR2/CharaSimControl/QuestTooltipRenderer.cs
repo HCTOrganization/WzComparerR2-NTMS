@@ -682,6 +682,7 @@ namespace WzComparerR2.CharaSimControl
             text = text.Replace("ＥＳ", "es");
             text = text.Replace("#E", "");
             text = text.Replace("#n", " ");
+            text = text.Replace("\\r\\n\\r\\n", "\n\n\n").Replace("\\r\\n", "\n\n").Replace("\\r", "\n");
 
             return text;
         }

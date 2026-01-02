@@ -106,6 +106,8 @@ namespace WzComparerR2.CharaSimControl
         public string AutoDesc { get; set; }
         public string Hdesc { get; set; }
         public string DescLeftAlign { get; set; }
+        public int QuestLvmin { get; set; }
+        public int QuestLvmax { get; set; }
         public string QuestCategory { get; set; }
         public string QuestAvailable { get; set; }
         public string QuestProgress { get; set; }
@@ -540,12 +542,12 @@ namespace WzComparerR2.CharaSimControl
                         sb.AppendLine((check0npcName == "") ? "|npc=" : $"|npc=[[{check0npcName}]]");
                         sb.AppendLine((check0npcName == "") ? "|npcimg=" : $"|npcimg=[[File:NPC {check0npcName}.png]]");
                         sb.AppendLine($"|repeat=");
-                        sb.AppendLine($"|req=");
+                        sb.AppendLine((this.QuestLvmax > 0) ? $"|req=\n*At least Level {this.QuestLvmin}, up to Level {this.QuestLvmax}" : $"|req=\n*At least Level {this.QuestLvmin}");
                         sb.AppendLine($"|cat=");
                         sb.AppendLine($"|type={this.QuestCategory}");
-                        sb.AppendLine($"|avail={this.QuestAvailable}");
-                        sb.AppendLine($"|prog={this.QuestProgress}");
-                        sb.AppendLine($"|comp={this.QuestComplete}");
+                        sb.AppendLine($"|avail={this.QuestAvailable.Replace("\\r\\n\\r\\n", "<br /><br /><br />").Replace("\\r\\n", "<br /><br />").Replace("\\n", "<br />").Replace("\\r", "<br />")}");
+                        sb.AppendLine($"|prog={this.QuestProgress.Replace("\\r\\n\\r\\n", "<br /><br /><br />").Replace("\\r\\n", "<br /><br />").Replace("\\n", "<br />").Replace("\\r", "<br />")}");
+                        sb.AppendLine($"|comp={this.QuestComplete.Replace("\\r\\n\\r\\n", "<br /><br /><br />").Replace("\\r\\n", "<br /><br />").Replace("\\n", "<br />").Replace("\\r", "<br />")}");
                         sb.AppendLine($"|pro=");
                         sb.AppendLine($"|reward=");
                         sb.AppendLine($"|select=");
