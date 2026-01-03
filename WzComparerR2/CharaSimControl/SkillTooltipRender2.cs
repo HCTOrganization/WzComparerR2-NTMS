@@ -246,6 +246,10 @@ namespace WzComparerR2.CharaSimControl
             if (sr.Desc != null)
             {
                 string hdesc = SummaryParser.GetSkillSummary(sr.Desc, Skill.Level, Skill.Common, SummaryParams.Default);
+                if (Skill.IsRoguelikeSkill)
+                {
+                    hdesc = hdesc.Replace("<style color=\"Orange\">", "#c").Replace("</>", "#");
+                }
                 if (isTranslateRequired)
                 {
                     string mergedDescString = Translator.MergeString(hdesc, Translator.TranslateString(hdesc), 2);

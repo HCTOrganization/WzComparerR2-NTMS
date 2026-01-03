@@ -104,10 +104,14 @@ namespace WzComparerR2
             { "艾伊爾", new int[] { 18002, 18300, 18310, 18311, 18312, 18314 } },
             { "5轉(其它)", new int[] { 40000, 40001, 40002, 40003, 40004, 40005 } },
             { "6轉(其它)", new int[] { 50000, 50006, 50007 } },
+            { "Roguelike技能(法老王的寶物)", new int[] { 99990000 } },
+            { "Roguelike技能(紅月之森)", new int[] { 99990001 } },
         };
 
         private static Dictionary<string, int[]> jobNameToCodeSorted = new Dictionary<string, int[]>()
         {
+            { "Roguelike技能(法老王的寶物)", new int[] { 99990000 } },
+            { "Roguelike技能(紅月之森)", new int[] { 99990001 } },
             { "爆拳槍神",  new int[] { 3000, 3700, 3710, 3711, 3712, 3714 } },
             { "破風使者",  new int[] { 1000, 1300, 1310, 1311, 1312, 1314 } },
             { "墨玄",  new int[] { 17000, 17500, 17510, 17511, 17512, 17514 } },
@@ -249,6 +253,14 @@ namespace WzComparerR2
                 if (this.clbJobName.CheckedItems.Contains("其它"))
                 {
                     selectedJob.AddRange(skillImg.Except(AllClassesCode()));
+                }
+                if (this.clbJobName.CheckedItems.Contains("Roguelike技能(法老王的寶物)"))
+                {
+                    selectedJob.Add(99990000);
+                }
+                if (this.clbJobName.CheckedItems.Contains("Roguelike技能(紅月之森)"))
+                {
+                    selectedJob.Add(99990001);
                 }
                 ExportFolderPath = dlg.SelectedPath;
                 SelectedJobCodes = allSelected ? skillImg : selectedJob;
