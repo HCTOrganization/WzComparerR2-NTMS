@@ -4536,7 +4536,6 @@ namespace WzComparerR2
                         tooltipQuickView.NodeName = quest.Name;
                         tooltipQuickView.Desc = string.Join("\r\n", quest.Desc);
                         tooltipQuickView.QuestLvmin = quest.Lvmin;
-                        tooltipQuickView.QuestLvmax = quest.Lvmax;
                         if (quest.Desc.Count() == 3)
                         {
                             tooltipQuickView.QuestAvailable = quest.Desc[0];
