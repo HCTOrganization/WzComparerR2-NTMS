@@ -2240,6 +2240,11 @@ namespace WzComparerR2
                     addPath();
                     break;
 
+                case "GuildCastle.img":
+                    wzPath.AddRange(new string[] { "Etc", "GuildCastle.img", "ResearchList", pathArray[2], id } );
+                    addPath();
+                    break;
+
                 case "Map.img":
                     id = id.PadLeft(9, '0');
                     wzPath.AddRange(new string[] { "Map", "Map", "Map" + id[0], id + ".img" });
@@ -3261,6 +3266,8 @@ namespace WzComparerR2
             {
                 case 0:
                     dicts.Add(stringLinker.StringEqp);
+                    dicts.Add(stringLinker.StringGuildCastleGuildResearch);
+                    dicts.Add(stringLinker.StringGuildCastlePersonalResearch);
                     dicts.Add(stringLinker.StringItem);
                     dicts.Add(stringLinker.StringMap);
                     dicts.Add(stringLinker.StringMob);
@@ -3290,6 +3297,8 @@ namespace WzComparerR2
                     dicts.Add(stringLinker.StringQuest);
                     break;
                 case 7:
+                    dicts.Add(stringLinker.StringGuildCastleGuildResearch);
+                    dicts.Add(stringLinker.StringGuildCastlePersonalResearch);
                     dicts.Add(stringLinker.StringRoguelikeSkill);
                     dicts.Add(stringLinker.StringSkill);
                     break;
@@ -4442,7 +4451,7 @@ namespace WzComparerR2
                         if (stringLinker == null || !stringLinker.StringRoguelikeSkill.TryGetValue(skill.SkillID, out sr))
                         {
                             sr = new StringResultSkill();
-                            sr.Name = "未知のスキル";
+                            sr.Name = "未知的技能";
                         }
                         if (skill != null)
                         {
@@ -4602,6 +4611,40 @@ namespace WzComparerR2
                             fileName = "achievement_" + achievement.ID + "_" + sr.Name + ".png";
                             altAutoDesc = string.Join("\r\n", achievement.Missions);
                             tooltipQuickView.NodeID = achievement.ID;
+                        }
+                    }
+                    else if (Regex.IsMatch(selectedNode.FullPathToFile, @"^Etc\\GuildCastle.img\\ResearchList\\(Guild|Personal)\\(\d+)$"))
+                    {
+                        Skill skill = Skill.CreateFromNode(selectedNode, PluginManager.FindWz, PluginManager.FindWz);
+                        switch (skill.GuildCastleResearchType)
+                        {
+                            case 0:
+                                if (stringLinker == null || !stringLinker.StringGuildCastleGuildResearch.TryGetValue(skill.SkillID, out sr))
+                                {
+                                    sr = new StringResultSkill();
+                                    sr.Name = "未知的研究";
+                                }
+                                break;
+                            case 1:
+                                if (stringLinker == null || !stringLinker.StringGuildCastlePersonalResearch.TryGetValue(skill.SkillID, out sr))
+                                {
+                                    sr = new StringResultSkill();
+                                    sr.Name = "未知的研究";
+                                }
+                                break;
+                        }
+                        if (skill != null)
+                        {
+                            switch (this.skillDefaultLevel)
+                            {
+                                case DefaultLevel.Level0: skill.Level = 0; break;
+                                case DefaultLevel.Level1: skill.Level = 1; break;
+                                case DefaultLevel.LevelMax: skill.Level = skill.MaxLevel; break;
+                                case DefaultLevel.LevelMaxWithCO: skill.Level = skill.MaxLevel + 2; break;
+                            }
+                            obj = skill;
+                            fileName = "guildresearch_" + skill.SkillID + "_" + RemoveInvalidFileNameChars(sr.Name) + ".png";
+                            tooltipQuickView.NodeID = skill.SkillID;
                         }
                     }
                     break;
@@ -5469,6 +5512,8 @@ namespace WzComparerR2
                     List<int> selectedJob = frm.SelectedJobCodes;
                     bool doRoguelikePharaoh = selectedJob.Contains(99990000);
                     bool doRedmoon = selectedJob.Contains(99990001);
+                    bool doGuildCastleGuildResearch = selectedJob.Contains(99990100);
+                    bool doGuildCastlePersonalResearch = selectedJob.Contains(99990101);
                     string exportedFolder = frm.ExportFolderPath;
                     labelX2.Text = "匯出中";
                     System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
@@ -5688,6 +5733,84 @@ namespace WzComparerR2
                                             Directory.CreateDirectory(Path.Combine(exportedFolder, categoryPath));
                                         }
                                         string imageName = Path.Combine(exportedFolder, categoryPath, "skill_" + i.Text.Replace(".img", "") + "_" + RemoveInvalidFileNameChars(skillName) + ".png");
+                                        if (File.Exists(imageName)) File.Delete(imageName);
+                                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                                        resultImage.Dispose();
+                                    }
+                                }
+                            }
+                            if (doGuildCastleGuildResearch)
+                            {
+                                var jobImg = PluginManager.FindWz($"Etc\\GuildCastle.img\\ResearchList\\Guild");
+                                if (jobImg != null)
+                                {
+                                    foreach (var i in jobImg.Nodes)
+                                    {
+                                        StringResult sr;
+                                        string skillName;
+                                        if (tooltip.StringLinker == null || !tooltip.StringLinker.StringGuildCastleGuildResearch.TryGetValue(int.Parse(i.Text.Replace(".img", "")), out sr))
+                                        {
+                                            sr = new StringResultSkill();
+                                            sr.Name = "未知的研究";
+                                        }
+                                        skillName = sr.Name;
+                                        labelX2.Text = string.Format("匯出中：{0} - {1}", i.Text.Replace(".img", ""), skillName);
+                                        Skill skill = Skill.CreateFromNode(i, PluginManager.FindWz, PluginManager.FindWz);
+                                        if (skill != null)
+                                        {
+                                            skill.Level = skill.MaxLevel;
+                                            tooltip.Skill = skill;
+                                        }
+                                        else
+                                        {
+                                            continue;
+                                        }
+                                        Bitmap resultImage = tooltip.Render();
+                                        string categoryPath = "公會城研究(共通研究)";
+                                        if (!Directory.Exists(Path.Combine(exportedFolder, categoryPath)))
+                                        {
+                                            Directory.CreateDirectory(Path.Combine(exportedFolder, categoryPath));
+                                        }
+                                        string imageName = Path.Combine(exportedFolder, categoryPath, "研究_" + i.Text.Replace(".img", "") + "_" + RemoveInvalidFileNameChars(skillName) + ".png");
+                                        if (File.Exists(imageName)) File.Delete(imageName);
+                                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                                        resultImage.Dispose();
+                                    }
+                                }
+                            }
+                            if (doGuildCastlePersonalResearch)
+                            {
+                                var jobImg = PluginManager.FindWz($"Etc\\GuildCastle.img\\ResearchList\\Personal");
+                                if (jobImg != null)
+                                {
+                                    foreach (var i in jobImg.Nodes)
+                                    {
+                                        StringResult sr;
+                                        string skillName;
+                                        if (tooltip.StringLinker == null || !tooltip.StringLinker.StringGuildCastlePersonalResearch.TryGetValue(int.Parse(i.Text.Replace(".img", "")), out sr))
+                                        {
+                                            sr = new StringResultSkill();
+                                            sr.Name = "未知的研究";
+                                        }
+                                        skillName = sr.Name;
+                                        labelX2.Text = string.Format("匯出中：{0} - {1}", i.Text.Replace(".img", ""), skillName);
+                                        Skill skill = Skill.CreateFromNode(i, PluginManager.FindWz, PluginManager.FindWz);
+                                        if (skill != null)
+                                        {
+                                            skill.Level = skill.MaxLevel;
+                                            tooltip.Skill = skill;
+                                        }
+                                        else
+                                        {
+                                            continue;
+                                        }
+                                        Bitmap resultImage = tooltip.Render();
+                                        string categoryPath = "公會城研究(個人研究)";
+                                        if (!Directory.Exists(Path.Combine(exportedFolder, categoryPath)))
+                                        {
+                                            Directory.CreateDirectory(Path.Combine(exportedFolder, categoryPath));
+                                        }
+                                        string imageName = Path.Combine(exportedFolder, categoryPath, "研究_" + i.Text.Replace(".img", "") + "_" + RemoveInvalidFileNameChars(skillName) + ".png");
                                         if (File.Exists(imageName)) File.Delete(imageName);
                                         resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
                                         resultImage.Dispose();

@@ -20,6 +20,11 @@ namespace WzComparerR2.CharaSim
             this.Action = new List<string>();
             this.IsRoguelikeSkill = false;
             this.IsRedmoon = false;
+            this.IsGuildCastleResearch = false;
+            this.GuildCastleResearchType = 0;
+            this.GuildCastleResearchRequirements = new Dictionary<int, int>();
+            this.GuildCastleResearchReqCondition = "";
+            this.VariableProps = new List<string>();
         }
 
         private int level;
@@ -77,6 +82,11 @@ namespace WzComparerR2.CharaSim
         public bool IsSequenceOn { get; set; }
         public bool IsRoguelikeSkill { get; set; }
         public bool IsRedmoon { get; set; }
+        public bool IsGuildCastleResearch { get; set; }
+        public int GuildCastleResearchType { get; set; }
+        public Dictionary<int, int> GuildCastleResearchRequirements { get; set; }
+        public string GuildCastleResearchReqCondition { get; set; }
+        public List<string> VariableProps { get; set; }
         public bool DisableNextLevelInfo { get; set; }
         public int MasterLevel { get; set; }
         public Dictionary<int, int> ReqSkill { get; private set; }
@@ -107,11 +117,36 @@ namespace WzComparerR2.CharaSim
             int skillID;
             if (!Int32.TryParse(node?.Text, out skillID))
             {
-                Match m = Regex.Match(node.FullPathToFile, @"^Skill\\Roguelike\\.+\\(\d+)\.img$");
-                if (!(m.Success && Int32.TryParse(m.Result("$1"), out skillID)))
+                if (node.FullPathToFile.StartsWith("Skill\\Roguelike"))
+                {
+                    Match m = Regex.Match(node.FullPathToFile, @"^Skill\\Roguelike\\.+\\(\d+)\.img$");
+                    if (!(m.Success && Int32.TryParse(m.Result("$1"), out skillID)))
+                    {
+                        return null;
+                    }
+                    else
+                    {
+                        skill.IsRoguelikeSkill = true;
+                        if (node.FullPathToFile.Contains("Redmoon")) skill.IsRedmoon = true;
+                    }
+                }
+            }
+            else if (node.FullPathToFile.StartsWith("Etc\\GuildCastle.img"))
+            {
+                Match m = Regex.Match(node.FullPathToFile, @"^Etc\\GuildCastle.img\\ResearchList\\(Guild|Personal)\\(\d+)$");
+                if (!m.Success)
+                {
                     return null;
-                skill.IsRoguelikeSkill = true;
-                if (node.FullPathToFile.Contains("Redmoon")) skill.IsRedmoon = true;
+                }
+                else
+                {
+                    skill.IsGuildCastleResearch = true;
+                    switch (m.Result("$1"))
+                    {
+                        case "Guild": skill.GuildCastleResearchType = 0; break;
+                        case "Personal": skill.GuildCastleResearchType = 1; break;
+                    }
+                }
             }
             skill.SkillID = skillID;
 
@@ -187,6 +222,17 @@ namespace WzComparerR2.CharaSim
                                     else if (commonNode.Text == "rb")
                                     {
                                         skill.RB = new Point(cNode.X, cNode.Y);
+                                    }
+                                }
+                                else if (commonNode.Nodes.Count > 0)
+                                {
+                                    skill.VariableProps.Add(commonNode.Text);
+                                    foreach (var levelNode in commonNode.Nodes)
+                                    {
+                                        if (levelNode.Value != null && !(levelNode.Value is Wz_Vector))
+                                        {
+                                            skill.common[$"{commonNode.Text}_{levelNode.Text}"] = levelNode.Value.ToString();
+                                        }
                                     }
                                 }
                             }
@@ -318,6 +364,22 @@ namespace WzComparerR2.CharaSim
                                 {
                                     skill.ReqSkill[reqSkill] = reqNode.GetValue<int>();
                                 }
+                            }
+                        }
+                        break;
+                    case "requirement":
+                        if (skill.IsGuildCastleResearch)
+                        {
+                            Wz_Node conditionNode = childNode.FindNodeByPath("condition");
+                            if (conditionNode != null)
+                                skill.GuildCastleResearchReqCondition = conditionNode.Value.ToString();
+                            foreach (Wz_Node reqNode in childNode.Nodes)
+                            {
+                                Wz_Node researchIDNode = reqNode.FindNodeByPath("researchID");
+                                Wz_Node researchLvNode = reqNode.FindNodeByPath("researchLv");
+                                if (researchIDNode == null || researchLvNode == null)
+                                    continue;
+                                skill.GuildCastleResearchRequirements[researchIDNode.GetValue<int>()] = researchLvNode.GetValue<int>();
                             }
                         }
                         break;

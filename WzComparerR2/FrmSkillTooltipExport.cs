@@ -106,6 +106,8 @@ namespace WzComparerR2
             { "6轉(其它)", new int[] { 50000, 50006, 50007 } },
             { "Roguelike技能(法老王的寶物)", new int[] { 99990000 } },
             { "Roguelike技能(紅月之森)", new int[] { 99990001 } },
+            { "公會城研究(共通研究)", new int[] { 99990100 } },
+            { "公會城研究(個人研究)", new int[] { 99990101 } },
         };
 
         private static Dictionary<string, int[]> jobNameToCodeSorted = new Dictionary<string, int[]>()
@@ -129,6 +131,8 @@ namespace WzComparerR2
             { "龍魔導士",  new int[] { 2001, 2200, 2210, 2211, 2212, 2213, 2214, 2215, 2216, 2217, 2218, 2219, 2220 } },
             // { "怪物農場",  new int[] { 7200 } },
             // { "公會",  new int[] { 9100 } },
+            { "公會城研究(共通研究)", new int[] { 99990100 } },
+            { "公會城研究(個人研究)", new int[] { 99990101 } },
             { "開拓者",  new int[] { 301, 330, 331, 332, 334 } },
             { "凱內西斯",  new int[] { 14000, 14200, 14210, 14211, 14212, 14214 } },
             { "凱薩",  new int[] { 6000, 6100, 6110, 6111, 6112, 6114 } },
@@ -261,6 +265,14 @@ namespace WzComparerR2
                 if (this.clbJobName.CheckedItems.Contains("Roguelike技能(紅月之森)"))
                 {
                     selectedJob.Add(99990001);
+                }
+                if (this.clbJobName.CheckedItems.Contains("公會城研究(共通研究)"))
+                {
+                    selectedJob.Add(99990100);
+                }
+                if (this.clbJobName.CheckedItems.Contains("公會城研究(個人研究)"))
+                {
+                    selectedJob.Add(99990101);
                 }
                 ExportFolderPath = dlg.SelectedPath;
                 SelectedJobCodes = allSelected ? skillImg : selectedJob;
