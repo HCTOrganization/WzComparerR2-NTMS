@@ -1317,7 +1317,7 @@ namespace WzComparerR2.CharaSimControl
                 hasThirdContents = true;
                 hasDescPart = true;
 
-                string finalDesc = sr.Desc + sr.Desc.Trim();
+                string finalDesc = sr.Desc.Trim();
 
                 if (!string.IsNullOrEmpty(Gear.AuthenticDesc))
                 {
