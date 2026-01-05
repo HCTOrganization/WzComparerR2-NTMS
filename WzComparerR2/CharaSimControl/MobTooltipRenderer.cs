@@ -534,6 +534,7 @@ namespace WzComparerR2.CharaSimControl
             else
             {
                 bmp = baseBmp;
+                baseBmp.Dispose();
             }
             return bmp;
         }

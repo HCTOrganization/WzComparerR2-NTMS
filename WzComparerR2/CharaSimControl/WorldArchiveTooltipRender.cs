@@ -210,6 +210,7 @@ namespace WzComparerR2.CharaSimControl
                     picH += 10 + Resource.WorldArchive.Height;
                     g.DrawImage(npcBmp, 10, picH, new Rectangle(0, 0, npcBmp.Width, npcBmp.Height), GraphicsUnit.Pixel);
                 }
+                npcBmp.Dispose();
                 return specialNpcTooltip;
             }
         }
