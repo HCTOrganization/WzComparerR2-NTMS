@@ -1537,7 +1537,10 @@ namespace WzComparerR2.CharaSimControl
                 name = Translator.IsKoreanStringPresent(sr.Name) ? $"#c{sr.Name}{(gender == 0 ? "(남)" : (gender == 1 ? "(여)" : ""))}#" : $"#c{sr.Name}{(gender == 0 ? "(男)" : (gender == 1 ? "(女)" : ""))}#";
 
                 int last = (name.LastOrDefault(c => c >= '가' && c <= '힣') - '가') % 28;
-                name += ((last == 0 || last == 8 ? "" : "으") + "로");
+                if (Translator.IsKoreanStringPresent(name))
+                {
+                    name += ((last == 0 || last == 8 ? "" : "으") + "로");
+                }
 
                 foreach (var color in AvatarCanvas.HairColor)
                 {
