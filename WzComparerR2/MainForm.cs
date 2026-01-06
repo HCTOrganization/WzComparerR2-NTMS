@@ -741,6 +741,10 @@ namespace WzComparerR2
 
             Wz_Node node = advTree3.SelectedNode.AsWzNode();
             string aniName = GetSelectedNodeImageName();
+            if (this.pictureBoxEx1.IsPaused)
+            {
+                ResumePictureBox();
+            }
 
             //添加到动画控件
             var spineDetectResult = SpineLoader.Detect(node);
@@ -815,6 +819,10 @@ namespace WzComparerR2
 
             Wz_Node node = advTree3.SelectedNode.AsWzNode();
             string aniName = "堆叠_" + GetSelectedNodeImageName();
+            if (this.pictureBoxEx1.IsPaused)
+            {
+                ResumePictureBox();
+            }
 
             if (node.Value is Wz_Png)
             {
@@ -1126,6 +1134,80 @@ namespace WzComparerR2
             {
                 labelItemStatus.Text = "圖片保存失敗";
             }
+        }
+
+        private void buttonItemPBPlay_Click(object sender, EventArgs e)
+        {
+            if (this.pictureBoxEx1.Items.Count <= 0)
+            {
+                return;
+            }
+            if (this.pictureBoxEx1.IsPlaying)
+            {
+                PausePictureBox();
+            }
+            else
+            {
+                ResumePictureBox();
+            }
+        }
+
+        private void PausePictureBox()
+        {
+            this.pictureBoxEx1.DoPause();
+            this.buttonItemPBPlay.Image = global::WzComparerR2.Properties.Resources.Play;
+            this.buttonItemPBPlay.Tooltip = "播放";
+            this.buttonItemPBGA1.Enabled = true;
+            this.buttonItemPBGA2.Enabled = true;
+            this.buttonItemPBGB1.Enabled = true;
+            this.buttonItemPBGB2.Enabled = true;
+        }
+
+        private void ResumePictureBox()
+        {
+            this.pictureBoxEx1.DoResume();
+            this.buttonItemPBPlay.Image = global::WzComparerR2.Properties.Resources.Pause;
+            this.buttonItemPBPlay.Tooltip = "暫停";
+            this.buttonItemPBGA1.Enabled = false;
+            this.buttonItemPBGA2.Enabled = false;
+            this.buttonItemPBGB1.Enabled = false;
+            this.buttonItemPBGB2.Enabled = false;
+        }
+
+        private void buttonItemPBGA1_Click(object sender, EventArgs e)
+        {
+            if (this.pictureBoxEx1.Items.Count <= 0)
+            {
+                return;
+            }
+            this.pictureBoxEx1.DoTimeUpdate(30);
+        }
+
+        private void buttonItemPBGA2_Click(object sender, EventArgs e)
+        {
+            if (this.pictureBoxEx1.Items.Count <= 0)
+            {
+                return;
+            }
+            this.pictureBoxEx1.DoTimeUpdate(360);
+        }
+
+        private void buttonItemPBGB1_Click(object sender, EventArgs e)
+        {
+            if (this.pictureBoxEx1.Items.Count <= 0)
+            {
+                return;
+            }
+            this.pictureBoxEx1.DoTimeUpdate(-30);
+        }
+
+        private void buttonItemPBGB2_Click(object sender, EventArgs e)
+        {
+            if (this.pictureBoxEx1.Items.Count <= 0)
+            {
+                return;
+            }
+            this.pictureBoxEx1.DoTimeUpdate(-360);
         }
 
         private void OnSaveImage(bool options)
@@ -1832,6 +1914,10 @@ namespace WzComparerR2
                     pictureBoxEx1.PictureName = GetSelectedNodeImageName();
                     pictureBoxEx1.ShowImage(png);
                     this.cmbItemAniNames.Items.Clear();
+                    if (this.pictureBoxEx1.IsPaused)
+                    {
+                        ResumePictureBox();
+                    }
                     if (png.ActualPages > 1)
                     {
                         for (int i = 0; i < png.ActualPages; i++)
@@ -1920,6 +2006,10 @@ namespace WzComparerR2
                     pictureBoxEx1.PictureName = GetSelectedNodeImageName();
                     this.pictureBoxEx1.ShowAnimation(videoFrameData);
                     this.cmbItemAniNames.Items.Clear();
+                    if (this.pictureBoxEx1.IsPaused)
+                    {
+                        ResumePictureBox();
+                    }
                     break;
 
 
