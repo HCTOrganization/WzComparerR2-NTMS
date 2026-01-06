@@ -1164,23 +1164,31 @@ namespace WzComparerR2.CharaSimControl
 
             if (ShowCashPurchasePrice && !isMsnClient && item.Cash)
             {
-                Commodity commodityPackage = new Commodity();
-                if (CharaSimLoader.LoadedCommoditiesByItemId.ContainsKey(item.ItemID))
+                if (CharaSimLoader.LoadedCommoditiesByItemId2.ContainsKey(item.ItemID))
                 {
-                    commodityPackage = CharaSimLoader.LoadedCommoditiesByItemId[item.ItemID];
-                    if (commodityPackage.Price > 0)
+                    picH += 29;
+                    if (CharaSimLoader.LoadedCommoditiesByItemId2[item.ItemID].Count > 1)
                     {
-                        picH += 16;
-                        GearGraphics.DrawString(g, "\r\n · 購買價格：" + commodityPackage.Price + "點", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
-                        if (Translator.DefaultDesiredCurrency != "none")
+                        GearGraphics.DrawString(g, " · 購買價格：", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                        foreach (var i in CharaSimLoader.LoadedCommoditiesByItemId2[item.ItemID])
                         {
-                            picH += 16;
-                            
+                            string approxPrice = "";
                             if (Translator.DefaultDesiredCurrency != "none")
                             {
-                                string exchangedPrice = Translator.GetConvertedCurrency(commodityPackage.Price, titleLanguage);
-                                GearGraphics.DrawString(g, "    " + exchangedPrice, GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                                approxPrice = $" ({Translator.GetConvertedCurrency(i.Value, titleLanguage)})";
                             }
+                            if (i.Value == 0) continue;
+                            GearGraphics.DrawString(g, string.Format("  · {0}個 {1} 點數{2}", i.Key, i.Value, approxPrice), GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                        }
+                    }
+                    else
+                    {
+                        int price = CharaSimLoader.LoadedCommoditiesByItemId2[item.ItemID].Values.ToList()[0]; picH += 16;
+                        GearGraphics.DrawString(g, " · 購買價格：" + price + "點數", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                        if (Translator.DefaultDesiredCurrency != "none")
+                        {
+                            string exchangedPrice = Translator.GetConvertedCurrency(price, titleLanguage);
+                            GearGraphics.DrawString(g, "    " + exchangedPrice, GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
                         }
                     }
                 }

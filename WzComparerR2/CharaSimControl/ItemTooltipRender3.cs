@@ -1271,17 +1271,29 @@ namespace WzComparerR2.CharaSimControl
             // purchasePrice
             if (ShowCashPurchasePrice && !isMsnClient && item.Cash)
             {
-                Commodity commodityPackage = new Commodity();
-                if (CharaSimLoader.LoadedCommoditiesByItemId.ContainsKey(item.ItemID))
+                if (CharaSimLoader.LoadedCommoditiesByItemId2.ContainsKey(item.ItemID))
                 {
-                    commodityPackage = CharaSimLoader.LoadedCommoditiesByItemId[item.ItemID];
-                    if (commodityPackage.Price > 0)
+                    if (CharaSimLoader.LoadedCommoditiesByItemId2[item.ItemID].Count > 1)
                     {
-                        tags.Add(string.Format(" · 購買價格：{0} 點數", ItemStringHelper.ToCJKNumberExpr(commodityPackage.Price)));
+                        tags.Add(" · 購買價格：");
+                        foreach (var i in CharaSimLoader.LoadedCommoditiesByItemId2[item.ItemID])
+                        {
+                            if (i.Value == 0) continue;
+                            string approxPrice = "";
+                            if (Translator.DefaultDesiredCurrency != "none")
+                            {
+                                approxPrice = $" ({Translator.GetConvertedCurrency(i.Value, titleLanguage)})";
+                            }
+                            tags.Add(string.Format("   · {0}個 {1} 點數{2}", i.Key, ItemStringHelper.ToCJKNumberExpr(i.Value), approxPrice));
+                        }
+                    }
+                    else
+                    {
+                        int price = CharaSimLoader.LoadedCommoditiesByItemId2[item.ItemID].Values.ToList()[0];
+                        tags.Add(string.Format(" · 購買價格：{0} 點數", ItemStringHelper.ToCJKNumberExpr(price)));
                         if (Translator.DefaultDesiredCurrency != "none")
                         {
-                            string exchangedPrice = Translator.GetConvertedCurrency(commodityPackage.Price, titleLanguage);
-                            tags.Add(string.Format("    " + exchangedPrice));
+                            tags.Add($"    {Translator.GetConvertedCurrency(price, titleLanguage)}");
                         }
                     }
                 }
