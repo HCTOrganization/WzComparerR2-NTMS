@@ -1817,9 +1817,9 @@ namespace WzComparerR2.CharaSimControl
 
                 if (Gear.Cash && ShowCashPurchasePrice)
                 {
-                    if (CharaSimLoader.LoadedCommoditiesByItemId2.ContainsKey(Gear.ItemID))
+                    if (CharaSimLoader.LoadedCommoditiesByItemIdRegular.ContainsKey(Gear.ItemID))
                     {
-                        int price = CharaSimLoader.LoadedCommoditiesByItemId2[Gear.ItemID].Values.ToList()[0];
+                        int price = CharaSimLoader.LoadedCommoditiesByItemIdRegular[Gear.ItemID].Values.ToList()[0];
                         if (price > 0)
                         {
                             picH += 16;

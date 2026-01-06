@@ -1164,31 +1164,44 @@ namespace WzComparerR2.CharaSimControl
 
             if (ShowCashPurchasePrice && !isMsnClient && item.Cash)
             {
-                if (CharaSimLoader.LoadedCommoditiesByItemId2.ContainsKey(item.ItemID))
+                if (CharaSimLoader.LoadedCommoditiesByItemIdRegular.ContainsKey(item.ItemID))
                 {
-                    picH += 29;
-                    if (CharaSimLoader.LoadedCommoditiesByItemId2[item.ItemID].Count > 1)
+                    List<string> priceList = new List<string>();
+                    if (CharaSimLoader.LoadedCommoditiesByItemIdRegular.ContainsKey(item.ItemID))
                     {
-                        GearGraphics.DrawString(g, " · 購買價格：", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
-                        foreach (var i in CharaSimLoader.LoadedCommoditiesByItemId2[item.ItemID])
+                        foreach (var i in CharaSimLoader.LoadedCommoditiesByItemIdRegular[item.ItemID])
                         {
+                            if (i.Value == 0) continue;
                             string approxPrice = "";
                             if (Translator.DefaultDesiredCurrency != "none")
                             {
                                 approxPrice = $" ({Translator.GetConvertedCurrency(i.Value, titleLanguage)})";
                             }
-                            if (i.Value == 0) continue;
-                            GearGraphics.DrawString(g, string.Format("  · {0}個 {1} 點數{2}", i.Key, i.Value, approxPrice), GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                            if (CharaSimLoader.LoadedCommoditiesByItemIdReboot.ContainsKey(item.ItemID)) approxPrice += " (一般伺服器)";
+                            priceList.Add(string.Format(" · {0}個 {1} 點數{2}", i.Key, i.Value, approxPrice));
                         }
                     }
-                    else
+                    if (CharaSimLoader.LoadedCommoditiesByItemIdReboot.ContainsKey(item.ItemID))
                     {
-                        int price = CharaSimLoader.LoadedCommoditiesByItemId2[item.ItemID].Values.ToList()[0]; picH += 16;
-                        GearGraphics.DrawString(g, " · 購買價格：" + price + "點數", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
-                        if (Translator.DefaultDesiredCurrency != "none")
+                        foreach (var i in CharaSimLoader.LoadedCommoditiesByItemIdReboot[item.ItemID])
                         {
-                            string exchangedPrice = Translator.GetConvertedCurrency(price, titleLanguage);
-                            GearGraphics.DrawString(g, "    " + exchangedPrice, GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                            if (i.Value == 0) continue;
+                            priceList.Add(string.Format(" · {0}個 {1} 楓幣 (Reboot伺服器)", i.Key, i.Value));
+                        }
+                    }
+                    if (priceList.Count > 0)
+                    {
+                        picH += 29;
+                        switch (priceList.Count)
+                        {
+                            case 1:
+                                GearGraphics.DrawString(g, " · 購買價格： " + priceList[0].Replace(" · 1個 ", "").Replace(" · ", ""), GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                                break;
+                            default:
+                                GearGraphics.DrawString(g, "購買價格：", GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                                foreach (var i in priceList)
+                                    GearGraphics.DrawString(g, i, GearGraphics.EquipDetailFont, 100, right, ref picH, 16);
+                                break;
                         }
                     }
                 }
