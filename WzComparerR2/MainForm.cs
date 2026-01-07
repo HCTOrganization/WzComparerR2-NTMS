@@ -4847,6 +4847,10 @@ namespace WzComparerR2
             int count = CharaSimLoader.LoadedCommoditiesBySN.Count;
             CharaSimLoader.LoadedCommoditiesBySN.Clear();
             CharaSimLoader.LoadedCommoditiesByItemId.Clear();
+            foreach (var dict in CharaSimLoader.LoadedCommodityPricesByItemId)
+            {
+                dict.Clear();
+            }
             labelItemStatus.Text = "已整合" + count + "個現金道具。";
         }
 

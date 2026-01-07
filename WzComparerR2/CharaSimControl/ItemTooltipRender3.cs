@@ -48,6 +48,7 @@ namespace WzComparerR2.CharaSimControl
         public bool ShowNickTag { get; set; }
         public bool CompareMode { get; set; } = false;
         public bool ShowSoldPrice { get; set; }
+        public int LoadedCommoditiesSlot { get; set; } = 0;
         public bool ShowCashPurchasePrice { get; set; }
         public bool ShowLinkedTamingMob { get; set; }
         public bool ShowDamageSkin { get; set; }
@@ -396,6 +397,7 @@ namespace WzComparerR2.CharaSimControl
                 { "c", ((SolidBrush)GearGraphics.Equip22BrushEmphasis).Color },
                 { "$r", ((SolidBrush)GearGraphics.Equip22BrushRed).Color },
                 { "$g", ((SolidBrush)GearGraphics.Equip22BrushLegendary).Color },
+                { "$S", ((SolidBrush)GearGraphics.ItemPriceBrush).Color },
             };
             splitterH = new List<int>();
             picH = 0;
@@ -1272,37 +1274,39 @@ namespace WzComparerR2.CharaSimControl
             if (ShowCashPurchasePrice && !isMsnClient && item.Cash)
             {
                 List<string> priceList = new List<string>();
-                if (CharaSimLoader.LoadedCommoditiesByItemIdRegular.ContainsKey(item.ItemID))
+                if (CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot].ContainsKey(item.ItemID))
                 {
-                    foreach (var i in CharaSimLoader.LoadedCommoditiesByItemIdRegular[item.ItemID])
+                    bool containRebootOnlyPrice = false;
+                    foreach (var i in CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot][item.ItemID])
                     {
-                        if (i.Value == 0) continue;
-                        string approxPrice = "";
-                        if (Translator.DefaultDesiredCurrency != "none")
-                        {
-                            approxPrice = $" ({Translator.GetConvertedCurrency(i.Value, titleLanguage)})";
-                        }
-                        if (CharaSimLoader.LoadedCommoditiesByItemIdReboot.ContainsKey(item.ItemID)) approxPrice += " (一般伺服器)";
-                        priceList.Add(string.Format(" · {0}個 {1} 點數{2}", i.Key, ItemStringHelper.ToCJKNumberExpr(i.Value), approxPrice));
+                        containRebootOnlyPrice = containRebootOnlyPrice || i.Meso;
                     }
-                }
-                if (CharaSimLoader.LoadedCommoditiesByItemIdReboot.ContainsKey(item.ItemID))
-                {
-                    foreach (var i in CharaSimLoader.LoadedCommoditiesByItemIdReboot[item.ItemID])
+                    foreach (var i in CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot][item.ItemID])
                     {
-                        if (i.Value == 0) continue;
-                        priceList.Add(string.Format(" · {0}個 {1} 楓幣 (Reboot伺服器)", i.Key, ItemStringHelper.ToCJKNumberExpr(i.Value)));
+                        if (i.Price == 0) continue;
+                        string currency = i.Meso ? "楓幣" : "點數";
+                        string rebootWorld = i.Reboot ? " (Reboot伺服器)" : (containRebootOnlyPrice ? " (一般伺服器)" : "");
+                        if (containRebootOnlyPrice && !i.Meso && i.Reboot) continue;
+                        string approxPrice = "";
+                        if (Translator.DefaultDesiredCurrency != "none" && !i.Meso)
+                        {
+                            approxPrice = $" ({Translator.GetConvertedCurrency(i.Price, titleLanguage)})";
+                            if (i.Reboot) rebootWorld += approxPrice;
+                        }
+                        priceList.Add(string.Format("#$S - {0}個 {1} {2}{3}#", i.Count, ItemStringHelper.ToCJKNumberExpr(i.Price), currency, rebootWorld));
                     }
                 }
                 if (priceList.Count > 0)
                 {
                     switch (priceList.Count)
                     {
+                        /*
                         case 1:
                             tags.Add(" · 購買價格：" + priceList[0].Replace(" · 1個 ", "").Replace(" · ", ""));
                             break;
+                        */
                         default:
-                            tags.Add("購買價格：");
+                            tags.Add("#$S購買價格：#");
                             tags.AddRange(priceList);
                             break;
                     }

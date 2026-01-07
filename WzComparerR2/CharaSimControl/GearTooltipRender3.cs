@@ -66,6 +66,7 @@ namespace WzComparerR2.CharaSimControl
 
         private bool isPostNEXTClient;
         private bool isMsnClient;
+        public int LoadedCommoditiesSlot { get; set; } = 0;
         private bool WillDrawMedal {  get; set; }
         private bool WillDrawChatBalloon { get; set; }
         private bool WillDrawNameTag { get; set; }
@@ -240,6 +241,7 @@ namespace WzComparerR2.CharaSimControl
                 { "$g", ((SolidBrush)GearGraphics.Equip22BrushGray).Color },
                 { "$d", ((SolidBrush)GearGraphics.Equip22BrushDarkGray).Color },
                 { "$z", ((SolidBrush)GearGraphics.GreenBrush2).Color },
+                { "$S", ((SolidBrush)GearGraphics.ItemPriceBrush).Color },
             };
             var itemPotentialColorTable = new Dictionary<string, Color>()
             {
@@ -1814,22 +1816,20 @@ namespace WzComparerR2.CharaSimControl
                     GearGraphics.DrawString(g, " · 出售價格：" + value + " 楓幣", GearGraphics.ItemDetailFont, 13, 244, ref picH, 16);
                     picH += 16;
                 }
-
-                if (Gear.Cash && ShowCashPurchasePrice)
+                if (CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot].ContainsKey(Gear.ItemID) && ShowCashPurchasePrice)
                 {
-                    if (CharaSimLoader.LoadedCommoditiesByItemIdRegular.ContainsKey(Gear.ItemID))
+                    var priceInfo = CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot][Gear.ItemID].FirstOrDefault();
+                    int price = priceInfo.Price;
+                    string currency = priceInfo.Meso ? "楓幣" : "點數";
+                    string approxPrice = "";
+                    if (Translator.DefaultDesiredCurrency != "none" && !priceInfo.Meso)
                     {
-                        int price = CharaSimLoader.LoadedCommoditiesByItemIdRegular[Gear.ItemID].Values.ToList()[0];
-                        if (price > 0)
-                        {
-                            picH += 16;
-                            GearGraphics.DrawString(g, " · 購買價格：" + ItemStringHelper.ToCJKNumberExpr(price) + " 點數", GearGraphics.ItemDetailFont, 13, 244, ref picH, 16);
-                            if (Translator.DefaultDesiredCurrency != "none")
-                            {
-                                string exchangedPrice = Translator.GetConvertedCurrency(price, titleLanguage);
-                                GearGraphics.DrawString(g, "    " + exchangedPrice, GearGraphics.ItemDetailFont, 13, 244, ref picH, 16);
-                            }
-                        }
+                        approxPrice = $" ({Translator.GetConvertedCurrency(price, titleLanguage)})";
+                    }
+                    if (price > 0)
+                    {
+                        picH += 16;
+                        GearGraphics.DrawString(g, "#$S · 購買價格：" + ItemStringHelper.ToCJKNumberExpr(price) + currency + approxPrice + "#", GearGraphics.EquipMDMoris9Font, equip22ColorTable, 13, 244, ref picH, 16);
                     }
                 }
             }

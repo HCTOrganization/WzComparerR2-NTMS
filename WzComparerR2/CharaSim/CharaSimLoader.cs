@@ -15,29 +15,29 @@ namespace WzComparerR2.CharaSim
             LoadedExclusiveEquips = new Dictionary<int, ExclusiveEquip>();
             LoadedCommoditiesBySN = new Dictionary<int, Commodity>();
             LoadedCommoditiesByItemId = new Dictionary<int, Commodity>();
-            LoadedCommoditiesByItemIdRegular = new Dictionary<int, Dictionary<int, int>>();
-            LoadedCommoditiesByItemIdReboot = new Dictionary<int, Dictionary<int, int>>();
+            LoadedCommodityPricesByItemId = new List<Dictionary<int, List<CommodityPriceInfo>>>();
+            for (int i = 0; i < 2; i++) // 2 slots
+                LoadedCommodityPricesByItemId.Add(new Dictionary<int, List<CommodityPriceInfo>>());
         }
 
         public static Dictionary<int, SetItem> LoadedSetItems { get; private set; }
         public static Dictionary<int, ExclusiveEquip> LoadedExclusiveEquips { get; private set; }
         public static Dictionary<int, Commodity> LoadedCommoditiesBySN { get; private set; }
         public static Dictionary<int, Commodity> LoadedCommoditiesByItemId { get; private set; }
-        public static Dictionary<int, Dictionary<int, int>> LoadedCommoditiesByItemIdRegular { get; private set; }
-        public static Dictionary<int, Dictionary<int, int>> LoadedCommoditiesByItemIdReboot { get; private set; }
+        public static List<Dictionary<int, List<CommodityPriceInfo>>> LoadedCommodityPricesByItemId { get; private set; }
 
-        public static void LoadSetItemsIfEmpty()
+        public static void LoadSetItemsIfEmpty(Wz_File sourceWzFile = null)
         {
             if (LoadedSetItems.Count == 0)
             {
-                LoadSetItems();
+                LoadSetItems(sourceWzFile);
             }
         }
 
-        public static void LoadSetItems()
+        public static void LoadSetItems(Wz_File sourceWzFile)
         {
             //搜索setItemInfo.img
-            Wz_Node etcWz = PluginManager.FindWz(Wz_Type.Etc, true);
+            Wz_Node etcWz = PluginManager.FindWz(Wz_Type.Etc, sourceWzFile, true);
             if (etcWz == null)
                 return;
             Wz_Node setItemNode = etcWz.FindNodeByPath("SetItemInfo.img", true);
@@ -45,7 +45,7 @@ namespace WzComparerR2.CharaSim
                 return;
 
             //搜索ItemOption.img
-            Wz_Node itemWz = PluginManager.FindWz(Wz_Type.Item, true);
+            Wz_Node itemWz = PluginManager.FindWz(Wz_Type.Item, sourceWzFile, true);
             if (itemWz == null)
                 return;
             Wz_Node optionNode = itemWz.FindNodeByPath("ItemOption.img", true);
@@ -98,17 +98,17 @@ namespace WzComparerR2.CharaSim
             return null;
         }
 
-        public static void LoadExclusiveEquipsIfEmpty()
+        public static void LoadExclusiveEquipsIfEmpty(Wz_File sourceWzFile = null)
         {
             if (LoadedExclusiveEquips.Count == 0)
             {
-                LoadExclusiveEquips();
+                LoadExclusiveEquips(sourceWzFile);
             }
         }
 
-        public static void LoadExclusiveEquips()
+        public static void LoadExclusiveEquips(Wz_File sourceWzFile)
         {
-            Wz_Node exclusiveNode = PluginManager.FindWz("Etc/ExclusiveEquip.img");
+            Wz_Node exclusiveNode = PluginManager.FindWz("Etc/ExclusiveEquip.img", sourceWzFile);
             if (exclusiveNode == null)
                 return;
 
@@ -125,22 +125,23 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        public static void LoadCommoditiesIfEmpty()
+        public static void LoadCommoditiesIfEmpty(Wz_File sourceWzFile = null, int slotIdx = 0)
         {
             if (LoadedCommoditiesBySN.Count == 0 && LoadedCommoditiesByItemId.Count == 0)
             {
-                LoadCommodities();
+                LoadCommodities(sourceWzFile, slotIdx);
             }
         }
 
-        public static void LoadCommodities()
+        public static void LoadCommodities(Wz_File sourceWzFile, int slotIdx = 0)
         {
-            Wz_Node commodityNode = PluginManager.FindWz("Etc/Commodity.img");
+            Wz_Node commodityNode = PluginManager.FindWz("Etc/Commodity.img", sourceWzFile);
             if (commodityNode == null)
                 return;
 
             LoadedCommoditiesBySN.Clear();
             LoadedCommoditiesByItemId.Clear();
+            LoadedCommodityPricesByItemId[slotIdx].Clear();
             foreach (Wz_Node node in commodityNode.Nodes)
             {
                 int commodityIndex;
@@ -150,29 +151,24 @@ namespace WzComparerR2.CharaSim
                     if (commodity != null)
                     {
                         LoadedCommoditiesBySN[commodity.SN] = commodity;
-                        LoadedCommoditiesByItemId[commodity.ItemId] = commodity;
-                        bool isRebootOnly = commodity.gameWorlds.Contains(45) && (!commodity.gameWorlds.Contains(1) || !commodity.gameWorlds.Contains(0));
-                        // 45: Reboot
-                        // 1: Scania (GMS)
-                        // 0: Scania (KMS)
-                        if (isRebootOnly)
+                        if (commodity.ItemId / 10000 == 910)
+                            LoadedCommoditiesByItemId[commodity.ItemId] = commodity;
+
+                        // if (commodity.OnSale > 0)
                         {
-                            if (!LoadedCommoditiesByItemIdReboot.ContainsKey(commodity.ItemId))
+                            if (!LoadedCommodityPricesByItemId[slotIdx].ContainsKey(commodity.ItemId))
                             {
-                                LoadedCommoditiesByItemIdReboot[commodity.ItemId] = new Dictionary<int, int>();
+                                LoadedCommodityPricesByItemId[slotIdx][commodity.ItemId] = new List<CommodityPriceInfo>();
                             }
-                            LoadedCommoditiesByItemIdReboot[commodity.ItemId][commodity.Count] = commodity.Price;
-                        }
-                        else
-                        {
-                            if (!LoadedCommoditiesByItemIdRegular.ContainsKey(commodity.ItemId))
-                            {
-                                LoadedCommoditiesByItemIdRegular[commodity.ItemId] = new Dictionary<int, int>();
-                            }
-                            if (commodity.Price > 1) LoadedCommoditiesByItemIdRegular[commodity.ItemId][commodity.Count] = commodity.Price;
+                            if (commodity.Price > 1) LoadedCommodityPricesByItemId[slotIdx][commodity.ItemId].Add(commodity.PriceInfo);
                         }
                     }
                 }
+            }
+
+            foreach (var kv in LoadedCommodityPricesByItemId[slotIdx])
+            {
+                kv.Value.Sort();
             }
         }
 
@@ -182,8 +178,10 @@ namespace WzComparerR2.CharaSim
             LoadedExclusiveEquips.Clear();
             LoadedCommoditiesBySN.Clear();
             LoadedCommoditiesByItemId.Clear();
-            LoadedCommoditiesByItemIdRegular.Clear();
-            LoadedCommoditiesByItemIdReboot.Clear();
+            foreach (var dict in LoadedCommodityPricesByItemId)
+            {
+                dict.Clear();
+            }
         }
 
         public static int GetActionDelay(string actionName, Wz_Node wzNode = null)
@@ -192,7 +190,6 @@ namespace WzComparerR2.CharaSim
             {
                 return 0;
             }
-            // Wz_Node actionNode = PluginManager.FindWz("Character/00002000.img/" + actionName);
             Wz_Node actionNode = wzNode == null ? PluginManager.FindWz("Character/00002000.img/" + actionName) :
                 PluginManager.FindWz("Character/00002000.img/" + actionName, wzNode.GetNodeWzFile());
             if (actionNode == null)

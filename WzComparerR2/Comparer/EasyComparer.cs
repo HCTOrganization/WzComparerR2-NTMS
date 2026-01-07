@@ -290,6 +290,17 @@ namespace WzComparerR2.Comparer
                         }
                     }
                 }
+                if (OutputItemTooltip || OutputGearTooltip) // Check commodity differences
+                {
+                    StateInfo = "ポイントアイテム整理中";
+                    CharaSimLoader.ClearAll();
+                    CharaSimLoader.LoadSetItemsIfEmpty(fileNew);
+                    CharaSimLoader.LoadExclusiveEquipsIfEmpty(fileNew);
+                    CharaSimLoader.LoadCommodities(fileOld, slotIdx: 1);
+                    CharaSimLoader.LoadCommodities(fileNew, slotIdx: 0);
+                    CompareCommodities();
+                    StateInfo = "ポイントアイテム整理完了";
+                }
 
 
                 var dictNew = SplitVirtualNode(virtualNodeNew);
@@ -1182,6 +1193,7 @@ namespace WzComparerR2.Comparer
                 itemRenderNewOld[i].DisplayUnitOnSingleLine = this.DisplayDamageSkinUnitOnSingleLine;
                 itemRenderNewOld[i].UseCTFamiliarRender = this.UseCTFamiliarUI;
                 itemRenderNewOld[i].DamageSkinNumber = this.DamageSkinNumber;
+                itemRenderNewOld[i].LoadedCommoditiesSlot = i;
                 itemRenderNewOld[i].CompareMode = true;
 
                 damageSkinRenderNewOld[i] = new DamageSkinTooltipRender();
@@ -1514,6 +1526,7 @@ namespace WzComparerR2.Comparer
                 itemRenderNewOld[i].AllowFamiliarOutOfBounds = this.AllowFamiliarOutOfBounds;
                 itemRenderNewOld[i].UseCTFamiliarRender = this.UseCTFamiliarUI;
                 itemRenderNewOld[i].DamageSkinNumber = this.DamageSkinNumber;
+                itemRenderNewOld[i].LoadedCommoditiesSlot = i;
                 itemRenderNewOld[i].CompareMode = true;
 
                 damageSkinRenderNewOld[i] = new DamageSkinTooltipRender();
@@ -1838,6 +1851,7 @@ namespace WzComparerR2.Comparer
                 gearRenderNewOld[i].ShowSoldPrice = this.ShowPrice;
                 gearRenderNewOld[i].ShowCashPurchasePrice = this.ShowPrice;
                 gearRenderNewOld[i].ShowCombatPower = true;
+                gearRenderNewOld[i].LoadedCommoditiesSlot = i;
                 gearRenderNewOld[i].CompareMode = true;
             }
 
@@ -2122,6 +2136,7 @@ namespace WzComparerR2.Comparer
                 gearRenderNewOld[i].ShowObjectID = this.ShowObjectID;
                 gearRenderNewOld[i].ShowSoldPrice = this.ShowPrice;
                 gearRenderNewOld[i].ShowCashPurchasePrice = this.ShowPrice;
+                gearRenderNewOld[i].LoadedCommoditiesSlot = i;
                 gearRenderNewOld[i].CompareMode = true;
             }
 
@@ -3630,6 +3645,64 @@ namespace WzComparerR2.Comparer
                     }
                 }
             }
+        }
+
+        // 캐시 아이템 가격 변경 확인
+        private void CompareCommodities()
+        {
+            var commodities_new = CharaSimLoader.LoadedCommodityPricesByItemId[0];
+            var commodities_old = CharaSimLoader.LoadedCommodityPricesByItemId[1];
+
+            var key_new = commodities_new.Keys;
+            var key_old = commodities_old.Keys;
+
+            var added = key_new.Except(key_old).ToList();
+            var removed = key_old.Except(key_new).ToList();
+            List<int> ids = new List<int>();
+            ids.AddRange(added);
+            ids.AddRange(removed);
+
+            var common = key_new.Intersect(key_old);
+            foreach (var id in common)
+            {
+                if (commodities_new.TryGetValue(id, out var commodity_new) && commodities_old.TryGetValue(id, out var commodity_old) && CommodityPriceChanged(commodity_new, commodity_old))
+                {
+                    ids.Add(id);
+                }
+            }
+
+            foreach (var id in ids)
+            {
+                if (id >= 2000000 && OutputItemTooltip) // item
+                {
+                    if (!OutputItemTooltipIDs.Contains(id.ToString()))
+                    {
+                        OutputItemTooltipIDs.Add(id.ToString());
+                    }
+                }
+                else if (OutputGearTooltip) // gear
+                {
+                    if (!OutputGearTooltipIDs.Contains(id.ToString()))
+                    {
+                        OutputGearTooltipIDs.Add(id.ToString());
+                    }
+                }
+            }
+        }
+
+        private bool CommodityPriceChanged(IReadOnlyList<CommodityPriceInfo> commodity_new, IReadOnlyList<CommodityPriceInfo> commodity_old)
+        {
+            if (commodity_new.Count != commodity_old.Count)
+                return true;
+
+            for (int i = 0; i < commodity_new.Count; i++) // Sorted in CharaSimLoader
+            {
+                if (commodity_new[i] != commodity_old[i])
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void CompareImg(Wz_Image imgNew, Wz_Image imgOld, string imgName, string anchorName, string menuAnchorName, string outputDir, StreamWriter sw, int newNumber = 0, int oldNumber = 0)

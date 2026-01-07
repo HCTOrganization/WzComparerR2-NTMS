@@ -64,6 +64,7 @@ namespace WzComparerR2.CharaSimControl
 
         private bool isPostNEXTClient;
         private bool isMsnClient;
+        public int LoadedCommoditiesSlot { get; set; } = 0;
 
         public TooltipRender SetItemRender { get; set; }
 
@@ -207,6 +208,10 @@ namespace WzComparerR2.CharaSimControl
             var orange3FontColorTable = new Dictionary<string, Color>()
             {
                 { "c", ((SolidBrush)GearGraphics.OrangeBrush3).Color },
+            };
+            var itemPriceColorTable = new Dictionary<string, Color>()
+            {
+                { "$S", ((SolidBrush)GearGraphics.ItemPriceBrush).Color },
             };
             int value, value2;
 
@@ -1591,21 +1596,20 @@ namespace WzComparerR2.CharaSimControl
                     picH += 16;
                 }
 
-                if (Gear.Cash && ShowCashPurchasePrice)
+                if (CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot].ContainsKey(Gear.ItemID) && ShowCashPurchasePrice)
                 {
-                    if (CharaSimLoader.LoadedCommoditiesByItemIdRegular.ContainsKey(Gear.ItemID))
+                    var priceInfo = CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot][Gear.ItemID].FirstOrDefault();
+                    int price = priceInfo.Price;
+                    string currency = priceInfo.Meso ? "楓幣" : "點數";
+                    string approxPrice = "";
+                    if (Translator.DefaultDesiredCurrency != "none" && !priceInfo.Meso)
                     {
-                        int price = CharaSimLoader.LoadedCommoditiesByItemIdRegular[Gear.ItemID].Values.ToList()[0];
-                        if (price > 0)
-                        {
-                            picH += 16;
-                            GearGraphics.DrawString(g, "· 購買價格：" + price + "點數", GearGraphics.EquipDetailFont, 13, 244, ref picH, 16);
-                            if (Translator.DefaultDesiredCurrency != "none")
-                            {
-                                string exchangedPrice = Translator.GetConvertedCurrency(price, titleLanguage);
-                                GearGraphics.DrawString(g, "    " + exchangedPrice, GearGraphics.EquipDetailFont, 13, 244, ref picH, 16);
-                            }
-                        }
+                        approxPrice = $" ({Translator.GetConvertedCurrency(price, titleLanguage)})";
+                    }
+                    if (price > 0)
+                    {
+                        picH += 16;
+                        GearGraphics.DrawString(g, "#$S · 購買價格：" + ItemStringHelper.ToCJKNumberExpr(price) + currency + approxPrice + "#", GearGraphics.EquipDetailFont, itemPriceColorTable, 13, 244, ref picH, 16);
                     }
                 }
             }
