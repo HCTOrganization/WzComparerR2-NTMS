@@ -395,7 +395,7 @@ namespace WzComparerR2
             this.labelX3.Name = "labelX3";
             this.labelX3.Size = new System.Drawing.Size(254, 26);
             this.labelX3.TabIndex = 6;
-            this.labelX3.Text = "使用 <b>- +</b> 鍵調整目前等級 <br />使用 <b>[ ]</b> 鍵調整間隔等級";
+            this.labelX3.Text = "<b>- +</b>: 調整目前等級 <b>[ ]</b>: 調整間隔等級<br />PgUp/PgDn: 調整適用職業";
             // 
             // comboBoxEx2
             // 

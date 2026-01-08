@@ -269,7 +269,16 @@ namespace WzComparerR2.CharaSimControl
 
             if (sr.Desc != null)
             {
-                string hdesc = SummaryParser.GetSkillSummary(sr.Desc, Skill.Level, Skill.Common, SummaryParams.Default);
+                Dictionary<string, string> skillCommon = Skill.Common;
+                if (Skill.PerJobAttackInfo.Count > 0)
+                {
+                    var perJobInfo = Skill.PerJobAttackInfo.Values.ToList()[Skill.PerJobIndex];
+                    foreach (var i in perJobInfo.Keys)
+                    {
+                        skillCommon[i] = perJobInfo[i];
+                    }
+                }
+                string hdesc = SummaryParser.GetSkillSummary(sr.Desc, Skill.Level, skillCommon, SummaryParams.Default);
                 if (Skill.IsRoguelikeSkill)
                 {
                     hdesc = hdesc.Replace("<style color=\"Orange\">", "#c").Replace("</>", "#");
@@ -649,6 +658,12 @@ namespace WzComparerR2.CharaSimControl
                     }
                 }
                 skillDescEx.Add(string.Format("#c[必要技能] {0}", string.Join("，", skillDescExAppend)));
+            }
+
+            if (Skill.PerJobAttackInfo.Count > 0)
+            {
+                int jobID = Skill.PerJobAttackInfo.Keys.ToList()[Skill.PerJobIndex];
+                skillDescEx.Add($"#c[適用職業] {ItemStringHelper.GetJobName(jobID).Replace("(4轉)", "")}({jobID})#");
             }
 
             if (Skill.LT.X != 0 && ShowRangeCoordinates)

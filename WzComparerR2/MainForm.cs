@@ -4904,6 +4904,16 @@ namespace WzComparerR2
                         skill.Level += this.skillInterval;
                         frm.Refresh();
                         return;
+
+                    case Keys.PageDown:
+                        skill.PerJobIndex += 1;
+                        frm.Refresh();
+                        return;
+
+                    case Keys.PageUp:
+                        skill.PerJobIndex -= 1;
+                        frm.Refresh();
+                        return;
                 }
             }
 
