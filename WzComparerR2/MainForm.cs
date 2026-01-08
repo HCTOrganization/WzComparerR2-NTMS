@@ -4437,6 +4437,8 @@ namespace WzComparerR2
                     if ((image = selectedNode.GetValue<Wz_Image>()) == null || !image.TryExtract())
                         return;
                     CharaSimLoader.LoadSetItemsIfEmpty();
+                    CharaSimLoader.LoadAstraSubWeaponsIfEmpty();
+                    CharaSimLoader.LoadExclusiveEquipsIfEmpty();
                     CharaSimLoader.LoadExclusiveEquipsIfEmpty();
                     CharaSimLoader.LoadCommoditiesIfEmpty();
                     if (characterNodePath.Contains("Familiar"))
@@ -4850,6 +4852,7 @@ namespace WzComparerR2
         {
             int count = CharaSimLoader.LoadedSetItems.Count;
             CharaSimLoader.LoadedSetItems.Clear();
+            CharaSimLoader.LoadedAstraSubWeapons.Clear();
             labelItemStatus.Text = "已整合" + count + "個套裝道具。";
         }
 

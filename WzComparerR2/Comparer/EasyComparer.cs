@@ -295,14 +295,15 @@ namespace WzComparerR2.Comparer
                 }
                 if (OutputItemTooltip || OutputGearTooltip) // Check commodity differences
                 {
-                    StateInfo = "ポイントアイテム整理中";
+                    StateInfo = "道具資訊初始化中";
                     CharaSimLoader.ClearAll();
                     CharaSimLoader.LoadSetItemsIfEmpty(fileNew);
+                    CharaSimLoader.LoadAstraSubWeaponsIfEmpty(fileNew);
                     CharaSimLoader.LoadExclusiveEquipsIfEmpty(fileNew);
                     CharaSimLoader.LoadCommodities(fileOld, slotIdx: 1);
                     CharaSimLoader.LoadCommodities(fileNew, slotIdx: 0);
                     CompareCommodities();
-                    StateInfo = "ポイントアイテム整理完了";
+                    StateInfo = "道具資訊初始化完成";
                 }
 
 

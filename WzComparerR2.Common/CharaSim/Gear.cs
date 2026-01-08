@@ -98,8 +98,18 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        public int GetMaxStar(bool isPostNEXTClient=false)
+        public int GetMaxStar(Dictionary<int, AstraSubWeaponInfo> loadedAstraSubWeapons, bool isPostNEXTClient=false)
         {
+            var astraIdx = GetAstraIndex(loadedAstraSubWeapons, this.ItemID);
+            switch (astraIdx)
+            {
+                case 0:
+                    return 15;
+                case 1:
+                    return 20;
+                case 2:
+                    return 30;
+            }
             if (!this.HasTuc)
             {
                 return 0;
@@ -668,6 +678,17 @@ namespace WzComparerR2.CharaSim
                 }
             }
             return (GearType)(code / 10000);
+        }
+
+        public static int GetAstraIndex(Dictionary<int, AstraSubWeaponInfo> loadedAstraSubWeapons, int id)
+        {
+            if (id / 10000 == 172)
+                return id % 10;
+
+            if (loadedAstraSubWeapons.TryGetValue(id, out AstraSubWeaponInfo value))
+                return value.Index;
+
+            return -1;
         }
 
         public static int GetGender(int code)

@@ -1070,7 +1070,7 @@ namespace WzComparerR2.CharaSimControl
             }
 
             //星星锤子
-            if (hasTuc && Gear.Hammer > -1 || Gear.GetMaxStar(isPostNEXTClient) > 0)
+            if (hasTuc && Gear.Hammer > -1 || Gear.GetMaxStar(CharaSimLoader.LoadedAstraSubWeapons, isPostNEXTClient) > 0)
             {
                 if (Gear.Hammer == 2)
                 {
@@ -1089,7 +1089,7 @@ namespace WzComparerR2.CharaSimControl
 
                 if (!Gear.GetBooleanValue(GearPropType.exceptUpgrade))
                 {
-                    int maxStar = Gear.GetMaxStar(isPostNEXTClient);
+                    int maxStar = Gear.GetMaxStar(CharaSimLoader.LoadedAstraSubWeapons, isPostNEXTClient);
 
                     if (Gear.Star > 0) //星星
                     {
@@ -2120,7 +2120,7 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (Gear.type == GearType.astra)
             {
-                extraReq = ItemStringHelper.GetAstraReqJob(Gear.ItemID);
+                extraReq = ItemStringHelper.GetExtraJobReqString(Gear.type, Gear.ReqSpecJobs.Count > 0, CharaSimLoader.LoadedAstraSubWeapons, Gear.ItemID);
             }
             else
             {
@@ -2216,7 +2216,7 @@ namespace WzComparerR2.CharaSimControl
         private void DrawStar2(Graphics g, ref int picH)
         {
             //int maxStar = Gear.GetMaxStar();
-            int maxStar = Math.Max(Gear.GetMaxStar(isPostNEXTClient), Gear.Star);
+            int maxStar = Math.Max(Gear.GetMaxStar(CharaSimLoader.LoadedAstraSubWeapons, isPostNEXTClient), Gear.Star);
             if (maxStar > 0)
             {
                 for (int i = 0; i < maxStar; i += 15)

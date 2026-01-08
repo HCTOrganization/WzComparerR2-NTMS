@@ -256,7 +256,7 @@ namespace WzComparerR2.CharaSimControl
             picH = 10;
 
             // 스타포스 별
-            int maxStar = Math.Max(Gear.GetMaxStar(isPostNEXTClient), Gear.Star);
+            int maxStar = Math.Max(Gear.GetMaxStar(CharaSimLoader.LoadedAstraSubWeapons, isPostNEXTClient), Gear.Star);
             if (maxStar >= 25 && Gear.IsGenesisWeapon)
             {
                 maxStar = 22;
@@ -666,6 +666,11 @@ namespace WzComparerR2.CharaSimControl
                     }
                 }
                 reqJobStr = string.Join("、", reqJobStrList);
+            }
+
+            if (string.IsNullOrEmpty(reqJobStr))
+            {
+                reqJobStr = ItemStringHelper.GetExtraJobReqString(Gear.type, Gear.ReqSpecJobs.Count > 0, CharaSimLoader.LoadedAstraSubWeapons, Gear.ItemID);
             }
 
 

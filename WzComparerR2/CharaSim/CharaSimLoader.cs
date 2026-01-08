@@ -4,6 +4,7 @@ using System.Text;
 using System.Drawing;
 using WzComparerR2.WzLib;
 using WzComparerR2.PluginBase;
+using System.Linq;
 
 namespace WzComparerR2.CharaSim
 {
@@ -12,6 +13,7 @@ namespace WzComparerR2.CharaSim
         static CharaSimLoader()
         {
             LoadedSetItems = new Dictionary<int, SetItem>();
+            LoadedAstraSubWeapons = new Dictionary<int, AstraSubWeaponInfo>();
             LoadedExclusiveEquips = new Dictionary<int, ExclusiveEquip>();
             LoadedCommoditiesBySN = new Dictionary<int, Commodity>();
             LoadedCommoditiesByItemId = new Dictionary<int, Commodity>();
@@ -21,6 +23,8 @@ namespace WzComparerR2.CharaSim
         }
 
         public static Dictionary<int, SetItem> LoadedSetItems { get; private set; }
+        public static Dictionary<int, AstraSubWeaponInfo> LoadedAstraSubWeapons { get; private set; }
+
         public static Dictionary<int, ExclusiveEquip> LoadedExclusiveEquips { get; private set; }
         public static Dictionary<int, Commodity> LoadedCommoditiesBySN { get; private set; }
         public static Dictionary<int, Commodity> LoadedCommoditiesByItemId { get; private set; }
@@ -62,6 +66,65 @@ namespace WzComparerR2.CharaSim
                     if (setItem != null)
                         LoadedSetItems[setItemIndex] = setItem;
                 }
+            }
+        }
+
+        public static void LoadAstraSubWeaponsIfEmpty(Wz_File sourceWzFile = null)
+        {
+            if (LoadedAstraSubWeapons.Count == 0)
+            {
+                LoadAstraSubWeapons(sourceWzFile);
+            }
+        }
+
+        public static void LoadAstraSubWeapons(Wz_File sourceWzFile)
+        {
+            //搜索setItemInfo.img
+            Wz_Node etcWz = PluginManager.FindWz(Wz_Type.Etc, sourceWzFile);
+            if (etcWz == null)
+                return;
+            Wz_Node astraNode = etcWz.FindNodeByPath("SubWeaponTransferData.img\\Job", true);
+            if (astraNode == null)
+                return;
+
+            LoadedAstraSubWeapons.Clear();
+            List<int> idSet = new List<int>();
+            Action<int> insert = (int jobID) =>
+            {
+                idSet.Sort();
+                for (int i = 0; i < idSet.Count; i++)
+                {
+                    LoadedAstraSubWeapons[idSet[i]] = new AstraSubWeaponInfo(idSet[i], i, jobID);
+                }
+                idSet.Clear();
+            };
+
+            foreach (var job in astraNode.Nodes)
+            {
+                if (!int.TryParse(job.Text, out var jobID))
+                    continue;
+
+                var targetNode = job.FindNodeByPath("target");
+                foreach (var target in targetNode?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+                {
+                    if (int.TryParse(target.Text, out var id))
+                    {
+                        idSet.Add(id);
+                    }
+                    else
+                    {
+                        insert(jobID);
+                        foreach (var inner_target in target?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+                        {
+                            if (int.TryParse(inner_target.Text, out var inner_id))
+                            {
+                                idSet.Add(inner_id);
+                            }
+                        }
+                        insert(jobID);
+                    }
+                }
+                insert(jobID);
             }
         }
 
