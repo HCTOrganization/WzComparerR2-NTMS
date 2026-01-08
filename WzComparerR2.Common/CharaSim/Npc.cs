@@ -130,7 +130,7 @@ namespace WzComparerR2.CharaSim
                                                 var faceBmpOrigin = BitmapOrigin.CreateFromNode(faceNode, findNode);
                                                 if (faceBmpOrigin.Bitmap != null && faceBmpOrigin.Bitmap.Size != new Size(1, 1))
                                                 {
-                                                    if (baseOrigin != Point.Empty)
+                                                    if (baseOrigin != Point.Empty && (npcInfo.Illustration2BaseBitmap.Width > faceBmpOrigin.Bitmap.Width && npcInfo.Illustration2BaseBitmap.Height > faceBmpOrigin.Bitmap.Height))
                                                     {
                                                         Bitmap combinedBmp = new Bitmap(npcInfo.Illustration2BaseBitmap.Width, npcInfo.Illustration2BaseBitmap.Height);
                                                         using (Graphics g = Graphics.FromImage(combinedBmp))
