@@ -325,6 +325,27 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+        public static bool IsAstraSubWeapon(int gearID)
+        {
+            switch (gearID / 10000)
+            {
+                case 172:
+                    return true;
+
+                default:
+                    switch (gearID)
+                    {
+                        case 1342120:
+                        case 1342121:
+                        case 1342122:
+                        case 1342123:
+                            return true;
+                        default: return false;
+                    }
+
+            }
+        }
+
         public static bool IsEmblem(GearType type)
         {
             if (type == GearType.emblem || type == GearType.powerSource)
@@ -656,6 +677,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.powerSource:
                 case GearType.bit:
                 case GearType.jewel:
+                case GearType.astra:
                     return 2;
                 case GearType.hair:
                 case GearType.hair2:

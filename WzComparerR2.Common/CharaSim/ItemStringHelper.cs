@@ -768,8 +768,9 @@ namespace WzComparerR2.CharaSim
                 case GearType.celestialLight: return "天之星光權杖";
                 case GearType.compass: return "羅盤";
 
-                case GearType.gram: return "克拉";
-                case GearType.keir: return "克伊勒";
+                case GearType.astra: return "阿斯特拉輔助武器";
+                // case GearType.gram: return "克拉";
+                // case GearType.keir: return "克伊勒";
 
                 case GearType.longSword: return "長劍";
                 case GearType.yeouiGem: return "如意寶珠";
@@ -918,8 +919,8 @@ namespace WzComparerR2.CharaSim
                 case GearType.ornament: return GetExtraJobReqString(162);
 
                 //18xxx
-                case GearType.gram:
-                case GearType.keir: return GetExtraJobReqString(181);
+                // case GearType.gram:
+                // case GearType.keir: return GetExtraJobReqString(181);
 
                 case GearType.celestialLight:
                 case GearType.compass: return GetExtraJobReqString(182);
@@ -970,6 +971,62 @@ namespace WzComparerR2.CharaSim
                 case 182: return "可裝備施亞";
                 case 183: return "可裝備艾伊爾";
                 default: return null;
+            }
+        }
+
+        public static string GetAstraWeaponType(int id)
+        {
+            int jobID = (id / 100) - 17200;
+            switch (jobID)
+            {
+                case 0: return GetGearTypeString(GearType.heroMedal);
+                case 1: return GetGearTypeString(GearType.rosario);
+                case 2: return GetGearTypeString(GearType.chain);
+                case 3: 
+                case 4: 
+                case 5: return GetGearTypeString(GearType.book1);
+                case 6: return GetGearTypeString(GearType.bowMasterFeather);
+                case 7: return GetGearTypeString(GearType.crossBowThimble);
+                case 8: return GetGearTypeString(GearType.relic);
+                case 9: return GetGearTypeString(GearType.nightLordPoutch);
+                case 10: return GetGearTypeString(GearType.shadowerSheath);
+                case 11: return GetGearTypeString(GearType.viperWristband);
+                case 12: return GetGearTypeString(GearType.captainSight);
+                case 13: return GetGearTypeString(GearType.cannonGunPowder);
+                case 14: 
+                case 15: 
+                case 16: 
+                case 17: 
+                case 18: return GetGearTypeString(GearType.cygnusGem);
+                case 19: return GetGearTypeString(GearType.aranPendulum);
+                case 20: return GetGearTypeString(GearType.evanPaper);
+                case 21: return GetGearTypeString(GearType.magicArrow);
+                case 22: return GetGearTypeString(GearType.card);
+                case 23: return GetGearTypeString(GearType.orb);
+                case 24: return GetGearTypeString(GearType.foxPearl);
+                case 25: 
+                case 26: return GetGearTypeString(GearType.demonShield);
+                case 27: return GetGearTypeString(GearType.battlemageBall);
+                case 28: return GetGearTypeString(GearType.wildHunterArrowHead);
+                case 29: return GetGearTypeString(GearType.mailin);
+                case 30: return GetGearTypeString(GearType.controller);
+                case 31: return GetGearTypeString(GearType.ExplosivePill);
+                case 32: return GetGearTypeString(GearType.soulShield);
+                case 33: return GetGearTypeString(GearType.novaMarrow);
+                case 34: return GetGearTypeString(GearType.weaponBelt);
+                case 35: return GetGearTypeString(GearType.transmitter);
+                case 36: return GetGearTypeString(GearType.soulBangle);
+                case 37: return "砂時計";
+                case 38: return GetGearTypeString(GearType.chess);
+                case 39: return GetGearTypeString(GearType.bracelet);
+                case 40: return GetGearTypeString(GearType.magicWing);
+                case 41: return GetGearTypeString(GearType.hexSeeker);
+                case 42: return GetGearTypeString(GearType.pathOfAbyss);
+                case 43: return GetGearTypeString(GearType.yeouiGem);
+                case 44: return GetGearTypeString(GearType.ornament);
+                case 45: return GetGearTypeString(GearType.fanTassel);
+
+                default: return GetGearTypeString(GearType.astra);
             }
         }
 

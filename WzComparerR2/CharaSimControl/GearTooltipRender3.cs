@@ -668,7 +668,7 @@ namespace WzComparerR2.CharaSimControl
 
 
             string extraReq = ItemStringHelper.GetExtraJobReqString(Gear.type);
-            if (extraReq == null && Gear.Props.TryGetValue(GearPropType.reqSpecJob, out value))
+            if ((extraReq == null || Gear.type == GearType.astra) && Gear.Props.TryGetValue(GearPropType.reqSpecJob, out value))
             {
                 extraReq = ItemStringHelper.GetExtraJobReqString(value);
             }
@@ -705,7 +705,7 @@ namespace WzComparerR2.CharaSimControl
             if (gender < 2)
             {
                 TextRenderer.DrawText(g, "適用性別", GearGraphics.EquipMDMoris9Font, new Point(moveX ? 15 + 217 : 15, picH - (moveX ? 16 : 0)), ((SolidBrush)GearGraphics.Equip22BrushGray).Color, TextFormatFlags.NoPadding);
-                TextRenderer.DrawText(g, gender == 0 ? "男" : "女", GearGraphics.EquipMDMoris9Font, new Point(moveX ? 100 + 217 : 100, picH - (moveX ? 16 : 0)), Color.White, TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, gender == 0 ? "男" : "女", GearGraphics.EquipMDMoris9Font, new Point(moveX ? 80 + 217 : 100, picH - (moveX ? 16 : 0)), Color.White, TextFormatFlags.NoPadding);
                 if (!moveX) picH += 16;
             }
 
@@ -2383,9 +2383,18 @@ namespace WzComparerR2.CharaSimControl
                     categories.Add("雙手");
                 }
             }
-            else if (Gear.IsSubWeapon(Gear.type) || Gear.type == GearType.shield)
+            else if ((Gear.IsSubWeapon(Gear.type) || Gear.type == GearType.shield) && !Gear.IsAstraSubWeapon(Gear.ItemID))
             {
                 categories.Add("輔助武器");
+            }
+            else if (Gear.IsAstraSubWeapon(Gear.ItemID))
+            {
+                categories.Add("阿斯特拉輔助武器");
+                var astraType = ItemStringHelper.GetAstraWeaponType(Gear.ItemID);
+                if (!categories.Contains(astraType))
+                {
+                    categories.Add(astraType);
+                }
             }
             else if (Gear.IsEmblem(Gear.type))
             {
@@ -2409,7 +2418,7 @@ namespace WzComparerR2.CharaSimControl
             }
 
             var text = ItemStringHelper.GetGearTypeString(Gear.type);
-            if (!string.IsNullOrEmpty(text))
+            if (!string.IsNullOrEmpty(text) && !categories.Contains(text))
             {
                 categories.Add(text);
             }

@@ -1916,6 +1916,11 @@ namespace WzComparerR2.Comparer
                         gearNodePath = String.Format(@"Character\Weapon\{0:D}.img", gearID);
                         categoryPath = "Weapon_武器";
                     }
+                    else if (gearID.StartsWith("0172")) // 判断开头是否是0172
+                    {
+                        gearNodePath = String.Format(@"Character\Weapon\{0:D}.img", gearID);
+                        categoryPath = "AstraSubWeapon_アストラ補助武器";
+                    }
                     else if (Regex.IsMatch(gearID, "^0161|^0162|^0163|^0164|^0165"))// 判断开头是否是0161~0165
                     {
                         gearNodePath = String.Format(@"Character\Mechanic\{0:D}.img", gearID);
@@ -2194,6 +2199,11 @@ namespace WzComparerR2.Comparer
                     {
                         gearNodePath = String.Format(@"Character\Weapon\{0:D}.img", gearID);
                         categoryPath = "Weapon_武器";
+                    }
+                    else if (gearID.StartsWith("0172")) // 判断开头是否是0172
+                    {
+                        gearNodePath = String.Format(@"Character\Weapon\{0:D}.img", gearID);
+                        categoryPath = "AstraSubWeapon_アストラ補助武器";
                     }
                     else if (Regex.IsMatch(gearID, "^0161|^0162|^0163|^0164|^0165"))// 判断开头是否是0161~0165
                     {

@@ -524,9 +524,9 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         ancientBow = 159,
         /// <summary>
-        /// Gram 172
+        /// Astra 172
         /// </summary>
-        gram = 172,
+        astra = 172,
         /// <summary>
         /// 拼图 168
         /// </summary>
