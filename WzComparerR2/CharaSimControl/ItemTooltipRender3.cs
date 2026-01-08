@@ -142,7 +142,10 @@ namespace WzComparerR2.CharaSimControl
                                             }
                                         }
                                     }
-                                    if (ShowLinkedTamingMob) recipeItemBmps.Add(RenderLinkRecipeGear(gear));
+                                    if (ShowLinkedTamingMob || !imgNode.FullPathToFile.StartsWith("Character\\TamingMob"))
+                                    {
+                                        recipeItemBmps.Add(RenderLinkRecipeGear(gear));
+                                    }
                                 }
 
                                 break;
