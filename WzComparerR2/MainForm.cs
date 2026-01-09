@@ -4417,7 +4417,63 @@ namespace WzComparerR2
 
             StringResult sr = new StringResult();
             string altAutoDesc = null;
-            switch (wzf.Type)
+            var wzfType = wzf.Type; // temp workaround
+            if (wzfType == Wz_Type.Unknown)
+            {
+                string[] path = selectedNode.FullPathToFile.Split('\\');
+                switch (path[0])
+                {
+                    case "Character":
+                        wzfType = Wz_Type.Character;
+                        break;
+                    case "Effect":
+                        wzfType = Wz_Type.Effect;
+                        break;
+                    case "Etc":
+                        wzfType = Wz_Type.Etc;
+                        break;
+                    case "Item":
+                        wzfType = Wz_Type.Item;
+                        break;
+                    case "Language":
+                        wzfType = Wz_Type.Language;
+                        break;
+                    case "Map":
+                        wzfType = Wz_Type.Map;
+                        break;
+                    case "Mob":
+                        wzfType = Wz_Type.Mob;
+                        break;
+                    case "Morph":
+                        wzfType = Wz_Type.Morph;
+                        break;
+                    case "Npc":
+                        wzfType = Wz_Type.Npc;
+                        break;
+                    case "Quest":
+                        wzfType = Wz_Type.Quest;
+                        break;
+                    case "Reactor":
+                        wzfType = Wz_Type.Reactor;
+                        break;
+                    case "Skill":
+                        wzfType = Wz_Type.Skill;
+                        break;
+                    case "Sound":
+                        wzfType = Wz_Type.Sound;
+                        break;
+                    case "String":
+                        wzfType = Wz_Type.String;
+                        break;
+                    case "TamingMob":
+                        wzfType = Wz_Type.TamingMob;
+                        break;
+                    case "UI":
+                        wzfType = Wz_Type.UI;
+                        break;
+                }
+            }
+            switch (wzfType)
             {
                 case Wz_Type.Character:
                     if (!selectedNode.FullPathToFile.Contains(".img")) return;
