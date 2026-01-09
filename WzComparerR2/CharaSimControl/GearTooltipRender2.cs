@@ -2118,6 +2118,10 @@ namespace WzComparerR2.CharaSimControl
             {
                 extraReq = (Gear.Props.TryGetValue(GearPropType.reqJob2, out value) ? ItemStringHelper.GetExtraJobReqString(value) : null);
             }
+            else if (Gear.type == GearType.astra)
+            {
+                extraReq = ItemStringHelper.GetAstraReqJob(Gear.ItemID);
+            }
             else
             {
                 extraReq = ItemStringHelper.GetExtraJobReqString(Gear.type) ??

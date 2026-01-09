@@ -1030,6 +1030,62 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+        public static string GetAstraReqJob(int id)
+        {
+            int jobID = (id / 100) - 17200;
+            switch (jobID)
+            {
+                case 0: return GetExtraJobReqString(GearType.heroMedal);
+                case 1: return GetExtraJobReqString(GearType.rosario);
+                case 2: return GetExtraJobReqString(GearType.chain);
+                case 3: return GetExtraJobReqString(GearType.book1);
+                case 4: return GetExtraJobReqString(GearType.book2);
+                case 5: return GetExtraJobReqString(GearType.book3);
+                case 6: return GetExtraJobReqString(GearType.bowMasterFeather);
+                case 7: return GetExtraJobReqString(GearType.crossBowThimble);
+                case 8: return GetExtraJobReqString(GearType.relic);
+                case 9: return GetExtraJobReqString(GearType.nightLordPoutch);
+                case 10: return GetExtraJobReqString(GearType.shadowerSheath);
+                case 11: return GetExtraJobReqString(GearType.viperWristband);
+                case 12: return GetExtraJobReqString(GearType.captainSight);
+                case 13: return GetExtraJobReqString(GearType.cannonGunPowder);
+                case 14: return "可裝備聖魂劍士";
+                case 15: return "可裝備烈焰巫師";
+                case 16: return "可裝備破風使者";
+                case 17: return "可裝備暗夜行者";
+                case 18: return "可裝備閃雷悍將";
+                case 19: return GetExtraJobReqString(GearType.aranPendulum);
+                case 20: return GetExtraJobReqString(GearType.evanPaper);
+                case 21: return GetExtraJobReqString(GearType.magicArrow);
+                case 22: return GetExtraJobReqString(GearType.card);
+                case 23: return GetExtraJobReqString(GearType.orb);
+                case 24: return GetExtraJobReqString(GearType.foxPearl);
+                case 25: return "可裝備惡魔殺手";
+                case 26: return "可裝備惡魔復仇者";
+                case 27: return GetExtraJobReqString(GearType.battlemageBall);
+                case 28: return GetExtraJobReqString(GearType.wildHunterArrowHead);
+                case 29: return GetExtraJobReqString(GearType.mailin);
+                case 30: return GetExtraJobReqString(GearType.controller);
+                case 31: return GetExtraJobReqString(GearType.ExplosivePill);
+                case 32: return GetExtraJobReqString(GearType.soulShield);
+                case 33: return GetExtraJobReqString(GearType.novaMarrow);
+                case 34: return GetExtraJobReqString(GearType.weaponBelt);
+                case 35: return GetExtraJobReqString(GearType.transmitter);
+                case 36: return GetExtraJobReqString(GearType.soulBangle);
+                case 37: return GetExtraJobReqString(GearType.swordZB);
+                case 38: return GetExtraJobReqString(GearType.chess);
+                case 39: return GetExtraJobReqString(GearType.bracelet);
+                case 40: return GetExtraJobReqString(GearType.magicWing);
+                case 41: return GetExtraJobReqString(154);
+                case 42: return GetExtraJobReqString(GearType.pathOfAbyss);
+                case 43: return GetExtraJobReqString(GearType.yeouiGem);
+                case 44: return GetExtraJobReqString(GearType.ornament);
+                case 45: return GetExtraJobReqString(GearType.fanTassel);
+
+                default: return GetExtraJobReqString(GearType.astra);
+            }
+        }
+
         public static string GetReqSpecJobMultipleString(int specJob)
         {
             switch (specJob)

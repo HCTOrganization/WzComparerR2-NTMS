@@ -670,9 +670,13 @@ namespace WzComparerR2.CharaSimControl
 
 
             string extraReq = ItemStringHelper.GetExtraJobReqString(Gear.type);
-            if ((extraReq == null || Gear.type == GearType.astra) && Gear.Props.TryGetValue(GearPropType.reqSpecJob, out value))
+            if (extraReq == null && Gear.Props.TryGetValue(GearPropType.reqSpecJob, out value))
             {
                 extraReq = ItemStringHelper.GetExtraJobReqString(value);
+            }
+            if (Gear.type == GearType.astra)
+            {
+                extraReq = ItemStringHelper.GetAstraReqJob(Gear.ItemID);
             }
             if (extraReq == null && Gear.ReqSpecJobs.Count > 0)
             {
