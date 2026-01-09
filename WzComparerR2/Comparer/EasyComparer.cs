@@ -1201,6 +1201,7 @@ namespace WzComparerR2.Comparer
                     int nullSkillIdx = 0;
 
                     int maxSkillIndex = 0;
+                    bool isSixthJobSkill = int.Parse(skillID) / 100000000 == 5;
 
                     // 變更前後のツールチップ画像の作成
                     for (int i = 0; i < 2; i++) // 0: New, 1: Old
@@ -1287,7 +1288,7 @@ namespace WzComparerR2.Comparer
                         int picH = ShowObjectID ? 13 : 1;
                         if (ShowChangeType && nullSkillIdx != 0) GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
 
-                        string categoryPath = ItemStringHelper.GetJobName(targetJobId + 2) ?? "其它";
+                        string categoryPath = (ItemStringHelper.GetJobName(isSixthJobSkill ? targetJobId + 2 : targetJobId) ?? "其它");
 
                         if (!Directory.Exists(Path.Combine(skillTooltipPath, categoryPath)))
                         {
