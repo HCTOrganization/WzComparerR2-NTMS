@@ -692,7 +692,7 @@ namespace WzComparerR2.MapRender
                 }
                 else
                 {
-                    this.ui.ChatBox.AppendTextSystem($"マップ{toMap.Value}には移動できません。");
+                    this.ui.ChatBox.AppendTextSystem($"無法移動至地圖{toMap.Value}。");
                 }
             }
             else //当前地图
