@@ -3575,13 +3575,20 @@ namespace WzComparerR2
 
         private void buttonItemSelectStringWz_Click(object sender, EventArgs e)
         {
+            buttonItemSearchString.Enabled = false;
+            Task.Run(() => selectStringWz());
+        }
+
+        private async void selectStringWz()
+        {
+            labelItemStatus.Text = "正在重新載入字串表連結...";
             Wz_File stringWzFile = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("String").GetNodeWzFile();
             Wz_File itemWzFile = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Item").GetNodeWzFile();
             Wz_File etcWzFile = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Etc").GetNodeWzFile();
             Wz_File questWzFile = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Quest").GetNodeWzFile();
             if (stringWzFile == null || itemWzFile == null || etcWzFile == null)
             {
-                MessageBoxEx.Show("請選擇 Base.wz。", LocalizedString_JP.COMMON_ERROR);
+                MessageBoxEx.Show(this, "請選擇 Base.wz。", LocalizedString_JP.COMMON_ERROR);
                 return;
             }
             QueryPerformance.Start();
@@ -3594,8 +3601,9 @@ namespace WzComparerR2
             }
             else
             {
-                MessageBoxEx.Show("字串表連結已被重置。", LocalizedString_JP.COMMON_ERROR);
+                MessageBoxEx.Show(this, "字串表連結已被重置。", LocalizedString_JP.COMMON_ERROR);
             }
+            buttonItemSearchString.Enabled = true;
         }
 
         private void buttonItemClearStringWz_Click(object sender, EventArgs e)
