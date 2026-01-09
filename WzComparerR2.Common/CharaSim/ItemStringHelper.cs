@@ -1016,7 +1016,7 @@ namespace WzComparerR2.CharaSim
                 case 34: return GetGearTypeString(GearType.weaponBelt);
                 case 35: return GetGearTypeString(GearType.transmitter);
                 case 36: return GetGearTypeString(GearType.soulBangle);
-                case 37: return "砂時計";
+                case 37: return "沙漏";
                 case 38: return GetGearTypeString(GearType.chess);
                 case 39: return GetGearTypeString(GearType.bracelet);
                 case 40: return GetGearTypeString(GearType.magicWing);
