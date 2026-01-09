@@ -1288,7 +1288,7 @@ namespace WzComparerR2.Comparer
                         int picH = ShowObjectID ? 13 : 1;
                         if (ShowChangeType && nullSkillIdx != 0) GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
 
-                        string categoryPath = (ItemStringHelper.GetJobName(isSixthJobSkill ? targetJobId + 2 : targetJobId) ?? "其它");
+                        string categoryPath = (ItemStringHelper.GetJobName(isSixthJobSkill ? targetJobId + 2 : targetJobId) ?? ItemStringHelper.GetJobName(isSixthJobSkill ? targetJobId + 3 : targetJobId) ?? ItemStringHelper.GetJobName(targetJobId) ?? "其它");
 
                         if (!Directory.Exists(Path.Combine(skillTooltipPath, categoryPath)))
                         {

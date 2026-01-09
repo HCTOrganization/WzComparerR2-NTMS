@@ -663,8 +663,7 @@ namespace WzComparerR2.CharaSimControl
             if (Skill.PerJobAttackInfo.Count > 0)
             {
                 int jobID = Skill.PerJobAttackInfo.Keys.ToList()[Skill.PerJobIndex];
-                if (Skill.SkillID / 100000000 == 5) jobID += 2;
-                skillDescEx.Add($"#c[適用職業] {ItemStringHelper.GetJobName(jobID)}({jobID})#");
+                skillDescEx.Add($"#c[適用職業] {ItemStringHelper.GetJobName(Skill.SkillID / 100000000 == 5 ? jobID + 2 : jobID) ?? ItemStringHelper.GetJobName(Skill.SkillID / 100000000 == 5 ? jobID + 3 : jobID) ?? ItemStringHelper.GetJobName(jobID)}({jobID})#");
             }
 
             if (Skill.LT.X != 0 && ShowRangeCoordinates)

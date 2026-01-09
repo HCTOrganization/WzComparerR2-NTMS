@@ -5769,7 +5769,7 @@ namespace WzComparerR2
                                             skill.PerJobIndex = jobIndex;
                                             Bitmap resultImage = tooltip.Render();
                                             int jobID = skill.PerJobAttackInfo.Keys.ToList()[jobIndex];
-                                            string categoryPath = ItemStringHelper.GetJobName((i / 10000) == 5 ? jobID + 2 : jobID) ?? "其它";
+                                            string categoryPath = ItemStringHelper.GetJobName((i / 10000) == 5 ? jobID + 2 : jobID) ?? ItemStringHelper.GetJobName((i / 10000) == 5 ? jobID + 3 : jobID) ?? ItemStringHelper.GetJobName(jobID) ?? "其它";
                                             if (!Directory.Exists(Path.Combine(exportedFolder, categoryPath)))
                                             {
                                                 Directory.CreateDirectory(Path.Combine(exportedFolder, categoryPath));
