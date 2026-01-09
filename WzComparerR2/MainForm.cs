@@ -5687,33 +5687,56 @@ namespace WzComparerR2
                                     skillName = sr.Name;
                                     labelX2.Text = string.Format("匯出中：{0} - {1}", j.Text, skillName);
                                     Skill skill = Skill.CreateFromNode(j, PluginManager.FindWz, PluginManager.FindWz);
+                                    bool isPerJobSkill = false;
                                     if (skill != null)
                                     {
                                         skill.Level = skill.MaxLevel;
                                         tooltip.Skill = skill;
+                                        isPerJobSkill = skill.PerJobAttackInfo.Count > 0;
                                     }
                                     else
                                     {
                                         continue;
                                     }
-                                    Bitmap resultImage = tooltip.Render();
-                                    string categoryPath = "";
-                                    if (FifthJobSkillToJobID.ContainsKey(int.Parse(j.Text)))
+                                    if (isPerJobSkill)
                                     {
-                                        categoryPath = ItemStringHelper.GetFifthJobName(int.Parse(j.Text), FifthJobSkillToJobID[int.Parse(j.Text)]);
+                                        for (int jobIndex = 0; jobIndex < skill.PerJobAttackInfo.Count; jobIndex++)
+                                        {
+                                            skill.PerJobIndex = jobIndex;
+                                            Bitmap resultImage = tooltip.Render();
+                                            int jobID = skill.PerJobAttackInfo.Keys.ToList()[jobIndex];
+                                            string categoryPath = ItemStringHelper.GetJobName((i / 10000) == 5 ? jobID + 2 : jobID) ?? "其它";
+                                            if (!Directory.Exists(Path.Combine(exportedFolder, categoryPath)))
+                                            {
+                                                Directory.CreateDirectory(Path.Combine(exportedFolder, categoryPath));
+                                            }
+                                            string imageName = Path.Combine(exportedFolder, categoryPath, "skill_" + j.Text + "_" + RemoveInvalidFileNameChars(skillName) + ".png");
+                                            if (File.Exists(imageName)) File.Delete(imageName);
+                                            resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                                            resultImage.Dispose();
+                                        }
                                     }
                                     else
                                     {
-                                        categoryPath = ItemStringHelper.GetJobName(i) ?? "其它";
+                                        Bitmap resultImage = tooltip.Render();
+                                        string categoryPath = "";
+                                        if (FifthJobSkillToJobID.ContainsKey(int.Parse(j.Text)))
+                                        {
+                                            categoryPath = ItemStringHelper.GetFifthJobName(int.Parse(j.Text), FifthJobSkillToJobID[int.Parse(j.Text)]);
+                                        }
+                                        else
+                                        {
+                                            categoryPath = ItemStringHelper.GetJobName(i) ?? "其它";
+                                        }
+                                        if (!Directory.Exists(Path.Combine(exportedFolder, categoryPath)))
+                                        {
+                                            Directory.CreateDirectory(Path.Combine(exportedFolder, categoryPath));
+                                        }
+                                        string imageName = Path.Combine(exportedFolder, categoryPath, "skill_" + j.Text + "_" + RemoveInvalidFileNameChars(skillName) + ".png");
+                                        if (File.Exists(imageName)) File.Delete(imageName);
+                                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                                        resultImage.Dispose();
                                     }
-                                    if (!Directory.Exists(Path.Combine(exportedFolder, categoryPath)))
-                                    {
-                                        Directory.CreateDirectory(Path.Combine(exportedFolder, categoryPath));
-                                    }
-                                    string imageName = Path.Combine(exportedFolder, categoryPath, "skill_" + j.Text + "_" + RemoveInvalidFileNameChars(skillName) + ".png");
-                                    if (File.Exists(imageName)) File.Delete(imageName);
-                                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                                    resultImage.Dispose();
                                 }
                                 if (FifthJobSkillToJobID.Count > 0)
                                 {

@@ -31,6 +31,7 @@ namespace WzComparerR2.Comparer
         private Wz_File[] EtcWzNewOld { get; set; } = new Wz_File[2];
         private Wz_File[] QuestWzNewOld { get; set; } = new Wz_File[2];
         private HashSet<string> OutputSkillTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputPerJobSkillTooltipIDs { get; set; } = new HashSet<string>();
         private HashSet<string> OutputCashTooltipIDs { get; set; } = new HashSet<string>();
         private HashSet<string> OutputGearTooltipIDs { get; set; } = new HashSet<string>();
         private HashSet<string> OutputItemTooltipIDs { get; set; } = new HashSet<string>();
@@ -47,6 +48,7 @@ namespace WzComparerR2.Comparer
         private Dictionary<string, List<string>> DiffNpcTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffQuestTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffSkillTags { get; set; } = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<string>> DiffPerJobSkillTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffAchvTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<int>> KMSContentID { get; set; } = new Dictionary<string, List<int>>();
         private Dictionary<string, List<string>> KMSComponentDict { get; set; } = new Dictionary<string, List<string>>();
@@ -458,7 +460,7 @@ namespace WzComparerR2.Comparer
                 {
                     subFiles.Add(subFile);
                 }
-                else //其他
+                else //其它
                 {
                     topNode.AddChild(childNode, true);
                 }
@@ -822,6 +824,14 @@ namespace WzComparerR2.Comparer
                 }
                 SaveSkillTooltip(skillTooltipPath);
             }
+            if (OutputSkillTooltip && type.ToString() == "String" && OutputPerJobSkillTooltipIDs != null)
+            {
+                if (!Directory.Exists(skillTooltipPath))
+                {
+                    Directory.CreateDirectory(skillTooltipPath);
+                }
+                SavePerJobSkillTooltip(skillTooltipPath);
+            }
             if (OutputItemTooltip && type.ToString() == "String" && OutputItemTooltipIDs != null)
             {
                 if (!Directory.Exists(itemTooltipPath))
@@ -1023,6 +1033,8 @@ namespace WzComparerR2.Comparer
                     skillName = RemoveInvalidFileNameChars(skillName);
                     int nullSkillIdx = 0;
 
+                    bool isPerJobVariableSkill = false;
+
                     // 變更前後的ツールチップ画像的作成
                     for (int i = 0; i < 2; i++) // 0: New, 1: Old
                     {
@@ -1035,6 +1047,7 @@ namespace WzComparerR2.Comparer
                         {
                             skill.Level = skill.MaxLevel;
                             skillRenderNewOld[i].Skill = skill;
+                            isPerJobVariableSkill = skill.PerJobAttackInfo.Count > 0;
                         }
                         else
                         {
@@ -1097,7 +1110,7 @@ namespace WzComparerR2.Comparer
                     int picH = ShowObjectID ? 13 : 1;
                     if (ShowChangeType && nullSkillIdx != 0) GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
 
-                    string categoryPath = (int.Parse(skillID) / 100000 == 4000 && FifthJobSkillToJobID.ContainsKey(int.Parse(skillID))) ? (ItemStringHelper.GetFifthJobName(int.Parse(skillID), FifthJobSkillToJobID[int.Parse(skillID)])) : (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "そ的他");
+                    string categoryPath = (int.Parse(skillID) / 100000 == 4000 && FifthJobSkillToJobID.ContainsKey(int.Parse(skillID))) ? (ItemStringHelper.GetFifthJobName(int.Parse(skillID), FifthJobSkillToJobID[int.Parse(skillID)])) : (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其它");
 
                     if (!Directory.Exists(Path.Combine(skillTooltipPath, categoryPath)))
                     {
@@ -1121,6 +1134,185 @@ namespace WzComparerR2.Comparer
             OutputSkillTooltipIDs.Clear();
             DiffSkillTags.Clear();
         }
+
+        private void SavePerJobSkillTooltip(string skillTooltipPath)
+        {
+            UpdateActionChanges();
+            SkillTooltipRender2[] skillRenderNewOld = new SkillTooltipRender2[2];
+            int count = 0;
+            int allCount = OutputSkillTooltipIDs.Count;
+            var skillTypeFont = new Font("MS Gothic", 11f, GraphicsUnit.Pixel);
+
+            for (int i = 0; i < 2; i++) // 0: New, 1: Old
+            {
+                this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
+                this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
+                this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
+
+                skillRenderNewOld[i] = new SkillTooltipRender2();
+                skillRenderNewOld[i].StringLinker = new StringLinker();
+                skillRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
+                skillRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                skillRenderNewOld[i].ShowDelay = true;
+                skillRenderNewOld[i].wzNode = WzNewOld[i];
+                skillRenderNewOld[i].DiffSkillTags = this.DiffPerJobSkillTags;
+                skillRenderNewOld[i].IgnoreEvalError = true;
+                skillRenderNewOld[i].Enable22AniStyle = this.Enable22AniStyle;
+            }
+
+            foreach (var skillID in OutputPerJobSkillTooltipIDs)
+            {
+                try
+                {
+                    StateInfo = string.Format("{0}/{1} 技能: {2}", ++count, allCount, skillID);
+                    StateDetail = "Skill 對比中...";
+
+                    bool[] isSkillNull = new bool[2] { false, false };
+
+                    if (SkipKMSContent && isKMSSkillID(Int32.Parse(skillID))) continue;
+
+                    string skillType = "";
+                    string skillNodePath = int.Parse(skillID) / 10000000 == 8 ? String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 100, skillID) : String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 10000, skillID);
+                    if (int.Parse(skillID) / 10000 == 0) skillNodePath = String.Format(@"\000.img\skill\{0:D7}", skillID);
+                    StringResult sr;
+                    string skillName;
+                    if (skillRenderNewOld[1].StringLinker == null || !skillRenderNewOld[1].StringLinker.StringSkill.TryGetValue(int.Parse(skillID), out sr))
+                    {
+                        sr = new StringResultSkill();
+                        sr.Name = "未知的技能";
+                    }
+                    skillName = sr.Name;
+                    if (skillRenderNewOld[0].StringLinker == null || !skillRenderNewOld[0].StringLinker.StringSkill.TryGetValue(int.Parse(skillID), out sr))
+                    {
+                        sr = new StringResultSkill();
+                        sr.Name = "未知的技能";
+                    }
+                    if (skillName != sr.Name && skillName != "未知的技能" && sr.Name != "未知的技能")
+                    {
+                        skillName += "_" + sr.Name;
+                    }
+                    else if (skillName == "未知的技能")
+                    {
+                        skillName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(skillName)) skillName = "未知的技能";
+                    skillName = RemoveInvalidFileNameChars(skillName);
+                    int nullSkillIdx = 0;
+
+                    int maxSkillIndex = 0;
+
+                    // 變更前後のツールチップ画像の作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Skill skill = Skill.CreateFromNode(PluginManager.FindWz("Skill" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            (Skill.CreateFromNode(PluginManager.FindWz("Skill001" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            (Skill.CreateFromNode(PluginManager.FindWz("Skill002" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            Skill.CreateFromNode(PluginManager.FindWz("Skill003" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i])));
+
+                        if (skill != null)
+                        {
+                            skill.Level = skill.MaxLevel;
+                            skillRenderNewOld[i].Skill = skill;
+                            maxSkillIndex = skill.PerJobAttackInfo.Count;
+                        }
+                        else
+                        {
+                            isSkillNull[i] = true;
+                            nullSkillIdx = i + 1;
+                        }
+                    }
+
+                    for (int jobIndex = 0; jobIndex < maxSkillIndex; jobIndex++)
+                    {
+                        // ツールチップ画像を合わせる
+                        Bitmap resultImage = null;
+                        Graphics g = null;
+
+                        int targetJobId = 0;
+
+                        switch (nullSkillIdx)
+                        {
+                            case 0: // change
+                                skillType = "變更";
+                                skillRenderNewOld[0].Skill.PerJobIndex = jobIndex;
+                                skillRenderNewOld[1].Skill.PerJobIndex = jobIndex;
+                                targetJobId = skillRenderNewOld[0].Skill.PerJobAttackInfo.Keys.ToList()[jobIndex];
+                                Bitmap ImageNew = skillRenderNewOld[0].Render(true);
+                                Bitmap ImageOld = skillRenderNewOld[1].Render(true);
+                                if (ShowChangeType)
+                                {
+                                    int picHchange = ShowObjectID ? 13 : 1;
+                                    Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                    GearGraphics.DrawPlainText(gNewOld[1], "變更前", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                    picHchange = ShowObjectID ? 13 : 1;
+                                    GearGraphics.DrawPlainText(gNewOld[0], "變更後", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                }
+
+                                resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                                g = Graphics.FromImage(resultImage);
+
+                                g.DrawImage(ImageOld, 0, 0);
+                                g.DrawImage(ImageNew, ImageOld.Width, 0);
+                                break;
+
+                            case 1: // delete
+                                skillType = "刪除";
+                                if (isSkillNull[1]) continue;
+                                skillRenderNewOld[1].Skill.PerJobIndex = jobIndex;
+                                targetJobId = skillRenderNewOld[1].Skill.PerJobAttackInfo.Keys.ToList()[jobIndex];
+                                resultImage = skillRenderNewOld[1].Render();
+                                g = Graphics.FromImage(resultImage);
+                                break;
+
+                            case 2: // add
+                                skillType = "新增";
+                                if (isSkillNull[0]) continue;
+                                skillRenderNewOld[0].Skill.PerJobIndex = jobIndex;
+                                targetJobId = skillRenderNewOld[0].Skill.PerJobAttackInfo.Keys.ToList()[jobIndex];
+                                resultImage = skillRenderNewOld[0].Render();
+                                g = Graphics.FromImage(resultImage);
+                                break;
+
+                            default:
+                                break;
+                        }
+
+                        if (resultImage == null || g == null)
+                        {
+                            continue;
+                        }
+
+                        var skillTypeTextInfo = g.MeasureString(skillType, GearGraphics.ItemDetailFont);
+                        int picH = ShowObjectID ? 13 : 1;
+                        if (ShowChangeType && nullSkillIdx != 0) GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
+
+                        string categoryPath = ItemStringHelper.GetJobName(targetJobId + 2) ?? "其它";
+
+                        if (!Directory.Exists(Path.Combine(skillTooltipPath, categoryPath)))
+                        {
+                            Directory.CreateDirectory(Path.Combine(skillTooltipPath, categoryPath));
+                        }
+
+                        string imageName = Path.Combine(skillTooltipPath, categoryPath, "技能_" + skillID + "_" + skillName + "_" + skillType + ".png");
+                        if (!File.Exists(imageName))
+                        {
+                            resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                            SendImage(imageName, string.Format("發現新的技能變更。 \r\n職業：`{0}`\r\n變更類型：{1}\r\n技能名稱：`{2}`\r\nID：`{3}`", categoryPath, skillType, skillName, skillID));
+                        }
+                        resultImage.Dispose();
+                        g.Dispose();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    FailToExportTooltips.Add("Skill Tooltip: " + skillID, ex.Message);
+                }
+            }
+            OutputPerJobSkillTooltipIDs.Clear();
+            DiffPerJobSkillTags.Clear();
+        }
+
 
         // 노드에서 스킬 ID 얻기
         private void GetSkillID(Wz_Node node, bool change)
@@ -1147,10 +1339,21 @@ namespace WzComparerR2.Comparer
 
                 if (skillID != null)
                 {
-                    if (!OutputSkillTooltipIDs.Contains(skillID))
+                    if (node.FindNodeByPath("common\\attackInfo") != null)
                     {
-                        OutputSkillTooltipIDs.Add(skillID);
-                        DiffSkillTags[skillID] = new List<string>();
+                        if (!OutputPerJobSkillTooltipIDs.Contains(skillID))
+                        {
+                            OutputPerJobSkillTooltipIDs.Add(skillID);
+                            DiffPerJobSkillTags[skillID] = new List<string>();
+                        }
+                    }
+                    else
+                    {
+                        if (!OutputSkillTooltipIDs.Contains(skillID))
+                        {
+                            OutputSkillTooltipIDs.Add(skillID);
+                            DiffSkillTags[skillID] = new List<string>();
+                        }
                     }
 
                     if (tag != null && !DiffSkillTags[skillID].Contains(tag))
@@ -1248,7 +1451,7 @@ namespace WzComparerR2.Comparer
                     else if (itemID.StartsWith("04")) // 判断第1位是否是04
                     {
                         itemNodePath = String.Format(@"Item\Etc\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
-                        categoryPath = "Etc_其他";
+                        categoryPath = "Etc_其它";
                     }
                     else if (itemID.StartsWith("05")) // 判断第1位是否是02
                     {
@@ -1581,7 +1784,7 @@ namespace WzComparerR2.Comparer
                     else if (itemID.StartsWith("04")) // 判断第1位是否是04
                     {
                         itemNodePath = String.Format(@"Item\Etc\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
-                        categoryPath = "Etc_其他";
+                        categoryPath = "Etc_其它";
                     }
                     else if (itemID.StartsWith("05")) // 判断第1位是否是02
                     {
