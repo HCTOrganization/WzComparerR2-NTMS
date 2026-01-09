@@ -417,7 +417,7 @@ namespace WzComparerR2.CharaSim
         /// <summary>
         /// 靈符 135_88
         /// </summary>
-        kannaOmamori = 135288,
+        kannaReipu = 135288,
         /// <summary>
         /// 手杖
         /// </summary>
