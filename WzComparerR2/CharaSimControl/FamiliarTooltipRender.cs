@@ -282,5 +282,39 @@ namespace WzComparerR2.CharaSimControl
 
             return sourceBmp.Clone(new Rectangle(rectangXoffset, rectangYoffset, rectangWidth, rectangHeight), sourceBmp.PixelFormat);
         }
+
+        private Bitmap DrawName(string name, int w, int h)
+        {
+            Bitmap bmp = new Bitmap(w, h);
+            var familiarColorTable = new Dictionary<string, Color>()
+            {
+                { "$b", Color.Black },
+                { "$g", Color.FromArgb(16, 16, 16) }
+            };
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                int picH = 0;
+                GearGraphics.DrawString(g, name, GearGraphics.NewCTFamiliarNameFont, familiarColorTable, 0, w, ref picH, h, Text.TextAlignment.Center);
+            }
+            return bmp;
+        }
+
+        private Bitmap DrawPotentialTier(string name, int w, int h)
+        {
+            Bitmap bmp = new Bitmap(w, h);
+            var familiarColorTable = new Dictionary<string, Color>()
+            {
+                { "$b", Color.Black },
+                { "$g", Color.FromArgb(16, 16, 16) }
+            };
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
+                int picH = 0;
+                GearGraphics.DrawString(g, name, GearGraphics.NewCTFamiliarLevelFont, familiarColorTable, 0, w, ref picH, h, Text.TextAlignment.Center);
+            }
+            return bmp;
+        }
     }
 }

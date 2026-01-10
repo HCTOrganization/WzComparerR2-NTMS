@@ -78,6 +78,8 @@ namespace WzComparerR2.CharaSimControl
         public static Font KMSAchievementTitleFont { get; private set; }
         public static Font FamiliarNameFont { get; private set; }
         public static Font FamiliarLevelFont { get; private set; }
+        public static Font NewCTFamiliarNameFont { get; private set; }
+        public static Font NewCTFamiliarLevelFont { get; private set; }
 
         public static void SetFontFamily(string fontName)
         {
@@ -205,6 +207,48 @@ namespace WzComparerR2.CharaSimControl
                 FamiliarLevelFont = null;
             }
             FamiliarLevelFont = new Font(fontName, 13f, GraphicsUnit.Pixel);
+            if (NewCTFamiliarNameFont != null)
+            {
+                NewCTFamiliarNameFont.Dispose();
+                NewCTFamiliarNameFont = null;
+            }
+            switch (fontName)
+            {
+                case "MS Gothic":
+                case "MS PGothic":
+                case "Arial":
+                    NewCTFamiliarNameFont = new Font("Noto Sans JP", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    break;
+                case "Dotum":
+                case "Gulimche":
+                    NewCTFamiliarNameFont = new Font("Noto Sans KR", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    break;
+                case "SimSun":
+                case "Noto Sans TC":
+                    NewCTFamiliarNameFont = new Font("Noto Sans TC", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    break;
+            }
+            if (NewCTFamiliarLevelFont != null)
+            {
+                NewCTFamiliarLevelFont.Dispose();
+                NewCTFamiliarLevelFont = null;
+            }
+            switch (fontName)
+            {
+                case "MS Gothic":
+                case "MS PGothic":
+                case "Arial":
+                    NewCTFamiliarLevelFont = new Font("Noto Sans JP", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    break;
+                case "Dotum":
+                case "Gulimche":
+                    NewCTFamiliarLevelFont = new Font("Noto Sans KR", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    break;
+                case "SimSun":
+                case "Noto Sans TC":
+                    NewCTFamiliarLevelFont = new Font("Noto Sans TC", 12f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    break;
+            }
         }
 
         public static readonly Color GearBackColor = Color.FromArgb(204, 0, 51, 85);
