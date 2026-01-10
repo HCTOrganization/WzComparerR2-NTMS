@@ -4418,61 +4418,13 @@ namespace WzComparerR2
             StringResult sr = new StringResult();
             string altAutoDesc = null;
             var wzfType = wzf.Type; // temp workaround
+            // temp workaround start
             if (wzfType == Wz_Type.Unknown)
             {
                 string[] path = selectedNode.FullPathToFile.Split('\\');
-                switch (path[0])
-                {
-                    case "Character":
-                        wzfType = Wz_Type.Character;
-                        break;
-                    case "Effect":
-                        wzfType = Wz_Type.Effect;
-                        break;
-                    case "Etc":
-                        wzfType = Wz_Type.Etc;
-                        break;
-                    case "Item":
-                        wzfType = Wz_Type.Item;
-                        break;
-                    case "Language":
-                        wzfType = Wz_Type.Language;
-                        break;
-                    case "Map":
-                        wzfType = Wz_Type.Map;
-                        break;
-                    case "Mob":
-                        wzfType = Wz_Type.Mob;
-                        break;
-                    case "Morph":
-                        wzfType = Wz_Type.Morph;
-                        break;
-                    case "Npc":
-                        wzfType = Wz_Type.Npc;
-                        break;
-                    case "Quest":
-                        wzfType = Wz_Type.Quest;
-                        break;
-                    case "Reactor":
-                        wzfType = Wz_Type.Reactor;
-                        break;
-                    case "Skill":
-                        wzfType = Wz_Type.Skill;
-                        break;
-                    case "Sound":
-                        wzfType = Wz_Type.Sound;
-                        break;
-                    case "String":
-                        wzfType = Wz_Type.String;
-                        break;
-                    case "TamingMob":
-                        wzfType = Wz_Type.TamingMob;
-                        break;
-                    case "UI":
-                        wzfType = Wz_Type.UI;
-                        break;
-                }
+                wzfType = ParseWzTypeManually(path[0]);
             }
+            // temp workaround end
             switch (wzfType)
             {
                 case Wz_Type.Character:
@@ -5525,6 +5477,47 @@ namespace WzComparerR2
             chkShowPrice.Checked = true;
             chkShowLinkedTamingMob.Checked = false;
             chkSkipKMSContent.Checked = false;
+        }
+
+        private Wz_Type ParseWzTypeManually(string baseDir)
+        {
+            switch (baseDir)
+            {
+                case "Character":
+                    return Wz_Type.Character;
+                case "Effect":
+                    return Wz_Type.Effect;
+                case "Etc":
+                    return Wz_Type.Etc;
+                case "Item":
+                    return Wz_Type.Item;
+                case "Language":
+                    return Wz_Type.Language;
+                case "Map":
+                    return Wz_Type.Map;
+                case "Mob":
+                    return Wz_Type.Mob;
+                case "Morph":
+                    return Wz_Type.Morph;
+                case "Npc":
+                    return Wz_Type.Npc;
+                case "Quest":
+                    return Wz_Type.Quest;
+                case "Reactor":
+                    return Wz_Type.Reactor;
+                case "Skill":
+                    return Wz_Type.Skill;
+                case "Sound":
+                    return Wz_Type.Sound;
+                case "String":
+                    return Wz_Type.String;
+                case "TamingMob":
+                    return Wz_Type.TamingMob;
+                case "UI":
+                    return Wz_Type.UI;
+                default:
+                    return Wz_Type.Unknown;
+            }
         }
 
         private void btnSkillChangeInfo_Click(object sender, EventArgs e)
