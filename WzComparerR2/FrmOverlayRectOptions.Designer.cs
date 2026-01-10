@@ -133,7 +133,7 @@ namespace WzComparerR2
             this.buttonVertex.Size = new System.Drawing.Size(80, 19);
             this.buttonVertex.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.buttonVertex.TabIndex = 5;
-            this.buttonVertex.Text = "정점 추가";
+            this.buttonVertex.Text = "添加頂点";
             // 
             // tableLayoutPanel1
             // 
@@ -153,8 +153,8 @@ namespace WzComparerR2
             this.tableLayoutPanel1.Controls.Add(this.labelX7, 1, 12);
             this.tableLayoutPanel1.Controls.Add(this.labelX11, 2, 13);
             this.tableLayoutPanel1.Controls.Add(this.labelX12, 1, 14);
-            this.tableLayoutPanel1.Controls.Add(this.labelX13, 1, 4);
-            this.tableLayoutPanel1.Controls.Add(this.labelX14, 2, 4);
+            this.tableLayoutPanel1.Controls.Add(this.labelX13, 1, 3);
+            this.tableLayoutPanel1.Controls.Add(this.labelX14, 2, 3);
             this.tableLayoutPanel1.Controls.Add(this.txtLeft, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.txtRight, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.txtTop, 3, 0);
@@ -173,9 +173,9 @@ namespace WzComparerR2
             this.tableLayoutPanel1.Controls.Add(this.colorPickerButton1, 2, 12);
             this.tableLayoutPanel1.Controls.Add(this.chkAutoArea, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.chkIsCircle, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.chkIsPolygon, 0, 4);
+            this.tableLayoutPanel1.Controls.Add(this.chkIsPolygon, 0, 3);
             this.tableLayoutPanel1.Controls.Add(this.chkAlphaGradation, 1, 13);
-            this.tableLayoutPanel1.Controls.Add(this.buttonVertex, 3, 4);
+            this.tableLayoutPanel1.Controls.Add(this.buttonVertex, 3, 3);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(9, 8);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -386,7 +386,7 @@ namespace WzComparerR2
             this.labelX13.Name = "labelX13";
             this.labelX13.Size = new System.Drawing.Size(137, 19);
             this.labelX13.TabIndex = 0;
-            this.labelX13.Text = "정점 개수";
+            this.labelX13.Text = "頂点数";
             // 
             // labelX14
             // 
