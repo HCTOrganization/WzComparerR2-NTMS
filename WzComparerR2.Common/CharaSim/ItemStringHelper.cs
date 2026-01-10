@@ -690,8 +690,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.tamingChair: return "騎寵";
                 case GearType.saddle: return "馬鞍";
                 case GearType.katana: return "太刀";
-                case GearType.fan: return "陰陽扇";
-                case GearType.kannaReifu: return "靈符";
+                case GearType.fan: return "扇";
                 case GearType.swordZB: return "琉";
                 case GearType.swordZL: return "璃";
                 case GearType.weapon: return "武器";
@@ -775,6 +774,9 @@ namespace WzComparerR2.CharaSim
 
                 case GearType.longSword: return "長劍";
                 case GearType.yeouiGem: return "如意寶珠";
+
+                case GearType.onmyoSen: return "陰陽扇";
+                case GearType.kannaReifu: return "靈符";
 
                 default: return null;
             }

@@ -187,6 +187,10 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         celestialLight = 1253,
         /// <summary>
+        /// Onmyo Sen 1254
+        /// </summary>
+        onmyoSen = 1254,
+        /// <summary>
         /// 驯兽魔法棒 1259
         /// </summary>
         magicStick = 1259,
