@@ -60,7 +60,9 @@
     <ProjectReference Include="..\WzComparerR2.WzLib\WzComparerR2.WzLib.csproj" />
     <ProjectReference Include="..\WzComparerR2.PluginBase\WzComparerR2.PluginBase.csproj" />
     <ProjectReference Include="..\WzComparerR2.CLI\WzComparerR2.CLI.csproj" />
-    <ProjectReference Include="..\WzComparerR2.Updater\WzComparerR2.Updater.csproj" />
+    <ProjectReference Include="..\WzComparerR2.Updater\WzComparerR2.Updater.csproj">
+        <Private>false</Private>
+    </ProjectReference>
     <ProjectReference Include="..\CharaSimResource\CharaSimResource.csproj" />
     <PackageReference Include="MonoGame.Framework.WindowsDX" Version="$(MonogameFrameworkVersion)" />
     <PackageReference Include="SharpDX" Version="$(SharpDXVersion)" />
