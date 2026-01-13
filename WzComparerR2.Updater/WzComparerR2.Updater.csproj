@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFrameworks>net48;net6.0-windows;net8.0-windows</TargetFrameworks>
+    <Platforms>AnyCPU;ARM64</Platforms>
+    <AssemblyName>Updater</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<UseWindowsForms>true</UseWindowsForms>
+	<ApplicationIcon>Updater.ico</ApplicationIcon>
+	<PlatformTarget>AnyCPU</PlatformTarget>
+	<NoWin32Manifest>true</NoWin32Manifest>
+	<AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
+	<SignAssembly>False</SignAssembly>
+  </PropertyGroup>
+  <ItemGroup Condition="$(DotnetEdition) == 'framework'">
+    <Reference Include="System" />
+    <Reference Include="System.Diagnostics" />
+    <Reference Include="System.IO" />
+	<Reference Include="System.IO.Compression" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+</Project>

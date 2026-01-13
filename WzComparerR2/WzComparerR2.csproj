@@ -41,6 +41,17 @@
     <Reference Include="System.Configuration" />
     <PackageReference Include="System.ValueTuple" Version="4.6.1" />
   </ItemGroup>
+  <ItemGroup Condition="$(DotnetEdition) == 'core'">
+    <EmbeddedResource Include="..\WzComparerR2.Updater\bin\$(Configuration)\$(TargetFramework)\Updater.deps.json" />
+    <EmbeddedResource Include="..\WzComparerR2.Updater\bin\$(Configuration)\$(TargetFramework)\Updater.dll" />
+    <EmbeddedResource Include="..\WzComparerR2.Updater\bin\$(Configuration)\$(TargetFramework)\Updater.dll.config" />
+    <EmbeddedResource Include="..\WzComparerR2.Updater\bin\$(Configuration)\$(TargetFramework)\Updater.exe" />
+    <EmbeddedResource Include="..\WzComparerR2.Updater\bin\$(Configuration)\$(TargetFramework)\Updater.runtimeconfig.json" />
+  </ItemGroup>
+  <ItemGroup Condition="$(DotnetEdition) == 'framework'">
+    <EmbeddedResource Include="..\WzComparerR2.Updater\bin\$(Configuration)\$(TargetFramework)\Updater.exe" />
+    <EmbeddedResource Include="..\WzComparerR2.Updater\bin\$(Configuration)\$(TargetFramework)\Updater.exe.config" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="wcr2_256.ico" />
   </ItemGroup>

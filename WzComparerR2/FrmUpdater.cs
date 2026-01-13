@@ -111,6 +111,7 @@ namespace WzComparerR2
             catch (Exception ex)
             {
                 this.lblUpdateContent.Text = LocalizedString_JP.FRMUPDATER_UPDATE_CHECKFAIL;
+                AppendText(ex.Message + "\r\n" + ex.StackTrace, Color.Red);
             }
         }
 
@@ -136,19 +137,21 @@ namespace WzComparerR2
                         }
                     }
                 }
-                if (!File.Exists(Path.Combine(currentDirectory, "Updater.exe")))
-                {
-                    object UpdaterFile = Properties.Resources.ResourceManager.GetObject("Updater");
-                    if (UpdaterFile is byte[] fileData)
-                    {
-                        File.WriteAllBytes(Path.Combine(currentDirectory, "Updater.exe"), fileData);
-                    }
-                }
+                ExtractResource("WzComparerR2.Updater.exe", Path.Combine(currentDirectory, "Updater.exe"));
+#if NET6_0_OR_GREATER
+                ExtractResource("WzComparerR2.Updater.deps.json", Path.Combine(currentDirectory, "Updater.deps.json"));
+                ExtractResource("WzComparerR2.Updater.dll", Path.Combine(currentDirectory, "Updater.dll"));
+                ExtractResource("WzComparerR2.Updater.dll.config", Path.Combine(currentDirectory, "Updater.dll.config"));
+                ExtractResource("WzComparerR2.Updater.runtimeconfig.json", Path.Combine(currentDirectory, "Updater.runtimeconfig.json"));
+#else
+                ExtractResource("WzComparerR2.Updater.exe.config", Path.Combine(currentDirectory, "Updater.exe.config"));
+#endif
                 RunProgram("Updater.exe", "\"" + savePath + "\"");
             }
             catch (Exception ex)
             {
                 this.lblUpdateContent.Text = LocalizedString_JP.FRMUPDATER_UPDATE_DOWNLOAD_FAIL;
+                AppendText(ex.Message + "\r\n" + ex.StackTrace, Color.Red);
             }
             finally
             {
@@ -208,6 +211,20 @@ namespace WzComparerR2
             this.richTextBoxEx1.SelectionColor = color;
             this.richTextBoxEx1.AppendText(text);
             this.richTextBoxEx1.SelectionColor = this.richTextBoxEx1.ForeColor;
+        }
+
+        private void ExtractResource(string resourceName, string outputPath)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+
+            using Stream? resourceStream = assembly.GetManifestResourceStream(resourceName);
+            if (resourceStream == null)
+                throw new InvalidOperationException($"Resource not found: {resourceName}");
+
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+
+            using FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
+            resourceStream.CopyTo(fileStream);
         }
 
         class UpdaterSession
