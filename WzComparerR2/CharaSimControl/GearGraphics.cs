@@ -180,7 +180,7 @@ namespace WzComparerR2.CharaSimControl
                 EquipDetailFont2.Dispose();
                 EquipDetailFont2 = null;
             }
-            EquipDetailFont2 = new Font(fontName, 11f, GraphicsUnit.Pixel);
+            EquipDetailFont2 = new Font(fontName, 12f, GraphicsUnit.Pixel);
 
             if (AchievementTitleFont != null)
             {
