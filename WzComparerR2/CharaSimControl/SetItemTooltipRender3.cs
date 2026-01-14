@@ -312,8 +312,8 @@ namespace WzComparerR2.CharaSimControl
                                             itemName = sr.Name;
                                             switch (Gear.GetGender(itemID))
                                             {
-                                                case 0: itemName += " (♂)"; break;
-                                                case 1: itemName += " (♀)"; break;
+                                                case 0: itemName += " (男)"; break;
+                                                case 1: itemName += " (女)"; break;
                                             }
                                         }
                                         else if (this.StringLinker.StringItem.TryGetValue(itemID, out sr)) //兼容宠物
