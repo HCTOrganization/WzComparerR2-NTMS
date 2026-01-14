@@ -217,15 +217,15 @@ namespace WzComparerR2.CharaSimControl
                 case "MS Gothic":
                 case "MS PGothic":
                 case "Arial":
-                    NewCTFamiliarNameFont = new Font("Noto Sans JP", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    NewCTFamiliarNameFont = new Font("Noto Sans JP", 15f, FontStyle.Bold, GraphicsUnit.Pixel);
                     break;
                 case "Dotum":
                 case "Gulimche":
-                    NewCTFamiliarNameFont = new Font("Noto Sans KR", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    NewCTFamiliarNameFont = new Font("Noto Sans KR", 15f, FontStyle.Bold, GraphicsUnit.Pixel);
                     break;
                 case "SimSun":
                 case "Noto Sans TC":
-                    NewCTFamiliarNameFont = new Font("Noto Sans TC", 14f, FontStyle.Bold, GraphicsUnit.Pixel);
+                    NewCTFamiliarNameFont = new Font("Noto Sans TC", 15f, FontStyle.Bold, GraphicsUnit.Pixel);
                     break;
             }
             if (NewCTFamiliarLevelFont != null)
