@@ -199,7 +199,7 @@ namespace WzComparerR2.CharaSimControl
                 g.DrawImage(baseTooltipTop, lDelta, tDelta, new Rectangle(0, 0, baseTooltipTop.Width, baseTooltipTop.Height), GraphicsUnit.Pixel);
                 g.DrawImage(baseTooltipBottom, lDelta, tDelta + baseTooltipTop.Height, new Rectangle(0, 0, baseTooltipBottom.Width, baseTooltipBottom.Height), GraphicsUnit.Pixel);
                 g.DrawImage(mobImg, mobXoffset + lDelta, mobYoffset + tDelta, new Rectangle(0, 0, mobImg.Width, mobImg.Height), GraphicsUnit.Pixel);
-                g.DrawImage(Resource.UIFamiliar_img_ToolTip__BackGround_0_MontserMask, 14, 16, new Rectangle(0, 0, Resource.UIFamiliar_img_ToolTip__BackGround_0_MontserMask.Width, Resource.UIFamiliar_img_ToolTip__BackGround_0_MontserMask.Height), GraphicsUnit.Pixel);
+                g.DrawImage(Resource.UIFamiliar_img_ToolTip__BackGround_0_MontserMask, 14 + lDelta, 16 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_ToolTip__BackGround_0_MontserMask.Width, Resource.UIFamiliar_img_ToolTip__BackGround_0_MontserMask.Height), GraphicsUnit.Pixel);
                 switch (this.FamiliarTier)
                 {
                     default:
