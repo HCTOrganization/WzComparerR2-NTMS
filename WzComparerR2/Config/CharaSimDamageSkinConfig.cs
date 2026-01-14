@@ -43,6 +43,13 @@ namespace WzComparerR2.Config
             set { this["displayUnitOnSingleLine"] = value; }
         }
 
+        [ConfigurationProperty("useInGameSpacing", DefaultValue = true)]
+        public bool UseInGameSpacing
+        {
+            get { return (bool)this["useInGameSpacing"]; }
+            set { this["useInGameSpacing"] = value; }
+        }
+
         [ConfigurationProperty("damageSkinNumber", DefaultValue = (long)1234567890)]
         public long DamageSkinNumber
         {

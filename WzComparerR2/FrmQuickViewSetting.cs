@@ -295,6 +295,13 @@ namespace WzComparerR2
         }
 
         [Link]
+        public bool DamageSkin_UseInGameSpacing
+        {
+            get { return chkUseInGameSpacing.Checked; }
+            set { chkUseInGameSpacing.Checked = value; }
+        }
+
+        [Link]
         public long DamageSkin_DamageSkinNumber
         {
             get { return long.TryParse(txtDamageSkinNumber.Text, out long val) ? val : 0; }
