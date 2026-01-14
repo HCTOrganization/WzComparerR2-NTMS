@@ -200,7 +200,7 @@ namespace WzComparerR2.CharaSimControl
                 FamiliarNameFont.Dispose();
                 FamiliarNameFont = null;
             }
-            FamiliarNameFont = new Font(fontName, 12f, GraphicsUnit.Pixel);
+            FamiliarNameFont = new Font(fontName, 15f, GraphicsUnit.Pixel);
             if (FamiliarLevelFont != null)
             {
                 FamiliarLevelFont.Dispose();

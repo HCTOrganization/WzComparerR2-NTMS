@@ -184,12 +184,15 @@ namespace WzComparerR2.CharaSimControl
                         g.DrawImage(Resource.Familiar__InfoWnd_gradeside_graderank__1, lDelta, tDelta, new Rectangle(0, 0, Resource.Familiar__InfoWnd_gradeside_graderank__1.Width, Resource.Familiar__InfoWnd_gradeside_graderank__1.Height), GraphicsUnit.Pixel);
                         break;
                     case 2:
+                    case 5:
                         g.DrawImage(Resource.Familiar__InfoWnd_gradeside_graderank__2, lDelta, tDelta, new Rectangle(0, 0, Resource.Familiar__InfoWnd_gradeside_graderank__2.Width, Resource.Familiar__InfoWnd_gradeside_graderank__2.Height), GraphicsUnit.Pixel);
                         break;
                     case 3:
+                    case 6:
                         g.DrawImage(Resource.Familiar__InfoWnd_gradeside_graderank__3, lDelta, tDelta, new Rectangle(0, 0, Resource.Familiar__InfoWnd_gradeside_graderank__3.Width, Resource.Familiar__InfoWnd_gradeside_graderank__3.Height), GraphicsUnit.Pixel);
                         break;
                     case 4:
+                    case 7:
                         g.DrawImage(Resource.Familiar__InfoWnd_gradeside_graderank__4, lDelta, tDelta, new Rectangle(0, 0, Resource.Familiar__InfoWnd_gradeside_graderank__4.Width, Resource.Familiar__InfoWnd_gradeside_graderank__4.Height), GraphicsUnit.Pixel);
                         break;
                 }
@@ -209,12 +212,15 @@ namespace WzComparerR2.CharaSimControl
                         g.DrawImage(Resource.Familiar__InfoWnd_gradename__1, 84 + lDelta, 16 + tDelta, new Rectangle(0, 0, Resource.Familiar__InfoWnd_gradename__1.Width, Resource.Familiar__InfoWnd_gradename__1.Height), GraphicsUnit.Pixel);
                         break;
                     case 2:
+                    case 5:
                         g.DrawImage(Resource.Familiar__InfoWnd_gradename__2, 84 + lDelta, 16 + tDelta, new Rectangle(0, 0, Resource.Familiar__InfoWnd_gradename__2.Width, Resource.Familiar__InfoWnd_gradename__2.Height), GraphicsUnit.Pixel);
                         break;
                     case 3:
+                    case 6:
                         g.DrawImage(Resource.Familiar__InfoWnd_gradename__3, 84 + lDelta, 16 + tDelta, new Rectangle(0, 0, Resource.Familiar__InfoWnd_gradename__3.Width, Resource.Familiar__InfoWnd_gradename__3.Height), GraphicsUnit.Pixel);
                         break;
                     case 4:
+                    case 7:
                         g.DrawImage(Resource.Familiar__InfoWnd_gradename__4, 84 + lDelta, 16 + tDelta, new Rectangle(0, 0, Resource.Familiar__InfoWnd_gradename__4.Width, Resource.Familiar__InfoWnd_gradename__4.Height), GraphicsUnit.Pixel);
                         break;
                 }
@@ -236,12 +242,15 @@ namespace WzComparerR2.CharaSimControl
                         g.DrawImage(Resource.Familiar__InfoWnd_gradejewel_info_rare_1, 23 + lDelta, 246 + tDelta, new Rectangle(0, 0, Resource.Familiar__InfoWnd_gradejewel_info_rare_1.Width, Resource.Familiar__InfoWnd_gradejewel_info_rare_1.Height), GraphicsUnit.Pixel);
                         break;
                     case 2:
+                    case 5:
                         g.DrawImage(Resource.Familiar__InfoWnd_gradejewel_info_epic_1, 23 + lDelta, 246 + tDelta, new Rectangle(0, 0, Resource.Familiar__InfoWnd_gradejewel_info_epic_1.Width, Resource.Familiar__InfoWnd_gradejewel_info_epic_1.Height), GraphicsUnit.Pixel);
                         break;
                     case 3:
+                    case 6:
                         g.DrawImage(Resource.Familiar__InfoWnd_gradejewel_info_unique_1, 23 + lDelta, 246 + tDelta, new Rectangle(0, 0, Resource.Familiar__InfoWnd_gradejewel_info_unique_1.Width, Resource.Familiar__InfoWnd_gradejewel_info_unique_1.Height), GraphicsUnit.Pixel);
                         break;
                     case 4:
+                    case 7:
                         g.DrawImage(Resource.Familiar__InfoWnd_gradejewel_info_regendary_1, 23 + lDelta, 246 + tDelta, new Rectangle(0, 0, Resource.Familiar__InfoWnd_gradejewel_info_regendary_1.Width, Resource.Familiar__InfoWnd_gradejewel_info_regendary_1.Height), GraphicsUnit.Pixel);
                         break;
                 }
@@ -366,12 +375,15 @@ namespace WzComparerR2.CharaSimControl
                         g.DrawImage(Resource.Familiar2025__InfoWnd_gradeSide_graderank__1, 2 + lDelta, 2 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_gradeSide_graderank__1.Width, Resource.Familiar2025__InfoWnd_gradeSide_graderank__1.Height), GraphicsUnit.Pixel);
                         break;
                     case 2:
+                    case 5:
                         g.DrawImage(Resource.Familiar2025__InfoWnd_gradeSide_graderank__2, 2 + lDelta, 2 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_gradeSide_graderank__2.Width, Resource.Familiar2025__InfoWnd_gradeSide_graderank__2.Height), GraphicsUnit.Pixel);
                         break;
                     case 3:
+                    case 6:
                         g.DrawImage(Resource.Familiar2025__InfoWnd_gradeSide_graderank__3, 2 + lDelta, 2 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_gradeSide_graderank__3.Width, Resource.Familiar2025__InfoWnd_gradeSide_graderank__3.Height), GraphicsUnit.Pixel);
                         break;
                     case 4:
+                    case 7:
                         g.DrawImage(Resource.Familiar2025__InfoWnd_gradeSide_graderank__4, 2 + lDelta, 2 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_gradeSide_graderank__4.Width, Resource.Familiar2025__InfoWnd_gradeSide_graderank__4.Height), GraphicsUnit.Pixel);
                         break;
                 }
@@ -393,14 +405,17 @@ namespace WzComparerR2.CharaSimControl
                         g.DrawImage(Resource.Familiar2025__InfoWnd_gradeJewel_info_rare, 93 + lDelta, 249 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_gradeJewel_info_rare.Width, Resource.Familiar2025__InfoWnd_gradeJewel_info_rare.Height), GraphicsUnit.Pixel);
                         break;
                     case 2:
+                    case 5:
                         g.DrawImage(Resource.Familiar2025__InfoWnd_gradeName__2, 14 + lDelta, 14 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_gradeName__2.Width, Resource.Familiar2025__InfoWnd_gradeName__2.Height), GraphicsUnit.Pixel);
                         g.DrawImage(Resource.Familiar2025__InfoWnd_gradeJewel_info_epic, 93 + lDelta, 249 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_gradeJewel_info_epic.Width, Resource.Familiar2025__InfoWnd_gradeJewel_info_epic.Height), GraphicsUnit.Pixel);
                         break;
                     case 3:
+                    case 6:
                         g.DrawImage(Resource.Familiar2025__InfoWnd_gradeName__3, 14 + lDelta, 14 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_gradeName__3.Width, Resource.Familiar2025__InfoWnd_gradeName__3.Height), GraphicsUnit.Pixel);
                         g.DrawImage(Resource.Familiar2025__InfoWnd_gradeJewel_info_unique, 93 + lDelta, 249 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_gradeJewel_info_unique.Width, Resource.Familiar2025__InfoWnd_gradeJewel_info_unique.Height), GraphicsUnit.Pixel);
                         break;
                     case 4:
+                    case 7:
                         g.DrawImage(Resource.Familiar2025__InfoWnd_gradeName__4, 14 + lDelta, 14 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_gradeName__4.Width, Resource.Familiar2025__InfoWnd_gradeName__4.Height), GraphicsUnit.Pixel);
                         g.DrawImage(Resource.Familiar2025__InfoWnd_gradeJewel_info_legendary, 93 + lDelta, 249 + tDelta, new Rectangle(0, 0, Resource.Familiar2025__InfoWnd_gradeJewel_info_legendary.Width, Resource.Familiar2025__InfoWnd_gradeJewel_info_legendary.Height), GraphicsUnit.Pixel);
                         break;
