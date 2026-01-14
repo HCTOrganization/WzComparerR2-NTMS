@@ -849,18 +849,21 @@ namespace WzComparerR2.CharaSimControl
             {
                 Wz_Node petDialog = PluginManager.FindWz("String\\PetDialog.img\\" + item.ItemID);
                 Dictionary<string, int> commandLev = new Dictionary<string, int>();
-                foreach (Wz_Node commandNode in PluginManager.FindWz("Item\\Pet\\" + item.ItemID + ".img\\interact").Nodes)
+                if (PluginManager.FindWz("Item\\Pet\\" + item.ItemID + ".img\\interact", this.SourceWzFile) != null)
                 {
-                    foreach (string command in petDialog?.Nodes[commandNode.Nodes["command"].GetValue<string>()].GetValueEx<string>(null)?.Split('|') ?? Enumerable.Empty<string>())
+                    foreach (Wz_Node commandNode in PluginManager.FindWz("Item\\Pet\\" + item.ItemID + ".img\\interact", this.SourceWzFile).Nodes)
                     {
-                        int l0;
-                        if (!commandLev.TryGetValue(command, out l0))
+                        foreach (string command in petDialog?.Nodes[commandNode.Nodes["command"].GetValue<string>()].GetValueEx<string>(null)?.Split('|') ?? Enumerable.Empty<string>())
                         {
-                            commandLev.Add(command, commandNode.Nodes["l0"].GetValue<int>());
-                        }
-                        else
-                        {
-                            commandLev[command] = Math.Min(l0, commandNode.Nodes["l0"].GetValue<int>());
+                            int l0;
+                            if (!commandLev.TryGetValue(command, out l0))
+                            {
+                                commandLev.Add(command, commandNode.Nodes["l0"].GetValue<int>());
+                            }
+                            else
+                            {
+                                commandLev[command] = Math.Min(l0, commandNode.Nodes["l0"].GetValue<int>());
+                            }
                         }
                     }
                 }

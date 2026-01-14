@@ -774,36 +774,42 @@ namespace WzComparerR2.CharaSimControl
             {
                 Wz_Node petDialog = PluginManager.FindWz("String\\PetDialog.img\\" + item.ItemID, this.SourceWzFile);
                 Dictionary<string, int> commandLev = new Dictionary<string, int>();
-                foreach (Wz_Node commandNode in PluginManager.FindWz("Item\\Pet\\" + item.ItemID + ".img\\interact", this.SourceWzFile).Nodes)
+                if (PluginManager.FindWz("Item\\Pet\\" + item.ItemID + ".img\\interact", this.SourceWzFile) != null)
                 {
-                    foreach (string command in petDialog?.Nodes[commandNode.Nodes["command"].GetValue<string>()].GetValueEx<string>(null)?.Split('|') ?? Enumerable.Empty<string>())
+                    foreach (Wz_Node commandNode in PluginManager.FindWz("Item\\Pet\\" + item.ItemID + ".img\\interact", this.SourceWzFile).Nodes)
                     {
-                        int l0;
-                        if (!commandLev.TryGetValue(command, out l0))
+                        foreach (string command in petDialog?.Nodes[commandNode.Nodes["command"].GetValue<string>()].GetValueEx<string>(null)?.Split('|') ?? Enumerable.Empty<string>())
                         {
-                            commandLev.Add(command, commandNode.Nodes["l0"].GetValue<int>());
-                        }
-                        else
-                        {
-                            commandLev[command] = Math.Min(l0, commandNode.Nodes["l0"].GetValue<int>());
+                            int l0;
+                            if (!commandLev.TryGetValue(command, out l0))
+                            {
+                                commandLev.Add(command, commandNode.Nodes["l0"].GetValue<int>());
+                            }
+                            else
+                            {
+                                commandLev[command] = Math.Min(l0, commandNode.Nodes["l0"].GetValue<int>());
+                            }
                         }
                     }
                 }
 
-                GearGraphics.DrawString(g, "#c[可使用的指令]#", GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
-                foreach (int l0 in commandLev.Values.OrderBy(i => i).Distinct())
+                if (commandLev.Count > 0)
                 {
-                    if (Translator.IsKoreanStringPresent(string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))))
+                    GearGraphics.DrawString(g, "#c[可使用的指令]#", GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
+                    foreach (int l0 in commandLev.Values.OrderBy(i => i).Distinct())
                     {
-                        GearGraphics.DrawString(g, $"#cLv. {10} 以上： {string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))}#", GearGraphics.KMSItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
+                        if (Translator.IsKoreanStringPresent(string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))))
+                        {
+                            GearGraphics.DrawString(g, $"#cLv. {10} 以上： {string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))}#", GearGraphics.KMSItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
+                        }
+                        else
+                        {
+                            GearGraphics.DrawString(g, $"#cLv. {10} 以上： {string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))}#", GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
+                        }
                     }
-                    else
-                    {
-                        GearGraphics.DrawString(g, $"#cLv. {10} 以上： {string.Join(", ", commandLev.Where(i => i.Value == l0).Select(i => i.Key).OrderBy(s => s))}#", GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
-                    }
+                    GearGraphics.DrawString(g, "#cTip. 當寵物等級達15級，可讓牠說出特定的內容。寵物說的話不會讓其他玩家看到。#", GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
+                    GearGraphics.DrawString(g, "#c例) /寵物 [内容]#", GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
                 }
-                GearGraphics.DrawString(g, "#cTip. 當寵物等級達15級，可讓牠說出特定的內容。寵物說的話不會讓其他玩家看到。#", GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
-                GearGraphics.DrawString(g, "#c例) /寵物 [内容]#", GearGraphics.ItemDetailFont, item22ColorTable, descLeft, descRight, ref picH, LineHeight);
             }
 
             // 미리보기
