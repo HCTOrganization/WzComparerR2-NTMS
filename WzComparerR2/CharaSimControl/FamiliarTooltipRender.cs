@@ -223,6 +223,18 @@ namespace WzComparerR2.CharaSimControl
                         g.DrawImage(Resource.UIFamiliar_img_ToolTip__BackGround_0__Symbol_4, 24 + lDelta, 24 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_ToolTip__BackGround_0__Symbol_4.Width, Resource.UIFamiliar_img_ToolTip__BackGround_0__Symbol_4.Height), GraphicsUnit.Pixel);
                         g.DrawImage(Resource.UIFamiliar_img_ToolTip__BackGround_0__Grade_4, 14 + lDelta, 292 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_ToolTip__BackGround_0__Grade_4.Width, Resource.UIFamiliar_img_ToolTip__BackGround_0__Grade_4.Height), GraphicsUnit.Pixel);
                         break;
+                    case 5:
+                        g.DrawImage(Resource.UIFamiliar_img_ToolTip__BackGround_0__Symbol_5, 24 + lDelta, 24 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_ToolTip__BackGround_0__Symbol_5.Width, Resource.UIFamiliar_img_ToolTip__BackGround_0__Symbol_5.Height), GraphicsUnit.Pixel);
+                        g.DrawImage(Resource.UIFamiliar_img_ToolTip__BackGround_0__Grade_5, 14 + lDelta, 292 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_ToolTip__BackGround_0__Grade_5.Width, Resource.UIFamiliar_img_ToolTip__BackGround_0__Grade_5.Height), GraphicsUnit.Pixel);
+                        break;
+                    case 6:
+                        g.DrawImage(Resource.UIFamiliar_img_ToolTip__BackGround_0__Symbol_6, 24 + lDelta, 24 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_ToolTip__BackGround_0__Symbol_6.Width, Resource.UIFamiliar_img_ToolTip__BackGround_0__Symbol_6.Height), GraphicsUnit.Pixel);
+                        g.DrawImage(Resource.UIFamiliar_img_ToolTip__BackGround_0__Grade_6, 14 + lDelta, 292 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_ToolTip__BackGround_0__Grade_6.Width, Resource.UIFamiliar_img_ToolTip__BackGround_0__Grade_6.Height), GraphicsUnit.Pixel);
+                        break;
+                    case 7:
+                        g.DrawImage(Resource.UIFamiliar_img_ToolTip__BackGround_0__Symbol_7, 24 + lDelta, 24 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_ToolTip__BackGround_0__Symbol_7.Width, Resource.UIFamiliar_img_ToolTip__BackGround_0__Symbol_7.Height), GraphicsUnit.Pixel);
+                        g.DrawImage(Resource.UIFamiliar_img_ToolTip__BackGround_0__Grade_7, 14 + lDelta, 292 + tDelta, new Rectangle(0, 0, Resource.UIFamiliar_img_ToolTip__BackGround_0__Grade_7.Width, Resource.UIFamiliar_img_ToolTip__BackGround_0__Grade_7.Height), GraphicsUnit.Pixel);
+                        break;
                 }
                 Bitmap mobNameOverlay = DrawName(GetMobName(mob.ID), 297, 21);
                 g.DrawImage(mobNameOverlay, 17 + lDelta, 255 + tDelta, new Rectangle(0, 0, mobNameOverlay.Width, mobNameOverlay.Height), GraphicsUnit.Pixel);                // Layout
