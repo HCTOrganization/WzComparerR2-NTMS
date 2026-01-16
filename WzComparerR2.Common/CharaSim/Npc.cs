@@ -97,6 +97,7 @@ namespace WzComparerR2.CharaSim
                                         {
                                             npcInfo.Illustration2BaseBitmap = bmpOrigin.Bitmap;
                                             baseOrigin = bmpOrigin.Origin;
+                                            npcInfo.Illustration2Bitmaps.Add(npcInfo.Illustration2BaseBitmap);
                                         }
                                         break;
                                     case "face":
@@ -153,11 +154,6 @@ namespace WzComparerR2.CharaSim
                                         }
                                         break;
                                 }
-                            }
-
-                            if (npcInfo.Illustration2Bitmaps.Count == 0)
-                            {
-                                npcInfo.Illustration2Bitmaps.Add(npcInfo.Illustration2BaseBitmap);
                             }
                             break;
                     }
