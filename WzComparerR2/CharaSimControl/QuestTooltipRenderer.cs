@@ -594,6 +594,37 @@ namespace WzComparerR2.CharaSimControl
                         return id.ToString();
                 }
             });
+            text = Regex.Replace(text, @"#(Qdaylimit|Qhourlimit|Qminlimit|Qseclimit|Dhour|Dmin|Dsec|Dminhour|Dcount|Ddaylimit)#", match =>
+            {
+                string tag = match.Groups[1].Value;
+                switch (tag)
+                {
+                    case "Qdaylimit":
+                        return "29";
+
+                    case "Qhourlimit":
+                        return "23";
+
+                    case "Qminlimit":
+                    case "Qseclimit":
+                        return "59";
+
+                    case "Dhour":
+                    case "Dmin":
+                    case "Dsec":
+                    case "Dcount":
+                        return "0";
+
+                    case "Dminhour":
+                        return "3";
+
+                    case "Ddaylimit":
+                        return "27";
+
+                    default:
+                        return $"<{tag}>";
+                }
+            });
             text = Regex.Replace(text, @"#(questorder|j|c|R|x|MD|M|u|fs|fn|fc|f|a|W|o9101069f|DL|h0)(.+?)#", match =>
             {
                 string tag = match.Groups[1].Value;
@@ -609,7 +640,18 @@ namespace WzComparerR2.CharaSimControl
                         return "";
 
                     case "j":
-                        return info;
+                        if (info.StartsWith("cmpcnt") || info.StartsWith("per") || info.EndsWith("cnt"))
+                        {
+                            return "0";
+                        }
+                        else if (info.StartsWith("gauge"))
+                        {
+                            return "<進度>";
+                        }
+                        else
+                        {
+                            return $"<{info}>";
+                        }
 
                     case "x":
                         return "x%";
