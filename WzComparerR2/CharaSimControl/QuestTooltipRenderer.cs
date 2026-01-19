@@ -646,7 +646,10 @@ namespace WzComparerR2.CharaSimControl
                         }
                         else if (info.StartsWith("gauge"))
                         {
-                            return "<進度>";
+                            var bmpGauge = (Bitmap)Resource.ResourceManager.GetObject("UIWindow2_img_Quest_Gauge2_frame");
+                            var retGauge = $"#@{this.ImageTable.Count}/{bmpGauge?.Width ?? 0}/{bmpGauge?.Height ?? 0}@";
+                            this.ImageTable.Add(this.ImageTable.Count.ToString(), bmpGauge);
+                            return retGauge;
                         }
                         else
                         {
