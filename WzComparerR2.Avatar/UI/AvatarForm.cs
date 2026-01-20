@@ -2713,9 +2713,9 @@ namespace WzComparerR2.Avatar.UI
                             else
                             {
                                 string[] decodedInfo = Encoding.UTF8.GetString(Convert.FromBase64String(avatarCode)).Split("a");
-                                List<string> msnCode = new List<string> {};
-                                msnCode.Add((Int32.Parse(decodedInfo[0]) + 2000).ToString());
-                                msnCode.Add((Int32.Parse(decodedInfo[1]) + 12000).ToString());
+                                List<int> msnCode = new List<int> {};
+                                msnCode.Add((Int32.Parse(decodedInfo[0]) + 2000));
+                                msnCode.Add((Int32.Parse(decodedInfo[1]) + 12000));
                                 foreach (string itemCode in decodedInfo.Skip(2))
                                 {
                                     switch (itemCode.Length)
@@ -2724,14 +2724,15 @@ namespace WzComparerR2.Avatar.UI
                                             break;
                                         case 5:
                                         case 7:
-                                            msnCode.Add(itemCode);
+                                            msnCode.Add(Int32.Parse(itemCode));
                                             break;
                                         case 8:
-                                            msnCode.Add(itemCode.Substring(0, 5));
+                                            msnCode.Add(Int32.Parse(itemCode.Substring(0, 5)));
                                             break;
 
                                     }
                                 }
+                                msnCode.Sort();
                                 LoadCode(string.Join(",", msnCode), 0);
                             }
                         }
