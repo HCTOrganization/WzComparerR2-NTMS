@@ -500,6 +500,7 @@ namespace WzComparerR2.CharaSimControl
                 string attrStr = null;
                 for (int i = 0; i < attrList.Count; i++)
                 {
+                    if (attrList[i] == null) continue;
                     var newStr = (attrStr != null ? (attrStr + ", ") : null) + attrList[i];
                     if (TextRenderer.MeasureText(g, newStr, font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width > tooltip.Width - 7 || (attrList[i].Contains('\n') && attrStr != null))
                     {
@@ -1239,7 +1240,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 tags.Add(ItemStringHelper.GetItemPropString(ItemPropType.only, value));
             }
-            if (item.Props.TryGetValue(ItemPropType.tradeBlock, out value) && value != 0)
+            if ((item.Props.TryGetValue(ItemPropType.tradeBlock, out value) && value != 0) && !(item.Props.TryGetValue(ItemPropType.mintable, out _)))
             {
                 tags.Add(ItemStringHelper.GetItemPropString(ItemPropType.tradeBlock, value));
             }
@@ -1282,9 +1283,17 @@ namespace WzComparerR2.CharaSimControl
             {
                 tags.Add(ItemStringHelper.GetItemPropString(ItemPropType.multiPet, 0));
             }
-            if (item.Props.TryGetValue(ItemPropType.mintable, out value))
+            if (CharaSimLoader.LoadedNotMintableItems.Contains(item.ItemID))
+            {
+                tags.Add(ItemStringHelper.GetItemPropString(ItemPropType.notMintable, 1));
+            }
+            else if (item.Props.TryGetValue(ItemPropType.mintable, out value) && value != 0)
             {
                 tags.Add(ItemStringHelper.GetItemPropString(ItemPropType.mintable, value));
+            }
+            else if (CharaSimLoader.LoadedMintableItems.Contains(item.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(item.ItemID))
+            {
+                tags.Add(ItemStringHelper.GetItemPropString(ItemPropType.mintable, 1));
             }
 
             return tags;

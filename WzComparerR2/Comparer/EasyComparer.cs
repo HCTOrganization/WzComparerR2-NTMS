@@ -300,6 +300,7 @@ namespace WzComparerR2.Comparer
                     CharaSimLoader.LoadSetItemsIfEmpty(fileNew);
                     CharaSimLoader.LoadAstraSubWeaponsIfEmpty(fileNew);
                     CharaSimLoader.LoadExclusiveEquipsIfEmpty(fileNew);
+                    CharaSimLoader.LoadMsnMintableItemListIfEmpty(fileNew);
                     CharaSimLoader.LoadCommodities(fileOld, slotIdx: 1);
                     CharaSimLoader.LoadCommodities(fileNew, slotIdx: 0);
                     CompareCommodities();

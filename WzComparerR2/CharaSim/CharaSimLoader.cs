@@ -20,6 +20,9 @@ namespace WzComparerR2.CharaSim
             LoadedCommodityPricesByItemId = new List<Dictionary<int, List<CommodityPriceInfo>>>();
             for (int i = 0; i < 2; i++) // 2 slots
                 LoadedCommodityPricesByItemId.Add(new Dictionary<int, List<CommodityPriceInfo>>());
+            LoadedMintableItems = new List<int>();
+            LoadedMintableSBTItems = new List<int>();
+            LoadedNotMintableItems = new List<int>();
         }
 
         public static Dictionary<int, SetItem> LoadedSetItems { get; private set; }
@@ -29,6 +32,9 @@ namespace WzComparerR2.CharaSim
         public static Dictionary<int, Commodity> LoadedCommoditiesBySN { get; private set; }
         public static Dictionary<int, Commodity> LoadedCommoditiesByItemId { get; private set; }
         public static List<Dictionary<int, List<CommodityPriceInfo>>> LoadedCommodityPricesByItemId { get; private set; }
+        public static List<int> LoadedMintableItems { get; private set; }
+        public static List<int> LoadedMintableSBTItems { get; private set; }
+        public static List<int> LoadedNotMintableItems { get; private set; }
 
         public static void LoadSetItemsIfEmpty(Wz_File sourceWzFile = null)
         {
@@ -125,6 +131,60 @@ namespace WzComparerR2.CharaSim
                     }
                 }
                 insert(jobID);
+            }
+        }
+
+        public static void LoadMsnMintableItemListIfEmpty(Wz_File sourceWzFile = null)
+        {
+            if (LoadedMintableItems.Count == 0 || LoadedMintableSBTItems.Count == 0 || LoadedNotMintableItems.Count == 0)
+            {
+                LoadMsnMintableItemList(sourceWzFile);
+            }
+        }
+
+        public static void LoadMsnMintableItemList(Wz_File sourceWzFile)
+        {
+            Wz_Node itemWz = PluginManager.FindWz(Wz_Type.Item, sourceWzFile);
+            if (itemWz == null)
+                return;
+            Wz_Node mintableListNode = itemWz.FindNodeByPath("MintableList.img", true);
+            if (mintableListNode == null)
+                return;
+
+            LoadedMintableItems.Clear();
+            LoadedMintableSBTItems.Clear();
+            LoadedNotMintableItems.Clear();
+
+            Wz_Node nftNode = mintableListNode.FindNodeByPath("NFT");
+            if (nftNode != null)
+            {
+                foreach (var i in nftNode.Nodes)
+                {
+                    switch (i.Text)
+                    {
+                        case "SBT":
+                            foreach (var j in i.Nodes)
+                            {
+                                if (int.TryParse(j.Text, out int sbtId))
+                                    LoadedMintableSBTItems.Add(sbtId);
+                            }
+                            break;
+                        default:
+                            if (int.TryParse(i.Text, out int id))
+                                LoadedMintableItems.Add(id);
+                            break;
+                    }
+                }
+            }
+
+            Wz_Node ftNode = mintableListNode.FindNodeByPath("FT");
+            if (ftNode != null)
+            {
+                foreach (var i in ftNode.Nodes)
+                {
+                    if (int.TryParse(i.Text, out int id))
+                        LoadedNotMintableItems.Add(id);
+                }
             }
         }
 
@@ -245,6 +305,9 @@ namespace WzComparerR2.CharaSim
             {
                 dict.Clear();
             }
+            LoadedMintableItems.Clear();
+            LoadedMintableSBTItems.Clear();
+            LoadedNotMintableItems.Clear();
         }
 
         public static int GetActionDelay(string actionName, Wz_Node wzNode = null)

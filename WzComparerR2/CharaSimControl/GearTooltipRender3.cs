@@ -242,6 +242,7 @@ namespace WzComparerR2.CharaSimControl
                 { "$d", ((SolidBrush)GearGraphics.Equip22BrushDarkGray).Color },
                 { "$z", ((SolidBrush)GearGraphics.GreenBrush2).Color },
                 { "$S", ((SolidBrush)GearGraphics.ItemPriceBrush).Color },
+                { "$n", ((SolidBrush)GearGraphics.NotMintableRedBrush).Color },
             };
             var itemPotentialColorTable = new Dictionary<string, Color>()
             {
@@ -2104,9 +2105,18 @@ namespace WzComparerR2.CharaSimControl
             }
 
             // 민팅
-            if (Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0)
+
+            if (CharaSimLoader.LoadedNotMintableItems.Contains(Gear.ItemID))
+            {
+                tags.Add($"#$n{ItemStringHelper.GetGearPropString3(GearPropType.notMintable, 1)[0]}#");
+            }
+            else if (Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0)
             {
                 tags.Add(ItemStringHelper.GetGearPropString3(GearPropType.mintable, value)[0]);
+            }
+            else if (CharaSimLoader.LoadedMintableItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(Gear.ItemID))
+            {
+                tags.Add(ItemStringHelper.GetGearPropString3(GearPropType.mintable, 1)[0]);
             }
 
             return tags.Where(text => !string.IsNullOrEmpty(text)).ToList();

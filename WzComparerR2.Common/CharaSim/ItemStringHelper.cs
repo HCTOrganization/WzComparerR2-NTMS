@@ -123,6 +123,7 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.accountSharableAfterExchange: return value == 0 ? null : "可交換1次\n(僅限在相同世界內的我的角色之間轉移)";
                 case GearPropType.noPrism: return value == 0 ? null : "無法使用棱鏡";
                 case GearPropType.mintable: return value == 0 ? null : "可鑄造";
+                case GearPropType.notMintable: return value == 0 ? null : "不可鑄造";
                 case GearPropType.tradeAvailable:
                     switch (value)
                     {
@@ -387,6 +388,9 @@ namespace WzComparerR2.CharaSim
                     return res;
                 case GearPropType.mintable:
                     res[0] = value == 0 ? null : "#$r可鑄造#";
+                    return res;
+                case GearPropType.notMintable:
+                    res[0] = value == 0 ? null : "#$r不可鑄造#";
                     return res;
                 case GearPropType.tradeAvailable:
                     switch (value)
@@ -1223,6 +1227,8 @@ namespace WzComparerR2.CharaSim
                     return value == 0 ? "普通寵物（不能與其他相同普通寵物一起使用）" : "多隻寵物（最多可使用3隻相同寵物）";
                 case ItemPropType.mintable:
                     return GetGearPropString(GearPropType.mintable, value);
+                case ItemPropType.notMintable:
+                    return GetGearPropString(GearPropType.notMintable, value);
                 default:
                     return null;
             }

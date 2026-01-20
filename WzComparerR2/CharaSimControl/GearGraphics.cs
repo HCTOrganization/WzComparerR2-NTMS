@@ -310,6 +310,10 @@ namespace WzComparerR2.CharaSimControl
         /// </summary>
         public static readonly Brush BlockRedBrush = new SolidBrush(Color.FromArgb(255, 0, 102));
         /// <summary>
+        /// 表示不可铸造的红色画刷。
+        /// </summary>
+        public static readonly Brush NotMintableRedBrush = new SolidBrush(Color.FromArgb(255, 0, 0));
+        /// <summary>
         /// 表示装备tooltip中金锤子描述文字的颜色画刷。
         /// </summary>
         public static readonly Brush GoldHammerBrush = new SolidBrush(Color.FromArgb(255, 238, 204));

@@ -1884,7 +1884,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 tags.Add(ItemStringHelper.GetGearPropString(GearPropType.only, value));
             }
-            if (Gear.Props.TryGetValue(GearPropType.tradeBlock, out value) && value != 0)
+            if (Gear.Props.TryGetValue(GearPropType.tradeBlock, out value) && value != 0 && !Gear.Props.TryGetValue(GearPropType.mintable, out _))
             {
                 tags.Add(ItemStringHelper.GetGearPropString(GearPropType.tradeBlock, value));
             }
@@ -1896,9 +1896,17 @@ namespace WzComparerR2.CharaSimControl
             {
                 tags.Add(ItemStringHelper.GetGearPropString(GearPropType.noPrism, value));
             }
-            if (Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0)
+            if (CharaSimLoader.LoadedNotMintableItems.Contains(Gear.ItemID))
+            {
+                tags.Add(ItemStringHelper.GetGearPropString(GearPropType.notMintable, 1));
+            }
+            else if (Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0)
             {
                 tags.Add(ItemStringHelper.GetGearPropString(GearPropType.mintable, value));
+            }
+            else if (CharaSimLoader.LoadedMintableItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(Gear.ItemID))
+            {
+                tags.Add(ItemStringHelper.GetGearPropString(GearPropType.mintable, 1));
             }
             if (Gear.Props.TryGetValue(GearPropType.abilityTimeLimited, out value) && value != 0)
             {
