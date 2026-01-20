@@ -2233,12 +2233,6 @@ namespace WzComparerR2.CharaSimControl
                 tags.Add(ItemStringHelper.GetGearPropString3(GearPropType.noPrism, value)[0]);
             }
 
-            // 민팅
-            if (Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0)
-            {
-                tags.Add(ItemStringHelper.GetGearPropString3(GearPropType.mintable, value)[0]);
-            }
-
             return tags.Where(text => !string.IsNullOrEmpty(text)).ToList();
         }
 
