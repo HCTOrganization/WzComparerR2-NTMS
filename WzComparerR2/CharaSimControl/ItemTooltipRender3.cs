@@ -593,7 +593,7 @@ namespace WzComparerR2.CharaSimControl
                 iconX + 6 + (1 - item.Icon.Origin.X) * 2,
                 picH + 6 + (33 - item.Icon.Origin.Y) * 2);
             }
-            if (item.Cash)
+            if (item.Cash && !((item.Props.TryGetValue(ItemPropType.mintable, out value) && value != 0) || CharaSimLoader.LoadedMintableItems.Contains(item.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(item.ItemID) || CharaSimLoader.LoadedNotMintableItems.Contains(item.ItemID)))
             {
                 Bitmap cashImg = null;
                 Point cashOrigin = new Point(12, 12);

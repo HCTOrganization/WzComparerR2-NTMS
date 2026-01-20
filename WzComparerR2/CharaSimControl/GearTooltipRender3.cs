@@ -536,7 +536,7 @@ namespace WzComparerR2.CharaSimControl
             else g.DrawImage(Resource.UIToolTipNew_img_Item_Common_ItemIcon_base, 15, picH + 10);
 
             // 캐시 라벨 아이콘
-            if (Gear.Cash && !(Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0))
+            if (Gear.Cash && !((Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0) || CharaSimLoader.LoadedMintableItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedNotMintableItems.Contains(Gear.ItemID)))
             {
                 Bitmap cashImg = null;
                 Point cashOrigin = new Point(12, 12);
