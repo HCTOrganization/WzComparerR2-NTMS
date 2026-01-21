@@ -183,7 +183,7 @@ namespace WzComparerR2.OpenAPI
                     serviceBackend = "https://tw-event.beanfun.com/MapleStory/api/UnionWebRank/GetRank";
                     break;
                 case "MSN":
-                    serviceBackend = "https://msu.io/maplestoryn/api/msn/ranking/by-name?characterName=" + Uri.EscapeDataString(characterName);
+                    serviceBackend = "https://msu.io/navigator/api/navigator/search?keyword=" + Uri.EscapeDataString(characterName);
                     break;
             }
             try
@@ -221,7 +221,7 @@ namespace WzComparerR2.OpenAPI
 
                         avatarCode = avatarDoc.DocumentNode.SelectNodes("//img[@src]")
                             ?.Select(node => node.GetAttributeValue("src", ""))
-                            .FirstOrDefault(src => src.StartsWith("//avatar-maplestory.nexon.co.jp")).Replace("//avatar-maplestory.nexon.co.jp/Character/", "").Replace(".png", "");
+                            .FirstOrDefault(src => src.StartsWith("//avatar-maplestory.nexon.co.jp")).Split('/').Last().Replace(".png", "");
                     }
                     else if (avatarLinks.Count > 2)
                     {
@@ -236,7 +236,7 @@ namespace WzComparerR2.OpenAPI
 
                         avatarCode = avatarDoc.DocumentNode.SelectNodes("//img[@src]")
                             ?.Select(node => node.GetAttributeValue("src", ""))
-                            .FirstOrDefault(src => src.StartsWith("//avatar-maplestory.nexon.co.jp")).Replace("//avatar-maplestory.nexon.co.jp/Character/", "").Replace(".png", "");
+                            .FirstOrDefault(src => src.StartsWith("//avatar-maplestory.nexon.co.jp")).Split('/').Last().Replace(".png", "");
                     }
                     else
                     {
@@ -253,11 +253,11 @@ namespace WzComparerR2.OpenAPI
                         var json = await response.Content.ReadAsStringAsync();
                         using JsonDocument doc = JsonDocument.Parse(json);
                         JsonElement root = doc.RootElement;
-                        JsonElement ranksArray = root.GetProperty("ranks");
+                        JsonElement records = root.GetProperty("ranks");
 
-                        if (ranksArray.GetArrayLength() > 0)
+                        if (records.GetArrayLength() > 0)
                         {
-                            avatarCode = ranksArray[0].GetProperty("characterImgURL").GetString().Replace("https://msavatar1.nexon.net/Character/", "").Replace(".png", "");
+                            avatarCode = records[0].GetProperty("characterImgURL").GetString().Split('/').Last().Replace(".png", "");
                         }
                     }
                     else
@@ -279,7 +279,7 @@ namespace WzComparerR2.OpenAPI
                             dataElement.TryGetProperty("characterBasic", out JsonElement characterBasicElement) &&
                             characterBasicElement.TryGetProperty("character_image", out JsonElement characterImageElement))
                         {
-                            avatarCode = characterImageElement.GetString().Replace("https://open.api.nexon.com/static/maplestorysea/character/look/", "").Replace("https://open.api.nexon.com/static/maplestory/character/look/", "");
+                            avatarCode = characterImageElement.GetString().Split('/').Last();
                         }
                     }
                     else
@@ -354,16 +354,24 @@ namespace WzComparerR2.OpenAPI
                 }
                 else if (region == "MSN")
                 {
-                    EdgeWebView webView = new EdgeWebView();
-                    EdgeWebView.webViewUri = serviceBackend;
-                    webView.ShowDialog();
-                    var json = webView.jsonResult;
-                    using JsonDocument doc = JsonDocument.Parse(json);
-                    JsonElement root = doc.RootElement;
-                    if (root.TryGetProperty("ranking", out JsonElement rankingData) &&
-                        rankingData.TryGetProperty("imageUrl", out JsonElement imageUrl))
+                    var client = new HttpClient();
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
+                    var response = await client.GetAsync(serviceBackend);
+                    if (response.IsSuccessStatusCode)
                     {
-                        avatarCode = imageUrl.GetString().Replace("https://market-static.msu.io/msu/platform/charimages/transient/", "").Replace(".png", "");
+                        var json3 = await response.Content.ReadAsStringAsync();
+                        using JsonDocument doc3 = JsonDocument.Parse(json3);
+                        JsonElement root3 = doc3.RootElement;
+                        JsonElement records = root3.GetProperty("records");
+
+                        if (records.GetArrayLength() > 0)
+                        {
+                            avatarCode = records[0].GetProperty("imageUrl").GetString().Split('/').Last().Replace(".png", "");
+                        }
+                    }
+                    else
+                    {
+                        avatarCode = "";
                     }
                 }
                 else if (region == "CMS")
