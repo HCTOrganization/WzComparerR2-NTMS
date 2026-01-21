@@ -608,7 +608,7 @@ namespace WzComparerR2.CharaSimControl
                 picH + 6 + (33 - item.Icon.Origin.Y) * 2);
                 //picH + 8 + (33 - item.Icon.Bitmap.Height) * 2);
             }
-            if (item.Cash && !((item.Props.TryGetValue(ItemPropType.mintable, out value) && value != 0) || CharaSimLoader.LoadedMintableItems.Contains(item.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(item.ItemID) || CharaSimLoader.LoadedNotMintableItems.Contains(item.ItemID)))
+            if (item.Cash && !((item.Props.TryGetValue(ItemPropType.mintable, out value) && value != 0) || CharaSimLoader.LoadedMintableNFTItems.Contains(item.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(item.ItemID) || CharaSimLoader.LoadedMintableFTItems.Contains(item.ItemID)))
             {
                 Bitmap cashImg = null;
                 Point cashOrigin = new Point(12, 12);
@@ -1283,15 +1283,11 @@ namespace WzComparerR2.CharaSimControl
             {
                 tags.Add(ItemStringHelper.GetItemPropString(ItemPropType.multiPet, 0));
             }
-            if (CharaSimLoader.LoadedNotMintableItems.Contains(item.ItemID))
-            {
-                tags.Add(ItemStringHelper.GetItemPropString(ItemPropType.notMintable, 1));
-            }
-            else if (item.Props.TryGetValue(ItemPropType.mintable, out value) && value != 0)
+            if (item.Props.TryGetValue(ItemPropType.mintable, out value) && value != 0)
             {
                 tags.Add(ItemStringHelper.GetItemPropString(ItemPropType.mintable, value));
             }
-            else if (CharaSimLoader.LoadedMintableItems.Contains(item.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(item.ItemID))
+            else if (CharaSimLoader.LoadedMintableNFTItems.Contains(item.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(item.ItemID) || CharaSimLoader.LoadedMintableFTItems.Contains(item.ItemID))
             {
                 tags.Add(ItemStringHelper.GetItemPropString(ItemPropType.mintable, 1));
             }

@@ -544,7 +544,7 @@ namespace WzComparerR2.CharaSimControl
 
                 attr.Dispose();
             }
-            if (Gear.Cash && !((Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0) || CharaSimLoader.LoadedMintableItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedNotMintableItems.Contains(Gear.ItemID))) //绘制cash标识
+            if (Gear.Cash && !((Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0) || CharaSimLoader.LoadedMintableNFTItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableFTItems.Contains(Gear.ItemID))) //绘制cash标识
             {
                 Bitmap cashImg = null;
                 Point cashOrigin = new Point(12, 12);
@@ -1896,15 +1896,11 @@ namespace WzComparerR2.CharaSimControl
             {
                 tags.Add(ItemStringHelper.GetGearPropString(GearPropType.noPrism, value));
             }
-            if (CharaSimLoader.LoadedNotMintableItems.Contains(Gear.ItemID))
-            {
-                tags.Add(ItemStringHelper.GetGearPropString(GearPropType.notMintable, 1));
-            }
-            else if (Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0)
+            if (Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0)
             {
                 tags.Add(ItemStringHelper.GetGearPropString(GearPropType.mintable, value));
             }
-            else if (CharaSimLoader.LoadedMintableItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(Gear.ItemID))
+            else if (CharaSimLoader.LoadedMintableNFTItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableFTItems.Contains(Gear.ItemID))
             {
                 tags.Add(ItemStringHelper.GetGearPropString(GearPropType.mintable, 1));
             }

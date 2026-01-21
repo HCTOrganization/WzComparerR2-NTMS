@@ -242,7 +242,6 @@ namespace WzComparerR2.CharaSimControl
                 { "$d", ((SolidBrush)GearGraphics.Equip22BrushDarkGray).Color },
                 { "$z", ((SolidBrush)GearGraphics.GreenBrush2).Color },
                 { "$S", ((SolidBrush)GearGraphics.ItemPriceBrush).Color },
-                { "$n", ((SolidBrush)GearGraphics.NotMintableRedBrush).Color },
             };
             var itemPotentialColorTable = new Dictionary<string, Color>()
             {
@@ -536,7 +535,7 @@ namespace WzComparerR2.CharaSimControl
             else g.DrawImage(Resource.UIToolTipNew_img_Item_Common_ItemIcon_base, 15, picH + 10);
 
             // 캐시 라벨 아이콘
-            if (Gear.Cash && !((Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0) || CharaSimLoader.LoadedMintableItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedNotMintableItems.Contains(Gear.ItemID)))
+            if (Gear.Cash && !((Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0) || CharaSimLoader.LoadedMintableNFTItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableFTItems.Contains(Gear.ItemID)))
             {
                 Bitmap cashImg = null;
                 Point cashOrigin = new Point(12, 12);
@@ -2105,16 +2104,11 @@ namespace WzComparerR2.CharaSimControl
             }
 
             // 민팅
-
-            if (CharaSimLoader.LoadedNotMintableItems.Contains(Gear.ItemID))
-            {
-                tags.Add($"#$n{ItemStringHelper.GetGearPropString3(GearPropType.notMintable, 1)[0]}#");
-            }
-            else if (Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0)
+            if (Gear.Props.TryGetValue(GearPropType.mintable, out value) && value != 0)
             {
                 tags.Add(ItemStringHelper.GetGearPropString3(GearPropType.mintable, value)[0]);
             }
-            else if (CharaSimLoader.LoadedMintableItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(Gear.ItemID))
+            else if (CharaSimLoader.LoadedMintableNFTItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableSBTItems.Contains(Gear.ItemID) || CharaSimLoader.LoadedMintableFTItems.Contains(Gear.ItemID))
             {
                 tags.Add(ItemStringHelper.GetGearPropString3(GearPropType.mintable, 1)[0]);
             }
