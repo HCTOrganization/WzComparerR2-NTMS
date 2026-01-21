@@ -1857,46 +1857,138 @@ namespace WzComparerR2.CharaSimControl
             picHeight = 0;
             if (CharaSimLoader.LoadedPetEquipInfo.ContainsKey(Gear.ItemID))
             {
-                List<Bitmap> petEquipBmps = new List<Bitmap>();
-                foreach (var i in CharaSimLoader.LoadedPetEquipInfo[Gear.ItemID])
+                if (CharaSimLoader.LoadedPetEquipInfo[Gear.ItemID].Count > 4)
                 {
-                    Item pet = Item.CreateFromNode(PluginBase.PluginManager.FindWz($@"Item\Pet\{i}.img", this.SourceWzFile), PluginBase.PluginManager.FindWz);
-                    if (pet != null)
+                    int reqColumns = (int)Math.Ceiling(CharaSimLoader.LoadedPetEquipInfo[Gear.ItemID].Count / 10.0);
+                    List<Dictionary<int, string>> petName = new List<Dictionary<int, string>>();
+                    List<Dictionary<int, BitmapOrigin>> petIcon = new List<Dictionary<int, BitmapOrigin>>();
+                    for (int index = 0; index < reqColumns; index++)
                     {
-                        TooltipRender renderer = this.ItemRender;
-                        if (renderer == null)
-                        {
-                            var defaultRenderer = new ItemTooltipRender2();
-                            defaultRenderer.StringLinker = this.StringLinker;
-                            defaultRenderer.ShowObjectID = this.ShowObjectID;
-                            defaultRenderer.ShowApplicablePetEquip = false;
-                            renderer = defaultRenderer;
-                        }
-
-                        renderer.TargetItem = pet;
-                        Bitmap bmp = renderer.Render();
-                        if (bmp != null) petEquipBmps.Add(bmp);
+                        petName.Add(new Dictionary<int, string>());
+                        petIcon.Add(new Dictionary<int, BitmapOrigin>());
                     }
-                }
-                if (petEquipBmps.Count > 0)
-                {
-                    int width = 0;
-                    foreach (var i in petEquipBmps)
+                    int columnIndex = 0;
+                    foreach (var i in CharaSimLoader.LoadedPetEquipInfo[Gear.ItemID])
                     {
-                        width = Math.Max(width, i.Width);
-                        picHeight += i.Height;
+                        StringResult sr;
+                        if (this.StringLinker == null || !this.StringLinker.StringItem.TryGetValue(i, out sr))
+                        {
+                            petName[columnIndex][i] = "(null)";
+                        }
+                        else
+                        {
+                            petName[columnIndex][i] = sr.Name;
+                        }
+                        Item pet = Item.CreateFromNode(PluginBase.PluginManager.FindWz($@"Item\Pet\{i}.img", this.SourceWzFile), PluginBase.PluginManager.FindWz);
+                        if (pet != null)
+                        {
+                            petIcon[columnIndex][i] = pet.Icon;
+                        }
+                        else
+                        {
+                            petIcon[columnIndex][i] = new BitmapOrigin();
+                        }
+                        if (CharaSimLoader.LoadedPetEquipInfo[Gear.ItemID].IndexOf(i) % 10 == 9) columnIndex++;
+                    }
+                    int width = 52;
+                    picHeight = 20;
+                    int[] columnWidths = new int[reqColumns];
+                    applicablePetBitmap = new Bitmap(1, 1);
+                    using (Graphics g = Graphics.FromImage(applicablePetBitmap))
+                    {
+                        for (int index = 0; index < reqColumns; index++)
+                        {
+                            int maxTextWidth = 0;
+                            foreach (var i in petName[index])
+                            {
+                                string petNameStr = $"{i.Value} ({i.Key})";
+                                SizeF nameSize = TextRenderer.MeasureText(g, petNameStr, Translator.IsKoreanStringPresent(petNameStr) ? GearGraphics.KMSItemNameFont : GearGraphics.ItemNameFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
+                                maxTextWidth = Math.Max(maxTextWidth, (int)nameSize.Width);
+                                if (index == 0) picHeight += 50;
+                            }
+                            columnWidths[index] = maxTextWidth + 35;
+                            width += maxTextWidth + 38;
+                        }
                     }
                     applicablePetBitmap = new Bitmap(width, picHeight);
                     using (Graphics g = Graphics.FromImage(applicablePetBitmap))
                     {
-                        int picH = 0;
-                        foreach (var i in petEquipBmps)
+                        int picH = 8;
+                        int right = width - 18;
+                        GearGraphics.DrawNewTooltipBack(g, 0, 0, width, picHeight); 
+                        g.DrawImage(Resource.UIToolTip_img_Item_Frame2_cover, 3, 3);
+                        TextRenderer.DrawText(g, "可用此裝備的寵物列表", GearGraphics.ItemDetailFont, new Point(width, picH), Color.FromArgb(255, 255, 255), TextFormatFlags.HorizontalCenter);
+                        int iconLeft = 15;
+                        int txtLeft = 55;
+                        for (int index = 0; index < reqColumns; index++)
                         {
-                            g.DrawImage(i, 0, picH, new Rectangle(0, 0, i.Width, i.Height), GraphicsUnit.Pixel);
-                            picH += i.Height;
+                            picH = 23;
+                            foreach (var i in petIcon[index])
+                            {
+                                g.DrawImage(Resource.UIToolTip_img_Item_ItemIcon_canvas_Backgrnd, iconLeft - 2, picH - 2);
+                                g.DrawImage(Resource.Item_shadow, iconLeft + 2 + 3, picH + 1 + 32 - 6);
+                                if (i.Value.Bitmap != null)
+                                {
+                                    var icon = i.Value;
+                                    g.DrawImage(icon.Bitmap, iconLeft + 2 - icon.Origin.X, picH + 1 + 32 - icon.Origin.Y);
+                                }
+                                picH += 50;
+                            }
+                            picH = 0;
+                            foreach (var i in petName[index])
+                            {
+                                picH += 34;
+                                string petNameStr = $"{i.Value} ({i.Key})";
+                                GearGraphics.DrawString(g, petNameStr, Translator.IsKoreanStringPresent(petNameStr) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, txtLeft, right, ref picH, 16);
+                            }
+                            txtLeft += columnWidths[index];
+                            iconLeft += columnWidths[index];
                         }
                     }
-                    petEquipBmps.Clear();
+                }
+                else
+                {
+                    List<Bitmap> petEquipBmps = new List<Bitmap>();
+                    foreach (var i in CharaSimLoader.LoadedPetEquipInfo[Gear.ItemID])
+                    {
+                        Item pet = Item.CreateFromNode(PluginBase.PluginManager.FindWz($@"Item\Pet\{i}.img", this.SourceWzFile), PluginBase.PluginManager.FindWz);
+                        if (pet != null)
+                        {
+                            TooltipRender renderer = this.ItemRender;
+                            if (renderer == null)
+                            {
+                                var defaultRenderer = new ItemTooltipRender2();
+                                defaultRenderer.StringLinker = this.StringLinker;
+                                defaultRenderer.ShowObjectID = this.ShowObjectID;
+                                defaultRenderer.ShowApplicablePetEquip = false;
+                                renderer = defaultRenderer;
+                            }
+
+                            renderer.TargetItem = pet;
+                            Bitmap bmp = renderer.Render();
+                            if (bmp != null) petEquipBmps.Add(bmp);
+                        }
+                    }
+                    if (petEquipBmps.Count > 0)
+                    {
+                        int width = 0;
+                        foreach (var i in petEquipBmps)
+                        {
+                            width = Math.Max(width, i.Width);
+                            picHeight += i.Height;
+                        }
+                        applicablePetBitmap = new Bitmap(width, picHeight);
+                        using (Graphics g = Graphics.FromImage(applicablePetBitmap))
+                        {
+                            int picH = 0;
+                            foreach (var i in petEquipBmps)
+                            {
+                                g.DrawImage(i, 0, picH, new Rectangle(0, 0, i.Width, i.Height), GraphicsUnit.Pixel);
+                                picH += i.Height;
+                            }
+                        }
+                        petEquipBmps.Clear();
+                    }
                 }
             }
             return applicablePetBitmap;
