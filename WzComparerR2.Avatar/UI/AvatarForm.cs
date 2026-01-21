@@ -2714,7 +2714,8 @@ namespace WzComparerR2.Avatar.UI
                             {
                                 string[] decodedInfo = Encoding.UTF8.GetString(Convert.FromBase64String(avatarCode)).Split("a");
                                 List<int> msnCode = new List<int> {};
-                                msnCode.Add((Int32.Parse(decodedInfo[0]) + 2000));
+                                int earType = Int32.Parse(decodedInfo[17]);
+                                msnCode.Add((Int32.Parse(decodedInfo[1]) + 2000));
                                 msnCode.Add((Int32.Parse(decodedInfo[1]) + 12000));
                                 foreach (string itemCode in decodedInfo.Skip(2))
                                 {
@@ -2734,6 +2735,7 @@ namespace WzComparerR2.Avatar.UI
                                 }
                                 msnCode.Sort();
                                 LoadCode(string.Join(",", msnCode), 0);
+                                this.cmbEar.SelectedIndex = earType;
                             }
                         }
                         catch (Exception ex)
