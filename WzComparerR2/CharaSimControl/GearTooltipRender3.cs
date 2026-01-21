@@ -59,6 +59,7 @@ namespace WzComparerR2.CharaSimControl
         public bool ShowSoldPrice { get; set; }
         public bool ShowCashPurchasePrice { get; set; }
         public bool AutoTitleWrap { get; set; }
+        public bool ShowApplicablePet { get; set; }
         public int CosmeticHairColor { get; set; }
         public int CosmeticFaceColor { get; set; }
         public bool CompareMode { get; set; } = false;
@@ -76,6 +77,7 @@ namespace WzComparerR2.CharaSimControl
         private Bitmap AvatarSample { get; set; }
 
         public TooltipRender SetItemRender { get; set; }
+        public TooltipRender ItemRender { get; set; }
         private List<int> linePos;
 
         public override Bitmap Render()
@@ -86,7 +88,7 @@ namespace WzComparerR2.CharaSimControl
             }
 
             InitSampleResources();
-            int[] picH = new int[4];
+            int[] picH = new int[5];
             linePos = new List<int>();
             Bitmap left = RenderBase(out picH[0]);
             Bitmap set = RenderSetItem(out int setHeight);
@@ -96,10 +98,16 @@ namespace WzComparerR2.CharaSimControl
             {
                 levelOrSealed = RenderLevelOrSealed(out picH[3]);
             }
+            Bitmap applicablePet = null;
+            if (this.ShowApplicablePet)
+            {
+                applicablePet = RenderApplicablePet(out picH[4]);
+            }
 
             int width = 324;
             if (set != null) width += set.Width;
             if (levelOrSealed != null) width += levelOrSealed.Width;
+            if (applicablePet != null) width += applicablePet.Width;
             int height = 0;
             for (int i = 0; i < picH.Length; i++)
             {
@@ -148,6 +156,12 @@ namespace WzComparerR2.CharaSimControl
                 g.DrawImage(levelOrSealed, width, 0, new Rectangle(0, 0, levelOrSealed.Width, picH[3]), GraphicsUnit.Pixel);
                 width += levelOrSealed.Width;
                 levelOrSealed.Dispose();
+            }
+
+            if (applicablePet != null)
+            {
+                g.DrawImage(applicablePet, width, 0, new Rectangle(0, 0, applicablePet.Width, applicablePet.Height), GraphicsUnit.Pixel);
+                applicablePet.Dispose();
             }
 
             if (this.ShowObjectID)
@@ -2031,6 +2045,57 @@ namespace WzComparerR2.CharaSimControl
                 picHeight += 13;
             }
             return levelOrSealed;
+        }
+
+        private Bitmap RenderApplicablePet(out int picHeight)
+        {
+            Bitmap applicablePetBitmap = null;
+            picHeight = 0;
+            if (CharaSimLoader.LoadedPetEquipInfo.ContainsKey(Gear.ItemID))
+            {
+                List<Bitmap> petEquipBmps = new List<Bitmap>();
+                foreach (var i in CharaSimLoader.LoadedPetEquipInfo[Gear.ItemID])
+                {
+                    Item pet = Item.CreateFromNode(PluginBase.PluginManager.FindWz($@"Item\Pet\{i}.img", this.SourceWzFile), PluginBase.PluginManager.FindWz);
+                    if (pet != null)
+                    {
+                        TooltipRender renderer = this.ItemRender;
+                        if (renderer == null)
+                        {
+                            var defaultRenderer = new ItemTooltipRender3();
+                            defaultRenderer.StringLinker = this.StringLinker;
+                            defaultRenderer.ShowObjectID = this.ShowObjectID;
+                            defaultRenderer.ShowApplicablePetEquip = false;
+                            renderer = defaultRenderer;
+                        }
+
+                        renderer.TargetItem = pet;
+                        Bitmap bmp = renderer.Render();
+                        if (bmp != null) petEquipBmps.Add(bmp);
+                    }
+                }
+                if (petEquipBmps.Count > 0)
+                {
+                    int width = 0;
+                    foreach (var i in petEquipBmps)
+                    {
+                        width = Math.Max(width, i.Width);
+                        picHeight += i.Height;
+                    }
+                    applicablePetBitmap = new Bitmap(width, picHeight);
+                    using (Graphics g = Graphics.FromImage(applicablePetBitmap))
+                    {
+                        int picH = 0;
+                        foreach (var i in petEquipBmps)
+                        {
+                            g.DrawImage(i, 0, picH, new Rectangle(0, 0, i.Width, i.Height), GraphicsUnit.Pixel);
+                            picH += i.Height;
+                        }
+                    }
+                    petEquipBmps.Clear();
+                }
+            }
+            return applicablePetBitmap;
         }
 
         private void FillRect(Graphics g, TextureBrush brush, int x, int y0, int y1)

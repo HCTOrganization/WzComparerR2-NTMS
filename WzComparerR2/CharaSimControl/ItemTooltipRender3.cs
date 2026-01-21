@@ -59,6 +59,7 @@ namespace WzComparerR2.CharaSimControl
         public bool AllowFamiliarOutOfBounds { get; set; }
         public bool UseInGameSpacing { get; set; }
         public bool UseCTFamiliarRender { get; set; }
+        public bool ShowApplicablePetEquip { get; set; }
         public long DamageSkinNumber { get; set; }
         public int CosmeticHairColor { get; set; }
         public int CosmeticFaceColor { get; set; }
@@ -251,7 +252,6 @@ namespace WzComparerR2.CharaSimControl
                 {
                     setItemBmp = RenderDamageSkin(damageSkin);
                 }
-
             }
 
             if (this.item.FamiliarID != null)
@@ -263,6 +263,15 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
+            if (this.item.IsPet && ShowApplicablePetEquip)
+            {
+                List<int> petEquipList = GetApplicablePetEquip();
+                foreach (int itemID in petEquipList)
+                {
+                    AppendGearOrItem(itemID);
+                }
+            }
+
             //计算布局
             Size totalSize = new Size(itemBmp.Width, picHeight);
             Point recipeInfoOrigin = Point.Empty;
@@ -270,6 +279,18 @@ namespace WzComparerR2.CharaSimControl
             Point setItemOrigin = Point.Empty;
             Point levelOrigin = Point.Empty;
 
+            if (setItemBmp != null)
+            {
+                setItemOrigin = new Point(totalSize.Width, 0);
+                totalSize.Width += setItemBmp.Width;
+                totalSize.Height = Math.Max(totalSize.Height, setItemBmp.Height);
+            }
+            if (levelBmp != null)
+            {
+                levelOrigin = new Point(totalSize.Width, 0);
+                totalSize.Width += levelBmp.Width;
+                totalSize.Height = Math.Max(totalSize.Height, levelHeight);
+            }
             if (recipeItemBmps.Count > 0)
             {
                 // layout:
@@ -282,11 +303,11 @@ namespace WzComparerR2.CharaSimControl
                 {
                     recipeInfoOrigin.X = itemBmp.Width - recipeInfoBmps.Max(bmp => bmp.Width);
                     recipeInfoOrigin.Y = picHeight;
-                    totalSize.Height = Math.Max(picHeight + recipeInfoBmps.Sum(bmp => bmp.Height), recipeItemBmps.Sum(bmp => bmp.Height));
+                    totalSize.Height = Math.Max(totalSize.Height, Math.Max(picHeight + recipeInfoBmps.Sum(bmp => bmp.Height), recipeItemBmps.Sum(bmp => bmp.Height)));
                 }
                 else
                 {
-                    totalSize.Height = Math.Max(picHeight, recipeItemBmps.Sum(bmp => bmp.Height));
+                    totalSize.Height = Math.Max(totalSize.Height, Math.Max(picHeight, recipeItemBmps.Sum(bmp => bmp.Height)));
                 }
             }
             else if (recipeInfoBmps.Count > 0)
@@ -296,18 +317,6 @@ namespace WzComparerR2.CharaSimControl
                 totalSize.Width += recipeInfoBmps.Max(bmp => bmp.Width);
                 totalSize.Height = Math.Max(picHeight, recipeInfoBmps.Sum(bmp => bmp.Height));
                 recipeInfoOrigin.X = itemBmp.Width;
-            }
-            if (setItemBmp != null)
-            {
-                setItemOrigin = new Point(totalSize.Width, 0);
-                totalSize.Width += setItemBmp.Width;
-                totalSize.Height = Math.Max(totalSize.Height, setItemBmp.Height);
-            }
-            if (levelBmp != null)
-            {
-                levelOrigin = new Point(totalSize.Width, 0);
-                totalSize.Width += levelBmp.Width;
-                totalSize.Height = Math.Max(totalSize.Height, levelHeight);
             }
 
             //开始绘制
@@ -350,6 +359,13 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
+            //绘制套装
+            if (setItemBmp != null)
+            {
+                g.DrawImage(setItemBmp, setItemOrigin.X, setItemOrigin.Y,
+                    new Rectangle(Point.Empty, setItemBmp.Size), GraphicsUnit.Pixel);
+            }
+
             //绘制产出道具
             if (recipeItemBmps.Count > 0)
             {
@@ -359,13 +375,6 @@ namespace WzComparerR2.CharaSimControl
                         new Rectangle(Point.Empty, recipeItemBmps[i].Size), GraphicsUnit.Pixel);
                     y += recipeItemBmps[i].Height;
                 }
-            }
-
-            //绘制套装
-            if (setItemBmp != null)
-            {
-                g.DrawImage(setItemBmp, setItemOrigin.X, setItemOrigin.Y,
-                    new Rectangle(Point.Empty, setItemBmp.Size), GraphicsUnit.Pixel);
             }
 
             if (levelBmp != null)
@@ -1287,7 +1296,7 @@ namespace WzComparerR2.CharaSimControl
             // purchasePrice
             if (ShowCashPurchasePrice && !isMsnClient && item.Cash)
             {
-                List<string> priceList = new List<string>();
+                HashSet<string> priceList = new HashSet<string>();
                 if (CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot].ContainsKey(item.ItemID))
                 {
                     bool containRebootOnlyPrice = false;
@@ -1363,7 +1372,8 @@ namespace WzComparerR2.CharaSimControl
             {
                 GearTooltipRender3 defaultRenderer = new GearTooltipRender3();
                 defaultRenderer.StringLinker = this.StringLinker;
-                defaultRenderer.ShowObjectID = false;
+                defaultRenderer.ShowObjectID = this.ShowObjectID;
+                defaultRenderer.ShowApplicablePet = false;
                 renderer = defaultRenderer;
             }
 
@@ -1479,6 +1489,16 @@ namespace WzComparerR2.CharaSimControl
 
             renderer.TargetItem = cashPackage;
             return renderer.Render();
+        }
+
+        private List<int> GetApplicablePetEquip()
+        {
+            List<int> petEquipList = new List<int>();
+            foreach (var i in CharaSimLoader.LoadedPetEquipInfo)
+            {
+                if (i.Value.Contains(item.ItemID)) petEquipList.Add(i.Key);
+            }
+            return petEquipList;
         }
 
         private Bitmap RenderLevel(out int picHeight)

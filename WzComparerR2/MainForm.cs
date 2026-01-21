@@ -273,6 +273,7 @@ namespace WzComparerR2
             tooltipQuickView.GearRender.AutoTitleWrap = Setting.Gear.AutoTitleWrap;
             tooltipQuickView.GearRender.CosmeticHairColor = Setting.Item.CosmeticHairColor;
             tooltipQuickView.GearRender.CosmeticFaceColor = Setting.Item.CosmeticFaceColor;
+            tooltipQuickView.GearRender.ShowApplicablePet = Setting.Misc.LocatePetEquip;
             tooltipQuickView.GearRender3.ShowObjectID = Setting.Gear.ShowID;
             tooltipQuickView.GearRender3.ShowSpeed = Setting.Gear.ShowWeaponSpeed;
             tooltipQuickView.GearRender3.ShowLevelOrSealed = Setting.Gear.ShowLevelOrSealed;
@@ -281,6 +282,7 @@ namespace WzComparerR2
             tooltipQuickView.GearRender3.AutoTitleWrap = Setting.Gear.AutoTitleWrap;
             tooltipQuickView.GearRender3.CosmeticHairColor = Setting.Item.CosmeticHairColor;
             tooltipQuickView.GearRender3.CosmeticFaceColor = Setting.Item.CosmeticFaceColor;
+            tooltipQuickView.GearRender3.ShowApplicablePet = Setting.Misc.LocatePetEquip;
             tooltipQuickView.ItemRender.ShowObjectID = Setting.Item.ShowID;
             tooltipQuickView.ItemRender.LinkRecipeInfo = Setting.Item.LinkRecipeInfo;
             tooltipQuickView.ItemRender.LinkRecipeItem = Setting.Item.LinkRecipeItem;
@@ -301,6 +303,7 @@ namespace WzComparerR2
             tooltipQuickView.ItemRender.DamageSkinNumber = Setting.DamageSkin.DamageSkinNumber;
             tooltipQuickView.ItemRender.AllowFamiliarOutOfBounds = Setting.Familiar.AllowOutOfBounds;
             tooltipQuickView.ItemRender.UseCTFamiliarRender = Setting.Familiar.UseCTFamiliarUI;
+            tooltipQuickView.ItemRender.ShowApplicablePetEquip = Setting.Misc.LocatePetEquip;
             tooltipQuickView.ItemRender3.ShowObjectID = Setting.Item.ShowID;
             tooltipQuickView.ItemRender3.LinkRecipeInfo = Setting.Item.LinkRecipeInfo;
             tooltipQuickView.ItemRender3.LinkRecipeItem = Setting.Item.LinkRecipeItem;
@@ -309,6 +312,7 @@ namespace WzComparerR2
             tooltipQuickView.ItemRender3.ShowSoldPrice = Setting.Item.ShowSoldPrice;
             tooltipQuickView.ItemRender3.ShowCashPurchasePrice = Setting.Item.ShowCashPurchasePrice;
             tooltipQuickView.ItemRender3.ShowLinkedTamingMob = Setting.Item.ShowLinkedTamingMob;
+            tooltipQuickView.ItemRender3.ShowApplicablePetEquip = Setting.Misc.LocatePetEquip;
             tooltipQuickView.ItemRender3.CosmeticHairColor = Setting.Item.CosmeticHairColor;
             tooltipQuickView.ItemRender3.CosmeticFaceColor = Setting.Item.CosmeticFaceColor;
             tooltipQuickView.ItemRender3.ShowDamageSkin = Setting.DamageSkin.ShowDamageSkin;
@@ -4442,6 +4446,7 @@ namespace WzComparerR2
                     CharaSimLoader.LoadExclusiveEquipsIfEmpty();
                     CharaSimLoader.LoadCommoditiesIfEmpty();
                     CharaSimLoader.LoadMsnMintableItemListIfEmpty();
+                    if (CharaSimConfig.Default.Misc.LocatePetEquip) CharaSimLoader.LoadPetEquipInfoIfEmpty();
                     if (characterNodePath.Contains("Familiar"))
                     {
                         var familiar = Familiar.CreateFromNode(image.Node, PluginManager.FindWz);
@@ -4476,6 +4481,7 @@ namespace WzComparerR2
                 case Wz_Type.Item:
                     CharaSimLoader.LoadCommoditiesIfEmpty();
                     CharaSimLoader.LoadMsnMintableItemListIfEmpty();
+                    if (CharaSimConfig.Default.Misc.LocatePetEquip) CharaSimLoader.LoadPetEquipInfoIfEmpty();
                     Wz_Node itemNode = selectedNode;
                     if (Regex.IsMatch(itemNode.FullPathToFile, @"^Item\\(Cash|Consume|Etc|Install|Cash)\\\d{4,6}.img\\\d+$") || Regex.IsMatch(itemNode.FullPathToFile, @"^Item\\Special\\0910.img\\\d+$"))
                     {
@@ -5284,6 +5290,7 @@ namespace WzComparerR2
                     comparer.EnableWorldArchive = CharaSimConfig.Default.Misc.EnableWorldArchive;
                     comparer.ShowNpcQuotes = CharaSimConfig.Default.Npc.ShowNpcQuotes;
                     comparer.EnableMonsterBook = CharaSimConfig.Default.Mob.EnableMonsterBook;
+                    comparer.LocatePetEquip = CharaSimConfig.Default.Misc.LocatePetEquip;
                     comparer.StateInfoChanged += new EventHandler(comparer_StateInfoChanged);
                     comparer.StateDetailChanged += new EventHandler(comparer_StateDetailChanged);
                     try

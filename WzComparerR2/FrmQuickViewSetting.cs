@@ -385,6 +385,13 @@ namespace WzComparerR2
             set { chkEnableWorldArchive.Checked = value; }
         }
 
+        [Link]
+        public bool Misc_LocatePetEquip
+        {
+            get { return chkLocatePetEquip.Checked; }
+            set { chkLocatePetEquip.Checked = value; }
+        }
+
 
         public int PreferredStringCopyMethod
         {

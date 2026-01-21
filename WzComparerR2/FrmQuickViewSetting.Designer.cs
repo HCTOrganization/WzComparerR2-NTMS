@@ -34,6 +34,7 @@ namespace WzComparerR2
             this.superTabControl1 = new DevComponents.DotNetBar.SuperTabControl();
             this.superTabControlPanel1 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.chkEnable22AniStyle = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkLocatePetEquip = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkShowNpcQuotes = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkEnableMonsterBook = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkEnableWorldArchive = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -1307,6 +1308,7 @@ namespace WzComparerR2
             this.superTabControlPanel5.Controls.Add(this.chkShowAllSubMobAtOnce);
             this.superTabControlPanel5.Controls.Add(this.chkShowAllIllustAtOnce);
             this.superTabControlPanel5.Controls.Add(this.chkEnable22AniStyle);
+            this.superTabControlPanel5.Controls.Add(this.chkLocatePetEquip);
             this.superTabControlPanel5.Controls.Add(this.chkShowNpcQuotes);
             this.superTabControlPanel5.Controls.Add(this.chkEnableMonsterBook);
             this.superTabControlPanel5.Controls.Add(this.chkEnableWorldArchive);
@@ -1465,6 +1467,21 @@ namespace WzComparerR2
             this.chkShowNpcQuotes.TabIndex = 9;
             this.chkShowNpcQuotes.Text = "顯示NPC對話內容";
             // 
+            // chkLocatePetEquip
+            // 
+            this.chkLocatePetEquip.AutoSize = true;
+            this.chkLocatePetEquip.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkLocatePetEquip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkLocatePetEquip.Location = new System.Drawing.Point(13, 204);
+            this.chkLocatePetEquip.Name = "chkLocatePetEquip";
+            this.chkLocatePetEquip.Size = new System.Drawing.Size(145, 16);
+            this.chkLocatePetEquip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkLocatePetEquip.TabIndex = 10;
+            this.chkLocatePetEquip.Text = "嘗試匹配寵物和配套裝備";
+            // 
             // buttonX2
             // 
             this.buttonX2.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
@@ -1590,6 +1607,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX22;
         private DevComponents.DotNetBar.Controls.CheckBoxX checkBoxX23;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnable22AniStyle;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkLocatePetEquip;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowNpcQuotes;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableMonsterBook;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableWorldArchive;

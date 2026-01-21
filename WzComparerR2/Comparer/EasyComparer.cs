@@ -95,6 +95,7 @@ namespace WzComparerR2.Comparer
         public bool EnableWorldArchive { get; set; }
         public bool EnableMonsterBook { get; set; }
         public bool ShowNpcQuotes { get; set; }
+        public bool LocatePetEquip { get; set; }
         public Dictionary<string, bool> selectedNodes { get; set; }
 
         public string StateInfo
@@ -301,6 +302,7 @@ namespace WzComparerR2.Comparer
                     CharaSimLoader.LoadAstraSubWeaponsIfEmpty(fileNew);
                     CharaSimLoader.LoadExclusiveEquipsIfEmpty(fileNew);
                     CharaSimLoader.LoadMsnMintableItemListIfEmpty(fileNew);
+                    if (this.LocatePetEquip) CharaSimLoader.LoadPetEquipInfoIfEmpty(fileNew);
                     CharaSimLoader.LoadCommodities(fileOld, slotIdx: 1);
                     CharaSimLoader.LoadCommodities(fileNew, slotIdx: 0);
                     CompareCommodities();
@@ -1401,6 +1403,7 @@ namespace WzComparerR2.Comparer
                 itemRenderNewOld[i].UseInGameSpacing = this.UseInGameSpacing;
                 itemRenderNewOld[i].UseCTFamiliarRender = this.UseCTFamiliarUI;
                 itemRenderNewOld[i].DamageSkinNumber = this.DamageSkinNumber;
+                itemRenderNewOld[i].ShowApplicablePetEquip = this.LocatePetEquip;
                 itemRenderNewOld[i].LoadedCommoditiesSlot = i;
                 itemRenderNewOld[i].CompareMode = true;
 
@@ -1735,6 +1738,7 @@ namespace WzComparerR2.Comparer
                 itemRenderNewOld[i].AllowFamiliarOutOfBounds = this.AllowFamiliarOutOfBounds;
                 itemRenderNewOld[i].UseCTFamiliarRender = this.UseCTFamiliarUI;
                 itemRenderNewOld[i].DamageSkinNumber = this.DamageSkinNumber;
+                itemRenderNewOld[i].ShowApplicablePetEquip = this.LocatePetEquip;
                 itemRenderNewOld[i].LoadedCommoditiesSlot = i;
                 itemRenderNewOld[i].CompareMode = true;
 
@@ -2060,6 +2064,7 @@ namespace WzComparerR2.Comparer
                 gearRenderNewOld[i].ShowSoldPrice = this.ShowPrice;
                 gearRenderNewOld[i].ShowCashPurchasePrice = this.ShowPrice;
                 gearRenderNewOld[i].ShowCombatPower = true;
+                gearRenderNewOld[i].ShowApplicablePet = this.LocatePetEquip;
                 gearRenderNewOld[i].LoadedCommoditiesSlot = i;
                 gearRenderNewOld[i].CompareMode = true;
             }
@@ -2345,6 +2350,7 @@ namespace WzComparerR2.Comparer
                 gearRenderNewOld[i].ShowObjectID = this.ShowObjectID;
                 gearRenderNewOld[i].ShowSoldPrice = this.ShowPrice;
                 gearRenderNewOld[i].ShowCashPurchasePrice = this.ShowPrice;
+                gearRenderNewOld[i].ShowApplicablePet = this.LocatePetEquip;
                 gearRenderNewOld[i].LoadedCommoditiesSlot = i;
                 gearRenderNewOld[i].CompareMode = true;
             }
