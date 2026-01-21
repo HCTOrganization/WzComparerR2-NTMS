@@ -120,6 +120,7 @@ namespace WzComparerR2.Avatar.UI
 
         private static void MigrateConfiguration()
         {
+            if (!Directory.Exists(avatarPath)) return;
             string[] files = Directory.GetFiles(avatarPath);
             foreach (string file in files)
             {
