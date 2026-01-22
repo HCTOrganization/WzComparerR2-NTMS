@@ -5747,7 +5747,7 @@ namespace WzComparerR2
                 sw.Stop();
                 btnPetEquipExport.Enabled = true;
                 labelX2.Text = "匯出完成。時間經過：" + sw.Elapsed.ToString();
-                labelItemStatus.Text = "匯出完成: " + exportedFolder;
+                labelItemStatus.Text = "匯出完成: " + dlg.SelectedPath;
             }
         }
 
