@@ -2054,7 +2054,7 @@ namespace WzComparerR2.CharaSimControl
             picHeight = 0;
             if (CharaSimLoader.LoadedPetEquipInfo.ContainsKey(Gear.ItemID))
             {
-                if (CharaSimLoader.LoadedPetEquipInfo[Gear.ItemID].Count > 4)
+                if (CharaSimLoader.LoadedPetEquipInfo[Gear.ItemID].Count > 2)
                 {
                     int reqColumns = (int)Math.Ceiling(CharaSimLoader.LoadedPetEquipInfo[Gear.ItemID].Count / 10.0);
                     List<Dictionary<int, string>> petName = new List<Dictionary<int, string>>();

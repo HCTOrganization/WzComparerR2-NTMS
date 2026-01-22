@@ -33,6 +33,7 @@ using static Microsoft.Xna.Framework.MathHelper;
 using Microsoft.Win32;
 using SharpDX;
 using System.Drawing.Imaging;
+using Newtonsoft.Json.Linq;
 
 namespace WzComparerR2
 {
@@ -5664,6 +5665,89 @@ namespace WzComparerR2
                     File.Copy(Path.Combine(dlg.SelectedPath, "ms_skill.csv"), Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache", String.Format("ms_skill_{0}.csv", langcode)));
                 }
                 MessageBoxEx.Show("匯出完成。");
+            }
+        }
+
+        private async void btnPetEquipExport_Click(object sender, EventArgs e)
+        {
+            if (PluginManager.FindWz(Wz_Type.Base) == null)
+            {
+                ToastNotification.Show(this, $"エラー: Base.wz ファイルを開けませんでした。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                return;
+            }
+            if (openedWz.Count > 1)
+            {
+                ToastNotification.Show(this, $"エラー: この機能を使用する前に、Base.wz を1つだけ開いてください。", null, 4000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                return;
+            }
+            FolderBrowserDialog dlg = new FolderBrowserDialog();
+            dlg.Description = "エクスポート先のフォルダーを選択します。";
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                btnPetEquipExport.Enabled = false;
+                labelX2.Text = "エクスポート中";
+                System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+                await Task.Run(() =>
+                {
+                    sw.Start();
+                    if (!this.stringLinker.HasValues)
+                        this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
+
+                    CharaSimLoader.LoadPetEquipInfoIfEmpty();
+
+                    SortedDictionary<int, List<int>> petToEquip = new SortedDictionary<int, List<int>>();
+
+                    foreach (var i in CharaSimLoader.LoadedPetEquipInfo.Keys)
+                    {
+                        List<int> applicablePets = CharaSimLoader.LoadedPetEquipInfo[i];
+                        foreach (var j in applicablePets)
+                        {
+                            if (!petToEquip.ContainsKey(j)) petToEquip[j] = new List<int>();
+                            petToEquip[j].Add(i);
+                        }
+                    }
+
+                    JObject root = new JObject();
+                    foreach (var pet in petToEquip)
+                    {
+                        int petId = pet.Key;
+                        StringResult sr;
+                        if (this.stringLinker == null || !this.stringLinker.StringItem.TryGetValue(petId, out sr))
+                        {
+                            sr = new StringResult();
+                            sr.Name = "(null)";
+                        }
+
+                        var petEquips = new Dictionary<int, string>();
+
+                        foreach (var i in pet.Value)
+                        {
+                            StringResult sr2;
+                            if (this.stringLinker == null || !this.stringLinker.StringEqp.TryGetValue(i, out sr2))
+                            {
+                                sr2 = new StringResult();
+                                sr2.Name = "(null)";
+                            }
+                            petEquips.Add(i, sr2.Name);
+                        }
+
+                        var equipsObj = new JObject(); 
+                        foreach (var eq in petEquips)
+                            equipsObj[eq.Key.ToString()] = eq.Value;
+
+                        var petObj = new JObject
+                        {
+                            ["name"] = sr.Name,
+                            ["petEquips"] = equipsObj
+                        };
+                        root[petId.ToString()] = petObj;
+                    }
+                    File.WriteAllText(Path.Combine(dlg.SelectedPath, "petToEquip.json"), root.ToString());
+                });
+                sw.Stop();
+                btnPetEquipExport.Enabled = true;
+                labelX2.Text = "エクスポート完了。時間が経過した：" + sw.Elapsed.ToString();
+                labelItemStatus.Text = "エクスポートされた: " + dlg.SelectedPath;
             }
         }
 

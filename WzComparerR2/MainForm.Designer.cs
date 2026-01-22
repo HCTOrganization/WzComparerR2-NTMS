@@ -316,6 +316,7 @@ namespace WzComparerR2
             this.comboItem22 = new DevComponents.Editors.ComboItem();
             this.btnRootNode = new DevComponents.DotNetBar.ButtonX();
             this.clbRootNode = new System.Windows.Forms.CheckedListBox();
+            this.btnPetEquipExport = new DevComponents.DotNetBar.ButtonX();
             this.btnSkillTooltipExport = new DevComponents.DotNetBar.ButtonX();
             this.btnPreset = new DevComponents.DotNetBar.ButtonX();
             this.btnMusicChannel = new DevComponents.DotNetBar.ButtonItem();
@@ -3203,6 +3204,7 @@ namespace WzComparerR2
             // 
             // superTabControlPanel3
             // 
+            this.superTabControlPanel3.Controls.Add(this.btnPetEquipExport);
             this.superTabControlPanel3.Controls.Add(this.btnSkillTooltipExport);
             this.superTabControlPanel3.Controls.Add(this.btnExportSkillOption);
             this.superTabControlPanel3.Controls.Add(this.btnExportSkill);
@@ -3213,6 +3215,18 @@ namespace WzComparerR2
             this.superTabControlPanel3.Size = new System.Drawing.Size(530, 228);
             this.superTabControlPanel3.TabIndex = 0;
             this.superTabControlPanel3.TabItem = this.superTabItem3;
+            // 
+            // btnPetEquipExport
+            // 
+            this.btnPetEquipExport.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.btnPetEquipExport.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnPetEquipExport.Location = new System.Drawing.Point(634, 6);
+            this.btnPetEquipExport.Name = "btnPetEquipExport";
+            this.btnPetEquipExport.Size = new System.Drawing.Size(217, 23);
+            this.btnPetEquipExport.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.btnPetEquipExport.TabIndex = 3;
+            this.btnPetEquipExport.Text = "ペットリストをエクスポート";
+            this.btnPetEquipExport.Click += new System.EventHandler(this.btnPetEquipExport_Click);
             // 
             // btnSkillTooltipExport
             // 
@@ -4121,6 +4135,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ColorPickerDropDown colorPickerPicBoxBgColor;
         private DevComponents.DotNetBar.ButtonX btnRootNode;
         private System.Windows.Forms.CheckedListBox clbRootNode;
+        private DevComponents.DotNetBar.ButtonX btnPetEquipExport;
         private DevComponents.DotNetBar.ButtonX btnSkillTooltipExport;
         private DevComponents.DotNetBar.ButtonX btnPreset;
         private DevComponents.DotNetBar.ButtonItem btnMusicChannel;
