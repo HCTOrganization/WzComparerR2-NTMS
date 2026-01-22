@@ -3225,7 +3225,7 @@ namespace WzComparerR2
             this.btnPetEquipExport.Size = new System.Drawing.Size(217, 23);
             this.btnPetEquipExport.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.btnPetEquipExport.TabIndex = 3;
-            this.btnPetEquipExport.Text = "ペットリストをエクスポート";
+            this.btnPetEquipExport.Text = "匯出寵物和裝備";
             this.btnPetEquipExport.Click += new System.EventHandler(this.btnPetEquipExport_Click);
             // 
             // btnSkillTooltipExport

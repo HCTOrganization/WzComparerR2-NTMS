@@ -5672,20 +5672,20 @@ namespace WzComparerR2
         {
             if (PluginManager.FindWz(Wz_Type.Base) == null)
             {
-                ToastNotification.Show(this, $"エラー: Base.wz ファイルを開けませんでした。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                ToastNotification.Show(this, $"錯誤: 未開啟 Base.wz。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
                 return;
             }
             if (openedWz.Count > 1)
             {
-                ToastNotification.Show(this, $"エラー: この機能を使用する前に、Base.wz を1つだけ開いてください。", null, 4000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                ToastNotification.Show(this, $"錯誤：使用此功能前僅可開啟一個 Base.wz。", null, 4000, eToastGlowColor.Red, eToastPosition.TopCenter);
                 return;
             }
             FolderBrowserDialog dlg = new FolderBrowserDialog();
-            dlg.Description = "エクスポート先のフォルダーを選択します。";
+            dlg.Description = "選擇要匯出到的資料夾。";
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 btnPetEquipExport.Enabled = false;
-                labelX2.Text = "エクスポート中";
+                labelX2.Text = "匯出中";
                 System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
                 await Task.Run(() =>
                 {
@@ -5746,8 +5746,8 @@ namespace WzComparerR2
                 });
                 sw.Stop();
                 btnPetEquipExport.Enabled = true;
-                labelX2.Text = "エクスポート完了。時間が経過した：" + sw.Elapsed.ToString();
-                labelItemStatus.Text = "エクスポートされた: " + dlg.SelectedPath;
+                labelX2.Text = "匯出完成。時間經過：" + sw.Elapsed.ToString();
+                labelItemStatus.Text = "匯出完成: " + exportedFolder;
             }
         }
 
