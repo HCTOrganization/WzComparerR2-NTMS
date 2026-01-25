@@ -1647,7 +1647,7 @@ namespace WzComparerR2.CharaSimControl
                 int right = width - 18;
                 GearGraphics.DrawNewTooltipBack(g, 0, 0, width, picHeight);
                 if (!this.Enable22AniStyle) g.DrawImage(Resource.UIToolTip_img_Item_Frame2_cover, 3, 3);
-                TextRenderer.DrawText(g, "可用的寵物裝備列表", GearGraphics.ItemDetailFont, new Point(width, picH), Color.FromArgb(255, 255, 255), TextFormatFlags.HorizontalCenter);
+                TextRenderer.DrawText(g, "可用的寵物裝備列表", GearGraphics.ItemDetailFont, new Point(width, picH), Color.FromArgb(204, 255, 0), TextFormatFlags.HorizontalCenter);
                 int iconLeft = 15;
                 int txtLeft = 55;
                 for (int index = 0; index < reqColumns; index++)
