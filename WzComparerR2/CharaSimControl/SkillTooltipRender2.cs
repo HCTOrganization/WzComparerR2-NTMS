@@ -272,7 +272,7 @@ namespace WzComparerR2.CharaSimControl
                 Dictionary<string, string> skillCommon = new Dictionary<string, string>(Skill.Common);
                 if (Skill.PerJobAttackInfo.Count > 0)
                 {
-                    var perJobInfo = Skill.PerJobAttackInfo.Values.ToList()[Skill.PerJobIndex];
+                    var perJobInfo = Skill.PerJobAttackInfo.ElementAt(Skill.PerJobIndex).Value;
                     foreach (var i in perJobInfo.Keys)
                     {
                         skillCommon[i] = perJobInfo[i];
