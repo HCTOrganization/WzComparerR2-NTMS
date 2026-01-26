@@ -156,6 +156,17 @@ namespace WzComparerR2.CharaSimControl
                 { "$g", GearGraphics.gearCyanColor },
             };
 
+            // Initialize skillCommon Dictionary
+            Dictionary<string, string> skillCommon = new Dictionary<string, string>(Skill.Common);
+            if (Skill.PerJobAttackInfo.Count > 0)
+            {
+                var perJobInfo = Skill.PerJobAttackInfo.ElementAt(Skill.PerJobIndex).Value;
+                foreach (var i in perJobInfo.Keys)
+                {
+                    skillCommon[i] = perJobInfo[i];
+                }
+            }
+
             picH = 0;
             splitterH = new List<int>();
             string skillIDstr = Skill.SkillID.ToString().PadLeft(7, '0');
@@ -269,15 +280,6 @@ namespace WzComparerR2.CharaSimControl
 
             if (sr.Desc != null)
             {
-                Dictionary<string, string> skillCommon = new Dictionary<string, string>(Skill.Common);
-                if (Skill.PerJobAttackInfo.Count > 0)
-                {
-                    var perJobInfo = Skill.PerJobAttackInfo.ElementAt(Skill.PerJobIndex).Value;
-                    foreach (var i in perJobInfo.Keys)
-                    {
-                        skillCommon[i] = perJobInfo[i];
-                    }
-                }
                 string hdesc = SummaryParser.GetSkillSummary(sr.Desc, Skill.Level, skillCommon, SummaryParams.Default);
                 if (Skill.IsRoguelikeSkill)
                 {
@@ -417,14 +419,13 @@ namespace WzComparerR2.CharaSimControl
                 // 스킬 변경점에 초록색 칠하기
                 if (doHighlight)
                 {
-
                     if (Skill.SkillID / 100000 == 4000)
                     {
                         if (Skill.VSkillValue == 2) Skill.Level = 60;
                         if (Skill.VSkillValue == 1) Skill.Level = 30;
                     }
                 }
-                string hStr = SummaryParser.GetSkillSummary(Skill, Skill.Level, sr, SummaryParams.Default, skillSummaryOptions, doHighlight, skillIDstr, this.DiffSkillTags);
+                string hStr = SummaryParser.GetSkillSummary(Skill, Skill.Level, sr, SummaryParams.Default, skillSummaryOptions, doHighlight, skillIDstr, this.DiffSkillTags, skillCommon);
 
                 if (Skill.IsGuildCastleResearch && Skill.VariableProps.Contains("ResearchTimeCost"))
                 {
