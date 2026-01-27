@@ -4304,7 +4304,7 @@ namespace WzComparerR2.Comparer
                 sw.WriteLine("table.lst2 { }");
                 sw.WriteLine("table.img tr.r0 { background-color:#CCCC00; color:#000000; }");
                 sw.WriteLine("table.img tr.r1 { background-color:#9CE34E; }");
-                sw.WriteLine("table.img tr.r2 { background-color:#961e1e; }");
+                sw.WriteLine("table.img tr.r2 { background-color:#FF6666; }");
                 sw.WriteLine("table.img.noChange { display:none; }");
             }
             sw.Flush();
