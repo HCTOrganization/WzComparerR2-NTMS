@@ -92,13 +92,13 @@ namespace WzComparerR2.CharaSim
         public Tuple<int, int> RelationSkill { get; set; }
         public bool IsPetAutoBuff { get; set; }
         public bool IsSequenceOn { get; set; }
-        public bool IsRoguelikeSkill { get; set; }
-        public bool IsRedmoon { get; set; }
-        public bool IsGuildCastleResearch { get; set; }
-        public int GuildCastleResearchType { get; set; }
-        public Dictionary<int, int> GuildCastleResearchRequirements { get; set; }
+        public bool IsRoguelikeSkill { get; private set; }
+        public bool IsRedmoon { get; private set; }
+        public bool IsGuildCastleResearch { get; private set; }
+        public int GuildCastleResearchType { get; private set; }
+        public Dictionary<int, int> GuildCastleResearchRequirements { get; private set; }
         public string GuildCastleResearchReqCondition { get; set; }
-        public List<string> VariableProps { get; set; }
+        public List<string> VariableProps { get; private set; }
         public bool DisableNextLevelInfo { get; set; }
         public int MasterLevel { get; set; }
         public Dictionary<int, int> ReqSkill { get; private set; }
@@ -106,7 +106,7 @@ namespace WzComparerR2.CharaSim
         public int AddAttackToolTipDescSkill { get; set; }
         public int AssistSkillLink { get; set; }
         public int VehicleID { get; set; }
-        public Dictionary<int, Dictionary<string, string>> PerJobAttackInfo { get; set; }
+        public Dictionary<int, Dictionary<string, string>> PerJobAttackInfo { get; private set; }
 
         public Point LT { get; set; }
         public Point RB { get; set; }
