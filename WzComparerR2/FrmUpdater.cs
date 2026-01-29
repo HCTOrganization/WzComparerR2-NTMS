@@ -31,13 +31,8 @@ namespace WzComparerR2
             this.Font = new Font(new FontFamily("SimSun"), 9f);
 #endif
 
-            // this.lblClrVer.Text = string.Format("{0} ({1})", Environment.Version, Program.GetArchitecture());
             this.lblCurrentVer.Text = Program.WcR2MajorVersion + BuildInfo.BuildTime;
-            // this.lblLatestVer.Text = GetFileVersion().ToString();
-            var updateSession = new UpdaterSession();
-            // this.lblUpdateContent.Text = GetAsmCopyright().ToString();
-            Task.Run(() => this.ExecuteUpdateAsync(updateSession, updateSession.CancellationToken));
-            // GetPluginInfo();
+            Task.Run(() => this.ExecuteUpdateAsync());
         }
 
         public bool EnableAutoUpdate
@@ -46,7 +41,6 @@ namespace WzComparerR2
             set { chkEnableAutoUpdate.Checked = value; }
         }
 
-        private UpdaterSession updateSession;
         private string net48url;
         private string net60url;
         private string net80url;
@@ -74,7 +68,7 @@ namespace WzComparerR2
             }
         }
 
-        private async Task ExecuteUpdateAsync(UpdaterSession session, CancellationToken cancellationToken)
+        private async Task ExecuteUpdateAsync()
         {
             var request = (HttpWebRequest)WebRequest.Create(Program.CheckUpdateURL);
             request.Accept = "application/json";
@@ -115,7 +109,7 @@ namespace WzComparerR2
             }
         }
 
-        private async Task DownloadUpdateAsync(string url, UpdaterSession session, CancellationToken cancellationToken)
+        private async Task DownloadUpdateAsync(string url)
         {
             string currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
             string savePath = Path.Combine(currentDirectory, "update.zip");
@@ -165,7 +159,6 @@ namespace WzComparerR2
             this.lblUpdateContent.Text = LocalizedString_JP.FRMUPDATER_UPDATE_DOWNLOADING;
             buttonX1.Enabled = false;
             string selectedURL = "";
-            updateSession = new UpdaterSession();
             switch (Environment.Version.Major)
             {
                 default:
@@ -179,7 +172,7 @@ namespace WzComparerR2
                     selectedURL = net80url;
                     break;
             }
-            Task.Run(() => this.DownloadUpdateAsync(selectedURL, updateSession, updateSession.CancellationToken));
+            Task.Run(() => this.DownloadUpdateAsync(selectedURL));
         }
 
         private void RunProgram(string url, string argument="")
@@ -225,40 +218,6 @@ namespace WzComparerR2
 
             using FileStream fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write);
             resourceStream.CopyTo(fileStream);
-        }
-
-        class UpdaterSession
-        {
-            public UpdaterSession()
-            {
-                this.cancellationTokenSource = new CancellationTokenSource();
-            }
-            public Task UpdateExecTask;
-
-            public CancellationToken CancellationToken => this.cancellationTokenSource.Token;
-            private CancellationTokenSource cancellationTokenSource;
-            private TaskCompletionSource<bool> tcsWaiting;
-
-            public void Cancel()
-            {
-                this.cancellationTokenSource.Cancel();
-            }
-
-            public async Task WaitForContinueAsync()
-            {
-                var tcs = new TaskCompletionSource<bool>();
-                this.tcsWaiting = tcs;
-                this.cancellationTokenSource.Token.Register(() => tcs.TrySetCanceled());
-                await tcs.Task;
-            }
-
-            public void Continue()
-            {
-                if (this.tcsWaiting != null)
-                {
-                    this.tcsWaiting.SetResult(true);
-                }
-            }
         }
 
         public void Load(WcR2Config config)
