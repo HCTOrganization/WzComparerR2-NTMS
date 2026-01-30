@@ -5613,58 +5613,69 @@ namespace WzComparerR2
             chkSkipKMSContent.Checked = false;
         }
 
-        private void btnExportSkill_Click(object sender, EventArgs e)
+        private async void btnExportSkill_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog dlg = new FolderBrowserDialog();
             dlg.Description = "選擇要匯出到的資料夾。";
             if (dlg.ShowDialog() == DialogResult.OK)
             {
-                if (!this.stringLinker.HasValues)
-                    this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
+                btnExportSkill.Enabled = false;
+                labelX2.Text = "匯出中";
+                System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
 
-                DBConnection conn = new DBConnection(this.stringLinker);
-                DataSet ds = conn.GenerateSkillTable();
-                foreach (DataTable dt in ds.Tables)
+                await Task.Run(() =>
                 {
-                    FileStream fs = new FileStream(Path.Combine(dlg.SelectedPath, dt.TableName + ".csv"), FileMode.Create);
-                    StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
-                    conn.OutputCsv(sw, dt);
-                    sw.Close();
-                    fs.Dispose();
-                }
-                stringLinker.StringMob.TryGetValue(100000, out var sr);
-                if (sr != null)
-                {
-                    string langcode = "qps-ploc";
-                    switch (sr.Name)
+                    sw.Start();
+                    if (!this.stringLinker.HasValues)
+                        this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
+
+                    DBConnection conn = new DBConnection(this.stringLinker);
+                    DataSet ds = conn.GenerateSkillTable();
+                    foreach (DataTable dt in ds.Tables)
                     {
-                        case "Snail":
-                            langcode = "en";
-                            break;
-                        case "蜗牛":
-                            langcode = "zh-CN";
-                            break;
-                        case "달팽이":
-                            langcode = "ko";
-                            break;
-                        case "嫩寶":
-                            langcode = "zh-TW";
-                            break;
-                        case "デンデン":
-                            langcode = "ja";
-                            break;
+                        FileStream fs = new FileStream(Path.Combine(dlg.SelectedPath, dt.TableName + ".csv"), FileMode.Create);
+                        StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
+                        conn.OutputCsv(sw, dt);
+                        sw.Close();
+                        fs.Dispose();
                     }
-                    if (Directory.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache")))
+                    stringLinker.StringMob.TryGetValue(100000, out var sr);
+                    if (sr != null)
                     {
-                        Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache"));
+                        string langcode = "qps-ploc";
+                        switch (sr.Name)
+                        {
+                            case "Snail":
+                                langcode = "en";
+                                break;
+                            case "蜗牛":
+                                langcode = "zh-CN";
+                                break;
+                            case "달팽이":
+                                langcode = "ko";
+                                break;
+                            case "嫩寶":
+                                langcode = "zh-TW";
+                                break;
+                            case "デンデン":
+                                langcode = "ja";
+                                break;
+                        }
+                        if (Directory.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache")))
+                        {
+                            Directory.CreateDirectory(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache"));
+                        }
+                        if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache", String.Format("ms_skill_{0}.csv", langcode))))
+                        {
+                            File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache", String.Format("ms_skill_{0}.csv", langcode)));
+                        }
+                        File.Copy(Path.Combine(dlg.SelectedPath, "ms_skill.csv"), Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache", String.Format("ms_skill_{0}.csv", langcode)));
                     }
-                    if (File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache", String.Format("ms_skill_{0}.csv", langcode))))
-                    {
-                        File.Delete(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache", String.Format("ms_skill_{0}.csv", langcode)));
-                    }
-                    File.Copy(Path.Combine(dlg.SelectedPath, "ms_skill.csv"), Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache", String.Format("ms_skill_{0}.csv", langcode)));
-                }
-                MessageBoxEx.Show("匯出完成。");
+                });
+                sw.Stop();
+                btnExportSkill.Enabled = true;
+                labelX2.Text = "匯出完成。時間經過：" + sw.Elapsed.ToString();
+                labelItemStatus.Text = "匯出完成: " + dlg.SelectedPath;
             }
         }
 
