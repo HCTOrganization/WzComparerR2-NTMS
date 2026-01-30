@@ -924,14 +924,6 @@ namespace WzComparerR2.CharaSimControl
             {
                 hasThirdContents = true;
                 hasOptionPart = true;
-
-                // 안드로이드 등급
-                if (Gear.Props.TryGetValue(GearPropType.grade, out value) && value > 0)
-                {
-                    picH += 4;
-                    TextRenderer.DrawText(g, "等級 : " + value, GearGraphics.EquipMDMoris9Font, new Point(15, picH), Color.White, TextFormatFlags.NoPadding);
-                    picH += 12;
-                }
             }
 
             // 세트 아이템
