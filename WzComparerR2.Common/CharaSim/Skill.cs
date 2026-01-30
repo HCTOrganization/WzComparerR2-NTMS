@@ -320,7 +320,7 @@ namespace WzComparerR2.CharaSim
                         }
                         break;
                     case "maxLevel":
-                        skill.common.Add("maxLevel", childNode.Value.ToString());
+                        skill.common["maxLevel"] = childNode.Value.ToString();
                         break;
                     case "hyper":
                         skill.Hyper = (HyperSkillType)childNode.GetValue<int>();
