@@ -769,6 +769,10 @@ namespace WzComparerR2.Common
                                                         }
                                                         foreach (var mobID in mobIDs)
                                                         {
+                                                            if (!stringMob.ContainsKey(mobID))
+                                                            {
+                                                                continue;
+                                                            }
                                                             StringResult strResult = new StringResult();
                                                             strResult.Name = stringMob[mobID].Name;
                                                             strResult.Desc = desc;
@@ -792,6 +796,10 @@ namespace WzComparerR2.Common
                                                         }
                                                         foreach (var npcID in npcIDs)
                                                         {
+                                                            if (!stringNpc.ContainsKey(npcID))
+                                                            {
+                                                                continue;
+                                                            }
                                                             StringResult strResult = new StringResult();
                                                             strResult.Name = stringNpc[npcID].Name;
                                                             strResult.Desc = desc;
