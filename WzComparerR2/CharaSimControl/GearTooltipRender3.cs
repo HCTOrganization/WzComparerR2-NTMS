@@ -2382,7 +2382,7 @@ namespace WzComparerR2.CharaSimControl
                 Gear.Props.TryGetValue(GearPropType.isAbleCustomIllust, out var value2);
                 if (value2 == 0)
                 {
-                    tags.Add("#$rカスタムイラスト依頼不可#");
+                    tags.Add("#$r不接受客製化插畫請求#");
                 }
             }
 
