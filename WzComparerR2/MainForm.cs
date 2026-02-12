@@ -1937,7 +1937,8 @@ namespace WzComparerR2
                         "大小:  " + png.Width + "*" + png.Height + "\r\n" +
                         "PNG形式:  " + png.Format + "(" + (int)png.Format + ")\r\n" +
                         "尺度: " + png.Scale + "(x" + png.ActualScale + ")\r\n" +
-                        "頁: " + png.Pages + "(" + png.ActualPages + ")";
+                        "頁: " + png.Pages + "(" + png.ActualPages + ")\r\n" +
+                        "不明1: " + png.Unknown1;
 
                     var sourceNode = selectedNode.GetLinkedSourceNode(PluginManager.FindWz);
                     if (sourceNode != selectedNode)
@@ -1961,7 +1962,8 @@ namespace WzComparerR2
                                 "大小:  " + png.Width + "*" + png.Height + "\r\n" +
                                 "PNG形式:  " + png.Format + "(" + (int)png.Format + ")\r\n" +
                                 "尺度: " + png.Scale + "(x" + png.ActualScale + ")\r\n" +
-                                "頁: " + png.Pages + "(" + png.ActualPages + ")");
+                                "頁: " + png.Pages + "(" + png.ActualPages + ")\r\n" +
+                                "不明1: " + png.Unknown1);
                         }
                     }
                     break;
