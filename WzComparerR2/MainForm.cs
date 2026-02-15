@@ -419,16 +419,27 @@ namespace WzComparerR2
             DiscordService.ChannelIDList = config.DiscordChannelID;
         }
 
-        async Task<bool> AutomaticCheckUpdate()
+        async Task AutomaticCheckUpdate()
         {
             var config = WcR2Config.Default;
             if (config.EnableAutoUpdate)
             {
-                return await FrmUpdater.QueryUpdate();
-            }
-            else
-            {
-                return false;
+                var updater = new Updater();
+                try
+                {
+                    await updater.QueryUpdateAsync();
+                    if (updater.UpdateAvailable)
+                    {
+                        ToastNotification.Show(this, $"發現更新: {updater.LatestVersionString}", 5000, eToastPosition.TopCenter);
+                        var frmUpdater = new FrmUpdater(updater);
+                        frmUpdater.LoadConfig(config);
+                        frmUpdater.ShowDialog(this);
+                    }
+                }
+                catch
+                {
+                    // ignore error
+                }
             }
         }
 
@@ -6214,7 +6225,7 @@ namespace WzComparerR2
         private void buttonItemUpdate_Click(object sender, EventArgs e)
         {
             var frm = new FrmUpdater();
-            frm.Load(WcR2Config.Default);
+            frm.LoadConfig(WcR2Config.Default);
             frm.ShowDialog();
         }
 
@@ -6274,23 +6285,7 @@ namespace WzComparerR2
 
         private async void MainForm_Shown(object sender, EventArgs e)
         {
-            // Run Setup Wizard
-            if (!WcR2Config.Default.IsSetupWizardCompleted)
-            {
-                RunSetupWizard();
-                ConfigManager.Reload();
-                WcR2Config.Default.IsSetupWizardCompleted = true;
-                ConfigManager.Save();
-            }
-
-            //Automatic Update Check
-            bool isUpdateRequired = await AutomaticCheckUpdate();
-            if (isUpdateRequired)
-            {
-                var frm = new FrmUpdater();
-                frm.Load(WcR2Config.Default);
-                frm.ShowDialog();
-            }
+            await this.AutomaticCheckUpdate();
         }
 
         private void buttomItem13_FormClosing(object sender, EventArgs e)

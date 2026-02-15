@@ -150,6 +150,12 @@
             this.richTextBoxEx1.ReadOnly = true;
             this.richTextBoxEx1.TabIndex = 9;
             // 
+            // elementStyle1
+            // 
+            this.elementStyle1.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.elementStyle1.Name = "elementStyle1";
+            this.elementStyle1.TextColor = System.Drawing.SystemColors.ControlText;
+            // 
             // chkEnableAutoUpdate
             // 
             this.chkEnableAutoUpdate.AutoSize = true;
@@ -165,12 +171,6 @@
             this.chkEnableAutoUpdate.TabIndex = 10;
             this.chkEnableAutoUpdate.Text = "自動檢查更新";
             this.chkEnableAutoUpdate.CheckedChanged += new System.EventHandler(this.chkEnableAutoUpdate_CheckedChanged);
-            // 
-            // elementStyle1
-            // 
-            this.elementStyle1.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.elementStyle1.Name = "elementStyle1";
-            this.elementStyle1.TextColor = System.Drawing.SystemColors.ControlText;
             // 
             // FrmUpdater
             // 
@@ -195,6 +195,8 @@
             this.Name = "FrmUpdater";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = LocalizedString_JP.FRMUPDATER_DESIGNER_TITLE;
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FrmUpdater_FormClosed);
+            this.Load += new System.EventHandler(this.FrmUpdater_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
