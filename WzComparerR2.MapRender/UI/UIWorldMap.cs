@@ -813,14 +813,11 @@ namespace WzComparerR2.MapRender.UI
 
                 if (curMap.Fog != null && this.SelectedFogIndex > -1 && this.SelectedFogIndex < curMap.Fog.Count)
                 {
-                    for (int i = 0; i <= this.SelectedFogIndex; i++)
+                    var fog = curMap.Fog[this.SelectedFogIndex];
+                    //重写底图
+                    if (fog.Img != null)
                     {
-                        var fog = curMap.Fog[i];
-                        //重写底图
-                        if (fog.Img != null)
-                        {
-                            addItem(fog.Img, null);
-                        }
+                        addItem(fog.Img, null);
                     }
                 }
 
