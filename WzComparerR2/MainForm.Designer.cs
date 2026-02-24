@@ -316,6 +316,8 @@ namespace WzComparerR2
             this.comboItem22 = new DevComponents.Editors.ComboItem();
             this.btnRootNode = new DevComponents.DotNetBar.ButtonX();
             this.clbRootNode = new System.Windows.Forms.CheckedListBox();
+            this.btnSelectDeselectAllNode = new DevComponents.DotNetBar.ButtonX();
+            this.btnReverseNodeSelection = new DevComponents.DotNetBar.ButtonX();
             this.btnPetEquipExport = new DevComponents.DotNetBar.ButtonX();
             this.btnSkillTooltipExport = new DevComponents.DotNetBar.ButtonX();
             this.btnPreset = new DevComponents.DotNetBar.ButtonX();
@@ -2827,6 +2829,8 @@ namespace WzComparerR2
             this.superTabControlPanel2.Controls.Add(this.btnEasyCompare);
             this.superTabControlPanel2.Controls.Add(this.btnRootNode);
             this.superTabControlPanel2.Controls.Add(this.clbRootNode);
+            this.superTabControlPanel2.Controls.Add(this.btnSelectDeselectAllNode);
+            this.superTabControlPanel2.Controls.Add(this.btnReverseNodeSelection);
             this.superTabControlPanel2.Controls.Add(this.btnPreset);
             this.superTabControlPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControlPanel2.Location = new System.Drawing.Point(0, 0);
@@ -3740,7 +3744,7 @@ namespace WzComparerR2
             this.btnRootNode.Size = new System.Drawing.Size(100, 30);
             this.btnRootNode.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.btnRootNode.TabIndex = 25;
-            this.btnRootNode.Text = "根節點 ▼";
+            this.btnRootNode.Text = "根節點 ▾";
             this.btnRootNode.Click += new System.EventHandler(this.btnRootNode_Click);
             //
             // clbRootNode
@@ -3751,6 +3755,32 @@ namespace WzComparerR2
             this.clbRootNode.Visible = false;
             this.clbRootNode.BorderStyle = BorderStyle.FixedSingle;
             this.clbRootNode.BringToFront();
+            // 
+            // btnSelectDeselectAllNode
+            // 
+            this.btnSelectDeselectAllNode.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.btnSelectDeselectAllNode.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnSelectDeselectAllNode.Location = new System.Drawing.Point(clbRootNode.Location.X, clbRootNode.Location.Y + clbRootNode.Size.Height - 6);
+            this.btnSelectDeselectAllNode.Name = "btnSelectDeselectAllNode";
+            this.btnSelectDeselectAllNode.Size = new System.Drawing.Size(100, 20);
+            this.btnSelectDeselectAllNode.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.btnSelectDeselectAllNode.TabIndex = 95;
+            this.btnSelectDeselectAllNode.Text = "全選/全不選";
+            this.btnSelectDeselectAllNode.Visible = false;
+            this.btnSelectDeselectAllNode.Click += new System.EventHandler(this.btnSelectDeselectAllNode_Click);
+            // 
+            // btnReverseNodeSelection
+            // 
+            this.btnReverseNodeSelection.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.btnReverseNodeSelection.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnReverseNodeSelection.Location = new System.Drawing.Point(btnSelectDeselectAllNode.Location.X, btnSelectDeselectAllNode.Location.Y + btnSelectDeselectAllNode.Size.Height + 4);
+            this.btnReverseNodeSelection.Name = "btnReverseNodeSelection";
+            this.btnReverseNodeSelection.Size = new System.Drawing.Size(100, 20);
+            this.btnReverseNodeSelection.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.btnReverseNodeSelection.TabIndex = 96;
+            this.btnReverseNodeSelection.Text = "反選";
+            this.btnReverseNodeSelection.Visible = false;
+            this.btnReverseNodeSelection.Click += new System.EventHandler(this.btnReverseNodeSelection_Click);
             // 
             // btnPreset
             // 
@@ -4135,6 +4165,8 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ColorPickerDropDown colorPickerPicBoxBgColor;
         private DevComponents.DotNetBar.ButtonX btnRootNode;
         private System.Windows.Forms.CheckedListBox clbRootNode;
+        private DevComponents.DotNetBar.ButtonX btnSelectDeselectAllNode;
+        private DevComponents.DotNetBar.ButtonX btnReverseNodeSelection;
         private DevComponents.DotNetBar.ButtonX btnPetEquipExport;
         private DevComponents.DotNetBar.ButtonX btnSkillTooltipExport;
         private DevComponents.DotNetBar.ButtonX btnPreset;

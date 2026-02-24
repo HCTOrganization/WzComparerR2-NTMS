@@ -917,6 +917,8 @@ namespace WzComparerR2.CharaSim
 
         public static Gear CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
         {
+            if (node == null) return null;
+            if (node.GetNodeWzFile().Type != Wz_Type.Character) return null;
             int gearID;
             Match m = Regex.Match(node.Text, @"^(\d{8})\.img$");
             if (!(m.Success && Int32.TryParse(m.Result("$1"), out gearID)))

@@ -821,6 +821,14 @@ namespace WzComparerR2.Comparer
                 OnPatchingStateChanged(new Patcher.PatchingEventArgs(null, Patcher.PatchingState.CompareFinished));
             }
 
+            if (OutputQuestTooltip && type.ToString() == "Quest" && OutputQuestTooltipIDs != null)
+            {
+                if (!Directory.Exists(questTooltipPath))
+                {
+                    Directory.CreateDirectory(questTooltipPath);
+                }
+                SaveQuestTooltip(questTooltipPath);
+            }
             if (OutputSkillTooltip && type.ToString() == "String" && OutputSkillTooltipIDs != null)
             {
                 if (!Directory.Exists(skillTooltipPath))
@@ -898,14 +906,6 @@ namespace WzComparerR2.Comparer
                     Directory.CreateDirectory(itemTooltipPath);
                 }
                 SaveCashTooltip(itemTooltipPath);
-            }
-            if (OutputQuestTooltip && type.ToString() == "String" && OutputQuestTooltipIDs != null)
-            {
-                if (!Directory.Exists(questTooltipPath))
-                {
-                    Directory.CreateDirectory(questTooltipPath);
-                }
-                SaveQuestTooltip(questTooltipPath);
             }
             if (OutputAchvTooltip && type.ToString() == "String" && OutputAchvTooltipIDs != null)
             {
@@ -4006,8 +4006,8 @@ namespace WzComparerR2.Comparer
                     GetCashID(diff.NodeNew);
                     GetCashID(diff.NodeOld);
                 }
-                // 變更的クエストTooltip处理
-                if (OutputQuestTooltip && (outputDir.Contains("Quest")))
+                // 変更的クエストTooltip处理
+                if (OutputQuestTooltip)
                 {
                     GetQuestID(diff.NodeNew);
                     GetQuestID(diff.NodeOld);

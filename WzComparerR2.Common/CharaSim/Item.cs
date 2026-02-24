@@ -105,6 +105,7 @@ namespace WzComparerR2.CharaSim
             {
                 return null;
             }
+            if (node.GetNodeWzFile().Type != Wz_Type.Item) return null;
             item.ItemID = value;
 
             // in msn the node could be UOL.

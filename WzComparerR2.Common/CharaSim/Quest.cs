@@ -57,6 +57,7 @@ namespace WzComparerR2.CharaSim
         public static Quest CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, GlobalFindNodeFunction2 findNode2, Wz_File wzf = null, int? fromInfoNode = null)
         {
             if (node == null) return null;
+            if (node.GetNodeWzFile().Type != Wz_Type.Quest) return null;
 
             int questID = -1;
             if (fromInfoNode != null)

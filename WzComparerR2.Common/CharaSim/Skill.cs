@@ -126,6 +126,9 @@ namespace WzComparerR2.CharaSim
 
         public static Skill CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, GlobalFindNodeFunction2 findNode2, Wz_File wzf = null)
         {
+            if (node == null) return null;
+            if (node.GetNodeWzFile().Type != Wz_Type.Skill && node.GetNodeWzFile().Type != Wz_Type.Etc) return null;
+
             Skill skill = new Skill();
             int skillID;
             if (!Int32.TryParse(node?.Text, out skillID))

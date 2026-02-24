@@ -82,7 +82,7 @@ namespace WzComparerR2.PluginBase
 
         public static void LogError(string logger, Exception ex, string format, params object[] args)
         {
-            string logText = string.Format("[{0:M-d-yyyy HH:mm:ss}][Error][{1}] {2}{3}",
+            string logText = string.Format("[{0:yyyy-MM-dd HH:mm:ss}][Error][{1}] {2}{3}",
                 DateTime.Now,
                 logger,
                 args == null ? format : string.Format(format, args),
