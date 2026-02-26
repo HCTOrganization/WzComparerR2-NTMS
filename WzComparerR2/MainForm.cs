@@ -5264,6 +5264,8 @@ namespace WzComparerR2
                     selectedNodes[item] = isChecked;
                 }
                 clbRootNode.Visible = false;
+                btnSelectDeselectAllNode.Visible = false;
+                btnReverseNodeSelection.Visible = false;
                 compareThread = new Thread(() =>
                 {
                     System.Diagnostics.Stopwatch sw = System.Diagnostics.Stopwatch.StartNew();
