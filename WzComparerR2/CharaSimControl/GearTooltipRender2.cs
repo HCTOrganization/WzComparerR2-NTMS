@@ -1610,7 +1610,7 @@ namespace WzComparerR2.CharaSimControl
                     picH += 16;
                 }
 
-                if (CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot].ContainsKey(Gear.ItemID) && ShowCashPurchasePrice)
+                if (CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot].ContainsKey(Gear.ItemID) && ShowCashPurchasePrice && Gear.Cash)
                 {
                     var priceInfo = CharaSimLoader.LoadedCommodityPricesByItemId[LoadedCommoditiesSlot][Gear.ItemID].FirstOrDefault();
                     int price = priceInfo.Price;
