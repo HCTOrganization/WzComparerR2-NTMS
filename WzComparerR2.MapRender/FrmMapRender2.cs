@@ -139,6 +139,7 @@ namespace WzComparerR2.MapRender
         bool captureViewPortOnly;
         bool ForceCaptureWithResolution;
         bool showFootholdBoundary;
+        bool enableMobMovement;
         Task captureTask;
         Resolution resolution;
         float opacity;
@@ -759,6 +760,7 @@ namespace WzComparerR2.MapRender
                     this.ui.ChatBox.AppendTextHelp(@"/minimap 小地圖設定");
                     this.ui.ChatBox.AppendTextHelp(@"/scene 場景設定");
                     this.ui.ChatBox.AppendTextHelp(@"/spine 開啟Spine動畫指定視窗");
+                    this.ui.ChatBox.AppendTextHelp(@"/summon 召喚怪物");
                     this.ui.ChatBox.AppendTextHelp(@"/quest 任務設定");
                     this.ui.ChatBox.AppendTextHelp(@"/questex 設定任務鍵值");
                     this.ui.ChatBox.AppendTextHelp(@"/date 設定日期");
@@ -1152,6 +1154,42 @@ namespace WzComparerR2.MapRender
                     uiSpineSelector.Show();
                     break;
 
+                case "/summon":
+                    var si = arguments.ElementAtOrDefault(1);
+                    var sx = arguments.ElementAtOrDefault(2);
+                    var sy = arguments.ElementAtOrDefault(3);
+                    if (int.TryParse(si, out int mobID))
+                    {
+                        int x, y;
+                        if (!int.TryParse(sx, out x) || !int.TryParse(sy, out y))
+                        {
+                            var p = this.renderEnv.Camera.CameraToWorld(renderEnv.Input.MousePosition);
+                            x = p.X;
+                            y = p.Y;
+                        }
+                        StringResult sr;
+                        string mobName = string.Empty;
+                        if (this.StringLinker != null)
+                        {
+                            this.StringLinker.StringMob.TryGetValue(mobID, out sr);
+                            mobName = sr?.Name ?? "(null)";
+                        }
+                        if (this.mapData.SummonMob(mobID, x, y, 0, 0, -1, playRegenMotion: false))
+                        {
+                            this.ui.ChatBox.AppendTextHelp($@"已召喚怪物：{mobName}({mobID})");
+                        }
+                        else
+                        {
+                            this.ui.ChatBox.AppendTextHelp($@"找不到此怪物：({mobID})");
+                        }
+                    }
+                    else
+                    {
+                        this.ui.ChatBox.AppendTextHelp(@"/summon (mobID) 在滑鼠所在位置召喚指定mobID的怪物");
+                        this.ui.ChatBox.AppendTextHelp(@"/summon (mobID) (x) (y) 在坐標x, y召喚指定mobID的怪物");
+                    }
+                    break;
+
                 default:
                     this.ui.ChatBox.AppendTextSystem($"未知指令: {arguments[0]}");
                     break;
@@ -1412,6 +1450,11 @@ namespace WzComparerR2.MapRender
             (this.Content as WcR2ContentManager).UseD2DFont = config.UseD2dRenderer;
             this.ForceCaptureWithResolution = config.ForceCaptureWithResolution;
             this.showFootholdBoundary = config.ShowFootholdBoundary;
+            this.enableMobMovement = config.EnableMobMovement;
+            if (this.mapData != null)
+            {
+                this.mapData.EnableMobMovement = this.enableMobMovement;
+            }
         }
 
         private void LoadOptionData(UIOptionsDataModel model)
@@ -1430,6 +1473,7 @@ namespace WzComparerR2.MapRender
             model.WorldMap_UseImageNameAsInfoName = this.ui.WorldMap.UseImageNameAsInfoName;
             model.ForceCaptureWithResolution = config.ForceCaptureWithResolution;
             model.ShowFootholdBoundary = config.ShowFootholdBoundary;
+            model.EnableMobMovement = config.EnableMobMovement;
             LoadCaptureRectOptionData(model);
         }
 
@@ -1450,6 +1494,7 @@ namespace WzComparerR2.MapRender
             config.WorldMap_UseImageNameAsInfoName = model.WorldMap_UseImageNameAsInfoName;
             config.ForceCaptureWithResolution = model.ForceCaptureWithResolution;
             config.ShowFootholdBoundary = model.ShowFootholdBoundary;
+            config.EnableMobMovement = model.EnableMobMovement;
             WzComparerR2.Config.ConfigManager.Save();
 
             if (int.TryParse(model.ScLeft, out int left) && int.TryParse(model.ScTop, out int top)
