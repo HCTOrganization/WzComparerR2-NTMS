@@ -281,8 +281,8 @@ namespace WzComparerR2.CharaSimControl
                 }
                 if (isSilverWolf)
                 {
-                    TextRenderer.DrawText(g, "銀狼武器", GearGraphics.EquipDetailFont2, new Point(10, picHeight), ((SolidBrush)GearGraphics.GrayBrush2).Color, TextFormatFlags.NoPadding);
-                    TextRenderer.DrawText(g, "(銀狼)", GearGraphics.EquipDetailFont2, new Point(252 - TextRenderer.MeasureText(g, "(銀狼)", GearGraphics.EquipDetailFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width, picHeight), ((SolidBrush)GearGraphics.GrayBrush2).Color, TextFormatFlags.NoPadding);
+                    TextRenderer.DrawText(g, "一件銀狼武器", GearGraphics.EquipDetailFont2, new Point(10, picHeight), ((SolidBrush)GearGraphics.GrayBrush2).Color, TextFormatFlags.NoPadding);
+                    TextRenderer.DrawText(g, "(銀狼武器)", GearGraphics.EquipDetailFont2, new Point(252 - TextRenderer.MeasureText(g, "(銀狼)", GearGraphics.EquipDetailFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width, picHeight), ((SolidBrush)GearGraphics.GrayBrush2).Color, TextFormatFlags.NoPadding);
                     picHeight += 18;
                 }
             }
