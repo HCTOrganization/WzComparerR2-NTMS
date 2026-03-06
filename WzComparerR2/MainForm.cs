@@ -6180,7 +6180,7 @@ namespace WzComparerR2
         {
             ConfigManager.Reload();
             var Setting = CustomCSSConfig.Default;
-            using (FrmCustomCSS frm = new FrmCustomCSS(true))
+            using (FrmCustomCSS frm = new FrmCustomCSS(styleManager1.ManagerStyle == eStyle.VisualStudio2012Dark))
             {
                 frm.LoadConfig(Setting);
                 if (frm.ShowDialog() == DialogResult.OK)
