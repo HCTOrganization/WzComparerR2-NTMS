@@ -584,7 +584,7 @@ namespace WzComparerR2
                 this.listViewExString.GridLines = false;
                 this.pictureBoxEx1.BackColor = System.Drawing.Color.FromArgb(-13816528);
                 this.pictureBoxEx1.PictureBoxInfoText = Microsoft.Xna.Framework.Color.LightGray;
-                this.chkEnableDarkMode.Checked = true;
+                //this.chkEnableDarkMode.Checked = true;
                 this.clbRootNode.BackColor = System.Drawing.Color.FromArgb(-13816528);
                 this.clbRootNode.ForeColor = System.Drawing.Color.LightGray;
             }
@@ -601,7 +601,7 @@ namespace WzComparerR2
                 this.listViewExString.GridLines = true;
                 this.pictureBoxEx1.BackColor = System.Drawing.Color.White;
                 this.pictureBoxEx1.PictureBoxInfoText = Microsoft.Xna.Framework.Color.Black;
-                this.chkEnableDarkMode.Checked = false;
+                //this.chkEnableDarkMode.Checked = false;
                 this.clbRootNode.BackColor = System.Drawing.Color.White;
                 this.clbRootNode.ForeColor = System.Drawing.Color.Black;
             }
@@ -5276,7 +5276,6 @@ namespace WzComparerR2
                     comparer.OutputPng = chkOutputPng.Checked;
                     comparer.OutputAddedImg = chkOutputAddedImg.Checked;
                     comparer.OutputRemovedImg = chkOutputRemovedImg.Checked;
-                    comparer.EnableDarkMode = chkEnableDarkMode.Checked;
                     comparer.OutputSkillTooltip = chkOutputSkillTooltip.Checked && selectedNodes["Skill"] && selectedNodes["String"];
                     comparer.OutputItemTooltip = chkOutputItemTooltip.Checked && selectedNodes["Item"] && selectedNodes["String"];
                     comparer.OutputGearTooltip = chkOutputEqpTooltip.Checked && selectedNodes["Character"] && selectedNodes["String"];
@@ -5309,6 +5308,17 @@ namespace WzComparerR2
                     comparer.LocatePetEquip = CharaSimConfig.Default.Misc.LocatePetEquip;
                     comparer.StateInfoChanged += new EventHandler(comparer_StateInfoChanged);
                     comparer.StateDetailChanged += new EventHandler(comparer_StateDetailChanged);
+                    comparer.ColorTable = new List<System.Drawing.Color>()
+                    {
+                        CustomCSSConfig.Default.BackgroundColor,
+                        CustomCSSConfig.Default.NormalTextColor,
+                        CustomCSSConfig.Default.ChangedBackgroundColor,
+                        CustomCSSConfig.Default.AddedBackgroundColor,
+                        CustomCSSConfig.Default.RemovedBackgroundColor,
+                        CustomCSSConfig.Default.ChangedTextColor,
+                        CustomCSSConfig.Default.AddedTextColor,
+                        CustomCSSConfig.Default.RemovedTextColor
+                    };
                     try
                     {
                         Wz_File fileNew = openedWz[0].wz_files[0];
@@ -5330,12 +5340,12 @@ namespace WzComparerR2
                                     clbRootNode.Enabled = false;
                                     btnSelectDeselectAllNode.Enabled = false;
                                     btnReverseNodeSelection.Enabled = false;
+                                    btnCustomCSS.Enabled = false;
                                     cmbComparePng.Enabled = false;
                                     chkOutputPng.Enabled = false;
                                     chkResolvePngLink.Enabled = false;
                                     chkOutputAddedImg.Enabled = false;
                                     chkOutputRemovedImg.Enabled = false;
-                                    chkEnableDarkMode.Enabled = false;
                                     chkOutputSkillTooltip.Enabled = false;
                                     chkOutputItemTooltip.Enabled = false;
                                     chkOutputEqpTooltip.Enabled = false;
@@ -5401,12 +5411,12 @@ namespace WzComparerR2
                         clbRootNode.Enabled = true;
                         btnSelectDeselectAllNode.Enabled = true;
                         btnReverseNodeSelection.Enabled = true;
+                        btnCustomCSS.Enabled = true;
                         cmbComparePng.Enabled = true;
                         chkOutputPng.Enabled = true;
                         chkResolvePngLink.Enabled = true;
                         chkOutputAddedImg.Enabled = true;
                         chkOutputRemovedImg.Enabled = true;
-                        chkEnableDarkMode.Enabled = true;
                         chkOutputSkillTooltip.Enabled = true;
                         chkOutputItemTooltip.Enabled = true;
                         chkOutputEqpTooltip.Enabled = true;
@@ -6162,6 +6172,21 @@ namespace WzComparerR2
                         labelX2.Text = "匯出完成。時間經過：" + sw.Elapsed.ToString();
                     }
                     labelItemStatus.Text = "匯出完成: " + exportedFolder;
+                }
+            }
+        }
+
+        private void btnCustomCSS_Click(object sender, EventArgs e)
+        {
+            ConfigManager.Reload();
+            var Setting = CustomCSSConfig.Default;
+            using (FrmCustomCSS frm = new FrmCustomCSS(true))
+            {
+                frm.LoadConfig(Setting);
+                if (frm.ShowDialog() == DialogResult.OK)
+                {
+                    frm.SaveConfig(Setting);
+                    ConfigManager.Save();
                 }
             }
         }

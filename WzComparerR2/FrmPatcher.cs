@@ -593,39 +593,6 @@ namespace WzComparerR2
                     progressBarX1.Maximum = 0;
                     progressBarX1.Text = string.Empty;
 
-                    if (!string.IsNullOrEmpty(session.CompareFolder)
-                        && e.Part.Type == 1
-                        && Path.GetExtension(e.Part.FileName).Equals(".wz", StringComparison.OrdinalIgnoreCase)
-                        && !Path.GetFileName(e.Part.FileName).Equals("list.wz", StringComparison.OrdinalIgnoreCase))
-                    {
-                        Wz_Structure wznew = new Wz_Structure();
-                        Wz_Structure wzold = new Wz_Structure();
-                        try
-                        {
-                            logFunc("  檔案比較中...\r\n");
-                            EasyComparer comparer = new EasyComparer();
-                            comparer.OutputPng = chkOutputPng.Checked;
-                            comparer.OutputAddedImg = chkOutputAddedImg.Checked;
-                            comparer.OutputRemovedImg = chkOutputRemovedImg.Checked;
-                            comparer.EnableDarkMode = chkEnableDarkMode.Checked;
-                            comparer.Comparer.PngComparison = (WzPngComparison)cmbComparePng.SelectedItem;
-                            comparer.Comparer.ResolvePngLink = chkResolvePngLink.Checked;
-                            wznew.Load(e.Part.TempFilePath, false);
-                            wzold.Load(e.Part.OldFilePath, false);
-                            comparer.EasyCompareWzFiles(wznew.wz_files[0], wzold.wz_files[0], session.CompareFolder);
-                        }
-                        catch (Exception ex)
-                        {
-                            txtPatchState.AppendText(ex.ToString());
-                        }
-                        finally
-                        {
-                            wznew.Clear();
-                            wzold.Clear();
-                            GC.Collect();
-                        }
-                    }
-
                     if (session.DeadPatch && e.Part.Type == 1 && sender is WzPatcher patcher)
                     {
                         if (patcher.IsKMST1125Format.Value)

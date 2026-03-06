@@ -230,7 +230,7 @@ namespace WzComparerR2
             this.superTabItem1 = new DevComponents.DotNetBar.SuperTabItem();
             this.superTabControlPanel2 = new DevComponents.DotNetBar.SuperTabControlPanel();
             this.chkResolvePngLink = new DevComponents.DotNetBar.Controls.CheckBoxX();
-            this.chkEnableDarkMode = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.btnCustomCSS = new DevComponents.DotNetBar.ButtonX();
             this.chkOutputCashTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOutputEqpTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOutputItemTooltip = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -2801,7 +2801,7 @@ namespace WzComparerR2
             // 
             // superTabControlPanel2
             // 
-            this.superTabControlPanel2.Controls.Add(this.chkEnableDarkMode);
+            this.superTabControlPanel2.Controls.Add(this.btnCustomCSS);
             this.superTabControlPanel2.Controls.Add(this.chkOutputCashTooltip);
             this.superTabControlPanel2.Controls.Add(this.chkOutputEqpTooltip);
             this.superTabControlPanel2.Controls.Add(this.chkOutputItemTooltip);
@@ -2853,19 +2853,20 @@ namespace WzComparerR2
             this.chkResolvePngLink.TabIndex = 9;
             this.chkResolvePngLink.Text = "解析 PNG 連結";
             // 
-            // chkEnableDarkMode
+            // btnCustomCSS
             // 
             // 
             // 
             // 
-            this.chkEnableDarkMode.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkEnableDarkMode.Location = new System.Drawing.Point(235, 61);
-            this.chkEnableDarkMode.Name = "chkEnableDarkMode";
-            this.chkEnableDarkMode.Size = new System.Drawing.Size(115, 23);
-            this.chkEnableDarkMode.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.superTooltip1.SetSuperTooltip(this.chkEnableDarkMode, new DevComponents.DotNetBar.SuperTooltipInfo("暗黑模式", "", "比較結果以暗黑模式輸出。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(180, 70)));
-            this.chkEnableDarkMode.TabIndex = 9;
-            this.chkEnableDarkMode.Text = "暗黑模式";
+            this.btnCustomCSS.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.btnCustomCSS.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnCustomCSS.Location = new System.Drawing.Point(240, 61);
+            this.btnCustomCSS.Name = "btnCustomCSS";
+            this.btnCustomCSS.Size = new System.Drawing.Size(145, 23);
+            this.btnCustomCSS.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.btnCustomCSS.TabIndex = 9;
+            this.btnCustomCSS.Text = "自訂比較報告配色";
+            this.btnCustomCSS.Click += new System.EventHandler(this.btnCustomCSS_Click);
             // 
             // chkOutputSkillTooltip
             // 
@@ -4132,7 +4133,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.CheckBoxItem checkBoxItemRegex1;
         private DevComponents.DotNetBar.CheckBoxItem checkBoxItemRegex2;
         private DevComponents.DotNetBar.SuperTooltip superTooltip1;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableDarkMode;
+        private DevComponents.DotNetBar.ButtonX btnCustomCSS;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputCashTooltip;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputEqpTooltip;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputItemTooltip;
