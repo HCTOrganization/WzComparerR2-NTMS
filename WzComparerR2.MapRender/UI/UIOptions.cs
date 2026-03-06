@@ -591,6 +591,12 @@ namespace WzComparerR2.MapRender.UI
                  "[Alt+Enter] 切换解析度",
                  "[S] 顯示截圖範圍",
                  "[ScrollLock] 截圖",
+                 "",
+                 "滑鼠指示:",
+                 "",
+                 "[左鍵點選怪物] 攻擊怪物",
+                 "[用滑鼠滾輪點選怪物] 怪物技能",
+                 "[按住滑鼠右鍵移動] 地圖範圍內移動"
             };
 
             foreach (var tip in tips)
