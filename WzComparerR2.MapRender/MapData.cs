@@ -820,6 +820,7 @@ namespace WzComparerR2.MapRender
                             (life.View.Animator as StateMachineAnimator)?.SetEffectData(effAniItem);
                         }
                         AddMobAI(life);
+                        life.Controller.InitFlyState();
                     }
                     break;
 
