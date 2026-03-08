@@ -89,6 +89,7 @@ namespace WzComparerR2
                 this.addedTextColor = Color.FromArgb(Int32.Parse("ff000000", NumberStyles.HexNumber));
                 this.removedTextColor = Color.FromArgb(Int32.Parse("ff000000", NumberStyles.HexNumber));
             }
+            this.DarkMode = !this.DarkMode;
         }
 
         private void colorPickers_SelectedColorChanged(object sender, EventArgs e)
