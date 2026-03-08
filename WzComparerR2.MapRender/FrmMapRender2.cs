@@ -385,9 +385,11 @@ namespace WzComparerR2.MapRender
 
                         case KeyCode.LeftControl:
                             boostMoveFlag |= 0x01;
+                            this.ui.OnCtrlKeyDown();
                             break;
                         case KeyCode.RightControl:
                             boostMoveFlag |= 0x02;
+                            this.ui.OnCtrlKeyDown();
                             break;
 
                         default:
@@ -416,9 +418,11 @@ namespace WzComparerR2.MapRender
 
                         case KeyCode.LeftControl:
                             boostMoveFlag &= ~0x01;
+                            this.ui.OnCtrlKeyUp();
                             break;
                         case KeyCode.RightControl:
                             boostMoveFlag &= ~0x02;
+                            this.ui.OnCtrlKeyUp();
                             break;
                     }
                 };
@@ -622,7 +626,7 @@ namespace WzComparerR2.MapRender
             #endregion
 
             //点击事件
-            var disposable = UIHelper.RegisterClickEvent<SceneItem>(this.ui.ContentControl,
+            var disposable = UIHelper.RegisterClickEvent<SceneItem>(this.ui, this.ui.ContentControl,
                 (sender, point) =>
                 {
                     int x = (int)point.X;
@@ -827,6 +831,11 @@ namespace WzComparerR2.MapRender
                     break;
                     
                 case "/minimap":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
                     var canvasList = this.mapData?.MiniMap?.ExtraCanvas;
                     switch (arguments.ElementAtOrDefault(1))
                     {
@@ -855,6 +864,11 @@ namespace WzComparerR2.MapRender
                     break;
 
                 case "/scene":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
                     switch (arguments.ElementAtOrDefault(1))
                     {
                         case "tag":
@@ -952,13 +966,16 @@ namespace WzComparerR2.MapRender
                     }
                     break;
 
-
-
                 case "/date":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
                     switch (arguments.ElementAtOrDefault(1))
                     {
                         case "list":
-                            List<Tuple<long, long>> dateList = this?.mapData.Scene.Npcs.SelectMany(item => item.Date).ToList();
+                            List<Tuple<long, long>> dateList = this?.mapData.Scene.Npcs.SelectMany(item => item.Date).ToList() ?? new();
                             this.ui.ChatBox.AppendTextHelp($"相關日期: ({dateList.Count()})");
                             foreach (Tuple<long, long> item in dateList)
                             {
@@ -987,10 +1004,15 @@ namespace WzComparerR2.MapRender
                     break;
 
                 case "/multibgm":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
                     switch (arguments.ElementAtOrDefault(1))
                     {
                         case "list":
-                            if (!string.IsNullOrEmpty(this.mapData.Bgm))
+                            if (!string.IsNullOrEmpty(this.mapData?.Bgm))
                             {
                                 var path = new List<string>() { "Sound" };
                                 path.AddRange(this.mapData.Bgm.Split('/'));
@@ -1048,6 +1070,11 @@ namespace WzComparerR2.MapRender
                     break;
 
                 case "/quest":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
                     switch (arguments.ElementAtOrDefault(1))
                     {
                         case "list":
@@ -1092,11 +1119,16 @@ namespace WzComparerR2.MapRender
                     break;
 
                 case "/questex":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
                     switch (arguments.ElementAtOrDefault(1))
                     {
                         case "list":
                             List<QuestExInfo> questList = this?.mapData.Scene.Layers.Nodes.SelectMany(l => ((LayerNode)l).Obj.Slots.SelectMany(item => ((ObjItem)item).Questex))
-                                .Distinct().ToList();
+                                .Distinct().ToList() ?? new();
                             this.ui.ChatBox.AppendTextHelp($"相關任務鍵ID: ({questList.Count()})");
                             foreach (QuestExInfo item in questList)
                             {
@@ -1132,6 +1164,11 @@ namespace WzComparerR2.MapRender
                     break;
 
                 case "/spine":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
                     var uiSpineSelector = this.ui.Windows.OfType<UISpineSelector>().FirstOrDefault();
                     if (uiSpineSelector == null)
                     {
@@ -1143,18 +1180,23 @@ namespace WzComparerR2.MapRender
                         uiSpineSelector.Hide();
                     }
 
-                    var back = this?.mapData.Scene.Back.Slots.OfType<BackItem>().Where(item => item.View.Animator is ISpineAnimator)
-                        .Concat(this?.mapData.Scene.Front.Slots.OfType<BackItem>().Where(item => item.View.Animator is ISpineAnimator)).ToList();
-                    var obj = this?.mapData.Scene.Layers.Nodes.OfType<LayerNode>()
+                    var back = this.mapData?.Scene.Back.Slots.OfType<BackItem>().Where(item => item.View.Animator is ISpineAnimator)
+                        .Concat(this.mapData.Scene.Front.Slots.OfType<BackItem>().Where(item => item.View.Animator is ISpineAnimator)).ToList() ?? new();
+                    var obj = this.mapData?.Scene.Layers.Nodes.OfType<LayerNode>()
                         .Select(layerNode => layerNode.Obj.Slots.OfType<ObjItem>()
                             .Where(item => item.View.Animator is ISpineAnimator)
-                            .ToList()).ToList();
+                            .ToList()).ToList() ?? new();
                     uiSpineSelector.LoadTabContents(back, obj);
 
                     uiSpineSelector.Show();
                     break;
 
                 case "/summon":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
                     var si = arguments.ElementAtOrDefault(1);
                     var sx = arguments.ElementAtOrDefault(2);
                     var sy = arguments.ElementAtOrDefault(3);
