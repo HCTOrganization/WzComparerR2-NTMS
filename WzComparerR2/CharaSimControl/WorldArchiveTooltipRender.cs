@@ -161,7 +161,7 @@ namespace WzComparerR2.CharaSimControl
             }
             if (waNpcBmp != null)
             {
-                Bitmap bmp3 = new Bitmap(bmp2.Width + waNpcBmp.Width, Math.Max(bmp2.Width, waNpcBmp.Height));
+                Bitmap bmp3 = new Bitmap(bmp2.Width + waNpcBmp.Width, Math.Max(bmp2.Height, waNpcBmp.Height));
                 using (Graphics g = Graphics.FromImage(bmp3))
                 {
                     g.DrawImage(bmp2, 0, 0, new Rectangle(0, 0, bmp2.Width, bmp2.Height), GraphicsUnit.Pixel);
