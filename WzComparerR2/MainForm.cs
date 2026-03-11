@@ -4838,18 +4838,18 @@ namespace WzComparerR2
                             item.Dispose();
                             break;
                     }
+                    if (wzf.Type is not Wz_Type.Quest)
+                    {
+                        tooltipQuickView.NodeName = sr.Name;
+                        tooltipQuickView.Desc = sr.Desc ?? mbSr.Desc;
+                        tooltipQuickView.Pdesc = sr.Pdesc ?? waSr.Desc;
+                        tooltipQuickView.AutoDesc = altAutoDesc ?? sr.AutoDesc ?? npcQuoteSb.ToString();
+                        tooltipQuickView.Hdesc = sr["h"];
+                        tooltipQuickView.DescLeftAlign = sr["desc_leftalign"];
+                    }
                 }
                 tooltipQuickView.TargetItem = obj;
                 tooltipQuickView.ImageFileName = fileName;
-                if (wzf.Type is not Wz_Type.Quest)
-                {
-                    tooltipQuickView.NodeName = sr.Name;
-                    tooltipQuickView.Desc = sr.Desc ?? mbSr.Desc;
-                    tooltipQuickView.Pdesc = sr.Pdesc ?? waSr.Desc;
-                    tooltipQuickView.AutoDesc = altAutoDesc ?? sr.AutoDesc ?? npcQuoteSb.ToString();
-                    tooltipQuickView.Hdesc = sr["h"];
-                    tooltipQuickView.DescLeftAlign = sr["desc_leftalign"];
-                }
                 tooltipQuickView.Refresh();
                 tooltipQuickView.HideOnHover = false;
                 tooltipQuickView.Show();
