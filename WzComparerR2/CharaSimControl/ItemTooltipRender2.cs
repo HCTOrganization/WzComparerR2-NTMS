@@ -279,6 +279,13 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
+            if (this.item.SummoningSack.Count > 0)
+            {
+                Bitmap summoningSackMobTooltip = RenderSummoningSackMobs();
+                if (summoningSackMobTooltip != null)
+                    recipeItemBmps.Add(summoningSackMobTooltip);
+            }
+
 
             //计算布局
             Size totalSize = new Size(itemBmp.Width, picHeight);
@@ -1713,6 +1720,112 @@ namespace WzComparerR2.CharaSimControl
             }
             
             return text;
+        }
+
+        private Bitmap RenderSummoningSackMobs()
+        {
+            if (Item.SummoningSack.Count <= 3)
+            {
+                List<Bitmap> MobBitmaps = new List<Bitmap>();
+                foreach (var i in Item.SummoningSack)
+                {
+                    int maxCount = i.Rate.Count;
+                    int minCount = i.Rate.Count(n => n == 100);
+                    Wz_Node mobNode = PluginManager.FindWz($"Mob/{i.MobID}.img");
+                    if (mobNode != null)
+                    {
+                        Mob targetMob = Mob.CreateFromNode(mobNode, PluginManager.FindWz);
+                        MobTooltipRenderer mobRender = new MobTooltipRenderer();
+                        mobRender.StringLinker = this.StringLinker;
+                        mobRender.ShowObjectID = this.ShowObjectID;
+                        mobRender.ShowAllSubMobAtOnce = false;
+                        mobRender.EnableWorldArchive = (Item.SummoningSack.Count == 1);
+                        mobRender.EnableMonsterBook = false;
+                        mobRender.MobInfo = targetMob;
+                        Bitmap mobBmp = mobRender.Render();
+                        var mobTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
+                        using (Graphics g = Graphics.FromImage(mobBmp))
+                        {
+                            int picH = 2;
+                            GearGraphics.DrawPlainText(g, maxCount == minCount ? $"{maxCount}隻" : $"{minCount}～{maxCount}隻", mobTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picH, 10);
+                        }
+                        MobBitmaps.Add(mobBmp);
+                    }
+                }
+                if (MobBitmaps.Count == 0)
+                    return null;
+                int bmpWidth = 0;
+                int bmpHeight = 0;
+                foreach (var i in MobBitmaps)
+                {
+                    bmpWidth = Math.Max(bmpWidth, i.Width);
+                    bmpHeight += i.Height;
+                }
+                Bitmap result = new Bitmap(bmpWidth, bmpHeight);
+                int bmpH = 0;
+                using (Graphics g = Graphics.FromImage(result))
+                {
+                    foreach (var i in MobBitmaps)
+                    {
+                        g.DrawImage(i, 0, bmpH, new Rectangle(0, 0, i.Width, i.Height), GraphicsUnit.Pixel);
+                        bmpH += i.Height;
+                    }
+                }
+                return result;
+            }
+            else
+            {
+                Dictionary<string, string> mobDict = new Dictionary<string, string>();
+                foreach (var i in Item.SummoningSack)
+                {
+                    int maxCount = i.Rate.Count;
+                    int minCount = i.Rate.Count(n => n == 100);
+                    string quantity = maxCount == minCount ? $"{maxCount}隻" : $"{minCount}～{maxCount}隻";
+                    StringResult sr;
+                    if (this.StringLinker == null || !this.StringLinker.StringMob.TryGetValue(i.MobID, out sr))
+                    {
+                        mobDict[$"(null) ({i.MobID})"] = quantity;
+                    }
+                    else
+                    {
+                        mobDict[$"{sr.Name} ({i.MobID})"] = quantity;
+                    }
+                }
+                int width = 20;
+                int picHeight = 32;
+                int maxQuantityWidth = 0;
+                int averageHeight = 0;
+                Bitmap result = new Bitmap(1, 1);
+                using (Graphics g = Graphics.FromImage(result))
+                {
+                    int maxTextWidth = 0;
+                    foreach (var i in mobDict.Keys)
+                    {
+                        SizeF nameSize = TextRenderer.MeasureText(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemNameFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
+                        maxTextWidth = Math.Max(maxTextWidth, (int)nameSize.Width);
+                        SizeF quantitySize = TextRenderer.MeasureText(g, mobDict[i], GearGraphics.ItemNameFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPrefix);
+                        maxQuantityWidth = Math.Max(maxQuantityWidth, (int)quantitySize.Width);
+                        averageHeight = Math.Max((int)nameSize.Height, (int)quantitySize.Height);
+                        picHeight += averageHeight;
+                    }
+                    width += maxTextWidth + maxQuantityWidth + 5;
+                }
+                result = new Bitmap(width, picHeight);
+                using (Graphics g = Graphics.FromImage(result))
+                {
+                    GearGraphics.DrawNewTooltipBack(g, 0, 0, width, picHeight);
+                    int picH = 8;
+                    TextRenderer.DrawText(g, "召喚包怪物一覽", GearGraphics.ItemDetailFont, new Point(width, picH), Color.FromArgb(204, 255, 0), TextFormatFlags.HorizontalCenter);
+                    picH = 25;
+                    foreach (var i in mobDict.Keys)
+                    {
+                        TextRenderer.DrawText(g, mobDict[i], GearGraphics.ItemDetailFont, new Point(8, picH), Color.White, TextFormatFlags.NoPrefix);
+                        TextRenderer.DrawText(g, i, Translator.IsKoreanStringPresent(i) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemNameFont2, new Point(12 + maxQuantityWidth, picH), Color.White, TextFormatFlags.NoPrefix);
+                        picH += averageHeight;
+                    }
+                }
+                return result;
+            }
         }
 
         private void InitSampleResources()

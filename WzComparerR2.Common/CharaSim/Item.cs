@@ -19,6 +19,7 @@ namespace WzComparerR2.CharaSim
             this.Recipes = new List<int>();
             this.overseasConstants = new Dictionary<string, string>();
             this.Grade = 0;
+            this.SummoningSack = new List<SummoningSackInfo>();
         }
 
         public int Level { get; set; }
@@ -47,6 +48,7 @@ namespace WzComparerR2.CharaSim
         public Bitmap DamageSkinSampleCriticalBitmap { get; set; }
         public Bitmap DamageSkinExtraBitmap { get; set; }
         public Bitmap DamageSkinUnitBitmap { get; set; }
+        public List<SummoningSackInfo> SummoningSack { get; private set; }
         public bool Cash
         {
             get { return GetBooleanValue(ItemPropType.cash); }
@@ -341,6 +343,30 @@ namespace WzComparerR2.CharaSim
                         item.overseasConstants[constantsNode.Text] = constantsNode.Value.ToString();
                     }
                 }
+            }
+
+            Wz_Node mobNode = node.FindNodeByPath("mob").ResolveUol();
+            if (mobNode != null)
+            {
+                List<SummoningSackInfo> ssiList = new List<SummoningSackInfo>();
+                foreach (Wz_Node subNode in mobNode.Nodes)
+                {
+                    SummoningSackInfo ssi = new SummoningSackInfo();
+                    foreach (Wz_Node propNode in subNode.Nodes)
+                    {
+                        switch (propNode.Text)
+                        {
+                            case "id":
+                                ssi.MobID = propNode.GetValueEx<int>(0);
+                                break;
+                            case "prob":
+                                ssi.Rate.Add(propNode.GetValueEx<int>(0));
+                                break;
+                        }
+                    }
+                    ssiList.Add(ssi);
+                }
+                item.SummoningSack = SummoningSackInfo.Consolidate(ssiList);
             }
             
             if (item.Icon.Bitmap == null)
