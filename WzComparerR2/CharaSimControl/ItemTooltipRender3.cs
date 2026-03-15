@@ -1194,10 +1194,10 @@ namespace WzComparerR2.CharaSimControl
             }
             if (!string.IsNullOrEmpty(descLeftAlign))
             {
-                tags.Add(descLeftAlign);
+                tags.Add(ReplaceDescTags(descLeftAlign));
                 if (isTranslateRequired)
                 {
-                    tags.Add(Translator.TranslateString(descLeftAlign));
+                    tags.Add(Translator.TranslateString(ReplaceDescTags(descLeftAlign)));
                 }
             }
 
@@ -1757,6 +1757,28 @@ namespace WzComparerR2.CharaSimControl
 
                 text = text.Replace("#cosmetic_EULO#", name);
             }
+
+            text = Regex.Replace(text, @$"#(t)\s*(\d{{1,9}}).*?#", match => // id should be less than 1,000,000,000
+            {
+                string tag = match.Groups[1].Value;
+                if (!int.TryParse(match.Groups[2].Value, out int id)) id = -1;
+                StringResult sr;
+                var name = "";
+                switch (tag)
+                {
+                    case "t":
+                        StringLinker.StringItem.TryGetValue(id, out sr);
+                        if (sr == null)
+                        {
+                            StringLinker.StringEqp.TryGetValue(id, out sr);
+                        }
+                        name = sr?.Name ?? id.ToString();
+                        return $"{name}";
+
+                    default:
+                        return id.ToString();
+                }
+            });
 
             return text;
         }

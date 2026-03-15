@@ -961,12 +961,12 @@ namespace WzComparerR2.CharaSimControl
                     picH += 12;
                     if (isTranslateRequired)
                     {
-                        string mergedDescLeftAlign = Translator.MergeString(descLeftAlign, Translator.TranslateString(descLeftAlign), 2);
+                        string mergedDescLeftAlign = Translator.MergeString(ReplaceDescTags(descLeftAlign), Translator.TranslateString(descLeftAlign), 2);
                         GearGraphics.DrawString(g, mergedDescLeftAlign, Translator.IsKoreanStringPresent(mergedDescLeftAlign) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 14, right, ref picH, 16);
                     }
                     else
                     {
-                        GearGraphics.DrawString(g, descLeftAlign, Translator.IsKoreanStringPresent(descLeftAlign) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 14, right, ref picH, 16);
+                        GearGraphics.DrawString(g, ReplaceDescTags(descLeftAlign), Translator.IsKoreanStringPresent(ReplaceDescTags(descLeftAlign)) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, 14, right, ref picH, 16);
                     }
                 }
                 if (item.CoreSpecs.Count > 0)
@@ -1720,7 +1720,29 @@ namespace WzComparerR2.CharaSimControl
 
                 text = text.Replace("#cosmetic_EULO#", name);
             }
-            
+
+            text = Regex.Replace(text, @$"#(t)\s*(\d{{1,9}}).*?#", match => // id should be less than 1,000,000,000
+            {
+                string tag = match.Groups[1].Value;
+                if (!int.TryParse(match.Groups[2].Value, out int id)) id = -1;
+                StringResult sr;
+                var name = "";
+                switch (tag)
+                {
+                    case "t":
+                        StringLinker.StringItem.TryGetValue(id, out sr);
+                        if (sr == null)
+                        {
+                            StringLinker.StringEqp.TryGetValue(id, out sr);
+                        }
+                        name = sr?.Name ?? id.ToString();
+                        return $"{name}";
+
+                    default:
+                        return id.ToString();
+                }
+            });
+
             return text;
         }
 
