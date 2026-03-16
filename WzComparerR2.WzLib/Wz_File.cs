@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace WzComparerR2.WzLib
 {
     public class Wz_File : IMapleStoryFile, IDisposable
     {
-        public Wz_File(string fileName, Wz_Structure wz)
+        public Wz_File(string fileName, Wz_Structure wz, string fallbackFileName = null)
         {
             this.imageCount = 0;
             this.wzStructure = wz;
@@ -33,7 +34,9 @@ namespace WzComparerR2.WzLib
         private readonly List<Wz_Directory> directories;
 
         public Encoding TextEncoding { get; set; }
-
+        public bool Forced { get; set; }
+        public List<Tuple<long, long>> ret { get; set; } = new List<Tuple<long, long>>();
+        public bool retInited { get; set; }
         public object ReadLock => this.fileStream;
 
         public FileStream FileStream
@@ -281,15 +284,15 @@ namespace WzComparerR2.WzLib
             return ((uint)(entryCount ^ encryptedEntryCount) - (hash1 << 24)) * 0x9937733D;
         }
 
-        public void GetDirTree(Wz_Node parent, bool useBaseWz = false, bool loadWzAsFolder = false)
+        public void GetDirTree(Wz_Node parent, bool useBaseWz = false, bool loadWzAsFolder = false, string fileName = null, string fallbackFileName = null)
         {
             var ps = new PartialStream(this.FileStream, this.header.DataStartPosition, this.fileStream.Length - this.header.DataStartPosition, true);
             ps.Position = 0;
             var reader = new WzBinaryReader(ps, false);
-            this.GetDirTree(reader, parent, useBaseWz, loadWzAsFolder);
+            this.GetDirTree(reader, parent, useBaseWz, loadWzAsFolder, fileName, fallbackFileName);
         }
 
-        private void GetDirTree(WzBinaryReader reader, Wz_Node parent, bool useBaseWz = false, bool loadWzAsFolder = false)
+        private void GetDirTree(WzBinaryReader reader, Wz_Node parent, bool useBaseWz = false, bool loadWzAsFolder = false, string fileName = null, string fallbackFileName = null)
         {
             List<string> dirs = new List<string>();
 
@@ -309,7 +312,8 @@ namespace WzComparerR2.WzLib
             int dirCount = dirs.Count;
             bool willLoadBaseWz = useBaseWz ? parent.Text.Equals("base.wz", StringComparison.OrdinalIgnoreCase) : false;
 
-            var baseFolder = Path.GetDirectoryName(this.header.FileName);
+            var baseFolder = Path.GetDirectoryName(fileName ?? this.header.FileName);
+            var baseFolder2 = Path.GetDirectoryName(fallbackFileName);
 
             if (willLoadBaseWz && this.WzStructure.AutoDetectExtFiles)
             {
@@ -377,15 +381,20 @@ namespace WzComparerR2.WzLib
                         if (loadWzAsFolder)
                         {
                             string wzFolder = willLoadBaseWz ? Path.Combine(Path.GetDirectoryName(baseFolder), dir) : Path.Combine(baseFolder, dir);
-                            if (Directory.Exists(wzFolder))
+                            string wzFolder2 = baseFolder2 == null ? (string)null : (willLoadBaseWz ? Path.Combine(Path.GetDirectoryName(baseFolder2), dir) : Path.Combine(baseFolder2, dir));
+                            if (!Directory.Exists(wzFolder))
                             {
-                                this.wzStructure.LoadWzFolder(wzFolder, ref t, false);
-                                if (!willLoadBaseWz)
+                                if (!Directory.Exists(wzFolder2))
                                 {
-                                    var dirWzFile = t.GetValue<Wz_File>();
-                                    dirWzFile.Type = Wz_Type.Unknown;
-                                    dirWzFile.isSubDir = true;
+                                    continue;
                                 }
+                            }
+                            this.wzStructure.LoadWzFolder(wzFolder, ref t, fallbackFolder: wzFolder2);
+                            if (!willLoadBaseWz)
+                            {
+                                var dirWzFile = t.GetValue<Wz_File>();
+                                dirWzFile.Type = Wz_Type.Unknown;
+                                dirWzFile.isSubDir = true;
                             }
                         }
                         else if (willLoadBaseWz)
@@ -526,6 +535,300 @@ namespace WzComparerR2.WzLib
             }
         }
 
+        public void ForceGetDirTree(
+          Wz_Node parent,
+          bool useBaseWz = false,
+          bool loadWzAsFolder = false,
+          string fileName = null,
+          string fallbackFileName = null)
+        {
+            var partialStream = new PartialStream(
+                this.FileStream,
+                this.header.DataStartPosition,
+                this.fileStream.Length - this.header.DataStartPosition,
+                leaveOpen: true);
+
+            partialStream.Position = 0;
+
+            string name = $"{this.FileStream}_{this.header.DataStartPosition}";
+
+            var reader = new WzBinaryReader(partialStream, false, name);
+
+            this.ForceGetDirTree(reader, parent, useBaseWz, loadWzAsFolder, fileName, fallbackFileName);
+        }
+
+
+        private void ForceGetDirTree(WzBinaryReader reader, Wz_Node parent, bool useBaseWz = false, bool loadWzAsFolder = false, string fileName = null, string fallbackFileName = null)
+        {
+            List<string> dirs = new List<string>();
+            if (!(this.header.Signature == "PKG2"))
+                throw new Exception("Unknown signature: " + this.header.Signature);
+            this.ForceReadDirTreePkg2(reader, parent, ref dirs);
+            int count = dirs.Count;
+            bool flag = useBaseWz && parent.Text.Equals("base.wz", StringComparison.OrdinalIgnoreCase);
+            string directoryName1 = Path.GetDirectoryName(fileName ?? this.header.FileName);
+            string directoryName2 = Path.GetDirectoryName(fallbackFileName);
+            if (flag && this.WzStructure.AutoDetectExtFiles)
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    var match = Regex.Match(dirs[i], "^([A-Za-z]+)$");
+                    if (!match.Success)
+                        continue;
+
+                    string prefix = match.Groups[1].Value;
+                    for (int n = 2; ; n++)
+                    {
+                        string extDir = prefix + n;
+                        string path = Path.Combine(directoryName1, extDir + ".wz");
+
+                        if (!File.Exists(path))
+                            break;
+
+                        if (!dirs.Take(count).Any(d => extDir.Equals(d, StringComparison.OrdinalIgnoreCase)))
+                            dirs.Add(extDir);
+                    }
+                    for (int n = 1; ; n++)
+                    {
+                        string extDir = prefix + n.ToString("D3");
+                        string path = Path.Combine(directoryName1, extDir + ".wz");
+
+                        if (!File.Exists(path))
+                            break;
+
+                        if (!dirs.Take(count).Any(d => extDir.Equals(d, StringComparison.OrdinalIgnoreCase)))
+                            dirs.Add(extDir);
+                    }
+                }
+            }
+
+            for (int index = 0; index < dirs.Count; ++index)
+            {
+                string str1 = dirs[index];
+                Wz_Node node = parent.Nodes.Add(str1);
+                if (index < count)
+                    this.ForceGetDirTree(reader, node);
+                if (node.Nodes.Count == 0)
+                {
+                    this.WzStructure.has_basewz |= flag;
+                    try
+                    {
+                        if (loadWzAsFolder)
+                        {
+                            string str2 = flag ? Path.Combine(Path.GetDirectoryName(directoryName1), str1) : Path.Combine(directoryName1, str1);
+                            string str3 = directoryName2 == null ? (string)null : (flag ? Path.Combine(Path.GetDirectoryName(directoryName2), str1) : Path.Combine(directoryName2, str1));
+                            if (!Directory.Exists(str2))
+                            {
+                                if (!Directory.Exists(str3))
+                                    continue;
+                            }
+                            this.wzStructure.LoadWzFolder(str2, ref node, fallbackFolder: str3, force: true);
+                            if (!flag)
+                            {
+                                Wz_File wzFile = node.GetValue<Wz_File>();
+                                wzFile.Type = Wz_Type.Unknown;
+                                wzFile.isSubDir = true;
+                            }
+                        }
+                        else if (flag)
+                        {
+                            string str4 = Path.Combine(directoryName1, str1 + ".wz");
+                            if (File.Exists(str4))
+                                this.WzStructure.LoadFile(str4, node, loadWzAsFolder: loadWzAsFolder, force: true);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                    }
+                }
+            }
+            parent.Nodes.Trim();
+        }
+
+        private void ForceReadDirTreePkg2(WzBinaryReader reader, Wz_Node parent, ref List<string> dirs)
+        {
+            this.WzStructure.encryption.Pkg2EncType2 = Wz_CryptoKeyType.KMST1199;
+            IWzDecrypter decrypter = this.WzStructure.encryption.Pkg1Keys ?? this.WzStructure.encryption.GetKeys(Wz_CryptoKeyType.BMS);
+            IWzDecrypter pkg2Keys2 = this.WzStructure.encryption.Pkg2Keys2;
+            int num1 = reader.ReadCompressedInt32();
+            this.FindAllHits(this);
+            int count = this.ret.Count;
+            int index1 = 0;
+            List<Wz_File.Pkg2DirEntry> list = new List<Wz_File.Pkg2DirEntry>();
+            byte num2;
+            while (true)
+            {
+                num2 = reader.ReadByte();
+
+                if (num2 == 3 || num2 == 4)
+                {
+                    string name;
+                    try
+                    {
+                        name = list.Count == 0
+                            ? reader.ReadPkg2DirString2(pkg2Keys2)
+                            : reader.ReadString(decrypter);
+                    }
+                    catch
+                    {
+                        this.WzStructure.encryption.Pkg2EncType = Wz_CryptoKeyType.BMS;
+                        name = reader.ReadString(pkg2Keys2);
+                    }
+
+                    int dataLength = reader.ReadCompressedInt32();
+                    int checksum = reader.ReadCompressedInt32();
+
+                    long forcedOffset = 0;
+                    if (num2 == 4 && index1 < this.ret.Count)
+                    {
+                        forcedOffset = dataLength == this.ret[index1].Item2
+                            ? this.ret[index1].Item1
+                            : 0;
+                        index1++;
+                    }
+
+                    list.Add(new Wz_File.Pkg2DirEntry
+                    {
+                        NodeType = num2,
+                        Name = name,
+                        DataLength = dataLength,
+                        Checksum = checksum,
+                        ForcedOffset = forcedOffset
+                    });
+                    continue;
+                }
+                if (num2 == 128)
+                    break;
+                break;
+            }
+            if (num2 != count && (count < -127 || count > sbyte.MaxValue))
+                throw new Exception($"Unknown type {num2} in WzDirTree.");
+            reader.BaseStream.Position--;
+
+            if (reader.ReadCompressedInt32() != num1 || list.Count == 0)
+                return;
+
+            var span = CollectionsMarshal.AsSpan(list);
+
+            for (int i = 0; i < span.Length; i++)
+            {
+                ref var entry = ref span[i];
+
+                int dummy = (int)reader.ReadUInt32();
+
+                switch (entry.NodeType)
+                {
+                    case 3:
+                        this.directories.Add(new Wz_Directory(entry.Name, entry.DataLength, entry.Checksum, 0, 0, this));
+                        dirs.Add(entry.Name);
+                        break;
+
+                    case 4:
+                        var img = new Wz_Image(entry.Name, entry.DataLength, entry.Checksum, 0, 0, this)
+                        {
+                            ForcedOffset = entry.ForcedOffset,
+                            Offset = entry.ForcedOffset
+                        };
+
+                        var node = parent.Nodes.Add(entry.Name);
+                        node.Value = img;
+                        img.OwnerNode = node;
+
+                        this.imageCount++;
+                        break;
+                }
+            }
+
+        }
+
+        public void FindAllHits(Wz_File file)
+        {
+            if (this.retInited)
+                return;
+            PartialStream partialStream = new PartialStream((Stream)file.FileStream, file.Header.DataStartPosition, file.FileStream.Length - file.Header.DataStartPosition, true);
+            partialStream.Position = 0L;
+            string name = $"{file.FileStream}_{file.Header.DataStartPosition}";
+            var reader = new WzBinaryReader(partialStream, false, name);
+            this.ret.Clear();
+            byte[] pattern = new byte[5]
+            {
+        (byte) 115,
+        (byte) 248,
+        (byte) 250,
+        (byte) 217,
+        (byte) 195
+            };
+            long position = reader.BaseStream.Position;
+            reader.BaseStream.Position = 0L;
+            List<long> allPatterns = Wz_File.FindAllPatterns(reader, pattern);
+            List<long> longList = Wz_File.DiffAdjacent(allPatterns);
+            if (allPatterns.Count == longList.Count + 1)
+            {
+                long dataStartPosition = this.header.DataStartPosition;
+                for (int index = 0; index < longList.Count; ++index)
+                    this.ret.Add(new Tuple<long, long>(allPatterns[index] + this.header.DataStartPosition, longList[index]));
+            }
+            reader.BaseStream.Position = position;
+        }
+
+        private static List<long> FindAllPatterns(WzBinaryReader reader, byte[] pattern)
+        {
+            int num1 = pattern != null && pattern.Length != 0 ? pattern.Length : throw new ArgumentException("pattern must not be empty");
+            int num2 = num1 - 1;
+            byte[] numArray1 = ArrayPool<byte>.Shared.Rent(262144 + num2);
+            List<long> allPatterns = new List<long>();
+            int[] numArray2 = new int[256];
+            for (int index = 0; index < numArray2.Length; ++index)
+                numArray2[index] = num1;
+            for (int index = 0; index < num1 - 1; ++index)
+                numArray2[(int)pattern[index]] = num1 - 1 - index;
+            long num3 = 0;
+            try
+            {
+                int num4;
+                while ((num4 = reader.BaseStream.Read(numArray1, num2, 262144)) > 0)
+                {
+                    int num5 = num4 + num2;
+                    int num6 = num5 - num1;
+                    int num7 = 0;
+                    while (num7 <= num6)
+                    {
+                        int index = num1 - 1;
+                        while (index >= 0 && (int)numArray1[num7 + index] == (int)pattern[index])
+                            --index;
+                        if (index < 0)
+                        {
+                            long num8 = num3 + (long)num7 - (long)num2;
+                            if (num8 >= 0L)
+                                allPatterns.Add(num8);
+                            ++num7;
+                        }
+                        else
+                            num7 += numArray2[(int)numArray1[num7 + num1 - 1]];
+                    }
+                    if (num2 > 0)
+                        Buffer.BlockCopy((Array)numArray1, num5 - num2, (Array)numArray1, 0, num2);
+                    num3 += (long)num4;
+                }
+                allPatterns.Add(reader.BaseStream.Length);
+                return allPatterns;
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(numArray1);
+            }
+        }
+
+        private static List<long> DiffAdjacent(List<long> list)
+        {
+            if (list.Count == 0)
+                return list;
+            List<long> longList = new List<long>();
+            for (int index = 1; index < list.Count; ++index)
+                longList.Add(list[index] - list[index - 1]);
+            return longList;
+        }
+
         private string getFullPath(Wz_Node parent, string name)
         {
             List<string> path = new List<string>(5);
@@ -623,32 +926,36 @@ namespace WzComparerR2.WzLib
 
         public void DetectWzVersion()
         {
-            IWzVersionVerifier wzVersionVerifier;
-
-            if (this.Header.Signature == Wz_Header.PKG1)
+            if (this.Forced)
             {
-                switch (this.wzStructure?.WzVersionVerifyMode)
-                {
-                    default:
-                    case WzVersionVerifyMode.Default:
-                        wzVersionVerifier = new DefaultVersionVerifier();
-                        break;
-
-                    case WzVersionVerifyMode.Fast:
-                        wzVersionVerifier = new FastVersionVerifier();
-                        break;
-                }
-            }
-            else if (this.header.Signature == Wz_Header.PKG2)
-            {
-                wzVersionVerifier = new Pkg2VersionVerifier();
+                this.header.VersionChecked = true;
             }
             else
             {
-                throw new Exception($"Unknown signature: {this.header.Signature}");
+                Wz_File.IWzVersionVerifier wzVersionVerifier;
+                if (this.Header.Signature == "PKG1")
+                {
+                    WzVersionVerifyMode? versionVerifyMode = this.wzStructure?.WzVersionVerifyMode;
+                    if (versionVerifyMode.HasValue)
+                    {
+                        switch (versionVerifyMode.GetValueOrDefault())
+                        {
+                            case WzVersionVerifyMode.Fast:
+                                wzVersionVerifier = (Wz_File.IWzVersionVerifier)new Wz_File.FastVersionVerifier();
+                                goto label_10;
+                        }
+                    }
+                    wzVersionVerifier = (Wz_File.IWzVersionVerifier)new Wz_File.DefaultVersionVerifier();
+                }
+                else
+                {
+                    if (!(this.header.Signature == "PKG2"))
+                        throw new Exception("Unknown signature: " + this.header.Signature);
+                    wzVersionVerifier = (Wz_File.IWzVersionVerifier)new Wz_File.Pkg2VersionVerifier();
+                }
+            label_10:
+                wzVersionVerifier.Verify(this);
             }
-
-            wzVersionVerifier.Verify(this);
         }
 
         public void MergeWzFile(Wz_File wz_File)
@@ -717,7 +1024,7 @@ namespace WzComparerR2.WzLib
             {
                 foreach (var img in imgList)
                 {
-                    img.Offset = this.CalcOffset(wzFile, img.HashedOffsetPosition, img.HashedOffset);
+                    img.Offset = img.ForcedOffset != -1L ? img.ForcedOffset : (long)this.CalcOffset(wzFile, img.HashedOffsetPosition, img.HashedOffset);
                 }
             }
 
@@ -894,12 +1201,6 @@ namespace WzComparerR2.WzLib
             public virtual bool Verify(Wz_File wzFile)
             {
                 List<Wz_Image> imgList = EnumerableAllWzImage(wzFile.node).Where(_img => _img.WzFile == wzFile).ToList();
-
-                if (wzFile.header.VersionChecked)
-                {
-                    this.CalcOffset(wzFile, imgList);
-                }
-                else
                 {
                     if (imgList.Count > 0)
                     {
@@ -955,6 +1256,7 @@ namespace WzComparerR2.WzLib
             public string Name;
             public int DataLength;
             public int Checksum;
+            public long ForcedOffset;
         }
     }
 

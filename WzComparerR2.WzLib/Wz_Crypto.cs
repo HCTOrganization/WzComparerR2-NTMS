@@ -23,6 +23,7 @@ namespace WzComparerR2.WzLib
         KMS = 2,
         GMS = 3,
         KMST1198 = 4,
+        KMST1199 = 5,
     }
 
     public class Wz_Crypto
@@ -33,6 +34,7 @@ namespace WzComparerR2.WzLib
             this.keys_kms = new Wz_CryptoKey(iv_kms);
             this.keys_gms = new Wz_CryptoKey(iv_gms);
             this.keys_kmst1198 = Pkg2DirStringKey.Instance;
+            this.keys_kmst1199 = Pkg2DirStringKey.Instance;
             this.UseListWz = false;
             this.Pkg1EncType = Wz_CryptoKeyType.Unknown;
             this.List = new StringCollection();
@@ -245,16 +247,19 @@ namespace WzComparerR2.WzLib
         private IWzDecrypter keys_bms;
         private Wz_CryptoKey keys_gms, keys_kms;
         private IWzDecrypter keys_kmst1198;
+        private IWzDecrypter keys_kmst1199;
 
         public bool UseListWz { get; private set; }
         public StringCollection List { get; private set; }
 
         public Wz_CryptoKeyType Pkg1EncType { get; set; }
         public Wz_CryptoKeyType Pkg2EncType { get; set; }
+        public Wz_CryptoKeyType Pkg2EncType2 { get; set; }
         public bool Pkg1DirEncDetected => this.Pkg1EncType != Wz_CryptoKeyType.Unknown;
         public bool Pkg2DirEncDetected => this.Pkg2EncType != Wz_CryptoKeyType.Unknown;
         public IWzDecrypter Pkg1Keys => this.GetKeys(this.Pkg1EncType);
         public IWzDecrypter Pkg2Keys => this.GetKeys(this.Pkg2EncType);
+        public IWzDecrypter Pkg2Keys2 => this.GetKeys(this.Pkg2EncType2);
 
         public bool IsDirEncDetected(Wz_File wzFile)
         {
@@ -275,7 +280,8 @@ namespace WzComparerR2.WzLib
                 case Wz_CryptoKeyType.BMS: return this.keys_bms;
                 case Wz_CryptoKeyType.KMS: return this.keys_kms;
                 case Wz_CryptoKeyType.GMS: return this.keys_gms;
-                case Wz_CryptoKeyType.KMST1198 : return this.keys_kmst1198;
+                case Wz_CryptoKeyType.KMST1198: return this.keys_kmst1198;
+                case Wz_CryptoKeyType.KMST1199: return this.keys_kmst1199;
                 default: throw new ArgumentOutOfRangeException(nameof(keyType));
             }
         }

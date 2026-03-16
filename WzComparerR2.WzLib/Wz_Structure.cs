@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace WzComparerR2.WzLib
 {
@@ -80,13 +80,13 @@ namespace WzComparerR2.WzLib
             calculate_img_count();
         }
 
-        public Wz_File LoadFile(string fileName, Wz_Node node, bool useBaseWz = false, bool loadWzAsFolder = false)
+        public Wz_File LoadFile(string fileName, Wz_Node node, bool useBaseWz = false, bool loadWzAsFolder = false, string fallbackFileName = null, bool force = false)
         {
             Wz_File file = null;
 
             try
             {
-                file = new Wz_File(fileName, this);
+                file = new Wz_File(fileName, this, fallbackFileName);
                 if (!file.Loaded)
                 {
                     throw new Exception("ファイルは有効な WZ ファイルではありません。");
@@ -108,12 +108,38 @@ namespace WzComparerR2.WzLib
             }
             catch
             {
-                if (file != null)
+                if (file.Header.Signature == "PKG2")
                 {
-                    file.Close();
-                    this.wz_files.Remove(file);
+                    try
+                    {
+                        file.FindAllHits(file);
+                        file.retInited = true;
+                        file.ForceGetDirTree(node, useBaseWz, loadWzAsFolder, fileName, fallbackFileName);
+                        file.Header.DirEndPosition = file.FileStream.Position;
+                        file.Forced = true;
+                        file.DetectWzType();
+                        file.DetectWzVersion();
+                        return file;
+                    }
+                    catch
+                    {
+                        if (file != null)
+                        {
+                            file.Close();
+                            this.wz_files.Remove(file);
+                        }
+                        throw;
+                    }
                 }
-                throw;
+                else
+                {
+                    if (file != null)
+                    {
+                        file.Close();
+                        this.wz_files.Remove(file);
+                    }
+                    throw;
+                }
             }
         }
 
@@ -153,10 +179,11 @@ namespace WzComparerR2.WzLib
             }
         }
 
-        public void LoadKMST1125DataWz(string fileName)
+        public void LoadKMST1125DataWz(string fileName, string fallbackFileName = null)
         {
-            LoadWzFolder(Path.GetDirectoryName(fileName), ref this.WzNode, true);
-            calculate_img_count();
+            this.LoadWzFolder(Path.GetDirectoryName(fileName), ref this.WzNode, true, fallbackFileName == null ? (string)null : Path.GetDirectoryName(fallbackFileName));
+            this.calculate_img_count();
+            this.calculate_img_count();
         }
 
         public bool IsKMST1125WzFormat(string fileName)
@@ -190,13 +217,14 @@ namespace WzComparerR2.WzLib
             }
         }
 
-        public void LoadWzFolder(string folder, ref Wz_Node node, bool useBaseWz = false)
+        public void LoadWzFolder(string folder, ref Wz_Node node, bool useBaseWz = false, string fallbackFolder = null, bool force = false)
         {
             string baseName = Path.Combine(folder, Path.GetFileName(folder));
+            string fallbackBaseName = fallbackFolder == null ? (string)null : Path.Combine(fallbackFolder, Path.GetFileName(fallbackFolder));
             string entryWzFileName = Path.ChangeExtension(baseName, ".wz");
             string iniFileName = Path.ChangeExtension(baseName, ".ini");
             Func<int, string> extraWzFileName = _index => Path.ChangeExtension($"{baseName}_{_index:D3}", ".wz");
-
+            Func<int, string> fallbackWzFileName = index => Path.ChangeExtension($"{fallbackBaseName}_{index:D3}", ".wz");
             // load iniFile
             int? lastWzIndex = null;
             if (File.Exists(iniFileName))
@@ -233,16 +261,16 @@ namespace WzComparerR2.WzLib
             {
                 node = new Wz_Node(Path.GetFileName(entryWzFileName));
             }
-            var entryWzf = this.LoadFile(entryWzFileName, node, useBaseWz, true);
-
+            var entryWzf = this.LoadFile(entryWzFileName, node, useBaseWz, true, Path.ChangeExtension(fallbackBaseName, ".wz"), force);
             // load extra file
             if (lastWzIndex != null)
             {
                 for (int i = 0, j = lastWzIndex.Value; i <= j; i++)
                 {
                     string extraFile = extraWzFileName(i);
+                    string fallbackFileName = fallbackWzFileName(i);
                     var tempNode = new Wz_Node(Path.GetFileName(extraFile));
-                    var extraWzf = this.LoadFile(extraFile, tempNode, false, true);
+                    var extraWzf = this.LoadFile(extraFile, tempNode, false, true, fallbackFileName: fallbackFileName, force: force);
 
                     /*
                      * there is a little hack here, we'll move all img to the entry file, and each img still refers to the original wzfile.

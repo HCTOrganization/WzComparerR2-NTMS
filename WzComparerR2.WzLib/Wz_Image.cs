@@ -39,6 +39,7 @@ namespace WzComparerR2.WzLib
         public uint HashedOffset { get; set; }
         public uint HashedOffsetPosition { get; set; }
         public long Offset { get; set; }
+        public long ForcedOffset { get; set; } = -1;
 
         public Wz_Node Node { get; private set; }
 
@@ -101,6 +102,24 @@ namespace WzComparerR2.WzLib
                         lock (this.WzFile.ReadLock)
                         {
                             this.stream.Position = 0;
+                            Wz_Image.RawTextReader.ExtractImg(new WzStreamReader(this.stream), this.Node);
+                            this.extr = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        e = ex;
+                        this.Unextract();
+                        return false;
+                    }
+                }
+                else if (Wz_Image.TextImageReaderV1.PreCheck(this.stream))
+                {
+                    try
+                    {
+                        lock (this.WzFile.ReadLock)
+                        {
+                            this.stream.Position = 0L;
                             var reader = new WzStreamReader(this.stream);
                             TextImageReaderV1.ExtractImg(reader, this.Node);
                             this.extr = true;
@@ -893,6 +912,22 @@ namespace WzComparerR2.WzLib
                     case "<Property>": type = NodeType.Property; return true;
                     default: type = NodeType.Unknown; return false;
                 }
+            }
+        }
+
+        internal class RawTextReader
+        {
+            public static bool PreCheck(Wz_Image img) => string.Equals(Path.GetExtension(img.Name), ".txt", StringComparison.OrdinalIgnoreCase);
+
+            public static void ExtractImg(WzStreamReader reader, Wz_Node parent)
+            {
+                StringBuilder stringBuilder = new StringBuilder();
+                while (!reader.EndOfStream)
+                {
+                    string str = reader.ReadLine();
+                    stringBuilder.Append(str).Append("\r\n");
+                }
+                parent.Value = (object)stringBuilder.ToString();
             }
         }
 
