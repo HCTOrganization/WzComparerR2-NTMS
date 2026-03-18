@@ -4904,6 +4904,54 @@ namespace WzComparerR2
             this.charaSimCtrl.UIItem.Visible = buttonItemCharItem.Checked;
         }
 
+        private void btnWorldArchiveBrowser_Click(object sender, EventArgs e)
+        {
+            if (PluginManager.FindWz(Wz_Type.Base) == null)
+            {
+                ToastNotification.Show(this, $"錯誤: 未開啟 Base.wz。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                return;
+            }
+            if (openedWz.Count > 1)
+            {
+                ToastNotification.Show(this, $"錯誤：使用此功能前僅可開啟一個 Base.wz。", null, 4000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                return;
+            }
+            Wz_Node etcWaNode = PluginManager.FindWz(Wz_Type.Etc)?.FindNodeByPath("worldArchive.img");
+            Wz_Node waUiNode = PluginManager.FindWz(Wz_Type.UI)?.FindNodeByPath("UIworldArchive.img");
+            if (etcWaNode == null || waUiNode == null)
+            {
+                ToastNotification.Show(this, $"錯誤：該客戶端未實裝世界檔案。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                return;
+            }
+            foreach (Form form in Application.OpenForms)
+            {
+                if (form is FrmWorldArchiveBrowser && !form.IsDisposed)
+                {
+                    form.Show();
+                    form.BringToFront();
+                    return;
+                }
+            }
+            FrmWorldArchiveBrowser frmWorldArchiveBrowser = new FrmWorldArchiveBrowser(styleManager1.ManagerStyle == eStyle.VisualStudio2012Dark);
+            frmWorldArchiveBrowser.EtcWaNode = etcWaNode;
+            frmWorldArchiveBrowser.UiWaNode = waUiNode;
+            frmWorldArchiveBrowser.MobNode = PluginManager.FindWz(Wz_Type.Mob);
+            frmWorldArchiveBrowser.NpcNode = PluginManager.FindWz(Wz_Type.Npc);
+            frmWorldArchiveBrowser.stringLinker = this.stringLinker;
+            frmWorldArchiveBrowser.regionID = 0;
+            frmWorldArchiveBrowser.typeID = 0;
+            frmWorldArchiveBrowser._mainForm = this;
+            frmWorldArchiveBrowser.Show();
+        }
+
+        public void RedirectToNode(Wz_Node node)
+        {
+            if (OnSelectedWzNode(node))
+            {
+                tooltipQuickView.BringToFront();
+            }
+        }
+
         private void buttonItemAddItem_Click(object sender, EventArgs e)
         {
             bool success;

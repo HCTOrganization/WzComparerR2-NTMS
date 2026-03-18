@@ -74,7 +74,7 @@ namespace WzComparerR2
             this.itemContainer31 = new DevComponents.DotNetBar.ItemContainer();
             // this.buttonItemCharaEquip = new DevComponents.DotNetBar.ButtonItem();
             this.itemContainer32 = new DevComponents.DotNetBar.ItemContainer();
-            // this.itemContainer33 = new DevComponents.DotNetBar.ItemContainer();
+            this.itemContainer33 = new DevComponents.DotNetBar.ItemContainer();
             this.buttonItemAddItem = new DevComponents.DotNetBar.ButtonItem();
             this.itemContainer34 = new DevComponents.DotNetBar.ItemContainer();
             this.itemContainer35 = new DevComponents.DotNetBar.ItemContainer();
@@ -320,6 +320,7 @@ namespace WzComparerR2
             this.btnReverseNodeSelection = new DevComponents.DotNetBar.ButtonX();
             this.btnPetEquipExport = new DevComponents.DotNetBar.ButtonX();
             this.btnSkillTooltipExport = new DevComponents.DotNetBar.ButtonX();
+            this.btnWorldArchiveBrowser = new DevComponents.DotNetBar.ButtonItem();
             this.btnPreset = new DevComponents.DotNetBar.ButtonX();
             this.btnMusicChannel = new DevComponents.DotNetBar.ButtonItem();
             this.btnSkillChangeInfo = new DevComponents.DotNetBar.ButtonItem();
@@ -447,7 +448,8 @@ namespace WzComparerR2
             this.itemContainer37,
             this.itemContainer23,
             this.itemContainer28,
-            this.itemContainer32});
+            this.itemContainer32,
+            this.itemContainer33,});
             this.ribbonBar8.Location = new System.Drawing.Point(265, 0);
             this.ribbonBar8.Name = "ribbonBar8";
             this.ribbonBar8.Size = new System.Drawing.Size(270, 91);
@@ -829,13 +831,11 @@ namespace WzComparerR2
             // 
             this.itemContainer31.TitleStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             // 
-            // buttonItemCharaEquip
+            // btnWorldArchiveBrowser
             // 
-            // this.buttonItemCharaEquip.AutoCheckOnClick = true;
-            // this.buttonItemCharaEquip.Name = "buttonItemCharaEquip";
-            // this.buttonItemCharaEquip.Text = "裝備欄";
-            // this.buttonItemCharaEquip.Tooltip = "裝備欄開關";
-            // this.buttonItemCharaEquip.CheckedChanged += new System.EventHandler(this.buttonItemCharaEquip_CheckedChanged);
+            this.btnWorldArchiveBrowser.Name = "btnWorldArchiveBrowser";
+            this.btnWorldArchiveBrowser.Text = "世界檔案";
+            this.btnWorldArchiveBrowser.Click += new System.EventHandler(this.btnWorldArchiveBrowser_Click);
             // 
             // itemContainer32
             // 
@@ -858,13 +858,14 @@ namespace WzComparerR2
             // 
             // 
             // 
-            // this.itemContainer33.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            // this.itemContainer33.Name = "itemContainer33";
-            // this.itemContainer33.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {});
+            this.itemContainer33.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.itemContainer33.Name = "itemContainer33";
+            this.itemContainer33.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.btnWorldArchiveBrowser});
             // 
             // 
             // 
-            // this.itemContainer33.TitleStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.itemContainer33.TitleStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             // 
             // buttonItemAddItem
             // 
@@ -4023,7 +4024,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ItemContainer itemContainer31;
         // private DevComponents.DotNetBar.ButtonItem buttonItemCharaEquip;
         private DevComponents.DotNetBar.ItemContainer itemContainer32;
-        // private DevComponents.DotNetBar.ItemContainer itemContainer33;
+        private DevComponents.DotNetBar.ItemContainer itemContainer33;
         private DevComponents.DotNetBar.ButtonItem buttonItemAddItem;
         private DevComponents.DotNetBar.ItemContainer itemContainer34;
         private DevComponents.DotNetBar.ItemContainer itemContainer35;
@@ -4170,6 +4171,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ButtonX btnReverseNodeSelection;
         private DevComponents.DotNetBar.ButtonX btnPetEquipExport;
         private DevComponents.DotNetBar.ButtonX btnSkillTooltipExport;
+        private DevComponents.DotNetBar.ButtonItem btnWorldArchiveBrowser;
         private DevComponents.DotNetBar.ButtonX btnPreset;
         private DevComponents.DotNetBar.ButtonItem btnMusicChannel;
         private DevComponents.DotNetBar.ButtonItem btnSkillChangeInfo;

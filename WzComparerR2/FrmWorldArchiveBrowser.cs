@@ -1,0 +1,442 @@
+﻿using DevComponents.AdvTree;
+using DevComponents.DotNetBar;
+using DevComponents.Editors;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using WzComparerR2.Common;
+using WzComparerR2.WzLib;
+using WzComparerR2.PluginBase;
+using WzComparerR2.CharaSim;
+using System.Text.RegularExpressions;
+
+namespace WzComparerR2
+{
+    public partial class FrmWorldArchiveBrowser : DevComponents.DotNetBar.Office2007Form
+    {
+        public FrmWorldArchiveBrowser(bool isDarkMode = false)
+        {
+            InitializeComponent(); 
+#if NET6_0_OR_GREATER
+            // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
+            this.Font = new Font(new FontFamily("SimSun"), 9f);
+#endif
+            cmbRegion.Items.AddRange(new[]
+            {
+                new ComboItem("楓之谷世界"){ Value = 0 },
+                new ComboItem("格蘭蒂斯"){ Value = 1 },
+                new ComboItem("奧術之河"){ Value = 2 },
+            });
+            cmbType.Items.AddRange(new[]
+            {
+                new ComboItem("NPC"){ Value = 0 },
+                new ComboItem("怪物"){ Value = 1 },
+            });
+            this.elementStyle1.TextColor = isDarkMode ? System.Drawing.Color.LightGray : System.Drawing.SystemColors.ControlText;
+            this.richDescription.BackColorRichTextBox = isDarkMode ? Color.Black : Color.White;
+            this.DarkMode = isDarkMode;
+            this.picWorldArchiveImg.MouseDoubleClick += (s, e) =>
+            {
+                if (e.Button == System.Windows.Forms.MouseButtons.Left)
+                {
+                    this.picWorldArchiveImg_Navigate();
+                }
+            };
+            this.picWorldArchiveImg.MouseClick += (s, e) =>
+            {
+                if (e.Button == System.Windows.Forms.MouseButtons.Right)
+                {
+                    this.picWorldArchiveImg_Save();
+                }
+            };
+        }
+
+        public Wz_Node EtcWaNode { get; set; }
+        public Wz_Node UiWaNode { get; set; }
+        public Wz_Node MobNode { get; set; }
+        public Wz_Node NpcNode { get; set; }
+        public StringLinker stringLinker { get; set; }
+        public MainForm _mainForm { get; set; }
+        private bool DarkMode;
+        private Bitmap unscaledBmp;
+        public int regionID
+        {
+            get
+            {
+                return ((cmbRegion.SelectedItem as ComboItem)?.Value as int?) ?? 0;
+            }
+            set
+            {
+                var items = cmbRegion.Items.Cast<ComboItem>();
+                var item = items.FirstOrDefault(_item => _item.Value as int? == value)
+                    ?? items.Last();
+                item.Value = value;
+                cmbRegion.SelectedItem = item;
+            }
+        }
+
+        public int typeID
+        {
+            get
+            {
+                return ((cmbType.SelectedItem as ComboItem)?.Value as int?) ?? 0;
+            }
+            set
+            {
+                var items = cmbType.Items.Cast<ComboItem>();
+                var item = items.FirstOrDefault(_item => _item.Value as int? == value)
+                    ?? items.Last();
+                item.Value = value;
+                cmbType.SelectedItem = item;
+            }
+        }
+
+        private async void btnTranslate_Click(object sender, EventArgs e)
+        {
+            if (this.richDescription.TextLength > 0)
+            {
+                this.btnTranslate.Enabled = false;
+                string originalText = this.richDescription.Text;
+                UpdateText("翻譯中...");
+                await Task.Run(() =>
+                {
+                    string translatedText = Translator.TranslateString(originalText);
+                    UpdateText(translatedText);
+                });
+            }
+        }
+
+        private void cmbRegion_SelectedValueChanged(object sender, EventArgs e)
+        {
+            var regionID = this.regionID;
+            this.btnTranslate.Enabled = true;
+            this.advTreeMap.Nodes.Clear();
+            this.advTreeLife.Nodes.Clear();
+            this.richDescription.Clear();
+            var mapNodes = EtcWaNode.FindNodeByPath($"collectionInfo\\{regionID}", true);
+            if (mapNodes != null)
+            {
+                foreach (var mapNode in mapNodes.Nodes)
+                {
+                    Wz_Node regionNameNode = mapNode.FindNodeByPath("regionName");
+                    if (regionNameNode != null)
+                    {
+                        var node = new Node(regionNameNode.Value.ToString());
+                        node.Tag = mapNode;
+                        this.advTreeMap.Nodes.Add(node);
+                    }
+                }
+                Wz_Node worldDescNode = mapNodes.FindNodeByPath("worldDesc");
+                if (worldDescNode != null)
+                {
+                    UpdateText(worldDescNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n"));
+                }
+            }
+            else
+            {
+                this.advTreeMap.Nodes.Add(new Node("找不到資訊"));
+            }
+            var worldIllustNode = UiWaNode.FindNodeByPath($"regionSelect\\main\\world\\{regionID}", true);
+            if (worldIllustNode != null)
+            {
+                BitmapOrigin bo = BitmapOrigin.CreateFromNode(worldIllustNode, PluginManager.FindWz);
+                this.picWorldArchiveImg.Image = bo.Bitmap;
+                this.unscaledBmp = null;
+            }
+            else
+            {
+                this.picWorldArchiveImg.Image = null;
+            }
+        }
+
+        private void cmbType_SelectedValueChanged(object sender, EventArgs e)
+        {
+            this.btnTranslate.Enabled = true;
+            UpdateAdvTreeLife();
+        }
+
+        private void advTreeMap_AfterNodeSelect(object sender, EventArgs e)
+        {
+            this.btnTranslate.Enabled = true;
+            UpdateMapImageInfo();
+            UpdateAdvTreeLife();
+        }
+
+        private void advTreeLife_AfterNodeSelect(object sender, EventArgs e)
+        {
+            this.btnTranslate.Enabled = true;
+            UpdateLifeImageInfo();
+        }
+
+        private void advTreeLife_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            this.btnTranslate.Enabled = true;
+            picWorldArchiveImg_Navigate();
+        }
+
+        private void picWorldArchiveImg_Navigate()
+        {
+            if (this.advTreeLife.SelectedNode != null)
+            {
+                if (Int32.TryParse(Regex.Match(this.advTreeLife.SelectedNode.Text, @"\d+").Value, out int LifeID))
+                {
+                    Wz_Node lifeNode = null;
+                    switch (this.typeID)
+                    {
+                        case 0:
+                            lifeNode = PluginManager.FindWz(Wz_Type.Npc)?.FindNodeByPath($"{LifeID:D7}.img");
+                            break;
+                        case 1:
+                            lifeNode = PluginManager.FindWz(Wz_Type.Mob)?.FindNodeByPath($"{LifeID:D7}.img");
+                            break;
+                    }
+                    _mainForm.RedirectToNode(lifeNode ?? (this.advTreeLife.SelectedNode.Tag as Wz_Node));
+                }
+            }
+        }
+
+        private void picWorldArchiveImg_Save()
+        {
+            if (this.picWorldArchiveImg.Image != null)
+            {
+                string fileName = "";
+                var TypeID = this.typeID;
+                if (this.advTreeLife.SelectedNode == null)
+                {
+                    fileName += this.advTreeMap.SelectedNode == null ? $"Map_{this.cmbRegion.SelectedItem.ToString()}" : $"Map_{this.advTreeMap.SelectedNode.Text}";
+                }
+                else
+                {
+                    switch (TypeID)
+                    {
+                        case 0: fileName += $"Npc_{advTreeLife.SelectedNode.Text}"; break;
+                        case 1: fileName += $"Mob_{advTreeLife.SelectedNode.Text}"; break;
+                    }
+                }
+                using (SaveFileDialog dlg = new SaveFileDialog())
+                {
+                    dlg.Filter = "PNG (*.png)|*.png|*.*|*.*";
+                    dlg.FileName = fileName;
+
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        if (this.unscaledBmp != null)
+                        {
+                            this.unscaledBmp.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                        }
+                        else
+                        {
+                            this.picWorldArchiveImg.Image.Save(dlg.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void UpdateMapImageInfo()
+        {
+            this.advTreeLife.Nodes.Clear();
+            int mapID = -1;
+            if (this.advTreeMap.SelectedNode == null)
+            {
+                return;
+            }
+            else
+            {
+                Int32.TryParse((this.advTreeMap.SelectedNode.Tag as Wz_Node).Text, out mapID);
+            }
+            Wz_Node illustNode = UiWaNode.FindNodeByPath($"detail\\main\\regionillust\\{this.regionID}\\{mapID}", true);
+            if (illustNode != null)
+            {
+                BitmapOrigin bo = BitmapOrigin.CreateFromNode(illustNode, PluginManager.FindWz);
+                this.picWorldArchiveImg.Image = bo.Bitmap;
+                this.unscaledBmp = null;
+            }
+            else
+            {
+                this.picWorldArchiveImg = null;
+            }
+            Wz_Node descNode = EtcWaNode.FindNodeByPath($"collectionInfo\\{this.regionID}\\{mapID}\\regionDesc", true);
+            if (descNode != null)
+            {
+                UpdateText(descNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n"));
+            }
+            else
+            {
+                this.richDescription.Clear();
+            }
+        }
+
+        private void UpdateLifeImageInfo()
+        {
+            if (this.advTreeLife.SelectedNode == null)
+            {
+                return;
+            }
+            var TypeID = this.typeID;
+            double scale = 1.00;
+            Wz_Node scaleNode = (this.advTreeLife.SelectedNode.Tag as Wz_Node).FindNodeByPath("scale");
+            if (scaleNode != null)
+            {
+                scale = scaleNode.GetValueEx<double>(100) / 100;
+            }
+            Wz_Node descNode = (this.advTreeLife.SelectedNode.Tag as Wz_Node).FindNodeByPath("desc");
+            if (descNode != null)
+            {
+                UpdateText(descNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n"));
+            }
+            else
+            {
+                this.richDescription.Clear();
+            }
+            if (Int32.TryParse(Regex.Match(this.advTreeLife.SelectedNode.Text, @"\d+").Value, out int LifeID))
+            {
+                Bitmap bmp = null;
+                Bitmap altBmp = null;
+                Wz_Node lifeNode;
+                Wz_Node altImageNode;
+                switch (TypeID)
+                {
+                    case 0:
+                        lifeNode = PluginManager.FindWz(Wz_Type.Npc)?.FindNodeByPath($"{LifeID:D7}.img", true);
+                        if (lifeNode != null)
+                        {
+                            Npc npc = Npc.CreateFromNode(lifeNode, PluginManager.FindWz);
+                            bmp = npc.Default.Bitmap;
+                        }
+                        altImageNode = UiWaNode.FindNodeByPath($"image\\npc\\{LifeID:D7}", true);
+                        if (altImageNode != null)
+                        {
+                            BitmapOrigin bo = BitmapOrigin.CreateFromNode(altImageNode, PluginManager.FindWz);
+                            altBmp = bo.Bitmap;
+                        }
+                        break;
+                    case 1:
+                        lifeNode = PluginManager.FindWz(Wz_Type.Mob)?.FindNodeByPath($"{LifeID:D7}.img", true);
+                        if (lifeNode != null)
+                        {
+                            Mob mob = Mob.CreateFromNode(lifeNode, PluginManager.FindWz);
+                            bmp = mob.Default.Bitmap;
+                        }
+                        altImageNode = UiWaNode.FindNodeByPath($"image\\mob\\{LifeID:D7}", true);
+                        if (altImageNode != null)
+                        {
+                            BitmapOrigin bo = BitmapOrigin.CreateFromNode(altImageNode, PluginManager.FindWz);
+                            altBmp = bo.Bitmap;
+                        }
+                        break;
+                }
+                this.unscaledBmp = altBmp ?? bmp;
+                this.picWorldArchiveImg.Image = ResizeImage(this.unscaledBmp, scale);
+            }
+        }
+
+        private void UpdateAdvTreeLife()
+        {
+            var TypeID = this.typeID;
+            this.advTreeLife.Nodes.Clear();
+            if (this.advTreeMap.SelectedNode == null)
+            {
+                return;
+            }
+            var lifeNode = this.advTreeMap.SelectedNode.Tag as Wz_Node;
+            if (lifeNode != null)
+            {
+                Wz_Node lifeNodes = null;
+                switch (TypeID)
+                {
+                    case 0:
+                        lifeNodes = lifeNode.FindNodeByPath("npc");
+                        break;
+                    case 1:
+                        lifeNodes = lifeNode.FindNodeByPath("mob");
+                        break;
+                }
+                if (lifeNodes != null)
+                {
+                    foreach (var node in lifeNodes.Nodes)
+                    {
+                        Wz_Node idNode = node.FindNodeByPath("id");
+                        if (idNode != null)
+                        {
+                            foreach (var id in idNode.Nodes)
+                            {
+                                var lifeID = id.GetValue<int>();
+                                StringResult sr;
+                                switch (TypeID)
+                                {
+                                    case 0:
+                                        if (this.stringLinker == null || !this.stringLinker.StringNpc.TryGetValue(lifeID, out sr))
+                                        {
+                                            sr = new StringResult();
+                                            sr.Name = "未知的NPC";
+                                        }
+                                        break;
+                                    case 1:
+                                        if (this.stringLinker == null || !this.stringLinker.StringMob.TryGetValue(lifeID, out sr))
+                                        {
+                                            sr = new StringResult();
+                                            sr.Name = "未知的怪物";
+                                        }
+                                        break;
+                                    default:
+                                        sr = new StringResult();
+                                        sr.Name = "(null)";
+                                        break;
+                                }
+                                var newNode = new Node($"{sr.Name} ({lifeID})");
+                                newNode.Tag = node;
+                                this.advTreeLife.Nodes.Add(newNode);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    this.advTreeLife.Nodes.Add(new Node("找不到資訊"));
+                }
+            }
+        }
+
+        private Bitmap ResizeImage(Bitmap bmp, double scale)
+        {
+            if (bmp == null) return null;
+            if (scale == 0)
+            {
+                scale = Math.Min((double)this.picWorldArchiveImg.Width / bmp.Width, (double)this.picWorldArchiveImg.Height / bmp.Height);
+            }
+
+            int w = (int)(bmp.Width * scale);
+            int h = (int)(bmp.Height * scale);
+
+            Bitmap result = new Bitmap(w, h);
+
+            using (Graphics g = Graphics.FromImage(result))
+            {
+                g.InterpolationMode = scale >= 1.00 ? System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor : System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+
+                g.DrawImage(bmp, new Rectangle(0, 0, w, h));
+            }
+
+            return result;
+        }
+
+        private void UpdateText(string text)
+        {
+            this.richDescription.Clear();
+            this.richDescription.AppendText(text);
+            this.richDescription.Select(0, text.Length);
+            this.richDescription.SelectionColor = DarkMode ? Color.LightGray : System.Drawing.SystemColors.ControlText;
+            this.richDescription.SelectionFont = new Font("Noto Sans TC", 14f);
+            this.richDescription.SelectionStart = 0;
+        }
+    }
+}
