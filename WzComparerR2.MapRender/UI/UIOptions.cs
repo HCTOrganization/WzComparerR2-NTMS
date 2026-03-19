@@ -590,7 +590,7 @@ namespace WzComparerR2.MapRender.UI
                  "[`] 開關聊天控制台",
                  "[Alt+Enter] 切换解析度",
                  "[S] 顯示截圖範圍",
-                 "[ScrollLock] 截圖",
+                 "[ScrollLock] / [F12] 截圖",
                  "",
                  "滑鼠指示:",
                  "",

@@ -243,6 +243,7 @@ namespace WzComparerR2.MapRender
 
             //截图
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { if (CanCapture()) prepareCapture = true; captureViewPortOnly = false; }), KeyCode.Scroll, ModifierKeys.None));
+            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { if (CanCapture()) prepareCapture = true; captureViewPortOnly = false; }), KeyCode.F12, ModifierKeys.None));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { if (CanCapture()) prepareCapture = true; captureViewPortOnly = true; }), KeyCode.S, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.CaptureRectVisible = !this.patchVisibility.CaptureRectVisible), KeyCode.S, ModifierKeys.None));
 
