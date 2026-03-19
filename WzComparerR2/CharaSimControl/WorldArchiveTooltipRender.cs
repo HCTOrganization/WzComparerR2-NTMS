@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Security.Cryptography;
 using WzComparerR2.CharaSim;
 using WzComparerR2.PluginBase;
+using WzComparerR2.WzLib;
 using static WzComparerR2.CharaSimControl.RenderHelper;
 using Resource = CharaSimResource.Resource;
 
