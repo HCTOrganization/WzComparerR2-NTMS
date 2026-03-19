@@ -196,22 +196,63 @@ namespace WzComparerR2.CharaSimControl
 
         private Bitmap GetSpecialNpcBitmap(int npcID)
         {
-            BitmapOrigin npcBitmap = BitmapOrigin.CreateFromNode(PluginManager.FindWz(@$"UI\UIworldArchive.img\illust\npc\{npcID}"), PluginManager.FindWz, this.SourceWzFile);
-            if (npcBitmap.Bitmap == null) return null;
-            else
+            Wz_Node npcBitmapNode = PluginManager.FindWz(@$"UI\UIworldArchive.img\illust\npc\{npcID}");
+            BitmapOrigin npcBitmap = new BitmapOrigin();
+            if (npcBitmapNode == null) return null;
+            else if (npcBitmapNode.Nodes.Count > 1 && !(npcBitmapNode.Value is Wz_Png))
             {
-                Bitmap npcBmp = npcBitmap.Bitmap;
-                Bitmap specialNpcTooltip = new Bitmap(npcBmp.Width + 20, npcBmp.Height + Resource.WorldArchive.Height + 32);
+                List<Bitmap> specialBitmaps = new List<Bitmap>();
+                int width = 0;
+                int height = 0;
+                foreach (Wz_Node subNode in npcBitmapNode.Nodes)
+                {
+                    npcBitmap = BitmapOrigin.CreateFromNode(subNode, PluginManager.FindWz, this.SourceWzFile);
+                    if (npcBitmap.Bitmap == null)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        specialBitmaps.Add(npcBitmap.Bitmap);
+                        width = Math.Max(width, npcBitmap.Bitmap.Width);
+                        height += npcBitmap.Bitmap.Height;
+                    }
+                }
+                Bitmap specialNpcTooltip = new Bitmap(width + 20, height + Resource.WorldArchive.Height + 32);
                 using (Graphics g = Graphics.FromImage(specialNpcTooltip))
                 {
                     GearGraphics.DrawNewTooltipBack(g, 0, 0, specialNpcTooltip.Width, specialNpcTooltip.Height);
                     int picH = 12;
                     g.DrawImage(Resource.WorldArchive, 14, picH, new Rectangle(0, 0, Resource.WorldArchive.Width, Resource.WorldArchive.Height), GraphicsUnit.Pixel);
                     picH += 10 + Resource.WorldArchive.Height;
-                    g.DrawImage(npcBmp, 10, picH, new Rectangle(0, 0, npcBmp.Width, npcBmp.Height), GraphicsUnit.Pixel);
+                    foreach (Bitmap subBitmap in specialBitmaps)
+                    {
+                        g.DrawImage(subBitmap, 10, picH, new Rectangle(0, 0, subBitmap.Width, subBitmap.Height), GraphicsUnit.Pixel);
+                        picH += subBitmap.Height;
+                    }
                 }
-                npcBmp.Dispose();
+                specialBitmaps.Clear();
                 return specialNpcTooltip;
+            }
+            else
+            {
+                npcBitmap = BitmapOrigin.CreateFromNode(PluginManager.FindWz(@$"UI\UIworldArchive.img\illust\npc\{npcID}"), PluginManager.FindWz, this.SourceWzFile);
+                if (npcBitmap.Bitmap == null) return null;
+                else
+                {
+                    Bitmap npcBmp = npcBitmap.Bitmap;
+                    Bitmap specialNpcTooltip = new Bitmap(npcBmp.Width + 20, npcBmp.Height + Resource.WorldArchive.Height + 32);
+                    using (Graphics g = Graphics.FromImage(specialNpcTooltip))
+                    {
+                        GearGraphics.DrawNewTooltipBack(g, 0, 0, specialNpcTooltip.Width, specialNpcTooltip.Height);
+                        int picH = 12;
+                        g.DrawImage(Resource.WorldArchive, 14, picH, new Rectangle(0, 0, Resource.WorldArchive.Width, Resource.WorldArchive.Height), GraphicsUnit.Pixel);
+                        picH += 10 + Resource.WorldArchive.Height;
+                        g.DrawImage(npcBmp, 10, picH, new Rectangle(0, 0, npcBmp.Width, npcBmp.Height), GraphicsUnit.Pixel);
+                    }
+                    npcBmp.Dispose();
+                    return specialNpcTooltip;
+                }
             }
         }
     }
