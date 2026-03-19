@@ -153,6 +153,7 @@ namespace WzComparerR2.MapRender
         public bool NoRegen => this.Summoned;
         public bool Summoned { get; }
         public bool PlayRegenMotion { get; }
+        public bool PlayRegenSound { get; set; } = true;
         public bool FlipX { get; private set; }
         public bool MovementEnabled { get; set; }
         public bool Fixed { get; set; }
