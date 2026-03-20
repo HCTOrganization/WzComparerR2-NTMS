@@ -1,20 +1,16 @@
 ﻿using DevComponents.AdvTree;
-using DevComponents.DotNetBar;
 using DevComponents.Editors;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using WzComparerR2.Common;
-using WzComparerR2.WzLib;
-using WzComparerR2.PluginBase;
 using WzComparerR2.CharaSim;
-using System.Text.RegularExpressions;
+using WzComparerR2.Common;
+using WzComparerR2.PluginBase;
+using WzComparerR2.WzLib;
 
 namespace WzComparerR2
 {
@@ -184,20 +180,18 @@ namespace WzComparerR2
         {
             if (this.advTreeLife.SelectedNode != null)
             {
-                if (Int32.TryParse(Regex.Match(this.advTreeLife.SelectedNode.Text, @"\d+").Value, out int LifeID))
+                int LifeID = this.advTreeLife.SelectedNode.Tag is KeyValuePair<int, Wz_Node> kvp ? kvp.Key : -1;
+                Wz_Node lifeNode = null;
+                switch (this.typeID)
                 {
-                    Wz_Node lifeNode = null;
-                    switch (this.typeID)
-                    {
-                        case 0:
-                            lifeNode = PluginManager.FindWz(Wz_Type.Npc)?.FindNodeByPath($"{LifeID:D7}.img");
-                            break;
-                        case 1:
-                            lifeNode = PluginManager.FindWz(Wz_Type.Mob)?.FindNodeByPath($"{LifeID:D7}.img");
-                            break;
-                    }
-                    _mainForm.RedirectToNode(lifeNode ?? (this.advTreeLife.SelectedNode.Tag as Wz_Node));
+                    case 0:
+                        lifeNode = PluginManager.FindWz(Wz_Type.Npc)?.FindNodeByPath($"{LifeID:D7}.img");
+                        break;
+                    case 1:
+                        lifeNode = PluginManager.FindWz(Wz_Type.Mob)?.FindNodeByPath($"{LifeID:D7}.img");
+                        break;
                 }
+                _mainForm.RedirectToNode(lifeNode ?? (this.advTreeLife.SelectedNode.Tag as Wz_Node));
             }
         }
 
@@ -281,12 +275,15 @@ namespace WzComparerR2
             }
             var TypeID = this.typeID;
             double scale = 1.00;
-            Wz_Node scaleNode = (this.advTreeLife.SelectedNode.Tag as Wz_Node).FindNodeByPath("scale");
+            KeyValuePair<int, Wz_Node> kvp = this.advTreeLife.SelectedNode.Tag as KeyValuePair<int, Wz_Node>? ?? default;
+            if (kvp.Value == null) return;
+            Wz_Node scaleNode = kvp.Value.FindNodeByPath("scale");
             if (scaleNode != null)
             {
                 scale = scaleNode.GetValueEx<double>(100) / 100;
             }
-            Wz_Node descNode = (this.advTreeLife.SelectedNode.Tag as Wz_Node).FindNodeByPath("desc");
+            Wz_Node descNode = kvp.Value.FindNodeByPath("desc");
+            int LifeID = kvp.Key;
             if (descNode != null)
             {
                 UpdateText(descNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n"));
@@ -295,46 +292,43 @@ namespace WzComparerR2
             {
                 this.richDescription.Clear();
             }
-            if (Int32.TryParse(Regex.Match(this.advTreeLife.SelectedNode.Text, @"\d+").Value, out int LifeID))
+            Bitmap bmp = null;
+            Bitmap altBmp = null;
+            Wz_Node lifeNode;
+            Wz_Node altImageNode;
+            switch (TypeID)
             {
-                Bitmap bmp = null;
-                Bitmap altBmp = null;
-                Wz_Node lifeNode;
-                Wz_Node altImageNode;
-                switch (TypeID)
-                {
-                    case 0:
-                        lifeNode = PluginManager.FindWz(Wz_Type.Npc)?.FindNodeByPath($"{LifeID:D7}.img", true);
-                        if (lifeNode != null)
-                        {
-                            Npc npc = Npc.CreateFromNode(lifeNode, PluginManager.FindWz);
-                            bmp = npc.Default.Bitmap;
-                        }
-                        altImageNode = UiWaNode.FindNodeByPath($"image\\npc\\{LifeID:D7}", true);
-                        if (altImageNode != null)
-                        {
-                            BitmapOrigin bo = BitmapOrigin.CreateFromNode(altImageNode, PluginManager.FindWz);
-                            altBmp = bo.Bitmap;
-                        }
-                        break;
-                    case 1:
-                        lifeNode = PluginManager.FindWz(Wz_Type.Mob)?.FindNodeByPath($"{LifeID:D7}.img", true);
-                        if (lifeNode != null)
-                        {
-                            Mob mob = Mob.CreateFromNode(lifeNode, PluginManager.FindWz);
-                            bmp = mob.Default.Bitmap;
-                        }
-                        altImageNode = UiWaNode.FindNodeByPath($"image\\mob\\{LifeID:D7}", true);
-                        if (altImageNode != null)
-                        {
-                            BitmapOrigin bo = BitmapOrigin.CreateFromNode(altImageNode, PluginManager.FindWz);
-                            altBmp = bo.Bitmap;
-                        }
-                        break;
-                }
-                this.unscaledBmp = altBmp ?? bmp;
-                this.picWorldArchiveImg.Image = ResizeImage(this.unscaledBmp, scale);
+                case 0:
+                    lifeNode = PluginManager.FindWz(Wz_Type.Npc)?.FindNodeByPath($"{LifeID:D7}.img", true);
+                    if (lifeNode != null)
+                    {
+                        Npc npc = Npc.CreateFromNode(lifeNode, PluginManager.FindWz);
+                        bmp = npc.Default.Bitmap;
+                    }
+                    altImageNode = UiWaNode.FindNodeByPath($"image\\npc\\{LifeID:D7}", true);
+                    if (altImageNode != null)
+                    {
+                        BitmapOrigin bo = BitmapOrigin.CreateFromNode(altImageNode, PluginManager.FindWz);
+                        altBmp = bo.Bitmap;
+                    }
+                    break;
+                case 1:
+                    lifeNode = PluginManager.FindWz(Wz_Type.Mob)?.FindNodeByPath($"{LifeID:D7}.img", true);
+                    if (lifeNode != null)
+                    {
+                        Mob mob = Mob.CreateFromNode(lifeNode, PluginManager.FindWz);
+                        bmp = mob.Default.Bitmap;
+                    }
+                    altImageNode = UiWaNode.FindNodeByPath($"image\\mob\\{LifeID:D7}", true);
+                    if (altImageNode != null)
+                    {
+                        BitmapOrigin bo = BitmapOrigin.CreateFromNode(altImageNode, PluginManager.FindWz);
+                        altBmp = bo.Bitmap;
+                    }
+                    break;
             }
+            this.unscaledBmp = altBmp ?? bmp;
+            this.picWorldArchiveImg.Image = ResizeImage(this.unscaledBmp, scale);
         }
 
         private void UpdateAdvTreeLife()
@@ -391,7 +385,7 @@ namespace WzComparerR2
                                         break;
                                 }
                                 var newNode = new Node($"{sr.Name} ({lifeID})");
-                                newNode.Tag = node;
+                                newNode.Tag = new KeyValuePair<int, Wz_Node>(lifeID, node);
                                 this.advTreeLife.Nodes.Add(newNode);
                             }
                         }
