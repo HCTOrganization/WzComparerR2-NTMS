@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WzComparerR2.CharaSim;
@@ -108,14 +110,67 @@ namespace WzComparerR2
             }
         }
 
+        private void btnCopyMapleStoryWikiFormat_Click(object sender, EventArgs e)
+        {
+            if (this.advTreeLife.SelectedNode != null)
+            {
+                var kvp = (KeyValuePair<int, Wz_Node>)this.advTreeLife.SelectedNode.Tag;
+                Wz_Node descNode = kvp.Value.FindNodeByPath("desc");
+                if (descNode != null)
+                {
+                    string text = descNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n");
+                    var quotes = QuoteParser.Parse(text);
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendLine("{{World Archive Description");
+                    int quoteIndex = 1;
+                    foreach (var i in quotes)
+                    {
+                        foreach (var j in i.Value)
+                        {
+                            sb.AppendLine($"|Quote{quoteIndex}={j}");
+                            sb.AppendLine($"|Citation{quoteIndex}={i.Key}");
+                            quoteIndex++;
+                        }
+                    }
+                    sb.AppendLine("}}");
+                    Clipboard.SetText(sb.ToString());
+                }
+            }
+            else if (this.advTreeMap.SelectedNode != null)
+            {
+                Wz_Node descNode = (this.advTreeMap.SelectedNode.Tag as Wz_Node)?.FindNodeByPath("regionDesc");
+                if (descNode != null)
+                {
+                    string text = descNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n");
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendLine("{{World Archive Description");
+                    sb.AppendLine($"|MapQuote={text.Replace("\r\n", "<br />").Replace("\n", "<br />")}");
+                    sb.AppendLine("}}");
+                    Clipboard.SetText(sb.ToString());
+                }
+            }
+            else
+            {
+                Wz_Node descNode = EtcWaNode.FindNodeByPath($"collectionInfo\\{this.regionID}\\worldDesc", true);
+                if (descNode != null)
+                {
+                    string text = descNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n");
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendLine("{{World Archive Description");
+                    sb.AppendLine($"|MapQuote={text.Replace("\r\n", "<br />").Replace("\n", "<br />")}");
+                    sb.AppendLine("}}");
+                    Clipboard.SetText(sb.ToString());
+                }
+            }
+        }
+
         private void cmbRegion_SelectedValueChanged(object sender, EventArgs e)
         {
-            var regionID = this.regionID;
             this.btnTranslate.Enabled = true;
             this.advTreeMap.Nodes.Clear();
             this.advTreeLife.Nodes.Clear();
             this.richDescription.Clear();
-            var mapNodes = EtcWaNode.FindNodeByPath($"collectionInfo\\{regionID}", true);
+            var mapNodes = EtcWaNode.FindNodeByPath($"collectionInfo\\{this.regionID}", true);
             if (mapNodes != null)
             {
                 foreach (var mapNode in mapNodes.Nodes)
@@ -138,7 +193,7 @@ namespace WzComparerR2
             {
                 this.advTreeMap.Nodes.Add(new Node("找不到資訊"));
             }
-            var worldIllustNode = UiWaNode.FindNodeByPath($"regionSelect\\main\\world\\{regionID}", true);
+            var worldIllustNode = UiWaNode.FindNodeByPath($"regionSelect\\main\\world\\{this.regionID}", true);
             if (worldIllustNode != null)
             {
                 BitmapOrigin bo = BitmapOrigin.CreateFromNode(worldIllustNode, PluginManager.FindWz);
@@ -431,6 +486,48 @@ namespace WzComparerR2
             this.richDescription.SelectionColor = DarkMode ? Color.LightGray : System.Drawing.SystemColors.ControlText;
             this.richDescription.SelectionFont = new Font("Noto Sans TC", 14f);
             this.richDescription.SelectionStart = 0;
+        }
+    }
+
+    public static class QuoteParser
+    {
+        private static readonly Regex CitationRegex = new Regex(@"\-\s*(.+)$");
+
+        public static Dictionary<string, List<string>> Parse(string input)
+        {
+            var result = new Dictionary<string, List<string>>();
+            var currentQuoteLines = new List<string>();
+
+            var lines = input.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+
+            foreach (var rawLine in lines)
+            {
+                var line = rawLine;
+                var trimmed = rawLine.Trim();
+                var match = CitationRegex.Match(trimmed);
+                if (match.Success)
+                {
+                    var citation = match.Groups[1].Value.Trim();
+                    var quote = string.Join("<br />", currentQuoteLines).TrimEnd();
+                    if (!string.IsNullOrWhiteSpace(quote))
+                    {
+                        if (!result.TryGetValue(citation, out var list))
+                        {
+                            list = new List<string>();
+                            result[citation] = list;
+                        }
+
+                        list.Add(quote);
+                    }
+                    currentQuoteLines.Clear();
+                }
+                else
+                {
+                    currentQuoteLines.Add(line);
+                }
+            }
+
+            return result;
         }
     }
 }

@@ -37,11 +37,24 @@ namespace WzComparerR2
             this.advTreeMap = new DevComponents.AdvTree.AdvTree();
             this.picWorldArchiveImg = new System.Windows.Forms.PictureBox();
             this.richDescription = new DevComponents.DotNetBar.Controls.RichTextBoxEx();
+            this.btnCopyMapleStoryWikiFormat = new DevComponents.DotNetBar.ButtonX();
             this.btnTranslate = new DevComponents.DotNetBar.ButtonX();
             ((System.ComponentModel.ISupportInitialize)(this.advTreeLife)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.advTreeMap)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWorldArchiveImg)).BeginInit();
             this.SuspendLayout();
+            // 
+            // btnCopyMapleStoryWikiFormat
+            // 
+            this.btnCopyMapleStoryWikiFormat.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.btnCopyMapleStoryWikiFormat.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnCopyMapleStoryWikiFormat.Location = new System.Drawing.Point(610, 667);
+            this.btnCopyMapleStoryWikiFormat.Name = "btnCopyMapleStoryWikiFormat";
+            this.btnCopyMapleStoryWikiFormat.Size = new System.Drawing.Size(150, 23);
+            this.btnCopyMapleStoryWikiFormat.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.btnCopyMapleStoryWikiFormat.TabIndex = 7;
+            this.btnCopyMapleStoryWikiFormat.Text = "複製 MapleWiki 格式塊";
+            this.btnCopyMapleStoryWikiFormat.Click += new System.EventHandler(this.btnCopyMapleStoryWikiFormat_Click);
             // 
             // btnTranslate
             // 
@@ -171,6 +184,7 @@ namespace WzComparerR2
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(770, 770);
+            this.Controls.Add(this.btnCopyMapleStoryWikiFormat);
             this.Controls.Add(this.btnTranslate);
             this.Controls.Add(this.richDescription);
             this.Controls.Add(this.picWorldArchiveImg);
@@ -201,6 +215,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ElementStyle elementStyle1;
         private System.Windows.Forms.PictureBox picWorldArchiveImg;
         private DevComponents.DotNetBar.Controls.RichTextBoxEx richDescription;
+        private DevComponents.DotNetBar.ButtonX btnCopyMapleStoryWikiFormat;
         private DevComponents.DotNetBar.ButtonX btnTranslate;
     }
 }
