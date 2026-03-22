@@ -508,7 +508,7 @@ namespace WzComparerR2
                 if (match.Success)
                 {
                     var citation = match.Groups[1].Value.Trim();
-                    var quote = string.Join("<br />", currentQuoteLines).TrimEnd();
+                    var quote = string.Join("<br />", currentQuoteLines.Where(s => !string.IsNullOrEmpty(s)).ToList()).TrimEnd();
                     if (!string.IsNullOrWhiteSpace(quote))
                     {
                         if (!result.TryGetValue(citation, out var list))
