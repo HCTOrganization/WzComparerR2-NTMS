@@ -37,6 +37,8 @@ namespace WzComparerR2
             this.advTreeMap = new DevComponents.AdvTree.AdvTree();
             this.picWorldArchiveImg = new System.Windows.Forms.PictureBox();
             this.richDescription = new DevComponents.DotNetBar.Controls.RichTextBoxEx();
+            this.btnExport = new DevComponents.DotNetBar.ButtonX();
+            this.btnLocateExtraIllust = new DevComponents.DotNetBar.ButtonX();
             this.btnCopyMapleStoryWikiFormat = new DevComponents.DotNetBar.ButtonX();
             this.btnTranslate = new DevComponents.DotNetBar.ButtonX();
             ((System.ComponentModel.ISupportInitialize)(this.advTreeLife)).BeginInit();
@@ -44,13 +46,39 @@ namespace WzComparerR2
             ((System.ComponentModel.ISupportInitialize)(this.picWorldArchiveImg)).BeginInit();
             this.SuspendLayout();
             // 
+            // btnExport
+            // 
+            this.btnExport.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.btnExport.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnExport.Location = new System.Drawing.Point(605, 736);
+            this.btnExport.Name = "btnExport";
+            this.btnExport.Size = new System.Drawing.Size(155, 23);
+            this.btnExport.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.btnExport.TabIndex = 9;
+            this.btnExport.Text = "匯出 (暫不可用)";
+            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
+            this.btnExport.Enabled = false;
+            // 
+            // btnLocateExtraIllust
+            // 
+            this.btnLocateExtraIllust.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.btnLocateExtraIllust.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnLocateExtraIllust.Location = new System.Drawing.Point(440, 736);
+            this.btnLocateExtraIllust.Name = "btnLocateExtraIllust";
+            this.btnLocateExtraIllust.Size = new System.Drawing.Size(155, 23);
+            this.btnLocateExtraIllust.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.btnLocateExtraIllust.TabIndex = 8;
+            this.btnLocateExtraIllust.Text = "查看追加繪圖";
+            this.btnLocateExtraIllust.Click += new System.EventHandler(this.btnLocateExtraIllust_Click);
+            this.btnLocateExtraIllust.Enabled = false;
+            // 
             // btnCopyMapleStoryWikiFormat
             // 
             this.btnCopyMapleStoryWikiFormat.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
             this.btnCopyMapleStoryWikiFormat.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
-            this.btnCopyMapleStoryWikiFormat.Location = new System.Drawing.Point(610, 667);
+            this.btnCopyMapleStoryWikiFormat.Location = new System.Drawing.Point(605, 703);
             this.btnCopyMapleStoryWikiFormat.Name = "btnCopyMapleStoryWikiFormat";
-            this.btnCopyMapleStoryWikiFormat.Size = new System.Drawing.Size(150, 23);
+            this.btnCopyMapleStoryWikiFormat.Size = new System.Drawing.Size(155, 23);
             this.btnCopyMapleStoryWikiFormat.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.btnCopyMapleStoryWikiFormat.TabIndex = 7;
             this.btnCopyMapleStoryWikiFormat.Text = "複製 MapleWiki 格式塊";
@@ -60,9 +88,9 @@ namespace WzComparerR2
             // 
             this.btnTranslate.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
             this.btnTranslate.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
-            this.btnTranslate.Location = new System.Drawing.Point(440, 667);
+            this.btnTranslate.Location = new System.Drawing.Point(440, 703);
             this.btnTranslate.Name = "btnTranslate";
-            this.btnTranslate.Size = new System.Drawing.Size(150, 23);
+            this.btnTranslate.Size = new System.Drawing.Size(155, 23);
             this.btnTranslate.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.btnTranslate.TabIndex = 6;
             this.btnTranslate.Text = "翻譯";
@@ -175,7 +203,7 @@ namespace WzComparerR2
             this.richDescription.Name = "richDescription";
             this.richDescription.Rtf = "{\\rtf1\\ansi\\ansicpg936\\deff0\\deflang1033\\deflangfe1042{\\fonttbl{\\f0\\fnil\\fcharset" +
     "129 \\\'b5\\\'b8\\\'bf\\\'f2;}}\r\n\\viewkind4\\uc1\\pard\\lang1042\\f0\\fs18\\par\r\n}\r\n";
-            this.richDescription.Size = new System.Drawing.Size(320, 314);
+            this.richDescription.Size = new System.Drawing.Size(320, 350);
             this.richDescription.TabIndex = 5;
             this.richDescription.ReadOnly = true;
             // 
@@ -184,6 +212,8 @@ namespace WzComparerR2
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(770, 770);
+            this.Controls.Add(this.btnExport);
+            this.Controls.Add(this.btnLocateExtraIllust);
             this.Controls.Add(this.btnCopyMapleStoryWikiFormat);
             this.Controls.Add(this.btnTranslate);
             this.Controls.Add(this.richDescription);
@@ -215,6 +245,8 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ElementStyle elementStyle1;
         private System.Windows.Forms.PictureBox picWorldArchiveImg;
         private DevComponents.DotNetBar.Controls.RichTextBoxEx richDescription;
+        private DevComponents.DotNetBar.ButtonX btnExport;
+        private DevComponents.DotNetBar.ButtonX btnLocateExtraIllust;
         private DevComponents.DotNetBar.ButtonX btnCopyMapleStoryWikiFormat;
         private DevComponents.DotNetBar.ButtonX btnTranslate;
     }

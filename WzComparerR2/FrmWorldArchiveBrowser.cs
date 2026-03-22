@@ -63,6 +63,7 @@ namespace WzComparerR2
         public MainForm _mainForm { get; set; }
         private bool DarkMode;
         private Bitmap unscaledBmp;
+        private Wz_Node currentExtraArtworkNode;
         public int regionID
         {
             get
@@ -93,6 +94,16 @@ namespace WzComparerR2
                 item.Value = value;
                 cmbType.SelectedItem = item;
             }
+        }
+
+        private async void btnExport_Click(object sender, EventArgs e)
+        {
+            // TBA
+        }
+
+        private void btnLocateExtraIllust_Click(object sender, EventArgs e)
+        {
+            _mainForm.RedirectToNode(currentExtraArtworkNode);
         }
 
         private async void btnTranslate_Click(object sender, EventArgs e)
@@ -188,10 +199,6 @@ namespace WzComparerR2
                 {
                     UpdateText(worldDescNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n"));
                 }
-            }
-            else
-            {
-                this.advTreeMap.Nodes.Add(new Node("找不到資訊"));
             }
             var worldIllustNode = UiWaNode.FindNodeByPath($"regionSelect\\main\\world\\{this.regionID}", true);
             if (worldIllustNode != null)
@@ -339,6 +346,7 @@ namespace WzComparerR2
             }
             Wz_Node descNode = kvp.Value.FindNodeByPath("desc");
             int LifeID = kvp.Key;
+            TryLocateExtraIllust(LifeID);
             if (descNode != null)
             {
                 UpdateText(descNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n"));
@@ -446,11 +454,14 @@ namespace WzComparerR2
                         }
                     }
                 }
-                else
-                {
-                    this.advTreeLife.Nodes.Add(new Node("找不到資訊"));
-                }
             }
+        }
+
+        private void TryLocateExtraIllust(int npcID)
+        {
+            Wz_Node npcExtraArtworkNode = UiWaNode.FindNodeByPath($"illust\\npc\\{npcID}", true);
+            this.currentExtraArtworkNode = npcExtraArtworkNode;
+            this.btnLocateExtraIllust.Enabled = (npcExtraArtworkNode != null);
         }
 
         private Bitmap ResizeImage(Bitmap bmp, double scale)
@@ -485,13 +496,25 @@ namespace WzComparerR2
             this.richDescription.Select(0, text.Length);
             this.richDescription.SelectionColor = DarkMode ? Color.LightGray : System.Drawing.SystemColors.ControlText;
             this.richDescription.SelectionFont = new Font("Noto Sans TC", 14f);
-            this.richDescription.SelectionStart = 0;
+            this.richDescription.Rtf = Regex.Replace(
+                this.richDescription.Rtf,
+                "#s#(.*?)#s#",
+                "{\\strike $1\\strike0}",
+                RegexOptions.Singleline
+                );
+            this.richDescription.Rtf = Regex.Replace(
+                this.richDescription.Rtf,
+                "#e(.*?)#n",
+                "{\\b $1\\b0}",
+                RegexOptions.Singleline
+                );
+            this.richDescription.Select(0, 0);
         }
     }
 
     public static class QuoteParser
     {
-        private static readonly Regex CitationRegex = new Regex(@"\-\s*(.+)$");
+        private static readonly Regex CitationRegex = new Regex(@"^\s*-\s*(.+)$");
 
         public static Dictionary<string, List<string>> Parse(string input)
         {
@@ -502,13 +525,26 @@ namespace WzComparerR2
 
             foreach (var rawLine in lines)
             {
-                var line = rawLine;
                 var trimmed = rawLine.Trim();
                 var match = CitationRegex.Match(trimmed);
+
                 if (match.Success)
                 {
                     var citation = match.Groups[1].Value.Trim();
                     var quote = string.Join("<br />", currentQuoteLines.Where(s => !string.IsNullOrEmpty(s)).ToList()).TrimEnd();
+                    quote = Regex.Replace(
+                            quote,
+                            "#s#(.*?)#s#",
+                            "<s>$1</s>",
+                            RegexOptions.Singleline
+                    );
+                    quote = Regex.Replace(
+                            quote,
+                            "#e(.*?)#n",
+                            "<strong>$1</strong>",
+                            RegexOptions.Singleline
+                    );
+
                     if (!string.IsNullOrWhiteSpace(quote))
                     {
                         if (!result.TryGetValue(citation, out var list))
@@ -523,11 +559,12 @@ namespace WzComparerR2
                 }
                 else
                 {
-                    currentQuoteLines.Add(line);
+                    currentQuoteLines.Add(rawLine);
                 }
             }
 
             return result;
         }
     }
+
 }
