@@ -1,9 +1,11 @@
 ﻿using DevComponents.AdvTree;
+using DevComponents.DotNetBar;
 using DevComponents.Editors;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -98,7 +100,165 @@ namespace WzComparerR2
 
         private async void btnExport_Click(object sender, EventArgs e)
         {
-            // TBA
+            if (advTreeMap.Nodes.Count == 0) return;
+            using (FolderBrowserDialog dlg = new FolderBrowserDialog())
+            {
+                dlg.Description = "請選擇要匯出的資料夾。";
+                if (DialogResult.OK == dlg.ShowDialog())
+                {
+                    DialogResult result1 = MessageBoxEx.Show("是否需要使用MapleWiki格式匯出？", "確認", MessageBoxButtons.YesNoCancel);
+                    if (result1 == DialogResult.Cancel) return;
+                    cmbRegion.Enabled = false;
+                    cmbType.Enabled = false;
+                    advTreeMap.Enabled = false;
+                    advTreeLife.Enabled = false;
+                    btnTranslate.Enabled = false;
+                    btnCopyMapleStoryWikiFormat.Enabled = false;
+                    btnLocateExtraIllust.Enabled = false;
+                    btnExport.Enabled = false;
+                    picWorldArchiveImg.Image = null;
+                    await Task.Run(() =>
+                    {
+                        var worldDescNode = EtcWaNode.FindNodeByPath($"collectionInfo\\{this.regionID}\\worldDesc", true);
+                        if (worldDescNode != null)
+                        {
+                            string text = worldDescNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n");
+                            if (result1 == DialogResult.Yes)
+                            {
+                                StringBuilder sb = new StringBuilder();
+                                sb.AppendLine("{{World Archive Description");
+                                sb.AppendLine($"|MapQuote={text.Replace("\r\n", "<br />").Replace("\n", "<br />")}");
+                                sb.AppendLine("}}");
+                                File.WriteAllText(Path.Combine(dlg.SelectedPath, "worldDesc.txt"), sb.ToString());
+                            }
+                            else
+                            {
+                                File.WriteAllText(Path.Combine(dlg.SelectedPath, "worldDesc.txt"), text);
+                            }
+                        }
+                        var worldIllustNode = UiWaNode.FindNodeByPath($"regionSelect\\main\\world\\{this.regionID}", true);
+                        if (worldIllustNode != null)
+                        {
+                            BitmapOrigin bo = BitmapOrigin.CreateFromNode(worldIllustNode, PluginManager.FindWz);
+                            bo.Bitmap.Save(Path.Combine(dlg.SelectedPath, "worldIllust.png"));
+                        }
+                        foreach (Node i in advTreeMap.Nodes)
+                        {
+                            UpdateText($"匯出中: {i.Text}\r\n{advTreeMap.Nodes.IndexOf(i) + 1} / {advTreeMap.Nodes.Count}");
+                            string currentWorkDir = Path.Combine(dlg.SelectedPath, i.Text);
+                            if (!Directory.Exists(currentWorkDir))
+                            {
+                                Directory.CreateDirectory(currentWorkDir);
+                            }
+                            Wz_Node targetNode = i.Tag as Wz_Node;
+                            if (Int32.TryParse(targetNode.Text, out int mapID))
+                            {
+                                Wz_Node descNode = EtcWaNode.FindNodeByPath($"collectionInfo\\{this.regionID}\\{mapID}\\regionDesc", true);
+                                if (descNode != null)
+                                {
+                                    string text = descNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n");
+                                    if (result1 == DialogResult.Yes)
+                                    {
+                                        StringBuilder sb = new StringBuilder();
+                                        sb.AppendLine("{{World Archive Description");
+                                        sb.AppendLine($"|MapQuote={text.Replace("\r\n", "<br />").Replace("\n", "<br />")}");
+                                        sb.AppendLine("}}");
+                                        File.WriteAllText(Path.Combine(currentWorkDir, "mapDesc.txt"), sb.ToString());
+                                    }
+                                    else
+                                    {
+                                        File.WriteAllText(Path.Combine(currentWorkDir, "mapDesc.txt"), text);
+                                    }
+                                }
+                                Wz_Node illustNode = UiWaNode.FindNodeByPath($"detail\\main\\regionillust\\{this.regionID}\\{mapID}", true);
+                                if (illustNode != null)
+                                {
+                                    BitmapOrigin bo = BitmapOrigin.CreateFromNode(illustNode, PluginManager.FindWz);
+                                    bo.Bitmap.Save(Path.Combine(currentWorkDir, "mapIllust.png"));
+                                }
+                                foreach (var j in new string[] { "npc", "mob" })
+                                {
+                                    var lifeNodes = targetNode.FindNodeByPath(j);
+                                    if (lifeNodes != null)
+                                    {
+                                        if (!Directory.Exists(Path.Combine(currentWorkDir, j)))
+                                        {
+                                            Directory.CreateDirectory(Path.Combine(currentWorkDir, j));
+                                        }
+                                        foreach (var node in lifeNodes.Nodes)
+                                        {
+                                            Wz_Node idNode = node.FindNodeByPath("id");
+                                            if (idNode != null)
+                                            {
+                                                foreach (var id in idNode.Nodes)
+                                                {
+                                                    var lifeID = id.GetValue<int>();
+                                                    StringResult sr;
+                                                    switch (j)
+                                                    {
+                                                        case "npc":
+                                                            if (this.stringLinker == null || !this.stringLinker.StringNpc.TryGetValue(lifeID, out sr))
+                                                            {
+                                                                sr = new StringResult();
+                                                                sr.Name = "未知的NPC";
+                                                            }
+                                                            break;
+                                                        case "mob":
+                                                            if (this.stringLinker == null || !this.stringLinker.StringMob.TryGetValue(lifeID, out sr))
+                                                            {
+                                                                sr = new StringResult();
+                                                                sr.Name = "未知的怪物";
+                                                            }
+                                                            break;
+                                                        default:
+                                                            sr = new StringResult();
+                                                            sr.Name = "(null)";
+                                                            break;
+                                                    }
+                                                    var lifeDescNode = node.FindNodeByPath("desc");
+                                                    if (lifeDescNode != null)
+                                                    {
+                                                        string text = lifeDescNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n");
+                                                        if (result1 == DialogResult.Yes)
+                                                        {
+                                                            var quotes = QuoteParser.Parse(text);
+                                                            StringBuilder sb = new StringBuilder();
+                                                            sb.AppendLine("{{World Archive Description");
+                                                            int quoteIndex = 1;
+                                                            foreach (var k in quotes)
+                                                            {
+                                                                foreach (var l in k.Value)
+                                                                {
+                                                                    sb.AppendLine($"|Quote{quoteIndex}={l}");
+                                                                    sb.AppendLine($"|QuoteCitation{quoteIndex}={k.Key}");
+                                                                    quoteIndex++;
+                                                                }
+                                                            }
+                                                            sb.AppendLine("}}");
+                                                            File.WriteAllText(Path.Combine(currentWorkDir, $"{RemoveInvalidFileNameChars(sr.Name)}.txt"), sb.ToString());
+                                                        }
+                                                        else
+                                                        {
+                                                            File.WriteAllText(Path.Combine(currentWorkDir, j, $"{lifeID}_{RemoveInvalidFileNameChars(sr.Name)}.txt"), text);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    UpdateText("匯出完成。");
+                    cmbRegion.Enabled = true;
+                    cmbType.Enabled = true;
+                    advTreeMap.Enabled = true;
+                    advTreeLife.Enabled = true;
+                    btnCopyMapleStoryWikiFormat.Enabled = true;
+                    btnExport.Enabled = true;
+                }
+            }
         }
 
         private void btnLocateExtraIllust_Click(object sender, EventArgs e)
@@ -509,6 +669,14 @@ namespace WzComparerR2
                 RegexOptions.Singleline
                 );
             this.richDescription.Select(0, 0);
+        }
+
+        private string RemoveInvalidFileNameChars(string fileName)
+        {
+            if (String.IsNullOrEmpty(fileName)) return "未知";
+            string invalidChars = new string(System.IO.Path.GetInvalidFileNameChars());
+            string regexPattern = $"[{Regex.Escape(invalidChars)}]";
+            return Regex.Replace(fileName, regexPattern, "_");
         }
     }
 
