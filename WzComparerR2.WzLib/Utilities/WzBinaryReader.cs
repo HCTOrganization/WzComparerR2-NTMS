@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace WzComparerR2.WzLib.Utilities
 {
-    internal class WzBinaryReader
+    public class WzBinaryReader
     {
         public WzBinaryReader(Stream stream, bool useStringPool)
             : this(stream, useStringPool ? new SimpleWzStringPool() : null)
@@ -19,15 +19,8 @@ namespace WzComparerR2.WzLib.Utilities
             this.stringPool = stringPool;
         }
 
-        public WzBinaryReader(Stream stream, bool useStringPool, string name)
-          : this(stream, useStringPool ? (IWzStringPool)new SimpleWzStringPool() : (IWzStringPool)null)
-        {
-            this.Name = name;
-        }
-
         public Stream BaseStream { get; private set; }
         public int StringReferenceOffsetBytes { get; set; }
-        public string Name { get; set; }
         private BinaryReader bReader;
         private IWzStringPool stringPool;
 
@@ -108,17 +101,11 @@ namespace WzComparerR2.WzLib.Utilities
                 try
                 {
                     this.BaseStream.ReadExactly(buffer, 0, size);
-                    decrypter.Decrypt(buffer, 0, size);
+                    decrypter.Decrypt(buffer.AsSpan(0, size));
 
                     using var charBuffer = MemoryPool<char>.Shared.Rent(size);
                     Span<char> chars = charBuffer.Memory.Span.Slice(0, size);
-                    // TODO: SIMD optimization for net6
-                    byte mask = 0xAA;
-                    for (int i = 0; i < size; i++)
-                    {
-                        chars[i] = (char)(buffer[i] ^ mask);
-                        mask++;
-                    }
+                    MathHelper.XorWidenToChar(buffer.AsSpan(0, size), chars);
                     return this.stringPool != null ? this.stringPool.GetOrAdd(currentPos, chars) : chars.ToString();
                 }
                 finally
@@ -137,16 +124,10 @@ namespace WzComparerR2.WzLib.Utilities
                 try
                 {
                     this.BaseStream.ReadExactly(buffer, 0, byteSize);
-                    decrypter.Decrypt(buffer, 0, byteSize);
+                    decrypter.Decrypt(buffer.AsSpan(0, byteSize));
 
                     Span<char> chars = MemoryMarshal.Cast<byte, char>(buffer.AsSpan(0, byteSize));
-                    // TODO: SIMD optimization for net6
-                    ushort mask = 0xAAAA;
-                    for (int i = 0; i < size; i++)
-                    {
-                        chars[i] = (char)(chars[i] ^ mask);
-                        mask++;
-                    }
+                    MathHelper.XorChars(chars, chars);
                     return this.stringPool != null ? this.stringPool.GetOrAdd(currentPos, chars) : chars.ToString();
                 }
                 finally
@@ -174,7 +155,7 @@ namespace WzComparerR2.WzLib.Utilities
                 try
                 {
                     this.BaseStream.ReadExactly(buffer, 0, byteSize);
-                    decrypter.Decrypt(buffer, 0, byteSize);
+                    decrypter.Decrypt(buffer.AsSpan(0, byteSize));
                     Span<char> chars = MemoryMarshal.Cast<byte, char>(buffer.AsSpan(0, byteSize));
                     return this.stringPool != null ? this.stringPool.GetOrAdd(currentPos, chars) : chars.ToString();
                 }
@@ -189,80 +170,6 @@ namespace WzComparerR2.WzLib.Utilities
             }
             else
             {
-                return string.Empty;
-            }
-        }
-
-        // Introduced in KMST1199
-        public string ReadPkg2DirString2(IWzDecrypter decrypter, string force = null)
-        {
-            long position = this.BaseStream.Position;
-            int num1 = (int)this.ReadSByte();
-            if (num1 < 0)
-            {
-                int length = -num1;
-                int num2 = length * 2;
-                byte[] numArray = ArrayPool<byte>.Shared.Rent(num2);
-                try
-                {
-                    this.BaseStream.ReadExactly(numArray, 0, num2);
-                    MemoryMarshal.Cast<byte, char>(numArray.AsSpan<byte>(0, num2));
-                    Span<char> span = (Span<char>)new char[length];
-                    byte num3 = 157;
-                    for (int index = 0; index < length; ++index)
-                        span[index] = index == 0 || index % 4 == 0 ? (char)((uint)numArray[index * 2] ^ (uint)num3) : (char)((uint)numArray[index * 2] ^ (uint)numArray[index * 2 - 1]);
-                    string str = span.ToString();
-                    char ch1 = str[length - 1];
-                    char ch2 = str[length - 2];
-                    char ch3 = str[length - 3];
-                    char ch4 = str[length - 4];
-                    if (ch4 == '.' && ch3 != 'i' && ch2 == 'm' && ch1 == 'g')
-                    {
-                        byte num4 = (byte)((uint)numArray[(length - 3) * 2] ^ 105U);
-                        for (int index = length - 3; index >= 0; index -= 4)
-                            span[index] = (char)((uint)numArray[index * 2] ^ (uint)num4);
-                        return span.ToString();
-                    }
-                    if (ch4 == '.' && ch3 == 'i' && ch2 != 'm' && ch1 == 'g')
-                    {
-                        byte num5 = (byte)((uint)numArray[(length - 2) * 2] ^ 109U);
-                        for (int index = length - 2; index >= 0; index -= 4)
-                            span[index] = (char)((uint)numArray[index * 2] ^ (uint)num5);
-                        return span.ToString();
-                    }
-                    if (ch4 == '.' && ch3 == 'i' && ch2 == 'm' && ch1 != 'g')
-                    {
-                        byte num6 = (byte)((uint)numArray[(length - 1) * 2] ^ 103U);
-                        for (int index = length - 1; index >= 0; index -= 4)
-                            span[index] = (char)((uint)numArray[index * 2] ^ (uint)num6);
-                        return span.ToString();
-                    }
-                    if (ch4 != '.' && ch3 == 'i' && ch2 == 'm' && ch1 == 'g')
-                    {
-                        byte num7 = (byte)((uint)numArray[(length - 4) * 2] ^ 46U);
-                        for (int index = length - 4; index >= 0; index -= 4)
-                            span[index] = (char)((uint)numArray[index * 2] ^ (uint)num7);
-                        return span.ToString();
-                    }
-                    if (str.Length == 6)
-                        str = "Dragon";
-                    else if (str.Length == 7)
-                        str = "_Canvas";
-                    else if (str.Length == 4)
-                        str = "Cash";
-                    return str;
-                }
-                finally
-                {
-                    ArrayPool<byte>.Shared.Return(numArray);
-                }
-            }
-            else
-            {
-                if (num1 > 0)
-                {
-                    throw new Exception($"Unexpected string length: {num1}");
-                }
                 return string.Empty;
             }
         }
@@ -290,7 +197,7 @@ namespace WzComparerR2.WzLib.Utilities
                     return this.ReadString(decrypter);
                 case 0x01:
                     return this.ReadStringAt(this.ReadInt32() + this.StringReferenceOffsetBytes, decrypter);
-                case 0x04:
+                case 0x04: 
                     this.SkipBytes(8);
                     return null;
                 default:

@@ -369,7 +369,6 @@ namespace WzComparerR2
             Wz_Structure.DefaultEncoding = enc;
             Wz_Structure.DefaultAutoDetectExtFiles = config.AutoDetectExtFiles;
             Wz_Structure.DefaultImgCheckDisabled = config.ImgCheckDisabled;
-            Wz_Structure.DefaultWzVersionVerifyMode = config.WzVersionVerifyMode;
             switch (config.PreferredClientRegion)
             {
                 default:
