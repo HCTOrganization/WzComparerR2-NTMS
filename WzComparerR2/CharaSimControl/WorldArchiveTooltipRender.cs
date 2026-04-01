@@ -200,7 +200,7 @@ namespace WzComparerR2.CharaSimControl
             Wz_Node npcBitmapNode = PluginManager.FindWz(@$"UI\UIworldArchive.img\illust\npc\{npcID}");
             BitmapOrigin npcBitmap = new BitmapOrigin();
             if (npcBitmapNode == null) return null;
-            else if (npcBitmapNode.Nodes.Count > 1 && !(npcBitmapNode.Value is Wz_Png))
+            else if (npcBitmapNode.Nodes.Count >= 1 && !(npcBitmapNode.Value is Wz_Png))
             {
                 List<Bitmap> specialBitmaps = new List<Bitmap>();
                 int width = 0;
