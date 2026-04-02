@@ -59,6 +59,7 @@ namespace WzComparerR2
 
         public Wz_Node EtcWaNode { get; set; }
         public Wz_Node UiWaNode { get; set; }
+        public Wz_Node UiWaBonusNode { get; set; }
         public Wz_Node MobNode { get; set; }
         public Wz_Node NpcNode { get; set; }
         public StringLinker stringLinker { get; set; }
@@ -341,35 +342,59 @@ namespace WzComparerR2
             this.advTreeMap.Nodes.Clear();
             this.advTreeLife.Nodes.Clear();
             this.richDescription.Clear();
-            var mapNodes = EtcWaNode.FindNodeByPath($"collectionInfo\\{this.regionID}", true);
-            if (mapNodes != null)
+            if (this.regionID >= 3000000)
             {
-                foreach (var mapNode in mapNodes.Nodes)
+                this.cmbType.Enabled = false;
+                this.btnExport.Enabled = false;
+                var appendixNodes = UiWaBonusNode.FindNodeByPath($"info\\{this.regionID - 3000000}", true);
+                if (appendixNodes != null)
                 {
-                    Wz_Node regionNameNode = mapNode.FindNodeByPath("regionName");
-                    if (regionNameNode != null)
+                    foreach (var appendixNode in appendixNodes.Nodes)
                     {
-                        var node = new Node(regionNameNode.Value.ToString());
-                        node.Tag = mapNode;
-                        this.advTreeMap.Nodes.Add(node);
+                        Wz_Node regionNameNode = appendixNode.FindNodeByPath("name");
+                        if (regionNameNode != null)
+                        {
+                            var node = new Node(regionNameNode.Value.ToString());
+                            node.Tag = appendixNode;
+                            this.advTreeMap.Nodes.Add(node);
+                        }
                     }
                 }
-                Wz_Node worldDescNode = mapNodes.FindNodeByPath("worldDesc");
-                if (worldDescNode != null)
-                {
-                    UpdateText(worldDescNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n"));
-                }
-            }
-            var worldIllustNode = UiWaNode.FindNodeByPath($"regionSelect\\main\\world\\{this.regionID}", true);
-            if (worldIllustNode != null)
-            {
-                BitmapOrigin bo = BitmapOrigin.CreateFromNode(worldIllustNode, PluginManager.FindWz);
-                this.picWorldArchiveImg.Image = bo.Bitmap;
-                this.unscaledBmp = null;
             }
             else
             {
-                this.picWorldArchiveImg.Image = null;
+                this.cmbType.Enabled = true;
+                this.btnExport.Enabled = true;
+                var mapNodes = EtcWaNode.FindNodeByPath($"collectionInfo\\{this.regionID}", true);
+                if (mapNodes != null)
+                {
+                    foreach (var mapNode in mapNodes.Nodes)
+                    {
+                        Wz_Node regionNameNode = mapNode.FindNodeByPath("regionName");
+                        if (regionNameNode != null)
+                        {
+                            var node = new Node(regionNameNode.Value.ToString());
+                            node.Tag = mapNode;
+                            this.advTreeMap.Nodes.Add(node);
+                        }
+                    }
+                    Wz_Node worldDescNode = mapNodes.FindNodeByPath("worldDesc");
+                    if (worldDescNode != null)
+                    {
+                        UpdateText(worldDescNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n"));
+                    }
+                }
+                var worldIllustNode = UiWaNode.FindNodeByPath($"regionSelect\\main\\world\\{this.regionID}", true);
+                if (worldIllustNode != null)
+                {
+                    BitmapOrigin bo = BitmapOrigin.CreateFromNode(worldIllustNode, PluginManager.FindWz);
+                    this.picWorldArchiveImg.Image = bo.Bitmap;
+                    this.unscaledBmp = null;
+                }
+                else
+                {
+                    this.picWorldArchiveImg.Image = null;
+                }
             }
         }
 
@@ -382,14 +407,28 @@ namespace WzComparerR2
         private void advTreeMap_AfterNodeSelect(object sender, EventArgs e)
         {
             this.btnTranslate.Enabled = true;
-            UpdateMapImageInfo();
-            UpdateAdvTreeLife();
+            if (this.regionID >= 3000000)
+            {
+                UpdateAppendixEntry();
+            }
+            else
+            {
+                UpdateMapImageInfo();
+                UpdateAdvTreeLife();
+            }
         }
 
         private void advTreeLife_AfterNodeSelect(object sender, EventArgs e)
         {
             this.btnTranslate.Enabled = true;
-            UpdateLifeImageInfo();
+            if (this.regionID >= 3000000)
+            {
+                UpdateAppendixInfo();
+            }
+            else
+            {
+                UpdateLifeImageInfo();
+            }
         }
 
         private void advTreeLife_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -554,6 +593,90 @@ namespace WzComparerR2
             this.picWorldArchiveImg.Image = ResizeImage(this.unscaledBmp, scale);
         }
 
+        private void UpdateAppendixEntry()
+        {
+            if (this.advTreeMap.SelectedNode == null)
+            {
+                return;
+            }
+            this.advTreeLife.Nodes.Clear();
+            Wz_Node entryNode = this.advTreeMap.SelectedNode.Tag as Wz_Node;
+            StringBuilder contentSb = new StringBuilder();
+            foreach (var i in entryNode.Nodes)
+            {
+                switch (i.Text)
+                {
+                    case "name": break;
+                    case "disable":
+                        if (i.GetValue<int>() == 1)
+                        {
+                            this.advTreeLife.Nodes.Clear();
+                            return;
+                        }
+                        break;
+                    default:
+                        string title = "";
+                        string content = "";
+                        foreach (var j in i.Nodes)
+                        {
+                            switch (j.Text)
+                            {
+                                case "str":
+                                    content = j.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n");
+                                    break;
+                                case "title":
+                                    title = j.GetValue<string>();
+                                    break;
+                                case "url":
+                                    if (Int32.TryParse(i.Text, out int id))
+                                    {
+                                        content = $"[画像_{id}]";
+                                        Node lifeNode = new Node($"画像: {id}");
+                                        lifeNode.Tag = PluginManager.FindWz(j.GetValue<string>());
+                                        this.advTreeLife.Nodes.Add(lifeNode);
+                                    }
+                                    break;
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(title)) contentSb.AppendLine(title);
+                        if (!string.IsNullOrEmpty(content)) contentSb.AppendLine(content);
+                        break;
+                }
+            }
+            UpdateText(contentSb.ToString());
+            if (this.advTreeLife.Nodes.Count > 0)
+            {
+                Wz_Node imageNode = this.advTreeLife.Nodes[0].Tag as Wz_Node;
+                if (imageNode != null)
+                {
+                    BitmapOrigin bo = BitmapOrigin.CreateFromNode(imageNode, PluginManager.FindWz);
+                    if (bo.Bitmap != null)
+                    {
+                        this.unscaledBmp = bo.Bitmap;
+                        this.picWorldArchiveImg.Image = bo.Bitmap;
+                    }
+                }
+            }
+        }
+
+        private void UpdateAppendixInfo()
+        {
+            if (this.advTreeLife.SelectedNode == null)
+            {
+                return;
+            }
+            Wz_Node imageNode = this.advTreeLife.SelectedNode.Tag as Wz_Node;
+            if (imageNode != null)
+            {
+                BitmapOrigin bo = BitmapOrigin.CreateFromNode(imageNode, PluginManager.FindWz);
+                if (bo.Bitmap != null)
+                {
+                    this.unscaledBmp = bo.Bitmap;
+                    this.picWorldArchiveImg.Image = bo.Bitmap;
+                }
+            }
+        }
+
         private void UpdateAdvTreeLife()
         {
             var TypeID = this.typeID;
@@ -669,6 +792,47 @@ namespace WzComparerR2
                 RegexOptions.Singleline
                 );
             this.richDescription.Select(0, 0);
+        }
+
+        public void LoadCmbRegion()
+        {
+            Wz_Node collectionInfoNode = this.EtcWaNode.FindNodeByPath("collectionInfo", true);
+            if (collectionInfoNode != null)
+            {
+                foreach (var i in collectionInfoNode.Nodes)
+                {
+                    int targetRegionID = -1;
+                    if (Int32.TryParse(i.Text, out targetRegionID))
+                    {
+                        Wz_Node worldNameNode = i.FindNodeByPath("worldName");
+                        string worldName = worldNameNode != null ? worldNameNode.GetValue<string>() : $"World{i.Text}";
+                        var existingItem = this.cmbRegion.Items
+                            .OfType<ComboItem>()
+                            .FirstOrDefault(i => Equals(i.Value, targetRegionID));
+                        if (existingItem != null)
+                        {
+                            if (worldName != existingItem.Text) existingItem.Text = $"{worldName} ({existingItem.Text})";
+                        }
+                        else
+                        {
+                            this.cmbRegion.Items.Add(new ComboItem(worldName) { Value = targetRegionID });
+                        }
+                    }
+                }
+            }
+            Wz_Node appendixInfoNode = this.UiWaBonusNode.FindNodeByPath($"info", true);
+            if (appendixInfoNode != null)
+            {
+                foreach (var i in appendixInfoNode.Nodes)
+                {
+                    Wz_Node nameNode = i.FindNodeByPath("name");
+                    if (nameNode != null)
+                    {
+                        if (Int32.TryParse(i.Text, out int id))
+                        cmbRegion.Items.Add(new ComboItem(nameNode.GetValue<string>()) { Value = 3000000 + id });
+                    }
+                }
+            }
         }
 
         private string RemoveInvalidFileNameChars(string fileName)

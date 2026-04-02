@@ -4916,8 +4916,9 @@ namespace WzComparerR2
                 return;
             }
             Wz_Node etcWaNode = PluginManager.FindWz(Wz_Type.Etc)?.FindNodeByPath("worldArchive.img");
-            Wz_Node waUiNode = PluginManager.FindWz(Wz_Type.UI)?.FindNodeByPath("UIworldArchive.img");
-            if (etcWaNode == null || waUiNode == null)
+            Wz_Node uiWaNode = PluginManager.FindWz(Wz_Type.UI)?.FindNodeByPath("UIworldArchive.img");
+            Wz_Node uiWaBonusNode = PluginManager.FindWz(Wz_Type.UI)?.FindNodeByPath("UIWorldArchiveBonusBook.img");
+            if (etcWaNode == null || uiWaNode == null || uiWaBonusNode == null)
             {
                 ToastNotification.Show(this, $"錯誤：該客戶端未實裝世界檔案。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
                 return;
@@ -4933,13 +4934,15 @@ namespace WzComparerR2
             }
             FrmWorldArchiveBrowser frmWorldArchiveBrowser = new FrmWorldArchiveBrowser(styleManager1.ManagerStyle == eStyle.VisualStudio2012Dark);
             frmWorldArchiveBrowser.EtcWaNode = etcWaNode;
-            frmWorldArchiveBrowser.UiWaNode = waUiNode;
+            frmWorldArchiveBrowser.UiWaNode = uiWaNode;
+            frmWorldArchiveBrowser.UiWaBonusNode = uiWaBonusNode;
             frmWorldArchiveBrowser.MobNode = PluginManager.FindWz(Wz_Type.Mob);
             frmWorldArchiveBrowser.NpcNode = PluginManager.FindWz(Wz_Type.Npc);
             frmWorldArchiveBrowser.stringLinker = this.stringLinker;
             frmWorldArchiveBrowser.regionID = 0;
             frmWorldArchiveBrowser.typeID = 0;
             frmWorldArchiveBrowser._mainForm = this;
+            frmWorldArchiveBrowser.LoadCmbRegion();
             frmWorldArchiveBrowser.Show();
         }
 
