@@ -460,7 +460,14 @@ namespace WzComparerR2
                         lifeNode = PluginManager.FindWz(Wz_Type.Mob)?.FindNodeByPath($"{LifeID:D7}.img");
                         break;
                 }
-                _mainForm.RedirectToNode(lifeNode ?? (this.advTreeLife.SelectedNode.Tag as Wz_Node));
+                if ((lifeNode ?? (this.advTreeLife.SelectedNode.Tag as Wz_Node)) != null)
+                {
+                    _mainForm.RedirectToNode(lifeNode ?? (this.advTreeLife.SelectedNode.Tag as Wz_Node));
+                }
+                else
+                {
+                    ToastNotification.Show(this, $"対応するWZノードが見つかりませんでした。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                }
             }
         }
 
