@@ -466,7 +466,7 @@ namespace WzComparerR2
                 }
                 else
                 {
-                    ToastNotification.Show(this, $"対応するWZノードが見つかりませんでした。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                    ToastNotification.Show(this, $"沒有找到對應的WZ節點。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
                 }
             }
         }
