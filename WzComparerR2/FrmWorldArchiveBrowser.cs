@@ -284,7 +284,15 @@ namespace WzComparerR2
 
         private void btnCopyMapleStoryWikiFormat_Click(object sender, EventArgs e)
         {
-            if (this.advTreeLife.SelectedNode != null)
+            if (this.regionID >= 3000000)
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.AppendLine("{{World Archive Description");
+                sb.AppendLine($"|MapQuote={this.richDescription.Text.Replace("\r\n", "<br />").Replace("\n", "<br />")}");
+                sb.AppendLine("}}");
+                Clipboard.SetText(sb.ToString());
+            }
+            else if (this.advTreeLife.SelectedNode != null)
             {
                 var kvp = (KeyValuePair<int, Wz_Node>)this.advTreeLife.SelectedNode.Tag;
                 Wz_Node descNode = kvp.Value.FindNodeByPath("desc");
@@ -631,7 +639,7 @@ namespace WzComparerR2
                                     if (Int32.TryParse(i.Text, out int id))
                                     {
                                         content = $"[画像_{id}]";
-                                        Node lifeNode = new Node($"画像: {id}");
+                                        Node lifeNode = new Node($"画像{id}");
                                         lifeNode.Tag = PluginManager.FindWz(j.GetValue<string>());
                                         this.advTreeLife.Nodes.Add(lifeNode);
                                     }
