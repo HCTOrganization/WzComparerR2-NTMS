@@ -5526,7 +5526,7 @@ namespace WzComparerR2
 
         void RunSetupWizard(bool isFirstRun=false)
         {
-            var frm = new FrmSetupWizard();
+            var frm = new FrmSetupWizard(styleManager1.ManagerStyle == eStyle.VisualStudio2012Dark);
             frm.Load(WcR2Config.Default, CharaSimConfig.Default);
             frm.isFirstRun = isFirstRun;
             if (frm.ShowDialog() == DialogResult.OK)
@@ -6386,6 +6386,14 @@ namespace WzComparerR2
 
         private async void MainForm_Shown(object sender, EventArgs e)
         {
+            // Run Setup Wizard
+            if (!WcR2Config.Default.IsSetupWizardCompleted)
+            {
+                RunSetupWizard(true);
+                ConfigManager.Reload();
+                WcR2Config.Default.IsSetupWizardCompleted = true;
+                ConfigManager.Save();
+            }
             await this.AutomaticCheckUpdate();
         }
 

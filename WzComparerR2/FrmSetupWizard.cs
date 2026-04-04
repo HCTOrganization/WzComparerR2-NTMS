@@ -17,13 +17,26 @@ namespace WzComparerR2
 {
     public partial class FrmSetupWizard : DevComponents.DotNetBar.Office2007Form
     {
-        public FrmSetupWizard()
+        public FrmSetupWizard(bool isDarkMode = false)
         {
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
             this.Font = new Font(new FontFamily("SimSun"), 9f);
 #endif
             InitializeComponent();
+
+            if (isDarkMode)
+            {
+                this.wizard.HeaderStyle.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.wizard.FooterStyle.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.wizard.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.wizardPage1.Style.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.finishedWizardPage.Style.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.previewCommonWizardPage.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.translatorWizardPage.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.animationOutputPage.BackColor = System.Drawing.Color.FromArgb(-13816528);
+            }
+
             this.wizard.HeaderImage = null;
             this.picPreview.Image = null;
 
