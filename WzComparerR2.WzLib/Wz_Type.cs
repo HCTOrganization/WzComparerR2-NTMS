@@ -12,6 +12,7 @@ namespace WzComparerR2.WzLib
         Unknown = 0,
         Base,
         Character,
+        DataMap,
         Effect,
         Etc,
         Item,

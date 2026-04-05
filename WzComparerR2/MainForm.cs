@@ -5583,6 +5583,8 @@ namespace WzComparerR2
             {
                 case "Character":
                     return Wz_Type.Character;
+                case "DataMap":
+                    return Wz_Type.DataMap;
                 case "Effect":
                     return Wz_Type.Effect;
                 case "Etc":
