@@ -88,12 +88,12 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incMADr: return "魔法攻擊力 : " + sign + value + "%";
                 case GearPropType.incPDD: return "防禦力 : " + sign + value;
                 case GearPropType.incPDDr: return "防禦力 : " + sign + value + "%";
-                //case GearPropType.incMDD: return "MAGIC DEF. : " + sign + value;
-                //case GearPropType.incMDDr: return "MAGIC DEF. : " + sign + value + "%";
-                //case GearPropType.incACC: return "ACCURACY : " + sign + value;
-                //case GearPropType.incACCr: return "ACCURACY : " + sign + value + "%";
-                //case GearPropType.incEVA: return "AVOIDABILITY : " + sign + value;
-                //case GearPropType.incEVAr: return "AVOIDABILITY : " + sign + value + "%";
+                case GearPropType.incMDD: return "魔法防禦力 : " + sign + value;
+                case GearPropType.incMDDr: return "魔法防禦力 : " + sign + value + "%";
+                case GearPropType.incACC: return "命中率 : " + sign + value;
+                case GearPropType.incACCr: return "命中率 : " + sign + value + "%";
+                case GearPropType.incEVA: return "迴避率 : " + sign + value;
+                case GearPropType.incEVAr: return "迴避率 : " + sign + value + "%";
                 case GearPropType.incSpeed: return "移動速度 : " + sign + value;
                 case GearPropType.incJump: return "跳躍力 : " + sign + value;
                 case GearPropType.incCraft: return "手藝 : " + sign + value;
@@ -155,9 +155,11 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incMHP_incMMP: return "最大HP / 最大MP : " + sign + value;
                 case GearPropType.incMHPr_incMMPr: return "最大HP / 最大MP : " + sign + value + "%";
                 case GearPropType.incPAD_incMAD:
-                case GearPropType.incAD: return "攻擊力 / 魔法攻擊力 : " + sign + value;
-                case GearPropType.incPDD_incMDD: return "防御力 : " + sign + value;
-                //case GearPropType.incACC_incEVA: return "ACC/AVO :" + sign + value;
+                case GearPropType.incAD: return "攻撃力/魔力" + sign + value;
+                case GearPropType.incPDD_incMDD: return "防禦力" + sign + value;
+                case GearPropType.incACC_incEVA: return "命中/迴避率 :" + sign + value;
+                case GearPropType.incCRT: return "爆擊率 :" + sign + value;
+                case GearPropType.incCRD: return "爆擊傷害: " + sign + value;
 
                 case GearPropType.incARC: return "ARC : " + sign + value;
                 case GearPropType.incAUT: return "AUT : " + sign + value;
@@ -268,11 +270,35 @@ namespace WzComparerR2.CharaSim
                     res[1] = sign + value + "%";
                     return res;
                 case GearPropType.incPDD:
-                    res[0] = "防御力";
+                    res[0] = "防禦力";
                     res[1] = sign + value;
                     return res;
                 case GearPropType.incPDDr:
-                    res[0] = "防御力";
+                    res[0] = "防禦力";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incMDD:
+                    res[0] = "魔法防禦力";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incMDDr:
+                    res[0] = "魔法防禦力";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incACC:
+                    res[0] = "命中率";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incACCr:
+                    res[0] = "命中率";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incEVA:
+                    res[0] = "迴避率";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incEVAr:
+                    res[0] = "迴避率";
                     res[1] = sign + value + "%";
                     return res;
                 case GearPropType.incSpeed:
@@ -292,9 +318,17 @@ namespace WzComparerR2.CharaSim
                     res[0] = "總傷害";
                     res[1] = sign + value + "%";
                     return res;
+                case GearPropType.incCRT:
+                    res[0] = "爆擊率";
+                    res[1] = sign + value;
+                    return res;
                 case GearPropType.incCr:
                     res[0] = "爆擊率";
                     res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incCRD:
+                    res[0] = "爆擊傷害";
+                    res[1] = sign + value;
                     return res;
                 case GearPropType.incCDr:
                     res[0] = "爆擊傷害";
@@ -436,9 +470,11 @@ namespace WzComparerR2.CharaSim
                     res[0] = "攻擊力 / 魔法攻擊力  " + sign + " " + value;
                     return res;
                 case GearPropType.incPDD_incMDD:
-                    res[0] = "防御力  " + sign + value;
+                    res[0] = "防禦力  " + sign + value;
                     return res;
-
+                case GearPropType.incACC_incEVA: 
+                    res[0] = "命中/迴避率 :" + sign + value;
+                    return res;
                 case GearPropType.Etuc:
                     res[0] = $"#$d卓越強化 : 無# (最大{value}次)";
                     return res;
@@ -2002,14 +2038,14 @@ namespace WzComparerR2.CharaSim
             {
                 case 100: return "物理攻擊力增加";
                 case 101: return "魔法攻擊力增加";
-                case 102: return "物理防御力增加";
-                case 103: return "魔法防御力增加";
+                case 102: return "物理防禦力增加";
+                case 103: return "魔法防禦力增加";
                 case 105: return "HP吸收";
 
                 case 110: return "周辺物理攻擊力增加";
                 case 111: return "周辺魔法攻擊力增加";
-                case 112: return "周辺物理防御力增加";
-                case 113: return "周辺魔法防御力增加";
+                case 112: return "周辺物理防禦力增加";
+                case 113: return "周辺魔法防禦力增加";
                 case 114: return "HP回復";
                 case 115: return "移動速度增加";
 
@@ -2043,10 +2079,10 @@ namespace WzComparerR2.CharaSim
 
                 case 150: return "物理攻擊力增加";
                 case 151: return "魔法攻擊力增加";
-                case 152: return "物理防御力增加";
-                case 153: return "魔法防御力增加";
+                case 152: return "物理防禦力增加";
+                case 153: return "魔法防禦力增加";
                 case 154: return "命中率增加";
-                case 155: return "回避率增加";
+                case 155: return "迴避率增加";
                 case 156: return "移動速度增加";
 
                 case 170: return "傳送";

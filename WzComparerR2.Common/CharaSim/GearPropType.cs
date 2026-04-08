@@ -36,6 +36,8 @@ namespace WzComparerR2.CharaSim
         incACC_incEVA,
         incACC,
         incEVA,
+        incCRT,
+        incCRD,
         incSpeed,
         incJump,
         incCraft,
