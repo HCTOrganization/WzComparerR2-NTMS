@@ -93,24 +93,6 @@ namespace WzComparerR2.MapRender.UI
             canvas.Children.Add(title);
             this.SetDragTarget(title);
 
-            ComboBox cmbMaps = new ComboBox();
-            cmbMaps.Width = 150;
-            cmbMaps.Height = 20;
-            Canvas.SetLeft(cmbMaps, 294);
-            Canvas.SetTop(cmbMaps, 42);
-            cmbMaps.SetBinding(ComboBox.SelectedItemProperty, new Binding(UIWorldMap.CurrentWorldMapProperty) { Source = this, Mode = BindingMode.TwoWay });
-            canvas.Children.Add(cmbMaps);
-            this.CmbMaps = cmbMaps;
-
-            ComboBox cmbQuestList = new ComboBox();
-            cmbQuestList.Width = 100;
-            cmbQuestList.Height = 20;
-            Canvas.SetLeft(cmbQuestList, 450);
-            Canvas.SetTop(cmbQuestList, 42);
-            cmbQuestList.SetBinding(ComboBox.SelectedIndexProperty, new Binding(UIWorldMap.SelectedQuestLimitIndexProperty) { Source = this, Mode = BindingMode.TwoWay });
-            canvas.Children.Add(cmbQuestList);
-            this.CmbQuestList = cmbQuestList;
-
             ComboBox cmbFogList = new ComboBox();
             cmbFogList.Width = 100;
             cmbFogList.Height = 20;
@@ -140,6 +122,24 @@ namespace WzComparerR2.MapRender.UI
             Canvas.SetLeft(btnGoToCurrentMap, 205);
             Canvas.SetTop(btnGoToCurrentMap, 40);
             canvas.Children.Add(btnGoToCurrentMap);
+
+            ComboBox cmbMaps = new ComboBox();
+            cmbMaps.Width = 150;
+            cmbMaps.Height = 20;
+            Canvas.SetLeft(cmbMaps, 294);
+            Canvas.SetTop(cmbMaps, 42);
+            cmbMaps.SetBinding(ComboBox.SelectedItemProperty, new Binding(UIWorldMap.CurrentWorldMapProperty) { Source = this, Mode = BindingMode.TwoWay });
+            canvas.Children.Add(cmbMaps);
+            this.CmbMaps = cmbMaps;
+
+            ComboBox cmbQuestList = new ComboBox();
+            cmbQuestList.Width = 100;
+            cmbQuestList.Height = 20;
+            Canvas.SetLeft(cmbQuestList, 450);
+            Canvas.SetTop(cmbQuestList, 42);
+            cmbQuestList.SetBinding(ComboBox.SelectedIndexProperty, new Binding(UIWorldMap.SelectedQuestLimitIndexProperty) { Source = this, Mode = BindingMode.TwoWay });
+            canvas.Children.Add(cmbQuestList);
+            this.CmbQuestList = cmbQuestList;
 
             ImageButton btnBack = new ImageButton();
             btnBack.Name = "Back";
