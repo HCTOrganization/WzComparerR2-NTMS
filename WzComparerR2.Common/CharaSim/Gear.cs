@@ -430,6 +430,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.face2:
                 case GearType.hair3:
                 case GearType.hair4:
+                case GearType.face3:
                 case GearType.medal:
                 case GearType.android:
                 case GearType.shovel:
@@ -480,6 +481,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.hair4:
                 case GearType.face:
                 case GearType.face2:
+                case GearType.face3:
                 case GearType.cap:
                 case GearType.faceAccessory:
                 case GearType.eyeAccessory:
@@ -735,6 +737,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.hair4:
                 case GearType.face:
                 case GearType.face2:
+                case GearType.face3:
                     return GetCosmeticGender(code) - 1;
             }
 
