@@ -104,13 +104,12 @@ namespace WzComparerR2.WzLib.Compatibility
         private static readonly WzVersionProfile[] allProfiles = new WzVersionProfile[]
         {
             new Pkg1Profile(),
+            new Pkg2Profile(1200, WzFileFormat.Pkg2Kmst1198, Pkg2OffsetVersion.KMST1199, Wz_CryptoKeyType.KMST1199, new Pkg2HashVersionCalcV5()),
             new Pkg2Profile(1199, WzFileFormat.Pkg2Kmst1198, Pkg2OffsetVersion.KMST1199, Wz_CryptoKeyType.KMST1199, new Pkg2HashVersionCalcV4()),
             new Pkg2Profile(1198, WzFileFormat.Pkg2Kmst1198, Pkg2OffsetVersion.KMST1198, Wz_CryptoKeyType.KMST1198, new Pkg2HashVersionCalcV3()),
             new Pkg2Profile(1197, WzFileFormat.Pkg2Kmst1196, Pkg2OffsetVersion.KMST1196, Wz_CryptoKeyType.BMS, new Pkg2HashVersionCalcV2()),  // BMS/KMS/GMS detected separately
             new Pkg2Profile(1196, WzFileFormat.Pkg2Kmst1196, Pkg2OffsetVersion.KMST1196, Wz_CryptoKeyType.BMS, new Pkg2HashVersionCalcV1()),
         };
-
-        private static readonly WzVersionProfile unknownPkg2Profile = new UnknownPkg2Profile(0, WzFileFormat.Pkg2Kmst1198, Pkg2OffsetVersion.KMST1199, Wz_CryptoKeyType.KMST1199, null);
 
         public static IEnumerable<WzVersionProfile> GetCandidates(WzFileFormat format)
         {
@@ -119,11 +118,6 @@ namespace WzComparerR2.WzLib.Compatibility
                 if (p.Format == format)
                     yield return p;
             }
-        }
-
-        public static WzVersionProfile GetUnknownPkg2Profile()
-        {
-            return unknownPkg2Profile;
         }
 
         public static WzVersionProfile GetByName(string name)
@@ -303,62 +297,6 @@ namespace WzComparerR2.WzLib.Compatibility
             }
             var pkg1Keys = crypto.Pkg1Keys ?? crypto.GetKeys(Wz_CryptoKeyType.BMS);
             return new Pkg2KmstDirStringReader(pkg2Keys, pkg1Keys);
-        }
-    }
-
-    #endregion
-
-    #region PKG2 unknown profiles
-
-    public sealed class UnknownPkg2Profile : WzVersionProfile
-    {
-        public UnknownPkg2Profile(
-            int wzVersion,
-            WzFileFormat format,
-            Pkg2OffsetVersion offsetVersion,
-            Wz_CryptoKeyType cryptoKeyType,
-            IPkg2HashVersionCalc hashVersionCalc)
-            : base(format, cryptoKeyType)
-        {
-            this.WzVersion = wzVersion;
-            this.OffsetVersion = offsetVersion;
-            this.HashVersionCalc = hashVersionCalc;
-        }
-
-        public int WzVersion { get; }
-        public Pkg2OffsetVersion OffsetVersion { get; }
-        public IPkg2HashVersionCalc HashVersionCalc { get; }
-
-        public override string Name => $"pkg2_unknown";
-
-        public override IWzVersionIterator CreateIterator(Wz_File wzFile)
-        {
-            return null;
-        }
-
-        public override bool TryDetect(Wz_File wzFile, WzPreReadResult preReadResult, IWzVersionIterator iterator)
-        {
-            if (preReadResult.Format != this.Format)
-                return false;
-
-            return true;
-        }
-
-        public override IWzImageOffsetCalc CreateOffsetCalc(Wz_File wzFile, uint hashVersion)
-        {
-            return null;
-        }
-
-        public override void DetectCryptoKeyType(Wz_File wzFile, Wz_Crypto crypto, WzPreReadResult preReadResult, out Wz_CryptoKeyType pkg1KeyType, out Wz_CryptoKeyType pkg2KeyType)
-        {
-            pkg1KeyType = Wz_CryptoKeyType.Unknown;
-            pkg2KeyType = Wz_CryptoKeyType.Unknown;
-        }
-
-        public IPkg2DirStringReader CreateDirStringReader(Wz_File wzFile, Wz_Crypto crypto)
-        {
-            var pkg1Keys = crypto.Pkg1Keys ?? crypto.GetKeys(Wz_CryptoKeyType.BMS);
-            return new Pkg2KmstDirStringReader(null, pkg1Keys);
         }
     }
 
