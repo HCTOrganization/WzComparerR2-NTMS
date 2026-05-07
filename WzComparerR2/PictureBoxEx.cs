@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevComponents.DotNetBar;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SpineV2 = Spine.V2;
@@ -30,6 +31,7 @@ namespace WzComparerR2
 
         public bool AutoAdjustPosition { get; set; }
         public string PictureName { get; set; }
+        public Color PictureBoxInfoText { get; set; } = Color.Black;
         public bool ShowInfo { get; set; }
 
         public override System.Drawing.Font Font
@@ -84,14 +86,14 @@ namespace WzComparerR2
             this.ShowAnimation(frameData);
         }
 
-        public FrameAnimationData LoadVideo(Wz_Video wzVideo)
+        public FrameAnimationData LoadVideo(Wz_Video wzVideo, Wz_Vector origin = null)
         {
-            return new MaplestoryCanvasVideoLoader().Load(wzVideo, this.GraphicsDevice);
+            return new MaplestoryCanvasVideoLoader().Load(wzVideo, this.GraphicsDevice, origin);
         }
 
-        public FrameAnimationData LoadFrameAnimation(Wz_Node node, FrameAnimationCreatingOptions options = default)
+        public FrameAnimationData LoadFrameAnimation(Wz_Node node, FrameAnimationCreatingOptions options = default, bool loadTexture = true)
         {
-            return FrameAnimationData.CreateFromNode(node, this.GraphicsDevice, options, PluginBase.PluginManager.FindWz);
+            return FrameAnimationData.CreateFromNode(node, this.GraphicsDevice, options, PluginBase.PluginManager.FindWz, loadTexture);
         }
 
         public ISpineAnimationData LoadSpineAnimation(Wz_Node node)
@@ -124,6 +126,78 @@ namespace WzComparerR2
             return FrameAnimationData.CreateFromPngNode(node, this.GraphicsDevice, PluginBase.PluginManager.FindWz);
         }
 
+        public FrameAnimationData CaptureAnimation(IEnumerable<AnimationItem> aniItems, IEnumerable<Tuple<int, int>> aniItemTimes, int time = 0)
+        {
+            var frameAnimationData = new FrameAnimationData();
+
+            var rec = new AnimationRecoder(this.GraphicsDevice);
+            rec.Items.AddRange(aniItems);
+            rec.ItemTimes.AddRange(aniItemTimes);
+            int length = rec.GetMaxLength();
+
+            if (time < 0 || time > length)
+            {
+                return null;
+            }
+
+            rec.ResetAll();
+            rec.BackgroundColor = Color.Transparent;
+            rec.Update(TimeSpan.FromMilliseconds(time));
+            Rectangle bounds = new Rectangle();
+            foreach (var aniItem in rec.Items)
+            {
+                var rect = aniItem.Measure();
+                bounds = Microsoft.Xna.Framework.Rectangle.Union(bounds, rect);
+            }
+            rec.Begin(bounds);
+            rec.Draw();
+            var t2d = rec.GetPngTexture();
+            var frame = new Frame(t2d, new Point(-bounds.Left, -bounds.Top), 0, 120, true);
+            frameAnimationData.Frames.Add(frame);
+            rec.End();
+
+            if (frameAnimationData.Frames.Count > 0)
+                return frameAnimationData;
+            else
+                return null;
+        }
+
+        public List<System.Drawing.Bitmap> GetSpineDefault(Wz_Node node)
+        {
+            var ret = new List<System.Drawing.Bitmap>();
+            ISpineAnimationData spineData = this.LoadSpineAnimation(SpineLoader.Detect(node));
+            AnimationItem spineAni = spineData?.CreateAnimator() as AnimationItem;
+            if (spineAni != null)
+            {
+                var aniList = (spineAni as ISpineAnimator).Animations.ToArray();
+                foreach (var aniName in aniList)
+                {
+                    (spineAni as ISpineAnimator).SelectedAnimationName = aniName;
+                    FrameAnimationData frameData = this.CaptureAnimation([spineAni], [new Tuple<int, int>(0, spineAni.Length)], 0);
+
+                    if (frameData != null && frameData.Frames.Count == 1)
+                    {
+                        System.Drawing.Bitmap bmp;
+                        var frame = frameData.Frames[0];
+                        byte[] frameDataArray = new byte[frame.Texture.Width * frame.Texture.Height * 4];
+                        frame.Texture.GetData(frameDataArray);
+                        var targetSize = new Point(frame.Texture.Width, frame.Texture.Height);
+                        unsafe
+                        {
+                            fixed (byte* pFrameBuffer = frameDataArray)
+                            {
+                                bmp = new System.Drawing.Bitmap(targetSize.X, targetSize.Y, targetSize.X * 4, System.Drawing.Imaging.PixelFormat.Format32bppArgb, new IntPtr(pFrameBuffer));
+                            }
+                        }
+                        ret.Add(bmp);
+                    }
+                    this.DisposeAnimationItem(new FrameAnimator(frameData));
+                }
+                this.DisposeAnimationItem(spineAni);
+            }
+            return ret;
+        }
+
         public void ShowAnimation(FrameAnimationData data)
         {
             this.ShowAnimation(new FrameAnimator(data));
@@ -150,9 +224,9 @@ namespace WzComparerR2
 
         public void ShowAnimation(AnimationItem animator)
         {
-            ClearItemList();
+            DisposeItemList();
 
-            this.Items.Add(animator);
+            AddItem(animator);
 
             if (this.AutoAdjustPosition)
             {
@@ -168,53 +242,66 @@ namespace WzComparerR2
             if (!ShowOverlayAni)
             {
                 ShowOverlayAni = !ShowOverlayAni;
-                ClearItemList();
+                DisposeItemList();
             }
 
+            bool removeTopItem = true;
             FrameAnimator baseAniItem;
-            if (this.Items.Count == 0)
+            if (this.Items.Count == 0 || this.Items[this.Items.Count - 1] is not FrameAnimator)
             {
                 var tmpFrame = new Frame(null, Point.Zero, 0, 0, true);
                 var tmpFrameAnimationData = new FrameAnimationData();
                 tmpFrameAnimationData.Frames.Add(tmpFrame);
                 baseAniItem = new FrameAnimator(tmpFrameAnimationData);
+                removeTopItem = false;
             }
-            else baseAniItem = (FrameAnimator)this.Items[0];
+            else baseAniItem = (FrameAnimator)this.Items[this.Items.Count - 1];
 
             FrameAnimator aniItem = (FrameAnimator)animator;
 
-            var frmOverlayAniOptions = new FrmOverlayAniOptions(0, aniItem.Data.Frames.Count - 1, multiFrameInfo, isPngFrameAni);
-            int delayOffset = 0;
-            int moveX = 0;
-            int moveY = 0;
-            int frameStart = 0;
+            var frmOverlayAniOptions = new FrmOverlayAniOptions(aniItem.Data.Frames, multiFrameInfo, isPngFrameAni);
+            OverlayOptions options = new OverlayOptions();
             int frameEnd = 0;
-            int pngDelay = 120;
 
             // 정보 받아오기
             if (frmOverlayAniOptions.ShowDialog() == DialogResult.OK)
             {
-                frmOverlayAniOptions.GetValues(out delayOffset, out moveX, out moveY, out frameStart, out frameEnd, out pngDelay);
-                frameStart = frameStart == -1 ? 0 : frameStart;
-                frameEnd = frameEnd == -1 ? aniItem.Data.Frames.Count - 1 : frameEnd;
+                options = frmOverlayAniOptions.GetValues();
+                options.AniStart = options.AniStart == -1 ? 0 : options.AniStart;
+                frameEnd = options.AniEnd == -1 ? aniItem.Data.Frames.Count - 1 : options.AniEnd;
 
-                if (frameStart > frameEnd) return;
+                if (options.AniStart > frameEnd)
+                {
+                    DisposeAnimationItem(aniItem);
+                    return;
+                }
             }
-            else return;
+            else
+            {
+                DisposeAnimationItem(aniItem);
+                return;
+            }
 
             // png 하나의 딜레이 설정
             if (isPngFrameAni)
             {
-                if (pngDelay == 0) return;
-                aniItem.Data.Frames[0].Delay = pngDelay;
+                if (options.PngDelay == 0)
+                {
+                    DisposeAnimationItem(aniItem);
+                    return;
+                }
+                aniItem.Data.Frames[0].Delay = options.PngDelay;
             }
 
-            var config = ImageHandlerConfig.Default;
+            if ((options.SpeedX != 0 && options.GoX != 0) || (options.SpeedY != 0 && options.GoY != 0))
+            {
+                FrameAnimationData.ApplyMovement(this.GraphicsDevice, aniItem.Data, options.SpeedX, options.SpeedY, options.GoX, options.GoY, options.FullMove, options.AniStart, ref frameEnd);
+            }
             var newAniItem = new FrameAnimator(FrameAnimationData.MergeAnimationData(baseAniItem.Data, aniItem.Data,
-                    this.GraphicsDevice, delayOffset, moveX, moveY, frameStart, frameEnd));
-
-            this.Items.Clear();
-            this.Items.Add(newAniItem);
+                    this.GraphicsDevice, options.AniOffset, options.PosX, options.PosY, options.AniStart, frameEnd));
+            
+            if (removeTopItem) RemoveTopItem();
+            AddItem(newAniItem);
 
             if (this.AutoAdjustPosition)
             {
@@ -224,52 +311,82 @@ namespace WzComparerR2
             this.Invalidate();
         }
 
-        public void AddHitboxOverlay()
+        public void AddHitboxOverlay(FrameAnimationData autoData)
         {
+            bool removeTopItem = true;
             FrameAnimator baseAniItem;
-            if (this.Items.Count == 0)
+            if (this.Items.Count == 0 || this.Items[this.Items.Count - 1] is not FrameAnimator)
             {
                 var tmpFrame = new Frame(null, Point.Zero, 0, 0, true);
                 var tmpFrameAnimationData = new FrameAnimationData();
                 tmpFrameAnimationData.Frames.Add(tmpFrame);
                 baseAniItem = new FrameAnimator(tmpFrameAnimationData);
+                removeTopItem = false;
             }
-            else baseAniItem = (FrameAnimator)this.Items[0];
+            else baseAniItem = (FrameAnimator)this.Items[this.Items.Count - 1];
 
             FrameAnimator aniItem;
 
             var config = ImageHandlerConfig.Default;
+            /*
             var baseDelayAll = 0;
             foreach (var frame in baseAniItem.Data.Frames)
             {
                 baseDelayAll += frame.Delay;
             }
+            */
+            var baseDelayAll = this.MaxLength;
 
-            var frmOverlayAniOptions = new FrmOverlayRectOptions(0, baseDelayAll, config);
-            int startTime = 0;
-            int endTime = 0;
-            int radius = 0;
-            Point lt;
-            Point rb;
-            Color bgColor = System.Drawing.Color.FromArgb(config.BackgroundType.Value == ImageBackgroundType.Transparent ? 0 : 255, config.BackgroundColor.Value).ToXnaColor();
+            var frmOverlayAniOptions = new FrmOverlayRectOptions(0, baseDelayAll, config, autoData != null);
+            OverlayOptions options = new OverlayOptions();
+            var frameEnd = 0;
 
             if (frmOverlayAniOptions.ShowDialog() == DialogResult.OK)
             {
-                frmOverlayAniOptions.GetValues(out lt, out rb, out startTime, out endTime, out radius, out int alpha, out int type, config);
-                Color fillColor = System.Drawing.Color.FromArgb((255 * alpha / 100), config.OverlayRectColor.Value).ToXnaColor();
-                Color outlineColor = System.Drawing.Color.FromArgb(255, config.OverlayRectColor.Value).ToXnaColor();
+                options = frmOverlayAniOptions.GetValues(config);
 
                 FrameAnimationData aniItemData = null;
-                switch (type)
+                if (!options.RectAutoArea)
                 {
-                    case 0:
-                        aniItemData = FrameAnimationData.CreateRectData(lt, rb, endTime - startTime, this.GraphicsDevice, fillColor, outlineColor);
-                        break;
-                    case 1:
-                        aniItemData = FrameAnimationData.CreateCircleData(lt, radius, endTime - startTime, this.GraphicsDevice, fillColor, outlineColor);
-                        break;
-                    default:
-                        break;
+                    var alphaTimeline = GetAlphaTimeline(options);
+                    frameEnd = alphaTimeline.Count - 1;
+                    switch (options.ShapeType)
+                    {
+                        case OverlayShapeType.Rectangle:
+                            var width = -options.RectLT.X + options.RectRB.X;
+                            var height = -options.RectLT.Y + options.RectRB.Y;
+                            if (width <= 0 || height <= 0)
+                            {
+                                MessageBoxEx.Show("您輸入的範圍無效。", "範圍設定錯誤");
+                                return;
+                            }
+                            aniItemData = FrameAnimationData.CreateRectData(this.GraphicsDevice, config.OverlayRectColor.Value, alphaTimeline);
+                            break;
+                        case OverlayShapeType.Circle:
+                            if (options.RectRadius <= 0)
+                            {
+                                MessageBoxEx.Show("您輸入的半徑無效。", "範圍設定錯誤");
+                                return;
+                            }
+                            aniItemData = FrameAnimationData.CreateCircleData(this.GraphicsDevice, options.RectRadius, config.OverlayRectColor.Value, alphaTimeline);
+                            break;
+                        case OverlayShapeType.Polygon:
+                            if (options.Vertices.Count <= 2)
+                            {
+                                MessageBoxEx.Show("多邊形至少需要3個頂點。", "範圍設定錯誤");
+                                return;
+                            }
+                            aniItemData = FrameAnimationData.CreatePolygonData(this.GraphicsDevice, options.Vertices, config.OverlayRectColor.Value, alphaTimeline);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else if (autoData != null)
+                {
+                    var alphaTimeline = GetAutoAreaTimeline(options, autoData);
+                    aniItemData = FrameAnimationData.CreateRectData(this.GraphicsDevice, config.OverlayRectColor.Value, alphaTimeline);
+                    frameEnd = aniItemData?.Frames.Count - 1 ?? 0;
                 }
 
                 if (aniItemData == null) return;
@@ -278,11 +395,201 @@ namespace WzComparerR2
             }
             else return;
 
+            if ((options.SpeedX != 0 && options.GoX != 0) || (options.SpeedY != 0 && options.GoY != 0))
+            {
+                FrameAnimationData.ApplyMovement(this.GraphicsDevice, aniItem.Data, options.SpeedX, options.SpeedY, options.GoX, options.GoY, false, 0, ref frameEnd);
+            }
             var newAniItem = new FrameAnimator(FrameAnimationData.MergeAnimationData(baseAniItem.Data, aniItem.Data,
-                    this.GraphicsDevice, startTime, 0, 0, 0, 0));
+                    this.GraphicsDevice, options.AniStart, 0, 0, 0, frameEnd));
 
-            this.Items.Clear();
-            this.Items.Add(newAniItem);
+            if (removeTopItem) RemoveTopItem();
+            AddItem(newAniItem);
+
+            if (this.AutoAdjustPosition)
+            {
+                this.AdjustPosition();
+            }
+
+            this.Invalidate();
+        }
+
+        private List<FrameAnimationData.TimelineData> GetAlphaTimeline(OverlayOptions options)
+        {
+            var ret = new List<FrameAnimationData.TimelineData>();
+            var lt = options.RectLT;
+            var rb = options.RectRB;
+            var totalLength = options.AniEnd - options.AniStart;
+            const int minInterval = 60;
+            if (options.RectGradation && options.RectAlphaStart <= options.RectAlphaEnd)
+            {
+                if (options.AniStart < options.RectAlphaStart)
+                {
+                    ret.Add(new FrameAnimationData.TimelineData()
+                    {
+                        LT = lt,
+                        RB = rb,
+                        Alpha = options.RectAlpha,
+                        Delay = options.RectAlphaStart - options.AniStart
+                    });
+                }
+
+                var gradationLength = options.RectAlphaEnd - options.RectAlphaStart;
+                if (gradationLength > 0)
+                {
+                    var count = gradationLength / minInterval;
+                    if (count == 0)
+                    {
+                        ret.Add(new FrameAnimationData.TimelineData()
+                        {
+                            LT = lt,
+                            RB = rb,
+                            Alpha = (options.RectAlpha + options.RectAlphaDst) / 2,
+                            Delay = gradationLength
+                        });
+                    }
+                    else
+                    {
+                        var length = minInterval;
+                        for (var i = 0; i < count; i++, length += minInterval)
+                        {
+                            var left = gradationLength - length;
+                            var alpha = (options.RectAlpha * left + options.RectAlphaDst * length) / (float)gradationLength;
+                            ret.Add(new FrameAnimationData.TimelineData()
+                            {
+                                LT = lt,
+                                RB = rb,
+                                Alpha = (int)alpha,
+                                Delay = (left < minInterval) ? (minInterval + left) : minInterval
+                            });
+                        }
+                    }
+                }
+
+                if (options.AniEnd > options.RectAlphaEnd)
+                {
+                    ret.Add(new FrameAnimationData.TimelineData()
+                    {
+                        LT = lt,
+                        RB = rb,
+                        Alpha = options.RectAlphaDst,
+                        Delay = options.AniEnd - options.RectAlphaEnd
+                    });
+                }
+            }
+            else
+            {
+                ret.Add(new FrameAnimationData.TimelineData()
+                {
+                    LT = lt,
+                    RB = rb,
+                    Alpha = options.RectAlpha,
+                    Delay = totalLength
+                });
+            }
+
+            return ret.GroupBy(t => new { t.Alpha, t.LT, t.RB }).Select(g => new FrameAnimationData.TimelineData()
+                {
+                    LT = g.Key.LT,
+                    RB = g.Key.RB,
+                    Alpha = g.Key.Alpha,
+                    Delay = g.Sum(t => t.Delay)
+                }).ToList();
+        }
+
+        private List<FrameAnimationData.TimelineData> GetAutoAreaTimeline(OverlayOptions options, FrameAnimationData data)
+        {
+            var ret = new List<FrameAnimationData.TimelineData>();
+            var startTime = options.AniStart;
+            var endTime = options.AniEnd;
+            var move = options.RectLT;
+            var time = 0;
+            foreach (var frame in data.Frames)
+            {
+                if (time > endTime) break;
+
+                var delay = frame.Delay;
+                if (time < startTime)
+                {
+                    if (time + frame.Delay > startTime)
+                    {
+                        if (time + frame.Delay <= endTime)
+                        {
+                            delay = time + frame.Delay - startTime;
+                        }
+                        else
+                        {
+                            delay = endTime - startTime;
+                        }
+                        ret.Add(new FrameAnimationData.TimelineData()
+                        {
+                            LT = frame.LT + move,
+                            RB = frame.RB + move,
+                            Alpha = options.RectAlpha,
+                            Delay = delay,
+                        });
+                    }
+                }
+                else if (time + frame.Delay <= endTime)
+                {
+                    ret.Add(new FrameAnimationData.TimelineData()
+                    {
+                        LT = frame.LT + move,
+                        RB = frame.RB + move,
+                        Alpha = options.RectAlpha,
+                        Delay = delay,
+                    });
+                }
+                else if (time + frame.Delay > endTime)
+                {
+                    delay = endTime - time;
+                    ret.Add(new FrameAnimationData.TimelineData()
+                    {
+                        LT = frame.LT + move,
+                        RB = frame.RB + move,
+                        Alpha = options.RectAlpha,
+                        Delay = delay,
+                    });
+                }
+                time += frame.Delay;
+            }
+
+            return ret;
+        }
+
+        public void ShowSpineOverlayAnimation(AnimationItem aniItem, int endPoint)
+        {
+            if (!ShowOverlayAni)
+            {
+                ShowOverlayAni = !ShowOverlayAni;
+                DisposeItemList();
+            }
+
+            var frmOverlayAniOptions = new FrmOverlayAniOptions(new List<Frame>(), null, false);
+            frmOverlayAniOptions.SetSpine();
+            OverlayOptions options = new OverlayOptions();
+
+            // 정보 받아오기
+            if (frmOverlayAniOptions.ShowDialog() == DialogResult.OK)
+            {
+                options = frmOverlayAniOptions.GetValues();
+            }
+            else
+            {
+                DisposeAnimationItem(aniItem);
+                return;
+            }
+
+            if (aniItem is SpineAnimatorV2 spinev2)
+            {
+                spinev2.Skeleton.X += options.PosX;
+                spinev2.Skeleton.Y += options.PosY;
+            }
+            else if (aniItem is SpineAnimatorV4 spinev4)
+            {
+                spinev4.Skeleton.X += options.PosX;
+                spinev4.Skeleton.Y += options.PosY;
+            }
+            AddItem(aniItem, options.AniOffset, endPoint);
 
             if (this.AutoAdjustPosition)
             {
@@ -297,44 +604,78 @@ namespace WzComparerR2
             if (this.Items.Count <= 0)
                 return;
 
-            var animator = this.Items[0];
-
+            //var animator = this.Items[0];
+            var animator = this.Items[this.Items.Count - 1];
+            var rect = new Rectangle();
             if (animator is FrameAnimator)
             {
                 var aniItem = (FrameAnimator)animator;
-                var rect = aniItem.Data.GetBound();
+                rect = aniItem.Data.GetBound();
                 aniItem.Position = new Point(-rect.Left, -rect.Top);
             }
             else if (animator is AnimationItem aniItem)
             {
-                var rect = aniItem.Measure();
+                rect = aniItem.Measure();
                 aniItem.Position = new Point(-rect.Left, -rect.Top);
             }
             else if (animator is MultiFrameAnimator)
             {
                 var multiAniItem = (MultiFrameAnimator)animator;
-                var rect = multiAniItem.Data.GetBound(multiAniItem.SelectedAnimationName);
+                rect = multiAniItem.Data.GetBound(multiAniItem.SelectedAnimationName);
                 multiAniItem.Position = new Point(-rect.Left, -rect.Top);
+            }
+
+            var l = (int)(-rect.Left * this.GlobalScale);
+            var t = (int)(-rect.Top * this.GlobalScale);
+            foreach (var item in this.Items)
+            {
+                if (item is FrameAnimator frameAni)
+                {
+                    frameAni.Position = new Point(l, t);
+                }
+                else if (item is AnimationItem aniItem)
+                {
+                    aniItem.Position = new Point(l, t);
+                }
+                else if (item is MultiFrameAnimator multiAniItem)
+                {
+                    multiAniItem.Position = new Point(l, t);
+                }
             }
         }
 
-        public bool SaveAsGif(AnimationItem aniItem, string fileName, ImageHandlerConfig config, GifEncoder encoder, bool showOptions)
+        public void UpdateLength(int index)
+        {
+            int start = this.ItemTimes[index].Item1;
+            this.ItemTimes[index] = new Tuple<int, int>(0 + start, this.Items[index].Length + start);
+            UpdateMaxLength();
+            ResetTimer();
+            ResetAll();
+        }
+
+        public bool SaveAsGif(IEnumerable<AnimationItem> aniItem, IEnumerable<Tuple<int, int>> aniItemTime, string fileName, ImageHandlerConfig config, GifEncoder encoder, bool showOptions)
         {
             var rec = new AnimationRecoder(this.GraphicsDevice);
             var cap = encoder.Compatibility;
 
-            rec.Items.Add(aniItem);
+            rec.Items.AddRange(aniItem);
+            rec.ItemTimes.AddRange(aniItemTime);
             int length = rec.GetMaxLength();
             int delay = Math.Max(cap.MinFrameDelay, config.MinDelay);
             int[] timeline = null;
-            if (!cap.IsFixedFrameRate)
+            if (!cap.IsFixedFrameRate && rec.Items.Count <= 1)
             {
                 timeline = rec.GetGifTimeLine(delay, cap.MaxFrameDelay);
             }
 
             // calc available canvas area
             rec.ResetAll();
-            Microsoft.Xna.Framework.Rectangle bounds = aniItem.Measure();
+            Microsoft.Xna.Framework.Rectangle bounds = new Rectangle();
+            foreach (var item in rec.Items)
+            {
+                var rect = item.Measure();
+                bounds = Microsoft.Xna.Framework.Rectangle.Union(bounds, rect);
+            }
             if (length > 0)
             {
                 IEnumerable<int> delays = timeline?.Take(timeline.Length - 1)
@@ -343,11 +684,14 @@ namespace WzComparerR2
                 foreach (var frameDelay in delays)
                 {
                     rec.Update(TimeSpan.FromMilliseconds(frameDelay));
-                    var rect = aniItem.Measure();
-                    bounds = Microsoft.Xna.Framework.Rectangle.Union(bounds, rect);
+                    foreach (var item in rec.Items)
+                    {
+                        var rect = item.Measure();
+                        bounds = Microsoft.Xna.Framework.Rectangle.Union(bounds, rect);
+                    }
                 }
             }
-            bounds.Offset(aniItem.Position);
+            bounds.Offset(aniItem.First().Position);
 
             // customize clip/scale options
             AnimationClipOptions clipOptions = new AnimationClipOptions()
@@ -664,6 +1008,11 @@ namespace WzComparerR2
             return this.Items.Count > 0 ? this.Items[0] : null;
         }
 
+        public override IEnumerable<AnimationItem> GetItemsAt(int x, int y)
+        {
+            return this.Items;
+        }
+
         protected override void Initialize()
         {
             base.Initialize();
@@ -683,7 +1032,7 @@ namespace WzComparerR2
             {
                 UpdateInfoText();
                 sprite.Begin();
-                sprite.DrawStringEx(this.XnaFont, this.sbInfo, Vector2.Zero, Color.Black);
+                sprite.DrawStringEx(this.XnaFont, this.sbInfo, Vector2.Zero, PictureBoxInfoText);
                 sprite.End();
             }
         }
@@ -720,8 +1069,10 @@ namespace WzComparerR2
             }
             if (this.Items.Count > 0)
             {
-                var aniItem = this.Items[0];
+                //var aniItem = this.Items[0];
+                var aniItem = this.Items[this.Items.Count - 1];
                 int time = 0;
+                /*
                 if (aniItem is FrameAnimator frameAni)
                 {
                     time = frameAni.CurrentTime;
@@ -734,15 +1085,34 @@ namespace WzComparerR2
                 {
                     time = ((MultiFrameAnimator)aniItem).CurrentTime;
                 }
+                */
+                time = this.CurrentTime;
                 this.sbInfo.AppendFormat("POS: {0}, Scale: {1:p0}, Play: {2} / {3}",
                     aniItem.Position,
                     base.GlobalScale,
-                    aniItem.Length <= 0 ? 0 : (time % aniItem.Length),
-                    aniItem.Length);
+                    //aniItem.Length <= 0 ? 0 : (time % aniItem.Length),
+                    //aniItem.Length);
+                    this.MaxLength <= 0 ? 0 : (time % this.MaxLength),
+                    this.MaxLength);
             }
         }
 
-        private void DisposeAnimationItem(AnimationItem animationItem)
+        public void DoPause()
+        {
+            base.Pause();
+        }
+
+        public void DoResume()
+        {
+            base.Resume();
+        }
+
+        public void DoTimeUpdate(int ms)
+        {
+            base.UpdateTimeOffset(ms);
+        }
+
+        public void DisposeAnimationItem(AnimationItem animationItem)
         {
             switch (animationItem)
             {
@@ -754,6 +1124,24 @@ namespace WzComparerR2
                             if (frame.Texture != null && !frame.Texture.IsDisposed)
                             {
                                 frame.Texture.Dispose();
+                            }
+                        }
+                    }
+                    break;
+                case MultiFrameAnimator multiFrameAni:
+                    if (multiFrameAni?.Data?.Frames != null)
+                    {
+                        foreach (var kv in multiFrameAni?.Data?.Frames)
+                        {
+                            if (kv.Value != null)
+                            {
+                                foreach (var frame in kv.Value)
+                                {
+                                    if (frame.Texture != null && !frame.Texture.IsDisposed)
+                                    {
+                                        frame.Texture.Dispose();
+                                    }
+                                }
                             }
                         }
                     }
@@ -776,6 +1164,10 @@ namespace WzComparerR2
                             }
                         }
                     }
+                    if (spineV2.Data.Atlas != null)
+                    {
+                        spineV2.Data.Atlas.Dispose();
+                    }
                     break;
                 case SpineAnimatorV4 spineV4:
                     if (spineV4.Skeleton != null)
@@ -794,16 +1186,20 @@ namespace WzComparerR2
                             }
                         }
                     }
+                    if (spineV4.Data.Atlas != null)
+                    {
+                        spineV4.Data.Atlas.Dispose();
+                    }
                     break;
             }
         }
 
-        public void ClearItemList()
+        public void DisposeItemList()
         {
             if (this.Items.Count > 0)
             {
                 var itemsCopy = new List<AnimationItem>(this.Items);
-                this.Items.Clear();
+                this.ClearItemList();
                 foreach (var aniItem in itemsCopy)
                 {
                     this.DisposeAnimationItem(aniItem);

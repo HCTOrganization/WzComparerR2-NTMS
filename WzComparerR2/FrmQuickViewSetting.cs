@@ -253,6 +253,76 @@ namespace WzComparerR2
         }
 
         [Link]
+        public bool Item_UseAssembleUI
+        {
+            get { return chkUseAssembleUI.Checked; }
+            set { chkUseAssembleUI.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_ShowDamageSkinID
+        {
+            get { return chkShowDamageSkinID.Checked; }
+            set { chkShowDamageSkinID.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_ShowDamageSkin
+        {
+            get { return chkShowDamageSkin.Checked; }
+            set { chkShowDamageSkin.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_UseMiniSize
+        {
+            get { return chkUseMiniSize.Checked; }
+            set { chkUseMiniSize.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_AlwaysUseMseaFormat
+        {
+            get { return chkAlwaysUseMseaFormat.Checked; }
+            set { chkAlwaysUseMseaFormat.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_DisplayUnitOnSingleLine
+        {
+            get { return chkDisplayUnitOnSingleLine.Checked; }
+            set { chkDisplayUnitOnSingleLine.Checked = value; }
+        }
+
+        [Link]
+        public bool DamageSkin_UseInGameSpacing
+        {
+            get { return chkUseInGameSpacing.Checked; }
+            set { chkUseInGameSpacing.Checked = value; }
+        }
+
+        [Link]
+        public long DamageSkin_DamageSkinNumber
+        {
+            get { return long.TryParse(txtDamageSkinNumber.Text, out long val) ? val : 0; }
+            set { txtDamageSkinNumber.Text = value.ToString(); }
+        }
+
+        [Link]
+        public bool Familiar_AllowOutOfBounds
+        {
+             get { return chkAllowFamiliarOutOfBounds.Checked; }
+            set { chkAllowFamiliarOutOfBounds.Checked = value; }
+        }
+
+        [Link]
+        public bool Familiar_UseCTFamiliarUI
+        {
+            get { return chkUseCTFamiliarUI.Checked; }
+            set { chkUseCTFamiliarUI.Checked = value; }
+        }
+
+        [Link]
         public bool Map_ShowMiniMap
         {
             get { return chkShowMiniMap.Checked; }
@@ -271,6 +341,55 @@ namespace WzComparerR2
         {
             get { return chkShowMobNpcObjectID.Checked; }
             set { chkShowMobNpcObjectID.Checked = value; }
+        }
+
+        [Link]
+        public bool Map_ShowBgmName
+        {
+            get { return chkShowBgmName.Checked; }
+            set { chkShowBgmName.Checked = value; }
+        }
+
+        [Link]
+        public bool Mob_ShowAllSubMobAtOnce
+        {
+            get { return chkShowAllSubMobAtOnce.Checked; }
+            set { chkShowAllSubMobAtOnce.Checked = value; }
+        }
+
+        [Link]
+        public bool Mob_EnableMonsterBook
+        {
+            get { return chkEnableMonsterBook.Checked; }
+            set { chkEnableMonsterBook.Checked = value; }
+        }
+
+        [Link]
+        public bool Npc_ShowAllIllustAtOnce
+        {
+            get { return chkShowAllIllustAtOnce.Checked; }
+            set { chkShowAllIllustAtOnce.Checked = value; }
+        }
+
+        [Link]
+        public bool Npc_ShowNpcQuotes
+        {
+            get { return chkShowNpcQuotes.Checked; }
+            set { chkShowNpcQuotes.Checked = value; }
+        }
+
+        [Link]
+        public bool Misc_EnableWorldArchive
+        {
+            get { return chkEnableWorldArchive.Checked; }
+            set { chkEnableWorldArchive.Checked = value; }
+        }
+
+        [Link]
+        public bool Misc_LocatePetEquip
+        {
+            get { return chkLocatePetEquip.Checked; }
+            set { chkLocatePetEquip.Checked = value; }
         }
 
 
@@ -296,11 +415,56 @@ namespace WzComparerR2
             set { chkCopyParsedSkillString.Checked = value; }
         }
 
+        
+        public bool Map_ShowMiniMapMob
+        {
+            get { return chkShowMiniMapMob.Checked; }
+            set { chkShowMiniMapMob.Checked = value; }
+        }
+
+        [Link]
+        public bool Map_ShowMiniMapNpc
+        {
+            get { return chkShowMiniMapNpc.Checked; }
+            set { chkShowMiniMapNpc.Checked = value; }
+        }
+
+        [Link]
+        public bool Map_ShowMiniMapPortal
+        {
+            get { return chkShowMiniMapPortal.Checked; }
+            set { chkShowMiniMapPortal.Checked = value; }
+        }
+
         public bool Enable22AniStyle
         {
             get { return chkEnable22AniStyle.Checked; }
             set { chkEnable22AniStyle.Checked = value; }
         }
+
+        [Link]
+        public int Quest_DefaultState
+        {
+            get { return comboBoxExQuestState.SelectedIndex; }
+            set { comboBoxExQuestState.SelectedIndex = value; }
+        }
+
+        [Link]
+        public bool Quest_ShowID
+        {
+            get { return chkShowQuestObjectID.Checked; }
+            set { chkShowQuestObjectID.Checked = value; }
+        }
+
+        [Link]
+        public bool Quest_ShowAllStates
+        {
+            get { return chkQAS.Checked; }
+            set { chkQAS.Checked = value; }
+        }
+
+        private DialogResult enableMonsterBookConfirmation = DialogResult.Yes;
+
 
         public void Load(CharaSimConfig config)
         {
@@ -343,6 +507,64 @@ namespace WzComparerR2
                     configPropInfo.GetSetMethod().Invoke(configGroup, new object[] { value });
                 }
                 catch { }
+            }
+        }
+
+        private void chkEnable22AniStyle_CheckedChanged(object sender, EventArgs e)
+        {
+            this.chkUseAssembleUI.Enabled = chkEnable22AniStyle.Checked;
+            if (!chkEnable22AniStyle.Checked)
+            {
+                this.chkUseAssembleUI.Checked = false;
+            }
+        }
+
+        private void ChkQAS_CheckedChanged(object sender, EventArgs e)
+        {
+            this.comboBoxExQuestState.Enabled = !this.chkQAS.Checked;
+            this.labelXQS.Enabled = !this.chkQAS.Checked;
+            this.labelXQSHint.Enabled = !this.chkQAS.Checked;
+        }
+
+        private void chkEnableWorldArchive_CheckedChanged(object sender, EventArgs e)
+        {
+            this.chkEnableMonsterBook.Enabled = chkEnableWorldArchive.Checked;
+            this.chkShowNpcQuotes.Enabled = chkEnableWorldArchive.Checked;
+        }
+
+        private void chkEnableMonsterBook_Click(object sender, EventArgs e)
+        {
+            if (!this.chkEnableMonsterBook.Checked)
+            {
+                this.enableMonsterBookConfirmation = DevComponents.DotNetBar.MessageBoxEx.Show(this, "怪物圖鑑中的資訊已過時，與目前版本不符。 \r\n是否仍要啟用此功能？", "警告", MessageBoxButtons.YesNo);
+            }
+        }
+
+        private void chkEnableMonsterBook_CheckedChanged(object sender, EventArgs e)
+        {
+            if (this.chkEnableMonsterBook.Checked)
+            {
+                switch (this.enableMonsterBookConfirmation)
+                {
+                    case DialogResult.Yes: return;
+                    default:
+                        this.chkEnableMonsterBook.Checked = false;
+                        return;
+                }
+            }
+        }
+
+        private void txtDamageSkinNumber_TextChanged(object sender, EventArgs e)
+        {
+            this.buttonX1.Enabled = !(string.IsNullOrEmpty(txtDamageSkinNumber.Text) || txtDamageSkinNumber.Text == "0");
+
+            string digitsOnly = new string(txtDamageSkinNumber.Text.Where(char.IsDigit).ToArray());
+
+            if (txtDamageSkinNumber.Text != digitsOnly)
+            {
+                int cursorPos = txtDamageSkinNumber.SelectionStart;
+                txtDamageSkinNumber.Text = digitsOnly;
+                txtDamageSkinNumber.SelectionStart = Math.Min(cursorPos, txtDamageSkinNumber.Text.Length);
             }
         }
 

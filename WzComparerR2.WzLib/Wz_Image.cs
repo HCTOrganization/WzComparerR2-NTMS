@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -38,7 +39,7 @@ namespace WzComparerR2.WzLib
         public uint HashedOffset { get; set; }
         public uint HashedOffsetPosition { get; set; }
         public long Offset { get; set; }
-
+        
         public Wz_Node Node { get; private set; }
 
         public Wz_Node OwnerNode { get; set; }
@@ -63,7 +64,7 @@ namespace WzComparerR2.WzLib
                 {
                     return crypto.GetKeys(this.encType);
                 }
-                return crypto.keys;
+                return crypto.Pkg1Keys;
             }
         }
 
@@ -93,16 +94,34 @@ namespace WzComparerR2.WzLib
                     this.chec = true;
                 }
 
-                if (this.IsTextFormat())
+                if (TextImageReaderV1.PreCheck(this.stream))
                 {
-                    var reader = new WzStreamReader(this.stream);
-
                     try
                     {
                         lock (this.WzFile.ReadLock)
                         {
-                            reader.BaseStream.Position = 0;
-                            this.ExtractImgInTextFormat(reader, this.Node);
+                            this.stream.Position = 0;
+                            var reader = new WzStreamReader(this.stream);
+                            TextImageReaderV1.ExtractImg(reader, this.Node);
+                            this.extr = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        e = ex;
+                        this.Unextract();
+                        return false;
+                    }
+                }
+                else if (TextImageReaderV2.PreCheck(this.stream))
+                {
+                    try
+                    {
+                        lock (this.WzFile.ReadLock)
+                        {
+                            this.stream.Position = 0;
+                            var reader = new WzStreamReader(this.stream);
+                            TextImageReaderV2.ExtractImg(reader, this.Node);
                             this.extr = true;
                         }
                     }
@@ -178,7 +197,7 @@ namespace WzComparerR2.WzLib
             this.Node.Nodes.Clear();
         }
 
-        public virtual unsafe int CalcCheckSum(Stream stream)
+        public virtual int CalcCheckSum(Stream stream)
         {
             lock (this.WzFile.ReadLock)
             {
@@ -192,21 +211,7 @@ namespace WzComparerR2.WzLib
                     int count;
                     while ((count = stream.Read(buffer, 0, Math.Min(size, buffer.Length))) > 0)
                     {
-                        fixed (byte* pBuffer = buffer)
-                        {
-                            int* p = (int*)pBuffer;
-                            int i, j = count / 4;
-                            for (i = 0; i < j; i++)
-                            {
-                                int data = *(p + i);
-                                cs += (data & 0xff) + (data >> 8 & 0xff) + (data >> 16 & 0xff) + (data >> 24 & 0xff);
-                            }
-                            for (i = i * 4; i < count; i++)
-                            {
-                                cs += buffer[i];
-                            }
-                        }
-
+                        cs += MathHelper.SumBytes(buffer.AsSpan(0, count));
                         size -= count;
                     }
                 }
@@ -267,9 +272,11 @@ namespace WzComparerR2.WzLib
                     int h = reader.ReadCompressedInt32();
                     int form = reader.ReadCompressedInt32();
                     int scale = reader.ReadByte();
-                    int pages = reader.ReadInt32(); // introduced in KMST 1186
+                    int pages = reader.ReadCompressedInt32(); // introduced in KMST 1186
+                    int unknown1 = reader.ReadCompressedInt32(); // introduced in KMST1198
+                    reader.SkipBytes(2); //TBD
                     int dataLen = reader.ReadInt32();
-                    parent.Value = new Wz_Png(w, h, dataLen, (Wz_TextureFormat)form, scale, pages, (uint)reader.BaseStream.Position, this);
+                    parent.Value = new Wz_Png(w, h, dataLen, (Wz_TextureFormat)form, scale, pages, unknown1, (uint)reader.BaseStream.Position, this);
                     reader.SkipBytes(dataLen);
                     break;
 
@@ -315,13 +322,13 @@ namespace WzComparerR2.WzLib
                     mediaType.FixedSizeSamples = reader.ReadByte() != 0;
                     mediaType.TemporalCompression = reader.ReadByte() != 0;
                     mediaType.FormatType = new Guid(reader.ReadBytes(16));
-                    switch (soundDecl)
+                    switch(soundDecl)
                     {
                         case 2:
                             int fmtExLen = reader.ReadCompressedInt32();
                             var fmtExData = reader.ReadBytes(fmtExLen);
                             mediaType.CbFormat = (uint)fmtExLen;
-
+                            
                             if (!this.TryDecryptWaveFormatEx(fmtExData, out Interop.WAVEFORMATEX waveFormatEx))
                             {
                                 throw new Exception($"無法解析偏移量為{this.Offset}+{reader.BaseStream.Position}的WaveFormatEx結構。");
@@ -381,7 +388,17 @@ namespace WzComparerR2.WzLib
                     break;
 
                 case "Canvas#Video": // introduced in KMST v1181
-                    reader.SkipBytes(3);
+                    reader.SkipBytes(1);
+                    if (reader.ReadByte() == 0x01) // introduced in KMST 1188, read sub property
+                    {
+                        reader.SkipBytes(2);
+                        entries = reader.ReadCompressedInt32();
+                        for (int i = 0; i < entries; i++)
+                        {
+                            ExtractValue(reader, parent);
+                        }
+                    }
+                    int unknown = reader.ReadByte();
                     int videoLen = reader.ReadCompressedInt32();
                     parent.Value = new Wz_Video((uint)reader.BaseStream.Position, videoLen, this);
                     reader.SkipBytes(videoLen);
@@ -397,7 +414,7 @@ namespace WzComparerR2.WzLib
             this.encType = default;
             this.checEnc = false;
 
-            var wzsEncType = this.WzFile.WzStructure.encryption.EncType;
+            var wzsEncType = this.WzFile.WzStructure.encryption.Pkg1EncType;
             if (wzsEncType != default)
             {
                 if (this.IsIllegalTag(wzsEncType))
@@ -510,14 +527,14 @@ namespace WzComparerR2.WzLib
                 if (MemoryMarshal.TryRead(dataCopy, out waveFormatEx))
                 {
                     if ((data.Length == waveFormatEx.CbSize + Interop.WAVEFORMATEX_SIZE)
-                         // workaround for KMST1185, waveFormatEx only has 18 bytes but cbsize is also 18.
-                         || (data.Length == waveFormatEx.CbSize && waveFormatEx.FormatTag == Interop.WAVE_FORMAT_MPEGLAYER3)
-                         )
+                        // workaround for KMST1185, waveFormatEx only has 18 bytes but cbsize is also 18.
+                        || (data.Length == waveFormatEx.CbSize && waveFormatEx.FormatTag == Interop.WAVE_FORMAT_MPEGLAYER3)
+                        )
                     {
                         // copy back to the original buffer
                         dataCopy.CopyTo(data);
                         return true;
-                    }
+                    } 
                 }
             }
             waveFormatEx = default;
@@ -550,7 +567,7 @@ namespace WzComparerR2.WzLib
             {
                 TryDetectLuaEnc(data);
             }
-            this.EncKeys.Decrypt(data, 0, data.Length);
+            this.EncKeys.Decrypt(data.AsSpan());
             string luaCode = Encoding.UTF8.GetString(data);
             parent.Value = luaCode;
         }
@@ -572,7 +589,7 @@ namespace WzComparerR2.WzLib
             {
                 Buffer.BlockCopy(luaBinary, 0, tempBuffer, 0, tempBuffer.Length);
 
-                this.WzFile.WzStructure.encryption.GetKeys(enc).Decrypt(tempBuffer, 0, tempBuffer.Length);
+                this.WzFile.WzStructure.encryption.GetKeys(enc).Decrypt(tempBuffer.AsSpan());
                 int count = Encoding.UTF8.GetChars(tempBuffer, 0, tempBuffer.Length, tempStr, 0);
                 int asciiCount = tempStr.Take(count).Count(chr => 32 <= chr && chr <= 127);
 
@@ -586,80 +603,281 @@ namespace WzComparerR2.WzLib
             this.checEnc = true;
         }
 
-        private bool IsTextFormat()
+        internal class TextImageReaderV1
         {
-            ReadOnlySpan<byte> signatureBytes = "#Property"u8;
-            if (this.stream.Length < signatureBytes.Length)
+            public static bool PreCheck(Stream stream)
             {
-                return false;
+                ReadOnlySpan<byte> signatureBytes = "#Property"u8;
+                if (stream.Length < signatureBytes.Length)
+                {
+                    return false;
+                }
+
+                stream.Position = 0;
+                Span<byte> buffer = stackalloc byte[signatureBytes.Length];
+                stream.ReadExactly(buffer);
+
+                return buffer.SequenceEqual(signatureBytes);
             }
 
-            this.stream.Position = 0;
-            Span<byte> buffer = stackalloc byte[signatureBytes.Length];
-            this.stream.ReadExactly(buffer);
-
-            return buffer.SequenceEqual(signatureBytes);
-        }
-
-        private void ExtractImgInTextFormat(WzStreamReader reader, Wz_Node parent)
-        {
-            reader.SkipLine();
-            this.ReadProperty(reader, parent, true);
-        }
-
-        private void ReadProperty(WzStreamReader reader, Wz_Node parent, bool isTopLevel = false)
-        {
-            while (!reader.EndOfStream)
+            public static void ExtractImg(WzStreamReader reader, Wz_Node parent)
             {
-                reader.SkipWhitespaceExceptLineEnding();
-                string key = reader.ReadUntilWhitespace();
+                reader.SkipLine();
+                ReadProperty(reader, parent, true);
+            }
 
-                if (string.IsNullOrEmpty(key)) // skip empty line
+            private static void ReadProperty(WzStreamReader reader, Wz_Node parent, bool isTopLevel = false)
+            {
+                while (!reader.EndOfStream)
                 {
-                    reader.SkipLine();
-                    continue;
-                }
-                else if (key == "}" && !isTopLevel) // end property
-                {
-                    if (!reader.SkipLineAndCheckEmpty())
+                    reader.SkipWhitespaceExceptLineEnding();
+                    string key = reader.ReadUntilWhitespace();
+
+                    if (string.IsNullOrEmpty(key)) // skip empty line
                     {
-                        throw new Exception("屬性結束行無效。");
+                        reader.SkipLine();
+                        continue;
                     }
-                    return;
+                    else if (key == "}" && !isTopLevel) // end property
+                    {
+                        if (!reader.SkipLineAndCheckEmpty())
+                        {
+                            throw new Exception("Incorrect property end line.");
+                        }
+                        return;
+                    }
+
+                    reader.SkipWhitespaceExceptLineEnding();
+                    int equalSign = reader.Read();
+                    if (equalSign != '=')
+                        throw new Exception($"Expect '=' sign but got '{(char)equalSign}'.");
+                    reader.SkipWhitespaceExceptLineEnding();
+
+                    string stringVal = reader.ReadLine();
+
+                    if (string.IsNullOrEmpty(stringVal))
+                    {
+                        parent.Nodes.Add(key);
+                    }
+                    else if (stringVal == "{") // start property
+                    {
+                        Wz_Node child = parent.Nodes.Add(key);
+                        ReadProperty(reader, child, false);
+                    }
+                    else if (int.TryParse(stringVal, out var intVal))
+                    {
+                        parent.Nodes.Add(key).Value = intVal;
+                    }
+                    else if (long.TryParse(stringVal, out var longVal))
+                    {
+                        parent.Nodes.Add(key).Value = longVal;
+                    }
+                    else if (double.TryParse(stringVal, out var doubleVal))
+                    {
+                        parent.Nodes.Add(key).Value = doubleVal;
+                    }
+                    else
+                    {
+                        parent.Nodes.Add(key).Value = stringVal;
+                    }
+                }
+            }
+        }
+
+        internal class TextImageReaderV2
+        {
+            public static bool PreCheck(Stream stream)
+            {
+                ReadOnlySpan<byte> signatureBytes = "Root"u8;
+                if (stream.Length < signatureBytes.Length)
+                {
+                    return false;
                 }
 
-                reader.SkipWhitespaceExceptLineEnding();
-                int equalSign = reader.Read();
-                if (equalSign != '=')
-                    throw new Exception($"預期為「=」符號，但傳回的是「{(char)equalSign}」。");
-                reader.SkipWhitespaceExceptLineEnding();
+                stream.Position = 0;
+                Span<byte> buffer = stackalloc byte[signatureBytes.Length];
+                stream.ReadExactly(buffer);
 
-                string stringVal = reader.ReadLine();
+                return buffer.SequenceEqual(signatureBytes);
+            }
 
-                if (string.IsNullOrEmpty(stringVal))
+            public static void ExtractImg(WzStreamReader reader, Wz_Node parent)
+            {
+                ReadNode(reader, out int indent, out string name, out NodeType type, out object value);
+                if (indent != 0 || name != "Root")
                 {
-                    parent.Nodes.Add(key);
+                    throw new Exception($"Unknown top level node '{name}'.");
                 }
-                else if (stringVal == "{") // start property
+                if (type != NodeType.Property)
                 {
-                    Wz_Node child = parent.Nodes.Add(key);
-                    this.ReadProperty(reader, child, false);
+                    throw new Exception($"Unexpected top level node type '{type}'.");
                 }
-                else if (int.TryParse(stringVal, out var intVal))
+
+                Stack<Wz_Node> nodePath = new();
+                nodePath.Push(parent);
+                while (!reader.EndOfStream)
                 {
-                    parent.Nodes.Add(key).Value = intVal;
+                    ReadNode(reader, out indent, out name, out type, out value);
+                    if (indent == 0)
+                    {
+                        throw new Exception($"More than one top level node '{name}' found.");
+                    }
+                    while (indent < nodePath.Count)
+                    {
+                        nodePath.Pop();
+                    }
+                    if (indent != nodePath.Count)
+                    {
+                        throw new Exception($"Unexpected indent {indent} when inserting node '{name}'.");
+                    }
+                    Wz_Node child = nodePath.Peek().Nodes.Add(name);
+                    if (value != null)
+                    {
+                        child.Value = value;
+                    }
+                    if (type == NodeType.Property)
+                    {
+                        nodePath.Push(child);
+                    }
                 }
-                else if (long.TryParse(stringVal, out var longVal))
+            }
+
+            private static void ReadNode(WzStreamReader reader, out int indent, out string name, out NodeType type, out object value)
+            {
+                indent = reader.ReadRepeatChars('\t');
+                name = reader.ReadUntilWhitespace();
+                if (reader.ReadRepeatChars(' ') == 0)
                 {
-                    parent.Nodes.Add(key).Value = longVal;
+                    int nextChar = reader.Peek();
+                    throw new FormatException($"Expect space char after node name but get {(char)nextChar}({nextChar}).");
                 }
-                else if (double.TryParse(stringVal, out var doubleVal))
+                string typeName = reader.ReadUntilWhitespace();
+                if (!TryParseNodeType(typeName, out type))
                 {
-                    parent.Nodes.Add(key).Value = doubleVal;
+                    throw new FormatException($"Unknown type name ${typeName}.");
+                }
+                if (reader.Peek() == '\t')
+                {
+                    reader.Read();
+                    string valueStr;
+                    switch (type)
+                    {
+                        default:
+                        case NodeType.Empty:
+                            reader.ReadLine();
+                            value = null;
+                            break;
+
+                        case NodeType.I4:
+                            valueStr = reader.ReadLine();
+                            if (!int.TryParse(valueStr, out var intValue))
+                                throw new FormatException($"Failed to parse I4 value {valueStr}.");
+                            value = intValue;
+                            break;
+
+                        case NodeType.I8:
+                            valueStr = reader.ReadLine();
+                            if (!long.TryParse(valueStr, out var longValue))
+                                throw new FormatException($"Failed to parse I8 value {valueStr}.");
+                            value = longValue;
+                            break;
+
+                        case NodeType.R8:
+                            valueStr = reader.ReadLine();
+                            if (!double.TryParse(valueStr, out var doubleValue))
+                                throw new FormatException($"Failed to parse R8 value {valueStr}.");
+                            value = doubleValue;
+                            break;
+
+                        case NodeType.String:
+                            const string MultiLineStart = "<Multi-Line/>";
+                            const string MultiLineEnd = "</Multi-Line>";
+                            valueStr = reader.ReadLine();
+                            if (valueStr == MultiLineStart)
+                            {
+                                StringBuilder sb = new StringBuilder();
+                                while (!reader.EndOfStream)
+                                {
+                                    int strIndent = reader.ReadRepeatChars('\t', indent + 1);
+                                    if (strIndent < indent + 1)
+                                    {
+                                        throw new FormatException($"Unexpected indent size {strIndent} for multiline string (should be {indent + 1}).");
+                                    }
+                                    valueStr = reader.ReadLine();
+                                    if (valueStr.EndsWith(MultiLineEnd))
+                                    {
+                                        sb.Append(valueStr, 0, valueStr.Length - MultiLineEnd.Length);
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        sb.Append(valueStr).Append("\r\n");
+                                    }
+                                }
+                                value = sb.ToString();
+                            }
+                            else
+                            {
+                                value = valueStr;
+                            }
+                            break;
+
+                        case NodeType.Vector:
+                            valueStr = reader.ReadLine();
+                            int commaIdx = valueStr.IndexOf(',');
+                            if (commaIdx == -1
+                                || !int.TryParse(valueStr.Substring(0, commaIdx), out int x)
+                                || !int.TryParse(valueStr.Substring(commaIdx + 1), out int y))
+                            {
+                                throw new FormatException($"Failed to parse Vector value {valueStr}.");
+                            }
+                            value = new Wz_Vector(x, y);
+                            break;
+
+                        case NodeType.Property:
+                            if (reader.Peek() == '[')
+                            {
+                                valueStr = reader.ReadLine();
+                                if (valueStr == "[no_binary]")
+                                {
+                                    // ignore flags
+                                }
+                            }
+                            value = null;
+                            break;
+                    }
                 }
                 else
                 {
-                    parent.Nodes.Add(key).Value = stringVal;
+                    value = null;
+                    reader.SkipLine();
+                }
+            }
+
+            public enum NodeType
+            {
+                Unknown = 0,
+                Empty,
+                I4,
+                I8,
+                R8,
+                String,
+                Vector,
+                Property,
+            }
+
+            public static bool TryParseNodeType(string s, out NodeType type)
+            {
+                switch (s)
+                {
+                    case "<Empty>": type = NodeType.Empty; return true;
+                    case "<I4>": type = NodeType.I4; return true;
+                    case "<I8>": type = NodeType.I8; return true;
+                    case "<R8>": type = NodeType.R8; return true;
+                    case "<String>": type = NodeType.String; return true;
+                    case "<Vector>": type = NodeType.Vector; return true;
+                    case "<Property>": type = NodeType.Property; return true;
+                    default: type = NodeType.Unknown; return false;
                 }
             }
         }

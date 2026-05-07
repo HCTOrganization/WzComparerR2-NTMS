@@ -17,20 +17,33 @@ namespace WzComparerR2
 {
     public partial class FrmSetupWizard : DevComponents.DotNetBar.Office2007Form
     {
-        public FrmSetupWizard()
+        public FrmSetupWizard(bool isDarkMode = false)
         {
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
             this.Font = new Font(new FontFamily("SimSun"), 9f);
 #endif
             InitializeComponent();
+
+            if (isDarkMode)
+            {
+                this.wizard.HeaderStyle.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.wizard.FooterStyle.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.wizard.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.wizardPage1.Style.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.finishedWizardPage.Style.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.previewCommonWizardPage.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.translatorWizardPage.BackColor = System.Drawing.Color.FromArgb(-13816528);
+                this.animationOutputPage.BackColor = System.Drawing.Color.FromArgb(-13816528);
+            }
+
             this.wizard.HeaderImage = null;
             this.picPreview.Image = null;
 
             this.translateLabelX5.Enabled = chkEnableTranslate.Checked;
             this.buttonX3.Enabled = chkEnableTranslate.Checked;
             this.buttonXCheck2.Enabled = chkEnableTranslate.Checked;
-            this.cmbMozhiBackend.Enabled = chkEnableTranslate.Checked;
+            this.cmbMozhiBackend.Enabled = chkEnableTranslate.Checked && (new int[] { 1, 2, 3, 4, 5, 6 }.Contains(PreferredTranslateEngine));
             this.cmbLanguageModel.Enabled = chkEnableTranslate.Checked;
             this.translateLabelX6.Enabled = chkEnableTranslate.Checked;
             this.cmbDesiredLanguage.Enabled = chkEnableTranslate.Checked;
@@ -43,7 +56,8 @@ namespace WzComparerR2
             this.translateLabelX10.Enabled = chkEnableTranslate.Checked;
             this.translateLabelX11.Enabled = chkEnableTranslate.Checked;
             this.cmbDesiredCurrency.Enabled = chkEnableTranslate.Checked;
-            this.cmbMozhiBackend.Enabled = false;
+            this.cmbMozhiBackend.Visible = (PreferredTranslateEngine != 9);
+            this.cmbLanguageModel.Visible = (PreferredTranslateEngine == 9);
 
             cmbDesiredLanguage.Items.AddRange(new[]
             {
@@ -384,7 +398,7 @@ namespace WzComparerR2
         private void cmbPreferredTranslateEngine_SelectedIndexChanged(object sender, EventArgs e)
         {
             ComboItem selectedItem = (ComboItem)cmbPreferredTranslateEngine.SelectedItem;
-            switch ((int)selectedItem.Value)
+            switch (PreferredTranslateEngine)
             {
                 case 0:
                 case 6:
@@ -410,21 +424,21 @@ namespace WzComparerR2
                 case 8:
                 case 9:
                     translateLabelX5.Visible = false;
-                    translateLabelX11.Visible = true;
-                    translateLabelX12.Visible = true;
+                    translateLabelX11.Visible = chkEnableTranslate.Checked;
+                    translateLabelX12.Visible = chkEnableTranslate.Checked;
                     translateLabelX13.Visible = chkOpenAIExtraOption.Checked;
                     translateLabelX14.Visible = chkOpenAIExtraOption.Checked;
-                    translateLabelX15.Visible = true;
-                    translateLabelX16.Visible = true;
-                    txtOpenAIBackend.Visible = true;
-                    txtOpenAISystemMessage.Visible = true;
-                    txtAPIkey.Visible = true;
-                    txtLMTemperature.Visible = chkOpenAIExtraOption.Checked;
-                    txtMaximumToken.Visible = chkOpenAIExtraOption.Checked;
+                    translateLabelX15.Visible = chkEnableTranslate.Checked;
+                    translateLabelX16.Visible = chkEnableTranslate.Checked;
+                    txtOpenAIBackend.Visible = chkEnableTranslate.Checked;
+                    txtOpenAISystemMessage.Visible = chkEnableTranslate.Checked;
+                    txtAPIkey.Visible = chkEnableTranslate.Checked;
+                    txtLMTemperature.Visible = chkOpenAIExtraOption.Checked && chkEnableTranslate.Checked;
+                    txtMaximumToken.Visible = chkOpenAIExtraOption.Checked && chkEnableTranslate.Checked;
                     cmbMozhiBackend.Visible = false;
-                    cmbLanguageModel.Visible = true;
-                    chkOpenAIExtraOption.Visible = true;
-                    buttonXCheck2.Visible = true;
+                    cmbLanguageModel.Visible = chkEnableTranslate.Checked;
+                    chkOpenAIExtraOption.Visible = chkEnableTranslate.Checked;
+                    buttonXCheck2.Visible = chkEnableTranslate.Checked;
                     break;
                 default:
                     translateLabelX5.Visible = true;
@@ -463,6 +477,7 @@ namespace WzComparerR2
 
         private void wizard_WizardPageChanging(object sender, WizardCancelPageChangeEventArgs e)
         {
+            return;
             if (e.OldPage == translatorWizardPage && e.PageChangeSource == eWizardPageChangeSource.NextButton)
             {
                 ComboItem selectedEngine = (ComboItem)cmbPreferredTranslateEngine.SelectedItem;
@@ -573,19 +588,19 @@ namespace WzComparerR2
             this.translateLabelX10.Enabled = chkEnableTranslate.Checked;
             this.translateLabelX11.Enabled = chkEnableTranslate.Checked;
             this.cmbDesiredCurrency.Enabled = chkEnableTranslate.Checked;
-            this.translateLabelX12.Visible = chkEnableTranslate.Checked;
-            this.translateLabelX13.Visible = chkEnableTranslate.Checked && chkOpenAIExtraOption.Checked;
-            this.translateLabelX14.Visible = chkEnableTranslate.Checked && chkOpenAIExtraOption.Checked;
-            this.translateLabelX15.Visible = chkEnableTranslate.Checked;
-            this.translateLabelX16.Visible = chkEnableTranslate.Checked;
-            this.txtOpenAIBackend.Visible = chkEnableTranslate.Checked;
-            this.txtOpenAISystemMessage.Visible = chkEnableTranslate.Checked;
-            this.txtLMTemperature.Visible = chkEnableTranslate.Checked && chkOpenAIExtraOption.Checked;
-            this.txtMaximumToken.Visible = chkEnableTranslate.Checked && chkOpenAIExtraOption.Checked;
+            this.translateLabelX12.Visible = chkEnableTranslate.Checked && PreferredTranslateEngine == 9;
+            this.translateLabelX13.Visible = chkEnableTranslate.Checked && PreferredTranslateEngine == 9 && chkOpenAIExtraOption.Checked;
+            this.translateLabelX14.Visible = chkEnableTranslate.Checked && PreferredTranslateEngine == 9 && chkOpenAIExtraOption.Checked;
+            this.translateLabelX15.Visible = chkEnableTranslate.Checked && PreferredTranslateEngine == 9;
+            this.translateLabelX16.Visible = chkEnableTranslate.Checked && PreferredTranslateEngine == 9;
+            this.txtOpenAIBackend.Visible = chkEnableTranslate.Checked && PreferredTranslateEngine == 9;
+            this.txtOpenAISystemMessage.Visible = chkEnableTranslate.Checked && PreferredTranslateEngine == 9;
+            this.txtLMTemperature.Visible = chkEnableTranslate.Checked && chkOpenAIExtraOption.Checked && PreferredTranslateEngine == 9;
+            this.txtMaximumToken.Visible = chkEnableTranslate.Checked && chkOpenAIExtraOption.Checked && PreferredTranslateEngine == 9;
             this.cmbMozhiBackend.Enabled = chkEnableTranslate.Checked;
-            this.chkOpenAIExtraOption.Visible = chkEnableTranslate.Checked;
-            this.buttonXCheck2.Visible = chkEnableTranslate.Checked;
-            this.txtAPIkey.Visible = chkEnableTranslate.Checked;
+            this.chkOpenAIExtraOption.Visible = chkEnableTranslate.Checked && PreferredTranslateEngine == 9;
+            this.buttonXCheck2.Visible = chkEnableTranslate.Checked && PreferredTranslateEngine == 9;
+            this.txtAPIkey.Visible = chkEnableTranslate.Checked && PreferredTranslateEngine == 9;
         }
 
         private void buttonXCheck2_Click(object sender, EventArgs e)
@@ -602,7 +617,7 @@ namespace WzComparerR2
             {
                 backendAddress = OpenAIBackend;
             }
-            switch ((int)selectedItem.Value)
+            switch (PreferredTranslateEngine)
             {
                 case 8:
                 case 9:
@@ -657,13 +672,13 @@ namespace WzComparerR2
             ComboItem selectedItem = (ComboItem)cmbPreferredTranslateEngine.SelectedItem;
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("{");
-            switch ((int)selectedItem.Value)
+            switch (PreferredTranslateEngine)
             {
                 case 6:
                     break;
                 case 8:
                 case 9:
-                    sb.AppendLine("    \"Authorization\": \"" + this.OpenAPIkey + "\"");
+                    sb.AppendLine("    \"Authorization\": \"Bearer " + this.OpenAPIkey + "\"");
                     break;
                 default:
                     return;
@@ -725,6 +740,7 @@ namespace WzComparerR2
                 mainconfig.PreferredLayout = 0;
             }
             characonfig.Enable22AniStyle = this.Enable22AniStyle;
+            characonfig.Item.UseAssembleUI = this.Enable22AniStyle;
             characonfig.AutoQuickView = this.EnableAutoPreview;
             characonfig.Gear.ShowID = this.ShowObjectID;
             characonfig.Item.ShowID = this.ShowObjectID;

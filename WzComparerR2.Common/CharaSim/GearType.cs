@@ -13,12 +13,16 @@ namespace WzComparerR2.CharaSim
         hair2 = 4,
         face2 = 5,
         hair3 = 6,
+        hair4 = 7,
         /// <summary>
         /// MSU support
         /// </summary>
         face_n = 1790,
         hair_n = 1791,
         head_n = 1792,
+        hair2_n = 1793,
+        face3 = 8,
+
         /// <summary>
         /// 脸饰 101
         /// </summary>
@@ -161,6 +165,10 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         breathShooter = 1214,
         /// <summary>
+        /// Long Sword 1215
+        /// </summary>
+        longSword = 1215,
+        /// <summary>
         /// 灵魂手铳 122
         /// </summary>
         soulShooter = 122,
@@ -176,6 +184,14 @@ namespace WzComparerR2.CharaSim
         /// 记忆长杖 125
         /// </summary>
         memorialStaff = 1252,
+        /// <summary>
+        /// Celestial Light 1253
+        /// </summary>
+        celestialLight = 1253,
+        /// <summary>
+        /// Onmyo Sen 1254
+        /// </summary>
+        onmyoSen = 1254,
         /// <summary>
         /// 驯兽魔法棒 1259
         /// </summary>
@@ -397,13 +413,17 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         hexSeeker = 135403,
         /// <summary>
-        /// Compass 135404
+        /// yeouiGem 135404
         /// </summary>
-        compass = 135404,
+        yeouiGem = 135404,
         /// <summary>
-        /// Keir 135405x
+        /// 靈符 135430
         /// </summary>
-        keir = 135405,
+        kannaReifu = 135430,
+        /// <summary>
+        /// Compass 135287
+        /// </summary>
+        compass = 135287,
         /// <summary>
         /// 手杖
         /// </summary>
@@ -510,13 +530,9 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         ancientBow = 159,
         /// <summary>
-        /// Celestial Light 171
+        /// Astra 172
         /// </summary>
-        celestialLight = 171,
-        /// <summary>
-        /// Gram 172
-        /// </summary>
-        gram = 172,
+        astra = 172,
         /// <summary>
         /// 拼图 168
         /// </summary>

@@ -141,7 +141,7 @@ namespace WzComparerR2
             var controls = GetInputGroup(isNew);
             var lbl = isNew ? this.lblDurationNew : this.lblDuration;
             int? duration = (controls[1].ValueObject as int?) - (controls[0].ValueObject as int?);
-            lbl.Text = $"{duration?.ToString() ?? "-"} ミリ秒";
+            lbl.Text = $"{duration?.ToString() ?? "-"} 毫秒";
         }
 
         private void onUpdateSizeAndScale(bool isNew, bool isBoundChanging = false, bool isOutSizeChanging = false, bool isScaleChanging = false)
@@ -185,28 +185,53 @@ namespace WzComparerR2
             }
         }
 
-        private void chk768Preset_CheckedChanged(object sender, EventArgs e)
+        private void btn768CenterPreset_Click(object sender, EventArgs e)
         {
-            if (chk768Preset.Checked)
-            {
-                txtClipLeftNew.Value = -683;
-                txtClipTopNew.Value = -384;
-                txtClipRightNew.Value = 683;
-                txtClipBottomNew.Value = 384;
-                txtWidthNew.Value = 1366;
-                txtHeightNew.Value = 768;
-                txtClipLeftNew.Enabled = false;
-                txtClipTopNew.Enabled = false;
-                txtClipRightNew.Enabled = false;
-                txtClipBottomNew.Enabled = false;
-            }
-            else
-            {
-                txtClipLeftNew.Enabled = true;
-                txtClipTopNew.Enabled = true;
-                txtClipRightNew.Enabled = true;
-                txtClipBottomNew.Enabled = true;
-            }
+            txtClipLeftNew.Value = -683;
+            txtClipTopNew.Value = -384;
+            txtClipRightNew.Value = 683;
+            txtClipBottomNew.Value = 384;
+            txtWidthNew.Value = 1366;
+            txtHeightNew.Value = 768;
+        }
+
+        private void btn768ShrinkPreset_Click(object sender, EventArgs e)
+        {
+            int actualWidth = txtClipRight.Value - txtClipLeft.Value;
+            int actualHeight = txtClipBottom.Value - txtClipTop.Value;
+            int[] sizeDelta = [ actualWidth - 1366, actualHeight - 768];
+            txtClipLeftNew.Value = txtClipLeft.Value + (sizeDelta[0] / 2) + ((sizeDelta[0] % 2 == 0) ? 0 : 1); // Adjust for odd sizes
+            txtClipTopNew.Value = txtClipTop.Value + (sizeDelta[1] / 2) + ((sizeDelta[1] % 2 == 0) ? 0 : 1);
+            txtClipRightNew.Value = txtClipRight.Value - (sizeDelta[0] / 2);
+            txtClipBottomNew.Value = txtClipBottom.Value - (sizeDelta[1] / 2);
+            txtWidthNew.Value = 1366;
+            txtHeightNew.Value = 768;
+        }
+
+        private void btn768SpecialPreset_Click(object sender, EventArgs e)
+        {
+            int actualWidth = txtClipRight.Value - txtClipLeft.Value;
+            int actualHeight = txtClipBottom.Value - txtClipTop.Value;
+            int[] sizeDelta = [actualWidth - 1366, actualHeight - 768];
+            txtClipLeftNew.Value = sizeDelta[0] / 2;
+            txtClipTopNew.Value = sizeDelta[1] / 2;
+            txtClipRightNew.Value = txtClipLeftNew.Value + 1366;
+            txtClipBottomNew.Value = txtClipTopNew.Value + 768;
+            txtWidthNew.Value = 1366;
+            txtHeightNew.Value = 768;
+        }
+
+        private void btnDefaultPreset_Click(object sender, EventArgs e)
+        {
+            txtStartTimeNew.Value = txtStartTime.Value;
+            txtStopTimeNew.Value = txtStopTime.Value;
+            txtClipLeftNew.Value = txtClipLeft.Value;
+            txtClipTopNew.Value = txtClipTop.Value;
+            txtClipRightNew.Value = txtClipRight.Value;
+            txtClipBottomNew.Value = txtClipBottom.Value;
+            txtWidthNew.Value = txtWidth.Value;
+            txtHeightNew.Value = txtHeight.Value;
+            txtScaleNew.Value = 100;
         }
     }
 }

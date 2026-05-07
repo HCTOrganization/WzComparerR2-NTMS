@@ -49,6 +49,8 @@ namespace WzComparerR2.Avatar.UI
                 cmbActionEffects[i] = t2;
             }
             this.panelDockContainer2.Controls.Remove(this.chkHairShade); // disable chkHairShade
+            this.chkShowWeaponEffect.Checked = true;
+            this.chkShowWeaponJumpEffect.Checked = true;
             btnReset_Click(btnReset, EventArgs.Empty);
             FillWeaponIdx();
             FillEarSelection();
@@ -81,6 +83,7 @@ namespace WzComparerR2.Avatar.UI
         string partsTag;
         bool suspendUpdate;
         bool needUpdate;
+        bool isUpdatingBtnItem;
         Animator animator;
         string specifiedSavePath = "";
         // virtual comboboxes for item effects, not shown
@@ -91,6 +94,7 @@ namespace WzComparerR2.Avatar.UI
         private NexonOpenAPI API;
         private string characterName = "";
         private int previousRegion = 7;
+        private string APIregion;
 #endif
 
         private string chairName;
@@ -500,6 +504,7 @@ namespace WzComparerR2.Avatar.UI
             {
                 this.partsTag = newPartsTag;
                 this.avatarContainer1.ClearAllCache();
+                this.avatar.ClearSkinCache();
             }
 
             ComboItem selectedItem;
@@ -535,7 +540,7 @@ namespace WzComparerR2.Avatar.UI
                 return;
             }
 
-            string actionTag = string.Format("{0}:{1},{2}:{3},{4}:{5},{6},{7},{8},{9},{10},{11},{12}:{13}:{14}",
+            string actionTag = string.Format("{0}:{1},{2}:{3},{4}:{5},{6},{7},{8},{9},{10},{11},{12},{13},{14}:{15}:{16}",
                 this.avatar.ActionName,
                 bodyFrame,
                 this.avatar.EmotionName,
@@ -544,6 +549,8 @@ namespace WzComparerR2.Avatar.UI
                 tamingFrame,
                 this.avatar.HairCover ? 1 : 0,
                 this.avatar.ShowHairShade ? 1 : 0,
+                this.avatar.ShowWeaponEffect ? 1 : 0,
+                this.avatar.ShowWeaponJumpEffect ? 1 : 0,
                 this.avatar.EarType,
                 this.avatar.WeaponType,
                 this.avatar.WeaponIndex,
@@ -581,6 +588,23 @@ namespace WzComparerR2.Avatar.UI
                     if (part.IsMixing)
                     {
                         partsID[i] += "+" + part.MixColor + "*" + part.MixOpacity;
+                    }
+
+                    bool prismValid = part.PrismData.IsValid(PrismDataCollection.PrismDataType.Default);
+                    bool prism2Valid = part.PrismData.IsValid(PrismDataCollection.PrismDataType.WeaponEffect);
+                    if (prismValid)
+                    {
+                        var prismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
+                        partsID[i] += $"+{prismData.Type}h{prismData.Hue}s{prismData.Saturation}v{prismData.Brightness}";
+                    }
+                    if (prism2Valid)
+                    {
+                        if (!prismValid)
+                        {
+                            partsID[i] += $"+0h0s100v100";
+                        }
+                        var prismData = part.PrismData.Get(PrismDataCollection.PrismDataType.WeaponEffect);
+                        partsID[i] += $"+{prismData.Type}h{prismData.Hue}s{prismData.Saturation}v{prismData.Brightness}";
                     }
                 }
             }
@@ -680,6 +704,26 @@ namespace WzComparerR2.Avatar.UI
         private void SelectEmotionByIndex(int emotionIdx)
         {
             cmbEmotion.SelectedIndex = emotionIdx + 1;
+        }
+
+        /// <summary>
+        /// Emotion을 선택된 프레임으로 고정합니다.
+        /// </summary>
+        /// <param name="emotionName">고정할 Emotion의 이름</param>
+        /// <param name="idx">고정할 프레임 번호</param>
+        private void FixEmotion(string emotionName, int Idx)
+        {
+            this.SelectEmotion(emotionName);
+
+            if (this.chkEmotionPlay.Checked)
+            {
+                this.chkEmotionPlay.Checked = false;
+            }
+
+            if (Idx >= 0)
+            {
+                this.cmbEmotionFrame.SelectedIndex = Idx;
+            }
         }
 
         #region 同步界面
@@ -831,13 +875,26 @@ namespace WzComparerR2.Avatar.UI
             {
                 if (part != null)
                 {
-                    var btn = new AvatarPartButtonItem(part.ID.Value, part.IsMixing ? part.MixColor : (int?)null, part.IsMixing ? part.MixOpacity : (int?)null);
+                    var btn = new AvatarPartButtonItem(part.ID.Value, part.IsMixing ? part.MixColor : (int?)null, part.IsMixing ? part.MixOpacity : (int?)null, part.HasWhiteMixColor,
+                        part.PrismData);
                     this.SetButtonText(part, btn);
-                    btn.SetIcon(part.Icon.Bitmap);
+                    if (part == avatar.Body || part == avatar.Head || part == avatar.Face || part == avatar.Hair)
+                    {
+                        using Bitmap icon = part.Icon.Bitmap == null ? null : new Bitmap(part.Icon.Bitmap);
+                        btn.SetIcon(icon, part.HasPrism);
+                    }
+                    else
+                    {
+                        var prismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
+                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, prismData.Type, prismData.Hue, prismData.Saturation, prismData.Brightness);
+                        btn.SetIcon(icon, part.HasPrism);
+                    }
                     btn.Tag = part;
                     btn.Checked = part.Visible;
                     btn.btnItemShow.Click += BtnItemShow_Click;
                     btn.btnItemDel.Click += BtnItemDel_Click;
+                    btn.btnItemReset.Click += BtnItemReset_Click;
+                    btn.btnChangePrismIndex.Click += BtnChangePrismIndex_Click;
                     btn.chkShowEffect.Click += ChkShowEffect_Click;
                     btn.CheckedChanged += Btn_CheckedChanged;
                     btn.rdoMixColor0.CheckedChanged += RadioMixColor0_CheckedChanged;
@@ -848,7 +905,20 @@ namespace WzComparerR2.Avatar.UI
                     btn.rdoMixColor5.CheckedChanged += RadioMixColor5_CheckedChanged;
                     btn.rdoMixColor6.CheckedChanged += RadioMixColor6_CheckedChanged;
                     btn.rdoMixColor7.CheckedChanged += RadioMixColor7_CheckedChanged;
+                    btn.rdoPrismType0.CheckedChanged += RadioPrismType_CheckedChanged;
+                    btn.rdoPrismType1.CheckedChanged += RadioPrismType_CheckedChanged;
+                    btn.rdoPrismType2.CheckedChanged += RadioPrismType_CheckedChanged;
+                    btn.rdoPrismType3.CheckedChanged += RadioPrismType_CheckedChanged;
+                    btn.rdoPrismType4.CheckedChanged += RadioPrismType_CheckedChanged;
+                    btn.rdoPrismType5.CheckedChanged += RadioPrismType_CheckedChanged;
+                    btn.rdoPrismType6.CheckedChanged += RadioPrismType_CheckedChanged;
                     btn.sliderMixRatio.ValueChanged += SliderMixRatio_ValueChanged;
+                    btn.sliderHue.ValueChanged += SliderHue_ValueChanged;
+                    btn.sliderSaturation.ValueChanged += SliderSaturation_ValueChanged;
+                    btn.sliderBrightness.ValueChanged += SliderBrightness_ValueChanged;
+                    btn.labelHue.MouseDown += LabelHue_MouseDown;
+                    btn.labelSaturation.MouseDown += LabelSaturation_MouseDown;
+                    btn.labelBrightness.MouseDown += LabelBrightness_MouseDown;
                     itemPanel1.Items.Add(btn);
                 }
             }
@@ -880,6 +950,42 @@ namespace WzComparerR2.Avatar.UI
                         this.UpdateDisplay();
                     }
                 }
+            }
+        }
+
+        private void BtnItemReset_Click(object sender, EventArgs e)
+        {
+            var btn = (sender as BaseItem).Parent as AvatarPartButtonItem;
+            if (btn != null)
+            {
+                this.isUpdatingBtnItem = true;
+
+                var part = btn.Tag as AvatarPart;
+                btn.Reset(part.ID ?? 0);
+
+                this.UpdateDisplay();
+                this.SetButtonText(part, btn);
+                using Bitmap icon = new Bitmap(part.Icon.Bitmap);
+                btn.SetIcon(icon);
+
+                this.isUpdatingBtnItem = false;
+            }
+        }
+
+        private void BtnChangePrismIndex_Click(object sender, EventArgs e)
+        {
+            var btn = (sender as BaseItem).Parent as AvatarPartButtonItem;
+            if (btn != null)
+            {
+                this.isUpdatingBtnItem = true;
+
+                var part = btn.Tag as AvatarPart;
+                var enumLen = Enum.GetValues(typeof(PrismDataCollection.PrismDataType)).Length;
+                btn.PrismIndex = (btn.PrismIndex + 1) % enumLen;
+                btn.PrismIndexChanged(btn.PrismIndex);
+                btn.SetPrism(part.ID ?? 0);
+
+                this.isUpdatingBtnItem = false;
             }
         }
 
@@ -989,6 +1095,7 @@ namespace WzComparerR2.Avatar.UI
                 if (part != null)
                 {
                     part.MixColor = mixColor;
+                    if (this.isUpdatingBtnItem) return;
                     this.UpdateDisplay();
                     this.SetButtonText(part, btn);
                 }
@@ -1005,14 +1112,147 @@ namespace WzComparerR2.Avatar.UI
                 if (part != null)
                 {
                     part.MixOpacity = slider.Value;
+                    if (this.isUpdatingBtnItem) return;
                     this.UpdateDisplay();
                     this.SetButtonText(part, btn);
                 }
             }
         }
 
+        private void RadioPrismType_CheckedChanged(object sender, EventArgs e)
+        {
+            var radio = sender as CheckBoxItem;
+            var btn = (sender as BaseItem).Parent as AvatarPartButtonItem;
+            if (btn != null)
+            {
+                var part = btn.Tag as AvatarPart;
+                if (part != null)
+                {
+                    btn.PrismTypeChanged(radio.Name[radio.Name.Length - 1] - '0');
+                    if (this.isUpdatingBtnItem) return;
+                    this.UpdateDisplay();
+                    this.SetButtonText(part, btn);
+                    if (part != avatar.Head && btn.PrismIndex == 0)
+                    {
+                        var iconPrismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
+                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, iconPrismData.Type, iconPrismData.Hue, iconPrismData.Saturation, iconPrismData.Brightness);
+                        btn.SetIcon(icon, part.HasPrism);
+                    }
+                }
+            }
+        }
+
+        private void SliderHue_ValueChanged(object sender, EventArgs e)
+        {
+            var slider = sender as SliderItem;
+            var btn = (sender as BaseItem).Parent as AvatarPartButtonItem;
+            if (btn != null)
+            {
+                var part = btn.Tag as AvatarPart;
+                if (part != null)
+                {
+                    btn.PrismHueChanged(slider.Value);
+                    if (this.isUpdatingBtnItem) return;
+                    this.UpdateDisplay();
+                    this.SetButtonText(part, btn);
+                    if (part != avatar.Head && btn.PrismIndex == 0)
+                    {
+                        var iconPrismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
+                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, iconPrismData.Type, iconPrismData.Hue, iconPrismData.Saturation, iconPrismData.Brightness);
+                        btn.SetIcon(icon, part.HasPrism);
+                    }
+
+                    var labelHue = btn.SubItems.OfType<LabelItem>().FirstOrDefault(Item => Item.Name.Contains("Hue"));
+                    labelHue.Text = $"色調({slider.Value})";
+                }
+            }
+        }
+
+        private void SliderSaturation_ValueChanged(object sender, EventArgs e)
+        {
+            var slider = sender as SliderItem;
+            var btn = (sender as BaseItem).Parent as AvatarPartButtonItem;
+            if (btn != null)
+            {
+                var part = btn.Tag as AvatarPart;
+                if (part != null)
+                {
+                    btn.PrismSaturationChanged(slider.Value + 100);
+                    if (this.isUpdatingBtnItem) return;
+                    this.UpdateDisplay();
+                    this.SetButtonText(part, btn);
+                    if (part != avatar.Head && btn.PrismIndex == 0)
+                    {
+                        var iconPrismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
+                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, iconPrismData.Type, iconPrismData.Hue, iconPrismData.Saturation, iconPrismData.Brightness);
+                        btn.SetIcon(icon, part.HasPrism);
+                    }
+
+                    var labelSaturation = btn.SubItems.OfType<LabelItem>().FirstOrDefault(Item => Item.Name.Contains("Saturation"));
+                    labelSaturation.Text = $"飽和度({(slider.Value + 100 > 100 ? "+" : "")}{slider.Value + 100 - 100})";
+                }
+            }
+        }
+
+        private void SliderBrightness_ValueChanged(object sender, EventArgs e)
+        {
+            var slider = sender as SliderItem;
+            var btn = (sender as BaseItem).Parent as AvatarPartButtonItem;
+            if (btn != null)
+            {
+                var part = btn.Tag as AvatarPart;
+                if (part != null)
+                {
+                    btn.PrismBrightnessChanged(slider.Value + 100);
+                    if (this.isUpdatingBtnItem) return;
+                    this.UpdateDisplay();
+                    this.SetButtonText(part, btn);
+                    if (part != avatar.Head && btn.PrismIndex == 0)
+                    {
+                        var iconPrismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
+                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, iconPrismData.Type, iconPrismData.Hue, iconPrismData.Saturation, iconPrismData.Brightness);
+                        btn.SetIcon(icon, part.HasPrism);
+                    }
+
+                    var labelBrightness = btn.SubItems.OfType<LabelItem>().FirstOrDefault(Item => Item.Name.Contains("Brightness"));
+                    labelBrightness.Text = $"亮度({(slider.Value + 100 > 100 ? "+" : "")}{slider.Value + 100 - 100})";
+                }
+            }
+        }
+
+        private void LabelHue_MouseDown(object sender, EventArgs e)
+        {
+            var btn = (sender as BaseItem).Parent as AvatarPartButtonItem;
+            if (btn != null)
+            {
+                var slider = btn.sliderHue;
+                slider.Value = 0;
+            }
+        }
+
+        private void LabelSaturation_MouseDown(object sender, EventArgs e)
+        {
+            var btn = (sender as BaseItem).Parent as AvatarPartButtonItem;
+            if (btn != null)
+            {
+                var slider = btn.sliderSaturation;
+                slider.Value = 0;
+            }
+        }
+
+        private void LabelBrightness_MouseDown(object sender, EventArgs e)
+        {
+            var btn = (sender as BaseItem).Parent as AvatarPartButtonItem;
+            if (btn != null)
+            {
+                var slider = btn.sliderBrightness;
+                slider.Value = 0;
+            }
+        }
+
         private void SetButtonText(AvatarPart part, AvatarPartButtonItem btn)
         {
+            itemPanel1.BeginUpdate();
             var stringLinker = this.PluginEntry.Context.DefaultStringLinker;
             StringResult sr;
             string text;
@@ -1031,6 +1271,38 @@ namespace WzComparerR2.Avatar.UI
                         part.MixColor,
                         part.MixOpacity);
                 }
+                if (part.HasPrism)
+                {
+                    text = sr.Name;
+                    if (part.PrismData.IsValid(PrismDataCollection.PrismDataType.Default))
+                    {
+                        var prismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
+                        text += string.Format("\r\n{0}\r\n色調 {1}, 飽和度 {2}, 亮度 {3}\r\n{4}+{5}h{6}s{7}v{8}",
+                            prismData.GetColorType(),
+                            prismData.Hue,
+                            $"{(prismData.Saturation > 100 ? "+" : "")}{prismData.Saturation - 100}",
+                            $"{(prismData.Brightness > 100 ? "+" : "")}{prismData.Brightness - 100}",
+                            part.ID,
+                            prismData.Type,
+                            prismData.Hue,
+                            prismData.Saturation,
+                            prismData.Brightness);
+                    }
+                    if (part.PrismData.IsValid(PrismDataCollection.PrismDataType.WeaponEffect))
+                    {
+                        var prismData2 = part.PrismData.Get(PrismDataCollection.PrismDataType.WeaponEffect);
+                        text += string.Format("\r\n武器效果: {0}\r\n色調 {1}, 飽和度 {2}, 亮度 {3}\r\n{4}+{5}h{6}s{7}v{8}",
+                        prismData2.GetColorType(),
+                        prismData2.Hue,
+                        $"{(prismData2.Saturation > 100 ? "+" : "")}{prismData2.Saturation - 100}",
+                        $"{(prismData2.Brightness > 100 ? "+" : "")}{prismData2.Brightness - 100}",
+                        part.ID,
+                        prismData2.Type,
+                        prismData2.Hue,
+                        prismData2.Saturation,
+                        prismData2.Brightness);
+                    }
+                }
             }
             else
             {
@@ -1047,6 +1319,7 @@ namespace WzComparerR2.Avatar.UI
             btn.Text = text;
             btn.NeedRecalcSize = true;
             btn.Refresh();
+            itemPanel1.EndUpdate();
         }
 
         private string GetColorName(int ID)
@@ -1554,10 +1827,23 @@ namespace WzComparerR2.Avatar.UI
             UpdateDisplay();
         }
 
+        private void chkShowWeaponEffect_CheckedChanged(object sender, EventArgs e)
+        {
+            avatar.ShowWeaponEffect = chkShowWeaponEffect.Checked;
+            UpdateDisplay();
+        }
+
+        private void chkShowWeaponJumpEffect_CheckedChanged(object sender, EventArgs e)
+        {
+            avatar.ShowWeaponJumpEffect = chkShowWeaponJumpEffect.Checked;
+            UpdateDisplay();
+        }
+
         private void chkApplyBRM_CheckedChanged(object sender, EventArgs e)
         {
             avatar.ApplyBRM = chkApplyBRM.Checked;
             this.avatarContainer1.ClearAllCache();
+            this.avatar.ClearSkinCache();
             UpdateDisplay();
         }
 
@@ -1844,12 +2130,155 @@ namespace WzComparerR2.Avatar.UI
                     return;
             }
         }
+        private void btnShinobuKocho_Click(object sender, EventArgs e)
+        {
+            switch (MessageBoxEx.Show("要呼出胡蝶忍的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
+            {
+                case DialogResult.Yes:
+                    LoadCode("2015,12015,56696,67506,1054202,1073966", 0);
+                    return;
+
+                case DialogResult.No:
+                default:
+                    return;
+            }
+        }
+        private void btnGiyuTomioka_Click(object sender, EventArgs e)
+        {
+            switch (MessageBoxEx.Show("要呼出富岡義勇的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
+            {
+                case DialogResult.Yes:
+                    LoadCode("2012,12012,55176,63840,1054203,1073967", 0);
+                    return;
+
+                case DialogResult.No:
+                default:
+                    return;
+            }
+        }
+        private void btnKanaoTsuyuri_Click(object sender, EventArgs e)
+        {
+            switch (MessageBoxEx.Show("要呼出栗花落香奈乎的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
+            {
+                case DialogResult.Yes:
+                    LoadCode("2015,12015,56697,67510,1054204,1073968", 0);
+                    return;
+
+                case DialogResult.No:
+                default:
+                    return;
+            }
+        }
+        private void btnKyojuroRengoku_Click(object sender, EventArgs e)
+        {
+            switch (MessageBoxEx.Show("要呼出煉獄杏壽郎的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
+            {
+                case DialogResult.Yes:
+                    LoadCode("2000,12000,55277,63853,1054205,1073969", 0);
+                    return;
+
+                case DialogResult.No:
+                default:
+                    return;
+            }
+        }
+        private void btnTengenUzui_Click(object sender, EventArgs e)
+        {
+            switch (MessageBoxEx.Show("要呼出宇髄天元的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
+            {
+                case DialogResult.Yes:
+                    LoadCode("2003,12003,55778,63860,1022345,1054206,1073970,1082820,1103741", 0);
+                    return;
+
+                case DialogResult.No:
+                default:
+                    return;
+            }
+        }
+        private void btnMuzanKibutsuji_Click(object sender, EventArgs e)
+        {
+            switch (MessageBoxEx.Show("要呼出鬼舞辻無慘的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
+            {
+                case DialogResult.Yes:
+                    LoadCode("2012,12012,55279,63870,1006568,1054207,1073971", 0);
+                    return;
+
+                case DialogResult.No:
+                default:
+                    return;
+            }
+        }
+        private void btnFrieren_Click(object sender, EventArgs e)
+        {
+            switch (MessageBoxEx.Show("要呼出芙莉蓮的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
+            {
+                case DialogResult.Yes:
+                    LoadCode("2012,12012,22035,42540,1054555,1074234,1703722", 0);
+                    return;
+
+                case DialogResult.No:
+                default:
+                    return;
+            }
+        }
+        private void btnFern_Click(object sender, EventArgs e)
+        {
+            switch (MessageBoxEx.Show("要呼出費倫的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
+            {
+                case DialogResult.Yes:
+                    LoadCode("2012,12012,22036,42570,1054558,1074235,1703723", 0);
+                    return;
+
+                case DialogResult.No:
+                default:
+                    return;
+            }
+        }
+        private void btnStark_Click(object sender, EventArgs e)
+        {
+            switch (MessageBoxEx.Show("要呼出修塔爾克的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
+            {
+                case DialogResult.Yes:
+                    LoadCode("2000,12000,56095,67490,1054200,1073963,1012832,1703724", 0);
+                    return;
+
+                case DialogResult.No:
+                default:
+                    return;
+            }
+        }
+        private void btnHimmel_Click(object sender, EventArgs e)
+        {
+            switch (MessageBoxEx.Show("要呼出欣梅爾的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
+            {
+                case DialogResult.Yes:
+                    LoadCode("2012,12012,22038,42590,1054561,1074237,1703725", 0);
+                    return;
+
+                case DialogResult.No:
+                default:
+                    return;
+            }
+        }
+        private void btnÜbel_Click(object sender, EventArgs e)
+        {
+            switch (MessageBoxEx.Show("要呼出尤蓓爾的紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
+            {
+                case DialogResult.Yes:
+                    LoadCode("2003,12003,22039,42600,1054562,1074238,1703726", 0);
+                    return;
+
+                case DialogResult.No:
+                default:
+                    return;
+            }
+        }
         private void btnLaraTheSheep_Click(object sender, EventArgs e)
         {
             switch (MessageBoxEx.Show("要呼出作者的菈菈紙娃娃預設嗎？", "確認", MessageBoxButtons.YesNo))
             {
                 case DialogResult.Yes:
-                    LoadCode("2000,12000,51484,61183,1003968,1052667,1072867,1082552,1703113", 0);
+                    LoadCode("2000,12000,51484,61183,1003968,1052667,1072867,1082552,1113329,1703113", 0);
                     return;
 
                 case DialogResult.No:
@@ -1860,6 +2289,11 @@ namespace WzComparerR2.Avatar.UI
 
         private void btnCustomPreset_Click(object sender, EventArgs e)
         {
+            if (PluginManager.FindWz(Wz_Type.Base) == null)
+            {
+                ToastNotification.Show(this, $"錯誤: 未開啟 Base.wz。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                return;
+            }
             string avatarPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images");
             if (LoadAvatarForm.Instance == null)
             {
@@ -1874,15 +2308,16 @@ namespace WzComparerR2.Avatar.UI
             {
                 System.IO.Directory.CreateDirectory(avatarPath);
             }
-            string[] files = Directory.GetFiles(avatarPath);
-            LoadAvatarForm._files.AddRange(files);
+
+            LoadAvatarForm.presetDict = Translator.loadDict(Path.Combine(avatarPath, "config.json"));
+            LoadAvatarForm._files = LoadAvatarForm.presetDict.Keys.Select(key => Path.Combine(avatarPath, key + ".png")).ToList();
             LoadAvatarForm.LoadImages();
         }
 
-        public void SavePreset(string pendingCode)
+        public void SavePreset(string pendingCode, string md5)
         {
             if (string.IsNullOrEmpty(pendingCode)) return;
-            string avatarPresetPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images", pendingCode.Replace("*", "×") + ".png");
+            string avatarPresetPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Images", md5 + ".png");
             this.GetSelectedBodyFrame(out int bodyFrame, out _);
             this.GetSelectedEmotionFrame(out int emoFrame, out _);
             this.GetSelectedTamingFrame(out int tamingFrame, out _);
@@ -2086,7 +2521,7 @@ namespace WzComparerR2.Avatar.UI
                         ToastNotification.Show(this, $"請選擇角色歸屬地區。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
                         return;
                     case 1: // KMS
-                        this.API = new NexonOpenAPI("-");
+                        this.API = new NexonOpenAPI("-", "KMS");
                         try
                         {
                             ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
@@ -2118,7 +2553,7 @@ namespace WzComparerR2.Avatar.UI
                         {
                             if (this.API == null || !this.API.CheckSameAPIKey(key))
                             {
-                                this.API = new NexonOpenAPI(key);
+                                this.API = new NexonOpenAPI(key, "KMS");
                             }
 
                             ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
@@ -2140,7 +2575,7 @@ namespace WzComparerR2.Avatar.UI
                         }
                         break;
                     case 2: // JMS
-                        this.API = new NexonOpenAPI("-");
+                        this.API = new NexonOpenAPI("-", "KMS");
                         try
                         {
                             ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
@@ -2159,8 +2594,28 @@ namespace WzComparerR2.Avatar.UI
                             ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
                         }
                         break;
+                    case 3: // CMS
+                        this.API = new NexonOpenAPI("-", "KMS");
+                        try
+                        {
+                            ToastNotification.Show(this, $"在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
+                            avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "CMS");
+                            if (string.IsNullOrEmpty(avatarCode))
+                            {
+                                ToastNotification.Show(this, $"找不到角色。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                            }
+                            else
+                            {
+                                await Type3(avatarCode);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
+                        }
+                        break;
                     case 4: // GMS-NA
-                        this.API = new NexonOpenAPI("-");
+                        this.API = new NexonOpenAPI("-", "KMS");
                         try
                         {
                             ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
@@ -2180,7 +2635,7 @@ namespace WzComparerR2.Avatar.UI
                         }
                         break;
                     case 5: // GMS-EU
-                        this.API = new NexonOpenAPI("-");
+                        this.API = new NexonOpenAPI("-", "KMS");
                         try
                         {
                             ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
@@ -2200,7 +2655,7 @@ namespace WzComparerR2.Avatar.UI
                         }
                         break;
                     case 6: // MSEA
-                        this.API = new NexonOpenAPI("-");
+                        this.API = new NexonOpenAPI("-", "KMS");
                         try
                         {
                             ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
@@ -2220,7 +2675,7 @@ namespace WzComparerR2.Avatar.UI
                         }
                         break;
                     case 7: // TMS
-                        this.API = new NexonOpenAPI("-");
+                        this.API = new NexonOpenAPI("-", "KMS");
                         try
                         {
                             ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
@@ -2231,7 +2686,14 @@ namespace WzComparerR2.Avatar.UI
                             }
                             else
                             {
-                                await Type4(avatarCode);
+                                if (Regex.IsMatch(avatarCode.Replace("0x", ""), @"^[0-9A-Fa-f]*$"))
+                                {
+                                    await Type4(avatarCode);
+                                }
+                                else
+                                {
+                                    await Type3(avatarCode);
+                                }
                             }
                         }
                         catch (Exception ex)
@@ -2240,9 +2702,10 @@ namespace WzComparerR2.Avatar.UI
                         }
                         break;
                     case 8: // MSN
-                        this.API = new NexonOpenAPI("-");
+                        this.API = new NexonOpenAPI("-", "KMS");
                         try
                         {
+                            ToastNotification.Show(this, $"正在取得紙娃娃情報，請稍等...", null, 3000, eToastGlowColor.Green, eToastPosition.TopCenter);
                             avatarCode = await this.API.GetAvatarCode(dlg.CharaName, "MSN");
                             if (string.IsNullOrEmpty(avatarCode))
                             {
@@ -2251,9 +2714,10 @@ namespace WzComparerR2.Avatar.UI
                             else
                             {
                                 string[] decodedInfo = Encoding.UTF8.GetString(Convert.FromBase64String(avatarCode)).Split("a");
-                                List<string> msnCode = new List<string> {};
-                                msnCode.Add((Int32.Parse(decodedInfo[0]) + 2000).ToString());
-                                msnCode.Add((Int32.Parse(decodedInfo[1]) + 12000).ToString());
+                                List<int> msnCode = new List<int> {};
+                                int earType = Int32.Parse(decodedInfo[17]);
+                                msnCode.Add((Int32.Parse(decodedInfo[1]) + 2000));
+                                msnCode.Add((Int32.Parse(decodedInfo[1]) + 12000));
                                 foreach (string itemCode in decodedInfo.Skip(2))
                                 {
                                     switch (itemCode.Length)
@@ -2262,15 +2726,17 @@ namespace WzComparerR2.Avatar.UI
                                             break;
                                         case 5:
                                         case 7:
-                                            msnCode.Add(itemCode);
+                                            msnCode.Add(Int32.Parse(itemCode));
                                             break;
                                         case 8:
-                                            msnCode.Add(itemCode.Substring(0, 5));
+                                            msnCode.Add(Int32.Parse(itemCode.Substring(0, 5)));
                                             break;
 
                                     }
                                 }
+                                msnCode.Sort();
                                 LoadCode(string.Join(",", msnCode), 0);
+                                this.cmbEar.SelectedIndex = earType;
                             }
                         }
                         catch (Exception ex)
@@ -2297,8 +2763,115 @@ namespace WzComparerR2.Avatar.UI
                     }
                 }
 
-                var code = $"20{res.Skin}, {res.Face + mixFace}, {res.Hair + mixHair}, {res.Cap}, {res.FaceAcc}, {res.EyeAcc}, {res.EarAcc}, {res.Coat}, {res.Pants}, {res.Shoes}, {res.Gloves}, {res.Cape}, {res.Shield}, {res.Weapon}, {res.CashWeapon}";
+                var code = $"20{res.Skin}, 120{res.Skin + GetPrismCode(res.SkinPrismInfo)}, {res.Face + mixFace}, {res.Hair + mixHair}," +
+                    $"{res.Cap + GetPrismCode(res.CapPrismInfo)}," +
+                    $"{res.FaceAcc + GetPrismCode(res.FaceAccPrismInfo)}," +
+                    $"{res.EyeAcc + GetPrismCode(res.EyeAccPrismInfo)}," +
+                    $"{res.EarAcc + GetPrismCode(res.EarAccPrismInfo)}," +
+                    $"{res.Coat + GetPrismCode(res.CoatPrismInfo)}," +
+                    $"{res.Pants + GetPrismCode(res.PantsPrismInfo)}," +
+                    $"{res.Shoes + GetPrismCode(res.ShoesPrismInfo)}," +
+                    $"{res.Gloves + GetPrismCode(res.GlovesPrismInfo)}," +
+                    $"{res.Cape + GetPrismCode(res.CapePrismInfo)}," +
+                    $"{res.Shield + GetPrismCode(res.ShieldPrismInfo)}," +
+                    $"{res.Weapon + GetPrismCode(res.WeaponPrismInfo)}," +
+                    $"{res.CashWeapon + GetPrismCode(res.WeaponPrismInfo)}," +
+                    $"{res.Ring1},{res.Ring2},{res.Ring3},{res.Ring4}";
                 LoadCode(code, 0);
+
+                this.SuspendUpdateDisplay();
+                var curAction = this.cmbActionBody.SelectedItem.ToString();
+                var hand = 1;
+                switch (res.WeaponMotionType)
+                {
+                    case 0:
+                    case 1: // 한손
+                        this.cmbWeaponType.SelectedIndex = this.cmbWeaponType.Items.Count > 0 ? 0 : -1;
+                        break;
+
+                    case 2: // 두손
+                        hand = 2;
+                        this.cmbWeaponType.SelectedIndex = this.cmbWeaponType.Items.Count > 0 ? 0 : -1;
+                        break;
+
+                    case 3: // 건
+                        if (res.WeaponMotionType == 3)
+                        {
+                            for (int i = 0; i < this.cmbWeaponType.Items.Count; i++)
+                            {
+                                if ((this.cmbWeaponType.Items[i] as ComboItem).Text == "49")
+                                {
+                                    this.cmbWeaponType.SelectedIndex = i;
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+
+                    default:
+                        break;
+                }
+                if (Regex.Match(curAction, @"^walk").Success)
+                {
+                    for (int i = 0; i < this.cmbActionBody.Items.Count; i++)
+                    {
+                        if ((this.cmbActionBody.Items[i] as ComboItem).Text == $"walk{hand}")
+                        {
+                            this.cmbActionBody.SelectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+                else if (Regex.Match(curAction, @"^stand").Success)
+                {
+                    for (int i = 0; i < this.cmbActionBody.Items.Count; i++)
+                    {
+                        if ((this.cmbActionBody.Items[i] as ComboItem).Text == $"stand{hand}")
+                        {
+                            this.cmbActionBody.SelectedIndex = i;
+                            break;
+                        }
+                    }
+                }
+
+                this.chkShowWeaponEffect.Checked = res.ShowWeaponEffect;
+                this.chkShowWeaponJumpEffect.Checked = res.ShowWeaponJumpEffect;
+                foreach (var item in this.itemPanel1.Items)
+                {
+                    if (item is AvatarPartButtonItem button && button.Tag is AvatarPart part)
+                    {
+                        if (part != null && part == this.avatar.Cape)
+                        {
+                            if (part.EffectVisible != res.ShowCapeEffect)
+                            {
+                                button.chkShowEffect.Checked = res.ShowCapeEffect;
+                                part.EffectVisible = res.ShowCapeEffect;
+                                this.avatar.EffectVisibles[11] = res.ShowCapeEffect;
+                            }
+                        }
+                    }
+                }
+
+                // 표정 얼굴장식
+                if (!string.IsNullOrEmpty(res.EmotionFaceAcc))
+                {
+                    Wz_Node infoRootNode = PluginManager.FindWz($@"Etc\EmotionFaceAccInfo.img");
+                    Wz_Node infoNode = infoRootNode?.FindNodeByPath($@"{res.EmotionFaceAcc}\fixedEmotion") ?? null;
+                    var fixedEmotion = infoNode.GetValueEx<string>("");
+                    if (!string.IsNullOrEmpty(fixedEmotion))
+                    {
+                        var info = fixedEmotion.Split('/');
+                        var emotionName = info[0];
+                        var faceFrame = 0;
+                        if (info.Length > 1)
+                        {
+                            int.TryParse(info[1], out faceFrame);
+                        }
+
+                        this.FixEmotion(emotionName, faceFrame);
+                    }
+                }
+                this.ResumeUpdateDisplay();
 
                 if (res.UnknownVer)
                 {
@@ -2351,7 +2924,19 @@ namespace WzComparerR2.Avatar.UI
                     }
                 }
 
-                var code = $"20{res.Skin}, {res.Face + mixFace}, {res.Hair + mixHair}, {res.Cap}, {res.FaceAcc}, {res.EyeAcc}, {res.EarAcc}, {res.Coat}, {res.Pants}, {res.Shoes}, {res.Gloves}, {res.Cape}, {res.Shield}, {res.Weapon}, {res.CashWeapon}";
+                var code = $"20{res.Skin}, 120{res.Skin + GetPrismCode(res.SkinPrismInfo)}, {res.Face + mixFace}, {res.Hair + mixHair}," +
+                    $"{res.Cap + GetPrismCode(res.CapPrismInfo)}," +
+                    $"{res.FaceAcc}," +
+                    $"{res.EyeAcc}," +
+                    $"{res.EarAcc}," +
+                    $"{res.Coat + GetPrismCode(res.CoatPrismInfo)}," +
+                    $"{res.Pants + GetPrismCode(res.PantsPrismInfo)}," +
+                    $"{res.Shoes + GetPrismCode(res.ShoesPrismInfo)}," +
+                    $"{res.Gloves + GetPrismCode(res.GlovesPrismInfo)}," +
+                    $"{res.Cape + GetPrismCode(res.CapePrismInfo)}," +
+                    $"{res.Shield}," +
+                    $"{res.Weapon}," +
+                    $"{res.CashWeapon + GetPrismCode(res.WeaponPrismInfo)}";
                 LoadCode(code, 0);
 
                 if (res.UnknownVer)
@@ -2376,7 +2961,19 @@ namespace WzComparerR2.Avatar.UI
                     }
                 }
 
-                var code = $"20{res.Skin}, {res.Face}, {res.Face + mixFace}, {res.Hair}, {res.Hair + mixHair}, {res.Cap}, {res.FaceAcc}, {res.EyeAcc}, {res.EarAcc}, {res.Coat}, {res.Pants}, {res.Shoes}, {res.Gloves}, {res.Cape}, {res.Shield}, {res.Weapon}, {res.CashWeapon}";
+                var code = $"20{res.Skin}, 120{res.Skin + GetPrismCode(res.SkinPrismInfo)}, {res.Face + mixFace}, {res.Hair + mixHair}," +
+                    $"{res.Cap + GetPrismCode(res.CapPrismInfo)}," +
+                    $"{res.FaceAcc}," +
+                    $"{res.EyeAcc}," +
+                    $"{res.EarAcc}," +
+                    $"{res.Coat + GetPrismCode(res.CoatPrismInfo)}," +
+                    $"{res.Pants + GetPrismCode(res.PantsPrismInfo)}," +
+                    $"{res.Shoes + GetPrismCode(res.ShoesPrismInfo)}," +
+                    $"{res.Gloves + GetPrismCode(res.GlovesPrismInfo)}," +
+                    $"{res.Cape + GetPrismCode(res.CapePrismInfo)}," +
+                    $"{res.Shield}," +
+                    $"{res.Weapon}," +
+                    $"{res.CashWeapon + GetPrismCode(res.WeaponPrismInfo)}";
                 LoadCode(code, 0);
 
                 if (res.UnknownVer)
@@ -2390,10 +2987,44 @@ namespace WzComparerR2.Avatar.UI
 #endif
         }
 
+#if NET6_0_OR_GREATER
+        private string GetPrismCode(OpenAPI.PrismInfo prism, bool alwaysReturnCode = false)
+        {
+            if (prism.Valid)
+            {
+                if (prism.Brightness > 0 && prism.Saturation > 0 && prism.Hue >= 0)
+                {
+                    return $"+{prism.ColorType}h{prism.Hue}s{prism.Saturation}v{prism.Brightness}";
+                }
+                else
+                {
+                    return $"+0h0s100v100";
+                }
+            }
+            return "";
+        }
+
+        private string GetPrismCode(OpenAPI.PrismInfoCollection prisms)
+        {
+            var ret = "";
+            ret += GetPrismCode(prisms.Prism1, true);
+            ret += GetPrismCode(prisms.Prism2);
+            return ret;
+        }
+#endif
+
         private void btnReset_Click(object sender, EventArgs e)
         {
             this.avatarContainer1.Origin = new Point(this.avatarContainer1.Width / 2, this.avatarContainer1.Height / 2 + 40);
             this.avatarContainer1.Invalidate();
+        }
+
+        private void btnZoom_Click(object sender, EventArgs e)
+        {
+            if (this.avatar.Parts.Count(p => p != null) > 0)
+            {
+                this.avatarContainer1.ChangeScale();
+            }
         }
 
         private void SaveGif(object sender, EventArgs e, bool isBodyPlayingChecked = true, bool isEmotionPlayingChecked = true, bool isTamingPlayingChecked = true, string outputFileName = null)
@@ -2742,7 +3373,7 @@ namespace WzComparerR2.Avatar.UI
         {
             chairName = "";
             //解析
-            var matches = Regex.Matches(code, @"s?(\d+)(\+([0-7])\*(\d{1,2}))?([,\s]|$)");
+            var matches = Regex.Matches(code, @"s?(\d+)(\+([0-8])\*(\d{1,2}))?((\+(\d+)h(\d+)s(\d+)v(\d+)){0,2})([,\s]|$)");
             if (matches.Count <= 0)
             {
                 ToastNotification.Show(this, $"錯誤: 沒有與道具 ID 相符的道具。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
@@ -2768,7 +3399,10 @@ namespace WzComparerR2.Avatar.UI
             var sl = this.PluginEntry.Context.DefaultStringLinker;
             if (!sl.HasValues) //生成默认stringLinker
             {
-                sl.Load(PluginManager.FindWz(Wz_Type.String).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Item).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Etc).GetValueEx<Wz_File>(null));
+                sl.Load(PluginManager.FindWz(Wz_Type.String).GetValueEx<Wz_File>(null),
+                    PluginManager.FindWz(Wz_Type.Item).GetValueEx<Wz_File>(null),
+                    PluginManager.FindWz(Wz_Type.Etc).GetValueEx<Wz_File>(null),
+                    PluginManager.FindWz(Wz_Type.Quest).GetValueEx<Wz_File>(null));
             }
 
             if (loadType == 0) //先清空。。
@@ -2792,6 +3426,10 @@ namespace WzComparerR2.Avatar.UI
                             part.MixColor = mixColor;
                             part.MixOpacity = mixOpacity;
                         }
+                        if (m.Groups.Count >= 10)
+                        {
+                            LoadCode_ApplyPrism(part, m.Groups[5].Value);
+                        }
                         OnNewPartAdded(part);
                         continue;
                     }
@@ -2811,6 +3449,10 @@ namespace WzComparerR2.Avatar.UI
                                 if (tamingMobNode != null)
                                 {
                                     var part = this.avatar.AddTamingPart(tamingMobNode, BitmapOrigin.CreateFromNode(imgNode.Nodes["icon"], PluginBase.PluginManager.FindWz), gearID, true);
+                                    if (m.Groups.Count >= 10)
+                                    {
+                                        LoadCode_ApplyPrism(part, m.Groups[6].Value);
+                                    }
                                     OnNewPartAdded(part);
                                 }
                             }
@@ -2838,6 +3480,10 @@ namespace WzComparerR2.Avatar.UI
 
                                 this.avatar.RemoveChairPart();
                                 var part = this.avatar.AddTamingPart(tamingMobNode, BitmapOrigin.CreateFromNode(tamingMobNode.FindNodeByPath("info\\icon"), PluginBase.PluginManager.FindWz), tamingMobID, false, brm);
+                                if (m.Groups.Count >= 10)
+                                {
+                                    LoadCode_ApplyPrism(part, m.Groups[6].Value);
+                                }
                                 OnNewPartAdded(part);
                             }
                         }
@@ -2858,12 +3504,20 @@ namespace WzComparerR2.Avatar.UI
 
                             if (removeTamingPart) RemoveTamingPart();
                             var part = this.avatar.AddChairPart(imgNode, BitmapOrigin.CreateFromNode(imgNode.FindNodeByPath("info\\icon"), PluginBase.PluginManager.FindWz), gearID, brm, fb);
+                            if (m.Groups.Count >= 10)
+                            {
+                                LoadCode_ApplyPrism(part, m.Groups[6].Value);
+                            }
                             OnNewPartAdded(part);
                         }
 
                         if (gearID / 10000 == 501) // effect items
                         {
                             var part = this.avatar.AddEffectPart(imgNode);
+                            if (m.Groups.Count >= 10)
+                            {
+                                LoadCode_ApplyPrism(part, m.Groups[6].Value);
+                            }
                             OnNewPartAdded(part);
                         }
                         continue;
@@ -2906,6 +3560,37 @@ namespace WzComparerR2.Avatar.UI
                 ToastNotification.Show(this, sb.ToString(), null, 4000, eToastGlowColor.Red, eToastPosition.TopCenter);
             }
 
+        }
+
+        private void LoadCode_ApplyPrism(AvatarPart part, string prismStr)
+        {
+            var prismMatches = Regex.Matches(prismStr, @"\+(\d+)h(\d+)s(\d+)v(\d+)");
+            if (prismMatches.Count >= 2)
+            {
+                GearType partType = Gear.GetGearType(part.ID.Value);
+                if (Gear.IsWeapon(partType) || Gear.IsCashWeapon(partType))
+                {
+                    var prismMatch = prismMatches[1];
+                    if (Int32.TryParse(prismMatch.Groups[1].Value, out int type)
+                        && Int32.TryParse(prismMatch.Groups[2].Value, out int hue)
+                        && Int32.TryParse(prismMatch.Groups[3].Value, out int saturation)
+                        && Int32.TryParse(prismMatch.Groups[4].Value, out int brightness))
+                    {
+                        part.PrismData.Set(PrismDataCollection.PrismDataType.WeaponEffect, type, hue, saturation, brightness);
+                    }
+                }
+            }
+            if (prismMatches.Count >= 1)
+            {
+                var prismMatch = prismMatches[0];
+                if (Int32.TryParse(prismMatch.Groups[1].Value, out int type)
+                    && Int32.TryParse(prismMatch.Groups[2].Value, out int hue)
+                    && Int32.TryParse(prismMatch.Groups[3].Value, out int saturation)
+                    && Int32.TryParse(prismMatch.Groups[4].Value, out int brightness))
+                {
+                    part.PrismData.Set(PrismDataCollection.PrismDataType.Default, type, hue, saturation, brightness);
+                }
+            }
         }
 
         private Wz_Node FindNodeByGearID(Wz_Node characWz, int id)
@@ -3038,7 +3723,10 @@ namespace WzComparerR2.Avatar.UI
             var sl = this.PluginEntry.Context.DefaultStringLinker;
             if (!sl.HasValues) //生成默认stringLinker
             {
-                sl.Load(PluginManager.FindWz(Wz_Type.String).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Item).GetValueEx<Wz_File>(null), PluginManager.FindWz(Wz_Type.Etc).GetValueEx<Wz_File>(null));
+                sl.Load(PluginManager.FindWz(Wz_Type.String).GetValueEx<Wz_File>(null),
+                    PluginManager.FindWz(Wz_Type.Item).GetValueEx<Wz_File>(null),
+                    PluginManager.FindWz(Wz_Type.Etc).GetValueEx<Wz_File>(null),
+                    PluginManager.FindWz(Wz_Type.Quest).GetValueEx<Wz_File>(null));
             }
 
             foreach (var kv in sl.StringEqp)

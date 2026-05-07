@@ -36,6 +36,18 @@ namespace WzComparerR2.Config
             get { return (CharaSimSkillConfig)this["skill"]; }
         }
 
+        [ConfigurationProperty("damageSkin")]
+        public CharaSimDamageSkinConfig DamageSkin
+        {
+            get { return (CharaSimDamageSkinConfig)this["damageSkin"]; }
+        }
+
+        [ConfigurationProperty("familiar")]
+        public CharaSimFamiliarConfig Familiar
+        {
+            get { return (CharaSimFamiliarConfig)this["familiar"]; }
+        }
+
         [ConfigurationProperty("gear")]
         public CharaSimGearConfig Gear
         {
@@ -72,6 +84,12 @@ namespace WzComparerR2.Config
             get { return (CharaSimNpcConfig)this["npc"]; }
         }
 
+        [ConfigurationProperty("misc")]
+        public CharaSimMiscConfig Misc
+        {
+            get { return (CharaSimMiscConfig)this["misc"]; }
+        }
+
         [ConfigurationProperty("PreferredStringCopyMethod")]
         public ConfigItem<int> PreferredStringCopyMethod
         {
@@ -91,6 +109,11 @@ namespace WzComparerR2.Config
         {
             get { return (ConfigItem<bool>)this["Enable22AniStyle"]; }
             set { this["Enable22AniStyle"] = value; }
+        }
+        [ConfigurationProperty("Quest")]
+        public CharaSimQuestConfig Quest
+        {
+            get { return (CharaSimQuestConfig)this["Quest"]; }
         }
     }
 }

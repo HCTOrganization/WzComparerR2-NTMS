@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿using DevComponents.DotNetBar;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Text;
-using System.Linq;
 using System.Windows.Forms;
-using System.Reflection;
-using DevComponents.DotNetBar;
 using WzComparerR2.Config;
 using MathHelper = Microsoft.Xna.Framework.MathHelper;
-using Newtonsoft.Json.Linq;
 
 namespace WzComparerR2
 {
@@ -160,6 +155,28 @@ namespace WzComparerR2
             set { textBoxX3.WatermarkText = value; }
         }
 
+        private void isFFmpegExist(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(this.FFmpegBinPath) || !File.Exists(this.FFmpegBinPath))
+            {
+                MessageBoxEx.Show(this, "未找到 FFmpeg 可執行檔。 \n按一下「OK」下載並指定路徑。", "注意", MessageBoxButtons.OK);
+#if NET6_0_OR_GREATER
+                    Process.Start(new ProcessStartInfo
+                    {
+                        UseShellExecute = true,
+                        FileName = "https://www.gyan.dev/ffmpeg/builds/",
+                    });
+#else
+                Process.Start("https://www.gyan.dev/ffmpeg/builds/");
+#endif
+                buttonX3_Click(sender, e);
+                if (string.IsNullOrEmpty(this.FFmpegBinPath) || !File.Exists(this.FFmpegBinPath))
+                {
+                    MessageBoxEx.Show(this, "未能指定 FFmpeg 可執行文件，此預設將無法運作。", "注意", MessageBoxButtons.OK);
+                }
+            }
+        }
+
         public void Load(ImageHandlerConfig config)
         {
             this.SavePngFramesEnabled = config.SavePngFramesEnabled;
@@ -199,10 +216,11 @@ namespace WzComparerR2
             config.FFmpegArgument = this.FFmpegArgument;
             config.FFmpegOutputFileExtension = this.FFmpegDefaultExtension;
         }
+
         private void buttonX3_Click(object sender, EventArgs e)
         {
             OpenFileDialog dlg = new();
-            dlg.Title = "FFMPEGプログラムを見つけてください";
+            dlg.Title = "請查找FFmpeg可執行檔。";
             dlg.Filter = "ffmpeg.exe|*.exe|*.*|*.*";
             dlg.FileName = this.FFmpegBinPath;
             if (dlg.ShowDialog(this) == DialogResult.OK)
@@ -210,7 +228,8 @@ namespace WzComparerR2
                 this.FFmpegBinPath = dlg.FileName;
             }
         }
-        private void btnDiscordPreset_Click(object sender, System.EventArgs e)
+
+        private void btnDiscordPreset_Click(object sender, EventArgs e)
         {
             string discordConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "discord", "settings.json");
             if (File.Exists(discordConfigPath))
@@ -232,6 +251,69 @@ namespace WzComparerR2
                 BackgroundColor = Color.FromArgb(-13750732);
             }
             BackgroundType = ImageBackgroundType.Color;
+            GifEncoder = 1;
+        }
+
+        private void btnNonTransparentMP4Preset_Click(object sender, EventArgs e)
+        {
+            GifEncoder = 3;
+            BackgroundType = ImageBackgroundType.Color;
+            BackgroundColor = Color.White;
+            FFmpegArgument = string.Empty;
+            FFmpegDefaultExtension = string.Empty;
+            isFFmpegExist(sender, e);
+        }
+
+        private void btnGreenBackdropMP4Preset_Click(object sender, EventArgs e)
+        {
+            GifEncoder = 3;
+            BackgroundType = ImageBackgroundType.Color;
+            BackgroundColor = Color.FromArgb(0, 255, 0);
+            FFmpegArgument = string.Empty;
+            FFmpegDefaultExtension = string.Empty;
+            isFFmpegExist(sender, e);
+        }
+
+        private void btnBlueBackdropMP4Preset_Click(object sender, EventArgs e)
+        {
+            GifEncoder = 3;
+            BackgroundType = ImageBackgroundType.Color;
+            BackgroundColor = Color.Blue;
+            FFmpegArgument = string.Empty;
+            FFmpegDefaultExtension = string.Empty;
+            isFFmpegExist(sender, e);
+        }
+
+        private void btnTransparentMOVPreset_Click(object sender, EventArgs e)
+        {
+            GifEncoder = 3;
+            BackgroundType = ImageBackgroundType.Transparent;
+            MinMixedAlpha = 0;
+            BackgroundColor = Color.White;
+            FFmpegArgument = @$"-y -f rawvideo -pixel_format bgra -s %w*%h -r 1000/%t -i ""%i"" -vf ""crop=trunc(iw/2)*2:trunc(ih/2)*2"" -vcodec qtrle -pix_fmt argb ""%o""";
+            FFmpegDefaultExtension = ".mov";
+            isFFmpegExist(sender, e);
+        }
+
+        private void btnTransparentWebMPreset_Click(object sender, EventArgs e)
+        {
+            GifEncoder = 3;
+            BackgroundType = ImageBackgroundType.Transparent;
+            MinMixedAlpha = 0;
+            BackgroundColor = Color.White;
+            FFmpegArgument = @$"-y -f rawvideo -pixel_format bgra -s %w*%h -r 1000/%t -i ""%i"" -vf ""crop=trunc(iw/2)*2:trunc(ih/2)*2"" -vcodec libvpx-vp9 -pix_fmt yuva420p ""%o""";
+            FFmpegDefaultExtension = ".webm";
+            isFFmpegExist(sender, e);
+        }
+
+        private void btnDefaultPreset_Click(object sender, EventArgs e)
+        {
+            GifEncoder = 0;
+            BackgroundType = ImageBackgroundType.Transparent;
+            MinMixedAlpha = 0;
+            BackgroundColor = Color.White;
+            FFmpegArgument = string.Empty;
+            FFmpegDefaultExtension = string.Empty;
         }
 
         private void slider1_ValueChanged(object sender, EventArgs e)

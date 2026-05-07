@@ -63,5 +63,7 @@ namespace WzComparerR2.CharaSim
         tamingMob,
         //MSN only
         mintable,
+        notMintable,
+        cashTradeBlock,
     }
 }

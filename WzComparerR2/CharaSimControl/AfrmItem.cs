@@ -542,6 +542,11 @@ namespace WzComparerR2.CharaSimControl
                     cashImg = Resource.CashShop_img_CashItem_label_11;
                     cashOrigin = new Point(cashImg.Width, cashImg.Height);
                 }
+                else if (gear.Props.TryGetValue(GearPropType.limitedLabel, out value) && value > 0)
+                {
+                    cashImg = Resource.CashShop_img_CashItem_label_15;
+                    cashOrigin = new Point(12, 12);
+                }
                 if (cashImg == null) //default cashImg
                 {
                     cashImg = Resource.CashItem_0;

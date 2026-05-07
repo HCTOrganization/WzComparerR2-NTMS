@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace WzComparerR2.CharaSim
 {
@@ -87,12 +88,12 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incMADr: return "魔法攻擊力 : " + sign + value + "%";
                 case GearPropType.incPDD: return "防禦力 : " + sign + value;
                 case GearPropType.incPDDr: return "防禦力 : " + sign + value + "%";
-                //case GearPropType.incMDD: return "MAGIC DEF. : " + sign + value;
-                //case GearPropType.incMDDr: return "MAGIC DEF. : " + sign + value + "%";
-                //case GearPropType.incACC: return "ACCURACY : " + sign + value;
-                //case GearPropType.incACCr: return "ACCURACY : " + sign + value + "%";
-                //case GearPropType.incEVA: return "AVOIDABILITY : " + sign + value;
-                //case GearPropType.incEVAr: return "AVOIDABILITY : " + sign + value + "%";
+                case GearPropType.incMDD: return "魔法防禦力 : " + sign + value;
+                case GearPropType.incMDDr: return "魔法防禦力 : " + sign + value + "%";
+                case GearPropType.incACC: return "命中率 : " + sign + value;
+                case GearPropType.incACCr: return "命中率 : " + sign + value + "%";
+                case GearPropType.incEVA: return "迴避率 : " + sign + value;
+                case GearPropType.incEVAr: return "迴避率 : " + sign + value + "%";
                 case GearPropType.incSpeed: return "移動速度 : " + sign + value;
                 case GearPropType.incJump: return "跳躍力 : " + sign + value;
                 case GearPropType.incCraft: return "手藝 : " + sign + value;
@@ -120,7 +121,9 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.onlyEquip: return value == 0 ? null : "只能單獨使用";
                 case GearPropType.notExtend: return value == 0 ? null : "無法延長有效時間。";
                 case GearPropType.accountSharableAfterExchange: return value == 0 ? null : "可交換1次\n(僅限在相同世界內的我的角色之間轉移)";
+                case GearPropType.noPrism: return value == 0 ? null : "無法使用棱鏡";
                 case GearPropType.mintable: return value == 0 ? null : "可鑄造";
+                case GearPropType.notMintable: return value == 0 ? null : "不可鑄造";
                 case GearPropType.tradeAvailable:
                     switch (value)
                     {
@@ -143,20 +146,25 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.abilityTimeLimited: return value == 0 ? null : "期間限定能力值";
                 case GearPropType.blockGoldHammer: return value == 0 ? null : "無法使用黄金鐵鎚";
                 case GearPropType.cantRepair: return value == 0 ? null : "無法修理";
-                case GearPropType.colorvar: return value == 0 ? null : "#c此裝備可以通過染色顏料進行染色。#";
+                case GearPropType.colorvar: return value == 0 ? null : "#c此裝備可進行染色。#";
                 case GearPropType.noLookChange: return value == 0 ? null : "無法使用神秘鐵砧";
+                case GearPropType.reissueBan: return value == 0 ? null : "無法重新發放";
 
                 case GearPropType.incAllStat_incMHP25: return "全部屬性：" + sign + value + ", 最大HP : " + sign + (value * 25);// check once Lv 250 set comes out in GMS
                 case GearPropType.incAllStat_incMHP50_incMMP50: return "全部屬性：" + sign + value + ", 最大HP / 最大MP : " + sign + (value * 50);
                 case GearPropType.incMHP_incMMP: return "最大HP / 最大MP : " + sign + value;
                 case GearPropType.incMHPr_incMMPr: return "最大HP / 最大MP : " + sign + value + "%";
                 case GearPropType.incPAD_incMAD:
-                case GearPropType.incAD: return "攻擊力 / 魔法攻擊力 : " + sign + value;
-                case GearPropType.incPDD_incMDD: return "防御力 : " + sign + value;
-                //case GearPropType.incACC_incEVA: return "ACC/AVO :" + sign + value;
+                case GearPropType.incAD: return "攻撃力/魔力" + sign + value;
+                case GearPropType.incPDD_incMDD: return "防禦力" + sign + value;
+                case GearPropType.incACC_incEVA: return "命中/迴避率 :" + sign + value;
+                case GearPropType.incCRT: return "爆擊率 :" + sign + value;
+                case GearPropType.incCRD: return "爆擊傷害: " + sign + value;
 
                 case GearPropType.incARC: return "ARC : " + sign + value;
                 case GearPropType.incAUT: return "AUT : " + sign + value;
+
+                case GearPropType.incCHUC: return "星力 : " + sign + value;
 
                 case GearPropType.Etuc: return "可進行卓越強化。 (最大\n\r: " + value + "次)";
                 case GearPropType.CuttableCount: return "可使用剪刀次數：" + value + "次";
@@ -262,11 +270,35 @@ namespace WzComparerR2.CharaSim
                     res[1] = sign + value + "%";
                     return res;
                 case GearPropType.incPDD:
-                    res[0] = "防御力";
+                    res[0] = "防禦力";
                     res[1] = sign + value;
                     return res;
                 case GearPropType.incPDDr:
-                    res[0] = "防御力";
+                    res[0] = "防禦力";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incMDD:
+                    res[0] = "魔法防禦力";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incMDDr:
+                    res[0] = "魔法防禦力";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incACC:
+                    res[0] = "命中率";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incACCr:
+                    res[0] = "命中率";
+                    res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incEVA:
+                    res[0] = "迴避率";
+                    res[1] = sign + value;
+                    return res;
+                case GearPropType.incEVAr:
+                    res[0] = "迴避率";
                     res[1] = sign + value + "%";
                     return res;
                 case GearPropType.incSpeed:
@@ -286,9 +318,17 @@ namespace WzComparerR2.CharaSim
                     res[0] = "總傷害";
                     res[1] = sign + value + "%";
                     return res;
+                case GearPropType.incCRT:
+                    res[0] = "爆擊率";
+                    res[1] = sign + value;
+                    return res;
                 case GearPropType.incCr:
                     res[0] = "爆擊率";
                     res[1] = sign + value + "%";
+                    return res;
+                case GearPropType.incCRD:
+                    res[0] = "爆擊傷害";
+                    res[1] = sign + value;
                     return res;
                 case GearPropType.incCDr:
                     res[0] = "爆擊傷害";
@@ -303,7 +343,7 @@ namespace WzComparerR2.CharaSim
                     return res;
                 case GearPropType.incBDR:
                 case GearPropType.bdR:
-                    res[0] = "BOSS傷害";
+                    res[0] = "BOSS怪物傷害";
                     res[1] = "+" + value + "%";
                     return res;
                 case GearPropType.incIMDR:
@@ -354,7 +394,7 @@ namespace WzComparerR2.CharaSim
                     res[0] = value == 0 ? null : "#$r專屬道具#";
                     return res;
                 case GearPropType.onlyEquip:
-                    res[0] = value == 0 ? null : "#$r只能單獨使用#";
+                    res[0] = value == 0 ? null : "#$r不可重複裝備#";
                     return res;
                 case GearPropType.equipTradeBlock:
                     res[0] = value == 0 ? null : "#$r裝備時不可交換#";
@@ -374,17 +414,26 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.noLookChange:
                     res[0] = value == 0 ? null : "#$r無法使用神秘鐵砧#";
                     return res;
+                case GearPropType.reissueBan:
+                    res[0] = value == 0 ? null : "#$r無法重新發放#";
+                    return res;
+                case GearPropType.noPrism:
+                    res[0] = value == 0 ? null : "#$r無法使用棱鏡#";
+                    return res;
                 case GearPropType.mintable:
                     res[0] = value == 0 ? null : "#$r可鑄造#";
+                    return res;
+                case GearPropType.notMintable:
+                    res[0] = value == 0 ? null : "#$r不可鑄造#";
                     return res;
                 case GearPropType.tradeAvailable:
                     switch (value)
                     {
                         case 1:
-                            res[0] = "#$g若使用 #c宿命剪刀，該道具可進行一次交易#";
+                            res[0] = "#$g若使用宿命剪刀，該道具可進行一次交易！#";
                             return res;
                         case 2:
-                            res[0] = "#$g若使用 #c白金神奇剪刀，該道具可進行一次交易#";
+                            res[0] = "#$g若使用白金神奇剪刀，該道具可進行一次交易！#";
                             return res;
                         default: return res;
                     }
@@ -421,14 +470,16 @@ namespace WzComparerR2.CharaSim
                     res[0] = "攻擊力 / 魔法攻擊力  " + sign + " " + value;
                     return res;
                 case GearPropType.incPDD_incMDD:
-                    res[0] = "防御力  " + sign + value;
+                    res[0] = "防禦力  " + sign + value;
                     return res;
-
+                case GearPropType.incACC_incEVA: 
+                    res[0] = "命中/迴避率 :" + sign + value;
+                    return res;
                 case GearPropType.Etuc:
                     res[0] = $"#$d卓越強化 : 無# (最大{value}次)";
                     return res;
                 case GearPropType.CuttableCount:
-                    res[0] = $" #$r(可使用剪刀次数: {value} / {value})#";
+                    res[0] = $" #$r(剪刀剩餘使用次數：{value}/{value})#";
                     return res;
 
                 case GearPropType.incEXPr:
@@ -602,11 +653,14 @@ namespace WzComparerR2.CharaSim
                 case GearType.head_n: return "紙娃娃(頭部)";
                 case GearType.face:
                 case GearType.face2:
+                case GearType.face3:
                 case GearType.face_n: return "紙娃娃(臉型)";
                 case GearType.hair:
                 case GearType.hair2:
                 case GearType.hair3:
-                case GearType.hair_n: return "紙娃娃(髮型)";
+                case GearType.hair4:
+                case GearType.hair_n:
+                case GearType.hair2_n: return "紙娃娃(髮型)";
                 case GearType.faceAccessory: return "臉飾";
                 case GearType.eyeAccessory: return "眼飾";
                 case GearType.earrings: return "耳環";
@@ -623,11 +677,11 @@ namespace WzComparerR2.CharaSim
                 case GearType.dragonTail: return "龍使者尾巴";
                 case GearType.glove: return "手套";
                 case GearType.longcoat: return "套服";
-                case GearType.machineEngine: return "機甲戰神引擎";
-                case GearType.machineArms: return "機甲戰神手臂";
-                case GearType.machineLegs: return "機甲戰神腿部";
-                case GearType.machineBody: return "機甲戰神身軀";
-                case GearType.machineTransistors: return "機甲戰神晶體管";
+                case GearType.machineEngine: return "引擎";
+                case GearType.machineArms: return "手臂";
+                case GearType.machineLegs: return "腿部";
+                case GearType.machineBody: return "身軀";
+                case GearType.machineTransistors: return "晶體管";
                 case GearType.pants: return "褲/裙";
                 case GearType.ring: return "戒指";
                 case GearType.shield: return "盾牌";
@@ -678,7 +732,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.tamingChair: return "騎寵";
                 case GearType.saddle: return "馬鞍";
                 case GearType.katana: return "太刀";
-                case GearType.fan: return "扇子";
+                case GearType.fan: return "扇";
                 case GearType.swordZB: return "琉";
                 case GearType.swordZL: return "璃";
                 case GearType.weapon: return "武器";
@@ -756,8 +810,15 @@ namespace WzComparerR2.CharaSim
                 case GearType.celestialLight: return "天之星光權杖";
                 case GearType.compass: return "羅盤";
 
-                case GearType.gram: return "克拉";
-                case GearType.keir: return "克伊勒";
+                case GearType.astra: return "阿斯特拉輔助武器";
+                // case GearType.gram: return "克拉";
+                // case GearType.keir: return "克伊勒";
+
+                case GearType.longSword: return "長劍";
+                case GearType.yeouiGem: return "如意寶珠";
+
+                case GearType.onmyoSen: return "陰陽扇";
+                case GearType.kannaReifu: return "靈符";
 
                 default: return null;
             }
@@ -800,8 +861,9 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         /// <param Name="Type">表示装备类型的GearType。</param>
         /// <returns></returns>
-        public static string GetExtraJobReqString(GearType type)
+        public static string GetExtraJobReqString(GearType type, bool hasReqSpecJobs = false, Dictionary<int, AstraSubWeaponInfo> loadedAstraSubWeapons = null, int id = 0)
         {
+            string str = null;
             switch (type)
             {
                 //0xxx
@@ -823,9 +885,20 @@ namespace WzComparerR2.CharaSim
                 case GearType.cannonGunPowder2: return "可裝備重砲指揮官職業";
                 case GearType.box:
                 case GearType.boxingClaw: return "可裝備蒼龍俠客";
+                case GearType.shield:
+                    if (!hasReqSpecJobs && GetAstraExtraJobReqString(loadedAstraSubWeapons, id, out str))
+                    {
+                        return str;
+                    }
+                    return null;
 
                 //1xxx
-                case GearType.cygnusGem: return "可裝備蒼龍俠客";
+                case GearType.cygnusGem:
+                    if (!hasReqSpecJobs && GetAstraExtraJobReqString(loadedAstraSubWeapons, id, out str))
+                    {
+                        return str;
+                    }    
+                    return "可裝備皇家騎士團職業";
 
                 //2xxx
                 case GearType.aranPendulum: return GetExtraJobReqString(21);
@@ -861,7 +934,8 @@ namespace WzComparerR2.CharaSim
                 case GearType.katana:
                 case GearType.kodachi:
                 case GearType.kodachi2: return GetExtraJobReqString(41);
-                case GearType.fan: return GetExtraJobReqString(42);
+                case GearType.fan: 
+                case GearType.kannaReifu: return GetExtraJobReqString(42);
 
                 //5xxx
                 case GearType.soulShield: return "可裝備米哈逸";
@@ -903,11 +977,14 @@ namespace WzComparerR2.CharaSim
                 case GearType.ornament: return GetExtraJobReqString(162);
 
                 //18xxx
-                case GearType.gram:
-                case GearType.keir: return GetExtraJobReqString(181);
+                // case GearType.gram:
+                // case GearType.keir: return GetExtraJobReqString(181);
 
                 case GearType.celestialLight:
                 case GearType.compass: return GetExtraJobReqString(182);
+
+                case GearType.longSword:
+                case GearType.yeouiGem: return GetExtraJobReqString(161);
                 default: return null;
             }
         }
@@ -943,13 +1020,127 @@ namespace WzComparerR2.CharaSim
                 case 151: return "可裝備阿戴爾";
                 case 152: return "可裝備伊利恩";
                 case 155: return "可裝備亞克";
+                case 161: return "可裝備蓮";
                 case 162: return "可裝備菈菈";
                 case 164: return "可裝備虎影";
                 case 172: return "可裝備琳恩";
                 case 175: return "可裝備墨玄";
                 case 181: return "可裝備葉里";
                 case 182: return "可裝備施亞";
+                case 183: return "可裝備艾伊爾";
                 default: return null;
+            }
+        }
+
+        public static string GetAstraWeaponType(int id)
+        {
+            int jobID = (id / 100) - 17200;
+            switch (jobID)
+            {
+                case 0: return GetGearTypeString(GearType.heroMedal);
+                case 1: return GetGearTypeString(GearType.rosario);
+                case 2: return GetGearTypeString(GearType.chain);
+                case 3: 
+                case 4: 
+                case 5: return GetGearTypeString(GearType.book1);
+                case 6: return GetGearTypeString(GearType.bowMasterFeather);
+                case 7: return GetGearTypeString(GearType.crossBowThimble);
+                case 8: return GetGearTypeString(GearType.relic);
+                case 9: return GetGearTypeString(GearType.nightLordPoutch);
+                case 10: return GetGearTypeString(GearType.shadowerSheath);
+                case 11: return GetGearTypeString(GearType.viperWristband);
+                case 12: return GetGearTypeString(GearType.captainSight);
+                case 13: return GetGearTypeString(GearType.cannonGunPowder);
+                case 14: 
+                case 15: 
+                case 16: 
+                case 17: 
+                case 18: return GetGearTypeString(GearType.cygnusGem);
+                case 19: return GetGearTypeString(GearType.aranPendulum);
+                case 20: return GetGearTypeString(GearType.evanPaper);
+                case 21: return GetGearTypeString(GearType.magicArrow);
+                case 22: return GetGearTypeString(GearType.card);
+                case 23: return GetGearTypeString(GearType.orb);
+                case 24: return GetGearTypeString(GearType.foxPearl);
+                case 25: 
+                case 26: return GetGearTypeString(GearType.demonShield);
+                case 27: return GetGearTypeString(GearType.battlemageBall);
+                case 28: return GetGearTypeString(GearType.wildHunterArrowHead);
+                case 29: return GetGearTypeString(GearType.mailin);
+                case 30: return GetGearTypeString(GearType.controller);
+                case 31: return GetGearTypeString(GearType.ExplosivePill);
+                case 32: return GetGearTypeString(GearType.soulShield);
+                case 33: return GetGearTypeString(GearType.novaMarrow);
+                case 34: return GetGearTypeString(GearType.weaponBelt);
+                case 35: return GetGearTypeString(GearType.transmitter);
+                case 36: return GetGearTypeString(GearType.soulBangle);
+                case 37: return "沙漏";
+                case 38: return GetGearTypeString(GearType.chess);
+                case 39: return GetGearTypeString(GearType.bracelet);
+                case 40: return GetGearTypeString(GearType.magicWing);
+                case 41: return GetGearTypeString(GearType.hexSeeker);
+                case 42: return GetGearTypeString(GearType.pathOfAbyss);
+                case 43: return GetGearTypeString(GearType.yeouiGem);
+                case 44: return GetGearTypeString(GearType.ornament);
+                case 45: return GetGearTypeString(GearType.fanTassel);
+
+                default: return GetGearTypeString(GearType.astra);
+            }
+        }
+
+        public static string GetAstraReqJob(int id)
+        {
+            int jobID = (id / 100) - 17200;
+            switch (jobID)
+            {
+                case 0: return GetExtraJobReqString(GearType.heroMedal);
+                case 1: return GetExtraJobReqString(GearType.rosario);
+                case 2: return GetExtraJobReqString(GearType.chain);
+                case 3: return GetExtraJobReqString(GearType.book1);
+                case 4: return GetExtraJobReqString(GearType.book2);
+                case 5: return GetExtraJobReqString(GearType.book3);
+                case 6: return GetExtraJobReqString(GearType.bowMasterFeather);
+                case 7: return GetExtraJobReqString(GearType.crossBowThimble);
+                case 8: return GetExtraJobReqString(GearType.relic);
+                case 9: return GetExtraJobReqString(GearType.nightLordPoutch);
+                case 10: return GetExtraJobReqString(GearType.shadowerSheath);
+                case 11: return GetExtraJobReqString(GearType.viperWristband);
+                case 12: return GetExtraJobReqString(GearType.captainSight);
+                case 13: return GetExtraJobReqString(GearType.cannonGunPowder);
+                case 14: return "可裝備聖魂劍士";
+                case 15: return "可裝備烈焰巫師";
+                case 16: return "可裝備破風使者";
+                case 17: return "可裝備暗夜行者";
+                case 18: return "可裝備閃雷悍將";
+                case 19: return GetExtraJobReqString(GearType.aranPendulum);
+                case 20: return GetExtraJobReqString(GearType.evanPaper);
+                case 21: return GetExtraJobReqString(GearType.magicArrow);
+                case 22: return GetExtraJobReqString(GearType.card);
+                case 23: return GetExtraJobReqString(GearType.orb);
+                case 24: return GetExtraJobReqString(GearType.foxPearl);
+                case 25: return "可裝備惡魔殺手";
+                case 26: return "可裝備惡魔復仇者";
+                case 27: return GetExtraJobReqString(GearType.battlemageBall);
+                case 28: return GetExtraJobReqString(GearType.wildHunterArrowHead);
+                case 29: return GetExtraJobReqString(GearType.mailin);
+                case 30: return GetExtraJobReqString(GearType.controller);
+                case 31: return GetExtraJobReqString(GearType.ExplosivePill);
+                case 32: return GetExtraJobReqString(GearType.soulShield);
+                case 33: return GetExtraJobReqString(GearType.novaMarrow);
+                case 34: return GetExtraJobReqString(GearType.weaponBelt);
+                case 35: return GetExtraJobReqString(GearType.transmitter);
+                case 36: return GetExtraJobReqString(GearType.soulBangle);
+                case 37: return GetExtraJobReqString(GearType.swordZB);
+                case 38: return GetExtraJobReqString(GearType.chess);
+                case 39: return GetExtraJobReqString(GearType.bracelet);
+                case 40: return GetExtraJobReqString(GearType.magicWing);
+                case 41: return GetExtraJobReqString(154);
+                case 42: return GetExtraJobReqString(GearType.pathOfAbyss);
+                case 43: return GetExtraJobReqString(GearType.yeouiGem);
+                case 44: return GetExtraJobReqString(GearType.ornament);
+                case 45: return GetExtraJobReqString(GearType.fanTassel);
+
+                default: return GetExtraJobReqString(GearType.astra);
             }
         }
 
@@ -970,22 +1161,58 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        public static string GetExtraJobReqString(IEnumerable<int> specJobs)
+        public static string GetExtraJobReqString(IEnumerable<int> specJobs, bool isMsnMode)
         {
             List<string> extraJobNames = new List<string>();
-            foreach (int specJob in specJobs)
+            if (isMsnMode)
             {
-                switch (specJob)
+                if (string.Join(",", specJobs) == "11,12,13,14,15,51")
                 {
-                    case 1: extraJobNames.AddRange(new[] { "英雄", "聖騎士" }); break;
-                    case 2: extraJobNames.AddRange(new[] { "大魔導士", "主教" }); break;
-                    case 4: extraJobNames.Add("暗影神偷"); break;
-                    case 11: extraJobNames.Add("聖魂騎士"); break;
-                    case 12: extraJobNames.Add("烈焰巫師"); break;
-                    case 22: extraJobNames.Add("\r\n龍魔導士"); break;
-                    case 32: extraJobNames.Add("煉獄巫師"); break;
-                    case 172: extraJobNames.Add("琳恩"); break;
-                    default: extraJobNames.Add(specJob.ToString()); break;
+                    return "皇家騎士團職業";
+                }
+                else
+                {
+                    int classBranch = 0;
+                    int count = 0;
+                    foreach (int job in specJobs)
+                    {
+                        classBranch += job / 10;
+                        count++;
+                    }
+                    classBranch = classBranch / count;
+                    switch (classBranch)
+                    {
+                        case 0: return "冒險家職業";
+                        case 1: return "皇家騎士團職業";
+                        case 2: return "英雄團職業";
+                        case 3: return "末日反抗軍職業";
+                        case 4: return "曉之陣職業";
+                        case 6: return "超新星職業";
+                        case 12: return "動漫聯動職業";
+                        case 15: return "雷普職業";
+                        case 16: return "阿尼瑪職業";
+                        case 17: return "江湖職業";
+                        case 18: return "閃耀職業";
+
+                    }
+                }
+            }
+            else
+            {
+                foreach (int specJob in specJobs)
+                {
+                    switch (specJob)
+                    {
+                        case 1: extraJobNames.AddRange(new[] { "英雄", "聖騎士" }); break;
+                        case 2: extraJobNames.AddRange(new[] { "大魔導士", "主教" }); break;
+                        case 4: extraJobNames.Add("暗影神偷"); break;
+                        case 11: extraJobNames.Add("聖魂騎士"); break;
+                        case 12: extraJobNames.Add("烈焰巫師"); break;
+                        case 22: extraJobNames.Add("\r\n龍魔導士"); break;
+                        case 32: extraJobNames.Add("煉獄巫師"); break;
+                        case 172: extraJobNames.Add("琳恩"); break;
+                        default: extraJobNames.Add(specJob.ToString()); break;
+                    }
                 }
             }
             if (extraJobNames.Count == 0)
@@ -993,6 +1220,17 @@ namespace WzComparerR2.CharaSim
                 return null;
             }
             return "可裝備" + string.Join("、", extraJobNames);
+        }
+
+        public static bool GetAstraExtraJobReqString(Dictionary<int, AstraSubWeaponInfo> loadedAstraSubWeapons, int id, out string str)
+        {
+            str = null;
+            if (loadedAstraSubWeapons != null && loadedAstraSubWeapons.TryGetValue(id, out AstraSubWeaponInfo value))
+            {
+                str = $"{Regex.Replace(ItemStringHelper.GetJobName(value.Job), @"\s*\(\d{1,2}차\)$", "")} 착용 가능";
+                return true;
+            }
+            return false;
         }
 
         public static string GetItemPropString(ItemPropType propType, long value)
@@ -1026,6 +1264,8 @@ namespace WzComparerR2.CharaSim
                     return value == 0 ? "普通寵物（不能與其他相同普通寵物一起使用）" : "多隻寵物（最多可使用3隻相同寵物）";
                 case ItemPropType.mintable:
                     return GetGearPropString(GearPropType.mintable, value);
+                case ItemPropType.notMintable:
+                    return GetGearPropString(GearPropType.notMintable, value);
                 default:
                     return null;
             }
@@ -1178,7 +1418,7 @@ namespace WzComparerR2.CharaSim
                 case 1110: return "聖魂劍士(2轉)";
                 case 1111: return "聖魂劍士(3轉)";
                 case 1112: return "聖魂劍士(4轉)";
-                case 1114: return "聖魂劍士((6轉)";
+                case 1114: return "聖魂劍士(6轉)";
                 case 1200: return "烈焰巫師(1轉)";
                 case 1210: return "烈焰巫師(2轉)";
                 case 1211: return "烈焰巫師(3轉)";
@@ -1286,6 +1526,9 @@ namespace WzComparerR2.CharaSim
 
                 case 4001: return "劍豪";
                 case 4002: return "陰陽師";
+                case 4003:
+                case 4004:
+                case 4005: return "曉之陣";
                 case 4100: return "劍豪(1轉)";
                 case 4110: return "劍豪(2轉)";
                 case 4111: return "劍豪(3轉)";
@@ -1296,6 +1539,21 @@ namespace WzComparerR2.CharaSim
                 case 4211: return "陰陽師(3轉)";
                 case 4212: return "陰陽師(4轉)";
                 case 4214: return "陰陽師(6轉)";
+                case 4300: return "曉之陣弓手(1轉)";
+                case 4310: return "曉之陣弓手(2轉)";
+                case 4311: return "曉之陣弓手(3轉)";
+                case 4312: return "曉之陣弓手(4轉)";
+                case 4314: return "曉之陣弓手(6轉)";
+                case 4400: return "曉之陣盜賊(1轉)";
+                case 4410: return "曉之陣盜賊(2轉)";
+                case 4411: return "曉之陣盜賊(3轉)";
+                case 4412: return "曉之陣盜賊(4轉)";
+                case 4414: return "曉之陣盜賊(6轉)";
+                case 4500: return "曉之陣海盜(1轉)";
+                case 4510: return "曉之陣海盜(2轉)";
+                case 4511: return "曉之陣海盜(3轉)";
+                case 4512: return "曉之陣海盜(4轉)";
+                case 4514: return "曉之陣海盜(6轉)";
 
 
                 case 5000: return "無名少年";
@@ -1310,11 +1568,17 @@ namespace WzComparerR2.CharaSim
                 case 6001: return "天使破壞者";
                 case 6002: return "卡蒂娜";
                 case 6003: return "凱殷";
+                case 6004: return "超新星";
                 case 6100: return "凱薩(1轉)";
                 case 6110: return "凱薩(2轉)";
                 case 6111: return "凱薩(3轉)";
                 case 6112: return "凱薩(4轉)";
                 case 6114: return "凱薩(6轉)";
+                case 6200: return "超新星法師(1轉)";
+                case 6210: return "超新星法師(2轉)"; 
+                case 6211: return "超新星法師(3轉)";
+                case 6212: return "超新星法師(4轉)";
+                case 6214: return "超新星法師(6轉)";
                 case 6300: return "凱殷(1轉)";
                 case 6310: return "凱殷(2轉)";
                 case 6311: return "凱殷(3轉)";
@@ -1360,6 +1624,9 @@ namespace WzComparerR2.CharaSim
                 case 12005:
                 case 12100: return "竈門炭治郎";
 
+                case 12006:
+                case 12200: return "埼玉";
+
                 case 13000: return "粉豆";
                 case 13001: return "雪吉拉";
                 case 13100: return "粉豆";
@@ -1377,6 +1644,7 @@ namespace WzComparerR2.CharaSim
                 case 15001: return "亞克";
                 case 15002: return "阿戴爾";
                 case 15003: return "卡莉";
+                case 15004: return "雷普";
                 case 15100: return "阿戴爾(1轉)";
                 case 15110: return "阿戴爾(2轉)";
                 case 15111: return "阿戴爾(3轉)";
@@ -1387,6 +1655,11 @@ namespace WzComparerR2.CharaSim
                 case 15211: return "伊利恩(3轉)";
                 case 15212: return "伊利恩(4轉)";
                 case 15214: return "伊利恩(6轉)";
+                case 15300: return "雷普弓手(1轉)";
+                case 15310: return "雷普弓手(2轉)";
+                case 15311: return "雷普弓手(3轉)";
+                case 15312: return "雷普弓手(4轉)";
+                case 15314: return "雷普弓手(6轉)";
                 case 15400: return "卡莉(1轉)";
                 case 15410: return "卡莉(2轉)";
                 case 15411: return "卡莉(3轉)";
@@ -1398,27 +1671,47 @@ namespace WzComparerR2.CharaSim
                 case 15512: return "亞克(4轉)";
                 case 15514: return "亞克(6轉)";
 
-                case 16000: return "阿尼瑪盜賊";
+                case 16000: return "虎影";
                 case 16001: return "菈菈";
-                case 16002: return "Len";
-                case 16100: return "Len(1次)";
-                case 16110: return "Len(2次)";
-                case 16111: return "Len(3次)";
-                case 16112: return "Len(4次)";
-                case 16114: return "Len(6次)";
+                case 16002: return "蓮";
+                case 16003:
+                case 16004: return "阿尼瑪";
+                case 16100: return "蓮(1轉)";
+                case 16110: return "蓮(2轉)";
+                case 16111: return "蓮(3轉)";
+                case 16112: return "蓮(4轉)";
+                case 16114: return "蓮(6轉)";
                 case 16200: return "菈菈(1轉)";
                 case 16210: return "菈菈(2轉)";
                 case 16211: return "菈菈(3轉)";
                 case 16212: return "菈菈(4轉)";
                 case 16214: return "菈菈(6轉)";
+                case 16300: return "阿尼瑪弓手(1轉)";
+                case 16310: return "阿尼瑪弓手(2轉)";
+                case 16311: return "阿尼瑪弓手(3轉)";
+                case 16312: return "阿尼瑪弓手(4轉)";
+                case 16314: return "阿尼瑪弓手(6轉)";
                 case 16400: return "虎影(1轉)";
                 case 16410: return "虎影(2轉)";
                 case 16411: return "虎影(3轉)";
                 case 16412: return "虎影(4轉)";
                 case 16414: return "虎影(6轉)";
+                case 16500: return "阿尼瑪海盜(1轉)";
+                case 16510: return "阿尼瑪海盜(2轉)";
+                case 16511: return "阿尼瑪海盜(3轉)";
+                case 16512: return "阿尼瑪海盜(4轉)";
+                case 16514: return "阿尼瑪海盜(6轉)";
 
                 case 17000: return "墨玄";
                 case 17001: return "琳恩";
+                case 17002:
+                case 17003:
+                case 17004: return "江湖";
+                case 17100: return "江湖劍士(1轉)";
+                case 17110: return "江湖劍士(2轉)";
+                case 17111: return "江湖劍士(3轉)";
+                case 17112: return "江湖劍士(4轉)";
+                case 17114: return "江湖劍士(6轉)";
                 case 17200: return "琳恩(1轉)";
                 case 17210: return "琳恩(2轉)";
                 case 17211: return "琳恩(3轉)";
@@ -1429,9 +1722,22 @@ namespace WzComparerR2.CharaSim
                 case 17511: return "墨玄(3轉)";
                 case 17512: return "墨玄(4轉)";
                 case 17514: return "墨玄(6轉)";
+                case 17300: return "江湖弓手(1轉)";
+                case 17310: return "江湖弓手(2轉)";
+                case 17311: return "江湖弓手(3轉)";
+                case 17312: return "江湖弓手(4轉)";
+                case 17314: return "江湖弓手(6轉)";
+                case 17400: return "江湖盜賊(1轉)";
+                case 17410: return "江湖盜賊(2轉)";
+                case 17411: return "江湖盜賊(3轉)";
+                case 17412: return "江湖盜賊(4轉)";
+                case 17414: return "江湖盜賊(6轉)";
 
                 case 18000: return "施亞阿斯特";
                 case 18001: return "葉里萊特";
+                case 18002: return "艾伊爾";
+                case 18003:
+                case 18004: return "閃耀";
                 case 18100: return "葉里萊特(1轉)";
                 case 18110: return "葉里萊特(2轉)";
                 case 18111: return "葉里萊特(3轉)";
@@ -1442,6 +1748,21 @@ namespace WzComparerR2.CharaSim
                 case 18211: return "施亞阿斯特(3轉)";
                 case 18212: return "施亞阿斯特(4轉)";
                 case 18214: return "施亞阿斯特(6轉)";
+                case 18300: return "艾伊爾(1轉)";
+                case 18310: return "艾伊爾(2轉)";
+                case 18311: return "艾伊爾(3轉)";
+                case 18312: return "艾伊爾(4轉)";
+                case 18314: return "艾伊爾(6轉)";
+                case 18400: return "閃耀盜賊(1轉)";
+                case 18410: return "閃耀盜賊(2轉)";
+                case 18411: return "閃耀盜賊(3轉)";
+                case 18412: return "閃耀盜賊(4轉)";
+                case 18414: return "閃耀盜賊(6轉)";
+                case 18500: return "閃耀海盜(1轉)";
+                case 18510: return "閃耀海盜(2轉)";
+                case 18511: return "閃耀海盜(3轉)";
+                case 18512: return "閃耀海盜(4轉)";
+                case 18514: return "閃耀海盜(6轉)";
 
                 case 40000: return "5轉";
                 case 40001: return "5轉(劍士)";
@@ -1458,34 +1779,255 @@ namespace WzComparerR2.CharaSim
             return null;
         }
 
-        public static string ToCJKNumberExpr(long value)
+        public static string GetFifthJobName(int skillCode, List<int> jobId)
         {
-            var sb = new StringBuilder(16);
+            string jobName = "";
+            switch (jobId.Count)
+            {
+                case 0:
+                    jobName = GetJobName(skillCode / 10000);
+                    break;
+                case 1:
+                    if (jobId[0] == 0)
+                    {
+                        jobName = GetJobName(skillCode / 10000);
+                    }
+                    else
+                    {
+                        jobName = GetJobName(jobId[0]);
+                        jobName = jobName.Contains("(4") ? jobName.Replace("(4", "(5") : jobName + "(5轉)";
+                    }
+                    break;
+                default:
+                    bool isSameFaction = true;
+                    int faction = jobId[0] / 1000;
+                    if (faction == 5) faction = 1;
+                    foreach (int id in jobId.Skip(1))
+                    {
+                        if (id == 0) continue;
+                        isSameFaction = isSameFaction && (id / 1000 == faction);
+                    }
+                    if (isSameFaction)
+                    {
+                        switch (faction)
+                        {
+                            case 0: jobName = "5轉(冒險家)"; break;
+                            case 1:
+                            case 5: jobName = "5轉(皇家騎士團)"; break;
+                            case 2: jobName = "5轉(英雄)"; break;
+                            case 3: jobName = "5轉(末日反抗軍)"; break;
+                            case 4: jobName = "5轉(曉之陣)"; break;
+                            case 6: jobName = "5轉(超新星)"; break;
+                            case 10: jobName = "5轉(超越者)"; break;
+                            case 11: jobName = "5轉(達恩維爾)"; break;
+                            case 12: jobName = "5轉(動漫聯動)"; break;
+                            case 13: jobName = "5轉(怪物)"; break;
+                            case 14: jobName = "5轉(朋友世界)"; break;
+                            case 15: jobName = "5轉(雷普)"; break;
+                            case 16: jobName = "5轉(阿尼瑪)"; break;
+                            case 17: jobName = "5轉(江湖)"; break;
+                            case 18: jobName = "5轉(閃耀)"; break;
+                        }
+                    }
+                    else
+                    {
+                        jobName = GetJobName(skillCode / 10000);
+                    }
+                    break;
+            }
+            return jobName;
+        }
+
+        public static string ToCJKNumberExpr(long value, bool detailedExpr = false)
+        {
+            var sb = new StringBuilder(32);
             bool firstPart = true;
             if (value < 0)
             {
                 sb.Append("-");
                 value = -value; // just ignore the exception -2147483648
             }
-            if (value >= 1_0000_0000)
+            if (detailedExpr)
             {
-                long part = value / 1_0000_0000;
-                sb.AppendFormat("{0}億", part); // Korean: 억, TradChinese+Japanese: 億, SimpChinese: 亿
-                value -= part * 1_0000_0000;
-                firstPart = false;
+                string[] smallUnits = { "", "十", "百", "千" }; // Korean: 십, 백, 천; Chinese+Japanese: 十, 百, 千
+                string[] bigUnits = { "", "萬", "億", "兆", "京" }; // Korean: 만, 억, 조, 경; TradChinese: 萬, 億, 兆, 京; SimpChinese: 万, 亿, 兆, 京; Japanese: 万, 億, 兆, 京;
+
+                string digits = value.ToString();
+                int len = digits.Length;
+
+                bool blockHasValue = false;
+                int zeroCount = 0;
+
+                for (int i = 0; i < len; i++)
+                {
+                    int posFromRight = len - i - 1;
+                    int smallUnitIndex = posFromRight % 4;
+                    int bigUnitIndex = posFromRight / 4;
+
+                    char d = digits[i];
+
+                    if (d == '0')
+                    {
+                        zeroCount++;
+                    }
+                    else
+                    {
+                        if (zeroCount > 0 && zeroCount <= 3)
+                        {
+                            sb.Append('0');
+                        }
+
+                        zeroCount = 0;
+
+                        sb.Append(d);
+                        if (smallUnitIndex > 0)
+                            sb.Append(smallUnits[smallUnitIndex]);
+
+                        blockHasValue = true;
+                    }
+
+                    if (smallUnitIndex == 0)
+                    {
+                        if (blockHasValue && bigUnitIndex > 0 && bigUnitIndex < bigUnits.Length)
+                            sb.Append(bigUnits[bigUnitIndex]);
+
+                        blockHasValue = false;
+                        zeroCount = 0;
+                    }
+                }
             }
-            if (value >= 1_0000)
+            else
             {
-                long part = value / 1_0000;
-                sb.Append(firstPart ? null : " ");
-                sb.AppendFormat("{0}萬", part); // Korean: 만, TradChinese: 萬, SimpChinese+Japanese: 万
-                value -= part * 1_0000;
-                firstPart = false;
+                if (value >= 1_0000_0000_0000_0000)
+                {
+                    long part = value / 1_0000_0000_0000_0000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}京", part); // Korean: 경, Chinese+Japanese: 京; English: Q
+                    value -= part * 1_0000_0000_0000_0000;
+                    firstPart = false;
+                }
+                if (value >= 1_0000_0000_0000)
+                {
+                    long part = value / 1_0000_0000_0000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}兆", part); // Korean: 조, Chinese+Japanese: 兆; English: T
+                    value -= part * 1_0000_0000_0000;
+                    firstPart = false;
+                }
+                if (value >= 1_0000_0000)
+                {
+                    long part = value / 1_0000_0000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}億", part); // Korean: 억, TradChinese+Japanese: 億, SimpChinese: 亿
+                    value -= part * 1_0000_0000;
+                    firstPart = false;
+                }
+                if (value >= 1_0000)
+                {
+                    long part = value / 1_0000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}萬", part); // Korean: 만, TradChinese: 萬, SimpChinese+Japanese: 万
+                    value -= part * 1_0000;
+                    firstPart = false;
+                }
+                if (value > 0)
+                {
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}", value);
+                }
             }
-            if (value > 0)
+
+            return sb.Length > 0 ? sb.ToString() : "0";
+        }
+
+        public static string ToThousandsNumberExpr(long value, bool isMsea = false)
+        {
+            var sb = new StringBuilder(32);
+            bool firstPart = true;
+            if (isMsea)
             {
-                sb.Append(firstPart ? null : " ");
-                sb.AppendFormat("{0}", value);
+                if (value < 0)
+                {
+                    sb.Append("-");
+                    value = -value; // just ignore the exception -2147483648
+                }
+                if (value >= 1_0000_0000_0000_0000)
+                {
+                    long part = value / 1_0000_0000_0000_0000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}Q", part);
+                    value -= part * 1_0000_0000_0000_0000;
+                    firstPart = false;
+                }
+                if (value >= 1_000_000_000_000)
+                {
+                    long part = value / 1_000_000_000_000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}T", part);
+                    value -= part * 1_000_000_000_000;
+                    firstPart = false;
+                }
+                if (value >= 1_000_000_000)
+                {
+                    long part = value / 1_000_000_000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}B", part);
+                    value -= part * 1_000_000_000;
+                    firstPart = false;
+                }
+                if (value >= 1_000_000)
+                {
+                    long part = value / 1_000_000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}M", part);
+                    value -= part * 1_000_000;
+                    firstPart = false;
+                }
+                if (value >= 1_000)
+                {
+                    long part = value / 1_000;
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}K", part);
+                    value -= part * 1_000;
+                    firstPart = false;
+                }
+                if (value > 0)
+                {
+                    sb.Append(firstPart ? null : " ");
+                    sb.AppendFormat("{0}", value);
+                }
+            }
+            else
+            {
+                if (value < 0)
+                {
+                    sb.Append("-");
+                    value = -value; // just ignore the exception -2147483648
+                }
+                /* if (value >= 1_000_000_000_000) // For future proofing
+                {
+                    double part = Math.Round((double)value / 1_000_000_000_000, 1);
+                    sb.AppendFormat("{0}T", part);
+                } */
+                if (value >= 1_000_000_000)
+                {
+                    double part = Math.Round((double)value / 1_000_000_000, 1);
+                    sb.AppendFormat("{0}B", part);
+                }
+                else if (value >= 1_000_000)
+                {
+                    double part = Math.Round((double)value / 1_000_000, 1);
+                    sb.AppendFormat("{0}M", part);
+                }
+                else if (value >= 1_000)
+                {
+                    double part = Math.Round((double)value / 1_000, 1);
+                    sb.AppendFormat("{0}K", part);
+                }
+                else if (value > 0)
+                {
+                    sb.AppendFormat("{0}", value);
+                }
             }
 
             return sb.Length > 0 ? sb.ToString() : "0";
@@ -1497,14 +2039,14 @@ namespace WzComparerR2.CharaSim
             {
                 case 100: return "物理攻擊力增加";
                 case 101: return "魔法攻擊力增加";
-                case 102: return "物理防御力增加";
-                case 103: return "魔法防御力增加";
+                case 102: return "物理防禦力增加";
+                case 103: return "魔法防禦力增加";
                 case 105: return "HP吸收";
 
                 case 110: return "周辺物理攻擊力增加";
                 case 111: return "周辺魔法攻擊力增加";
-                case 112: return "周辺物理防御力增加";
-                case 113: return "周辺魔法防御力增加";
+                case 112: return "周辺物理防禦力增加";
+                case 113: return "周辺魔法防禦力增加";
                 case 114: return "HP回復";
                 case 115: return "移動速度增加";
 
@@ -1538,10 +2080,10 @@ namespace WzComparerR2.CharaSim
 
                 case 150: return "物理攻擊力增加";
                 case 151: return "魔法攻擊力增加";
-                case 152: return "物理防御力增加";
-                case 153: return "魔法防御力增加";
+                case 152: return "物理防禦力增加";
+                case 153: return "魔法防禦力增加";
                 case 154: return "命中率增加";
-                case 155: return "回避率增加";
+                case 155: return "迴避率增加";
                 case 156: return "移動速度增加";
 
                 case 170: return "傳送";

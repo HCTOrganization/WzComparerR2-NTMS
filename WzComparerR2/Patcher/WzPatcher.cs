@@ -1011,7 +1011,7 @@ namespace WzComparerR2.Patcher
         {
             if (expected != actual)
             {
-                if (fileName == "MapleStory.exe" || fileName == "MapleStoryT.exe") reason = "您是否已安裝最新的 Minor Patch？";
+                if (fileName == "MapleStory.exe" || fileName == "MapleStoryT.exe" || fileName == "MapleResource.ini") reason = "您是否已安裝最新的 Minor Patch？";
                 throw new Exception(string.Format("檔案「{0}」的校驗和不符（{1}）。 （預期：0x{2:x8}，實際：0x{3:x8}）", fileName, reason, expected, actual));
             }
         }

@@ -14,5 +14,19 @@ namespace WzComparerR2.Config
             get { return (bool)this["showID"]; }
             set { this["showID"] = value; }
         }
+
+        [ConfigurationProperty("showAllSubMobAtOnce", DefaultValue = false)]
+        public bool ShowAllSubMobAtOnce
+        {
+            get { return (bool)this["showAllSubMobAtOnce"]; }
+            set { this["showAllSubMobAtOnce"] = value; }
+        }
+
+        [ConfigurationProperty("enableMonsterBook", DefaultValue = false)]
+        public bool EnableMonsterBook
+        {
+            get { return (bool)this["enableMonsterBook"]; }
+            set { this["enableMonsterBook"] = value; }
+        }
     }
 }

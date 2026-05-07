@@ -14,23 +14,20 @@ namespace WzComparerR2.OpenAPI
             Version = version;
             UnknownVer = false;
 
-            if (!Utils.Structure.ContainsKey(version))
+            if (!AvatarCodeStructure.Structure.ContainsKey(version))
             {
-                if (version < Utils.Structure.Keys.Min())
+                if (version < AvatarCodeStructure.Structure.Keys.Min())
                 {
-                    version = Utils.Structure.Keys.Min();
+                    version = AvatarCodeStructure.Structure.Keys.Min();
                 }
                 else
                 {
-                    version = Utils.Structure.Keys.Max();
+                    version = AvatarCodeStructure.Structure.Keys.Max();
                 }
                 UnknownVer = true;
             }
                 
-            Unpacked = Utils.Structure[version].Select(d => new DataInfo(d.Name, d.Bits)
-            {
-                Value = d.Value
-            }).ToList();
+            Unpacked = AvatarCodeStructure.Structure[version].Select(d => d.Clone()).ToList();
         }
 
         public int Version { get; set; }
@@ -206,9 +203,18 @@ namespace WzComparerR2.OpenAPI
             if (id == -1) return "";
 
             var ret = "";
-            if (GetValue("isNotBlade") == 0) ret += 134;
-            else if (GetValue("isSubWeapon") != 0) ret += 135;
-            else ret += 109;
+            switch (GetValue("subWeaponType"))
+            {
+                case 0:
+                case 1:
+                    ret += 109; break;
+                case 2:
+                    ret += 134; break;
+                case 3:
+                    ret += 135; break;
+                case 4:
+                    ret += 172; break;
+            }
             ret += GetValue("shieldGender");
             ret += id.ToString().PadLeft(3, '0');
             return ret;
@@ -269,6 +275,17 @@ namespace WzComparerR2.OpenAPI
             return ret;
         }
 
+        public string GetEmotionFaceAcc()
+        {
+            var id = GetValue("emotionFaceAccID");
+            if (id == -1) return "";
+
+            var ret = "101";
+            ret += GetValue("emotionFaceAccGender");
+            ret += id.ToString().PadLeft(3, '0');
+            return ret;
+        }
+
         public byte GetEarType()
         {
             return (byte)GetValue("earType");
@@ -279,14 +296,58 @@ namespace WzComparerR2.OpenAPI
             return (byte)GetValue("jobWingTailType");
         }
 
+        public byte GetJobWingTailTypeDetail()
+        {
+            return (byte)GetValue("jobWingTailTypeDetail");
+        }
+
         public string GetJobWingTailTypeString()
         {
+            var detail = "";
+            switch (this.JobWingTailTypeDetail)
+            {
+                case 0:
+                    detail += "耳";
+                    break;
+                case 1:
+                    detail += "髮飾";
+                    break;
+                case 2:
+                    break;
+            }
+
             switch (this.JobWingTailType)
             {
                 case 1:
                     return "虎影";
                 case 2:
                     return "菈菈";
+                case 3:
+                    return $"蓮(女,{detail})";
+                case 4:
+                    return $"蓮(男,{detail})";
+                default:
+                    return null;
+            }
+        }
+
+        public byte GetEventJob()
+        {
+            return (byte)GetValue("eventJob");
+        }
+
+        public string GetEventJobString()
+        {
+            switch (this.EventJob)
+            {
+                case 1:
+                    return "ピンクビーン";
+                case 2:
+                    return "イェティ";
+                case 3:
+                    return "竈門炭治郎";
+                case 4:
+                    return "サイタマ";
                 default:
                     return null;
             }
@@ -332,21 +393,35 @@ namespace WzComparerR2.OpenAPI
             return GetValue("mixFaceInfo").ToString().PadLeft(3, '0').Substring(0, 1);
         }
 
-        public PrismInfo GetPrismInfo(string type)
+        public int GetShowEffectFlags()
+        {
+            return GetValue("showEffectFlags");
+        }
+
+        public PrismInfo GetPrismInfo(string type, string index = "")
         {
             var ret = new PrismInfo();
-            if (GetValue($"has{type}Prism") != 0)
+            if (GetValue($"has{type}Prism") == 1)
             {
-                ret.ColorType = (byte)GetValue($"{type.ToLower()}PrismColorType");
-                ret.Brightness = GetValue($"{type.ToLower()}PrismBrightness") - 100;
-                ret.Saturation = GetValue($"{type.ToLower()}PrismSaturation") - 100;
-                ret.Hue = GetValue($"{type.ToLower()}PrismHue");
+                ret.On = (byte)GetValue($"{type.ToLower()}Prism{index}On");
+                ret.ColorType = (byte)GetValue($"{type.ToLower()}Prism{index}ColorType");
+                ret.Brightness = GetValue($"{type.ToLower()}Prism{index}Brightness");
+                ret.Saturation = GetValue($"{type.ToLower()}Prism{index}Saturation");
+                ret.Hue = GetValue($"{type.ToLower()}Prism{index}Hue");
                 ret.Valid = true;
             }
             else
             {
                 ret.Valid = false;
             }
+            return ret;
+        }
+
+        public PrismInfoCollection GetPrismInfoCollection(string type)
+        {
+            var ret = new PrismInfoCollection();
+            ret.Prism1 = GetPrismInfo(type);
+            ret.Prism2 = GetPrismInfo(type, "2");
             return ret;
         }
 
@@ -370,6 +445,7 @@ namespace WzComparerR2.OpenAPI
             Shield = GetShield();
             CashWeapon = GetCashWeapon();
             Weapon = GetWeapon();
+            EmotionFaceAcc = GetEmotionFaceAcc();
 
             Ring1 = GetRing(1);
             Ring2 = GetRing(2);
@@ -378,6 +454,8 @@ namespace WzComparerR2.OpenAPI
 
             EarType = GetEarType();
             JobWingTailType = GetJobWingTailType();
+            JobWingTailTypeDetail = GetJobWingTailTypeDetail();
+            EventJob = GetEventJob();
             WeaponMotionType = GetWeaponMotionType();
 
             MixHairRatio = GetMixHairRatio();
@@ -385,13 +463,19 @@ namespace WzComparerR2.OpenAPI
             MixFaceRatio = GetMixFaceRatio();
             MixFaceColor = GetMixFaceColor();
 
-            CapPrismInfo = GetPrismInfo("Cap");
-            CoatPrismInfo = GetPrismInfo("Coat");
-            PantsPrismInfo = GetPrismInfo("Pants");
-            ShoesPrismInfo = GetPrismInfo("Shoes");
-            GlovesPrismInfo = GetPrismInfo("Gloves");
-            CapePrismInfo = GetPrismInfo("Cape");
-            WeaponPrismInfo = GetPrismInfo("Weapon");
+            ShowEffectFlags = GetShowEffectFlags();
+
+            CapPrismInfo = GetPrismInfoCollection("Cap");
+            FaceAccPrismInfo = GetPrismInfoCollection("FaceAcc");
+            EyeAccPrismInfo = GetPrismInfoCollection("EyeAcc");
+            EarAccPrismInfo = GetPrismInfoCollection("EarAcc");
+            CoatPrismInfo = GetPrismInfoCollection("Coat");
+            PantsPrismInfo = GetPrismInfoCollection("Pants");
+            ShoesPrismInfo = GetPrismInfoCollection("Shoes");
+            GlovesPrismInfo = GetPrismInfoCollection("Gloves");
+            CapePrismInfo = GetPrismInfoCollection("Cape");
+            ShieldPrismInfo = GetPrismInfoCollection("Shield");
+            WeaponPrismInfo = GetPrismInfoCollection("Weapon");
             SkinPrismInfo = GetPrismInfo("Skin");
         }
 
@@ -415,27 +499,50 @@ namespace WzComparerR2.OpenAPI
         public string Ring2 { get; set; }
         public string Ring3 { get; set; }
         public string Ring4 { get; set; }
+        public string EmotionFaceAcc { get; set; }
         public byte EarType { get; set; }
         public byte JobWingTailType { get; set; }
+        public byte JobWingTailTypeDetail { get; set; }
+        public string JobWingTailTypeString { get { return this.GetJobWingTailTypeString(); } }
+        public byte EventJob { get; set; }
+        public string EventJobString { get { return this.GetEventJobString(); } }
         public byte WeaponMotionType { get; set; }
+        public string WeaponMotionTypeString { get { return this.GetWeaponMotionTypeString(); } }
         public string MixHairRatio { get; set; }
         public string MixHairColor { get; set; }
         public string MixFaceRatio { get; set; }
         public string MixFaceColor { get; set; }
-        public PrismInfo CapPrismInfo { get; set; }
-        public PrismInfo CoatPrismInfo { get; set; }
-        public PrismInfo PantsPrismInfo { get; set; }
-        public PrismInfo ShoesPrismInfo { get; set; }
-        public PrismInfo GlovesPrismInfo { get; set; }
-        public PrismInfo CapePrismInfo { get; set; }
-        public PrismInfo WeaponPrismInfo { get; set; }
+        public int ShowEffectFlags { get; set; }
+        public bool ShowWeaponEffect { get { return (ShowEffectFlags & 1) != 0; } }
+        public bool ShowWeaponJumpEffect { get { return (ShowEffectFlags & (1 << 1)) != 0; } }
+        public bool ShowWeaponSpecialEffect { get { return (ShowEffectFlags & (1 << 2)) != 0; } }
+        public bool ShowCapeEffect { get { return (ShowEffectFlags & (1 << 3)) != 0; } }
+        public PrismInfoCollection CapPrismInfo { get; set; }
+        public PrismInfoCollection FaceAccPrismInfo { get; set; }
+        public PrismInfoCollection EyeAccPrismInfo { get; set; }
+        public PrismInfoCollection EarAccPrismInfo { get; set; }
+        public PrismInfoCollection CoatPrismInfo { get; set; }
+        public PrismInfoCollection PantsPrismInfo { get; set; }
+        public PrismInfoCollection ShoesPrismInfo { get; set; }
+        public PrismInfoCollection GlovesPrismInfo { get; set; }
+        public PrismInfoCollection ShieldPrismInfo { get; set; }
+        public PrismInfoCollection CapePrismInfo { get; set; }
+        public PrismInfoCollection WeaponPrismInfo { get; set; }
         public PrismInfo SkinPrismInfo { get; set; }
+    }
+
+    public class PrismInfoCollection
+    {
+        public PrismInfo Prism1 { get; set; }
+        public PrismInfo Prism2 { get; set; }
     }
 
     public class PrismInfo
     {
         public bool Valid { get; set; }
+        public byte On { get; set; }
         public byte ColorType { get; set; }
+        public string ColorTypeString { get { return this.GetColorType(); } }
         public int Hue { get; set; }
         public int Saturation { get; set; }
         public int Brightness { get; set; }
@@ -447,6 +554,8 @@ namespace WzComparerR2.OpenAPI
 
         public string GetColorType()
         {
+            if (!this.Valid) return null;
+
             switch (ColorType)
             {
                 case 0:

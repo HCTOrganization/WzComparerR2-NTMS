@@ -70,7 +70,7 @@ namespace WzComparerR2
             skillHTable.Columns.Add("ph", typeof(string));
             skillHTable.Columns.Add("hch", typeof(string));
 
-            StringResult sr;
+            StringResultSkill sr;
 
             foreach (Wz_Node node in skillWz.Nodes)
             {
@@ -87,8 +87,8 @@ namespace WzComparerR2
                 }
                 //导入职业
                 string jobID = m.Result("$1");
-                sl.StringSkill2.TryGetValue(jobID, out sr);
-                jobTable.Rows.Add(jobID, (sr != null ? sr["bookName"] : null));
+                sl.StringSkill2.TryGetValue(jobID, out var _sr);
+                jobTable.Rows.Add(jobID, (_sr != null ? _sr["bookName"] : null));
 
                 //获取技能
                 Wz_Node skillListNode = img.Node.FindNodeByPath("skill");
@@ -99,7 +99,7 @@ namespace WzComparerR2
 
                 foreach (Wz_Node skillNode in skillListNode.Nodes)
                 {
-                    Skill skill = Skill.CreateFromNode(skillNode, PluginManager.FindWz);
+                    Skill skill = Skill.CreateFromNode(skillNode, PluginManager.FindWz, PluginManager.FindWz);
                     if (skill == null)
                         continue;
 
@@ -108,8 +108,8 @@ namespace WzComparerR2
 
                     //导入技能
                     string skillID = skillNode.Text;
-                    sl.StringSkill2.TryGetValue(skillID, out sr);
-
+                    sl.StringSkill2.TryGetValue(skillID, out _sr);
+                    sr = _sr as StringResultSkill;
                     string reqSkill = null;
                     int reqSkillLevel = 0;
                     if (skill.ReqSkill.Count > 0)
@@ -351,7 +351,7 @@ namespace WzComparerR2
                                 sw.WriteLine("<tr><td>技能名</td><td>{0} (id:{1})</td></tr>", sr == null ? "null" : sr.Name, skillId);
                             }
 
-                            Skill skill = Skill.CreateFromNode(skill8000.Nodes[skillId.ToString("D7")], PluginManager.FindWz);
+                            Skill skill = Skill.CreateFromNode(skill8000.Nodes[skillId.ToString("D7")], PluginManager.FindWz, PluginManager.FindWz);
                             if (skill != null)
                             {
                                 skill.Level = skill.MaxLevel;

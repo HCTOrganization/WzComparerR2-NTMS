@@ -40,12 +40,6 @@ namespace WzComparerR2
                 new ComboItem("ASCII"){ Value = -1 },
             });
 
-            cmbWzVersionVerifyMode.Items.AddRange(new[]
-            {
-                new ComboItem("快速"){ Value = WzLib.WzVersionVerifyMode.Fast },
-                new ComboItem("傳統"){ Value = WzLib.WzVersionVerifyMode.Default },
-            });
-
             cmbDesiredLanguage.Items.AddRange(new[]
             {
                 new ComboItem("繁體中文 (TMS)"){ Value = "zh-TW" },
@@ -190,6 +184,18 @@ namespace WzComparerR2
         {
             get { return txtSecretkey.Text; }
             set { txtSecretkey.Text = value;}
+        }
+
+        public string DiscordBotToken
+        {
+            get { return txtDiscordBotToken.Text; }
+            set { txtDiscordBotToken.Text = value; }
+        }
+
+        public string DiscordChannelID
+        {
+            get { return txtDiscordChannelID.Text; }
+            set { txtDiscordChannelID.Text = value; }
         }
 
         public int PreferredLayout
@@ -538,26 +544,12 @@ namespace WzComparerR2
             labelX14.Enabled = chkOpenAIExtraOption.Checked && chkOpenAIExtraOption.Enabled;
         }
 
-        public WzLib.WzVersionVerifyMode WzVersionVerifyMode
-        {
-            get { return ((cmbWzVersionVerifyMode.SelectedItem as ComboItem)?.Value as WzLib.WzVersionVerifyMode?) ?? default; }
-            set
-            {
-                var items = cmbWzVersionVerifyMode.Items.Cast<ComboItem>();
-                var item = items.FirstOrDefault(_item => _item.Value as WzLib.WzVersionVerifyMode? == value)
-                    ?? items.First();
-                cmbWzVersionVerifyMode.SelectedItem = item;
-            }
-        }
-
         public void Load(WcR2Config config)
         {
             this.SortWzOnOpened = config.SortWzOnOpened;
             this.SortWzByImgID = config.SortWzByImgID;
             this.DefaultWzCodePage = config.WzEncoding;
             this.AutoDetectExtFiles = config.AutoDetectExtFiles;
-            this.ImgCheckDisabled = config.ImgCheckDisabled;
-            this.WzVersionVerifyMode = config.WzVersionVerifyMode;
             this.NxOpenAPIKey = config.NxOpenAPIKey;
             this.NxSecretKey = config.NxSecretKey;
             this.MozhiBackend = config.MozhiBackend;
@@ -572,6 +564,8 @@ namespace WzComparerR2
             this.PreferredLayout = config.PreferredLayout;
             this.DetectCurrency = config.DetectCurrency;
             this.DesiredCurrency = config.DesiredCurrency;
+            this.DiscordBotToken = config.DiscordBotToken;
+            this.DiscordChannelID = config.DiscordChannelID;
         }
 
         public void Save(WcR2Config config)
@@ -581,7 +575,6 @@ namespace WzComparerR2
             config.WzEncoding = this.DefaultWzCodePage;
             config.AutoDetectExtFiles = this.AutoDetectExtFiles;
             config.ImgCheckDisabled = this.ImgCheckDisabled;
-            config.WzVersionVerifyMode = this.WzVersionVerifyMode;
             config.NxOpenAPIKey = this.NxOpenAPIKey;
             config.NxSecretKey = this.NxSecretKey;
             config.MozhiBackend = this.MozhiBackend;
@@ -596,6 +589,8 @@ namespace WzComparerR2
             config.PreferredLayout = this.PreferredLayout;
             config.DetectCurrency = this.DetectCurrency;
             config.DesiredCurrency = this.DesiredCurrency;
+            config.DiscordBotToken = this.DiscordBotToken;
+            config.DiscordChannelID = this.DiscordChannelID;
         }
     }
 }

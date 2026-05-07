@@ -173,7 +173,14 @@ namespace WzComparerR2.MapRender.UI
                             blocks.Add(blocks2[i]);
                         }
                         size.X = Math.Max(size.X, size2.X);
-                        size.Y = current.Y + size2.Y;
+                        current.Y += size2.Y;
+
+                        var aniName = (item.View?.Animator as StateMachineAnimator)?.GetCurrent();
+                        if (aniName != null)
+                        {
+                            blocks.Add(PrepareTextLine(env.Fonts.TooltipContentFont, "行動: " + aniName, ref current, Color.White, ref size.X));
+                        }
+                        size.Y = current.Y;
                     }
                     break;
 
@@ -245,6 +252,11 @@ namespace WzComparerR2.MapRender.UI
                         sb.Append("(").Append(sr?.Name ?? "null").AppendLine(")");
                     }
                 }
+            }
+
+            if (item.HRange > 0 && item.VRange > 0)
+            {
+                sb.AppendLine($"範圍: {item.HRange}×{item.VRange}");
             }
 
             sb.Length -= 2;

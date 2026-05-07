@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO;
-using System.Net;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
-using WzComparerR2.WzLib;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using WzComparerR2.CharaSim;
+using WzComparerR2.CharaSimControl;
 using WzComparerR2.Common;
 using WzComparerR2.PluginBase;
-using WzComparerR2.CharaSimControl;
-using WzComparerR2.CharaSim;
-using System.Text.RegularExpressions;
-using System.Drawing.Imaging;
+using WzComparerR2.WzLib;
 
 namespace WzComparerR2.Comparer
 {
@@ -27,36 +29,48 @@ namespace WzComparerR2.Comparer
         private Wz_File[] StringWzNewOld { get; set; } = new Wz_File[2];
         private Wz_File[] ItemWzNewOld { get; set; } = new Wz_File[2];
         private Wz_File[] EtcWzNewOld { get; set; } = new Wz_File[2];
-        private List<string> OutputSkillTooltipIDs { get; set; } = new List<string>();
-        private List<string> OutputCashTooltipIDs { get; set; } = new List<string>();
-        private List<string> OutputGearTooltipIDs { get; set; } = new List<string>();
-        private List<string> OutputItemTooltipIDs { get; set; } = new List<string>();
-        private List<string> OutputMapTooltipIDs { get; set; } = new List<string>();
-        private List<string> OutputMobTooltipIDs { get; set; } = new List<string>();
-        private List<string> OutputNpcTooltipIDs { get; set; } = new List<string>();
+        private Wz_File[] QuestWzNewOld { get; set; } = new Wz_File[2];
+        private HashSet<string> OutputSkillTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputPerJobSkillTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputCashTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputGearTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputItemTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputMapTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputMobTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputNpcTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputQuestTooltipIDs { get; set; } = new HashSet<string>();
+        private HashSet<string> OutputAchvTooltipIDs { get; set; } = new HashSet<string>();
         private Dictionary<string, List<string>> DiffCashTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffGearTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffItemTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffMapTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffMobTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffNpcTags { get; set; } = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<string>> DiffQuestTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<string>> DiffSkillTags { get; set; } = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<string>> DiffPerJobSkillTags { get; set; } = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<string>> DiffAchvTags { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<string, List<int>> KMSContentID { get; set; } = new Dictionary<string, List<int>>();
         private Dictionary<string, List<string>> KMSComponentDict { get; set; } = new Dictionary<string, List<string>>();
         private Dictionary<int, List<int>> FifthJobSkillToJobID { get; set; } = new Dictionary<int, List<int>>();
+        public Dictionary<string, string> FailToExportNodes { get; private set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> FailToExportTooltips { get; private set; } = new Dictionary<string, string>();
+        private Dictionary<string, HashSet<int>> ChangedActions { get; set; } = new Dictionary<string, HashSet<int>>();
+        private DiscordService DiscordSvc = new DiscordService();
         public WzFileComparer Comparer { get; protected set; }
         private string stateInfo;
         private string stateDetail;
         public bool OutputPng { get; set; }
         public bool OutputAddedImg { get; set; }
         public bool OutputRemovedImg { get; set; }
-        public bool EnableDarkMode { get; set; }
+        public bool OutputAchvTooltip { get; set; }
         public bool OutputCashTooltip { get; set; }
         public bool OutputGearTooltip { get; set; }
         public bool OutputItemTooltip { get; set; }
         public bool OutputMapTooltip { get; set; }
         public bool OutputMobTooltip { get; set; }
         public bool OutputNpcTooltip { get; set; }
+        public bool OutputQuestTooltip { get; set; }
         public bool OutputSkillTooltip { get; set; }
         public bool HashPngFileName { get; set; }
         public bool Enable22AniStyle { get; set; }
@@ -66,6 +80,23 @@ namespace WzComparerR2.Comparer
         public bool ShowLinkedTamingMob { get; set; }
         public bool SkipKMSContent { get; set; }
         public bool DownloadKMSContentDB { get; set; }
+        public bool SkipGodChangseopDuplicatedNodes { get; set; }
+        public bool EnableAssembleTooltip { get; set; }
+        public bool ShowDamageSkin { get; set; }
+        public bool UseMiniSizeDamageSkin { get; set; }
+        public bool AlwaysUseMseaFormatDamageSkin { get; set; }
+        public bool DisplayDamageSkinUnitOnSingleLine { get; set; }
+        public bool UseInGameSpacing { get; set; }
+        public long DamageSkinNumber { get; set; }
+        public bool AllowFamiliarOutOfBounds { get; set; }
+        public bool UseCTFamiliarUI { get; set; }
+        public bool PostChangesToDiscord { get; set; }
+        public bool EnableWorldArchive { get; set; }
+        public bool EnableMonsterBook { get; set; }
+        public bool ShowNpcQuotes { get; set; }
+        public bool LocatePetEquip { get; set; }
+        public List<Color> ColorTable { get; set; }
+        public Dictionary<string, bool> selectedNodes { get; set; }
 
         public string StateInfo
         {
@@ -111,6 +142,8 @@ namespace WzComparerR2.Comparer
 
         public void EasyCompareWzFiles(Wz_File fileNew, Wz_File fileOld, string outputDir, StreamWriter index = null)
         {
+            ReportVersionToDiscord(string.Format("{0} -> {1}", fileOld.Header.WzVersion, fileNew.Header.WzVersion));
+
             StateInfo = "比較中...";
 
             if ((fileNew.Type == Wz_Type.Base || fileOld.Type == Wz_Type.Base) && index == null) //至少有一个base 拆分对比
@@ -120,17 +153,54 @@ namespace WzComparerR2.Comparer
                 WzFileComparer comparer = new WzFileComparer();
                 comparer.IgnoreWzFile = true;
 
-                if (OutputCashTooltip || OutputGearTooltip || OutputItemTooltip || OutputMapTooltip || OutputMobTooltip || OutputNpcTooltip || OutputSkillTooltip || SkipKMSContent)
+                if (OutputCashTooltip || OutputGearTooltip || OutputItemTooltip || OutputMapTooltip || OutputMobTooltip || OutputNpcTooltip || OutputSkillTooltip || OutputQuestTooltip || OutputAchvTooltip || SkipKMSContent)
                 {
                     this.WzNewOld[0] = fileNew.Node;
                     this.WzNewOld[1] = fileOld.Node;
                     this.WzFileNewOld[0] = fileNew.Node.GetNodeWzFile();
                     this.WzFileNewOld[1] = fileOld.Node.GetNodeWzFile();
+
+                    StateInfo = "正在初始化5轉技能職業對應關係...";
+                    for (int i = 0; i < 2; i++)
+                    {
+                        Wz_Node vCoreData = PluginManager.FindWz("Etc\\VcoreNew.img\\vSkill\\CoreData", WzFileNewOld[i]);
+                        if (vCoreData == null || vCoreData.FullPath == "Base.wz") vCoreData = PluginManager.FindWz("Etc\\VCore.img\\CoreData", WzFileNewOld[i]);
+                        if (vCoreData == null || vCoreData.FullPath == "Base.wz") break;
+
+                        foreach (Wz_Node data in vCoreData.Nodes)
+                        {
+                            Wz_Node connectSkill = data.FindNodeByPath("connectSkill").ResolveUol();
+                            Wz_Node jobIDValue = data.FindNodeByPath("job").ResolveUol();
+                            List<int> applicableJobID = new List<int>();
+                            foreach (Wz_Node jobID in jobIDValue.Nodes)
+                            {
+                                applicableJobID.Add(jobID.GetValueEx<int>(0));
+                            }
+                            if (connectSkill == null)
+                            {
+                                int skillIDValue = data.FindNodeByPath("spCoreOption\\effect\\skill_id").ResolveUol().GetValueEx<int>(0);
+                                if (!FifthJobSkillToJobID.ContainsKey(skillIDValue)) FifthJobSkillToJobID.Add(skillIDValue, [0]);
+                            }
+                            else
+                            {
+                                foreach (Wz_Node skillID in connectSkill.Nodes)
+                                {
+                                    int skillIDValue = skillID.GetValueEx<int>(0);
+                                    if (skillIDValue > 0 && !FifthJobSkillToJobID.ContainsKey(skillIDValue))
+                                    {
+                                        FifthJobSkillToJobID.Add(skillIDValue, applicableJobID);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     if (SkipKMSContent)
                     {
+                        KMSContentID["Skill"] = new List<int>();
                         if (DownloadKMSContentDB)
                         {
-                            foreach (string item in new string[] { "Item", "Map", "Mob", "Npc" })
+                            foreach (string item in new string[] { "Item", "Map", "Mob", "Npc", "Skill", "Achievement" })
                             {
                                 StateInfo = string.Format("正在下載KMS的{0}資料庫...", item);
                                 var request = (HttpWebRequest)WebRequest.Create(string.Format("https://raw.githubusercontent.com/HikariCalyx/KMSContent/refs/heads/main/{0}ID.txt", item));
@@ -168,7 +238,7 @@ namespace WzComparerR2.Comparer
                                     }
                                 }
                             }
-                            foreach (string item in new string[] { "Effect", "MapBack", "MapObj", "MapTile", "MapWorldMap" })
+                            foreach (string item in new string[] { "Effect", "MapBack", "MapObj", "MapTile", "MapWorldMap", "MobBossPattern" })
                             {
                                 StateInfo = string.Format("正在下載KMS的{0}資料庫...", item);
                                 var request = (HttpWebRequest)WebRequest.Create(string.Format("https://raw.githubusercontent.com/HikariCalyx/KMSContent/refs/heads/main/{0}ImgList.txt", item));
@@ -204,40 +274,39 @@ namespace WzComparerR2.Comparer
                                 }
                             }
                         }
-                        StateInfo = "正在初始化5轉技能職業對應關係...";
-                        for (int i = 0; i < 2; i++)
+                        else
                         {
-                            Wz_Node vCoreData = PluginManager.FindWz("Etc\\VCore.img\\CoreData", WzFileNewOld[i]);
-                            if (vCoreData == null) break;
-
-                            foreach (Wz_Node data in vCoreData.Nodes)
+                            foreach (string item in new string[] { "Item", "Map", "Mob", "Npc", "Skill", "Achievement" })
                             {
-                                Wz_Node connectSkill = data.FindNodeByPath("connectSkill").ResolveUol();
-                                Wz_Node jobIDValue = data.FindNodeByPath("job").ResolveUol();
-                                List<int> applicableJobID = new List<int>();
-                                foreach (Wz_Node jobID in jobIDValue.Nodes)
+                                if (!KMSContentID.ContainsKey(item))
                                 {
-                                    applicableJobID.Add(jobID.GetValueEx<int>(0));
+                                    KMSContentID[item] = new List<int>();
                                 }
-                                if (connectSkill == null)
+                            }
+                            foreach (string item in new string[] { "Effect", "MapBack", "MapObj", "MapTile", "MapWorldMap" })
+                            {
+                                if (!KMSComponentDict.ContainsKey(item))
                                 {
-                                    int skillIDValue = data.FindNodeByPath("spCoreOption\\effect\\skill_id").ResolveUol().GetValueEx<int>(0);
-                                    if (!FifthJobSkillToJobID.ContainsKey(skillIDValue)) FifthJobSkillToJobID.Add(skillIDValue, [0]);
-                                }
-                                else
-                                {
-                                    foreach (Wz_Node skillID in connectSkill.Nodes)
-                                    {
-                                        int skillIDValue = skillID.GetValueEx<int>(0);
-                                        if (skillIDValue > 0 && !FifthJobSkillToJobID.ContainsKey(skillIDValue))
-                                        {
-                                            FifthJobSkillToJobID.Add(skillIDValue, applicableJobID);
-                                        }
-                                    }
+                                    KMSComponentDict[item] = new List<string>();
+
                                 }
                             }
                         }
                     }
+                }
+                if (OutputItemTooltip || OutputGearTooltip) // Check commodity differences
+                {
+                    StateInfo = "道具資訊初始化中";
+                    CharaSimLoader.ClearAll();
+                    CharaSimLoader.LoadSetItemsIfEmpty(fileNew);
+                    CharaSimLoader.LoadAstraSubWeaponsIfEmpty(fileNew);
+                    CharaSimLoader.LoadExclusiveEquipsIfEmpty(fileNew);
+                    CharaSimLoader.LoadMsnMintableItemListIfEmpty(fileNew);
+                    if (this.LocatePetEquip) CharaSimLoader.LoadPetEquipInfoIfEmpty(fileNew);
+                    CharaSimLoader.LoadCommodities(fileOld, slotIdx: 1);
+                    CharaSimLoader.LoadCommodities(fileNew, slotIdx: 0);
+                    CompareCommodities();
+                    StateInfo = "道具資訊初始化完成";
                 }
 
 
@@ -271,9 +340,13 @@ namespace WzComparerR2.Comparer
                     //输出概况
                     sw.WriteLine("<p class=\"wzf\">");
                     sw.WriteLine("<table>");
-                    sw.WriteLine("<tr><th>檔案名</th><th>新版本的大小</th><th>舊版本的大小</th><th>變更済み</th><th>新增</th><th>刪除されました</th></tr>");
+                    sw.WriteLine("<tr><th>檔案名</th><th>新版本的大小</th><th>舊版本的大小</th><th>變更</th><th>新增</th><th>刪除</th></tr>");
                     foreach (var wzType in wzTypeList)
                     {
+                        if (!selectedNodes[wzType.ToString()])
+                        {
+                            if (!(wzType is Wz_Type.Character && OutputSkillTooltip)) continue;
+                        }
                         var vNodeNew = dictNew[wzType];
                         var vNodeOld = dictOld[wzType];
                         var cmp = comparer.Compare(vNodeNew, vNodeOld);
@@ -336,6 +409,10 @@ namespace WzComparerR2.Comparer
 
             foreach (var wzType in wzTypeList)
             {
+                if (!selectedNodes[wzType.ToString()])
+                {
+                    if (!(wzType is Wz_Type.Character && OutputSkillTooltip)) continue;
+                }
                 var vNodeNew = dictNew[wzType];
                 var vNodeOld = dictOld[wzType];
                 var cmp = comparer.Compare(vNodeNew, vNodeOld);
@@ -388,7 +465,7 @@ namespace WzComparerR2.Comparer
                 {
                     subFiles.Add(subFile);
                 }
-                else //其他
+                else //其它
                 {
                     topNode.AddChild(childNode, true);
                 }
@@ -494,6 +571,8 @@ namespace WzComparerR2.Comparer
             string mapTooltipPath = Path.Combine(outputDir, "MapTooltips");
             string mobTooltipPath = Path.Combine(outputDir, "MobTooltips");
             string npcTooltipPath = Path.Combine(outputDir, "NpcTooltips");
+            string questTooltipPath = Path.Combine(outputDir, "QuestTooltips");
+            string achvTooltipPath = Path.Combine(outputDir, "AchievementTooltips");
 
             FileStream htmlFile = null;
             StreamWriter sw = null;
@@ -525,15 +604,15 @@ namespace WzComparerR2.Comparer
                     string.Join("<br/>", fileOld.SelectMany(wzf => GetFileInfo(wzf, ewzf => ewzf.Header.FileSize.ToString("N0")))),
                     string.Join("<br/>", fileOld.Select(wzf => wzf.GetMergedVersion()))
                     );
-                sw.WriteLine("<tr><td>現在時間</td><td colspan='3'>{0:M-d-yyyy HH:mm:ss.fff}</td></tr>", DateTime.Now);
+                sw.WriteLine("<tr><td>現在時間</td><td colspan='3'>{0:yyyy年 M月 d日 HH:mm:ss.fff}</td></tr>", DateTime.Now);
                 sw.WriteLine("<tr><td>選項</td><td colspan='3'>{0}</td></tr>", string.Join("<br/>", new[] {
                     this.OutputPng ? "- 輸出PNG和音訊" : null,
                     this.OutputAddedImg ? "- 新增的檔案" : null,
                     this.OutputRemovedImg ? "- 已刪除的檔案" : null,
-                    this.EnableDarkMode ? "- 暗黑模式" : null,
                     "- Compare " + this.Comparer.PngComparison,
                     this.Comparer.ResolvePngLink ? "- 解析PNG連結" : null,
-                    this.SkipKMSContent ? "- 跳過KMS職業對比" : null,
+                    this.SkipKMSContent ? "- 跳過KMS內容對比" : null,
+                    this.SkipGodChangseopDuplicatedNodes ? "- 跳過神昌燮的重複節點" : null,
                 }.Where(p => p != null)));
                 sw.WriteLine("</table>");
                 sw.WriteLine("</p>");
@@ -542,9 +621,15 @@ namespace WzComparerR2.Comparer
                 StringBuilder[] sb = { new StringBuilder(), new StringBuilder(), new StringBuilder() };
                 int[] count = new int[6];
                 List<CompareDifference> kmsContent = new List<CompareDifference> { };
+                List<CompareDifference> godChangseopNode = new List<CompareDifference> { };
                 string[] diffStr = { "變更", "新增", "刪除" };
                 foreach (CompareDifference diff in diffLst)
                 {
+                    if (!selectedNodes["Character"] && OutputSkillTooltip)
+                    {
+                        if (!(diff.NodeNew != null && diff.NodeNew.FullPathToFile.StartsWith("Character\\00002000.img")) && (diff.NodeNew != null && diff.NodeNew.FullPathToFile.StartsWith("Character"))) continue;
+                        if (!(diff.NodeOld != null && diff.NodeOld.FullPathToFile.StartsWith("Character\\00002000.img")) && (diff.NodeOld != null && diff.NodeOld.FullPathToFile.StartsWith("Character"))) continue;
+                    }
                     int idx = -1;
                     string detail = null;
                     switch (diff.DifferenceType)
@@ -556,6 +641,11 @@ namespace WzComparerR2.Comparer
                                 kmsContent.Add(diff);
                                 continue;
                             }
+                            if (SkipGodChangseopDuplicatedNodes && (isGodChangseopNode(diff.NodeNew) || isGodChangseopNode(diff.NodeOld)))
+                            {
+                                godChangseopNode.Add(diff);
+                                continue;
+                            }
                             detail = string.Format("<a name=\"m_{1}_{2}\" href=\"#a_{1}_{2}\">{0}</a>", diff.NodeNew.FullPathToFile, idx, count[idx]);
                             break;
                         case DifferenceType.Append:
@@ -563,6 +653,11 @@ namespace WzComparerR2.Comparer
                             if (SkipKMSContent && isKMSNode(diff.NodeNew))
                             {
                                 kmsContent.Add(diff);
+                                continue;
+                            }
+                            if (SkipGodChangseopDuplicatedNodes && isGodChangseopNode(diff.NodeNew))
+                            {
+                                godChangseopNode.Add(diff);
                                 continue;
                             }
                             if (this.OutputAddedImg)
@@ -579,6 +674,11 @@ namespace WzComparerR2.Comparer
                             if (SkipKMSContent && isKMSNode(diff.NodeOld))
                             {
                                 kmsContent.Add(diff);
+                                continue;
+                            }
+                            if (SkipGodChangseopDuplicatedNodes && isGodChangseopNode(diff.NodeOld))
+                            {
+                                godChangseopNode.Add(diff);
                                 continue;
                             }
                             if (this.OutputRemovedImg)
@@ -617,9 +717,20 @@ namespace WzComparerR2.Comparer
 
                 foreach (CompareDifference diff in diffLst)
                 {
+                    if (!selectedNodes["Character"] && OutputSkillTooltip)
+                    {
+                        if (!(diff.NodeNew != null && diff.NodeNew.FullPathToFile.StartsWith("Character\\00002000.img")) && (diff.NodeNew != null && diff.NodeNew.FullPathToFile.StartsWith("Character"))) continue;
+                        if (!(diff.NodeOld != null && diff.NodeOld.FullPathToFile.StartsWith("Character\\00002000.img")) && (diff.NodeOld != null && diff.NodeOld.FullPathToFile.StartsWith("Character"))) continue;
+                    }
                     if (kmsContent.Contains(diff))
                     {
-                        StateInfo = string.Format("{0}/{1} 変更: {2}", count[0], count[3], "KMS內容");
+                        StateInfo = string.Format("{0}/{1} 變更: {2}", count[0], count[3], "KMS內容");
+                        count[0]++;
+                        continue;
+                    }
+                    if (godChangseopNode.Contains(diff))
+                    {
+                        StateInfo = string.Format("{0}/{1} 變更: {2}", count[0], count[3], "神昌燮的重複節點");
                         count[0]++;
                         continue;
                     }
@@ -709,6 +820,14 @@ namespace WzComparerR2.Comparer
                 OnPatchingStateChanged(new Patcher.PatchingEventArgs(null, Patcher.PatchingState.CompareFinished));
             }
 
+            if (OutputQuestTooltip && type.ToString() == "Quest" && OutputQuestTooltipIDs != null)
+            {
+                if (!Directory.Exists(questTooltipPath))
+                {
+                    Directory.CreateDirectory(questTooltipPath);
+                }
+                SaveQuestTooltip(questTooltipPath);
+            }
             if (OutputSkillTooltip && type.ToString() == "String" && OutputSkillTooltipIDs != null)
             {
                 if (!Directory.Exists(skillTooltipPath))
@@ -717,13 +836,28 @@ namespace WzComparerR2.Comparer
                 }
                 SaveSkillTooltip(skillTooltipPath);
             }
+            if (OutputSkillTooltip && type.ToString() == "String" && OutputPerJobSkillTooltipIDs != null)
+            {
+                if (!Directory.Exists(skillTooltipPath))
+                {
+                    Directory.CreateDirectory(skillTooltipPath);
+                }
+                SavePerJobSkillTooltip(skillTooltipPath);
+            }
             if (OutputItemTooltip && type.ToString() == "String" && OutputItemTooltipIDs != null)
             {
                 if (!Directory.Exists(itemTooltipPath))
                 {
                     Directory.CreateDirectory(itemTooltipPath);
                 }
-                SaveItemTooltip(itemTooltipPath);
+                if (this.EnableAssembleTooltip)
+                {
+                    SaveItemTooltip3(itemTooltipPath);
+                }
+                else
+                {
+                    SaveItemTooltip(itemTooltipPath);
+                }
             }
             if (OutputGearTooltip && type.ToString() == "String" && OutputGearTooltipIDs != null)
             {
@@ -772,11 +906,74 @@ namespace WzComparerR2.Comparer
                 }
                 SaveCashTooltip(itemTooltipPath);
             }
+            if (OutputAchvTooltip && type.ToString() == "String" && OutputAchvTooltipIDs != null)
+            {
+                if (!Directory.Exists(achvTooltipPath))
+                {
+                    Directory.CreateDirectory(achvTooltipPath);
+                }
+                SaveAchvTooltip(achvTooltipPath);
+            }
         }
 
-        // 變更された技能ツールチップ出力
+        // 변경된 스킬 툴팁 출력
+        private void UpdateActionChanges()
+        {
+            if (ChangedActions.Count <= 0) return;
+
+            StateInfo = $"正在整理{ChangedActions.Count}個技能延遲變更點...";
+            StateDetail = "Skill 對比中...";
+
+            for (int i = 0; i < 2; i++) // 0: New, 1: Old
+            {
+                var skill_wz = PluginManager.FindWz(Wz_Type.Skill, WzFileNewOld[i]);
+                foreach (var skill_img in skill_wz?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+                {
+                    if (!Regex.Match(skill_img.Text, @"^\d+[.]img$").Success) continue;
+
+                    var skill_node = skill_img.FindNodeByPath("skill", true);
+                    foreach (var skill in skill_node?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+                    {
+                        if (!int.TryParse(skill.Text, out int skill_id)) continue;
+
+                        var action_node = skill.FindNodeByPath("action");
+                        foreach (var action in action_node?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+                        {
+                            var action_str = action.GetValueEx<string>(null);
+                            if (string.IsNullOrEmpty(action_str)) continue;
+                            if (ChangedActions.ContainsKey(action_str))
+                            {
+                                ChangedActions[action_str].Add(skill_id);
+                            }
+                        }
+                    }
+                }
+            }
+            foreach (var kv in ChangedActions)
+            {
+                var action = kv.Key;
+                var ids = kv.Value;
+                foreach (var id in ids)
+                {
+                    if (!OutputSkillTooltipIDs.Contains(id.ToString()))
+                    {
+                        OutputSkillTooltipIDs.Add(id.ToString());
+                        DiffSkillTags[id.ToString()] = new List<string>();
+                    }
+
+                    if (!DiffSkillTags[id.ToString()].Contains(action))
+                    {
+                        DiffSkillTags[id.ToString()].Add(action);
+                    }
+                }
+            }
+            ChangedActions.Clear();
+        }
+
+        // 變更されたスキルツールチップ出力
         private void SaveSkillTooltip(string skillTooltipPath)
         {
+            UpdateActionChanges();
             SkillTooltipRender2[] skillRenderNewOld = new SkillTooltipRender2[2];
             int count = 0;
             int allCount = OutputSkillTooltipIDs.Count;
@@ -787,10 +984,11 @@ namespace WzComparerR2.Comparer
                 this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
                 this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
                 this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
 
                 skillRenderNewOld[i] = new SkillTooltipRender2();
                 skillRenderNewOld[i].StringLinker = new StringLinker();
-                skillRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i]);
+                skillRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
                 skillRenderNewOld[i].ShowObjectID = this.ShowObjectID;
                 skillRenderNewOld[i].ShowDelay = true;
                 skillRenderNewOld[i].wzNode = WzNewOld[i];
@@ -801,130 +999,325 @@ namespace WzComparerR2.Comparer
 
             foreach (var skillID in OutputSkillTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} 技能: {2}", ++count, allCount, skillID);
-                StateDetail = "Skill 對比中...";
+                try
+                {
 
-                if (SkipKMSContent && isKMSSkillID(Int32.Parse(skillID))) continue;
+                    StateInfo = string.Format("{0}/{1} 技能: {2}", ++count, allCount, skillID);
+                    StateDetail = "Skill 對比中...";
 
-                string skillType = "";
-                string skillNodePath = int.Parse(skillID) / 10000000 == 8 ? String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 100, skillID) : String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 10000, skillID);
-                if (int.Parse(skillID) / 10000 == 0) skillNodePath = String.Format(@"\000.img\skill\{0:D7}", skillID);
-                StringResult sr;
-                string skillName;
-                if (skillRenderNewOld[1].StringLinker == null || !skillRenderNewOld[1].StringLinker.StringSkill.TryGetValue(int.Parse(skillID), out sr))
-                {
-                    sr = new StringResultSkill();
-                    sr.Name = "未知的技能";
-                }
-                skillName = sr.Name;
-                if (skillRenderNewOld[0].StringLinker == null || !skillRenderNewOld[0].StringLinker.StringSkill.TryGetValue(int.Parse(skillID), out sr))
-                {
-                    sr = new StringResultSkill();
-                    sr.Name = "未知的技能";
-                }
-                if (skillName != sr.Name && skillName != "未知的技能" && sr.Name != "未知的技能")
-                {
-                    skillName += "_" + sr.Name;
-                }
-                else if (skillName == "未知的技能")
-                {
+                    bool[] isSkillNull = new bool[2] { false, false };
+
+                    if (SkipKMSContent && isKMSSkillID(Int32.Parse(skillID))) continue;
+
+                    string skillType = "";
+                    string skillNodePath = int.Parse(skillID) / 10000000 == 8 ? String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 100, skillID) : String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 10000, skillID);
+                    if (int.Parse(skillID) / 10000 == 0) skillNodePath = String.Format(@"\000.img\skill\{0:D7}", skillID);
+                    StringResult sr;
+                    string skillName;
+                    if (skillRenderNewOld[1].StringLinker == null || !skillRenderNewOld[1].StringLinker.StringSkill.TryGetValue(int.Parse(skillID), out sr))
+                    {
+                        sr = new StringResultSkill();
+                        sr.Name = "未知的技能";
+                    }
                     skillName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(skillName)) skillName = "未知的技能";
-                skillName = RemoveInvalidFileNameChars(skillName);
-                int nullSkillIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Skill skill = Skill.CreateFromNode(PluginManager.FindWz("Skill" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, WzFileNewOld[i]) ??
-                        (Skill.CreateFromNode(PluginManager.FindWz("Skill001" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, WzFileNewOld[i]) ??
-                        (Skill.CreateFromNode(PluginManager.FindWz("Skill002" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, WzFileNewOld[i]) ??
-                        Skill.CreateFromNode(PluginManager.FindWz("Skill003" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, WzFileNewOld[i])));
-
-                    if (skill != null)
+                    if (skillRenderNewOld[0].StringLinker == null || !skillRenderNewOld[0].StringLinker.StringSkill.TryGetValue(int.Parse(skillID), out sr))
                     {
-                        skill.Level = skill.MaxLevel;
-                        skillRenderNewOld[i].Skill = skill;
+                        sr = new StringResultSkill();
+                        sr.Name = "未知的技能";
                     }
-                    else
+                    if (skillName != sr.Name && skillName != "未知的技能" && sr.Name != "未知的技能")
                     {
-                        nullSkillIdx = i + 1;
+                        skillName += "_" + sr.Name;
                     }
-                }
+                    else if (skillName == "未知的技能")
+                    {
+                        skillName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(skillName)) skillName = "未知的技能";
+                    skillName = RemoveInvalidFileNameChars(skillName);
+                    int nullSkillIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    bool isPerJobVariableSkill = false;
 
-                switch (nullSkillIdx)
-                {
-                    case 0: // change
-                        //skillType = "變更";
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Skill skill = Skill.CreateFromNode(PluginManager.FindWz("Skill" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            (Skill.CreateFromNode(PluginManager.FindWz("Skill001" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            (Skill.CreateFromNode(PluginManager.FindWz("Skill002" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            Skill.CreateFromNode(PluginManager.FindWz("Skill003" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i])));
 
-                        Bitmap ImageNew = skillRenderNewOld[0].Render(true);
-                        Bitmap ImageOld = skillRenderNewOld[1].Render(true);
-                        if (ShowChangeType)
+                        if (skill != null)
                         {
-                            int picHchange = ShowObjectID ? 13 : 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 13 : 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            skill.Level = skill.MaxLevel;
+                            skillRenderNewOld[i].Skill = skill;
+                            isPerJobVariableSkill = skill.PerJobAttackInfo.Count > 0;
                         }
+                        else
+                        {
+                            isSkillNull[i] = true;
+                            nullSkillIdx = i + 1;
+                        }
+                    }
 
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    switch (nullSkillIdx)
+                    {
+                        case 0: // change
+                            skillType = "變更";
 
-                    case 1: // delete
-                        skillType = "刪除";
+                            Bitmap ImageNew = skillRenderNewOld[0].Render(true);
+                            Bitmap ImageOld = skillRenderNewOld[1].Render(true);
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
 
-                        resultImage = skillRenderNewOld[1].Render();
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    case 2: // add
-                        skillType = "新增";
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
 
-                        resultImage = skillRenderNewOld[0].Render();
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                        case 1: // delete
+                            skillType = "刪除";
+                            if (isSkillNull[1]) continue;
+                            resultImage = skillRenderNewOld[1].Render();
+                            g = Graphics.FromImage(resultImage);
+                            break;
 
-                    default:
-                        break;
+                        case 2: // add
+                            skillType = "新增";
+                            if (isSkillNull[0]) continue;
+                            resultImage = skillRenderNewOld[0].Render();
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var skillTypeTextInfo = g.MeasureString(skillType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullSkillIdx != 0) GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string categoryPath = (int.Parse(skillID) / 100000 == 4000 && FifthJobSkillToJobID.ContainsKey(int.Parse(skillID))) ? (ItemStringHelper.GetFifthJobName(int.Parse(skillID), FifthJobSkillToJobID[int.Parse(skillID)])) : (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其它");
+
+                    if (!Directory.Exists(Path.Combine(skillTooltipPath, categoryPath)))
+                    {
+                        Directory.CreateDirectory(Path.Combine(skillTooltipPath, categoryPath));
+                    }
+
+                    string imageName = Path.Combine(skillTooltipPath, categoryPath, "技能_" + skillID + "_" + skillName + "_" + skillType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的技能變更。 \r\n職業：`{0}`\r\n變更類型：{1}\r\n技能名稱：`{2}`\r\nID：`{3}`", categoryPath, skillType, skillName, skillID));
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Skill Tooltip: " + skillID, ex.Message);
                 }
-
-                var skillTypeTextInfo = g.MeasureString(skillType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 13 : 1;
-                if (ShowChangeType) GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string categoryPath = (ItemStringHelper.GetJobName(int.Parse(skillID) / 10000) ?? "其他");
-
-                if (!Directory.Exists(Path.Combine(skillTooltipPath, categoryPath)))
-                {
-                    Directory.CreateDirectory(Path.Combine(skillTooltipPath, categoryPath));
-                }
-
-                string imageName = Path.Combine(skillTooltipPath, categoryPath, "技能_" + skillID + "_" + skillName + "_" + skillType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputSkillTooltipIDs.Clear();
             DiffSkillTags.Clear();
         }
+
+        private void SavePerJobSkillTooltip(string skillTooltipPath)
+        {
+            UpdateActionChanges();
+            SkillTooltipRender2[] skillRenderNewOld = new SkillTooltipRender2[2];
+            int count = 0;
+            int allCount = OutputSkillTooltipIDs.Count;
+            var skillTypeFont = new Font("MS Gothic", 11f, GraphicsUnit.Pixel);
+
+            for (int i = 0; i < 2; i++) // 0: New, 1: Old
+            {
+                this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
+                this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
+                this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
+
+                skillRenderNewOld[i] = new SkillTooltipRender2();
+                skillRenderNewOld[i].StringLinker = new StringLinker();
+                skillRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
+                skillRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                skillRenderNewOld[i].ShowDelay = true;
+                skillRenderNewOld[i].wzNode = WzNewOld[i];
+                skillRenderNewOld[i].DiffSkillTags = this.DiffPerJobSkillTags;
+                skillRenderNewOld[i].IgnoreEvalError = true;
+                skillRenderNewOld[i].Enable22AniStyle = this.Enable22AniStyle;
+            }
+
+            foreach (var skillID in OutputPerJobSkillTooltipIDs)
+            {
+                try
+                {
+                    StateInfo = string.Format("{0}/{1} 技能: {2}", ++count, allCount, skillID);
+                    StateDetail = "Skill 對比中...";
+
+                    bool[] isSkillNull = new bool[2] { false, false };
+
+                    if (SkipKMSContent && isKMSSkillID(Int32.Parse(skillID))) continue;
+
+                    string skillType = "";
+                    string skillNodePath = int.Parse(skillID) / 10000000 == 8 ? String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 100, skillID) : String.Format(@"\{0:D}.img\skill\{1:D}", int.Parse(skillID) / 10000, skillID);
+                    if (int.Parse(skillID) / 10000 == 0) skillNodePath = String.Format(@"\000.img\skill\{0:D7}", skillID);
+                    StringResult sr;
+                    string skillName;
+                    if (skillRenderNewOld[1].StringLinker == null || !skillRenderNewOld[1].StringLinker.StringSkill.TryGetValue(int.Parse(skillID), out sr))
+                    {
+                        sr = new StringResultSkill();
+                        sr.Name = "未知的技能";
+                    }
+                    skillName = sr.Name;
+                    if (skillRenderNewOld[0].StringLinker == null || !skillRenderNewOld[0].StringLinker.StringSkill.TryGetValue(int.Parse(skillID), out sr))
+                    {
+                        sr = new StringResultSkill();
+                        sr.Name = "未知的技能";
+                    }
+                    if (skillName != sr.Name && skillName != "未知的技能" && sr.Name != "未知的技能")
+                    {
+                        skillName += "_" + sr.Name;
+                    }
+                    else if (skillName == "未知的技能")
+                    {
+                        skillName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(skillName)) skillName = "未知的技能";
+                    skillName = RemoveInvalidFileNameChars(skillName);
+                    int nullSkillIdx = 0;
+
+                    int maxSkillIndex = 0;
+                    bool isSixthJobSkill = int.Parse(skillID) / 100000000 == 5;
+
+                    // 變更前後のツールチップ画像の作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Skill skill = Skill.CreateFromNode(PluginManager.FindWz("Skill" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            (Skill.CreateFromNode(PluginManager.FindWz("Skill001" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            (Skill.CreateFromNode(PluginManager.FindWz("Skill002" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i]) ??
+                            Skill.CreateFromNode(PluginManager.FindWz("Skill003" + skillNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, WzFileNewOld[i])));
+
+                        if (skill != null)
+                        {
+                            skill.Level = skill.MaxLevel;
+                            skillRenderNewOld[i].Skill = skill;
+                            maxSkillIndex = skill.PerJobAttackInfo.Count;
+                        }
+                        else
+                        {
+                            isSkillNull[i] = true;
+                            nullSkillIdx = i + 1;
+                        }
+                    }
+
+                    for (int jobIndex = 0; jobIndex < maxSkillIndex; jobIndex++)
+                    {
+                        // ツールチップ画像を合わせる
+                        Bitmap resultImage = null;
+                        Graphics g = null;
+
+                        int targetJobId = 0;
+
+                        switch (nullSkillIdx)
+                        {
+                            case 0: // change
+                                skillType = "變更";
+                                skillRenderNewOld[0].Skill.PerJobIndex = jobIndex;
+                                skillRenderNewOld[1].Skill.PerJobIndex = jobIndex;
+                                targetJobId = skillRenderNewOld[0].Skill.PerJobAttackInfo.Keys.ToList()[jobIndex];
+                                Bitmap ImageNew = skillRenderNewOld[0].Render(true);
+                                Bitmap ImageOld = skillRenderNewOld[1].Render(true);
+                                if (ShowChangeType)
+                                {
+                                    int picHchange = ShowObjectID ? 13 : 1;
+                                    Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                    GearGraphics.DrawPlainText(gNewOld[1], "變更前", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                    picHchange = ShowObjectID ? 13 : 1;
+                                    GearGraphics.DrawPlainText(gNewOld[0], "變更後", skillTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                }
+
+                                resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                                g = Graphics.FromImage(resultImage);
+
+                                g.DrawImage(ImageOld, 0, 0);
+                                g.DrawImage(ImageNew, ImageOld.Width, 0);
+                                break;
+
+                            case 1: // delete
+                                skillType = "刪除";
+                                if (isSkillNull[1]) continue;
+                                skillRenderNewOld[1].Skill.PerJobIndex = jobIndex;
+                                targetJobId = skillRenderNewOld[1].Skill.PerJobAttackInfo.Keys.ToList()[jobIndex];
+                                resultImage = skillRenderNewOld[1].Render();
+                                g = Graphics.FromImage(resultImage);
+                                break;
+
+                            case 2: // add
+                                skillType = "新增";
+                                if (isSkillNull[0]) continue;
+                                skillRenderNewOld[0].Skill.PerJobIndex = jobIndex;
+                                targetJobId = skillRenderNewOld[0].Skill.PerJobAttackInfo.Keys.ToList()[jobIndex];
+                                resultImage = skillRenderNewOld[0].Render();
+                                g = Graphics.FromImage(resultImage);
+                                break;
+
+                            default:
+                                break;
+                        }
+
+                        if (resultImage == null || g == null)
+                        {
+                            continue;
+                        }
+
+                        var skillTypeTextInfo = g.MeasureString(skillType, GearGraphics.ItemDetailFont);
+                        int picH = ShowObjectID ? 13 : 1;
+                        if (ShowChangeType && nullSkillIdx != 0) GearGraphics.DrawPlainText(g, skillType, skillTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(skillTypeTextInfo.Width) + 2, ref picH, 10);
+
+                        string categoryPath = (ItemStringHelper.GetJobName(isSixthJobSkill ? targetJobId + 2 : targetJobId) ?? ItemStringHelper.GetJobName(isSixthJobSkill ? targetJobId + 3 : targetJobId) ?? ItemStringHelper.GetJobName(targetJobId) ?? "其它");
+
+                        if (!Directory.Exists(Path.Combine(skillTooltipPath, categoryPath)))
+                        {
+                            Directory.CreateDirectory(Path.Combine(skillTooltipPath, categoryPath));
+                        }
+
+                        string imageName = Path.Combine(skillTooltipPath, categoryPath, "技能_" + skillID + "_" + skillName + "_" + skillType + ".png");
+                        if (!File.Exists(imageName))
+                        {
+                            resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                            SendImage(imageName, string.Format("發現新的技能變更。 \r\n職業：`{0}`\r\n變更類型：{1}\r\n技能名稱：`{2}`\r\nID：`{3}`", categoryPath, skillType, skillName, skillID));
+                        }
+                        resultImage.Dispose();
+                        g.Dispose();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    FailToExportTooltips.Add("Skill Tooltip: " + skillID, ex.Message);
+                }
+            }
+            OutputPerJobSkillTooltipIDs.Clear();
+            DiffPerJobSkillTags.Clear();
+        }
+
 
         // 노드에서 스킬 ID 얻기
         private void GetSkillID(Wz_Node node, bool change)
@@ -951,10 +1344,21 @@ namespace WzComparerR2.Comparer
 
                 if (skillID != null)
                 {
-                    if (!OutputSkillTooltipIDs.Contains(skillID))
+                    if (node.FindNodeByPath("common\\attackInfo") != null)
                     {
-                        OutputSkillTooltipIDs.Add(skillID);
-                        DiffSkillTags[skillID] = new List<string>();
+                        if (!OutputPerJobSkillTooltipIDs.Contains(skillID))
+                        {
+                            OutputPerJobSkillTooltipIDs.Add(skillID);
+                            DiffPerJobSkillTags[skillID] = new List<string>();
+                        }
+                    }
+                    else
+                    {
+                        if (!OutputSkillTooltipIDs.Contains(skillID))
+                        {
+                            OutputSkillTooltipIDs.Add(skillID);
+                            DiffSkillTags[skillID] = new List<string>();
+                        }
                     }
 
                     if (tag != null && !DiffSkillTags[skillID].Contains(tag))
@@ -969,6 +1373,7 @@ namespace WzComparerR2.Comparer
         private void SaveItemTooltip(string itemTooltipPath)
         {
             ItemTooltipRender2[] itemRenderNewOld = new ItemTooltipRender2[2];
+            DamageSkinTooltipRender[] damageSkinRenderNewOld = new DamageSkinTooltipRender[2];
             int count = 0;
             int allCount = OutputItemTooltipIDs.Count;
             var itemTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
@@ -978,176 +1383,665 @@ namespace WzComparerR2.Comparer
                 this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
                 this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
                 this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
 
                 itemRenderNewOld[i] = new ItemTooltipRender2();
                 itemRenderNewOld[i].StringLinker = new StringLinker();
-                itemRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i]);
+                itemRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
                 itemRenderNewOld[i].ShowObjectID = this.ShowObjectID;
                 itemRenderNewOld[i].Enable22AniStyle = this.Enable22AniStyle;
                 itemRenderNewOld[i].ShowSoldPrice = this.ShowPrice;
                 itemRenderNewOld[i].ShowCashPurchasePrice = this.ShowPrice;
                 itemRenderNewOld[i].ShowLinkedTamingMob = this.ShowLinkedTamingMob;
+                itemRenderNewOld[i].ShowDamageSkinID = this.ShowObjectID;
+                itemRenderNewOld[i].ShowDamageSkin = this.ShowDamageSkin;
+                itemRenderNewOld[i].UseMiniSizeDamageSkin = this.UseMiniSizeDamageSkin;
+                itemRenderNewOld[i].AlwaysUseMseaFormatDamageSkin = this.AlwaysUseMseaFormatDamageSkin;
+                itemRenderNewOld[i].AllowFamiliarOutOfBounds = this.AllowFamiliarOutOfBounds;
+                itemRenderNewOld[i].DisplayUnitOnSingleLine = this.DisplayDamageSkinUnitOnSingleLine;
+                itemRenderNewOld[i].UseInGameSpacing = this.UseInGameSpacing;
+                itemRenderNewOld[i].UseCTFamiliarRender = this.UseCTFamiliarUI;
+                itemRenderNewOld[i].DamageSkinNumber = this.DamageSkinNumber;
+                itemRenderNewOld[i].ShowApplicablePetEquip = this.LocatePetEquip;
+                itemRenderNewOld[i].LoadedCommoditiesSlot = i;
+                itemRenderNewOld[i].CompareMode = true;
+
+                damageSkinRenderNewOld[i] = new DamageSkinTooltipRender();
+                damageSkinRenderNewOld[i].AlwaysUseMseaFormat = this.AlwaysUseMseaFormatDamageSkin;
+                damageSkinRenderNewOld[i].DisplayUnitOnSingleLine = this.DisplayDamageSkinUnitOnSingleLine;
             }
 
             foreach (var itemID in OutputItemTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} 道具: {2}", ++count, allCount, itemID);
-                StateDetail = "Item 對比中...";
-                string itemType = "";
-                string itemNodePath = null;
-                string categoryPath = "";
+                try
+                {
+                    StateInfo = string.Format("{0}/{1} 道具: {2}", ++count, allCount, itemID);
+                    StateDetail = "Item 對比中...";
+                    bool[] isItemNull = new bool[2] { false, false };
+                    string itemType = "";
+                    string itemNodePath = null;
+                    string categoryPath = "";
 
-                if (!int.TryParse(itemID, out _)) continue;
-                if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(itemID)))) continue;
+                    bool isDamageSkin = false;
+                    bool isFamiliar = false;
 
-                if (itemID.StartsWith("03015")) // 判断开头是否是03015
-                {
-                    itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 100, itemID);
-                    categoryPath = "Chair_椅子";
-                }
-                else if (itemID.StartsWith("0301")) // 判断开头是否是0301
-                {
-                    itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 1000, itemID);
-                    categoryPath = "Chair_椅子";
-                }
-                else if (itemID.StartsWith("500")) // 判断开头是否是0500
-                {
-                    itemNodePath = String.Format(@"Item\Pet\{0:D}.img", itemID);
-                    categoryPath = "Pet_寵物";
-                }
-                else if (itemID.StartsWith("02")) // 判断第1位是否是02
-                {
-                    itemNodePath = String.Format(@"Item\Consume\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
-                    categoryPath = "Consumable_消耗品";
-                }
-                else if (itemID.StartsWith("03")) // 判断第1位是否是03
-                {
-                    itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
-                    categoryPath = "OtherSetup";
-                }
-                else if (itemID.StartsWith("04")) // 判断第1位是否是04
-                {
-                    itemNodePath = String.Format(@"Item\Etc\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
-                    categoryPath = "Etc_其他";
-                }
-                else if (itemID.StartsWith("05")) // 判断第1位是否是02
-                {
-                    itemNodePath = String.Format(@"Item\Cash\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
-                    categoryPath = "Cash_現金";
-                }
+                    List<string> extraImagePathList = new List<string>();
 
-                StringResult sr;
-                string ItemName;
-                if (itemRenderNewOld[1].StringLinker == null || !itemRenderNewOld[1].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的道具";
-                }
-                ItemName = sr.Name;
-                if (itemRenderNewOld[0].StringLinker == null || !itemRenderNewOld[0].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的道具";
-                }
-                if (ItemName != sr.Name && ItemName != "未知的道具" && sr.Name != "未知的道具")
-                {
-                    ItemName += "_" + sr.Name;
-                }
-                else if (ItemName == "未知的道具")
-                {
+                    if (!int.TryParse(itemID, out _)) continue;
+                    if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(itemID)))) continue;
+
+                    if (itemID.StartsWith("03015")) // 判断开头是否是03015
+                    {
+                        itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 100, itemID);
+                        categoryPath = "Chair_椅子";
+                    }
+                    else if (itemID.StartsWith("0301")) // 判断开头是否是0301
+                    {
+                        itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 1000, itemID);
+                        categoryPath = "Chair_椅子";
+                    }
+                    else if (itemID.StartsWith("500")) // 判断开头是否是0500
+                    {
+                        itemNodePath = String.Format(@"Item\Pet\{0:D}.img", itemID);
+                        categoryPath = "Pet_寵物";
+                    }
+                    else if (itemID.StartsWith("02")) // 判断第1位是否是02
+                    {
+                        itemNodePath = String.Format(@"Item\Consume\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                        categoryPath = "Consumable_消耗品";
+                    }
+                    else if (itemID.StartsWith("03")) // 判断第1位是否是03
+                    {
+                        itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                        categoryPath = "OtherSetup";
+                    }
+                    else if (itemID.StartsWith("04")) // 判断第1位是否是04
+                    {
+                        itemNodePath = String.Format(@"Item\Etc\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                        categoryPath = "Etc_其它";
+                    }
+                    else if (itemID.StartsWith("05")) // 判断第1位是否是02
+                    {
+                        itemNodePath = String.Format(@"Item\Cash\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                        categoryPath = "Cash_現金";
+                    }
+
+                    StringResult sr;
+                    string ItemName;
+                    if (itemRenderNewOld[1].StringLinker == null || !itemRenderNewOld[1].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的道具";
+                    }
                     ItemName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(ItemName)) ItemName = "未知的道具";
-                ItemName = RemoveInvalidFileNameChars(ItemName);
-                int nullItemIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Item item = Item.CreateFromNode(PluginManager.FindWz(itemNodePath, WzFileNewOld[i]), PluginManager.FindWz);
-
-                    if (item != null)
+                    if (itemRenderNewOld[0].StringLinker == null || !itemRenderNewOld[0].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
                     {
-                        itemRenderNewOld[i].Item = item;
+                        sr = new StringResult();
+                        sr.Name = "未知的道具";
                     }
-                    else
+                    if (ItemName != sr.Name && ItemName != "未知的道具" && sr.Name != "未知的道具")
                     {
-                        nullItemIdx = i + 1;
+                        ItemName += "_" + sr.Name;
                     }
-                }
+                    else if (ItemName == "未知的道具")
+                    {
+                        ItemName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(ItemName)) ItemName = "未知的道具";
+                    ItemName = RemoveInvalidFileNameChars(ItemName);
+                    int nullItemIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Item item = Item.CreateFromNode(PluginManager.FindWz(itemNodePath, WzFileNewOld[i]), PluginManager.FindWz);
 
-                switch (nullItemIdx)
-                {
-                    case 0: // change
-                        //itemType = "變更";
-
-                        Bitmap ImageNew = itemRenderNewOld[0].Render();
-                        Bitmap ImageOld = itemRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                        if (item != null)
                         {
-                            int picHchange = ShowObjectID ? 13 : 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 13 : 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            itemRenderNewOld[i].Item = item;
+                            isDamageSkin = (item.DamageSkinID != null);
+                            isFamiliar = (item.FamiliarID != null);
+
+                            if (isDamageSkin)
+                            {
+                                DamageSkin damageSkin = DamageSkin.CreateFromNode(PluginManager.FindWz($@"Etc\DamageSkin.img\{item.DamageSkinID}", WzFileNewOld[i]), PluginManager.FindWz) ?? DamageSkin.CreateFromNode(PluginManager.FindWz($@"Effect\DamageSkin.img\{item.DamageSkinID}", WzFileNewOld[i]), PluginManager.FindWz);
+                                damageSkinRenderNewOld[i].DamageSkin = damageSkin;
+                                categoryPath = "DamageSkin_傷害字型";
+
+                                if (!Directory.Exists(Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample")))
+                                {
+                                    Directory.CreateDirectory(Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample"));
+                                }
+                            }
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            isItemNull[i] = true;
+                            nullItemIdx = i + 1;
+                        }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                        if (isFamiliar)
+                        {
+                            categoryPath = "Familiar_萌獸";
+                        }
+                    }
 
-                    case 1: // delete
-                        itemType = "刪除";
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                        resultImage = itemRenderNewOld[1].Render();
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                    switch (nullItemIdx)
+                    {
+                        case 0: // change
+                            itemType = "變更";
 
-                    case 2: // add
-                        itemType = "新增";
 
-                        resultImage = itemRenderNewOld[0].Render();
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = itemRenderNewOld[0].Render();
+                            Bitmap ImageOld = itemRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    default:
-                        break;
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            if (isDamageSkin)
+                            {
+                                Bitmap[] nonCriticalDmgMiniSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, false), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, false) };
+                                Bitmap[] nonCriticalDmgBigSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, false), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, false) };
+                                Bitmap[] criticalDmgMiniSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, true), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, true) };
+                                Bitmap[] criticalDmgBigSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, true), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, true) };
+                                Bitmap[] unitSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetUnit(), damageSkinRenderNewOld[1].GetUnit() };
+                                Bitmap[] extraDmgSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetExtraEffect(), damageSkinRenderNewOld[1].GetExtraEffect() };
+                                Dictionary<int, string> dmgSampleDesc = new Dictionary<int, string>()
+                                {
+                                    { 0, "變更後" },
+                                    { 1, "變更前" }
+                                };
+                                for (int i = 0; i < 2; i++)
+                                {
+                                    string sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_NonCritical_" + dmgSampleDesc[i] + ".png");
+                                    extraImagePathList.Add(sampleName);
+                                    if (GetBitmapHash(nonCriticalDmgMiniSampleNewOld[0]) != GetBitmapHash(nonCriticalDmgMiniSampleNewOld[1])) nonCriticalDmgMiniSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_nonCritical_" + dmgSampleDesc[i] + ".png");
+                                    extraImagePathList.Add(sampleName);
+                                    if (GetBitmapHash(nonCriticalDmgBigSampleNewOld[0]) != GetBitmapHash(nonCriticalDmgBigSampleNewOld[1])) nonCriticalDmgBigSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_Critical_" + dmgSampleDesc[i] + ".png");
+                                    extraImagePathList.Add(sampleName);
+                                    if (GetBitmapHash(criticalDmgMiniSampleNewOld[0]) != GetBitmapHash(criticalDmgMiniSampleNewOld[1])) criticalDmgMiniSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_Critical_" + dmgSampleDesc[i] + ".png");
+                                    extraImagePathList.Add(sampleName);
+                                    if (GetBitmapHash(criticalDmgBigSampleNewOld[0]) != GetBitmapHash(criticalDmgBigSampleNewOld[1])) criticalDmgBigSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    if (this.DisplayDamageSkinUnitOnSingleLine)
+                                    {
+                                        sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_unit_" + dmgSampleDesc[i] + ".png");
+                                        if (GetBitmapHash(unitSampleNewOld[0]) != GetBitmapHash(unitSampleNewOld[1])) unitSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                        extraImagePathList.Add(sampleName);
+                                    }
+                                    sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_extra_" + dmgSampleDesc[i] + ".png");
+                                    if (GetBitmapHash(extraDmgSampleNewOld[0]) != GetBitmapHash(extraDmgSampleNewOld[1])) extraDmgSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    extraImagePathList.Add(sampleName);
+                                }
+                            }
+                            break;
+
+                        case 1: // delete
+                            itemType = "刪除";
+                            if (isItemNull[1]) continue;
+                            resultImage = itemRenderNewOld[1].Render();
+                            g = Graphics.FromImage(resultImage);
+                            if (isDamageSkin)
+                            {
+                                Bitmap nonCriticalDmgMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, false);
+                                Bitmap nonCriticalBigMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, false);
+                                Bitmap criticalDmgMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, true);
+                                Bitmap criticalBigMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, true);
+                                Bitmap unitSample = damageSkinRenderNewOld[1].GetUnit();
+                                Bitmap extraDmgSample = damageSkinRenderNewOld[1].GetExtraEffect();
+                                string sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_NonCritical_" + itemType + ".png");
+                                nonCriticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_nonCritical_" + itemType + ".png");
+                                nonCriticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_Critical_" + itemType + ".png");
+                                criticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_Critical_" + itemType + ".png");
+                                criticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "unit" + itemType + ".png");
+                                if (this.DisplayDamageSkinUnitOnSingleLine)
+                                {
+                                    if (unitSample != null) unitSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    extraImagePathList.Add(sampleName);
+                                }
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_extra_" + itemType + ".png");
+                                extraDmgSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                            }
+                            break;
+
+                        case 2: // add
+                            itemType = "新增";
+                            if (isItemNull[0]) continue;
+                            resultImage = itemRenderNewOld[0].Render();
+                            g = Graphics.FromImage(resultImage);
+                            if (isDamageSkin)
+                            {
+                                Bitmap nonCriticalDmgMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, false);
+                                Bitmap nonCriticalBigMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, false);
+                                Bitmap criticalDmgMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, true);
+                                Bitmap criticalBigMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, true);
+                                Bitmap unitSample = damageSkinRenderNewOld[0].GetUnit();
+                                Bitmap extraDmgSample = damageSkinRenderNewOld[0].GetExtraEffect();
+                                string sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_NonCritical_" + itemType + ".png");
+                                nonCriticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_nonCritical_" + itemType + ".png");
+                                nonCriticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_Critical_" + itemType + ".png");
+                                criticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_Critical_" + itemType + ".png");
+                                criticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "unit" + itemType + ".png");
+                                if (this.DisplayDamageSkinUnitOnSingleLine)
+                                {
+                                    if (unitSample != null) unitSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    extraImagePathList.Add(sampleName);
+                                }
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_extra_" + itemType + ".png");
+                                extraDmgSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    if (!Directory.Exists(Path.Combine(itemTooltipPath, categoryPath)))
+                    {
+                        Directory.CreateDirectory(Path.Combine(itemTooltipPath, categoryPath));
+                    }
+
+                    var itemTypeTextInfo = g.MeasureString(itemType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullItemIdx != 0) GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(itemTooltipPath, categoryPath, "道具_" + itemID + "_" + ItemName + "_" + itemType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的道具變更。 \r\n道具類型：`{0}`\r\n變更類型：{1}\r\n道具名稱：`{2}`\r\nID：`{3}`", categoryPath, itemType, ItemName, itemID));
+                    }
+                    foreach (string imagePath in extraImagePathList)
+                    {
+                        SendImage(imagePath);
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Item Tooltip: " + itemID, ex.Message + ex.StackTrace);
                 }
-
-                if (!Directory.Exists(Path.Combine(itemTooltipPath, categoryPath)))
-                {
-                    Directory.CreateDirectory(Path.Combine(itemTooltipPath, categoryPath));
-                }
-
-                var itemTypeTextInfo = g.MeasureString(itemType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 13 : 1;
-                if (ShowChangeType) GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(itemTooltipPath, categoryPath, "道具_" + itemID + "_" + ItemName + "_" + itemType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputItemTooltipIDs.Clear();
             DiffItemTags.Clear();
         }
 
-        // 變更された裝備ツールチップ出力
+        private void SaveItemTooltip3(string itemTooltipPath)
+        {
+            ItemTooltipRender3[] itemRenderNewOld = new ItemTooltipRender3[2];
+            DamageSkinTooltipRender[] damageSkinRenderNewOld = new DamageSkinTooltipRender[2];
+            int count = 0;
+            int allCount = OutputItemTooltipIDs.Count;
+            var itemTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
+
+            for (int i = 0; i < 2; i++) // 0: New, 1: Old
+            {
+                this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
+                this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
+                this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
+
+                itemRenderNewOld[i] = new ItemTooltipRender3();
+                itemRenderNewOld[i].StringLinker = new StringLinker();
+                itemRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
+                itemRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                itemRenderNewOld[i].ShowSoldPrice = this.ShowPrice;
+                itemRenderNewOld[i].ShowCashPurchasePrice = this.ShowPrice;
+                itemRenderNewOld[i].ShowLinkedTamingMob = this.ShowLinkedTamingMob;
+                itemRenderNewOld[i].ShowDamageSkinID = this.ShowObjectID;
+                itemRenderNewOld[i].ShowDamageSkin = this.ShowDamageSkin;
+                itemRenderNewOld[i].UseMiniSizeDamageSkin = this.UseMiniSizeDamageSkin;
+                itemRenderNewOld[i].AlwaysUseMseaFormatDamageSkin = this.AlwaysUseMseaFormatDamageSkin;
+                itemRenderNewOld[i].DisplayUnitOnSingleLine = this.DisplayDamageSkinUnitOnSingleLine;
+                itemRenderNewOld[i].UseInGameSpacing = this.UseInGameSpacing;
+                itemRenderNewOld[i].AllowFamiliarOutOfBounds = this.AllowFamiliarOutOfBounds;
+                itemRenderNewOld[i].UseCTFamiliarRender = this.UseCTFamiliarUI;
+                itemRenderNewOld[i].DamageSkinNumber = this.DamageSkinNumber;
+                itemRenderNewOld[i].ShowApplicablePetEquip = this.LocatePetEquip;
+                itemRenderNewOld[i].LoadedCommoditiesSlot = i;
+                itemRenderNewOld[i].CompareMode = true;
+
+                damageSkinRenderNewOld[i] = new DamageSkinTooltipRender();
+                damageSkinRenderNewOld[i].AlwaysUseMseaFormat = this.AlwaysUseMseaFormatDamageSkin;
+                damageSkinRenderNewOld[i].DisplayUnitOnSingleLine = this.DisplayDamageSkinUnitOnSingleLine;
+            }
+
+            foreach (var itemID in OutputItemTooltipIDs)
+            {
+                try
+                {
+                    StateInfo = string.Format("{0}/{1} 道具: {2}", ++count, allCount, itemID);
+                    StateDetail = "Item 對比中...";
+                    bool[] isItemNull = new bool[2] { false, false };
+                    string itemType = "";
+                    string itemNodePath = null;
+                    string categoryPath = "";
+
+                    bool isDamageSkin = false;
+                    bool isFamiliar = false;
+
+                    List<string> extraImagePathList = new List<string>();
+
+                    if (!int.TryParse(itemID, out _)) continue;
+                    if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(itemID)))) continue;
+
+                    if (itemID.StartsWith("03015")) // 判断开头是否是03015
+                    {
+                        itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 100, itemID);
+                        categoryPath = "Chair_椅子";
+                    }
+                    else if (itemID.StartsWith("0301")) // 判断开头是否是0301
+                    {
+                        itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 1000, itemID);
+                        categoryPath = "Chair_椅子";
+                    }
+                    else if (itemID.StartsWith("500")) // 判断开头是否是0500
+                    {
+                        itemNodePath = String.Format(@"Item\Pet\{0:D}.img", itemID);
+                        categoryPath = "Pet_寵物";
+                    }
+                    else if (itemID.StartsWith("02")) // 判断第1位是否是02
+                    {
+                        itemNodePath = String.Format(@"Item\Consume\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                        categoryPath = "Consumable_消耗品";
+                    }
+                    else if (itemID.StartsWith("03")) // 判断第1位是否是03
+                    {
+                        itemNodePath = String.Format(@"Item\Install\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                        categoryPath = "OtherSetup";
+                    }
+                    else if (itemID.StartsWith("04")) // 判断第1位是否是04
+                    {
+                        itemNodePath = String.Format(@"Item\Etc\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                        categoryPath = "Etc_其它";
+                    }
+                    else if (itemID.StartsWith("05")) // 判断第1位是否是02
+                    {
+                        itemNodePath = String.Format(@"Item\Cash\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                        categoryPath = "Cash_現金";
+                    }
+
+                    StringResult sr;
+                    string ItemName;
+                    if (itemRenderNewOld[1].StringLinker == null || !itemRenderNewOld[1].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的道具";
+                    }
+                    ItemName = sr.Name;
+                    if (itemRenderNewOld[0].StringLinker == null || !itemRenderNewOld[0].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的道具";
+                    }
+                    if (ItemName != sr.Name && ItemName != "未知的道具" && sr.Name != "未知的道具")
+                    {
+                        ItemName += "_" + sr.Name;
+                    }
+                    else if (ItemName == "未知的道具")
+                    {
+                        ItemName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(ItemName)) ItemName = "未知的道具";
+                    ItemName = RemoveInvalidFileNameChars(ItemName);
+                    int nullItemIdx = 0;
+
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Item item = Item.CreateFromNode(PluginManager.FindWz(itemNodePath, WzFileNewOld[i]), PluginManager.FindWz);
+
+                        if (item != null)
+                        {
+                            itemRenderNewOld[i].Item = item;
+                            isDamageSkin = (item.DamageSkinID != null);
+                            isFamiliar = (item.FamiliarID != null);
+
+                            if (isDamageSkin)
+                            {
+                                DamageSkin damageSkin = DamageSkin.CreateFromNode(PluginManager.FindWz($@"Etc\DamageSkin.img\{item.DamageSkinID}", WzFileNewOld[i]), PluginManager.FindWz) ?? DamageSkin.CreateFromNode(PluginManager.FindWz($@"Effect\DamageSkin.img\{item.DamageSkinID}", WzFileNewOld[i]), PluginManager.FindWz);
+                                damageSkinRenderNewOld[i].DamageSkin = damageSkin;
+                                categoryPath = "DamageSkin_傷害字型";
+
+                                if (!Directory.Exists(Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample")))
+                                {
+                                    Directory.CreateDirectory(Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample"));
+                                }
+                            }
+                        }
+                        else
+                        {
+                            isItemNull[i] = true;
+                            nullItemIdx = i + 1;
+                        }
+
+                        if (isFamiliar)
+                        {
+                            categoryPath = "Familiar_萌獸";
+                        }
+                    }
+
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
+
+                    switch (nullItemIdx)
+                    {
+                        case 0: // change
+                            itemType = "變更";
+
+
+                            Bitmap ImageNew = itemRenderNewOld[0].Render();
+                            Bitmap ImageOld = itemRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
+
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            if (isDamageSkin)
+                            {
+                                Bitmap[] nonCriticalDmgMiniSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, false), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, false) };
+                                Bitmap[] nonCriticalDmgBigSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, false), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, false) };
+                                Bitmap[] criticalDmgMiniSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, true), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, true) };
+                                Bitmap[] criticalDmgBigSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, true), damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, true) };
+                                Bitmap[] unitSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetUnit(), damageSkinRenderNewOld[1].GetUnit() };
+                                Bitmap[] extraDmgSampleNewOld = new Bitmap[2] { damageSkinRenderNewOld[0].GetExtraEffect(), damageSkinRenderNewOld[1].GetExtraEffect() };
+                                Dictionary<int, string> dmgSampleDesc = new Dictionary<int, string>()
+                                {
+                                    { 0, "變更後" },
+                                    { 1, "變更前" }
+                                };
+                                for (int i = 0; i < 2; i++)
+                                {
+                                    string sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_NonCritical_" + dmgSampleDesc[i] + ".png");
+                                    extraImagePathList.Add(sampleName);
+                                    if (GetBitmapHash(nonCriticalDmgMiniSampleNewOld[0]) != GetBitmapHash(nonCriticalDmgMiniSampleNewOld[1])) nonCriticalDmgMiniSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_nonCritical_" + dmgSampleDesc[i] + ".png");
+                                    extraImagePathList.Add(sampleName);
+                                    if (GetBitmapHash(nonCriticalDmgBigSampleNewOld[0]) != GetBitmapHash(nonCriticalDmgBigSampleNewOld[1])) nonCriticalDmgBigSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_Critical_" + dmgSampleDesc[i] + ".png");
+                                    extraImagePathList.Add(sampleName);
+                                    if (GetBitmapHash(criticalDmgMiniSampleNewOld[0]) != GetBitmapHash(criticalDmgMiniSampleNewOld[1])) criticalDmgMiniSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_Critical_" + dmgSampleDesc[i] + ".png");
+                                    extraImagePathList.Add(sampleName);
+                                    if (GetBitmapHash(criticalDmgBigSampleNewOld[0]) != GetBitmapHash(criticalDmgBigSampleNewOld[1])) criticalDmgBigSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    if (this.DisplayDamageSkinUnitOnSingleLine)
+                                    {
+                                        sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_unit_" + dmgSampleDesc[i] + ".png");
+                                        if (GetBitmapHash(unitSampleNewOld[0]) != GetBitmapHash(unitSampleNewOld[1])) unitSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                        extraImagePathList.Add(sampleName);
+                                    }
+                                    sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_extra_" + dmgSampleDesc[i] + ".png");
+                                    if (GetBitmapHash(extraDmgSampleNewOld[0]) != GetBitmapHash(extraDmgSampleNewOld[1])) extraDmgSampleNewOld[i].Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    extraImagePathList.Add(sampleName);
+                                }
+                            }
+                            break;
+
+                        case 1: // delete
+                            itemType = "刪除";
+                            if (isItemNull[1]) continue;
+                            resultImage = itemRenderNewOld[1].Render();
+                            g = Graphics.FromImage(resultImage);
+                            if (isDamageSkin)
+                            {
+                                Bitmap nonCriticalDmgMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, false);
+                                Bitmap nonCriticalBigMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, false);
+                                Bitmap criticalDmgMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, true, true);
+                                Bitmap criticalBigMiniSample = damageSkinRenderNewOld[1].GetCustomSample(this.DamageSkinNumber, false, true);
+                                Bitmap unitSample = damageSkinRenderNewOld[1].GetUnit();
+                                Bitmap extraDmgSample = damageSkinRenderNewOld[1].GetExtraEffect();
+                                string sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_NonCritical_" + itemType + ".png");
+                                nonCriticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_nonCritical_" + itemType + ".png");
+                                nonCriticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_Critical_" + itemType + ".png");
+                                criticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_Critical_" + itemType + ".png");
+                                criticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "unit" + itemType + ".png");
+                                if (this.DisplayDamageSkinUnitOnSingleLine)
+                                {
+                                    if (unitSample != null) unitSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    extraImagePathList.Add(sampleName);
+                                }
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_extra_" + itemType + ".png");
+                                extraDmgSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                            }
+                            break;
+
+                        case 2: // add
+                            itemType = "新增";
+                            if (isItemNull[0]) continue;
+                            resultImage = itemRenderNewOld[0].Render();
+                            g = Graphics.FromImage(resultImage);
+                            if (isDamageSkin)
+                            {
+                                Bitmap nonCriticalDmgMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, false);
+                                Bitmap nonCriticalBigMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, false);
+                                Bitmap criticalDmgMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, true, true);
+                                Bitmap criticalBigMiniSample = damageSkinRenderNewOld[0].GetCustomSample(this.DamageSkinNumber, false, true);
+                                Bitmap unitSample = damageSkinRenderNewOld[0].GetUnit();
+                                Bitmap extraDmgSample = damageSkinRenderNewOld[0].GetExtraEffect();
+                                string sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_NonCritical_" + itemType + ".png");
+                                nonCriticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_nonCritical_" + itemType + ".png");
+                                nonCriticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_mini_Critical_" + itemType + ".png");
+                                criticalDmgMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_big_Critical_" + itemType + ".png");
+                                criticalBigMiniSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "unit" + itemType + ".png");
+                                if (this.DisplayDamageSkinUnitOnSingleLine)
+                                {
+                                    if (unitSample != null) unitSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                    extraImagePathList.Add(sampleName);
+                                }
+                                sampleName = Path.Combine(itemTooltipPath, categoryPath, "DamageSkinSample", itemID + "_" + ItemName + "_extra_" + itemType + ".png");
+                                extraDmgSample.Save(sampleName, System.Drawing.Imaging.ImageFormat.Png);
+                                extraImagePathList.Add(sampleName);
+                            }
+                            break;
+
+                        default:
+                            break;
+                    }
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    if (!Directory.Exists(Path.Combine(itemTooltipPath, categoryPath)))
+                    {
+                        Directory.CreateDirectory(Path.Combine(itemTooltipPath, categoryPath));
+                    }
+
+                    var itemTypeTextInfo = g.MeasureString(itemType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullItemIdx != 0) GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(itemTooltipPath, categoryPath, "道具_" + itemID + "_" + ItemName + "_" + itemType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的道具變更。 \r\n道具類型：`{0}`\r\n變更類型：{1}\r\n道具名稱：`{2}`\r\nID：`{3}`", categoryPath, itemType, ItemName, itemID));
+                    }
+                    foreach (string imagePath in extraImagePathList)
+                    {
+                        SendImage(imagePath);
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    FailToExportTooltips.Add("Item Tooltip 3: " + itemID, ex.Message + ex.StackTrace);
+                }
+            }
+            OutputItemTooltipIDs.Clear();
+            DiffItemTags.Clear();
+        }
+
+
+        // 變更された装備ツールチップ出力
         private void SaveGearTooltip(string gearTooltipPath)
         {
             GearTooltipRender2[] gearRenderNewOld = new GearTooltipRender2[2];
@@ -1160,257 +2054,276 @@ namespace WzComparerR2.Comparer
                 this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
                 this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
                 this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
 
                 gearRenderNewOld[i] = new GearTooltipRender2();
                 gearRenderNewOld[i].StringLinker = new StringLinker();
-                gearRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i]);
+                gearRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
                 gearRenderNewOld[i].ShowObjectID = this.ShowObjectID;
                 gearRenderNewOld[i].ShowSoldPrice = this.ShowPrice;
                 gearRenderNewOld[i].ShowCashPurchasePrice = this.ShowPrice;
                 gearRenderNewOld[i].ShowCombatPower = true;
+                gearRenderNewOld[i].ShowApplicablePet = this.LocatePetEquip;
+                gearRenderNewOld[i].LoadedCommoditiesSlot = i;
+                gearRenderNewOld[i].CompareMode = true;
             }
 
             foreach (var gearID in OutputGearTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} 裝備: {2}", ++count, allCount, gearID);
-                StateDetail = "Character 對比中...";
-                string gearType = "";
-                string gearNodePath = null;
-                string categoryPath = "";
+                try
+                {
+                    StateInfo = string.Format("{0}/{1} 裝備: {2}", ++count, allCount, gearID);
+                    StateDetail = "Character 對比中...";
+                    bool[] isGearNull = new bool[2] { false, false };
+                    string gearType = "";
+                    string gearNodePath = null;
+                    string categoryPath = "";
 
-                if (!int.TryParse(gearID, out _)) continue;
+                    if (!int.TryParse(gearID, out _)) continue;
 
-                if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(gearID)))) continue;
+                    if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(gearID)))) continue;
 
-                if (Regex.IsMatch(gearID, "^0101|^0102|^0103|^0112|^0113|^0114|^0115|^0116|^0118|^0119")) // 判断开头是否是0101~0103或0112~0116-0118~0119
-                {
-                    gearNodePath = String.Format(@"Character\Accessory\{0:D}.img", gearID);
-                    categoryPath = "Accessory_飾品";
-                }
-                else if (gearID.StartsWith("0100")) // 判断开头是否是0100
-                {
-                    gearNodePath = String.Format(@"Character\Cap\{0:D}.img", gearID);
-                    categoryPath = "Hat_帽子";
-                }
-                else if (gearID.StartsWith("0104")) // 判断开头是否是0104
-                {
-                    gearNodePath = String.Format(@"Character\Coat\{0:D}.img", gearID);
-                    categoryPath = "Top_上衣";
-                }
-                else if (gearID.StartsWith("0105")) // 判断开头是否是0104
-                {
-                    gearNodePath = String.Format(@"Character\Longcoat\{0:D}.img", gearID);
-                    categoryPath = "Overall_套服";
-                }
-                else if (gearID.StartsWith("0106")) // 判断开头是否是0106
-                {
-                    gearNodePath = String.Format(@"Character\Pants\{0:D}.img", gearID);
-                    categoryPath = "Bottom_褲裙";
-                }
-                else if (gearID.StartsWith("0107")) // 判断开头是否是0107
-                {
-                    gearNodePath = String.Format(@"Character\Shoes\{0:D}.img", gearID);
-                    categoryPath = "Shoes_鞋子";
-                }
-                else if (gearID.StartsWith("0108")) // 判断开头是否是0108
-                {
-                    gearNodePath = String.Format(@"Character\Glove\{0:D}.img", gearID);
-                    categoryPath = "Glove_手套";
-                }
-                else if (gearID.StartsWith("0109")) // 判断开头是否是0109
-                {
-                    gearNodePath = String.Format(@"Character\Shield\{0:D}.img", gearID);
-                    categoryPath = "Shield_盾";
-                }
-                else if (gearID.StartsWith("0110")) // 判断开头是否是0110
-                {
-                    gearNodePath = String.Format(@"Character\Cape\{0:D}.img", gearID);
-                    categoryPath = "Cape_披風";
-                }
-                else if (gearID.StartsWith("0111")) // 判断开头是否是0111
-                {
-                    gearNodePath = String.Format(@"Character\Ring\{0:D}.img", gearID);
-                    categoryPath = "Ring_戒指";
-                }
-                else if (gearID.StartsWith("0120") || gearID.StartsWith("120")) // 判断开头是否是0120
-                {
-                    gearNodePath = String.Format(@"Character\Totem\{0:D}.img", gearID);
-                    categoryPath = "Totem_圖騰";
-                }
-                else if (Regex.IsMatch(gearID, "^012[1-9]|^013|^014|^015|^0160|^0169|^0170")) // 判断开头是否是012~015、0160或0169-0179
-                {
-                    gearNodePath = String.Format(@"Character\Weapon\{0:D}.img", gearID);
-                    categoryPath = "Weapon_武器";
-                }
-                else if (Regex.IsMatch(gearID, "^0161|^0162|^0163|^0164|^0165"))// 判断开头是否是0161~0165
-                {
-                    gearNodePath = String.Format(@"Character\Mechanic\{0:D}.img", gearID);
-                    categoryPath = "MechanicPart_機甲部件";
-                }
-                else if (Regex.IsMatch(gearID, "^0166|^0167")) // 判断开头是否是0166或0167
-                {
-                    gearNodePath = String.Format(@"Character\Android\{0:D}.img", gearID);
-                    categoryPath = "Android_機器人";
-                }
-                else if (gearID.StartsWith("0168")) // 判断开头是否是0168
-                {
-                    gearNodePath = String.Format(@"Character\Bits\{0:D}.img", gearID);
-                    categoryPath = "Bits_拼圖";
-                }
-                else if (gearID.StartsWith("01712")) // 判断开头是否是01712
-                {
-                    gearNodePath = String.Format(@"Character\ArcaneForce\{0:D}.img", gearID);
-                    categoryPath = "Arcane_秘法";
-                }
-                else if (Regex.IsMatch(gearID, "^01713|^01714")) // 判断开头是否是01713或01714
-                {
-                    gearNodePath = String.Format(@"Character\AuthenticForce\{0:D}.img", gearID);
-                    categoryPath = "Authentic_真實";
-                }
-                else if (Regex.IsMatch(gearID, "^0178"))  // 判断开头是否是0178
-                {
-                    gearNodePath = String.Format(@"Character\Jewel\{0:D}.img", gearID);
-                    categoryPath = "Jewel_寶玉";
-                }
-                else if (Regex.IsMatch(gearID, "^0179"))  // 判断开头是否是0179
-                {
-                    gearNodePath = String.Format(@"Character\NT_Beauty\{0:D}.img", gearID);
-                    categoryPath = "MSN_Cosmetic_外形";
-                }
-                else if (gearID.StartsWith("018")) // 判断开头是否是018
-                {
-                    gearNodePath = String.Format(@"Character\PetEquip\{0:D}.img", gearID);
-                    categoryPath = "PetEquipment_寵物裝備";
-                }
-                else if (Regex.IsMatch(gearID, "^0194|^0195|^0196|^0197")) // 判断开头是否是0194~0197
-                {
-                    gearNodePath = String.Format(@"Character\Dragon\{0:D}.img", gearID);
-                    categoryPath = "EvanDragonEquip_龍魔裝備";
-                }
-                else if (Regex.IsMatch(gearID, "^0190|^0191|^0192|^0193|^0198")) // 判断开头是否是0190~0193或0198
-                {
-                    gearNodePath = String.Format(@"Character\TamingMob\{0:D}.img", gearID);
-                    categoryPath = "TamedMonster_馴服的怪物";
-                }
-                else if (Regex.IsMatch(gearID, "^0002|^0005")) // 判断开头是否是0002或0005
-                {
-                    gearNodePath = String.Format(@"Character\Face\{0:D}.img", gearID);
-                    categoryPath = "Cosmetic_外形";
-                }
-                else if (Regex.IsMatch(gearID, "^0003|^0004|^0006")) // 判断开头是否是0003、0004或0006
-                {
-                    gearNodePath = String.Format(@"Character\Hair\{0:D}.img", gearID);
-                    categoryPath = "Cosmetic_外形";
-                }
+                    if (Regex.IsMatch(gearID, "^0101|^0102|^0103|^0112|^0113|^0114|^0115|^0116|^0118|^0119")) // 判断开头是否是0101~0103或0112~0116-0118~0119
+                    {
+                        gearNodePath = String.Format(@"Character\Accessory\{0:D}.img", gearID);
+                        categoryPath = "Accessory_飾品";
+                    }
+                    else if (gearID.StartsWith("0100")) // 判断开头是否是0100
+                    {
+                        gearNodePath = String.Format(@"Character\Cap\{0:D}.img", gearID);
+                        categoryPath = "Hat_帽子";
+                    }
+                    else if (gearID.StartsWith("0104")) // 判断开头是否是0104
+                    {
+                        gearNodePath = String.Format(@"Character\Coat\{0:D}.img", gearID);
+                        categoryPath = "Top_上衣";
+                    }
+                    else if (gearID.StartsWith("0105")) // 判断开头是否是0104
+                    {
+                        gearNodePath = String.Format(@"Character\Longcoat\{0:D}.img", gearID);
+                        categoryPath = "Overall_套服";
+                    }
+                    else if (gearID.StartsWith("0106")) // 判断开头是否是0106
+                    {
+                        gearNodePath = String.Format(@"Character\Pants\{0:D}.img", gearID);
+                        categoryPath = "Bottom_褲裙";
+                    }
+                    else if (gearID.StartsWith("0107")) // 判断开头是否是0107
+                    {
+                        gearNodePath = String.Format(@"Character\Shoes\{0:D}.img", gearID);
+                        categoryPath = "Shoes_鞋子";
+                    }
+                    else if (gearID.StartsWith("0108")) // 判断开头是否是0108
+                    {
+                        gearNodePath = String.Format(@"Character\Glove\{0:D}.img", gearID);
+                        categoryPath = "Glove_手套";
+                    }
+                    else if (gearID.StartsWith("0109")) // 判断开头是否是0109
+                    {
+                        gearNodePath = String.Format(@"Character\Shield\{0:D}.img", gearID);
+                        categoryPath = "Shield_盾";
+                    }
+                    else if (gearID.StartsWith("0110")) // 判断开头是否是0110
+                    {
+                        gearNodePath = String.Format(@"Character\Cape\{0:D}.img", gearID);
+                        categoryPath = "Cape_披風";
+                    }
+                    else if (gearID.StartsWith("0111")) // 判断开头是否是0111
+                    {
+                        gearNodePath = String.Format(@"Character\Ring\{0:D}.img", gearID);
+                        categoryPath = "Ring_戒指";
+                    }
+                    else if (gearID.StartsWith("0120") || gearID.StartsWith("120")) // 判断开头是否是0120
+                    {
+                        gearNodePath = String.Format(@"Character\Totem\{0:D}.img", gearID);
+                        categoryPath = "Totem_圖騰";
+                    }
+                    else if (Regex.IsMatch(gearID, "^012[1-9]|^013|^014|^015|^0160|^0169|^0170")) // 判断开头是否是012~015、0160或0169-0179
+                    {
+                        gearNodePath = String.Format(@"Character\Weapon\{0:D}.img", gearID);
+                        categoryPath = "Weapon_武器";
+                    }
+                    else if (gearID.StartsWith("0172")) // 判断开头是否是0172
+                    {
+                        gearNodePath = String.Format(@"Character\Weapon\{0:D}.img", gearID);
+                        categoryPath = "AstraSubWeapon_アストラ補助武器";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0161|^0162|^0163|^0164|^0165"))// 判断开头是否是0161~0165
+                    {
+                        gearNodePath = String.Format(@"Character\Mechanic\{0:D}.img", gearID);
+                        categoryPath = "MechanicPart_機甲部件";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0166|^0167")) // 判断开头是否是0166或0167
+                    {
+                        gearNodePath = String.Format(@"Character\Android\{0:D}.img", gearID);
+                        categoryPath = "Android_機器人";
+                    }
+                    else if (gearID.StartsWith("0168")) // 判断开头是否是0168
+                    {
+                        gearNodePath = String.Format(@"Character\Bits\{0:D}.img", gearID);
+                        categoryPath = "Bits_拼圖";
+                    }
+                    else if (gearID.StartsWith("01712")) // 判断开头是否是01712
+                    {
+                        gearNodePath = String.Format(@"Character\ArcaneForce\{0:D}.img", gearID);
+                        categoryPath = "Arcane_秘法";
+                    }
+                    else if (Regex.IsMatch(gearID, "^01713|^01714")) // 判断开头是否是01713或01714
+                    {
+                        gearNodePath = String.Format(@"Character\AuthenticForce\{0:D}.img", gearID);
+                        categoryPath = "Authentic_真實";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0178"))  // 判断开头是否是0178
+                    {
+                        gearNodePath = String.Format(@"Character\Jewel\{0:D}.img", gearID);
+                        categoryPath = "Jewel_寶玉";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0179"))  // 判断开头是否是0179
+                    {
+                        gearNodePath = String.Format(@"Character\NT_Beauty\{0:D}.img", gearID);
+                        categoryPath = "MSN_Cosmetic_外形";
+                    }
+                    else if (gearID.StartsWith("018")) // 判断开头是否是018
+                    {
+                        gearNodePath = String.Format(@"Character\PetEquip\{0:D}.img", gearID);
+                        categoryPath = "PetEquipment_寵物裝備";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0194|^0195|^0196|^0197")) // 判断开头是否是0194~0197
+                    {
+                        gearNodePath = String.Format(@"Character\Dragon\{0:D}.img", gearID);
+                        categoryPath = "EvanDragonEquip_龍魔裝備";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0190|^0191|^0192|^0193|^0198")) // 判断开头是否是0190~0193或0198
+                    {
+                        gearNodePath = String.Format(@"Character\TamingMob\{0:D}.img", gearID);
+                        categoryPath = "TamedMonster_馴服的怪物";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0002|^0005|^0008")) // 判断开头是否是0002或0005
+                    {
+                        gearNodePath = String.Format(@"Character\Face\{0:D}.img", gearID);
+                        categoryPath = "Cosmetic_外形";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0003|^0004|^0006|^0007")) // 判断开头是否是0003、0004或0006
+                    {
+                        gearNodePath = String.Format(@"Character\Hair\{0:D}.img", gearID);
+                        categoryPath = "Cosmetic_外形";
+                    }
 
-                StringResult sr;
-                string EqpName;
-                if (gearRenderNewOld[1].StringLinker == null || !gearRenderNewOld[1].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的裝備";
-                }
-                EqpName = sr.Name;
-                if (gearRenderNewOld[0].StringLinker == null || !gearRenderNewOld[0].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的裝備";
-                }
-                if (EqpName != sr.Name && EqpName != "未知的裝備" && sr.Name != "未知的裝備")
-                {
-                    EqpName += "_" + sr.Name;
-                }
-                else if (EqpName == "未知的裝備")
-                {
+                    StringResult sr;
+                    string EqpName;
+                    if (gearRenderNewOld[1].StringLinker == null || !gearRenderNewOld[1].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的裝備";
+                    }
                     EqpName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(EqpName)) EqpName = "未知的裝備";
-                EqpName = RemoveInvalidFileNameChars(EqpName);
-                int nullEqpIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Gear gear = Gear.CreateFromNode(PluginManager.FindWz(gearNodePath, WzFileNewOld[i]), PluginManager.FindWz);
-
-                    if (gear != null)
+                    if (gearRenderNewOld[0].StringLinker == null || !gearRenderNewOld[0].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
                     {
-                        gearRenderNewOld[i].Gear = gear;
+                        sr = new StringResult();
+                        sr.Name = "未知的裝備";
                     }
-                    else
+                    if (EqpName != sr.Name && EqpName != "未知的裝備" && sr.Name != "未知的裝備")
                     {
-                        nullEqpIdx = i + 1;
+                        EqpName += "_" + sr.Name;
                     }
-                }
+                    else if (EqpName == "未知的裝備")
+                    {
+                        EqpName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(EqpName)) EqpName = "未知的裝備";
+                    EqpName = RemoveInvalidFileNameChars(EqpName);
+                    int nullEqpIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Gear gear = Gear.CreateFromNode(PluginManager.FindWz(gearNodePath, WzFileNewOld[i]), PluginManager.FindWz);
 
-                switch (nullEqpIdx)
-                {
-                    case 0: // change
-                        //gearType = "變更";
-
-                        Bitmap ImageNew = gearRenderNewOld[0].Render();
-                        Bitmap ImageOld = gearRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                        if (gear != null)
                         {
-                            int picHchange = ShowObjectID ? 13 : 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 13 : 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            gearRenderNewOld[i].Gear = gear;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            isGearNull[i] = true;
+                            nullEqpIdx = i + 1;
+                        }
+                    }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                    case 1: // delete
-                        gearType = "刪除";
+                    switch (nullEqpIdx)
+                    {
+                        case 0: // change
+                            gearType = "變更";
 
-                        resultImage = gearRenderNewOld[1].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = gearRenderNewOld[0].Render();
+                            Bitmap ImageOld = gearRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    case 2: // add
-                        gearType = "新增";
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
 
-                        resultImage = gearRenderNewOld[0].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                        case 1: // delete
+                            gearType = "刪除";
+                            if (isGearNull[1]) continue;
+                            resultImage = gearRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
 
-                    default:
-                        break;
+                        case 2: // add
+                            gearType = "新增";
+                            if (isGearNull[0]) continue;
+                            resultImage = gearRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    if (!Directory.Exists(Path.Combine(gearTooltipPath, categoryPath)))
+                    {
+                        Directory.CreateDirectory(Path.Combine(gearTooltipPath, categoryPath));
+                    }
+
+                    var gearTypeTextInfo = g.MeasureString(gearType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullEqpIdx != 0) GearGraphics.DrawPlainText(g, gearType, gearTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(gearTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(gearTooltipPath, categoryPath, "裝備_" + gearID + "_" + EqpName + "_" + gearType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的裝備變更。 \r\n裝備類型：`{0}`\r\n變更類型：{1}\r\n裝備名稱：`{2}`\r\nID：`{3}`", categoryPath, gearType, EqpName, gearID));
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Gear Tooltip: " + gearID, ex.Message);
                 }
-
-                if (!Directory.Exists(Path.Combine(gearTooltipPath, categoryPath)))
-                {
-                    Directory.CreateDirectory(Path.Combine(gearTooltipPath, categoryPath));
-                }
-
-                var gearTypeTextInfo = g.MeasureString(gearType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 13 : 1;
-                if (ShowChangeType) GearGraphics.DrawPlainText(g, gearType, gearTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(gearTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(gearTooltipPath, categoryPath, "裝備_" + gearID + "_" + EqpName + "_" + gearType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputGearTooltipIDs.Clear();
             DiffGearTags.Clear();
@@ -1428,255 +2341,275 @@ namespace WzComparerR2.Comparer
                 this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
                 this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
                 this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
 
                 gearRenderNewOld[i] = new GearTooltipRender3();
                 gearRenderNewOld[i].StringLinker = new StringLinker();
-                gearRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i]);
+                gearRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
                 gearRenderNewOld[i].ShowObjectID = this.ShowObjectID;
                 gearRenderNewOld[i].ShowSoldPrice = this.ShowPrice;
                 gearRenderNewOld[i].ShowCashPurchasePrice = this.ShowPrice;
+                gearRenderNewOld[i].ShowApplicablePet = this.LocatePetEquip;
+                gearRenderNewOld[i].LoadedCommoditiesSlot = i;
+                gearRenderNewOld[i].CompareMode = true;
             }
 
             foreach (var gearID in OutputGearTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} 裝備: {2}", ++count, allCount, gearID);
-                StateDetail = "Character 對比中...";
-                string gearType = "";
-                string gearNodePath = null;
-                string categoryPath = "";
+                try
+                {
 
-                if (!int.TryParse(gearID, out _)) continue;
-                if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(gearID)))) continue;
+                    StateInfo = string.Format("{0}/{1} 裝備: {2}", ++count, allCount, gearID);
+                    StateDetail = "Character 對比中...";
+                    bool[] isGearNull = new bool[2] { false, false };
+                    string gearType = "";
+                    string gearNodePath = null;
+                    string categoryPath = "";
 
-                if (Regex.IsMatch(gearID, "^0101|^0102|^0103|^0112|^0113|^0114|^0115|^0116|^0118|^0119")) // 判断开头是否是0101~0103或0112~0116-0118~0119
-                {
-                    gearNodePath = String.Format(@"Character\Accessory\{0:D}.img", gearID);
-                    categoryPath = "Accessory_飾品";
-                }
-                else if (gearID.StartsWith("0100")) // 判断开头是否是0100
-                {
-                    gearNodePath = String.Format(@"Character\Cap\{0:D}.img", gearID);
-                    categoryPath = "Hat_帽子";
-                }
-                else if (gearID.StartsWith("0104")) // 判断开头是否是0104
-                {
-                    gearNodePath = String.Format(@"Character\Coat\{0:D}.img", gearID);
-                    categoryPath = "Top_上衣";
-                }
-                else if (gearID.StartsWith("0105")) // 判断开头是否是0104
-                {
-                    gearNodePath = String.Format(@"Character\Longcoat\{0:D}.img", gearID);
-                    categoryPath = "Overall_套服";
-                }
-                else if (gearID.StartsWith("0106")) // 判断开头是否是0106
-                {
-                    gearNodePath = String.Format(@"Character\Pants\{0:D}.img", gearID);
-                    categoryPath = "Bottom_褲裙";
-                }
-                else if (gearID.StartsWith("0107")) // 判断开头是否是0107
-                {
-                    gearNodePath = String.Format(@"Character\Shoes\{0:D}.img", gearID);
-                    categoryPath = "Shoes_鞋子";
-                }
-                else if (gearID.StartsWith("0108")) // 判断开头是否是0108
-                {
-                    gearNodePath = String.Format(@"Character\Glove\{0:D}.img", gearID);
-                    categoryPath = "Glove_手套";
-                }
-                else if (gearID.StartsWith("0109")) // 判断开头是否是0109
-                {
-                    gearNodePath = String.Format(@"Character\Shield\{0:D}.img", gearID);
-                    categoryPath = "Shield_盾";
-                }
-                else if (gearID.StartsWith("0110")) // 判断开头是否是0110
-                {
-                    gearNodePath = String.Format(@"Character\Cape\{0:D}.img", gearID);
-                    categoryPath = "Cape_披風";
-                }
-                else if (gearID.StartsWith("0111")) // 判断开头是否是0111
-                {
-                    gearNodePath = String.Format(@"Character\Ring\{0:D}.img", gearID);
-                    categoryPath = "Ring_戒指";
-                }
-                else if (gearID.StartsWith("0120") || gearID.StartsWith("120")) // 判断开头是否是0120
-                {
-                    gearNodePath = String.Format(@"Character\Totem\{0:D}.img", gearID);
-                    categoryPath = "Totem_圖騰";
-                }
-                else if (Regex.IsMatch(gearID, "^012[1-9]|^013|^014|^015|^0160|^0169|^0170")) // 判断开头是否是012~015、0160或0169-0179
-                {
-                    gearNodePath = String.Format(@"Character\Weapon\{0:D}.img", gearID);
-                    categoryPath = "Weapon_武器";
-                }
-                else if (Regex.IsMatch(gearID, "^0161|^0162|^0163|^0164|^0165"))// 判断开头是否是0161~0165
-                {
-                    gearNodePath = String.Format(@"Character\Mechanic\{0:D}.img", gearID);
-                    categoryPath = "MechanicPart_機甲部件";
-                }
-                else if (Regex.IsMatch(gearID, "^0166|^0167")) // 判断开头是否是0166或0167
-                {
-                    gearNodePath = String.Format(@"Character\Android\{0:D}.img", gearID);
-                    categoryPath = "Android_機器人";
-                }
-                else if (gearID.StartsWith("0168")) // 判断开头是否是0168
-                {
-                    gearNodePath = String.Format(@"Character\Bits\{0:D}.img", gearID);
-                    categoryPath = "Bits_拼圖";
-                }
-                else if (gearID.StartsWith("01712")) // 判断开头是否是01712
-                {
-                    gearNodePath = String.Format(@"Character\ArcaneForce\{0:D}.img", gearID);
-                    categoryPath = "Arcane_秘法";
-                }
-                else if (Regex.IsMatch(gearID, "^01713|^01714")) // 判断开头是否是01713或01714
-                {
-                    gearNodePath = String.Format(@"Character\AuthenticForce\{0:D}.img", gearID);
-                    categoryPath = "Authentic_真實";
-                }
-                else if (Regex.IsMatch(gearID, "^0178"))  // 判断开头是否是0178
-                {
-                    gearNodePath = String.Format(@"Character\Jewel\{0:D}.img", gearID);
-                    categoryPath = "Jewel_寶玉";
-                }
-                else if (Regex.IsMatch(gearID, "^0179"))  // 判断开头是否是0179
-                {
-                    gearNodePath = String.Format(@"Character\NT_Beauty\{0:D}.img", gearID);
-                    categoryPath = "MSN_Cosmetic_外形";
-                }
-                else if (gearID.StartsWith("018")) // 判断开头是否是018
-                {
-                    gearNodePath = String.Format(@"Character\PetEquip\{0:D}.img", gearID);
-                    categoryPath = "PetEquipment_寵物裝備";
-                }
-                else if (Regex.IsMatch(gearID, "^0194|^0195|^0196|^0197")) // 判断开头是否是0194~0197
-                {
-                    gearNodePath = String.Format(@"Character\Dragon\{0:D}.img", gearID);
-                    categoryPath = "EvanDragonEquip_龍魔裝備";
-                }
-                else if (Regex.IsMatch(gearID, "^0190|^0191|^0192|^0193|^0198")) // 判断开头是否是0190~0193或0198
-                {
-                    gearNodePath = String.Format(@"Character\TamingMob\{0:D}.img", gearID);
-                    categoryPath = "TamedMonster_馴服的怪物";
-                }
-                else if (Regex.IsMatch(gearID, "^0002|^0005")) // 判断开头是否是0002或0005
-                {
-                    gearNodePath = String.Format(@"Character\Face\{0:D}.img", gearID);
-                    categoryPath = "Cosmetic_外形";
-                }
-                else if (Regex.IsMatch(gearID, "^0003|^0004|^0006")) // 判断开头是否是0003、0004或0006
-                {
-                    gearNodePath = String.Format(@"Character\Hair\{0:D}.img", gearID);
-                    categoryPath = "Cosmetic_外形";
-                }
+                    if (!int.TryParse(gearID, out _)) continue;
+                    if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(gearID)))) continue;
 
-                StringResult sr;
-                string EqpName;
-                if (gearRenderNewOld[1].StringLinker == null || !gearRenderNewOld[1].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的裝備";
-                }
-                EqpName = sr.Name;
-                if (gearRenderNewOld[0].StringLinker == null || !gearRenderNewOld[0].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的裝備";
-                }
-                if (EqpName != sr.Name && EqpName != "未知的裝備" && sr.Name != "未知的裝備")
-                {
-                    EqpName += "_" + sr.Name;
-                }
-                else if (EqpName == "未知的裝備")
-                {
+                    if (Regex.IsMatch(gearID, "^0101|^0102|^0103|^0112|^0113|^0114|^0115|^0116|^0118|^0119")) // 判断开头是否是0101~0103或0112~0116-0118~0119
+                    {
+                        gearNodePath = String.Format(@"Character\Accessory\{0:D}.img", gearID);
+                        categoryPath = "Accessory_飾品";
+                    }
+                    else if (gearID.StartsWith("0100")) // 判断开头是否是0100
+                    {
+                        gearNodePath = String.Format(@"Character\Cap\{0:D}.img", gearID);
+                        categoryPath = "Hat_帽子";
+                    }
+                    else if (gearID.StartsWith("0104")) // 判断开头是否是0104
+                    {
+                        gearNodePath = String.Format(@"Character\Coat\{0:D}.img", gearID);
+                        categoryPath = "Top_上衣";
+                    }
+                    else if (gearID.StartsWith("0105")) // 判断开头是否是0104
+                    {
+                        gearNodePath = String.Format(@"Character\Longcoat\{0:D}.img", gearID);
+                        categoryPath = "Overall_套服";
+                    }
+                    else if (gearID.StartsWith("0106")) // 判断开头是否是0106
+                    {
+                        gearNodePath = String.Format(@"Character\Pants\{0:D}.img", gearID);
+                        categoryPath = "Bottom_褲裙";
+                    }
+                    else if (gearID.StartsWith("0107")) // 判断开头是否是0107
+                    {
+                        gearNodePath = String.Format(@"Character\Shoes\{0:D}.img", gearID);
+                        categoryPath = "Shoes_鞋子";
+                    }
+                    else if (gearID.StartsWith("0108")) // 判断开头是否是0108
+                    {
+                        gearNodePath = String.Format(@"Character\Glove\{0:D}.img", gearID);
+                        categoryPath = "Glove_手套";
+                    }
+                    else if (gearID.StartsWith("0109")) // 判断开头是否是0109
+                    {
+                        gearNodePath = String.Format(@"Character\Shield\{0:D}.img", gearID);
+                        categoryPath = "Shield_盾";
+                    }
+                    else if (gearID.StartsWith("0110")) // 判断开头是否是0110
+                    {
+                        gearNodePath = String.Format(@"Character\Cape\{0:D}.img", gearID);
+                        categoryPath = "Cape_披風";
+                    }
+                    else if (gearID.StartsWith("0111")) // 判断开头是否是0111
+                    {
+                        gearNodePath = String.Format(@"Character\Ring\{0:D}.img", gearID);
+                        categoryPath = "Ring_戒指";
+                    }
+                    else if (gearID.StartsWith("0120") || gearID.StartsWith("120")) // 判断开头是否是0120
+                    {
+                        gearNodePath = String.Format(@"Character\Totem\{0:D}.img", gearID);
+                        categoryPath = "Totem_圖騰";
+                    }
+                    else if (Regex.IsMatch(gearID, "^012[1-9]|^013|^014|^015|^0160|^0169|^0170")) // 判断开头是否是012~015、0160或0169-0179
+                    {
+                        gearNodePath = String.Format(@"Character\Weapon\{0:D}.img", gearID);
+                        categoryPath = "Weapon_武器";
+                    }
+                    else if (gearID.StartsWith("0172")) // 判断开头是否是0172
+                    {
+                        gearNodePath = String.Format(@"Character\Weapon\{0:D}.img", gearID);
+                        categoryPath = "AstraSubWeapon_アストラ補助武器";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0161|^0162|^0163|^0164|^0165"))// 判断开头是否是0161~0165
+                    {
+                        gearNodePath = String.Format(@"Character\Mechanic\{0:D}.img", gearID);
+                        categoryPath = "MechanicPart_機甲部件";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0166|^0167")) // 判断开头是否是0166或0167
+                    {
+                        gearNodePath = String.Format(@"Character\Android\{0:D}.img", gearID);
+                        categoryPath = "Android_機器人";
+                    }
+                    else if (gearID.StartsWith("0168")) // 判断开头是否是0168
+                    {
+                        gearNodePath = String.Format(@"Character\Bits\{0:D}.img", gearID);
+                        categoryPath = "Bits_拼圖";
+                    }
+                    else if (gearID.StartsWith("01712")) // 判断开头是否是01712
+                    {
+                        gearNodePath = String.Format(@"Character\ArcaneForce\{0:D}.img", gearID);
+                        categoryPath = "Arcane_秘法";
+                    }
+                    else if (Regex.IsMatch(gearID, "^01713|^01714")) // 判断开头是否是01713或01714
+                    {
+                        gearNodePath = String.Format(@"Character\AuthenticForce\{0:D}.img", gearID);
+                        categoryPath = "Authentic_真實";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0178"))  // 判断开头是否是0178
+                    {
+                        gearNodePath = String.Format(@"Character\Jewel\{0:D}.img", gearID);
+                        categoryPath = "Jewel_寶玉";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0179"))  // 判断开头是否是0179
+                    {
+                        gearNodePath = String.Format(@"Character\NT_Beauty\{0:D}.img", gearID);
+                        categoryPath = "MSN_Cosmetic_外形";
+                    }
+                    else if (gearID.StartsWith("018")) // 判断开头是否是018
+                    {
+                        gearNodePath = String.Format(@"Character\PetEquip\{0:D}.img", gearID);
+                        categoryPath = "PetEquipment_寵物裝備";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0194|^0195|^0196|^0197")) // 判断开头是否是0194~0197
+                    {
+                        gearNodePath = String.Format(@"Character\Dragon\{0:D}.img", gearID);
+                        categoryPath = "EvanDragonEquip_龍魔裝備";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0190|^0191|^0192|^0193|^0198")) // 判断开头是否是0190~0193或0198
+                    {
+                        gearNodePath = String.Format(@"Character\TamingMob\{0:D}.img", gearID);
+                        categoryPath = "TamedMonster_馴服的怪物";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0002|^0005|^0008")) // 判断开头是否是0002或0005
+                    {
+                        gearNodePath = String.Format(@"Character\Face\{0:D}.img", gearID);
+                        categoryPath = "Cosmetic_外形";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0003|^0004|^0006|^0007")) // 判断开头是否是0003、0004或0006
+                    {
+                        gearNodePath = String.Format(@"Character\Hair\{0:D}.img", gearID);
+                        categoryPath = "Cosmetic_外形";
+                    }
+
+                    StringResult sr;
+                    string EqpName;
+                    if (gearRenderNewOld[1].StringLinker == null || !gearRenderNewOld[1].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的裝備";
+                    }
                     EqpName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(EqpName)) EqpName = "未知的裝備";
-                EqpName = RemoveInvalidFileNameChars(EqpName);
-                int nullEqpIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Gear gear = Gear.CreateFromNode(PluginManager.FindWz(gearNodePath, WzFileNewOld[i]), PluginManager.FindWz);
-
-                    if (gear != null)
+                    if (gearRenderNewOld[0].StringLinker == null || !gearRenderNewOld[0].StringLinker.StringEqp.TryGetValue(int.Parse(gearID), out sr))
                     {
-                        gearRenderNewOld[i].Gear = gear;
+                        sr = new StringResult();
+                        sr.Name = "未知的裝備";
                     }
-                    else
+                    if (EqpName != sr.Name && EqpName != "未知的裝備" && sr.Name != "未知的裝備")
                     {
-                        nullEqpIdx = i + 1;
+                        EqpName += "_" + sr.Name;
                     }
-                }
+                    else if (EqpName == "未知的裝備")
+                    {
+                        EqpName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(EqpName)) EqpName = "未知的裝備";
+                    EqpName = RemoveInvalidFileNameChars(EqpName);
+                    int nullEqpIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Gear gear = Gear.CreateFromNode(PluginManager.FindWz(gearNodePath, WzFileNewOld[i]), PluginManager.FindWz);
 
-                switch (nullEqpIdx)
-                {
-                    case 0: // change
-                        gearType = "變更";
-
-                        Bitmap ImageNew = gearRenderNewOld[0].Render();
-                        Bitmap ImageOld = gearRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                        if (gear != null)
                         {
-                            int picHchange = ShowObjectID ? 13 : 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 13 : 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            gearRenderNewOld[i].Gear = gear;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            isGearNull[i] = true;
+                            nullEqpIdx = i + 1;
+                        }
+                    }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                    case 1: // delete
-                        gearType = "刪除";
+                    switch (nullEqpIdx)
+                    {
+                        case 0: // change
+                            gearType = "變更";
 
-                        resultImage = gearRenderNewOld[1].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = gearRenderNewOld[0].Render();
+                            Bitmap ImageOld = gearRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", gearTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    case 2: // add
-                        gearType = "新增";
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
 
-                        resultImage = gearRenderNewOld[0].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                        case 1: // delete
+                            gearType = "刪除";
+                            if (isGearNull[1]) continue;
+                            resultImage = gearRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
 
-                    default:
-                        break;
+                        case 2: // add
+                            gearType = "新增";
+                            if (isGearNull[0]) continue;
+                            resultImage = gearRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    if (!Directory.Exists(Path.Combine(gearTooltipPath, categoryPath)))
+                    {
+                        Directory.CreateDirectory(Path.Combine(gearTooltipPath, categoryPath));
+                    }
+
+                    var gearTypeTextInfo = g.MeasureString(gearType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullEqpIdx != 0) GearGraphics.DrawPlainText(g, gearType, gearTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(gearTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(gearTooltipPath, categoryPath, "裝備_" + gearID + "_" + EqpName + "_" + gearType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的裝備變更。 \r\n裝備類型：`{0}`\r\n變更類型：{1}\r\n裝備名稱：`{2}`\r\nID：`{3}`", categoryPath, gearType, EqpName, gearID));
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Gear Tooltip 3: " + gearID, ex.Message);
                 }
-
-                if (!Directory.Exists(Path.Combine(gearTooltipPath, categoryPath)))
-                {
-                    Directory.CreateDirectory(Path.Combine(gearTooltipPath, categoryPath));
-                }
-
-                var gearTypeTextInfo = g.MeasureString(gearType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 13 : 1;
-                if (ShowChangeType) GearGraphics.DrawPlainText(g, gearType, gearTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(gearTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(gearTooltipPath, categoryPath, "裝備_" + gearID + "_" + EqpName + "_" + gearType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputGearTooltipIDs.Clear();
             DiffGearTags.Clear();
@@ -1694,129 +2627,144 @@ namespace WzComparerR2.Comparer
                 this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
                 this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
                 this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
 
                 mapRenderNewOld[i] = new MapTooltipRenderer();
                 mapRenderNewOld[i].StringLinker = new StringLinker();
-                mapRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i]);
+                mapRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
                 mapRenderNewOld[i].Enable22AniStyle = this.Enable22AniStyle;
                 mapRenderNewOld[i].ShowObjectID = this.ShowObjectID;
                 mapRenderNewOld[i].ShowMiniMap = true;
+                mapRenderNewOld[i].ShowMiniMapMob = true;
+                mapRenderNewOld[i].ShowMiniMapNpc = true;
+                mapRenderNewOld[i].ShowMiniMapPortal = true;
+                mapRenderNewOld[i].ShowBgmName = true;
                 mapRenderNewOld[i].ShowMobNpcObjectID = this.ShowObjectID;
             }
 
             foreach (var mapID in OutputMapTooltipIDs)
             {
-                if (!int.TryParse(mapID, out _)) continue;
-                StateInfo = string.Format("{0}/{1} 地圖: {2}", ++count, allCount, mapID);
-                StateDetail = "Map 對比中...";
-                string mapType = "";
-                string mapNodePath = String.Format(@"Map\Map\Map{0}\{1:D}.img", int.Parse(mapID) / 100000000, mapID);
+                try
+                {
+                    if (!int.TryParse(mapID, out _)) continue;
+                    StateInfo = string.Format("{0}/{1} 地圖: {2}", ++count, allCount, mapID);
+                    StateDetail = "Map 對比中...";
+                    bool[] isMapNull = new bool[2] { false, false };
+                    string mapType = "";
+                    string mapNodePath = String.Format(@"Map\Map\Map{0}\{1:D}.img", int.Parse(mapID) / 100000000, mapID);
 
-                if (SkipKMSContent && KMSContentID["Map"].Contains((Int32.Parse(mapID)))) continue;
+                    if (SkipKMSContent && KMSContentID["Map"].Contains((Int32.Parse(mapID)))) continue;
 
-                StringResult sr;
-                string MapName;
-                if (mapRenderNewOld[1].StringLinker == null || !mapRenderNewOld[1].StringLinker.StringMap.TryGetValue(int.Parse(mapID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的地圖";
-                }
-                MapName = sr.Name;
-                if (mapRenderNewOld[0].StringLinker == null || !mapRenderNewOld[0].StringLinker.StringMap.TryGetValue(int.Parse(mapID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的地圖";
-                }
-                if (MapName != sr.Name && MapName != "未知的地圖" && sr.Name != "未知的地圖")
-                {
-                    MapName += "_" + sr.Name;
-                }
-                else if (MapName == "未知的地圖")
-                {
+                    StringResult sr;
+                    string MapName;
+                    if (mapRenderNewOld[1].StringLinker == null || !mapRenderNewOld[1].StringLinker.StringMap.TryGetValue(int.Parse(mapID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的地圖";
+                    }
                     MapName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(MapName)) MapName = "未知的地圖";
-                MapName = RemoveInvalidFileNameChars(MapName);
-                int nullMapIdx = 0;
-
-                // 變更前後のツールチップ画像の作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Map map = Map.CreateFromNode(PluginManager.FindWz(mapNodePath, WzFileNewOld[i]), PluginManager.FindWz);
-
-                    if (map != null)
+                    if (mapRenderNewOld[0].StringLinker == null || !mapRenderNewOld[0].StringLinker.StringMap.TryGetValue(int.Parse(mapID), out sr))
                     {
-                        mapRenderNewOld[i].Map = map;
+                        sr = new StringResult();
+                        sr.Name = "未知的地圖";
                     }
-                    else
+                    if (MapName != sr.Name && MapName != "未知的地圖" && sr.Name != "未知的地圖")
                     {
-                        nullMapIdx = i + 1;
+                        MapName += "_" + sr.Name;
                     }
-                }
+                    else if (MapName == "未知的地圖")
+                    {
+                        MapName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(MapName)) MapName = "未知的地圖";
+                    MapName = RemoveInvalidFileNameChars(MapName);
+                    int nullMapIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Map map = Map.CreateFromNode(PluginManager.FindWz(mapNodePath, WzFileNewOld[i]), PluginManager.FindWz);
 
-                switch (nullMapIdx)
-                {
-                    case 0: // change
-                        //mapType = "變更";
-
-                        Bitmap ImageNew = mapRenderNewOld[0].Render();
-                        Bitmap ImageOld = mapRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                        if (map != null)
                         {
-                            int picHchange = ShowObjectID ? 13 : 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", mapTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 13 : 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", mapTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            mapRenderNewOld[i].Map = map;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            isMapNull[i] = true;
+                            nullMapIdx = i + 1;
+                        }
+                    }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                    case 1: // delete
-                        mapType = "刪除";
+                    switch (nullMapIdx)
+                    {
+                        case 0: // change
+                            mapType = "變更";
 
-                        resultImage = mapRenderNewOld[1].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = mapRenderNewOld[0].Render();
+                            Bitmap ImageOld = mapRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", mapTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", mapTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    case 2: // add
-                        mapType = "新增";
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
 
-                        resultImage = mapRenderNewOld[0].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                        case 1: // delete
+                            mapType = "刪除";
+                            if (isMapNull[1]) continue;
+                            resultImage = mapRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
 
-                    default:
-                        break;
+                        case 2: // add
+                            mapType = "新增";
+                            if (isMapNull[0]) continue;
+                            resultImage = mapRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var mapTypeTextInfo = g.MeasureString(mapType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullMapIdx != 0) GearGraphics.DrawPlainText(g, mapType, mapTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(mapTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(mapTooltipPath, "地圖_" + mapID + "_" + MapName + "_" + mapType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的地圖變更。 \r\n變更類型：{0}\r\n地圖名稱：`{1}`\r\nID：`{2}`", mapType, MapName, mapID));
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Map Tooltip: " + mapID, ex.Message);
                 }
-
-                var mapTypeTextInfo = g.MeasureString(mapType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 13 : 1;
-                if (ShowChangeType) GearGraphics.DrawPlainText(g, mapType, mapTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(mapTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(mapTooltipPath, "地圖_" + mapID + "_" + MapName + "_" + mapType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputMapTooltipIDs.Clear();
             DiffMapTags.Clear();
@@ -1834,125 +2782,164 @@ namespace WzComparerR2.Comparer
                 this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
                 this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
                 this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
 
                 mobRenderNewOld[i] = new MobTooltipRenderer();
                 mobRenderNewOld[i].StringLinker = new StringLinker();
-                mobRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i]);
+                mobRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
                 mobRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                mobRenderNewOld[i].ShowAllSubMobAtOnce = true;
+                mobRenderNewOld[i].EnableWorldArchive = this.EnableWorldArchive;
+                mobRenderNewOld[i].EnableMonsterBook = this.EnableMonsterBook;
+                mobRenderNewOld[i].MaxWidth = 3840;
+            }
+
+            if (this.EnableWorldArchive)
+            {
+                HashSet<int> WorldArchiveDeltaIDs = WorldArchiveDelta(mobRenderNewOld[0].StringLinker.StringWorldArchiveMob, mobRenderNewOld[1].StringLinker.StringWorldArchiveMob);
+                foreach (var i in WorldArchiveDeltaIDs)
+                {
+                    OutputMobTooltipIDs.Add(i.ToString());
+                }
             }
 
             foreach (var mobID in OutputMobTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} 怪物: {2}", ++count, allCount, mobID);
-                StateDetail = "Mob 對比中...";
-                string mobType = "";
-                string mobNodePath = String.Format(@"Mob\{0:D}.img", mobID);
+                try
+                {
 
-                if (SkipKMSContent && KMSContentID["Mob"].Contains((Int32.Parse(mobID)))) continue;
+                    StateInfo = string.Format("{0}/{1} 怪物: {2}", ++count, allCount, mobID);
+                    StateDetail = "Mob 對比中...";
 
-                StringResult sr;
-                string MobName;
-                if (mobRenderNewOld[1].StringLinker == null || !mobRenderNewOld[1].StringLinker.StringMob.TryGetValue(int.Parse(mobID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的怪物";
-                }
-                MobName = sr.Name;
-                if (mobRenderNewOld[0].StringLinker == null || !mobRenderNewOld[0].StringLinker.StringMob.TryGetValue(int.Parse(mobID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的怪物";
-                }
-                if (MobName != sr.Name && MobName != "未知的怪物" && sr.Name != "未知的怪物")
-                {
-                    MobName += "_" + sr.Name;
-                }
-                else if (MobName == "未知的怪物")
-                {
+                    bool[] isMobNull = new bool[2] { false, false };
+                    string mobType = "";
+                    List<string> mobNodePaths = new List<string>()
+                    {
+                        String.Format(@"Mob\{0:D7}.img", mobID),
+                        String.Format(@"Mob\AbyssExpeditionMob\{0:D7}.img", mobID),
+                        String.Format(@"Mob\MExplorerMob\{0:D7}.img", mobID),
+                        String.Format(@"Mob\QuestCountGroup\{0:D7}.img", mobID),
+                        String.Format(@"Mob\RoguelikeMob\{0:D7}.img", mobID),
+                        String.Format(@"Mob\RoguelikeMob\Redmoon\{0:D7}.img", mobID)
+                    };
+
+                    if (SkipKMSContent && KMSContentID["Mob"].Contains((Int32.Parse(mobID)))) continue;
+
+                    StringResult sr;
+                    string MobName;
+                    if (mobRenderNewOld[1].StringLinker == null || !mobRenderNewOld[1].StringLinker.StringMob.TryGetValue(int.Parse(mobID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的怪物";
+                    }
                     MobName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(MobName)) MobName = "未知的怪物";
-                MobName = RemoveInvalidFileNameChars(MobName);
-                int nullMobIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Mob mob = Mob.CreateFromNode(PluginManager.FindWz(mobNodePath, WzFileNewOld[i]), PluginManager.FindWz);
-
-                    if (mob != null)
+                    if (mobRenderNewOld[0].StringLinker == null || !mobRenderNewOld[0].StringLinker.StringMob.TryGetValue(int.Parse(mobID), out sr))
                     {
-                        mobRenderNewOld[i].MobInfo = mob;
+                        sr = new StringResult();
+                        sr.Name = "未知的怪物";
                     }
-                    else
+                    if (MobName != sr.Name && MobName != "未知的怪物" && sr.Name != "未知的怪物")
                     {
-                        nullMobIdx = i + 1;
+                        MobName += "_" + sr.Name;
                     }
-                }
+                    else if (MobName == "未知的怪物")
+                    {
+                        MobName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(MobName)) MobName = "未知的怪物";
+                    MobName = RemoveInvalidFileNameChars(MobName);
+                    int nullMobIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
-
-                switch (nullMobIdx)
-                {
-                    case 0: // change
-                        //mobType = "變更";
-
-                        Bitmap ImageNew = mobRenderNewOld[0].Render();
-                        Bitmap ImageOld = mobRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Mob mob = null;
+                        foreach (var path in mobNodePaths)
                         {
-                            int picHchange = 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", mobTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", mobTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            mob = Mob.CreateFromNode(PluginManager.FindWz(path, WzFileNewOld[i]), PluginManager.FindWz);
+                            if (mob != null) break;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                        if (mob != null)
+                        {
+                            mobRenderNewOld[i].MobInfo = mob;
+                        }
+                        else
+                        {
+                            isMobNull[i] = true;
+                            nullMobIdx = i + 1;
+                        }
+                    }
 
-                    case 1: // delete
-                        mobType = "刪除";
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                        resultImage = mobRenderNewOld[1].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                    switch (nullMobIdx)
+                    {
+                        case 0: // change
+                            mobType = "變更";
 
-                    case 2: // add
-                        mobType = "新增";
+                            Bitmap ImageNew = mobRenderNewOld[0].Render();
+                            Bitmap ImageOld = mobRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", mobTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", mobTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                        resultImage = mobRenderNewOld[0].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
 
-                    default:
-                        break;
+                        case 1: // delete
+                            mobType = "刪除";
+                            if (isMobNull[1]) continue;
+                            resultImage = mobRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            mobType = "新增";
+                            if (isMobNull[0]) continue;
+                            resultImage = mobRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var mobTypeTextInfo = g.MeasureString(mobType, GearGraphics.ItemDetailFont);
+                    int picH = 1;
+                    if (ShowChangeType && nullMobIdx != 0) GearGraphics.DrawPlainText(g, mobType, mobTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(mobTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(mobTooltipPath, "怪物_" + mobID + "_" + MobName + "_" + mobType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的怪物變更。 \r\n變更類型：{0}\r\n怪物名稱：`{1}`\r\nID：`{2}`", mobType, MobName, mobID));
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Mob Tooltip: " + mobID, ex.Message);
                 }
-
-                var mobTypeTextInfo = g.MeasureString(mobType, GearGraphics.ItemDetailFont);
-                int picH = 1;
-                if (ShowChangeType) GearGraphics.DrawPlainText(g, mobType, mobTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(mobTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(mobTooltipPath, "怪物_" + mobID + "_" + MobName + "_" + mobType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputMobTooltipIDs.Clear();
             DiffMobTags.Clear();
@@ -1970,125 +2957,148 @@ namespace WzComparerR2.Comparer
                 this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
                 this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
                 this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
 
                 npcRenderNewOld[i] = new NpcTooltipRenderer();
                 npcRenderNewOld[i].StringLinker = new StringLinker();
-                npcRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i]);
+                npcRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
                 npcRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                npcRenderNewOld[i].ShowAllIllustAtOnce = true;
+                npcRenderNewOld[i].EnableWorldArchive = this.EnableWorldArchive;
+                npcRenderNewOld[i].ShowNpcQuotes = this.ShowNpcQuotes;
+            }
+
+            if (this.EnableWorldArchive)
+            {
+                HashSet<int> WorldArchiveDeltaIDs = WorldArchiveDelta(npcRenderNewOld[0].StringLinker.StringWorldArchiveNpc, npcRenderNewOld[1].StringLinker.StringWorldArchiveNpc);
+                foreach (var i in WorldArchiveDeltaIDs)
+                {
+                    OutputNpcTooltipIDs.Add(i.ToString());
+                }
             }
 
             foreach (var npcID in OutputNpcTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} NPC: {2}", ++count, allCount, npcID);
-                StateDetail = "Npc 對比中...";
-                string npcType = "";
-                string npcNodePath = String.Format(@"Npc\{0:D}.img", npcID);
+                try
+                {
+                    StateInfo = string.Format("{0}/{1} NPC: {2}", ++count, allCount, npcID);
+                    StateDetail = "Npc 對比中...";
+                    bool[] isNpcNull = new bool[2] { false, false };
+                    string npcType = "";
+                    string npcNodePath = String.Format(@"Npc\{0:D}.img", npcID);
 
-                if (SkipKMSContent && KMSContentID["Npc"].Contains((Int32.Parse(npcID)))) continue;
+                    if (SkipKMSContent && KMSContentID["Npc"].Contains((Int32.Parse(npcID)))) continue;
 
-                StringResult sr;
-                string NpcName;
-                if (npcRenderNewOld[1].StringLinker == null || !npcRenderNewOld[1].StringLinker.StringNpc.TryGetValue(int.Parse(npcID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的NPC";
-                }
-                NpcName = sr.Name;
-                if (npcRenderNewOld[0].StringLinker == null || !npcRenderNewOld[0].StringLinker.StringNpc.TryGetValue(int.Parse(npcID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的NPC";
-                }
-                if (NpcName != sr.Name && NpcName != "未知的NPC" && sr.Name != "未知的NPC")
-                {
-                    NpcName += "_" + sr.Name;
-                }
-                else if (NpcName == "未知的NPC")
-                {
+                    StringResult sr;
+                    string NpcName;
+                    if (npcRenderNewOld[1].StringLinker == null || !npcRenderNewOld[1].StringLinker.StringNpc.TryGetValue(int.Parse(npcID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的NPC";
+                    }
                     NpcName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(NpcName)) NpcName = "未知的NPC";
-                NpcName = RemoveInvalidFileNameChars(NpcName);
-                int nullNpcIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    Npc npc = Npc.CreateFromNode(PluginManager.FindWz(npcNodePath, WzFileNewOld[i]), PluginManager.FindWz);
-
-                    if (npc != null)
+                    if (npcRenderNewOld[0].StringLinker == null || !npcRenderNewOld[0].StringLinker.StringNpc.TryGetValue(int.Parse(npcID), out sr))
                     {
-                        npcRenderNewOld[i].NpcInfo = npc;
+                        sr = new StringResult();
+                        sr.Name = "未知的NPC";
                     }
-                    else
+                    if (NpcName != sr.Name && NpcName != "未知的NPC" && sr.Name != "未知的NPC")
                     {
-                        nullNpcIdx = i + 1;
+                        NpcName += "_" + sr.Name;
                     }
-                }
+                    else if (NpcName == "未知的NPC")
+                    {
+                        NpcName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(NpcName)) NpcName = "未知的NPC";
+                    NpcName = RemoveInvalidFileNameChars(NpcName);
+                    int nullNpcIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Npc npc = Npc.CreateFromNode(PluginManager.FindWz(npcNodePath, WzFileNewOld[i]), PluginManager.FindWz);
 
-                switch (nullNpcIdx)
-                {
-                    case 0: // change
-                        //npcType = "變更";
-
-                        Bitmap ImageNew = npcRenderNewOld[0].Render();
-                        Bitmap ImageOld = npcRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                        if (npc != null)
                         {
-                            int picHchange = 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", npcTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", npcTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            npcRenderNewOld[i].NpcInfo = npc;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            isNpcNull[i] = true;
+                            nullNpcIdx = i + 1;
+                        }
+                    }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                    case 1: // delete
-                        npcType = "刪除";
+                    switch (nullNpcIdx)
+                    {
+                        case 0: // change
+                            npcType = "變更";
 
-                        resultImage = npcRenderNewOld[1].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = npcRenderNewOld[0].Render();
+                            Bitmap ImageOld = npcRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", npcTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", npcTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    case 2: // add
-                        npcType = "新增";
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
 
-                        resultImage = npcRenderNewOld[0].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                        case 1: // delete
+                            npcType = "刪除";
+                            if (isNpcNull[1]) continue;
+                            resultImage = npcRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
 
-                    default:
-                        break;
+                        case 2: // add
+                            npcType = "新增";
+                            if (isNpcNull[0]) continue;
+                            resultImage = npcRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var npcTypeTextInfo = g.MeasureString(npcType, GearGraphics.ItemDetailFont);
+                    int picH = 1;
+                    if (ShowChangeType && nullNpcIdx != 0) GearGraphics.DrawPlainText(g, npcType, npcTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(npcTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(npcTooltipPath, "Npc_" + npcID + "_" + NpcName + "_" + npcType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的NPC變更。 \r\n變更類型：{0}\r\nNPC名稱：`{1}`\r\nID：`{2}`", npcType, NpcName, npcID));
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("NPC Tooltip: " + npcID, ex.Message);
                 }
-
-                var npcTypeTextInfo = g.MeasureString(npcType, GearGraphics.ItemDetailFont);
-                int picH = 1;
-                if (ShowChangeType) GearGraphics.DrawPlainText(g, npcType, npcTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(npcTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(npcTooltipPath, "Npc_" + npcID + "_" + NpcName + "_" + npcType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputNpcTooltipIDs.Clear();
             DiffNpcTags.Clear();
@@ -2106,134 +3116,305 @@ namespace WzComparerR2.Comparer
                 this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
                 this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
                 this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
 
                 cashRenderNewOld[i] = new CashPackageTooltipRender();
                 cashRenderNewOld[i].StringLinker = new StringLinker();
-                cashRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i]);
+                cashRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
                 cashRenderNewOld[i].ShowObjectID = this.ShowObjectID;
             }
 
             foreach (var itemID in OutputCashTooltipIDs)
             {
-                StateInfo = string.Format("{0}/{1} 現金禮包: {2}", ++count, allCount, itemID);
-                StateDetail = "Item 對比中...";
-                string itemType = "";
-                string itemNodePath = null;
+                try
+                {
+                    StateInfo = string.Format("{0}/{1} 現金禮包: {2}", ++count, allCount, itemID);
+                    StateDetail = "Item 對比中...";
+                    bool[] isCashNull = new bool[2] { false, false };
+                    string itemType = "";
+                    string itemNodePath = null;
 
-                if (itemID.StartsWith("9")) // 判断第1位是否是09
-                {
-                    itemNodePath = String.Format(@"Item\Special\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
-                }
+                    if (itemID.StartsWith("9")) // 判断第1位是否是09
+                    {
+                        itemNodePath = String.Format(@"Item\Special\0{0:D}.img\{1:D}", int.Parse(itemID) / 10000, itemID);
+                    }
 
-                if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(itemID)))) continue;
+                    if (SkipKMSContent && KMSContentID["Item"].Contains((Int32.Parse(itemID)))) continue;
 
-                StringResult sr;
-                string ItemName;
-                if (cashRenderNewOld[1].StringLinker == null || !cashRenderNewOld[1].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的現金禮包";
-                }
-                ItemName = sr.Name;
-                if (cashRenderNewOld[0].StringLinker == null || !cashRenderNewOld[0].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
-                {
-                    sr = new StringResult();
-                    sr.Name = "未知的現金禮包";
-                }
-                if (ItemName != sr.Name && ItemName != "未知的現金禮包" && sr.Name != "未知的現金禮包")
-                {
-                    ItemName += "_" + sr.Name;
-                }
-                else if (ItemName == "未知的現金禮包")
-                {
+                    StringResult sr;
+                    string ItemName;
+                    if (cashRenderNewOld[1].StringLinker == null || !cashRenderNewOld[1].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的現金禮包";
+                    }
                     ItemName = sr.Name;
-                }
-                if (String.IsNullOrEmpty(ItemName)) ItemName = "未知的現金禮包";
-                ItemName = RemoveInvalidFileNameChars(ItemName);
-                int nullItemIdx = 0;
-
-                // 變更前後的ツールチップ画像的作成
-                for (int i = 0; i < 2; i++) // 0: New, 1: Old
-                {
-                    CashPackage item = CashPackage.CreateFromNode(PluginManager.FindWz(itemNodePath, WzFileNewOld[i]), PluginBase.PluginManager.FindWz(string.Format(@"Etc\CashPackage.img\{0}", itemID)), PluginManager.FindWz);
-
-                    if (item != null)
+                    if (cashRenderNewOld[0].StringLinker == null || !cashRenderNewOld[0].StringLinker.StringItem.TryGetValue(int.Parse(itemID), out sr))
                     {
-                        cashRenderNewOld[i].CashPackage = item;
+                        sr = new StringResult();
+                        sr.Name = "未知的現金禮包";
                     }
-                    else
+                    if (ItemName != sr.Name && ItemName != "未知的現金禮包" && sr.Name != "未知的現金禮包")
                     {
-                        nullItemIdx = i + 1;
+                        ItemName += "_" + sr.Name;
                     }
-                }
+                    else if (ItemName == "未知的現金禮包")
+                    {
+                        ItemName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(ItemName)) ItemName = "未知的現金禮包";
+                    ItemName = RemoveInvalidFileNameChars(ItemName);
+                    int nullItemIdx = 0;
 
-                // ツールチップ画像を合わせる
-                Bitmap resultImage = null;
-                Graphics g = null;
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        CashPackage item = CashPackage.CreateFromNode(PluginManager.FindWz(itemNodePath, WzFileNewOld[i]), PluginBase.PluginManager.FindWz(string.Format(@"Etc\CashPackage.img\{0}", itemID)), PluginManager.FindWz);
 
-                switch (nullItemIdx)
-                {
-                    case 0: // change
-                        //itemType = "變更";
-
-                        Bitmap ImageNew = cashRenderNewOld[0].Render();
-                        Bitmap ImageOld = cashRenderNewOld[1].Render();
-                        if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
-                        if (ShowChangeType)
+                        if (item != null)
                         {
-                            int picHchange = ShowObjectID ? 13 : 1;
-                            Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
-                            GearGraphics.DrawPlainText(gNewOld[1], "變更前", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
-                            picHchange = ShowObjectID ? 13 : 1;
-                            GearGraphics.DrawPlainText(gNewOld[0], "變更後", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            cashRenderNewOld[i].CashPackage = item;
                         }
-                        resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
-                        g = Graphics.FromImage(resultImage);
+                        else
+                        {
+                            isCashNull[i] = true;
+                            nullItemIdx = i + 1;
+                        }
+                    }
 
-                        g.DrawImage(ImageOld, 0, 0);
-                        g.DrawImage(ImageNew, ImageOld.Width, 0);
-                        break;
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
 
-                    case 1: // delete
-                        itemType = "刪除";
+                    switch (nullItemIdx)
+                    {
+                        case 0: // change
+                            itemType = "變更";
 
-                        resultImage = cashRenderNewOld[1].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                            Bitmap ImageNew = cashRenderNewOld[0].Render();
+                            Bitmap ImageOld = cashRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", itemTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
 
-                    case 2: // add
-                        itemType = "新增";
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
 
-                        resultImage = cashRenderNewOld[0].Render();
-                        if (resultImage == null) continue;
-                        g = Graphics.FromImage(resultImage);
-                        break;
+                        case 1: // delete
+                            itemType = "刪除";
+                            if (isCashNull[1]) continue;
+                            resultImage = cashRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
 
-                    default:
-                        break;
+                        case 2: // add
+                            itemType = "新增";
+                            if (isCashNull[0]) continue;
+                            resultImage = cashRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var itemTypeTextInfo = g.MeasureString(itemType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullItemIdx != 0) GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(itemTooltipPath, "Item_" + itemID + "_" + ItemName + "_" + itemType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
                 }
-
-                if (resultImage == null || g == null)
+                catch (Exception ex)
                 {
-                    continue;
+                    FailToExportTooltips.Add("Cash Tooltip: " + itemID, ex.Message);
                 }
-
-                var itemTypeTextInfo = g.MeasureString(itemType, GearGraphics.ItemDetailFont);
-                int picH = ShowObjectID ? 13 : 1;
-                if (ShowChangeType) GearGraphics.DrawPlainText(g, itemType, itemTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(itemTypeTextInfo.Width) + 2, ref picH, 10);
-
-                string imageName = Path.Combine(itemTooltipPath, "Item_" + itemID + "_" + ItemName + "_" + itemType + ".png");
-                if (!File.Exists(imageName))
-                {
-                    resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                resultImage.Dispose();
-                g.Dispose();
             }
             OutputCashTooltipIDs.Clear();
             DiffCashTags.Clear();
         }
+        private void SaveQuestTooltip(string questTooltipPath)
+        {
+            QuestTooltipRenderer[] questRenderNewOld = new QuestTooltipRenderer[2];
+            int count = 0;
+            int allCount = OutputQuestTooltipIDs.Count;
+            var questTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
+
+            for (int i = 0; i < 2; i++) // 0: New, 1: Old
+            {
+                this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
+                this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
+                this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
+
+                questRenderNewOld[i] = new QuestTooltipRenderer();
+                questRenderNewOld[i].StringLinker = new StringLinker();
+                questRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
+                questRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                questRenderNewOld[i].CompareMode = true;
+                questRenderNewOld[i].ShowAllStates = true;
+            }
+
+            foreach (var questID in OutputQuestTooltipIDs)
+            {
+                try
+                {
+                    if (!int.TryParse(questID, out _)) continue;
+                    StateInfo = string.Format("{0}/{1} 任務: {2}", ++count, allCount, questID);
+                    StateDetail = "Quest 對比中...";
+                    bool[] isQuestNull = new bool[2] { false, false };
+                    string questType = "";
+                    string questNodePath = String.Format(@"Quest\QuestData\{0:D}.img", questID);
+                    string questNodePathLegacy = String.Format(@"Quest\QuestInfo.img\{0:D}", questID);
+
+                    StringResult sr;
+                    string QuestName;
+                    if (questRenderNewOld[1].StringLinker == null || !questRenderNewOld[1].StringLinker.StringQuest.TryGetValue(int.Parse(questID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的任務";
+                    }
+                    QuestName = sr.Name;
+                    if (questRenderNewOld[0].StringLinker == null || !questRenderNewOld[0].StringLinker.StringQuest.TryGetValue(int.Parse(questID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的任務";
+                    }
+                    if (QuestName != sr.Name && QuestName != "未知的任務" && sr.Name != "未知的任務")
+                    {
+                        QuestName += "_" + sr.Name;
+                    }
+                    else if (QuestName == "未知的任務")
+                    {
+                        QuestName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(QuestName)) QuestName = "未知的任務";
+                    QuestName = RemoveInvalidFileNameChars(QuestName);
+                    int nullQuestIdx = 0;
+
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Quest quest = Quest.CreateFromNode(PluginManager.FindWz(questNodePath, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz) ?? Quest.CreateFromNode(PluginManager.FindWz(questNodePathLegacy, WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz, fromInfoNode: int.Parse(questID));
+                        if (quest == null)
+                        {
+                            isQuestNull[i] = true;
+                            nullQuestIdx = i + 1;
+                        }
+                        else
+                        {
+                            questRenderNewOld[i].Quest = quest;
+                        }
+                    }
+
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
+
+                    switch (nullQuestIdx)
+                    {
+                        case 0: // change
+                            questType = "變更";
+
+                            Bitmap ImageNew = questRenderNewOld[0].Render();
+                            Bitmap ImageOld = questRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 23 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                picHchange += questRenderNewOld[1].Margin_top;
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", questTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 23 : 1;
+                                picHchange += questRenderNewOld[0].Margin_top;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", questTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
+
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
+
+                        case 1: // delete
+                            questType = "刪除";
+                            if (isQuestNull[1]) continue;
+                            resultImage = questRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            questType = "新增";
+                            if (isQuestNull[0]) continue;
+                            resultImage = questRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var questTypeTextInfo = g.MeasureString(questType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 23 : 1;
+                    switch (nullQuestIdx)
+                    {
+                        case 1:
+                            picH += questRenderNewOld[1].Margin_top;
+                            break;
+                        case 2:
+                            picH += questRenderNewOld[0].Margin_top;
+                            break;
+                        default:
+                            break;
+                    }
+                    if (ShowChangeType && nullQuestIdx != 0) GearGraphics.DrawPlainText(g, questType, questTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(questTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(questTooltipPath, "Quest_" + questID + "_" + QuestName + "_" + questType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的任務變更。 \r\n變更類型：{0}\r\n任務名稱：`{1}`\r\n任務ID：`{2}`", questType, QuestName, questID));
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    FailToExportTooltips.Add("Quest Tooltip: " + questID, ex.Message);
+                }
+            }
+            OutputQuestTooltipIDs.Clear();
+            DiffQuestTags.Clear();
+        }
+
 
 
         //異なるItemノードからItemIDを取得する
@@ -2302,6 +3483,25 @@ namespace WzComparerR2.Comparer
                     if (tag != null && !DiffCashTags[cashID].Contains(tag))
                     {
                         DiffCashTags[cashID].Add(tag);
+                    }
+                }
+            }
+        }
+
+        private void GetActionChanges(Wz_Node node, bool change)
+        {
+            if (node == null) return;
+
+            Match match = Regex.Match(node.FullPathToFile, @"^Character\\00002000.img\\([^\\]+)\\\d+\\delay");
+            if (match.Success)
+            {
+                string action = match.Groups[1].ToString();
+
+                if (!string.IsNullOrEmpty(action))
+                {
+                    if (!ChangedActions.ContainsKey(action))
+                    {
+                        ChangedActions[action] = new HashSet<int>();
                     }
                 }
             }
@@ -2439,7 +3639,287 @@ namespace WzComparerR2.Comparer
             }
         }
 
-        private void CompareImg(Wz_Image imgNew, Wz_Image imgOld, string imgName, string anchorName, string menuAnchorName, string outputDir, StreamWriter sw, int newNumber=0, int oldNumber=0)
+        private void GetQuestID(Wz_Node node)
+        {
+            if (node == null) return; // 변경은 확인하지 않음 // 추가,삭제만 확인
+
+            Match match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+).*\\.*");
+
+            if (!match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestInfo.img\\(\d+)$");
+            }
+
+            if (!match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestData\\(\d+).img\\(QuestInfo|Check|Act)\\.*");
+            }
+
+            if (!match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Quest\\QuestData\\(\d+).img$");
+            }
+
+            if (match.Success)
+            {
+                var questID = match.Groups[1].Value;
+
+                if (questID != null)
+                {
+                    if (!OutputQuestTooltipIDs.Contains(questID))
+                    {
+                        OutputQuestTooltipIDs.Add(questID);
+                    }
+                }
+            }
+        }
+
+        private void SaveAchvTooltip(string achvTooltipPath)
+        {
+            AchievementTooltipRenderer[] achvRenderNewOld = new AchievementTooltipRenderer[2];
+            int count = 0;
+            int allCount = OutputAchvTooltipIDs.Count;
+            var achvTypeFont = new Font("MS Gothic", 11f, GraphicsUnit.Pixel);
+
+            for (int i = 0; i < 2; i++) // 0: New, 1: Old
+            {
+                this.StringWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("String").GetNodeWzFile();
+                this.ItemWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Item").GetNodeWzFile();
+                this.EtcWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Etc").GetNodeWzFile();
+                this.QuestWzNewOld[i] = WzNewOld[i]?.FindNodeByPath("Quest").GetNodeWzFile();
+
+                achvRenderNewOld[i] = new AchievementTooltipRenderer();
+                achvRenderNewOld[i].StringLinker = new StringLinker();
+                achvRenderNewOld[i].StringLinker.Load(StringWzNewOld[i], ItemWzNewOld[i], EtcWzNewOld[i], QuestWzNewOld[i]);
+                achvRenderNewOld[i].ShowObjectID = this.ShowObjectID;
+                achvRenderNewOld[i].CompareMode = true;
+            }
+
+            foreach (var achvID in OutputAchvTooltipIDs)
+            {
+                try
+                {
+
+                    if (!int.TryParse(achvID, out _)) continue;
+                    StateInfo = string.Format("{0}/{1} 成就: {2}", ++count, allCount, achvID);
+                    StateDetail = "Achievement 對比中...";
+                    bool[] isAchievementNull = new bool[2] { false, false };
+
+                    if (SkipKMSContent && KMSContentID["Achievement"].Contains((Int32.Parse(achvID)))) continue;
+
+                    string achvType = "";
+                    string achvNodePath = String.Format(@"Achievement\AchievementData\{0:D}.img", achvID);
+
+                    StringResult sr;
+                    string AchievementName;
+                    if (achvRenderNewOld[1].StringLinker == null || !achvRenderNewOld[1].StringLinker.StringAchievement.TryGetValue(int.Parse(achvID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的成就";
+                    }
+                    AchievementName = sr.Name;
+                    if (achvRenderNewOld[0].StringLinker == null || !achvRenderNewOld[0].StringLinker.StringAchievement.TryGetValue(int.Parse(achvID), out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的成就";
+                    }
+                    if (AchievementName != sr.Name && AchievementName != "未知的成就" && sr.Name != "未知的成就")
+                    {
+                        AchievementName += "_" + sr.Name;
+                    }
+                    else if (AchievementName == "未知的成就")
+                    {
+                        AchievementName = sr.Name;
+                    }
+                    if (String.IsNullOrEmpty(AchievementName)) AchievementName = "未知的成就";
+                    AchievementName = RemoveInvalidFileNameChars(AchievementName);
+                    int nullAchievementIdx = 0;
+
+                    // 變更前後的ツールチップ画像的作成
+                    for (int i = 0; i < 2; i++) // 0: New, 1: Old
+                    {
+                        Achievement achv = Achievement.CreateFromNode(PluginManager.FindWz($@"Etc\Achievement\AchievementData\{achvID}.img", WzFileNewOld[i]), PluginManager.FindWz, PluginManager.FindWz);
+
+                        if (achv == null)
+                        {
+                            isAchievementNull[i] = true;
+                            nullAchievementIdx = i + 1;
+                        }
+                        else
+                        {
+                            achvRenderNewOld[i].Achievement = achv;
+                        }
+                    }
+
+                    // ツールチップ画像を合わせる
+                    Bitmap resultImage = null;
+                    Graphics g = null;
+
+                    switch (nullAchievementIdx)
+                    {
+                        case 0: // change
+                            achvType = "變更";
+
+                            Bitmap ImageNew = achvRenderNewOld[0].Render();
+                            Bitmap ImageOld = achvRenderNewOld[1].Render();
+                            if (GetBitmapHash(ImageNew) == GetBitmapHash(ImageOld)) continue;
+                            if (ShowChangeType)
+                            {
+                                int picHchange = ShowObjectID ? 13 : 1;
+                                Graphics[] gNewOld = new Graphics[] { Graphics.FromImage(ImageNew), Graphics.FromImage(ImageOld) };
+                                GearGraphics.DrawPlainText(gNewOld[1], "變更前", achvTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                                picHchange = ShowObjectID ? 13 : 1;
+                                GearGraphics.DrawPlainText(gNewOld[0], "變更後", achvTypeFont, Color.FromArgb(255, 255, 255), 2, 64, ref picHchange, 10);
+                            }
+                            resultImage = new Bitmap(ImageNew.Width + ImageOld.Width, Math.Max(ImageNew.Height, ImageOld.Height));
+                            g = Graphics.FromImage(resultImage);
+
+                            g.DrawImage(ImageOld, 0, 0);
+                            g.DrawImage(ImageNew, ImageOld.Width, 0);
+                            break;
+
+                        case 1: // delete
+                            achvType = "刪除";
+                            if (isAchievementNull[1]) continue;
+                            resultImage = achvRenderNewOld[1].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        case 2: // add
+                            achvType = "新增";
+                            if (isAchievementNull[0]) continue;
+                            resultImage = achvRenderNewOld[0].Render();
+                            if (resultImage == null) continue;
+                            g = Graphics.FromImage(resultImage);
+                            break;
+
+                        default:
+                            break;
+                    }
+
+                    if (resultImage == null || g == null)
+                    {
+                        continue;
+                    }
+
+                    var achvTypeTextInfo = g.MeasureString(achvType, GearGraphics.ItemDetailFont);
+                    int picH = ShowObjectID ? 13 : 1;
+                    if (ShowChangeType && nullAchievementIdx != 0) GearGraphics.DrawPlainText(g, achvType, achvTypeFont, Color.FromArgb(255, 255, 255), 2, (int)Math.Ceiling(achvTypeTextInfo.Width) + 2, ref picH, 10);
+
+                    string imageName = Path.Combine(achvTooltipPath, "成就_" + achvID + "_" + AchievementName + "_" + achvType + ".png");
+                    if (!File.Exists(imageName))
+                    {
+                        resultImage.Save(imageName, System.Drawing.Imaging.ImageFormat.Png);
+                        SendImage(imageName, string.Format("發現新的成就變更。 \r\n變更類型：{0}\r\n成就名稱：`{1}`\r\n成就ID：`{2}`", achvType, AchievementName, achvID));
+                    }
+                    resultImage.Dispose();
+                    g.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    FailToExportTooltips.Add("Achievement Tooltip: " + achvID, ex.Message);
+                }
+            }
+            OutputAchvTooltipIDs.Clear();
+            DiffAchvTags.Clear();
+        }
+
+
+        private void GetAchvID(Wz_Node node)
+        {
+            if (node == null) return;
+
+            Match match = Regex.Match(node.FullPathToFile, @"^Etc\\Achievement\\AchievementData\\(\d+).img$");
+
+            if (!match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Etc\\Achievement\\AchievementData\\(\d+).img\\info\\(name|desc|difficulty|score|mainCategory).*$");
+            }
+
+            if (!match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Etc\\Achievement\\AchievementData\\(\d+).img\\mission\\\d+\\(name).*$");
+            }
+
+            if (!match.Success)
+            {
+                match = Regex.Match(node.FullPathToFile, @"^Etc\\Achievement\\AchievementData\\(\d+).img\\reward\\0\\(desc).*$");
+            }
+
+            if (match.Success)
+            {
+                var achvID = match.Groups[1].Value;
+
+                if (achvID != null)
+                {
+                    if (!OutputAchvTooltipIDs.Contains(achvID))
+                    {
+                        OutputAchvTooltipIDs.Add(achvID);
+                    }
+                }
+            }
+        }
+
+        // 캐시 아이템 가격 변경 확인
+        private void CompareCommodities()
+        {
+            var commodities_new = CharaSimLoader.LoadedCommodityPricesByItemId[0];
+            var commodities_old = CharaSimLoader.LoadedCommodityPricesByItemId[1];
+
+            var key_new = commodities_new.Keys;
+            var key_old = commodities_old.Keys;
+
+            var added = key_new.Except(key_old).ToList();
+            var removed = key_old.Except(key_new).ToList();
+            List<int> ids = new List<int>();
+            ids.AddRange(added);
+            ids.AddRange(removed);
+
+            var common = key_new.Intersect(key_old);
+            foreach (var id in common)
+            {
+                if (commodities_new.TryGetValue(id, out var commodity_new) && commodities_old.TryGetValue(id, out var commodity_old) && CommodityPriceChanged(commodity_new, commodity_old))
+                {
+                    ids.Add(id);
+                }
+            }
+
+            foreach (var id in ids)
+            {
+                if (id >= 2000000 && OutputItemTooltip) // item
+                {
+                    if (!OutputItemTooltipIDs.Contains(id.ToString()))
+                    {
+                        OutputItemTooltipIDs.Add(id.ToString());
+                    }
+                }
+                else if (OutputGearTooltip) // gear
+                {
+                    if (!OutputGearTooltipIDs.Contains(id.ToString()))
+                    {
+                        OutputGearTooltipIDs.Add(id.ToString());
+                    }
+                }
+            }
+        }
+
+        private bool CommodityPriceChanged(IReadOnlyList<CommodityPriceInfo> commodity_new, IReadOnlyList<CommodityPriceInfo> commodity_old)
+        {
+            if (commodity_new.Count != commodity_old.Count)
+                return true;
+
+            for (int i = 0; i < commodity_new.Count; i++) // Sorted in CharaSimLoader
+            {
+                if (commodity_new[i] != commodity_old[i])
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void CompareImg(Wz_Image imgNew, Wz_Image imgOld, string imgName, string anchorName, string menuAnchorName, string outputDir, StreamWriter sw, int newNumber = 0, int oldNumber = 0)
         {
             StateDetail = "IMG匯出中";
             if (!imgNew.TryExtract() || !imgOld.TryExtract())
@@ -2476,10 +3956,18 @@ namespace WzComparerR2.Comparer
                 count[idx]++;
 
                 // 변경된 스킬 툴팁 출력
-                if (OutputSkillTooltip && (outputDir.Contains("Skill") || outputDir.Contains("String")))
+                if (OutputSkillTooltip)
                 {
-                    GetSkillID(diff.NodeNew, idx == 0 ? true : false);
-                    GetSkillID(diff.NodeOld, idx == 0 ? true : false);
+                    if (imgName.StartsWith("Skill") || imgName.StartsWith("String"))
+                    {
+                        GetSkillID(diff.NodeNew, idx == 0 ? true : false);
+                        GetSkillID(diff.NodeOld, idx == 0 ? true : false);
+                    }
+                    if (imgName.StartsWith("Character\\00002000.img"))
+                    {
+                        GetActionChanges(diff.NodeNew, idx == 0 ? true : false);
+                        GetActionChanges(diff.NodeOld, idx == 0 ? true : false);
+                    }
                 }
                 // 變更的道具Tooltip处理
                 if (OutputItemTooltip && (outputDir.Contains("Item") || outputDir.Contains("String")))
@@ -2516,6 +4004,17 @@ namespace WzComparerR2.Comparer
                 {
                     GetCashID(diff.NodeNew);
                     GetCashID(diff.NodeOld);
+                }
+                // 変更的クエストTooltip处理
+                if (OutputQuestTooltip)
+                {
+                    GetQuestID(diff.NodeNew);
+                    GetQuestID(diff.NodeOld);
+                }
+                if (OutputAchvTooltip && (outputDir.Contains("Etc") && imgName.Contains("Achievement") && !imgName.Contains("_Canvas")))
+                {
+                    GetAchvID(diff.NodeNew);
+                    GetAchvID(diff.NodeOld);
                 }
             }
             StateDetail = "匯出檔案中";
@@ -2563,9 +4062,16 @@ namespace WzComparerR2.Comparer
                     sw.WriteLine("</tr>");
 
                     // 변경된 스킬 툴팁 출력
-                    if (OutputSkillTooltip && (outputDir.Contains("Skill") || outputDir.Contains("String")))
+                    if (OutputSkillTooltip)
                     {
-                        GetSkillID(node, idx == 0 ? true : false);
+                        if (imgName.StartsWith("Skill") || imgName.StartsWith("String"))
+                        {
+                            GetSkillID(node, idx == 0 ? true : false);
+                        }
+                        if (imgName.StartsWith("Character\\00002000.img"))
+                        {
+                            GetActionChanges(node, idx == 0 ? true : false);
+                        }
                     }
                     if (OutputItemTooltip && outputDir.Contains("Item"))
                     {
@@ -2586,6 +4092,14 @@ namespace WzComparerR2.Comparer
                     if (OutputNpcTooltip && outputDir.Contains("Npc"))
                     {
                         GetNpcID(node);
+                    }
+                    if (OutputQuestTooltip && outputDir.Contains("Quest"))
+                    {
+                        GetQuestID(node);
+                    }
+                    if (OutputAchvTooltip && (outputDir.Contains("Etc") && imgName.Contains("Achievement") && !imgName.Contains("_Canvas")))
+                    {
+                        GetAchvID(node);
                     }
 
 
@@ -2644,17 +4158,40 @@ namespace WzComparerR2.Comparer
                         bool isCanvas = fileName.Contains(canvas);
                         if (isCanvas)
                         {
-                            outputDir = Path.Combine(outputDir, canvas);
-                            if (!Directory.Exists(outputDir))
+                            if (this.Comparer.ResolvePngLink)
                             {
-                                Directory.CreateDirectory(outputDir);
+                                fileName = fileName.Replace(canvas + ".", string.Empty);
+                            }
+                            else
+                            {
+                                outputDir = Path.Combine(outputDir, canvas);
+                                if (!Directory.Exists(outputDir))
+                                {
+                                    Directory.CreateDirectory(outputDir);
+                                }
                             }
                         }
-                        using (Bitmap bmp = png.ExtractPng())
+                        // Skip unparseable content
+                        try
                         {
-                            bmp.Save(Path.Combine(outputDir, fileName), System.Drawing.Imaging.ImageFormat.Png);
+                            using (Bitmap bmp = png.ExtractPng())
+                            {
+                                bmp.Save(Path.Combine(outputDir, fileName), System.Drawing.Imaging.ImageFormat.Png);
+                            }
                         }
-                        return string.Format("<img src=\"{0}/{1}\" />", isCanvas ? Path.Combine(outputDirName, canvas) : outputDirName, WebUtility.UrlEncode(fileName));
+                        catch (Exception ex)
+                        {
+                            if (!FailToExportNodes.ContainsKey(colName + ": " + fullPath.Replace('\\', '/')))
+                            {
+                                FailToExportNodes.Add(colName + ": " + fullPath.Replace('\\', '/'), ex.Message);
+                            }
+                            else
+                            {
+                                FailToExportNodes[colName + ": " + fullPath.Replace('\\', '/')] = ex.Message;
+                            }
+                            return string.Format("無法解析的PNG數據 {0} bytes", png.DataLength);
+                        }
+                        return string.Format("<img src=\"{0}/{1}\" />", (isCanvas && !this.Comparer.ResolvePngLink) ? Path.Combine(outputDirName, canvas) : outputDirName, WebUtility.UrlEncode(fileName));
                     }
                     else
                     {
@@ -2679,12 +4216,27 @@ namespace WzComparerR2.Comparer
                             filePath = filePath.Replace(invalidChars[i].ToString(), null);
                         }
 
-                        byte[] mp3 = sound.ExtractSound();
-                        if (mp3 != null)
+                        try
                         {
-                            FileStream fileStream = new FileStream(Path.Combine(outputDir, filePath), FileMode.Create, FileAccess.Write);
-                            fileStream.Write(mp3, 0, mp3.Length);
-                            fileStream.Close();
+                            byte[] mp3 = sound.ExtractSound();
+                            if (mp3 != null)
+                            {
+                                FileStream fileStream = new FileStream(Path.Combine(outputDir, filePath), FileMode.Create, FileAccess.Write);
+                                fileStream.Write(mp3, 0, mp3.Length);
+                                fileStream.Close();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            if (!FailToExportNodes.ContainsKey(colName + ": " + fullPath.Replace('\\', '/')))
+                            {
+                                FailToExportNodes.Add(colName + ": " + fullPath.Replace('\\', '/'), ex.Message);
+                            }
+                            else
+                            {
+                                FailToExportNodes[colName + ": " + fullPath.Replace('\\', '/')] = ex.Message;
+                            }
+                            return string.Format("無法解析的音訊數據 {0} bytes", sound.DataLength);
                         }
                         return string.Format("<audio controls src=\"{0}\" type=\"audio/mpeg\">audio {1} ms\n</audio>", Path.Combine(new DirectoryInfo(outputDir).Name, filePath), sound.Ms);
                     }
@@ -2715,45 +4267,24 @@ namespace WzComparerR2.Comparer
             string path = Path.Combine(outputDir, "style.css");
             if (File.Exists(path))
                 return;
+            StringBuilder css = new StringBuilder();
+            css.AppendLine($"body {{ font-size:12px; background-color:{ColorToHex(ColorTable[0])}; color:{ColorToHex(ColorTable[1])}; }}");
+            css.AppendLine($"a {{ color:{ColorToHex(ColorTable[8])}; }}");
+            css.AppendLine($"p.wzf {{ }}");
+            css.AppendLine($"table, tr, th, td {{ border:1px solid #ff8000; border-collapse:collapse; }}");
+            css.AppendLine($"table {{ margin-bottom:16px; }}");
+            css.AppendLine($"th {{ text-align:left; }}");
+            css.AppendLine($"table.lst0 {{ }}");
+            css.AppendLine($"table.lst1 {{ }}");
+            css.AppendLine($"table.lst2 {{ }}");
+            css.AppendLine($"table.img {{ }}");
+            css.AppendLine($"table.img tr.r0 {{ background-color:{ColorToHex(ColorTable[2])}; color:{ColorToHex(ColorTable[5])}; }}");
+            css.AppendLine($"table.img tr.r1 {{ background-color:{ColorToHex(ColorTable[3])}; color:{ColorToHex(ColorTable[6])}; }}");
+            css.AppendLine($"table.img tr.r2 {{ background-color:{ColorToHex(ColorTable[4])}; color:{ColorToHex(ColorTable[7])}; }}");
+            css.AppendLine($"table.img.noChange {{ display:none; }}");
             FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write);
             StreamWriter sw = new StreamWriter(fs, Encoding.UTF8);
-            if (EnableDarkMode)
-            {
-
-                sw.WriteLine("body { font-size:12px; background-color:black; color:white; }");
-                sw.WriteLine("a { color:white; }");
-                sw.WriteLine("p.wzf { }");
-                sw.WriteLine("table, tr, th, td { border:1px solid #ff8000; border-collapse:collapse; }");
-                sw.WriteLine("table { margin-bottom:16px; }");
-                sw.WriteLine("th { text-align:left; }");
-                sw.WriteLine("table.lst0 { }");
-                sw.WriteLine("table.lst1 { }");
-                sw.WriteLine("table.lst2 { }");
-                sw.WriteLine("table.img { }");
-                sw.WriteLine("table.img tr.r0 { background-color:#003049; }");
-                sw.WriteLine("table.img tr.r1 { background-color:#000000; }");
-                sw.WriteLine("table.img tr.r2 { background-color:#462306; }");
-                sw.WriteLine("table.img.noChange { display:none; }");
-            }
-            else
-            {
-                sw.WriteLine("body { font-size:12px; background-color:#101010; color:#ffffff }");
-                sw.WriteLine("p.wzf { }");
-                sw.WriteLine("table, tr, th, td { border:2px solid #000000; border-collapse:collapse; }");
-                sw.WriteLine("table { margin-bottom:16px; }");
-                sw.WriteLine("th { text-align:left; }");
-                sw.WriteLine("table.lst0 { background-color:#101010; }");
-                sw.WriteLine("table.lst0 a:link { color:#ffffff }");
-                sw.WriteLine("table.lst0 a:visited { color:#ffffff }");
-                sw.WriteLine("table.lst0 a:hover { color:#ffffff }");
-                sw.WriteLine("table.lst0 a:activated { color:#ffffff }");
-                sw.WriteLine("table.lst1 { background-color:#101010; color: #ffffff; }");
-                sw.WriteLine("table.lst2 { background-color:#101010; color: #ffffff; }");
-                sw.WriteLine("table.img tr.r0 { background-color:#CCCC00; color:#000000; }");
-                sw.WriteLine("table.img tr.r1 { background-color:#154211; }");
-                sw.WriteLine("table.img tr.r2 { background-color:#961e1e; }");
-                sw.WriteLine("table.img.noChange { display:none; }");
-            }
+            sw.Write(css.ToString());
             sw.Flush();
             sw.Close();
         }
@@ -2783,8 +4314,14 @@ namespace WzComparerR2.Comparer
             return Regex.Replace(fileName, regexPattern, "_");
         }
 
+        private static string ColorToHex(Color color)
+        {
+            return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
+        }
+
         private static string GetBitmapHash(Bitmap bitmap)
         {
+            if (bitmap == null) return "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
             using (SHA256 sha256 = SHA256.Create())
             {
                 // Lock bits for direct memory access
@@ -2852,6 +4389,26 @@ namespace WzComparerR2.Comparer
                 if (KMSComponentDict.ContainsKey("Effect"))
                 {
                     return KMSComponentDict["Effect"].Contains(effectImgStr);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else if (node.FullPathToFile.StartsWith("Etc\\Achievement\\AchievementData"))
+            {
+                string[] achvNodePath = node.FullPathToFile.Split('\\');
+                string achvImgStr = achvNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                if (Int32.TryParse(achvImgStr.Replace(".img", ""), out int achvID))
+                {
+                    if (KMSContentID.ContainsKey("Achievement"))
+                    {
+                        return KMSContentID["Achievement"].Contains(achvID);
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
                 else
                 {
@@ -2945,7 +4502,25 @@ namespace WzComparerR2.Comparer
             else if (node.FullPathToFile.StartsWith("Mob"))
             {
                 string[] mobNodePath = node.FullPathToFile.Split('\\');
-                if (mobNodePath.Contains("BossPattern")) return true;
+                if (mobNodePath.Contains("BossPattern"))
+                {
+                    string bossPatternImgStr = mobNodePath.LastOrDefault(part => part.EndsWith(".img"));
+                    if (bossPatternImgStr == null)
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        if (KMSComponentDict.ContainsKey("MobBossPattern"))
+                        {
+                            return KMSComponentDict["MobBossPattern"].Contains(bossPatternImgStr);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+                }
                 string mobImgStr = mobNodePath.LastOrDefault(part => part.EndsWith(".img"));
                 if (mobImgStr == null)
                 {
@@ -3014,7 +4589,7 @@ namespace WzComparerR2.Comparer
                         {
                             case 0:
                                 return !(new int[] { 508, 570, 571, 572 }.Contains(baseSkillIDInt)); // ジェット
-                            case 4: // 暁の陣
+                            case 4: // 暁的陣
                             case 11: // ビーストテイマー
                             case 12: // アニメコラボ
                             case 17: // 江湖
@@ -3022,6 +4597,7 @@ namespace WzComparerR2.Comparer
                                 return false;
                             case 40: // 5次スキル
                             case 50: // 6次強化コア
+                            case 800: // イベントスキル
                                 if (skillNodePath.Split('\\').Length < 4)
                                 {
                                     return false;
@@ -3057,13 +4633,23 @@ namespace WzComparerR2.Comparer
             }
         }
 
+        private bool isGodChangseopNode(Wz_Node node)
+        {
+            if (node == null)
+                return false;
+            string[] nodePath = node.FullPathToFile.Split('\\');
+            string imgStr = nodePath.LastOrDefault(part => part.EndsWith(".img"));
+            if (string.IsNullOrEmpty(imgStr)) return false;
+            return imgStr.EndsWith("_.img");
+        }
+
         private bool isKMSSkillID(int skillID)
         {
             switch (skillID / 10000000)
             {
                 case 0:
                     return !(new int[] { 508, 570, 571, 572 }.Contains((int)skillID / 10000)); // ジェット
-                case 4: // 暁の陣
+                case 4: // 暁的陣
                 case 11: // ビーストテイマー
                 case 12: // アニメコラボ
                 case 17: // 江湖
@@ -3084,10 +4670,62 @@ namespace WzComparerR2.Comparer
                     }
                     else
                     {
+                        return KMSContentID["Skill"].Contains(skillID);
+                    }
+                case 8:
+                    if (KMSContentID.ContainsKey("Skill"))
+                    {
+                        return KMSContentID["Skill"].Contains(skillID);
+                    }
+                    else
+                    {
                         return false;
                     }
                 default:
                     return true;
+            }
+        }
+
+        public HashSet<int> WorldArchiveDelta(Dictionary<int, StringResult> dictOld, Dictionary<int, StringResult> dictNew)
+        {
+            var oldOnly = dictOld.Keys.Except(dictNew.Keys).ToList();
+            var newOnly = dictNew.Keys.Except(dictOld.Keys).ToList();
+            var delta = dictOld.Keys.Intersect(dictNew.Keys).Where(k => !EqualityComparer<StringResult>.Default.Equals(dictOld[k], dictNew[k])).ToList();
+
+            HashSet<int> result = new HashSet<int>().Concat(oldOnly).Concat(newOnly).Concat(delta).ToHashSet();
+            return result;
+        }
+
+        private void ReportVersionToDiscord(string version)
+        {
+            if (PostChangesToDiscord)
+            {
+                Thread t = new Thread(() =>
+                {
+                    Task.Run(async () =>
+                    {
+                        await DiscordSvc.InitializeAsync();
+                        await DiscordSvc.BroadcastMessageAsync("目前正在進行 WZ 版本比較。請等待結果公佈。 \r\n版本：" + version);
+                    }).GetAwaiter().GetResult();
+                });
+
+                t.Start();
+            }
+        }
+
+        private void SendImage(string imagePath, string description = null)
+        {
+            if (PostChangesToDiscord)
+            {
+                Thread t = new Thread(() =>
+                {
+                    Task.Run(async () =>
+                    {
+                        await DiscordSvc.InitializeAsync();
+                        await DiscordSvc.BroadcastImageAsync(imagePath, description);
+                    });
+                });
+                t.Start();
             }
         }
     }

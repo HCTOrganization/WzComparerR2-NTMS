@@ -21,6 +21,10 @@ namespace WzComparerR2.CharaSimControl
         public bool ShowMiniMap { get; set; }
         public bool Enable22AniStyle { get; set; }
         public bool ShowMobNpcObjectID { get; set; }
+        public bool ShowMiniMapMob { get; set; }
+        public bool ShowMiniMapNpc { get; set; }
+        public bool ShowMiniMapPortal { get; set; }
+        public bool ShowBgmName { get; set; }
 
         public override object TargetItem
         {
@@ -48,6 +52,7 @@ namespace WzComparerR2.CharaSimControl
             List<TextBlock> mobBlocks = new List<TextBlock>();
             List<TextBlock> npcBlocks = new List<TextBlock>();
             TextBlock barrierBlock = null;
+            TextBlock descBlock = null;
             int[] barrierResourceWidth = [17, 18, 18];
             int barrierType = 0;
             int picY = 0;
@@ -83,6 +88,14 @@ namespace WzComparerR2.CharaSimControl
                 barrierBlock = PrepareText(g, Map.BarrierAut.ToString(), GearGraphics.EquipDetailFont, GearGraphics.BarrierAutBrush, 0, 0);
             }
 
+            var mapDesc = GetMapDesc(Map.MapID, Map.Link);
+            if (!string.IsNullOrEmpty(mapDesc) || !string.IsNullOrEmpty(Map.Bgm))
+            {
+                mapDesc = (ShowBgmName ? string.Format("BGM: {0}\r\n\r\n", Map.Bgm) : "") + mapDesc;
+                var block = PrepareText(g, mapDesc, Translator.IsKoreanStringPresent(mapDesc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, Brushes.White, 0, 0);
+                descBlock = block;
+            }
+
             if (Map.Mobs.Count > 0)
             {
                 picY = 0;
@@ -102,7 +115,7 @@ namespace WzComparerR2.CharaSimControl
                 foreach (var npc in Map.Npcs)
                 {
                     string npcName = GetNpcName(npc);
-                    var block = PrepareText(g, npcName ?? "(null)", GearGraphics.ItemDetailFont, GearGraphics.Equip22BrushRare, 0, picY);
+                    var block = PrepareText(g, npcName ?? "(null)", Translator.IsKoreanStringPresent(npcName) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, GearGraphics.Equip22BrushRare, 0, picY);
                     npcBlocks.Add(block);
                     picY += 18;
                 }
@@ -122,17 +135,25 @@ namespace WzComparerR2.CharaSimControl
             if (ShowMiniMap && Map.MiniMapNode != null)
             {
                 miniMap = BitmapOrigin.CreateFromNode(Map.MiniMapNode.FindNodeByPath("canvas"), PluginBase.PluginManager.FindWz).Bitmap;
+                if (IsPngCompletelyTransparent(miniMap))
+                {
+                    miniMap.Dispose();
+                    miniMap = null;
+                }
             }
 
             Rectangle barrierRect = barrierBlock?.Rectangle ?? new Rectangle();
             Rectangle markRect = new Rectangle(0, 0, mapMark?.Width ?? 0, mapMark?.Height ?? 0);
             Rectangle titleRect = Measure(titleBlocks);
             Rectangle miniMapRect = new Rectangle(0, 0, miniMap?.Width ?? 0, miniMap?.Height ?? 0);
+            Rectangle descRect = descBlock?.Rectangle ?? new Rectangle();
             Rectangle mobRect = Measure(mobBlocks);
             Rectangle npcRect = Measure(npcBlocks);
 
             int width = 0;
             width = Math.Max(miniMapRect.Width, Math.Max(markRect.Width + 5 + titleRect.Width, Math.Max(mobRect.Width + 21, npcRect.Width + 21)));
+            if (!descRect.IsEmpty)
+                width = Math.Max(width, 300);
             if (!markRect.IsEmpty)
                 titleRect.X = markRect.Width + 5;
             miniMapRect.X = (width - miniMapRect.Width) / 2;
@@ -152,27 +173,29 @@ namespace WzComparerR2.CharaSimControl
                 titleHeight += 6;
             if (!miniMapRect.IsEmpty)
                 miniMapRect.Height += 6;
+            if (!descRect.IsEmpty)
+                descRect.Height += 6;
             if (!mobRect.IsEmpty)
                 mobRect.Height += 6;
             if (!npcRect.IsEmpty)
                 npcRect.Height += 6;
 
             miniMapRect.Y = barrierRect.Height + titleHeight;
-            mobRect.Y = miniMapRect.Y + miniMapRect.Height;
+            descRect.Y = miniMapRect.Y + miniMapRect.Height;
+            mobRect.Y = descRect.Y + descRect.Height;
             npcRect.Y = mobRect.Y + mobRect.Height;
 
-            int height = barrierRect.Height + titleHeight + miniMapRect.Height + mobRect.Height + npcRect.Height;
+            int height = barrierRect.Height + titleHeight + miniMapRect.Height + descRect.Height + mobRect.Height + npcRect.Height;
 
             Bitmap bmp2 = new Bitmap(width + 20, height + 20);
-            using Graphics g2 = Graphics.FromImage(bmp2);
+            Graphics g2 = Graphics.FromImage(bmp2);
             barrierRect.Offset(10, 10);
             markRect.Offset(10, 10);
             titleRect.Offset(10, 10);
             miniMapRect.Offset(10, 10);
+            descRect.Offset(10, 10);
             mobRect.Offset(31, 12);
             npcRect.Offset(31, 12);
-
-            GearGraphics.DrawNewTooltipBack(g2, 0, 0, bmp2.Width, bmp2.Height);
             if (!Enable22AniStyle) g2.DrawImage(Resource.UIToolTip_img_Item_Frame2_cover, 3, 3);
             if (this.ShowObjectID)
             {
@@ -206,10 +229,30 @@ namespace WzComparerR2.CharaSimControl
 
             if (miniMap != null)
             {
-                g2.DrawImage(miniMap, miniMapRect.X, miniMapRect.Y);
+                var dx = (bmp2.Width - miniMap.Width - 2) / 2;
+                miniMap = DrawMinimapIcons(miniMap, dx);
+                g2.DrawImage(miniMap, miniMapRect.X - dx, miniMapRect.Y);
                 miniMap.Dispose();
             }
 
+            if(descBlock != null)
+            {
+                DrawMultilineText(g2, descBlock, descRect.Location, bmp2.Width - 15, 18, out int offsetY);
+
+                // 비트맵 크기 조절
+                Bitmap bmp3 = new Bitmap(bmp2.Width, bmp2.Height + offsetY);
+                Graphics g3 = Graphics.FromImage(bmp3);
+                g3.DrawImage(bmp2, 0, 0);
+
+                bmp2.Dispose();
+                g2.Dispose();
+                bmp2 = bmp3;
+                g2 = g3;
+
+                mobRect.Offset(0, offsetY);
+                npcRect.Offset(0, offsetY);
+            }
+            
             if (mobBlocks.Count > 0)
             {
                 g2.DrawImage(Resource.UIWindow_img_ToolTip_WorldMap_Mob, mobRect.X - 21, mobRect.Y - 2);
@@ -228,7 +271,112 @@ namespace WzComparerR2.CharaSimControl
                 DrawText(g2, item, npcRect.Location);
             }
 
-            return bmp2;
+            // 배경 채워넣기
+            Bitmap bmpResult = new Bitmap(bmp2.Width, bmp2.Height);
+            using Graphics gResult = Graphics.FromImage(bmpResult);
+            GearGraphics.DrawNewTooltipBack(gResult, 0, 0, bmpResult.Width, bmpResult.Height);
+            gResult.DrawImage(bmp2, 0, 0);
+
+            bmp2.Dispose();
+            g2.Dispose();
+
+            return bmpResult;
+        }
+
+        private Bitmap DrawMinimapIcons(Bitmap miniMap, int dx)
+        {
+            Bitmap bmp = new Bitmap(miniMap.Width + dx * 2, miniMap.Height);
+            using Graphics g = Graphics.FromImage(bmp);
+            g.DrawImage(miniMap, dx, 0);
+            Image image = null;
+
+            if (ShowMiniMapMob)
+            {
+                foreach (var mob in this.Map.MiniMapMobs)
+                {
+                    image = Resource.MapHelper_img_minimap_mob_1;
+                    g.DrawImage(image, TranslateMiniMapIcon(new Point(mob.X, mob.Y), miniMap.Size, image.Size, dx));
+                }
+            }
+
+            if (ShowMiniMapNpc)
+            {
+                // 0 : npc
+                // 1 : shop
+                // 2 : event npc
+                // 3 : transport
+                // 4 : trunk
+                foreach (var npc in this.Map.MiniMapNpcs)
+                {
+                    switch (npc.Type)
+                    {
+                        case 0:
+                            image = Resource.MapHelper_img_minimap_npc;
+                            break;
+                        case 1:
+                            image = Resource.MapHelper_img_minimap_shop;
+                            break;
+                        case 2:
+                            image = Resource.MapHelper_img_minimap_eventnpc;
+                            break;
+                        case 3:
+                            image = Resource.MapHelper_img_minimap_transport;
+                            break;
+                        case 4:
+                            image = Resource.MapHelper_img_minimap_trunk;
+                            break;
+                    }
+                    g.DrawImage(image, TranslateMiniMapIcon(new Point(npc.X, npc.Y), miniMap.Size, image.Size, dx));
+                }
+            }
+
+            if (ShowMiniMapPortal)
+            {
+                // 0 : portal
+                // 1 : enchant portal
+                // 2 : blink portal
+                // 3 : hidden portal
+                foreach (var portal in this.Map.MiniMapPortals)
+                {
+                    switch (portal.Type)
+                    {
+                        case 0:
+                            image = Resource.MapHelper_img_minimap_portal;
+                            break;
+                        case 1:
+                            image = Resource.MapHelper_img_minimap_enchantportal;
+                            break;
+                        case 2:
+                            image = Resource.MapHelper_img_minimap_arrowup;
+                            break;
+                        case 3:
+                            image = Resource.MapHelper_img_minimap_hiddenportal;
+                            break;
+                    }
+                    g.DrawImage(image, TranslateMiniMapIcon(new Point(portal.X, portal.Y), miniMap.Size, image.Size, dx));
+                }
+
+                foreach (var illuminantCluster in this.Map.MiniMapIlluminantClusters)
+                {
+                    image = Resource.MapHelper_img_minimap_cluster;
+                    g.DrawImage(image, TranslateMiniMapIcon(new Point(illuminantCluster.X, illuminantCluster.Y), miniMap.Size, image.Size, dx));
+                }
+            }
+
+            miniMap.Dispose();
+            return bmp;
+        }
+
+        private Point TranslateMiniMapIcon(Point item, Size minimap, Size texture, int offset)
+        {
+            if (this.Map.MiniMapWidth != 0 && this.Map.MiniMapHeight != 0)
+            {
+                var x = (float)minimap.Width / this.Map.MiniMapWidth * (item.X + this.Map.MiniMapCenterX) - (texture.Width / 2);
+                var y = (float)minimap.Height / this.Map.MiniMapHeight * (item.Y + this.Map.MiniMapCenterY) - (texture.Height / 2) - 5;
+
+                return new Point((int)x + offset, (int)y);
+            }
+            else return (new Point(-100, -100));
         }
 
         private string[] GetMapName(int mapID, int? linkID)
@@ -267,6 +415,54 @@ namespace WzComparerR2.CharaSimControl
                 ret[0] = sr.StreetName ?? "";
                 ret[1] = sr.MapName ?? "";
             }
+            return ret;
+        }
+
+        private unsafe bool IsPngCompletelyTransparent(Bitmap bmp)
+        {
+            if (bmp == null) return true;
+            if ((bmp.PixelFormat & PixelFormat.Alpha) == 0)
+                return false;
+
+            Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
+            BitmapData data = bmp.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+            try
+            {
+                byte* ptr = (byte*)data.Scan0;
+
+                for (int y = 0; y < data.Height; y++)
+                {
+                    byte* row = ptr + (y * data.Stride);
+                    for (int x = 0; x < data.Width; x++)
+                    {
+                        byte alpha = row[x * 4 + 3];
+                        if (alpha != 0)
+                            return false;
+                    }
+                }
+
+                return true;
+            }
+            finally
+            {
+                bmp.UnlockBits(data);
+            }
+        }
+
+        private string GetMapDesc(int mapID, int? linkID)
+        {
+            string ret = null;
+            StringResult sr;
+            if (this.StringLinker == null || !this.StringLinker.StringMap.TryGetValue(mapID, out sr))
+            {
+                if (!this.StringLinker.StringMap.TryGetValue(linkID ?? -1, out sr))
+                {
+                    return ret;
+                }
+            }
+
+            ret = sr["mapDesc"];
             return ret;
         }
 

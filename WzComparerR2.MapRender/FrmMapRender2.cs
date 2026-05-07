@@ -23,6 +23,7 @@ using KeyCode = EmptyKeys.UserInterface.Input.KeyCode;
 using ModifierKeys = EmptyKeys.UserInterface.Input.ModifierKeys;
 using ServiceManager = EmptyKeys.UserInterface.Mvvm.ServiceManager;
 using WzComparerR2.MapRender.Effects;
+using WzComparerR2.Animation;
 #endregion
 
 namespace WzComparerR2.MapRender
@@ -50,7 +51,9 @@ namespace WzComparerR2.MapRender
             this.patchVisibility.SkyWhaleVisible = false;
             this.patchVisibility.IlluminantClusterPathVisible = false;
             this.patchVisibility.SpringPortalPathVisible = false;
+            this.patchVisibility.PortalRangeVisible = false;
             this.patchVisibility.ObstacleAreaVisible = false;
+            this.patchVisibility.MobHitboxVisible = false;
             this.patchVisibility.CaptureRectVisible = false;
 
             var form = Form.FromHandle(this.Window.Handle) as Form;
@@ -135,6 +138,8 @@ namespace WzComparerR2.MapRender
         bool prepareCapture;
         bool captureViewPortOnly;
         bool ForceCaptureWithResolution;
+        bool showFootholdBoundary;
+        bool enableMobMovement;
         Task captureTask;
         Resolution resolution;
         float opacity;
@@ -238,6 +243,7 @@ namespace WzComparerR2.MapRender
 
             //截图
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { if (CanCapture()) prepareCapture = true; captureViewPortOnly = false; }), KeyCode.Scroll, ModifierKeys.None));
+            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { if (CanCapture()) prepareCapture = true; captureViewPortOnly = false; }), KeyCode.F12, ModifierKeys.None));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => { if (CanCapture()) prepareCapture = true; captureViewPortOnly = true; }), KeyCode.S, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.CaptureRectVisible = !this.patchVisibility.CaptureRectVisible), KeyCode.S, ModifierKeys.None));
 
@@ -249,7 +255,22 @@ namespace WzComparerR2.MapRender
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.ObjVisible = !this.patchVisibility.ObjVisible), KeyCode.D3, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.TileVisible = !this.patchVisibility.TileVisible), KeyCode.D4, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.NpcVisible = !this.patchVisibility.NpcVisible), KeyCode.D5, ModifierKeys.Control));
-            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ => this.patchVisibility.MobVisible = !this.patchVisibility.MobVisible), KeyCode.D6, ModifierKeys.Control));
+            this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ =>
+            {
+                if (!this.patchVisibility.MobVisible)
+                {
+                    this.patchVisibility.MobVisible = true;
+                }
+                else if (!this.patchVisibility.MobHitboxVisible)
+                {
+                    this.patchVisibility.MobHitboxVisible = true;
+                }
+                else
+                {
+                    this.patchVisibility.MobVisible = false;
+                    this.patchVisibility.MobHitboxVisible = false;
+                }
+            }), KeyCode.D6, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ =>
             {
                 var visible = this.patchVisibility.FootHoldVisible;
@@ -258,6 +279,7 @@ namespace WzComparerR2.MapRender
                 this.patchVisibility.SkyWhaleVisible = !visible;
                 this.patchVisibility.IlluminantClusterPathVisible = !visible;
                 this.patchVisibility.SpringPortalPathVisible = !visible;
+                this.patchVisibility.PortalRangeVisible = !visible;
                 this.patchVisibility.ObstacleAreaVisible = !visible;
             }), KeyCode.D7, ModifierKeys.Control));
             this.ui.InputBindings.Add(new KeyBinding(new RelayCommand(_ =>
@@ -364,9 +386,11 @@ namespace WzComparerR2.MapRender
 
                         case KeyCode.LeftControl:
                             boostMoveFlag |= 0x01;
+                            this.ui.OnCtrlKeyDown();
                             break;
                         case KeyCode.RightControl:
                             boostMoveFlag |= 0x02;
+                            this.ui.OnCtrlKeyDown();
                             break;
 
                         default:
@@ -395,9 +419,11 @@ namespace WzComparerR2.MapRender
 
                         case KeyCode.LeftControl:
                             boostMoveFlag &= ~0x01;
+                            this.ui.OnCtrlKeyUp();
                             break;
                         case KeyCode.RightControl:
                             boostMoveFlag &= ~0x02;
+                            this.ui.OnCtrlKeyUp();
                             break;
                     }
                 };
@@ -601,7 +627,7 @@ namespace WzComparerR2.MapRender
             #endregion
 
             //点击事件
-            var disposable = UIHelper.RegisterClickEvent<SceneItem>(this.ui.ContentControl,
+            var disposable = UIHelper.RegisterClickEvent<SceneItem>(this.ui, this.ui.ContentControl,
                 (sender, point) =>
                 {
                     int x = (int)point.X;
@@ -670,6 +696,13 @@ namespace WzComparerR2.MapRender
             LoadOptionData(data);
         }
 
+        private void SpineSelector_Visible(object sender, RoutedEventArgs e)
+        {
+            UISpineSelector wnd = sender as UISpineSelector;
+            wnd.Left = (int)Math.Max(0, (this.ui.Width - wnd.Width) / 2);
+            wnd.Top = (int)Math.Max(0, (this.ui.Height - wnd.Height) / 2);
+        }
+
         private void WorldMap_MapSpotClick(object sender, UIWorldMap.MapSpotEventArgs e)
         {
             int mapID = e.MapID;
@@ -731,6 +764,8 @@ namespace WzComparerR2.MapRender
                     this.ui.ChatBox.AppendTextHelp(@"/history [max number] 造訪過的地圖的歷史記錄");
                     this.ui.ChatBox.AppendTextHelp(@"/minimap 小地圖設定");
                     this.ui.ChatBox.AppendTextHelp(@"/scene 場景設定");
+                    this.ui.ChatBox.AppendTextHelp(@"/spine 開啟Spine動畫指定視窗");
+                    this.ui.ChatBox.AppendTextHelp(@"/summon 召喚怪物");
                     this.ui.ChatBox.AppendTextHelp(@"/quest 任務設定");
                     this.ui.ChatBox.AppendTextHelp(@"/questex 設定任務鍵值");
                     this.ui.ChatBox.AppendTextHelp(@"/date 設定日期");
@@ -797,6 +832,11 @@ namespace WzComparerR2.MapRender
                     break;
                     
                 case "/minimap":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
                     var canvasList = this.mapData?.MiniMap?.ExtraCanvas;
                     switch (arguments.ElementAtOrDefault(1))
                     {
@@ -825,6 +865,11 @@ namespace WzComparerR2.MapRender
                     break;
 
                 case "/scene":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
                     switch (arguments.ElementAtOrDefault(1))
                     {
                         case "tag":
@@ -922,13 +967,16 @@ namespace WzComparerR2.MapRender
                     }
                     break;
 
-
-
                 case "/date":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
                     switch (arguments.ElementAtOrDefault(1))
                     {
                         case "list":
-                            List<Tuple<long, long>> dateList = this?.mapData.Scene.Npcs.SelectMany(item => item.Date).ToList();
+                            List<Tuple<long, long>> dateList = this?.mapData.Scene.Npcs.SelectMany(item => item.Date).ToList() ?? new();
                             this.ui.ChatBox.AppendTextHelp($"相關日期: ({dateList.Count()})");
                             foreach (Tuple<long, long> item in dateList)
                             {
@@ -957,10 +1005,15 @@ namespace WzComparerR2.MapRender
                     break;
 
                 case "/multibgm":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
                     switch (arguments.ElementAtOrDefault(1))
                     {
                         case "list":
-                            if (!string.IsNullOrEmpty(this.mapData.Bgm))
+                            if (!string.IsNullOrEmpty(this.mapData?.Bgm))
                             {
                                 var path = new List<string>() { "Sound" };
                                 path.AddRange(this.mapData.Bgm.Split('/'));
@@ -1018,6 +1071,11 @@ namespace WzComparerR2.MapRender
                     break;
 
                 case "/quest":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
                     switch (arguments.ElementAtOrDefault(1))
                     {
                         case "list":
@@ -1062,11 +1120,16 @@ namespace WzComparerR2.MapRender
                     break;
 
                 case "/questex":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
                     switch (arguments.ElementAtOrDefault(1))
                     {
                         case "list":
                             List<QuestExInfo> questList = this?.mapData.Scene.Layers.Nodes.SelectMany(l => ((LayerNode)l).Obj.Slots.SelectMany(item => ((ObjItem)item).Questex))
-                                .Distinct().ToList();
+                                .Distinct().ToList() ?? new();
                             this.ui.ChatBox.AppendTextHelp($"相關任務鍵ID: ({questList.Count()})");
                             foreach (QuestExInfo item in questList)
                             {
@@ -1098,6 +1161,75 @@ namespace WzComparerR2.MapRender
                             this.ui.ChatBox.AppendTextHelp(@"/questex list 查看相關任務鍵清單");
                             this.ui.ChatBox.AppendTextHelp(@"/questex set (questID) (key) (questState) 設定對應任務鍵的狀態");
                             break;
+                    }
+                    break;
+
+                case "/spine":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
+                    var uiSpineSelector = this.ui.Windows.OfType<UISpineSelector>().FirstOrDefault();
+                    if (uiSpineSelector == null)
+                    {
+                        uiSpineSelector = new UISpineSelector();
+                        uiSpineSelector.Visible += SpineSelector_Visible;
+                        uiSpineSelector.Visibility = EmptyKeys.UserInterface.Visibility.Visible;
+                        this.ui.Windows.Add(uiSpineSelector);
+                        uiSpineSelector.Parent = this.ui;
+                        uiSpineSelector.Hide();
+                    }
+
+                    var back = this.mapData?.Scene.Back.Slots.OfType<BackItem>().Where(item => item.View.Animator is ISpineAnimator)
+                        .Concat(this.mapData.Scene.Front.Slots.OfType<BackItem>().Where(item => item.View.Animator is ISpineAnimator)).ToList() ?? new();
+                    var obj = this.mapData?.Scene.Layers.Nodes.OfType<LayerNode>()
+                        .Select(layerNode => layerNode.Obj.Slots.OfType<ObjItem>()
+                            .Where(item => item.View.Animator is ISpineAnimator)
+                            .ToList()).ToList() ?? new();
+                    uiSpineSelector.LoadTabContents(back, obj);
+
+                    uiSpineSelector.Show();
+                    break;
+
+                case "/summon":
+                    if (this.mapData == null)
+                    {
+                        this.ui.ChatBox.AppendTextHelp("地圖加載失敗。");
+                        break;
+                    }
+                    var si = arguments.ElementAtOrDefault(1);
+                    var sx = arguments.ElementAtOrDefault(2);
+                    var sy = arguments.ElementAtOrDefault(3);
+                    if (int.TryParse(si, out int mobID))
+                    {
+                        int x, y;
+                        if (!int.TryParse(sx, out x) || !int.TryParse(sy, out y))
+                        {
+                            var p = this.renderEnv.Camera.CameraToWorld(renderEnv.Input.MousePosition);
+                            x = p.X;
+                            y = p.Y;
+                        }
+                        StringResult sr;
+                        string mobName = string.Empty;
+                        if (this.StringLinker != null)
+                        {
+                            this.StringLinker.StringMob.TryGetValue(mobID, out sr);
+                            mobName = sr?.Name ?? "(null)";
+                        }
+                        if (this.mapData.SummonMob(mobID, x, y, 0, 0, -1, playRegenMotion: false))
+                        {
+                            this.ui.ChatBox.AppendTextHelp($@"已召喚怪物：{mobName}({mobID})");
+                        }
+                        else
+                        {
+                            this.ui.ChatBox.AppendTextHelp($@"找不到此怪物：({mobID})");
+                        }
+                    }
+                    else
+                    {
+                        this.ui.ChatBox.AppendTextHelp(@"/summon (mobID) 在滑鼠所在位置召喚指定mobID的怪物");
+                        this.ui.ChatBox.AppendTextHelp(@"/summon (mobID) (x) (y) 在坐標x, y召喚指定mobID的怪物");
                     }
                     break;
 
@@ -1360,6 +1492,12 @@ namespace WzComparerR2.MapRender
             this.batcher.D2DEnabled = config.UseD2dRenderer;
             (this.Content as WcR2ContentManager).UseD2DFont = config.UseD2dRenderer;
             this.ForceCaptureWithResolution = config.ForceCaptureWithResolution;
+            this.showFootholdBoundary = config.ShowFootholdBoundary;
+            this.enableMobMovement = config.EnableMobMovement;
+            if (this.mapData != null)
+            {
+                this.mapData.EnableMobMovement = this.enableMobMovement;
+            }
         }
 
         private void LoadOptionData(UIOptionsDataModel model)
@@ -1377,6 +1515,8 @@ namespace WzComparerR2.MapRender
             model.Minimap_CameraRegionVisible = this.ui.Minimap.CameraRegionVisible;
             model.WorldMap_UseImageNameAsInfoName = this.ui.WorldMap.UseImageNameAsInfoName;
             model.ForceCaptureWithResolution = config.ForceCaptureWithResolution;
+            model.ShowFootholdBoundary = config.ShowFootholdBoundary;
+            model.EnableMobMovement = config.EnableMobMovement;
             LoadCaptureRectOptionData(model);
         }
 
@@ -1396,6 +1536,8 @@ namespace WzComparerR2.MapRender
             config.Minimap_CameraRegionVisible = model.Minimap_CameraRegionVisible;
             config.WorldMap_UseImageNameAsInfoName = model.WorldMap_UseImageNameAsInfoName;
             config.ForceCaptureWithResolution = model.ForceCaptureWithResolution;
+            config.ShowFootholdBoundary = model.ShowFootholdBoundary;
+            config.EnableMobMovement = model.EnableMobMovement;
             WzComparerR2.Config.ConfigManager.Save();
 
             if (int.TryParse(model.ScLeft, out int left) && int.TryParse(model.ScTop, out int top)

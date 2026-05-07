@@ -19,6 +19,8 @@ namespace WzComparerR2.CharaSim
         {
             if (H == null) return null;
 
+            H = Regex.Replace(H, @"\{(.*?)\:g\}", "#$1"); // Overseas content replacement
+
             int idx = 0;
             StringBuilder sb = new StringBuilder();
             bool beginC = false;
@@ -232,14 +234,14 @@ namespace WzComparerR2.CharaSim
             return false;
         }
 
-        public static string GetSkillSummary(Skill skill, StringResult sr, SummaryParams param)
+        public static string GetSkillSummary(Skill skill, StringResultSkill sr, SummaryParams param)
         {
             if (skill == null)
                 return null;
             return GetSkillSummary(skill, skill.Level, sr, param);
         }
 
-        public static string GetSkillSummary(Skill skill, int level, StringResult sr, SummaryParams param, SkillSummaryOptions options = default, bool doHighlight = false, string skillID = null, Dictionary<string, List<string>> DiffSkillTags = null)
+        public static string GetSkillSummary(Skill skill, int level, StringResultSkill sr, SummaryParams param, SkillSummaryOptions options = default, bool doHighlight = false, string skillID = null, Dictionary<string, List<string>> DiffSkillTags = null, Dictionary<string, string> overrideSkillCommon = null)
         {
             if (skill == null || sr == null)
                 return null;
@@ -247,8 +249,9 @@ namespace WzComparerR2.CharaSim
             string h = null;
             if (skill.PreBBSkill) //用level声明的技能
             {
-                string hs;
-                if (skill.Level == level && skill.Common.TryGetValue("hs", out hs))
+                string hsSummary;
+                if (skill.Level == level && skill.Common.TryGetValue("hs", out string hs)
+                    && (hsSummary = sr[hs]) != null) // fix for skill 170001005, 170011005
                 {
                     h = sr[hs];
                 }
@@ -291,8 +294,26 @@ namespace WzComparerR2.CharaSim
                 if (sr.SkillH.Count > 0)
                 {
                     h = sr.SkillH[0];
+                    if (skill.VariableProps.Count > 0)
+                    {
+                        foreach (var i in skill.VariableProps)
+                        {
+                            h = (h == null ? null : h.Replace($"{{{i}:g}}", $"#{i}_{level}"));
+                        }
+                    }
                 }
-
+                if (sr.SkillExtraH.Count > 0)
+                {
+                    // SkillExtraH is always sorted
+                    foreach (var kv in sr.SkillExtraH)
+                    {
+                        if (level < kv.Key)
+                        {
+                            break;
+                        }
+                        h = kv.Value;
+                    }
+                }
                 if (doHighlight && DiffSkillTags != null && skillID != null)
                 {
                     if (DiffSkillTags.ContainsKey(skillID))
@@ -304,7 +325,7 @@ namespace WzComparerR2.CharaSim
                     }
                 }
 
-                return GetSkillSummary(h, level, skill.Common, param, options);
+                return GetSkillSummary(h, level, overrideSkillCommon ?? skill.Common, param, options);
             }
         }
 

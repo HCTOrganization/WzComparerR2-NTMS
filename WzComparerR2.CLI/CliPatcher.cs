@@ -467,7 +467,7 @@ namespace WzComparerR2.CLI
             double targetbytes = size;
             int order = 0;
 
-            while (targetbytes >= 1024 && order < sizes.Length)
+            while (targetbytes >= 1024 && order + 1 < sizes.Length)
             {
                 order++;
                 targetbytes /= 1024;

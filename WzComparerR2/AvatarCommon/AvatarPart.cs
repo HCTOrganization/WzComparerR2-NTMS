@@ -23,6 +23,7 @@ namespace WzComparerR2.AvatarCommon
             this.GroupCount = 0;
             this.GroupTamingID = new List<int>();
             this.GroupBodyRelMove = new List<Wz_Vector>();
+            this.PrismData = new PrismDataCollection();
         }
 
         public AvatarPart(Wz_Node node, BitmapOrigin forceIcon, int forceID, bool isSkill) : this (node)
@@ -40,6 +41,7 @@ namespace WzComparerR2.AvatarCommon
         public string ISlot { get; private set; }
         public string VSlot { get; private set; }
         public BitmapOrigin Icon { get; private set; }
+        public BitmapOrigin IconRaw { get; private set; }
         public bool Visible { get; set; }
         public bool EffectVisible { get; set; }
         public int? ID { get; private set; }
@@ -67,6 +69,9 @@ namespace WzComparerR2.AvatarCommon
         public int MixColor { get; set; }
         public int MixOpacity { get; set; }
         public bool IsMixing { get { return BaseColor != -1 && BaseColor != MixColor && MixOpacity > 0; } }
+        public bool HasWhiteMixColor { get { return MixNodes[MixNodes.Length - 1] != null; } }
+        public PrismDataCollection PrismData { get; set; }
+        public bool HasPrism { get { return PrismData.Valid; } }
         public Wz_Node EffectNode { get; set; }
 
         private void LoadInfo()
@@ -116,7 +121,20 @@ namespace WzComparerR2.AvatarCommon
                     case "icon":
                         this.Icon = BitmapOrigin.CreateFromNode(node, PluginBase.PluginManager.FindWz);
                         break;
+
+                    case "iconRaw":
+                        this.IconRaw = BitmapOrigin.CreateFromNode(node, PluginBase.PluginManager.FindWz);
+                        break;
                 }
+            }
+
+            if (this.Icon.Bitmap == null)
+            {
+                this.Icon = new BitmapOrigin(this.IconRaw.Bitmap, this.IconRaw.Origin);
+            }
+            else if (this.IconRaw.Bitmap == null)
+            {
+                this.IconRaw = new BitmapOrigin(this.Icon.Bitmap, this.Icon.Origin);
             }
 
             if (this.Node.Nodes.Count == 1)

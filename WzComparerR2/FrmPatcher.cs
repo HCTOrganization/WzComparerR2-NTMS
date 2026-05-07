@@ -21,9 +21,10 @@ namespace WzComparerR2
 {
     public partial class FrmPatcher : DevComponents.DotNetBar.Office2007Form
     {
-        public FrmPatcher()
+        public FrmPatcher(MainForm mainForm)
         {
             InitializeComponent();
+            this._mainFormReference = mainForm;
             this.FormClosing += new FormClosingEventHandler(FrmPatcher_FormClosing);
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
@@ -60,6 +61,8 @@ namespace WzComparerR2
             }
             cmbComparePng.SelectedItem = WzPngComparison.SizeAndDataLength;
         }
+
+        private MainForm _mainFormReference;
 
         SortedDictionary<string, long> patchedFileSizes = new SortedDictionary<string, long>();
         List<string> patchedFileIndex = new List<string>();
@@ -262,6 +265,17 @@ namespace WzComparerR2
 
         private void buttonXPatch_Click(object sender, EventArgs e)
         {
+            foreach (var openedWzStructure in _mainFormReference.openedWz)
+            {
+                foreach (var wzFile in openedWzStructure.wz_files)
+                {
+                    if (wzFile.FileStream.Name.StartsWith(txtMSFolder.Text, StringComparison.OrdinalIgnoreCase))
+                    {
+                        MessageBoxEx.Show("請在執行更新前關閉當前正在開啟的WZ檔案。", "錯誤", MessageBoxButtons.OK);
+                        return;
+                    }
+                }
+            }
             if (!File.Exists(txtMSFolder.Text + "//MapleStory.exe") && !File.Exists(txtMSFolder.Text + "//MapleStoryT.exe"))
             {
                 DialogResult PatcherPromptResult = MessageBoxEx.Show("所選資料夾似乎不是有效的新楓之谷安裝資料夾。 \r\n您還想繼續嗎？", "警告", MessageBoxButtons.YesNo);
@@ -579,39 +593,6 @@ namespace WzComparerR2
                     progressBarX1.Maximum = 0;
                     progressBarX1.Text = string.Empty;
 
-                    if (!string.IsNullOrEmpty(session.CompareFolder)
-                        && e.Part.Type == 1
-                        && Path.GetExtension(e.Part.FileName).Equals(".wz", StringComparison.OrdinalIgnoreCase)
-                        && !Path.GetFileName(e.Part.FileName).Equals("list.wz", StringComparison.OrdinalIgnoreCase))
-                    {
-                        Wz_Structure wznew = new Wz_Structure();
-                        Wz_Structure wzold = new Wz_Structure();
-                        try
-                        {
-                            logFunc("  檔案比較中...\r\n");
-                            EasyComparer comparer = new EasyComparer();
-                            comparer.OutputPng = chkOutputPng.Checked;
-                            comparer.OutputAddedImg = chkOutputAddedImg.Checked;
-                            comparer.OutputRemovedImg = chkOutputRemovedImg.Checked;
-                            comparer.EnableDarkMode = chkEnableDarkMode.Checked;
-                            comparer.Comparer.PngComparison = (WzPngComparison)cmbComparePng.SelectedItem;
-                            comparer.Comparer.ResolvePngLink = chkResolvePngLink.Checked;
-                            wznew.Load(e.Part.TempFilePath, false);
-                            wzold.Load(e.Part.OldFilePath, false);
-                            comparer.EasyCompareWzFiles(wznew.wz_files[0], wzold.wz_files[0], session.CompareFolder);
-                        }
-                        catch (Exception ex)
-                        {
-                            txtPatchState.AppendText(ex.ToString());
-                        }
-                        finally
-                        {
-                            wznew.Clear();
-                            wzold.Clear();
-                            GC.Collect();
-                        }
-                    }
-
                     if (session.DeadPatch && e.Part.Type == 1 && sender is WzPatcher patcher)
                     {
                         if (patcher.IsKMST1125Format.Value)
@@ -776,7 +757,7 @@ namespace WzComparerR2
             double targetbytes = size;
             int order = 0;
 
-            while (targetbytes >= 1024 && order < sizes.Length)
+            while (targetbytes >= 1024 && order + 1 < sizes.Length)
             {
                 order++;
                 targetbytes /= 1024;
@@ -792,7 +773,7 @@ namespace WzComparerR2
             }
         }
 
-        static bool HasWritePermission(string directoryPath)
+        private static bool HasWritePermission(string directoryPath)
         {
             try
             {

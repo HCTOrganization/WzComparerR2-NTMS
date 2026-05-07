@@ -72,6 +72,8 @@ namespace WzComparerR2.Avatar.UI
             this.chkHairShade = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkHairCover = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkApplyBRM = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowWeaponEffect = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkShowWeaponJumpEffect = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.labelX5 = new DevComponents.DotNetBar.LabelX();
             this.labelX6 = new DevComponents.DotNetBar.LabelX();
             this.cmbGroupChair = new DevComponents.DotNetBar.Controls.ComboBoxEx();
@@ -95,6 +97,10 @@ namespace WzComparerR2.Avatar.UI
             this.btnAngelicBuster = new DevComponents.DotNetBar.ButtonItem();
             this.btnOldBokugen = new DevComponents.DotNetBar.ButtonItem();
             this.btnNewBokugen = new DevComponents.DotNetBar.ButtonItem();
+            this.btnPopTeamEpic = new DevComponents.DotNetBar.ButtonItem();
+            this.btnKonosuba = new DevComponents.DotNetBar.ButtonItem();
+            this.btnKimetsuNoYaiba = new DevComponents.DotNetBar.ButtonItem();
+            this.btnSosoNoFrieren = new DevComponents.DotNetBar.ButtonItem();
             this.btnPopuko = new DevComponents.DotNetBar.ButtonItem();
             this.btnPipimi = new DevComponents.DotNetBar.ButtonItem();
             this.btnMegumin = new DevComponents.DotNetBar.ButtonItem();
@@ -104,6 +110,17 @@ namespace WzComparerR2.Avatar.UI
             this.btnNezukoKamado = new DevComponents.DotNetBar.ButtonItem();
             this.btnZenitsuAgatsuma = new DevComponents.DotNetBar.ButtonItem();
             this.btnInosukeHashibira = new DevComponents.DotNetBar.ButtonItem();
+            this.btnShinobuKocho = new DevComponents.DotNetBar.ButtonItem();
+            this.btnGiyuTomioka = new DevComponents.DotNetBar.ButtonItem();
+            this.btnKanaoTsuyuri = new DevComponents.DotNetBar.ButtonItem();
+            this.btnKyojuroRengoku = new DevComponents.DotNetBar.ButtonItem();
+            this.btnTengenUzui = new DevComponents.DotNetBar.ButtonItem();
+            this.btnMuzanKibutsuji = new DevComponents.DotNetBar.ButtonItem();
+            this.btnFrieren = new DevComponents.DotNetBar.ButtonItem();
+            this.btnFern = new DevComponents.DotNetBar.ButtonItem();
+            this.btnStark = new DevComponents.DotNetBar.ButtonItem();
+            this.btnHimmel = new DevComponents.DotNetBar.ButtonItem();
+            this.btnÜbel = new DevComponents.DotNetBar.ButtonItem();
             this.btnLaraTheSheep = new DevComponents.DotNetBar.ButtonItem();
             this.btnCustomPreset = new DevComponents.DotNetBar.ButtonItem();
             this.Separator1 = new DevComponents.DotNetBar.Separator();
@@ -118,6 +135,7 @@ namespace WzComparerR2.Avatar.UI
             this.btnEnableAutosave = new DevComponents.DotNetBar.ButtonItem();
             this.btnSpecifySavePath = new DevComponents.DotNetBar.ButtonItem();
             this.btnExport = new DevComponents.DotNetBar.ButtonItem();
+            this.btnZoom = new DevComponents.DotNetBar.ButtonItem();
             this.dockSite3 = new DevComponents.DotNetBar.DockSite();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.avatarContainer1 = new WzComparerR2.Avatar.UI.AvatarContainer();
@@ -189,7 +207,7 @@ namespace WzComparerR2.Avatar.UI
             ((DevComponents.DotNetBar.DocumentBaseContainer)(new DevComponents.DotNetBar.DocumentBarContainer(this.bar2, 213, 231)))}, DevComponents.DotNetBar.eOrientation.Vertical);
             this.dockSite2.Location = new System.Drawing.Point(559, 27);
             this.dockSite2.Name = "dockSite2";
-            this.dockSite2.Size = new System.Drawing.Size(250, 512);
+            this.dockSite2.Size = new System.Drawing.Size(280, 512);
             this.dockSite2.TabIndex = 1;
             this.dockSite2.TabStop = false;
             // 
@@ -303,6 +321,8 @@ namespace WzComparerR2.Avatar.UI
             this.panelDockContainer2.Controls.Add(this.chkHairShade);
             this.panelDockContainer2.Controls.Add(this.chkHairCover);
             this.panelDockContainer2.Controls.Add(this.chkApplyBRM);
+            this.panelDockContainer2.Controls.Add(this.chkShowWeaponEffect);
+            this.panelDockContainer2.Controls.Add(this.chkShowWeaponJumpEffect);
             this.panelDockContainer2.Controls.Add(this.labelX5);
             this.panelDockContainer2.Controls.Add(this.labelX6);
             this.panelDockContainer2.Controls.Add(this.cmbGroupChair);
@@ -326,11 +346,11 @@ namespace WzComparerR2.Avatar.UI
             this.cmbEar.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cmbEar.FormattingEnabled = true;
             this.cmbEar.ItemHeight = 15;
-            this.cmbEar.Location = new System.Drawing.Point(163, 103);
+            this.cmbEar.Location = new System.Drawing.Point(173, 103);
             this.cmbEar.Name = "cmbEar";
             this.cmbEar.Size = new System.Drawing.Size(39, 21);
             this.cmbEar.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.cmbEar.TabIndex = 15;
+            this.cmbEar.TabIndex = 14;
             this.cmbEar.SelectedIndexChanged += new System.EventHandler(this.cmbEar_SelectedIndexChanged);
             // 
             // cmbWeaponIdx
@@ -345,7 +365,7 @@ namespace WzComparerR2.Avatar.UI
             this.cmbWeaponIdx.Name = "cmbWeaponIdx";
             this.cmbWeaponIdx.Size = new System.Drawing.Size(50, 21);
             this.cmbWeaponIdx.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.cmbWeaponIdx.TabIndex = 13;
+            this.cmbWeaponIdx.TabIndex = 11;
             this.cmbWeaponIdx.SelectedIndexChanged += new System.EventHandler(this.cmbWeaponIdx_SelectedIndexChanged);
             // 
             // cmbWeaponType
@@ -360,7 +380,7 @@ namespace WzComparerR2.Avatar.UI
             this.cmbWeaponType.Name = "cmbWeaponType";
             this.cmbWeaponType.Size = new System.Drawing.Size(50, 21);
             this.cmbWeaponType.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.cmbWeaponType.TabIndex = 12;
+            this.cmbWeaponType.TabIndex = 10;
             this.cmbWeaponType.SelectedIndexChanged += new System.EventHandler(this.cmbWeaponType_SelectedIndexChanged);
             // 
             // labelX4
@@ -611,13 +631,45 @@ namespace WzComparerR2.Avatar.UI
             // 
             // 
             this.chkApplyBRM.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkApplyBRM.Location = new System.Drawing.Point(5, 155);
+            this.chkApplyBRM.Location = new System.Drawing.Point(5, 205);
             this.chkApplyBRM.Name = "chkApplyBRM";
             this.chkApplyBRM.Size = new System.Drawing.Size(172, 18);
             this.chkApplyBRM.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkApplyBRM.TabIndex = 16;
+            this.chkApplyBRM.TabIndex = 17;
             this.chkApplyBRM.Text = "調整角色位置（椅子）";
             this.chkApplyBRM.CheckedChanged += new System.EventHandler(this.chkApplyBRM_CheckedChanged);
+            // 
+            // chkShowWeaponEffect
+            // 
+            this.chkShowWeaponEffect.AutoSize = true;
+            this.chkShowWeaponEffect.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowWeaponEffect.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowWeaponEffect.Location = new System.Drawing.Point(5, 130);
+            this.chkShowWeaponEffect.Name = "chkShowWeaponEffect";
+            this.chkShowWeaponEffect.Size = new System.Drawing.Size(76, 20);
+            this.chkShowWeaponEffect.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowWeaponEffect.TabIndex = 12;
+            this.chkShowWeaponEffect.Text = "武器基本效果";
+            this.chkShowWeaponEffect.CheckedChanged += new System.EventHandler(this.chkShowWeaponEffect_CheckedChanged);
+            // 
+            // chkShowWeaponJumpEffect
+            // 
+            this.chkShowWeaponJumpEffect.AutoSize = true;
+            this.chkShowWeaponJumpEffect.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkShowWeaponJumpEffect.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkShowWeaponJumpEffect.Location = new System.Drawing.Point(5, 155);
+            this.chkShowWeaponJumpEffect.Name = "chkShowWeaponJumpEffect";
+            this.chkShowWeaponJumpEffect.Size = new System.Drawing.Size(76, 20);
+            this.chkShowWeaponJumpEffect.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkShowWeaponJumpEffect.TabIndex = 13;
+            this.chkShowWeaponJumpEffect.Text = "武器跳躍效果";
+            this.chkShowWeaponJumpEffect.CheckedChanged += new System.EventHandler(this.chkShowWeaponJumpEffect_CheckedChanged);
             // 
             // cmbGroupChair
             // 
@@ -627,11 +679,11 @@ namespace WzComparerR2.Avatar.UI
             this.cmbGroupChair.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.cmbGroupChair.FormattingEnabled = true;
             this.cmbGroupChair.ItemHeight = 15;
-            this.cmbGroupChair.Location = new System.Drawing.Point(70, 129);
+            this.cmbGroupChair.Location = new System.Drawing.Point(70, 179);
             this.cmbGroupChair.Name = "cmbGroupChair";
             this.cmbGroupChair.Size = new System.Drawing.Size(50, 21);
             this.cmbGroupChair.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.cmbGroupChair.TabIndex = 18;
+            this.cmbGroupChair.TabIndex = 16;
             this.cmbGroupChair.Enabled = false;
             this.cmbGroupChair.SelectedIndexChanged += new System.EventHandler(this.cmbGroupChair_SelectedIndexChanged);
             // 
@@ -695,6 +747,7 @@ namespace WzComparerR2.Avatar.UI
             this.btnCode,
             this.btnCharac,
             this.btnReset,
+            this.btnZoom,
             this.btnLock,
             this.btnSaveAsGif,
             this.btnSaveOptions,
@@ -755,16 +808,63 @@ namespace WzComparerR2.Avatar.UI
             this.btnLara,
             this.btnLynn,
             this.Separator4,
+            this.btnPopTeamEpic,
+            this.btnKonosuba,
+            this.btnKimetsuNoYaiba,
+            this.btnSosoNoFrieren});
+            this.btnCharac.Tooltip = "初始化";
+            // 
+            // 
+            // btnPopTeamEpic
+            // 
+            this.btnPopTeamEpic.Name = "btnPopTeamEpic";
+            this.btnPopTeamEpic.Text = "POP TEAM EPIC";
+            this.btnPopTeamEpic.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.btnPopuko,
-            this.btnPipimi,
+            this.btnPipimi
+            });
+            // 
+            // 
+            // btnKonosuba
+            // 
+            this.btnKonosuba.Name = "btnKonosuba";
+            this.btnKonosuba.Text = "為美好的世界獻上祝福！";
+            this.btnKonosuba.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.btnMegumin,
             this.btnAqua,
-            this.btnDarkness,
+            this.btnDarkness
+            });
+            // 
+            // 
+            // btnKimetsuNoYaiba
+            // 
+            this.btnKimetsuNoYaiba.Name = "btnKimetsuNoYaiba";
+            this.btnKimetsuNoYaiba.Text = "鬼滅之刃";
+            this.btnKimetsuNoYaiba.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.btnTanjiroKamado,
             this.btnNezukoKamado,
+            this.btnGiyuTomioka,
+            this.btnMuzanKibutsuji,
             this.btnZenitsuAgatsuma,
-            this.btnInosukeHashibira});
-            this.btnCharac.Tooltip = "初始化";
+            this.btnInosukeHashibira,
+            this.btnShinobuKocho,
+            this.btnKanaoTsuyuri,
+            this.btnKyojuroRengoku,
+            this.btnTengenUzui
+            });
+            // 
+            // 
+            // btnSosoNoFrieren
+            // 
+            this.btnSosoNoFrieren.Name = "btnSosoNoFrieren";
+            this.btnSosoNoFrieren.Text = "葬送的芙莉蓮";
+            this.btnSosoNoFrieren.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
+            this.btnFrieren,
+            this.btnFern,
+            this.btnStark,
+            this.btnHimmel,
+            this.btnÜbel
+            });
             // 
             // 
             // btnCustomPreset
@@ -924,6 +1024,84 @@ namespace WzComparerR2.Avatar.UI
             this.btnInosukeHashibira.Name = "btnInosukeHashibira";
             this.btnInosukeHashibira.Text = "嘴平伊之助";
             this.btnInosukeHashibira.Click += new System.EventHandler(this.btnInosukeHashibira_Click);
+            // 
+            // 
+            // btnShinobuKocho
+            // 
+            this.btnShinobuKocho.Name = "btnShinobuKocho";
+            this.btnShinobuKocho.Text = "胡蝶忍";
+            this.btnShinobuKocho.Click += new System.EventHandler(this.btnShinobuKocho_Click);
+            // 
+            // 
+            // btnGiyuTomioka
+            // 
+            this.btnGiyuTomioka.Name = "btnGiyuTomioka";
+            this.btnGiyuTomioka.Text = "富岡義勇";
+            this.btnGiyuTomioka.Click += new System.EventHandler(this.btnGiyuTomioka_Click);
+            // 
+            // 
+            // btnKanaoTsuyuri
+            // 
+            this.btnKanaoTsuyuri.Name = "btnKanaoTsuyuri";
+            this.btnKanaoTsuyuri.Text = "栗花落香奈乎";
+            this.btnKanaoTsuyuri.Click += new System.EventHandler(this.btnKanaoTsuyuri_Click);
+            // 
+            // 
+            // btnKyojuroRengoku
+            // 
+            this.btnKyojuroRengoku.Name = "btnKyojuroRengoku";
+            this.btnKyojuroRengoku.Text = "煉獄杏壽郎";
+            this.btnKyojuroRengoku.Click += new System.EventHandler(this.btnKyojuroRengoku_Click);
+            // 
+            // 
+            // btnTengenUzui
+            // 
+            this.btnTengenUzui.Name = "btnTengenUzui";
+            this.btnTengenUzui.Text = "宇髄天元";
+            this.btnTengenUzui.Click += new System.EventHandler(this.btnTengenUzui_Click);
+            // 
+            // 
+            // btnMuzanKibutsuji
+            // 
+            this.btnMuzanKibutsuji.Name = "btnMuzanKibutsuji";
+            this.btnMuzanKibutsuji.Text = "鬼舞辻無慘";
+            this.btnMuzanKibutsuji.Click += new System.EventHandler(this.btnMuzanKibutsuji_Click);
+            // 
+            // 
+            // btnFrieren
+            // 
+            this.btnFrieren.Name = "btnFrieren";
+            this.btnFrieren.Text = "芙莉蓮";
+            this.btnFrieren.Click += new System.EventHandler(this.btnFrieren_Click);
+            // 
+            // 
+            // btnFern
+            // 
+            this.btnFern.Name = "btnFern";
+            this.btnFern.Text = "費倫";
+            this.btnFern.Click += new System.EventHandler(this.btnFern_Click);
+            // 
+            // 
+            // btnStark
+            // 
+            this.btnStark.Name = "btnStark";
+            this.btnStark.Text = "修塔爾克";
+            this.btnStark.Click += new System.EventHandler(this.btnStark_Click);
+            // 
+            // 
+            // btnHimmel
+            // 
+            this.btnHimmel.Name = "btnHimmel";
+            this.btnHimmel.Text = "欣梅爾";
+            this.btnHimmel.Click += new System.EventHandler(this.btnHimmel_Click);
+            // 
+            // 
+            // btnÜbel
+            // 
+            this.btnÜbel.Name = "btnÜbel";
+            this.btnÜbel.Text = "尤蓓爾";
+            this.btnÜbel.Click += new System.EventHandler(this.btnÜbel_Click);
+            //
             // btnAPI
             // 
             this.btnAPI.Name = "btnAPI";
@@ -936,6 +1114,13 @@ namespace WzComparerR2.Avatar.UI
             this.btnReset.Name = "btnReset";
             this.btnReset.Tooltip = "初始位置";
             this.btnReset.Click += new System.EventHandler(this.btnReset_Click);
+            // 
+            // btnZoom
+            // 
+            this.btnZoom.Image = global::WzComparerR2.Avatar.Properties.Resources.magnify;
+            this.btnZoom.Name = "btnZoom";
+            this.btnZoom.Tooltip = "縮放";
+            this.btnZoom.Click += new System.EventHandler(this.btnZoom_Click);
             // 
             // btnLock
             // 
@@ -1023,7 +1208,7 @@ namespace WzComparerR2.Avatar.UI
             // 
             // 
             this.labelX6.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelX6.Location = new System.Drawing.Point(3, 131);
+            this.labelX6.Location = new System.Drawing.Point(3, 181);
             this.labelX6.Name = "labelX6";
             this.labelX6.Size = new System.Drawing.Size(60, 18);
             this.labelX6.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -1114,6 +1299,8 @@ namespace WzComparerR2.Avatar.UI
         private AvatarContainer avatarContainer1;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkHairCover;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkApplyBRM;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowWeaponEffect;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkShowWeaponJumpEffect;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbWeaponIdx;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbWeaponType;
         private DevComponents.DotNetBar.LabelX labelX4;
@@ -1135,6 +1322,10 @@ namespace WzComparerR2.Avatar.UI
         private DevComponents.DotNetBar.ButtonItem btnAngelicBuster;
         private DevComponents.DotNetBar.ButtonItem btnOldBokugen;
         private DevComponents.DotNetBar.ButtonItem btnNewBokugen;
+        private DevComponents.DotNetBar.ButtonItem btnPopTeamEpic;
+        private DevComponents.DotNetBar.ButtonItem btnKonosuba;
+        private DevComponents.DotNetBar.ButtonItem btnKimetsuNoYaiba;
+        private DevComponents.DotNetBar.ButtonItem btnSosoNoFrieren;
         private DevComponents.DotNetBar.ButtonItem btnPopuko;
         private DevComponents.DotNetBar.ButtonItem btnPipimi;
         private DevComponents.DotNetBar.ButtonItem btnMegumin;
@@ -1144,6 +1335,17 @@ namespace WzComparerR2.Avatar.UI
         private DevComponents.DotNetBar.ButtonItem btnNezukoKamado;
         private DevComponents.DotNetBar.ButtonItem btnZenitsuAgatsuma;
         private DevComponents.DotNetBar.ButtonItem btnInosukeHashibira;
+        private DevComponents.DotNetBar.ButtonItem btnShinobuKocho;
+        private DevComponents.DotNetBar.ButtonItem btnGiyuTomioka;
+        private DevComponents.DotNetBar.ButtonItem btnKanaoTsuyuri;
+        private DevComponents.DotNetBar.ButtonItem btnKyojuroRengoku;
+        private DevComponents.DotNetBar.ButtonItem btnTengenUzui;
+        private DevComponents.DotNetBar.ButtonItem btnMuzanKibutsuji;
+        private DevComponents.DotNetBar.ButtonItem btnFrieren;
+        private DevComponents.DotNetBar.ButtonItem btnFern;
+        private DevComponents.DotNetBar.ButtonItem btnStark;
+        private DevComponents.DotNetBar.ButtonItem btnHimmel;
+        private DevComponents.DotNetBar.ButtonItem btnÜbel;
         private DevComponents.DotNetBar.ButtonItem btnLaraTheSheep;
         private DevComponents.DotNetBar.ButtonItem btnCustomPreset;
         private DevComponents.DotNetBar.ButtonItem btnAPI;
@@ -1158,6 +1360,7 @@ namespace WzComparerR2.Avatar.UI
         private DevComponents.DotNetBar.Separator Separator4;
         private DevComponents.DotNetBar.LabelX labelX5;
         private DevComponents.DotNetBar.ButtonItem btnExport;
+        private DevComponents.DotNetBar.ButtonItem btnZoom;
         private DevComponents.DotNetBar.LabelX labelX6;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbGroupChair;
     }

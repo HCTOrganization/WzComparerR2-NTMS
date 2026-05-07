@@ -28,5 +28,33 @@ namespace WzComparerR2.Config
             get { return (bool)this["showMobNpcObjectID"]; }
             set { this["showMobNpcObjectID"] = value; }
         }
+
+        [ConfigurationProperty("showMiniMapMob", DefaultValue = true)]
+        public bool ShowMiniMapMob
+        {
+            get { return (bool)this["showMiniMapMob"]; }
+            set { this["showMiniMapMob"] = value; }
+        }
+
+        [ConfigurationProperty("showMiniMapNpc", DefaultValue = true)]
+        public bool ShowMiniMapNpc
+        {
+            get { return (bool)this["showMiniMapNpc"]; }
+            set { this["showMiniMapNpc"] = value; }
+        }
+
+        [ConfigurationProperty("showMiniMapPortal", DefaultValue = true)]
+        public bool ShowMiniMapPortal
+        {
+            get { return (bool)this["showMiniMapPortal"]; }
+            set { this["showMiniMapPortal"] = value; }
+        }
+
+        [ConfigurationProperty("showBgmName", DefaultValue = true)]
+        public bool ShowBgmName
+        {
+            get { return (bool)this["showBgmName"]; }
+            set { this["showBgmName"] = value; }
+        }
     }
 }

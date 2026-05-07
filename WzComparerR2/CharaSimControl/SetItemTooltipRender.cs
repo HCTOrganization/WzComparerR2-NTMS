@@ -92,16 +92,10 @@ namespace WzComparerR2.CharaSimControl
             Graphics g = Graphics.FromImage(setBitmap);
             StringFormat format = new StringFormat();
             format.Alignment = StringAlignment.Center;
+            bool isSilverWolf = IsSilverWolf();
 
             picHeight = 10;
-            if (Translator.IsKoreanStringPresent(this.SetItem.SetItemName))
-            {
-                TextRenderer.DrawText(g, this.SetItem.SetItemName, GearGraphics.KMSItemDetailFont, new Point(261, 10), ((SolidBrush)GearGraphics.GreenBrush2).Color, TextFormatFlags.HorizontalCenter);
-            }
-            else
-            {
-                TextRenderer.DrawText(g, this.SetItem.SetItemName, GearGraphics.ItemDetailFont2, new Point(261, 10), ((SolidBrush)GearGraphics.GreenBrush2).Color, TextFormatFlags.HorizontalCenter);//default value is '261' - Used for set name centered in set effect tooltip window   
-            }
+            TextRenderer.DrawText(g, this.SetItem.SetItemName, Translator.IsKoreanStringPresent(this.SetItem.SetItemName) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont2, new Point(261, 10), ((SolidBrush)GearGraphics.GreenBrush2).Color, TextFormatFlags.HorizontalCenter);
             picHeight += 25;
 
             format.Alignment = StringAlignment.Far;
@@ -127,7 +121,11 @@ namespace WzComparerR2.CharaSimControl
 
                     if (setItemPart.Value.ItemIDs.Count > 0)
                     {
-                        var itemID = setItemPart.Value.ItemIDs.First().Key;
+                        var itemID = setItemPart.Value.ItemIDs.First().Key; 
+                        if (isSilverWolf)
+                        {
+                            if (Gear.GetGearType(itemID) == GearType.katara) continue;
+                        }
 
                         switch (itemID / 1000000)
                         {
@@ -281,6 +279,12 @@ namespace WzComparerR2.CharaSimControl
                         }
                     }
                 }
+                if (isSilverWolf)
+                {
+                    TextRenderer.DrawText(g, "一件銀狼武器", GearGraphics.EquipDetailFont2, new Point(10, picHeight), ((SolidBrush)GearGraphics.GrayBrush2).Color, TextFormatFlags.NoPadding);
+                    TextRenderer.DrawText(g, "(銀狼武器)", GearGraphics.EquipDetailFont2, new Point(252 - TextRenderer.MeasureText(g, "(銀狼)", GearGraphics.EquipDetailFont2, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width, picHeight), ((SolidBrush)GearGraphics.GrayBrush2).Color, TextFormatFlags.NoPadding);
+                    picHeight += 18;
+                }
             }
             else
             {
@@ -304,6 +308,32 @@ namespace WzComparerR2.CharaSimControl
             format.Dispose();
             g.Dispose();
             return setBitmap;
+        }
+
+        private bool IsSilverWolf()
+        {
+            if (this.SetItem == null)
+            {
+                return false;
+            }
+
+            foreach (var idkvp in this.SetItem.ItemIDs.Parts)
+            {
+                foreach (var itemID in idkvp.Value.ItemIDs.Keys)
+                {
+                    if (Gear.IsWeapon(Gear.GetGearType(itemID)) || Gear.IsSubWeapon(Gear.GetGearType(itemID)))
+                    {
+                        Wz_Node weaponNode = PluginBase.PluginManager.FindWz(string.Format(@"Character\Weapon\{0:D8}.img", itemID));
+                        if (weaponNode != null)
+                        {
+                            var weapon = Gear.CreateFromNode(weaponNode, PluginManager.FindWz);
+                            weapon.Props.TryGetValue(GearPropType.plusToSetItem, out int value);
+                            if (value == 1) return true;
+                        }
+                    }
+                }
+            }
+            return false;
         }
 
         private static string Compact(Graphics g, string text, int width) // https://www.codeproject.com/Articles/37503/Auto-Ellipsis

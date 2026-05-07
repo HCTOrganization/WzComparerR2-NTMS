@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using System.Text.RegularExpressions;
 using WzComparerR2.CharaSim;
 using WzComparerR2.Common;
+using WzComparerR2.PluginBase;
 using WzComparerR2.WzLib;
 using WzComparerR2.AvatarCommon;
 using static WzComparerR2.CharaSimControl.RenderHelper;
@@ -27,7 +28,13 @@ namespace WzComparerR2.CharaSimControl
         }
 
         public Mob MobInfo { get; set; }
+        public int MaxWidth { get; set; }
+        public bool ShowAllSubMobAtOnce { get; set; }
+        public bool EnableWorldArchive { get; set; }
+        public bool EnableMonsterBook { get; set; }
         private AvatarCanvasManager avatar { get; set; }
+        private WorldArchiveTooltipRender WorldArchiveRender { get; set; }
+
         public override Bitmap Render()
         {
             if (MobInfo == null)
@@ -36,6 +43,7 @@ namespace WzComparerR2.CharaSimControl
             }
 
             Bitmap bmp = new Bitmap(1, 1, PixelFormat.Format32bppArgb);
+            Bitmap subMobBmpTooltip = null;
             Graphics g = Graphics.FromImage(bmp);
             bool isTranslateRequired = Translator.IsTranslateEnabled;
 
@@ -55,207 +63,335 @@ namespace WzComparerR2.CharaSimControl
             int picY = 0;
 
             StringBuilder sbExt = new StringBuilder();
-            if (MobInfo.Boss && MobInfo.PartyBonusMob)
+            if (MobInfo.IsQuestCountGroupMob)
             {
-                sbExt.Append("MiniBoss ");
-            }
-            if (MobInfo.Boss && !MobInfo.PartyBonusMob)
-            {
-                sbExt.Append("Boss ");
-            }
-            if (MobInfo.Undead)
-            {
-                sbExt.Append("不死系 ");
-            }
-            if (MobInfo.FirstAttack)
-            {
-                sbExt.Append("主動攻擊 ");
-            }
-            if (!MobInfo.BodyAttack)
-            {
-                sbExt.Append("無觸触傷害 ");
-            }
-            if (MobInfo.DamagedByMob)
-            {
-                sbExt.Append("弱小怪物 ");
-            }
-            if (MobInfo.ChangeableMob)
-            {
-                sbExt.Append("只受怪物傷害 ");
-            }
-            if (MobInfo.AllyMob)
-            {
-                sbExt.Append("同盟怪物 ");
-            }
-            if (MobInfo.Invincible)
-            {
-                sbExt.Append("無敵 ");
-            }
-            if (MobInfo.NotAttack)
-            {
-                sbExt.Append("無法攻擊 ");
-            }
-            if (MobInfo.FixedDamage > 0)
-            {
-                sbExt.Append("固定傷害 " + ToCJKNumberExpr(MobInfo.FixedDamage) + " ");
-            }
-            if (MobInfo.FixedBodyAttackDamageR > 0)
-            {
-                sbExt.Append("固定接触傷害: " + MobInfo.FixedBodyAttackDamageR + "% ");
-            }
-            if (MobInfo.IgnoreDamage)
-            {
-                sbExt.Append("無視傷害 ");
-            }
-            if (MobInfo.IgnoreMoveImpact)
-            {
-                sbExt.Append("無視眩暈 ");
-            }
-            if (MobInfo.IgnoreMovable)
-            {
-                sbExt.Append("無視束縛 ");
-            }
-            if (MobInfo.NoDebuff)
-            {
-                sbExt.Append("無視減益 ");
-            }
-            if (MobInfo.OnlyNormalAttack)
-            {
-                sbExt.Append("只能承受一般攻擊 ");
-            }
-            if (MobInfo.OnlyHittedByCommonAttack)
-            {
-                sbExt.Append("只能承受一般攻擊 ");
-            }
-
-            if (sbExt.Length > 1)
-            {
-                sbExt.Remove(sbExt.Length - 1, 1);
-                propBlocks.Add(PrepareText(g, sbExt.ToString(), GearGraphics.ItemDetailFont, Brushes.GreenYellow, 0, picY));
-                picY += 16;
-            }
-
-            if (MobInfo.RemoveAfter > 0)
-            {
-                propBlocks.Add(PrepareText(g, "[" + MobInfo.RemoveAfter + "秒後自動消失]", GearGraphics.ItemDetailFont, Brushes.GreenYellow, 0, picY));
-                picY += 16;
-            }
-
-            propBlocks.Add(PrepareText(g, "種類: " + GetMobCategoryName(MobInfo.Category), GearGraphics.ItemDetailFont, Brushes.White, 0, picY));
-            long fmaxhp, fmaxmp;
-            string hpNum = long.TryParse(MobInfo.FinalMaxHP, out fmaxhp) ? ToCJKNumberExpr(fmaxhp) : ToCJKNumberExpr(MobInfo.MaxHP);
-            string mpNum = long.TryParse(MobInfo.FinalMaxMP, out fmaxmp) ? ToCJKNumberExpr(fmaxmp) : ToCJKNumberExpr(MobInfo.MaxMP);
-            if (MobInfo.ChangeableMob)
-            {
-                propBlocks.Add(PrepareText(g, "等級: 不定", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-                propBlocks.Add(PrepareText(g, "HP: 不定", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-                propBlocks.Add(PrepareText(g, "MP: 不定", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                if (MobInfo.LvOptimum)
+                {
+                    sbExt.Append($"[任務怪物組: 自身角色等級±20以內的怪物] ");
+                }
+                else if (MobInfo.ChangeableMob)
+                {
+                    sbExt.Append($"[任務怪物組: 菁英怪物] ");
+                }
+                else if (MobInfo.Filters != 0)
+                {
+                    switch (MobInfo.Filters)
+                    {
+                        case 1: sbExt.Append($"[任務怪物組: 星力地區怪物] "); break;
+                        case 2: sbExt.Append($"[任務怪物組: 奧術之河地區怪物] "); break;
+                        case 5: sbExt.Append($"[任務怪物組: 星力地區菁英怪物] "); break;
+                        case -10: sbExt.Append($"[任務怪物組: 奧術之力/真實之力地區怪物] "); break;
+                        default: sbExt.Append($"[任務怪物組: 特殊] "); break;
+                    }
+                }
+                else
+                {
+                    sbExt.Append($"[任務怪物組: {MobInfo.QuestCountGroupMobID.Count}隻] ");
+                }
+                if (sbExt.Length > 1)
+                {
+                    sbExt.Remove(sbExt.Length - 1, 1);
+                    propBlocks.Add(PrepareText(g, sbExt.ToString(), GearGraphics.ItemDetailFont, Brushes.GreenYellow, 0, picY));
+                    picY += 16;
+                }
+                if (!ShowAllSubMobAtOnce && !MobInfo.LvOptimum && !MobInfo.ChangeableMob && !(MobInfo.Filters != 0))
+                {
+                    propBlocks.Add(PrepareText(g, "請使用 [-] / [+] 切換。", GearGraphics.ItemDetailFont, Brushes.White, 0, picY));
+                }
+                Bitmap[] subMobBmps = new Bitmap[MobInfo.QuestCountGroupMobID.Count];
+                MobTooltipRenderer subRenderer = new MobTooltipRenderer();
+                subRenderer.StringLinker = this.StringLinker;
+                subRenderer.ShowObjectID = this.ShowObjectID;
+                for (int i = 0; i < MobInfo.QuestCountGroupMobID.Count; i++)
+                {
+                    try
+                    {
+                        Mob subMobInfo = Mob.CreateFromNode(PluginManager.FindWz(string.Format(@"Mob\{0:D7}.img", MobInfo.QuestCountGroupMobID[i]), this.SourceWzFile), PluginManager.FindWz);
+                        subRenderer.MobInfo = subMobInfo;
+                        subRenderer.EnableWorldArchive = false;
+                        subMobBmps[i] = subRenderer.Render();
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+                if (ShowAllSubMobAtOnce)
+                {
+                    Size fullBitmapSize = new Size(0, 0);
+                    int maxHeightPerLine = 0;
+                    int currentItem = 0;
+                    int currentWidth = 0;
+                    foreach (Bitmap i in subMobBmps)
+                    {
+                        if (i != null)
+                        {
+                            currentWidth += i.Width;
+                            maxHeightPerLine = Math.Max(maxHeightPerLine, i.Height);
+                            if (currentWidth > this.MaxWidth)
+                            {
+                                currentWidth -= i.Width;
+                                fullBitmapSize.Width = Math.Max(fullBitmapSize.Width, currentWidth);
+                                fullBitmapSize.Height += maxHeightPerLine;
+                                currentWidth = 0;
+                                maxHeightPerLine = 0;
+                            }
+                            currentItem++;
+                            if (currentItem == subMobBmps.Count())
+                            {
+                                fullBitmapSize.Width = Math.Max(fullBitmapSize.Width, currentWidth);
+                                fullBitmapSize.Height += maxHeightPerLine;
+                                maxHeightPerLine = 0;
+                                currentItem = 0;
+                            }
+                        }
+                    }
+                    maxHeightPerLine = 0;
+                    currentItem = 1;
+                    subMobBmpTooltip = new Bitmap(fullBitmapSize.Width, fullBitmapSize.Height);
+                    using (Graphics subG = Graphics.FromImage(subMobBmpTooltip))
+                    {
+                        int subH = 0;
+                        int subW = 0;
+                        foreach (Bitmap i in subMobBmps)
+                        {
+                            if (i != null)
+                            {
+                                if (subW + i.Width > this.MaxWidth)
+                                {
+                                    subH += maxHeightPerLine;
+                                    subW = 0;
+                                    maxHeightPerLine = 0;
+                                }
+                                using (Graphics subG2 = Graphics.FromImage(i))
+                                {
+                                    GearGraphics.DrawGearDetailNumber(subG2, 3, 3, currentItem.ToString(), true);
+                                }
+                                subG.DrawImage(i, subW, subH, new Rectangle(0, 0, i.Width, i.Height), GraphicsUnit.Pixel);
+                                subW += i.Width;
+                                maxHeightPerLine = Math.Max(maxHeightPerLine, i.Height);
+                                currentItem++;
+                            }
+                        }
+                    }
+                }
+                else if (subMobBmps.Count() > 0)
+                {
+                    if (subMobBmps[MobInfo.MobGroupIndex] != null)
+                    {
+                        using (Graphics subG = Graphics.FromImage(subMobBmps[MobInfo.MobGroupIndex]))
+                        {
+                            var labelFont = new Font("MS Gothic", 12f, GraphicsUnit.Pixel);
+                            int picH = 2;
+                            GearGraphics.DrawPlainText(subG, $"{MobInfo.MobGroupIndex + 1} / {subMobBmps.Count()}", labelFont, Color.FromArgb(255, 255, 255), 2, 130, ref picH, 13);
+                        }
+                        subMobBmpTooltip = subMobBmps[MobInfo.MobGroupIndex];
+                    }
+                }
             }
             else
             {
-                propBlocks.Add(PrepareText(g, "等級: " + MobInfo.Level, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-                propBlocks.Add(PrepareText(g, "HP: " + hpNum, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-                propBlocks.Add(PrepareText(g, "MP: " + mpNum, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo.HPRecovery > 0)
-            {
-                propBlocks.Add(PrepareText(g, "HP回復: " + ToCJKNumberExpr(MobInfo.HPRecovery), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo.MPRecovery > 0)
-            {
-                propBlocks.Add(PrepareText(g, "MP回復: " + ToCJKNumberExpr(MobInfo.MPRecovery), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            propBlocks.Add(PrepareText(g, "物理傷害: " + ToCJKNumberExpr(MobInfo.PADamage), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            propBlocks.Add(PrepareText(g, "魔法傷害: " + ToCJKNumberExpr(MobInfo.MADamage), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            propBlocks.Add(PrepareText(g, "物理防御率: " + MobInfo.PDRate + "%", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            propBlocks.Add(PrepareText(g, "魔法防御率: " + MobInfo.MDRate + "%", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            propBlocks.Add(PrepareText(g, "擊退率: " + ToCJKNumberExpr(MobInfo.Pushed), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            propBlocks.Add(PrepareText(g, "經驗值: " + ToCJKNumberExpr(MobInfo.Exp), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            if (MobInfo.CharismaEXP > 0)
-            {
-                propBlocks.Add(PrepareText(g, "領導力: +" + MobInfo.CharismaEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo.SenseEXP > 0)
-            {
-                propBlocks.Add(PrepareText(g, "感性: +" + MobInfo.SenseEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo.InsightEXP > 0)
-            {
-                propBlocks.Add(PrepareText(g, "洞察力: +" + MobInfo.InsightEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo.WillEXP > 0)
-            {
-                propBlocks.Add(PrepareText(g, "意志: +" + MobInfo.WillEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo.CraftEXP > 0)
-            {
-                propBlocks.Add(PrepareText(g, "手藝: +" + MobInfo.CraftEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo.CharmEXP > 0)
-            {
-                propBlocks.Add(PrepareText(g, "魅力: +" + MobInfo.CharmEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo.WP > 0)
-            {
-                propBlocks.Add(PrepareText(g, "WP: " + MobInfo.WP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            //propBlocks.Add(PrepareText(g, GetElemAttrString(MobInfo.ElemAttr), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            if (GetElemAttrString(MobInfo.ElemAttr) != "")
-            {
-                propBlocks.Add(PrepareText(g, GetElemAttrString(MobInfo.ElemAttr), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
-            }
-            if (MobInfo?.ID != null)
-            {
-                var locNode = PluginBase.PluginManager.FindWz("Etc\\MobLocation.img\\" + MobInfo.ID.ToString());
-                if (locNode != null)
+                if (MobInfo.Boss && MobInfo.PartyBonusMob)
                 {
-                    propBlocks.Add(PrepareText(g, "位置: ", GearGraphics.ItemDetailFont, GearGraphics.LocationBrush, 0, picY += 30));
-                    foreach (var locMapNode in locNode.Nodes)
+                    sbExt.Append("MiniBoss ");
+                }
+                if (MobInfo.Boss && !MobInfo.PartyBonusMob)
+                {
+                    sbExt.Append("Boss ");
+                }
+                if (MobInfo.Undead)
+                {
+                    sbExt.Append("不死系 ");
+                }
+                if (MobInfo.FirstAttack)
+                {
+                    sbExt.Append("主動攻擊 ");
+                }
+                if (!MobInfo.BodyAttack)
+                {
+                    sbExt.Append("無觸触傷害 ");
+                }
+                if (MobInfo.DamagedByMob)
+                {
+                    sbExt.Append("弱小怪物 ");
+                }
+                if (MobInfo.ChangeableMob)
+                {
+                    sbExt.Append("只受怪物傷害 ");
+                }
+                if (MobInfo.AllyMob)
+                {
+                    sbExt.Append("同盟怪物 ");
+                }
+                if (MobInfo.Invincible)
+                {
+                    sbExt.Append("無敵 ");
+                }
+                if (MobInfo.NotAttack)
+                {
+                    sbExt.Append("無法攻擊 ");
+                }
+                if (MobInfo.FixedDamage > 0)
+                {
+                    sbExt.Append("固定傷害 " + ToCJKNumberExpr(MobInfo.FixedDamage) + " ");
+                }
+                if (MobInfo.FixedBodyAttackDamageR > 0)
+                {
+                    sbExt.Append("固定接触傷害: " + MobInfo.FixedBodyAttackDamageR + "% ");
+                }
+                if (MobInfo.IgnoreDamage)
+                {
+                    sbExt.Append("無視傷害 ");
+                }
+                if (MobInfo.IgnoreMoveImpact)
+                {
+                    sbExt.Append("無視眩暈 ");
+                }
+                if (MobInfo.IgnoreMovable)
+                {
+                    sbExt.Append("無視束縛 ");
+                }
+                if (MobInfo.NoDebuff)
+                {
+                    sbExt.Append("無視減益 ");
+                }
+                if (MobInfo.OnlyNormalAttack)
+                {
+                    sbExt.Append("只能承受一般攻擊 ");
+                }
+                if (MobInfo.OnlyHittedByCommonAttack)
+                {
+                    sbExt.Append("只能承受一般攻擊 ");
+                }
+
+                if (sbExt.Length > 1)
+                {
+                    sbExt.Remove(sbExt.Length - 1, 1);
+                    propBlocks.Add(PrepareText(g, sbExt.ToString(), GearGraphics.ItemDetailFont, Brushes.GreenYellow, 0, picY));
+                    picY += 16;
+                }
+
+                if (MobInfo.RemoveAfter > 0)
+                {
+                    propBlocks.Add(PrepareText(g, "[" + MobInfo.RemoveAfter + "秒後自動消失]", GearGraphics.ItemDetailFont, Brushes.GreenYellow, 0, picY));
+                    picY += 16;
+                }
+
+                propBlocks.Add(PrepareText(g, "種類: " + GetMobCategoryName(MobInfo.Category), GearGraphics.ItemDetailFont, Brushes.White, 0, picY));
+                long fmaxhp, fmaxmp;
+                string hpNum = long.TryParse(MobInfo.FinalMaxHP, out fmaxhp) ? ToCJKNumberExpr(fmaxhp) : ToCJKNumberExpr(MobInfo.MaxHP);
+                string mpNum = long.TryParse(MobInfo.FinalMaxMP, out fmaxmp) ? ToCJKNumberExpr(fmaxmp) : ToCJKNumberExpr(MobInfo.MaxMP);
+                if (MobInfo.ChangeableMob)
+                {
+                    propBlocks.Add(PrepareText(g, "等級: 不定", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                    propBlocks.Add(PrepareText(g, "HP: 不定", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                    propBlocks.Add(PrepareText(g, "MP: 不定", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                }
+                else
+                {
+                    propBlocks.Add(PrepareText(g, "等級: " + MobInfo.Level, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                    propBlocks.Add(PrepareText(g, "HP: " + hpNum, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                    propBlocks.Add(PrepareText(g, "MP: " + mpNum, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                }
+                if (MobInfo.HPRecovery > 0)
+                {
+                    propBlocks.Add(PrepareText(g, "HP回復: " + ToCJKNumberExpr(MobInfo.HPRecovery), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                }
+                if (MobInfo.MPRecovery > 0)
+                {
+                    propBlocks.Add(PrepareText(g, "MP回復: " + ToCJKNumberExpr(MobInfo.MPRecovery), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                }
+                propBlocks.Add(PrepareText(g, "物理傷害: " + ToCJKNumberExpr(MobInfo.PADamage), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                propBlocks.Add(PrepareText(g, "魔法傷害: " + ToCJKNumberExpr(MobInfo.MADamage), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                propBlocks.Add(PrepareText(g, "物理防御率: " + MobInfo.PDRate + "%", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                propBlocks.Add(PrepareText(g, "魔法防御率: " + MobInfo.MDRate + "%", GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                propBlocks.Add(PrepareText(g, "擊退率: " + ToCJKNumberExpr(MobInfo.Pushed), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                propBlocks.Add(PrepareText(g, "經驗值: " + ToCJKNumberExpr(MobInfo.Exp), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                if (MobInfo.CharismaEXP > 0)
+                {
+                    propBlocks.Add(PrepareText(g, "領導力: +" + MobInfo.CharismaEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                }
+                if (MobInfo.SenseEXP > 0)
+                {
+                    propBlocks.Add(PrepareText(g, "感性: +" + MobInfo.SenseEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                }
+                if (MobInfo.InsightEXP > 0)
+                {
+                    propBlocks.Add(PrepareText(g, "洞察力: +" + MobInfo.InsightEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                }
+                if (MobInfo.WillEXP > 0)
+                {
+                    propBlocks.Add(PrepareText(g, "意志: +" + MobInfo.WillEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                }
+                if (MobInfo.CraftEXP > 0)
+                {
+                    propBlocks.Add(PrepareText(g, "手藝: +" + MobInfo.CraftEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                }
+                if (MobInfo.CharmEXP > 0)
+                {
+                    propBlocks.Add(PrepareText(g, "魅力: +" + MobInfo.CharmEXP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                }
+                if (MobInfo.WP > 0)
+                {
+                    propBlocks.Add(PrepareText(g, "WP: " + MobInfo.WP, GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                }
+                //propBlocks.Add(PrepareText(g, GetElemAttrString(MobInfo.ElemAttr), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                if (GetElemAttrString(MobInfo.ElemAttr) != "")
+                {
+                    propBlocks.Add(PrepareText(g, GetElemAttrString(MobInfo.ElemAttr), GearGraphics.ItemDetailFont, Brushes.White, 0, picY += 16));
+                }
+                if (MobInfo?.ID != null)
+                {
+                    var locNode = PluginBase.PluginManager.FindWz("Etc\\MobLocation.img\\" + MobInfo.ID.ToString());
+                    if (locNode != null)
                     {
-                        int mapID = locMapNode.GetValueEx<int>(-1);
-                        string mapName = null;
-                        if (mapID >= 0)
+                        propBlocks.Add(PrepareText(g, "位置: ", GearGraphics.ItemDetailFont, GearGraphics.LocationBrush, 0, picY += 30));
+                        foreach (var locMapNode in locNode.Nodes)
                         {
-                            mapName = GetMapName(mapID);
+                            int mapID = locMapNode.GetValueEx<int>(-1);
+                            string mapName = null;
+                            if (mapID >= 0)
+                            {
+                                mapName = GetMapName(mapID);
+                            }
+                            string mobLoc = string.Format(" - {0} ({1})", mapName ?? "null", mapID);
+
+                            propBlocks.Add(PrepareText(g, mobLoc, Translator.IsKoreanStringPresent(mobLoc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, GearGraphics.LocationBrush, 0, picY += 16));
                         }
-                        string mobLoc = string.Format(" - {0} ({1})", mapName ?? "null", mapID);
-
-                        propBlocks.Add(PrepareText(g, mobLoc, Translator.IsKoreanStringPresent(mobLoc) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, GearGraphics.LocationBrush, 0, picY += 16));
                     }
                 }
-            }
 
-            picY += 28;
+                picY += 28;
 
-            if (MobInfo.Revive.Count > 0)
-            {
-                Dictionary<int, int> reviveCounts = new Dictionary<int, int>();
-                foreach (var reviveID in MobInfo.Revive)
+                if (MobInfo.Revive.Count > 0)
                 {
-                    int count = 0;
-                    reviveCounts.TryGetValue(reviveID, out count);
-                    reviveCounts[reviveID] = count + 1;
-                }
-
-                StringBuilder sb = new StringBuilder();
-                //sb.Append("Summons after death: ");
-                sb.Append("死亡后召喚: ");
-                int rowCount = 0;
-                foreach (var kv in reviveCounts)
-                {
-                    if (rowCount++ > 0)
+                    Dictionary<int, int> reviveCounts = new Dictionary<int, int>();
+                    foreach (var reviveID in MobInfo.Revive)
                     {
-                        sb.AppendLine().Append("       ");
+                        int count = 0;
+                        reviveCounts.TryGetValue(reviveID, out count);
+                        reviveCounts[reviveID] = count + 1;
                     }
-                    string mobName = GetMobName(kv.Key);
-                    sb.AppendFormat("{0} ({1:D7})", mobName, kv.Key);
-                    if (kv.Value > 1)
-                    {
-                        sb.Append(" * " + kv.Value);
-                    }
-                }
 
-                propBlocks.Add(PrepareText(g, sb.ToString(), Translator.IsKoreanStringPresent(sb.ToString()) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, Brushes.GreenYellow, 0, picY));
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("死亡后召喚: ");
+                    int rowCount = 0;
+                    foreach (var kv in reviveCounts)
+                    {
+                        if (rowCount++ > 0)
+                        {
+                            sb.AppendLine().Append("       ");
+                        }
+                        string mobName = GetMobName(kv.Key);
+                        sb.AppendFormat("{0} ({1:D7})", mobName, kv.Key);
+                        if (kv.Value > 1)
+                        {
+                            sb.Append(" * " + kv.Value);
+                        }
+                    }
+
+                    propBlocks.Add(PrepareText(g, sb.ToString(), Translator.IsKoreanStringPresent(sb.ToString()) ? GearGraphics.KMSItemDetailFont : GearGraphics.ItemDetailFont, Brushes.GreenYellow, 0, picY));
+                }
             }
             g.Dispose();
             bmp.Dispose();
@@ -265,6 +401,7 @@ namespace WzComparerR2.CharaSimControl
             Rectangle imgRect = Rectangle.Empty;
             Rectangle textRect = Measure(propBlocks);
             Bitmap mobImg = MobInfo.Default.Bitmap;
+            Bitmap mobIcon = GetMobIcon(MobInfo.ID);
             if (MobInfo.IsAvatarLook)
             {
                 if (this.avatar == null)
@@ -284,6 +421,10 @@ namespace WzComparerR2.CharaSimControl
                 var img = this.avatar.GetBitmapOrigin();
                 if (img.Bitmap != null)
                 {
+                    if (MobInfo.Default.Bitmap != null)
+                    {
+                        MobInfo.Default.Bitmap.Dispose();
+                    }
                     MobInfo.Default = img;
                     mobImg = img.Bitmap;
                 }
@@ -302,7 +443,6 @@ namespace WzComparerR2.CharaSimControl
                     imgRect = new Rectangle(0, 0, mobImg.Width, mobImg.Height);
                 }
             }
-
 
             //布局 
             //水平排列
@@ -325,31 +465,76 @@ namespace WzComparerR2.CharaSimControl
                 imgRect.Y += titleRect.Bottom + 4;
                 textRect.Y += titleRect.Bottom + 4;
             }
+            if (mobIcon != null)
+            {
+                if (textRect.Y < titleRect.Y - (mobIcon.Height - titleRect.Height) / 2 + mobIcon.Height)
+                {
+                    int heightDelta = titleRect.Y - (mobIcon.Height - titleRect.Height) / 2 + mobIcon.Height - textRect.Y;
+                    height += heightDelta + 4;
+                    textRect.Y += heightDelta + 4;
+                }
+            }
 
             //绘制
-            bmp = new Bitmap(width + 20, height + 20);
+            Bitmap baseBmp = new Bitmap(width + 20, height + 20);
             titleRect.Offset(10, 10);
             imgRect.Offset(10, 10);
             textRect.Offset(10, 10);
-            g = Graphics.FromImage(bmp);
-            //绘制背景
-            GearGraphics.DrawNewTooltipBack(g, 0, 0, bmp.Width, bmp.Height);
-            //绘制标题
-            foreach (var item in titleBlocks)
+            using (g = Graphics.FromImage(baseBmp))
             {
-                DrawText(g, item, titleRect.Location);
+                //绘制背景
+                GearGraphics.DrawNewTooltipBack(g, 0, 0, baseBmp.Width, baseBmp.Height);
+                //绘制标题
+                foreach (var item in titleBlocks)
+                {
+                    DrawText(g, item, titleRect.Location);
+                }
+                //Attempt Draw Mob Icon
+                if (mobIcon != null)
+                {
+                    g.DrawImage(mobIcon, titleRect.Location.X - mobIcon.Width - 4, titleRect.Y - (mobIcon.Height - titleRect.Height) / 2, new Rectangle(0, 0, mobIcon.Width, mobIcon.Height), GraphicsUnit.Pixel);
+                }
+                //绘制图像
+                if (mobImg != null && !imgRect.IsEmpty)
+                {
+                    g.DrawImage(mobImg, imgRect);
+                }
+                //绘制文本
+                foreach (var item in propBlocks)
+                {
+                    DrawText(g, item, textRect.Location);
+                }
             }
-            //绘制图像
-            if (mobImg != null && !imgRect.IsEmpty)
+            string monsterBookDesc = EnableMonsterBook ? GetMobDesc(MobInfo.ID) : null;
+            string worldArchiveDesc = EnableWorldArchive ? GetWorldArchiveDesc(MobInfo.ID) : null;
+            if (!string.IsNullOrEmpty(worldArchiveDesc) || !string.IsNullOrEmpty(monsterBookDesc) && EnableWorldArchive)
             {
-                g.DrawImage(mobImg, imgRect);
+                WorldArchiveRender = new WorldArchiveTooltipRender();
+                WorldArchiveRender.WorldArchiveMessage = worldArchiveDesc;
+                WorldArchiveRender.MonsterBookMessage = monsterBookDesc;
+                WorldArchiveRender.MobID = MobInfo.ID;
+                Bitmap waBitmap = WorldArchiveRender.Render();
+                Bitmap appendWaBitmap = new Bitmap(baseBmp.Width + waBitmap.Width, Math.Max(baseBmp.Height, waBitmap.Height));
+                using (g = Graphics.FromImage(appendWaBitmap))
+                {
+                    g.DrawImage(baseBmp, 0, 0, new Rectangle(0, 0, baseBmp.Width, baseBmp.Height), GraphicsUnit.Pixel);
+                    g.DrawImage(waBitmap, baseBmp.Width, 0, new Rectangle(0, 0, waBitmap.Width, waBitmap.Height), GraphicsUnit.Pixel);
+                }
+                baseBmp = appendWaBitmap;
             }
-            //绘制文本
-            foreach (var item in propBlocks)
+            if (subMobBmpTooltip != null)
             {
-                DrawText(g, item, textRect.Location);
+                bmp = new Bitmap(Math.Max(baseBmp.Width, subMobBmpTooltip.Width), baseBmp.Height + subMobBmpTooltip.Height);
+                using (g = Graphics.FromImage(bmp))
+                {
+                    g.DrawImage(baseBmp, 0, 0, new Rectangle(0, 0, baseBmp.Width, baseBmp.Height), GraphicsUnit.Pixel);
+                    g.DrawImage(subMobBmpTooltip, 0, baseBmp.Height, new Rectangle(0, 0, subMobBmpTooltip.Width, subMobBmpTooltip.Height), GraphicsUnit.Pixel);
+                }
             }
-            g.Dispose();
+            else
+            {
+                bmp = baseBmp;
+            }
             return bmp;
         }
 
@@ -369,6 +554,35 @@ namespace WzComparerR2.CharaSimControl
             {
                 return sr.Name;
             }
+        }
+
+        private string GetMobDesc(int mobID)
+        {
+            StringResult sr;
+            if (this.StringLinker == null || !this.StringLinker.StringMonsterBook.TryGetValue(mobID, out sr))
+            {
+                return null;
+            }
+            else
+            {
+                return sr.Desc;
+            }
+        }
+
+        private Bitmap GetMobIcon(int mobID)
+        {
+            BitmapOrigin mobIconOrigin = BitmapOrigin.CreateFromNode(PluginManager.FindWz($@"UI\UIWindow2.img\MobGage\Mob\{mobID.ToString()}", this.SourceWzFile), PluginManager.FindWz);
+            return mobIconOrigin.Bitmap;
+        }
+
+        private string GetWorldArchiveDesc(int mobID)
+        {
+            StringResult sr;
+            if (this.StringLinker == null || !this.StringLinker.StringWorldArchiveMob.TryGetValue(mobID, out sr))
+            {
+                return null;
+            }
+            return sr.Desc;
         }
 
         private string GetElemAttrString(MobElemAttr elemAttr)

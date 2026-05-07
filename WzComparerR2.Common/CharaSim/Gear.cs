@@ -19,6 +19,7 @@ namespace WzComparerR2.CharaSim
             Options = new Potential[3];
             AdditionalOptions = new Potential[3];
             Additions = new List<Addition>();
+            AuthenticDesc = "";
         }
         public GearGrade Grade { get; set; }
         public GearGrade AdditionGrade { get; set; }
@@ -43,6 +44,7 @@ namespace WzComparerR2.CharaSim
         public string EpicHs { get; internal set; }
         public BitmapOrigin ToolTipPreview {  get; set; }
         public Bitmap AndroidBitmap { get; set; }
+        public string LabelGradeTooltip { get; internal set; }
 
         public bool FixLevel { get; internal set; }
         public List<GearLevelInfo> Levels { get; internal set; }
@@ -54,6 +56,7 @@ namespace WzComparerR2.CharaSim
         public Dictionary<GearPropType, float> VariableStat { get; private set; }
         public Dictionary<GearPropType, int> AbilityTimeLimited { get; private set; }
         public List<int> ReqSpecJobs { get; private set; }
+        public string AuthenticDesc { get; private set; }
 
         /// <summary>
         /// 获取或设置装备的标准属性。
@@ -95,8 +98,18 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        public int GetMaxStar(bool isPostNEXTClient=false)
+        public int GetMaxStar(Dictionary<int, AstraSubWeaponInfo> loadedAstraSubWeapons, bool isPostNEXTClient=false)
         {
+            var astraIdx = GetAstraIndex(loadedAstraSubWeapons, this.ItemID);
+            switch (astraIdx)
+            {
+                case 0:
+                    return 15;
+                case 1:
+                    return 20;
+                case 2:
+                    return 30;
+            }
             if (!this.HasTuc)
             {
                 return 0;
@@ -322,6 +335,27 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+        public static bool IsAstraSubWeapon(int gearID)
+        {
+            switch (gearID / 10000)
+            {
+                case 172:
+                    return true;
+
+                default:
+                    switch (gearID)
+                    {
+                        case 1342120:
+                        case 1342121:
+                        case 1342122:
+                        case 1342123:
+                            return true;
+                        default: return false;
+                    }
+
+            }
+        }
+
         public static bool IsEmblem(GearType type)
         {
             if (type == GearType.emblem || type == GearType.powerSource)
@@ -376,6 +410,13 @@ namespace WzComparerR2.CharaSim
                     return false;
             }
         }
+        public static bool IsTamingMob(GearType type)
+        {
+            if ((int)type >= 190 && (int)type < 200)
+                return true;
+
+            return false;
+        }
 
         public static bool IsEnhanceable(GearType type)
         {
@@ -388,6 +429,8 @@ namespace WzComparerR2.CharaSim
                 case GearType.hair2:
                 case GearType.face2:
                 case GearType.hair3:
+                case GearType.hair4:
+                case GearType.face3:
                 case GearType.medal:
                 case GearType.android:
                 case GearType.shovel:
@@ -426,6 +469,34 @@ namespace WzComparerR2.CharaSim
             }
         }
 
+        public static bool CanCustomIllust(GearType type)
+        {
+            switch (type)
+            {
+                case GearType.body:
+                case GearType.head:
+                case GearType.hair:
+                case GearType.hair2:
+                case GearType.hair3:
+                case GearType.hair4:
+                case GearType.face:
+                case GearType.face2:
+                case GearType.face3:
+                case GearType.cap:
+                case GearType.faceAccessory:
+                case GearType.eyeAccessory:
+                case GearType.earrings:
+                case GearType.coat:
+                case GearType.longcoat:
+                case GearType.pants:
+                case GearType.shoes:
+                case GearType.glove:
+                case GearType.cape:
+                    return true;
+                default:
+                    return false;
+            }
+        }
 
         /// <summary>
         /// 获取一个值，指示装备类型是否为双手武器。
@@ -573,8 +644,14 @@ namespace WzComparerR2.CharaSim
                     return GearType.tuner;
                 case 1214:
                     return GearType.breathShooter;
+                case 1215:
+                    return GearType.longSword;
                 case 1252:
                     return GearType.memorialStaff;
+                case 1253:
+                    return GearType.celestialLight;
+                case 1254:
+                    return GearType.onmyoSen;
                 case 1259:
                     return GearType.magicStick;
                 case 1403:
@@ -623,12 +700,24 @@ namespace WzComparerR2.CharaSim
                     case 1790:
                     case 1791:
                     case 1792:
+                    case 1793:
                         return (GearType)(code / 1000);
                     default:
                         return (GearType)(code / 100 * 10);
                 }
             }
             return (GearType)(code / 10000);
+        }
+
+        public static int GetAstraIndex(Dictionary<int, AstraSubWeaponInfo> loadedAstraSubWeapons, int id)
+        {
+            if (id / 10000 == 172)
+                return id % 10;
+
+            if (loadedAstraSubWeapons.TryGetValue(id, out AstraSubWeaponInfo value))
+                return value.Index;
+
+            return -1;
         }
 
         public static int GetGender(int code)
@@ -640,12 +729,15 @@ namespace WzComparerR2.CharaSim
                 case GearType.powerSource:
                 case GearType.bit:
                 case GearType.jewel:
+                case GearType.astra:
                     return 2;
                 case GearType.hair:
                 case GearType.hair2:
                 case GearType.hair3:
+                case GearType.hair4:
                 case GearType.face:
                 case GearType.face2:
+                case GearType.face3:
                     return GetCosmeticGender(code) - 1;
             }
 
@@ -681,6 +773,7 @@ namespace WzComparerR2.CharaSim
                 case 3: // hair
                 case 4:
                 case 6:
+                case 7:
                     switch (check % 10)
                     {
                         case 0:
@@ -854,6 +947,8 @@ namespace WzComparerR2.CharaSim
 
         public static Gear CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
         {
+            if (node == null) return null;
+            if (node.GetNodeWzFile().Type != Wz_Type.Character) return null;
             int gearID;
             Match m = Regex.Match(node.Text, @"^(\d{8})\.img$");
             if (!(m.Success && Int32.TryParse(m.Result("$1"), out gearID)))
@@ -1115,6 +1210,21 @@ namespace WzComparerR2.CharaSim
                             foreach (Wz_Node jobNode in subNode.Nodes)
                             {
                                 gear.ReqSpecJobs.Add(jobNode.GetValue<int>());
+                            }
+                            break;
+
+                        case "limitedLabelGradeTooltip":
+                            gear.LabelGradeTooltip = Convert.ToString(subNode.Value);
+                            break;
+
+                        case "specificTarget_bdR":
+                        case "specificTarget_expR":
+                            foreach (Wz_Node specificTargetNode in subNode.Nodes)
+                            {
+                                switch (specificTargetNode.Text)
+                                {
+                                    case "desc": gear.AuthenticDesc = Convert.ToString(specificTargetNode.Value); break;
+                                }
                             }
                             break;
 

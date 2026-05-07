@@ -148,6 +148,7 @@ namespace WzComparerR2.CharaSimControl
             Graphics g = Graphics.FromImage(setBitmap);
             StringFormat format = new StringFormat();
             format.Alignment = StringAlignment.Center;
+            bool isSilverWolf = IsSilverWolf();
 
             picHeight = 21;
             g.DrawImage(Resource.UIToolTipNew_img_Item_Equip_textIcon_set_normal, 14, picHeight - 1);
@@ -179,6 +180,10 @@ namespace WzComparerR2.CharaSimControl
                     if (setItemPart.Value.ItemIDs.Count > 0)
                     {
                         var itemID = setItemPart.Value.ItemIDs.First().Key;
+                        if (isSilverWolf)
+                        {
+                            if (Gear.GetGearType(itemID) == GearType.katara) continue;
+                        }
 
                         switch (itemID / 1000000)
                         {
@@ -312,8 +317,8 @@ namespace WzComparerR2.CharaSimControl
                                             itemName = sr.Name;
                                             switch (Gear.GetGender(itemID))
                                             {
-                                                case 0: itemName += " (♂)"; break;
-                                                case 1: itemName += " (♀)"; break;
+                                                case 0: itemName += " (男)"; break;
+                                                case 1: itemName += " (女)"; break;
                                             }
                                         }
                                         else if (this.StringLinker.StringItem.TryGetValue(itemID, out sr)) //兼容宠物
@@ -332,6 +337,13 @@ namespace WzComparerR2.CharaSimControl
                             picHeight = tempHeight + 50;
                         }
                     }
+                }
+                if (isSilverWolf)
+                {
+                    int typeWidth = TextRenderer.MeasureText(g, "銀狼武器", GearGraphics.EquipMDMoris9Font, new Size(int.MaxValue, int.MaxValue), TextFormatFlags.NoPadding).Width;
+                    TextRenderer.DrawText(g, "銀狼武器", GearGraphics.EquipMDMoris9Font, new Point(14, picHeight), ((SolidBrush)GearGraphics.Equip22BrushDarkGray).Color, TextFormatFlags.NoPadding);
+                    TextRenderer.DrawText(g, Compact(g, "一件銀狼武器", 200), GearGraphics.EquipMDMoris9Font, new Point(90, picHeight), ((SolidBrush)GearGraphics.Equip22BrushDarkGray).Color, TextFormatFlags.NoPadding);
+                    picHeight += 15;
                 }
             }
             else
@@ -356,6 +368,32 @@ namespace WzComparerR2.CharaSimControl
             format.Dispose();
             g.Dispose();
             return setBitmap;
+        }
+
+        private bool IsSilverWolf()
+        {
+            if (this.SetItem == null)
+            {
+                return false;
+            }
+
+            foreach (var idkvp in this.SetItem.ItemIDs.Parts)
+            {
+                foreach (var itemID in idkvp.Value.ItemIDs.Keys)
+                {
+                    if (Gear.IsWeapon(Gear.GetGearType(itemID)) || Gear.IsSubWeapon(Gear.GetGearType(itemID)))
+                    {
+                        Wz_Node weaponNode = PluginBase.PluginManager.FindWz(string.Format(@"Character\Weapon\{0:D8}.img", itemID));
+                        if (weaponNode != null)
+                        {
+                            var weapon = Gear.CreateFromNode(weaponNode, PluginManager.FindWz);
+                            weapon.Props.TryGetValue(GearPropType.plusToSetItem, out int value);
+                            if (value == 1) return true;
+                        }
+                    }
+                }
+            }
+            return false;
         }
 
         private static string Compact(Graphics g, string text, int width) // https://www.codeproject.com/Articles/37503/Auto-Ellipsis

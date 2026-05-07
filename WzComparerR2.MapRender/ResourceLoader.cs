@@ -77,10 +77,10 @@ namespace WzComparerR2.MapRender
             return (T)holder.Resource;
         }
 
-        public object LoadAnimationData(Wz_Node node)
+        public object LoadAnimationData(Wz_Node node, string forceAssetName = null)
         {
             object aniData;
-            string assetName = node.FullPathToFile;
+            string assetName = forceAssetName ?? node.FullPathToFile;
             if (!loadedAnimationData.TryGetValue(assetName, out aniData))
             {
                 aniData = InnerLoadAnimationData(node);
@@ -367,6 +367,7 @@ namespace WzComparerR2.MapRender
                     else //读取序列帧动画
                     {
                         var frames = new List<Frame>();
+                        /*
                         Wz_Node frameNode;
                         for (int i = 0; (frameNode = node.Nodes[i.ToString()]) != null; i++)
                         {
@@ -374,7 +375,17 @@ namespace WzComparerR2.MapRender
                             {
                                 return InnerLoadAnimationData(frameNode);
                             }
-
+                        }
+                        */
+                        Wz_Node frameNode = node.Nodes["0"];
+                        if (frameNode != null && frameNode.Value == null)
+                        {
+                            return InnerLoadAnimationData(frameNode);
+                        }
+                        var frame0 = LoadFrame(frameNode);
+                        frames.Add(frame0);
+                        for (int i = 1; (frameNode = node.Nodes[i.ToString()]) != null; i++)
+                        {
                             var frame = LoadFrame(frameNode);
                             frames.Add(frame);
                         }
@@ -417,7 +428,7 @@ namespace WzComparerR2.MapRender
 
                 for (int i = 0; i < avatar.GetActionFrameCount(action + "1"); i++)
                 {
-                    var frame = avatar.GetTexture2DFrame(action + "1", "default", i, 0, 0, this.GraphicsDevice);
+                    var frame = avatar.GetTexture2DFrame(action + "1", avatar.GetStandardEmotion(), i, 0, 0, this.GraphicsDevice);
                     frames.Add(frame);
                 }
 

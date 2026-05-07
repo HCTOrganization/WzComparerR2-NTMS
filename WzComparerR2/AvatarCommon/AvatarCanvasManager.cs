@@ -56,6 +56,17 @@ namespace WzComparerR2.AvatarCommon
         {
             int hairColor = 0;
             int faceColor = 0;
+            int mixColor = -1;
+            int mixRatio = -1;
+
+            // mix
+            if (id.ToString().Length == 8)
+            {
+                mixColor = (id / 100) % 10;
+                mixRatio = id % 100;
+                id /= 1000;
+            }
+
             if (cosmetic)
             {
                 if ((id + 9) / 10 == id / 10)
@@ -72,7 +83,16 @@ namespace WzComparerR2.AvatarCommon
                 PluginManager.FindWz($@"Character\Face\{id + faceColor:D8}.img");
             if (gearNode != null)
             {
-                this.canvas.AddPart(gearNode);
+                var part = this.canvas.AddPart(gearNode);
+                if (part != null && (mixColor >= 0 && mixColor < 8) && (mixRatio > 0 && mixRatio < 100))
+                {
+                    part.MixColor = mixColor;
+                    part.MixOpacity = mixRatio;
+                }
+                if (part == this.canvas.Face)
+                {
+                    this.canvas.LoadEmotions();
+                }
             }
         }
 
@@ -89,10 +109,30 @@ namespace WzComparerR2.AvatarCommon
 
         public void AddGear(int id)
         {
+            int mixColor = -1;
+            int mixRatio = -1;
+
+            // mix
+            if (id.ToString().Length == 8)
+            {
+                mixColor = (id / 100) % 10;
+                mixRatio = id % 100;
+                id /= 1000;
+            }
+
             var gearNode = FindNodeByGearID(id);
             if (gearNode != null)
             {
-                this.canvas.AddPart(gearNode);
+                var part = this.canvas.AddPart(gearNode);
+                if (part != null && (mixColor >= 0 && mixColor < 8) && (mixRatio > 0 && mixRatio < 100))
+                {
+                    part.MixColor = mixColor;
+                    part.MixOpacity = mixRatio;
+                }
+                if (part == this.canvas.Face)
+                {
+                    this.canvas.LoadEmotions();
+                }
             }
         }
 
@@ -106,7 +146,7 @@ namespace WzComparerR2.AvatarCommon
 
         public BitmapOrigin GetBitmapOrigin()
         {
-            return GetBitmapOrigin("stand1", "default", 0, 0, 0);
+            return GetBitmapOrigin("stand1", GetStandardEmotion(), 0, 0, 0);
         }
 
         public BitmapOrigin GetBitmapOrigin(string actionName, string emotionName, int bodyFrame, int faceFrame, int tamingFrame)
@@ -221,8 +261,22 @@ namespace WzComparerR2.AvatarCommon
             return node.GetValueEx<int>(0);
         }
 
+        public string GetStandardEmotion()
+        {
+            if (this.canvas.Emotions.Contains("default"))
+            {
+                return "default";
+            }
+            else if (this.canvas.Emotions.Contains("blink"))
+            {
+                return "blink";
+            }
+            else return this.canvas.Emotions.FirstOrDefault();
+        }
+
         public void ClearCanvas()
         {
+            this.canvas.ClearSkinCache();
             Array.Clear(this.canvas.Parts, 0, this.canvas.Parts.Length);
             SetEarType(0);
         }

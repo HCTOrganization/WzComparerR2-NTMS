@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using System.Configuration;
 using System.Drawing;
 using WzComparerR2.Patcher;
@@ -18,7 +19,6 @@ namespace WzComparerR2.Config
             this.SortWzOnOpened = true;
             this.AutoDetectExtFiles = true;
             this.NoPatcherPrompt = false;
-            this.WzVersionVerifyMode = WzLib.WzVersionVerifyMode.Fast;
             this.PreferredLayout = 0;
             this.DesiredLanguage = "zh-TW";
             this.MozhiBackend = "https://mozhi.aryak.me";
@@ -157,6 +157,16 @@ namespace WzComparerR2.Config
         {
             get { return (ConfigItem<string>)this["DesiredLanguage"]; }
             set { this["DesiredLanguage"] = value; }
+        }
+
+        /// <summary>
+        /// Preferred Client Region Configuration
+        /// </summary>
+        [ConfigurationProperty("PreferredClientRegion")]
+        public ConfigItem<int> PreferredClientRegion
+        {
+            get { return (ConfigItem<int>)this["PreferredClientRegion"]; }
+            set { this["PreferredClientRegion"] = value; }
         }
 
         /// <summary>
@@ -302,21 +312,55 @@ namespace WzComparerR2.Config
             set { this["imgCheckDisabled"] = value; }
         }
 
-        /// <summary>
-        /// 获取或设置一个值，指示读取wz是否跳过img检测。
-        /// </summary>
-        [ConfigurationProperty("wzVersionVerifyMode")]
-        public ConfigItem<WzLib.WzVersionVerifyMode> WzVersionVerifyMode
-        {
-            get { return (ConfigItem<WzLib.WzVersionVerifyMode>)this["wzVersionVerifyMode"]; }
-            set { this["wzVersionVerifyMode"] = value; }
-        }
-
         [ConfigurationProperty("patcherSettings")]
         [ConfigurationCollection(typeof(PatcherSetting), CollectionType = ConfigurationElementCollectionType.AddRemoveClearMap)]
         public PatcherSettingCollection PatcherSettings
         {
             get { return (PatcherSettingCollection)this["patcherSettings"]; }
+        }
+
+        [ConfigurationProperty("ignoreArticles")]
+        public ConfigItem<bool> IgnoreArticles
+        {
+            get { return (ConfigItem<bool>)this["ignoreArticles"]; }
+            set { this["ignoreArticles"] = value; }
+        }
+
+        /// <summary>
+        /// Discord Bot Token Configuration
+        /// </summary>
+        [ConfigurationProperty("DiscordBotToken")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> DiscordBotToken
+        {
+            get { return (ConfigItem<string>)this["DiscordBotToken"]; }
+            set { this["DiscordBotToken"] = value; }
+        }
+
+        /// <summary>
+        /// Discord Channel ID Configuration
+        /// </summary>
+        [ConfigurationProperty("DiscordChannelID")]
+        [ConfigurationCollection(typeof(ConfigArrayList<string>.ItemElement))]
+        public ConfigItem<string> DiscordChannelID
+        {
+            get { return (ConfigItem<string>)this["DiscordChannelID"]; }
+            set { this["DiscordChannelID"] = value; }
+        }
+
+        private static readonly HashSet<string> obsoleteElements = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "wzVersionVerifyMode",
+        };
+
+        protected override bool OnDeserializeUnrecognizedElement(string elementName, XmlReader reader)
+        {
+            if (obsoleteElements.Contains(elementName))
+            {
+                reader.Skip();
+                return true;
+            }
+            return base.OnDeserializeUnrecognizedElement(elementName, reader);
         }
     }
 }

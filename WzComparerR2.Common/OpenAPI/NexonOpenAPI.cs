@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Reflection;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
@@ -8,8 +10,11 @@ using AES = System.Security.Cryptography.Aes;
 
 #if NET6_0_OR_GREATER
 using HtmlAgilityPack;
-using MapleStory.OpenAPI;
 using System.Net; 
+using KMS = MapleStory.OpenAPI.KMS;
+using MSEA = MapleStory.OpenAPI.MSEA;
+using TMS = MapleStory.OpenAPI.TMS;
+using MapleStory.OpenAPI.Common;
 using System.Net.Http;
 using System.Linq;
 using System.Text;
@@ -21,29 +26,89 @@ namespace WzComparerR2.OpenAPI
 {
     public class NexonOpenAPI
     {
-        public NexonOpenAPI(string apiKey)
+        public NexonOpenAPI(string apiKey, string region)
         {
             APIKey = apiKey;
-            if (API == null)
+            
+            switch (region)
             {
-                API = new MapleStoryAPI(apiKey);
+                case "KMS":
+                    this.region = 0;
+                    if (API_KMS == null)
+                    {
+                        API_KMS = new KMS.MapleStoryAPI(apiKey);
+                    }
+                    break;
+
+                case "MSEA":
+                    this.region = 1;
+                    if (API_MSEA == null)
+                    {
+                        API_MSEA = new MSEA.MapleStoryAPI(apiKey);
+                    }
+                    break;
+
+                case "TMS":
+                    this.region = 2;
+                    if (API_TMS == null)
+                    {
+                        API_TMS = new TMS.MapleStoryAPI(apiKey);
+                    }
+                    break;
+
+                default:
+                    break;
             }
         }
 
         private string APIKey;
-        private MapleStoryAPI API;
+        private int region;
+        private KMS.MapleStoryAPI API_KMS;
+        private MSEA.MapleStoryAPI API_MSEA;
+        private TMS.MapleStoryAPI API_TMS;
 
         public bool CheckSameAPIKey(string apiKey)
         {
             return APIKey == apiKey;
         }
 
+        public bool CheckRegion(string region)
+        {
+            switch (region)
+            {
+                case "KMS":
+                    return this.region == 0;
+                case "MSEA":
+                    return this.region == 1;
+                case "TMS":
+                    return this.region == 2;
+                default:
+                    return false;
+            }
+        }
+
         public async Task<string> GetCharacterOCID(string characterName)
         {
             try
             {
-                var character = await API.GetCharacter(characterName);
-                return character.OCID;
+                MapleStory.OpenAPI.Common.DTO.CharacterDTO character = null;
+                switch (region)
+                {
+                    case 0:
+                        character = await API_KMS.GetCharacter(characterName);
+                        return character.OCID;
+
+                    case 1:
+                        character = await API_MSEA.GetCharacter(characterName);
+                        return character.OCID;
+
+                    case 2:
+                        character = await API_TMS.GetCharacter(characterName);
+                        return character.OCID;
+
+                    default:
+                        return null;
+                }
             }
             catch (MapleStoryAPIException e)
             {
@@ -89,6 +154,7 @@ namespace WzComparerR2.OpenAPI
         public async Task<string> GetAvatarCode(string characterName, string region)
         {
             string serviceBackend = "";
+            string secondaryServiceBackend = "https://api.hikaricalyx.com/WcR2-NTMS/v1/GetAvatar";
             string avatarCode = "";
             string jmsBaseUrl = "https://maplestory.nexon.co.jp";
             string b64CharName = Uri.EscapeDataString(Convert.ToBase64String(Encoding.UTF8.GetBytes(characterName)));
@@ -96,6 +162,8 @@ namespace WzComparerR2.OpenAPI
             {
                 default:
                     return avatarCode;
+                case "CMS":
+                    break;
                 case "KMS":
                     serviceBackend = "https://maple.dakgg.io/api/v1/bypass/characters/" + Uri.EscapeDataString(characterName); // Used Maple GG API
                     break;
@@ -115,7 +183,7 @@ namespace WzComparerR2.OpenAPI
                     serviceBackend = "https://tw-event.beanfun.com/MapleStory/api/UnionWebRank/GetRank";
                     break;
                 case "MSN":
-                    serviceBackend = "https://msu.io/maplestoryn/api/gateway/msn/ranking/by-name?characterName=" + Uri.EscapeDataString(characterName);
+                    serviceBackend = "https://msu.io/navigator/api/navigator/search?keyword=" + Uri.EscapeDataString(characterName);
                     break;
             }
             try
@@ -153,7 +221,7 @@ namespace WzComparerR2.OpenAPI
 
                         avatarCode = avatarDoc.DocumentNode.SelectNodes("//img[@src]")
                             ?.Select(node => node.GetAttributeValue("src", ""))
-                            .FirstOrDefault(src => src.StartsWith("//avatar-maplestory.nexon.co.jp")).Replace("//avatar-maplestory.nexon.co.jp/Character/", "").Replace(".png", "");
+                            .FirstOrDefault(src => src.StartsWith("//avatar-maplestory.nexon.co.jp")).Split('/').Last().Replace(".png", "");
                     }
                     else if (avatarLinks.Count > 2)
                     {
@@ -168,7 +236,7 @@ namespace WzComparerR2.OpenAPI
 
                         avatarCode = avatarDoc.DocumentNode.SelectNodes("//img[@src]")
                             ?.Select(node => node.GetAttributeValue("src", ""))
-                            .FirstOrDefault(src => src.StartsWith("//avatar-maplestory.nexon.co.jp")).Replace("//avatar-maplestory.nexon.co.jp/Character/", "").Replace(".png", "");
+                            .FirstOrDefault(src => src.StartsWith("//avatar-maplestory.nexon.co.jp")).Split('/').Last().Replace(".png", "");
                     }
                     else
                     {
@@ -185,11 +253,11 @@ namespace WzComparerR2.OpenAPI
                         var json = await response.Content.ReadAsStringAsync();
                         using JsonDocument doc = JsonDocument.Parse(json);
                         JsonElement root = doc.RootElement;
-                        JsonElement ranksArray = root.GetProperty("ranks");
+                        JsonElement records = root.GetProperty("ranks");
 
-                        if (ranksArray.GetArrayLength() > 0)
+                        if (records.GetArrayLength() > 0)
                         {
-                            avatarCode = ranksArray[0].GetProperty("characterImgURL").GetString().Replace("https://msavatar1.nexon.net/Character/", "").Replace(".png", "");
+                            avatarCode = records[0].GetProperty("characterImgURL").GetString().Split('/').Last().Replace(".png", "");
                         }
                     }
                     else
@@ -211,7 +279,7 @@ namespace WzComparerR2.OpenAPI
                             dataElement.TryGetProperty("characterBasic", out JsonElement characterBasicElement) &&
                             characterBasicElement.TryGetProperty("character_image", out JsonElement characterImageElement))
                         {
-                            avatarCode = characterImageElement.GetString().Replace("https://open.api.nexon.com/static/maplestorysea/character/look/", "").Replace("https://open.api.nexon.com/static/maplestory/character/look/", "");
+                            avatarCode = characterImageElement.GetString().Split('/').Last();
                         }
                     }
                     else
@@ -231,10 +299,74 @@ namespace WzComparerR2.OpenAPI
                         var json = await response.Content.ReadAsStringAsync();
                         using JsonDocument doc = JsonDocument.Parse(json);
                         JsonElement root = doc.RootElement;
-                        if (root.TryGetProperty("Data", out JsonElement dataElement) &&
-                            dataElement.TryGetProperty("CharacterLookCipherText", out JsonElement characterLookCipherText))
+                        if (root.TryGetProperty("Data", out JsonElement dataElement))
                         {
-                            avatarCode = characterLookCipherText.GetString();
+                            try
+                            {
+                                dataElement.TryGetProperty("CharacterLookCipherText", out JsonElement characterLookCipherText);
+                                avatarCode = characterLookCipherText.GetString();
+                            }
+                            catch
+                            {
+                                avatarCode = "";
+                            }
+                        }
+                    }
+                    else
+                    {
+                        avatarCode = "";
+                    }
+                    if (string.IsNullOrEmpty(avatarCode))
+                    {
+                        string client_checksum = ChecksumCalculation();
+                        client.DefaultRequestHeaders.Add("Checksum", client_checksum);
+                        string jsonPayload2 = $"{{\"ign\":\"{characterName}\",\"region\":\"TerryMS_Island\"}}";
+                        var content2 = new StringContent(jsonPayload2, Encoding.UTF8, "application/json");
+                        var response2 = await client.PostAsync(secondaryServiceBackend, content2);
+                        if (response2.IsSuccessStatusCode)
+                        {
+                            var json2 = await response2.Content.ReadAsStringAsync();
+                            using JsonDocument doc2 = JsonDocument.Parse(json2);
+                            JsonElement root2 = doc2.RootElement;
+                            if (root2.TryGetProperty("status", out JsonElement resultStatus))
+                            {
+                                switch (resultStatus.GetString())
+                                {
+                                    case "Ok":
+                                        if (root2.TryGetProperty("avatarCode", out JsonElement avatarCodeElement2))
+                                        {
+                                            avatarCode = avatarCodeElement2.GetString();
+                                        }
+                                        break;
+                                    case "Fail":
+                                        if (root2.TryGetProperty("reason_nt", out JsonElement messageElement))
+                                        {
+                                            System.Windows.Forms.Clipboard.SetText(client_checksum);
+                                            throw new Exception(messageElement.GetString());
+                                        }
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if (region == "MSN")
+                {
+                    var client = new HttpClient();
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
+                    var response = await client.GetAsync(serviceBackend);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var json3 = await response.Content.ReadAsStringAsync();
+                        using JsonDocument doc3 = JsonDocument.Parse(json3);
+                        JsonElement root3 = doc3.RootElement;
+                        JsonElement records = root3.GetProperty("records");
+
+                        if (records.GetArrayLength() > 0)
+                        {
+                            avatarCode = records[0].GetProperty("imageUrl").GetString().Split('/').Last().Replace(".png", "");
                         }
                     }
                     else
@@ -242,18 +374,41 @@ namespace WzComparerR2.OpenAPI
                         avatarCode = "";
                     }
                 }
-                else if (region == "MSN")
+                else if (region == "CMS")
                 {
-                    EdgeWebView webView = new EdgeWebView();
-                    EdgeWebView.webViewUri = serviceBackend;
-                    webView.ShowDialog();
-                    var json = webView.jsonResult;
-                    using JsonDocument doc = JsonDocument.Parse(json);
-                    JsonElement root = doc.RootElement;
-                    if (root.TryGetProperty("ranking", out JsonElement rankingData) &&
-                        rankingData.TryGetProperty("imageUrl", out JsonElement imageUrl))
+                    var client = new HttpClient();
+                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
+                    string client_checksum = ChecksumCalculation();
+                    client.DefaultRequestHeaders.Add("Checksum", client_checksum);
+                    string jsonPayload = $"{{\"ign\":\"{characterName}\",\"region\":\"TerryMS_Continent\"}}";
+                    var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+                    var response = await client.PostAsync(secondaryServiceBackend, content);
+                    if (response.IsSuccessStatusCode)
                     {
-                        avatarCode = imageUrl.GetString().Replace("https://market-static.msu.io/msu/platform/charimages/transient/", "").Replace(".png", "");
+                        var json = await response.Content.ReadAsStringAsync();
+                        using JsonDocument doc = JsonDocument.Parse(json);
+                        JsonElement root = doc.RootElement;
+                        if (root.TryGetProperty("status", out JsonElement resultStatus))
+                        {
+                            switch (resultStatus.GetString())
+                            {
+                                case "Ok":
+                                    if (root.TryGetProperty("avatarCode", out JsonElement avatarCodeElement2))
+                                    {
+                                        avatarCode = avatarCodeElement2.GetString();
+                                    }
+                                    break;
+                                case "Fail":
+                                    if (root.TryGetProperty("reason_nt", out JsonElement messageElement))
+                                    {
+                                        System.Windows.Forms.Clipboard.SetText(client_checksum);
+                                        throw new Exception(messageElement.GetString());
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
                     }
                 }
             }
@@ -269,8 +424,22 @@ namespace WzComparerR2.OpenAPI
         {
             try
             {
-                var basic = await API.GetCharacterBasic(ocid);
-                var m = Regex.Match(basic.CharacterImage, @"look/([A-Z]+)$");
+                MapleStory.OpenAPI.Common.DTO.CharacterBasicDTO basic = null;
+                switch (region)
+                {
+                    case 0:
+                        basic = await API_KMS.GetCharacterBasic(ocid);
+                        break;
+
+                    case 1:
+                        basic = await API_MSEA.GetCharacterBasic(ocid);
+                        break;
+
+                    case 2:
+                        basic = await API_TMS.GetCharacterBasic(ocid);
+                        break;
+                }
+                var m = Regex.Match(basic.CharacterImage, @"look/([A-Z]+)");
                 if (m.Success)
                 {
                     var data = m.Groups[1].Value;
@@ -384,7 +553,21 @@ namespace WzComparerR2.OpenAPI
             {
                 result.ItemList = new List<string>();
 
-                var item = await API.GetCharacterItemEquipment(ocid);
+                dynamic item = null;
+                switch (region)
+                {
+                    case 0:
+                        item = await API_KMS.GetCharacterItemEquipment(ocid);
+                        break;
+
+                    case 1:
+                        item = await API_MSEA.GetCharacterItemEquipment(ocid);
+                        break;
+
+                    case 2:
+                        item = await API_TMS.GetCharacterItemEquipment(ocid);
+                        break;
+                }
                 result.Preset = item.PresetNo ?? 0;
 
                 foreach (var it in item.ItemEquipment)
@@ -415,7 +598,21 @@ namespace WzComparerR2.OpenAPI
                 result.CashBaseItemList = new List<string>();
                 result.CashPresetItemList = new List<string>();
 
-                var item = await API.GetCharacterCashItemEquipment(ocid);
+                dynamic item = null;
+                switch (region)
+                {
+                    case 0:
+                        item = await API_KMS.GetCharacterCashItemEquipment(ocid);
+                        break;
+
+                    case 1:
+                        item = await API_MSEA.GetCharacterCashItemEquipment(ocid);
+                        break;
+
+                    case 2:
+                        item = await API_TMS.GetCharacterCashItemEquipment(ocid);
+                        break;
+                }
                 result.CashPreset = item.PresetNo ?? 0;
 
                 foreach (var it in item.CashItemEquipmentBase)
@@ -453,8 +650,21 @@ namespace WzComparerR2.OpenAPI
         {
             try
             {
-                var item = await API.GetCharacterBeautyEquipment(ocid);
+                dynamic item = null;
+                switch (region)
+                {
+                    case 0:
+                        item = await API_KMS.GetCharacterBeautyEquipment(ocid);
+                        break;
 
+                    case 1:
+                        item = await API_MSEA.GetCharacterBeautyEquipment(ocid);
+                        break;
+
+                    case 2:
+                        item = await API_TMS.GetCharacterBeautyEquipment(ocid);
+                        break;
+                }
                 result.Gender = item.CharacterGender == "남" ? 0 : 1;
 
                 result.HairInfo = new Dictionary<string, string>
@@ -496,16 +706,30 @@ namespace WzComparerR2.OpenAPI
             }
         }
 
-        public async Task Debug()
+        public async Task<UnpackedAvatarData> Debug(string cname = "창섭")
         {
             var data = "";
-            var cname = "창섭";
-            var ocid = await GetCharacterOCID(cname);
-            var basic = await API.GetCharacterBasic(ocid);
-            var m = Regex.Match(basic.CharacterImage, @"look/([A-Z]+)$");
-            if (m.Success)
-                data = m.Groups[1].Value;
-
+            if (cname.Length <= 10)
+            {
+                var ocid = await GetCharacterOCID(cname);
+                MapleStory.OpenAPI.Common.DTO.CharacterBasicDTO basic = null;
+                switch (region)
+                {
+                    case 0:
+                        basic = await API_KMS.GetCharacterBasic(ocid);
+                        break;
+                    case 1:
+                        basic = await API_MSEA.GetCharacterBasic(ocid);
+                        break;
+                    case 2:
+                        basic = await API_TMS.GetCharacterBasic(ocid);
+                        break;
+                }
+                var m = Regex.Match(basic.CharacterImage, @"look/([A-Z]+)");
+                if (m.Success)
+                    data = m.Groups[1].Value;
+            }
+            else data = cname;
             var decrypted = Utils.Decrypt(data);
             var version = Utils.CheckVer(decrypted);
 
@@ -530,7 +754,20 @@ namespace WzComparerR2.OpenAPI
 
             result.SetProperties();
 
-            return;
+            return result;
+        }
+
+        private static string ChecksumCalculation()
+        {
+            string exePath = Assembly.GetExecutingAssembly().Location;
+            string sha256checksum;
+            using (FileStream stream = File.OpenRead(exePath))
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] hash = sha256.ComputeHash(stream);
+                sha256checksum = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+            }
+            return sha256checksum;
         }
     }
 
@@ -653,12 +890,37 @@ namespace WzComparerR2.OpenAPI
                 {
                     res.Unpacked.InsertRange(k + 1, new[] { new DataInfo("cashWeaponID", 10), new DataInfo("cashWeaponGender", 2) });
                 }
-                foreach (var type in new[] { "Cap", "Coat", "Pants", "Shoes", "Gloves", "Cape", "Weapon", "Skin" })
+                foreach (var type in new[] { "Cap", "FaceAcc", "EyeAcc", "EarAcc", "Coat", "Pants", "Shoes", "Gloves", "Cape", "Shield", "Weapon", "Skin" })
                 {
                     if (res.Version >= 27 && value == 1 && res.Unpacked[k].Name == $"has{type}Prism")
                     {
-                        res.Unpacked.InsertRange(k + 1, new[] { new DataInfo($"{type.ToLower()}PrismColorType", 3), new DataInfo($"{type.ToLower()}PrismBrightness", 8), new DataInfo($"{type.ToLower()}PrismSaturation", 8), new DataInfo($"{type.ToLower()}PrismHue", 9) });
+                        string[] indexs;
+                        bool addOn = false;
+                        if (res.Version >= 33 && type != "Skin")
+                        {
+                            indexs = new[] { "", "2" };
+                            addOn = true;
+                        }
+                        else
+                        {
+                            indexs = new[] { "" };
+                        }
+
+                        var items = new List<DataInfo>();
+                        foreach (var index in indexs)
+                        {
+                            if (addOn)
+                            {
+                                items.Add(new DataInfo($"{type.ToLower()}Prism{index}On", 3));
+                            }
+                            items.AddRange(new[] { new DataInfo($"{type.ToLower()}Prism{index}ColorType", 3), new DataInfo($"{type.ToLower()}Prism{index}Brightness", 8), new DataInfo($"{type.ToLower()}Prism{index}Saturation", 8), new DataInfo($"{type.ToLower()}Prism{index}Hue", 9), });
+                        }
+                        res.Unpacked.InsertRange(k + 1, items);
                     }
+                }
+                if (res.Version >= 39 && value != 0 && res.Unpacked[k].Name == $"subWeaponType")
+                {
+                    res.Unpacked.InsertRange(k + 1, new[] { new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4) });
                 }
             }
             return;
@@ -666,7 +928,9 @@ namespace WzComparerR2.OpenAPI
 
         public static int CheckVer(byte[] pack)
         {
-            return pack[pack.Length - 9];
+            if (pack.Length <= 0) return 0;
+
+            return pack[pack.Length - pack.Length / 16 - 1];
         }
 
         private static readonly byte[] aesKey = {0x10, 0x04, 0x3F, 0x11,
@@ -678,15 +942,6 @@ namespace WzComparerR2.OpenAPI
                                     0x04, 0x3F, 0x8E, 0x7A,
                                     0x12, 0x15, 0x80, 0x11,
                                     0x5D, 0x19, 0x4F, 0x10 };
-
-        public static readonly Dictionary<int, List<DataInfo>> Structure = new Dictionary<int, List<DataInfo>>
-        {
-            // not fully decoded yet
-            { 26, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 2), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("isNotBlade", 1), new DataInfo("isSubWeapon", 1), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 7), new DataInfo("unknown1", 1), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown2", 2), new DataInfo("jobWingTailType", 2), new DataInfo("unknown3", 30), new DataInfo("weaponMotionType", 2), new DataInfo("unknown4", 11) } },
-            { 27, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 2), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("isNotBlade", 1), new DataInfo("isSubWeapon", 1), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 7), new DataInfo("unknown1", 1), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown2", 2), new DataInfo("jobWingTailType", 2), new DataInfo("unknown3", 30), new DataInfo("weaponMotionType", 2), new DataInfo("unknown4", 11), new DataInfo("hasCapPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1) } },
-            { 28, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 2), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("isNotBlade", 1), new DataInfo("isSubWeapon", 1), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 7), new DataInfo("unknown1", 1), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown2", 2), new DataInfo("jobWingTailType", 2), new DataInfo("unknown3", 30), new DataInfo("weaponMotionType", 2), new DataInfo("unknown4", 11), new DataInfo("hasCapPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1), new DataInfo("ringID1", 10), new DataInfo("ringGender1", 4), new DataInfo("ringID2", 10), new DataInfo("ringGender2", 4), new DataInfo("ringID3", 10), new DataInfo("ringGender3", 4), new DataInfo("ringID4", 10), new DataInfo("ringGender4", 4), new DataInfo("unknown5", 32), new DataInfo("unknown6", 32), new DataInfo("unknown7", 32), new DataInfo("unknown8", 16) } },
-            { 29, new List<DataInfo>() {new DataInfo("gender", 1), new DataInfo("skinID", 10), new DataInfo("face50k", 1), new DataInfo("faceID", 10), new DataInfo("faceGender", 4), new DataInfo("hair10k", 4), new DataInfo("hairID", 10), new DataInfo("hairGender", 4), new DataInfo("capID", 10), new DataInfo("capGender", 3), new DataInfo("faceAccID", 10), new DataInfo("faceAccGender", 2), new DataInfo("eyeAccID", 10), new DataInfo("eyeAccGender", 2), new DataInfo("earAccID", 10), new DataInfo("earAccGender", 2), new DataInfo("isLongCoat", 1), new DataInfo("coatID", 10), new DataInfo("coatGender", 4), new DataInfo("pantsID", 10), new DataInfo("pantsGender", 2), new DataInfo("shoesID", 10), new DataInfo("shoesGender", 4), new DataInfo("glovesID", 10), new DataInfo("glovesGender", 2), new DataInfo("capeID", 10), new DataInfo("capeGender", 2), new DataInfo("isNotBlade", 1), new DataInfo("isSubWeapon", 1), new DataInfo("shieldID", 10), new DataInfo("shieldGender", 4), new DataInfo("isCashWeapon", 1), new DataInfo("weaponID", 10), new DataInfo("weaponGender", 2), new DataInfo("weaponType", 8), new DataInfo("earType", 4), new DataInfo("mixHairColor", 4), new DataInfo("mixHairRatio", 7), new DataInfo("unknown1", 1), new DataInfo("mixFaceInfo", 10), new DataInfo("unknown2", 2), new DataInfo("jobWingTailType", 2), new DataInfo("unknown3", 30), new DataInfo("weaponMotionType", 2), new DataInfo("unknown4", 11), new DataInfo("hasCapPrism", 1), new DataInfo("hasCoatPrism", 1), new DataInfo("hasPantsPrism", 1), new DataInfo("hasShoesPrism", 1), new DataInfo("hasGlovesPrism", 1), new DataInfo("hasCapePrism", 1), new DataInfo("hasWeaponPrism", 1), new DataInfo("hasSkinPrism", 1), new DataInfo("ringID1", 10), new DataInfo("ringGender1", 4), new DataInfo("ringID2", 10), new DataInfo("ringGender2", 4), new DataInfo("ringID3", 10), new DataInfo("ringGender3", 4), new DataInfo("ringID4", 10), new DataInfo("ringGender4", 4), new DataInfo("unknown5", 32), new DataInfo("unknown6", 32), new DataInfo("unknown7", 32), new DataInfo("unknown8", 16) } },
-        };
 
         public static readonly int[] WeaponsKMS = { -1, 130, 131, 132, 133, 137, 138, 140, 141, 142,
             143, 144, 145, 146, 147, 148, 149, -1, 134, 152,
@@ -706,19 +961,6 @@ namespace WzComparerR2.OpenAPI
             "OPMNKLIJGH",
             "BADCFEHGJI",
         };
-    }
-
-    public class DataInfo
-    {
-        public DataInfo(string name, int bits)
-        {
-            Name = name;
-            Bits = bits;
-        }
-
-        public string Name { get; set; }
-        public int Bits { get; set; }
-        public int Value { get; set; }
     }
 }
 #endif

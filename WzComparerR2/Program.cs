@@ -35,7 +35,7 @@ namespace WzComparerR2
         public static string LibPath { get; private set; }
         private static List<Assembly> loadedPluginAssemblies = new List<Assembly>();
         public static string NxAPIBaseURL = "https://open.api.nexon.com";
-        public static string WcR2MajorVersion = "v5.7.0.";
+        public static string WcR2MajorVersion = "v5.9.0.";
         public static string CheckUpdateURL = "https://api.hikaricalyx.com/WcR2-NTMS/v1/GetLatestUpdate";
         private
 
@@ -158,6 +158,20 @@ namespace WzComparerR2
 
             }
         }
+
+        internal static T GetAsmAttr<T>()
+        {
+            object[] attr = typeof(WzComparerR2.Program).Assembly.GetCustomAttributes(typeof(T), true);
+            if (attr != null && attr.Length > 0)
+            {
+                return (T)attr[0];
+            }
+            return default(T);
+        }
+
+        private static string _appVersion;
+        internal static string ApplicationVersion => _appVersion ?? (_appVersion = GetAsmAttr<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                ?? GetAsmAttr<AssemblyFileVersionAttribute>()?.Version);
 
         [DllImport("kernel32.dll")]
         static extern bool SetDllDirectory(string path);

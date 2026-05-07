@@ -153,6 +153,8 @@ namespace WzComparerR2.MapRender
             //加载地图数据
             var mapData = new MapData(this.Services.GetService<IRandom>());
             mapData.Load(this.mapImgLoading.Node, resLoader);
+            mapData.SoundEffPlayer = PlaySoundEff;
+            mapData.LoadMobResource = LoadMobResource;
 
             //处理bgm
             Music newBgm = LoadBgm(mapData);
@@ -182,6 +184,7 @@ namespace WzComparerR2.MapRender
             this.mapImg = this.mapImgLoading;
             this.mapImgLoading = null;
             this.mapData = mapData;
+            this.mapData.EnableMobMovement = this.enableMobMovement;
             this.bgm = newBgm;
             if (willSwitchBgm && this.bgm != null)
             {
@@ -216,7 +219,7 @@ namespace WzComparerR2.MapRender
 
         private Music LoadBgm(MapData mapData, string multiBgmText = null)
         {
-            if (!string.IsNullOrEmpty(mapData.Bgm))
+            if (!string.IsNullOrEmpty(mapData?.Bgm))
             {
                 var path = new List<string>() { "Sound" };
                 path.AddRange(mapData.Bgm.Split('/'));
@@ -380,7 +383,7 @@ namespace WzComparerR2.MapRender
                     case 10:
                         this.ui.Minimap.Icons.Add(new UIMinimap2.MapIcon()
                         {
-                            IconType = portal.ToMap == mapData.ID ? UIMinimap2.IconType.ArrowUp : UIMinimap2.IconType.HiddenPortal,
+                            IconType = (portal.ToMap == mapData.ID || (portal.ToMap == 999999999 && !string.IsNullOrEmpty(portal.ToName))) ? UIMinimap2.IconType.ArrowUp : UIMinimap2.IconType.HiddenPortal,
                             Tooltip = portal.Tooltip,
                             WorldPosition = new EmptyKeys.UserInterface.PointF(portal.X, portal.Y)
                         });
@@ -427,7 +430,7 @@ namespace WzComparerR2.MapRender
                         tooltip = sr.Name;
                     }
                 }
-                if (npc.ID == 9010022)
+                if (npc.ID == 9010022 || (npcNode?.Nodes["miniMapType"].GetValueEx<int>(0) ?? 0) == 3)
                 {
                     this.ui.Minimap.Icons.Add(new UIMinimap2.MapIcon()
                     {
@@ -436,7 +439,7 @@ namespace WzComparerR2.MapRender
                         WorldPosition = new EmptyKeys.UserInterface.PointF(npc.X, npc.Y)
                     });
                 }
-                else if ((npcNode?.Nodes["shop"].GetValueEx(0) ?? 0) != 0)
+                else if ((npcNode?.Nodes["shop"].GetValueEx(0) ?? 0) != 0 || (npcNode?.Nodes["miniMapType"].GetValueEx<int>(0) ?? 0) == 1)
                 {
                     this.ui.Minimap.Icons.Add(new UIMinimap2.MapIcon()
                     {
@@ -445,7 +448,7 @@ namespace WzComparerR2.MapRender
                         WorldPosition = new EmptyKeys.UserInterface.PointF(npc.X, npc.Y)
                     });
                 }
-                else if (npc.ID / 10000 == 900 || npc.ID / 10000 == 901)
+                else if ((npcNode?.Nodes["miniMapType"].GetValueEx<int>(0) ?? 0) == 2)
                 {
                     this.ui.Minimap.Icons.Add(new UIMinimap2.MapIcon()
                     {
@@ -454,7 +457,7 @@ namespace WzComparerR2.MapRender
                         WorldPosition = new EmptyKeys.UserInterface.PointF(npc.X, npc.Y)
                     });
                 }
-                else if ((npcNode?.Nodes["trunkPut"].GetValueEx(0) ?? 0) != 0)
+                else if ((npcNode?.Nodes["trunkPut"].GetValueEx(-1) ?? -1) != -1)
                 {
                     this.ui.Minimap.Icons.Add(new UIMinimap2.MapIcon()
                     {
@@ -580,7 +583,7 @@ namespace WzComparerR2.MapRender
 
         private async Task SetCameraChangedEffect(Vector2 pos)
         {
-            if (this.mapData.ID / 100 == 9932670)
+            if (this.mapData?.ID / 100 == 9932670)
             {
                 var bgmRegionsInfo = PluginManager.FindWz($@"Etc\MinigameClient.img\DimensionTower\fieldList\{this.mapData.ID}\bgmRegions");
                 if (bgmRegionsInfo != null)
@@ -670,6 +673,7 @@ namespace WzComparerR2.MapRender
             }
             //更新tooltip
             UpdateTooltip();
+            UpdateMinimapIcons();
         }
 
         private void MoveToPortal(int? toMap, string pName, string fromPName = null, bool isBack = false)
@@ -692,7 +696,7 @@ namespace WzComparerR2.MapRender
                 }
                 else
                 {
-                    this.ui.ChatBox.AppendTextSystem($"マップ{toMap.Value}には移動できません。");
+                    this.ui.ChatBox.AppendTextSystem($"無法移動至地圖{toMap.Value}。");
                 }
             }
             else //当前地图

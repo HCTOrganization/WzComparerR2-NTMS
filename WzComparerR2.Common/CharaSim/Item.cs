@@ -17,22 +17,38 @@ namespace WzComparerR2.CharaSim
             this.CoreSpecs = new Dictionary<ItemCoreSpecType, Wz_Node>();
             this.AddTooltips = new List<int>();
             this.Recipes = new List<int>();
+            this.overseasConstants = new Dictionary<string, string>();
+            this.Grade = 0;
+            this.SummoningSack = new List<SummoningSackInfo>();
         }
 
         public int Level { get; set; }
         public int? DamageSkinID { get; set; }
+        public int? FamiliarID { get; set; }
+        public int Grade { get; set; }
         public string ConsumableFrom { get; set; }
         public string EndUseDate { get; set; }
         public string SamplePath { get; set; }
+        internal Dictionary<string, string> overseasConstants;
+        public ItemType type { get; set; }
 
         public List<GearLevelInfo> Levels { get; internal set; }
 
         public Dictionary<ItemPropType, long> Props { get; private set; }
         public Dictionary<ItemSpecType, long> Specs { get; private set; }
         public Dictionary<ItemCoreSpecType, Wz_Node> CoreSpecs { get; private set; }
+        public Dictionary<string, string> OverseasConstants
+        {
+            get { return overseasConstants; }
+        }
         public List<int> AddTooltips { get; internal set; } // Additional Tooltips
         public List<int> Recipes { get; private set; }
         public Bitmap AvatarBitmap { get; set; }
+        public Bitmap DamageSkinSampleNonCriticalBitmap { get; set; }
+        public Bitmap DamageSkinSampleCriticalBitmap { get; set; }
+        public Bitmap DamageSkinExtraBitmap { get; set; }
+        public Bitmap DamageSkinUnitBitmap { get; set; }
+        public List<SummoningSackInfo> SummoningSack { get; private set; }
         public bool Cash
         {
             get { return GetBooleanValue(ItemPropType.cash); }
@@ -53,9 +69,32 @@ namespace WzComparerR2.CharaSim
             get { return this.Specs.TryGetValue(ItemSpecType.cosmetic, out long value) && value > 0; }
         }
 
+        public static ItemType GetItemType(int code)
+        {
+            switch (code / 1000000)
+            {
+                case 2:
+                    return ItemType.Consume;
+                case 3:
+                    return ItemType.Install;
+                case 4:
+                    return ItemType.Etc;
+                case 5:
+                    if (code / 10000 != 500)
+                        return ItemType.Cash;
+                    return ItemType.Pet;
+                default:
+                    return ItemType.Unknown;
+            }
+        }
+
         public bool GetBooleanValue(ItemPropType type)
         {
             return this.Props.TryGetValue(type, out long value) && value != 0;
+        }
+        public bool IsPet
+        {
+            get { return this.type == ItemType.Pet; }
         }
 
         public static Item CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
@@ -68,6 +107,7 @@ namespace WzComparerR2.CharaSim
             {
                 return null;
             }
+            if (node.GetNodeWzFile().Type != Wz_Type.Item) return null;
             item.ItemID = value;
 
             // in msn the node could be UOL.
@@ -113,6 +153,39 @@ namespace WzComparerR2.CharaSim
 
                         case "damageSkinID":
                             item.DamageSkinID = Convert.ToInt32(subNode.Value);
+                            break;
+
+                        case "familiarID":
+                            item.FamiliarID = Convert.ToInt32(subNode.Value);
+                            break;
+
+                        case "grade":
+                            if (int.TryParse(Convert.ToString(subNode.Value), out _))
+                            {
+                                item.Grade = Convert.ToInt32(subNode.Value);
+                            }
+                            else
+                            {
+                                switch (Convert.ToString(subNode.Value))
+                                {
+                                    default:
+                                    case "normal":
+                                        item.Grade = 0;
+                                        break;
+                                    case "rare":
+                                        item.Grade = 1;
+                                        break;
+                                    case "epic":
+                                        item.Grade = 2;
+                                        break;
+                                    case "unique":
+                                        item.Grade = 3;
+                                        break;
+                                    case "legendary":
+                                        item.Grade = 4;
+                                        break;
+                                }
+                            }
                             break;
 
                         case "consumableFrom":
@@ -260,6 +333,51 @@ namespace WzComparerR2.CharaSim
                 }
             }
 
+            Wz_Node buffConstantsNode = node.FindNodeByPath("buff\\constants").ResolveUol();
+            if (buffConstantsNode != null)
+            {
+                foreach (Wz_Node constantsNode in buffConstantsNode.Nodes)
+                {
+                    if (constantsNode.Value != null && !(constantsNode.Value is Wz_Vector))
+                    {
+                        item.overseasConstants[constantsNode.Text] = constantsNode.Value.ToString();
+                    }
+                }
+            }
+
+            Wz_Node mobNode = node.FindNodeByPath("mob").ResolveUol();
+            if (mobNode != null)
+            {
+                List<SummoningSackInfo> ssiList = new List<SummoningSackInfo>();
+                foreach (Wz_Node subNode in mobNode.Nodes)
+                {
+                    SummoningSackInfo ssi = new SummoningSackInfo();
+                    foreach (Wz_Node propNode in subNode.Nodes)
+                    {
+                        switch (propNode.Text)
+                        {
+                            case "id":
+                                ssi.MobID = propNode.GetValueEx<int>(0);
+                                break;
+                            case "prob":
+                                ssi.Rate.Add(propNode.GetValueEx<int>(0));
+                                break;
+                        }
+                    }
+                    ssiList.Add(ssi);
+                }
+                item.SummoningSack = SummoningSackInfo.Consolidate(ssiList);
+            }
+            
+            if (item.Icon.Bitmap == null)
+            {
+                item.Icon = new BitmapOrigin(item.IconRaw.Bitmap, item.IconRaw.Origin);
+            }
+            else if (item.IconRaw.Bitmap == null)
+            {
+                item.IconRaw = new BitmapOrigin(item.Icon.Bitmap, item.Icon.Origin);
+            }
+
             // MSEA v241 chair
             Wz_Node customChairNode = node.FindNodeByPath("info\\customChair\\self");
             if (customChairNode != null)
@@ -333,7 +451,17 @@ namespace WzComparerR2.CharaSim
                     }
                 }
             }
+            item.type = GetItemType(item.ItemID);
             return item;
+        }
+        public enum ItemType
+        {
+            Unknown = 0,
+            Consume = 200,
+            Install = 300,
+            Etc = 400,
+            Pet = 500,
+            Cash = 501,
         }
 
     }

@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using WzComparerR2.WzLib;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using DevComponents.DotNetBar;
 using WzComparerR2.Rendering;
+using WzComparerR2.WzLib;
 
 namespace WzComparerR2.Animation
 {
@@ -34,7 +33,7 @@ namespace WzComparerR2.Animation
             return bound ?? Rectangle.Empty;
         }
 
-        public static FrameAnimationData CreateFromNode(Wz_Node node, GraphicsDevice graphicsDevice, FrameAnimationCreatingOptions options, GlobalFindNodeFunction findNode)
+        public static FrameAnimationData CreateFromNode(Wz_Node node, GraphicsDevice graphicsDevice, FrameAnimationCreatingOptions options, GlobalFindNodeFunction findNode, bool loadTexture = true)
         {
             if (node == null)
                 return null;
@@ -43,7 +42,7 @@ namespace WzComparerR2.Animation
             {
                 foreach(var frameNode in node.Nodes)
                 {
-                    Frame frame = Frame.CreateFromNode(frameNode, graphicsDevice, findNode);
+                    Frame frame = Frame.CreateFromNode(frameNode, graphicsDevice, findNode, loadTexture);
                     if (frame != null)
                     {
                         anime.Frames.Add(frame);
@@ -58,7 +57,7 @@ namespace WzComparerR2.Animation
 
                     if (frameNode == null || frameNode.Value == null)
                         break;
-                    Frame frame = Frame.CreateFromNode(frameNode, graphicsDevice, findNode);
+                    Frame frame = Frame.CreateFromNode(frameNode, graphicsDevice, findNode, loadTexture);
 
                     if (frame == null)
                         break;
@@ -89,37 +88,49 @@ namespace WzComparerR2.Animation
                 return null;
         }
 
-        public static FrameAnimationData CreateRectData(Point lt, Point rb, int delay, GraphicsDevice graphicsDevice, Color fillColor, Color outlineColor)
+        public static FrameAnimationData CreateRectData(GraphicsDevice graphicsDevice, System.Drawing.Color baseColor, IEnumerable<TimelineData> alphaTimeline)
         {
             var thickness = 2;
-            var width = -lt.X + rb.X;
-            var height = -lt.Y + rb.Y;
 
-            if (width <= 0 || height <= 0)
-            {
-                MessageBoxEx.Show("您輸入的範圍無效。", "範圍設定錯誤");
-                return null;
-            }
-
-            using SpriteBatchEx spriteBatch = new SpriteBatchEx(graphicsDevice);
-            Rectangle rectangle = new Rectangle(0, 0, width, height);
-
-            RenderTarget2D renderTarget = new RenderTarget2D(graphicsDevice, width, height, false, SurfaceFormat.Bgra32, DepthFormat.None, 0, Microsoft.Xna.Framework.Graphics.RenderTargetUsage.DiscardContents);
-            graphicsDevice.SetRenderTarget(renderTarget);
-            graphicsDevice.Clear(Color.Transparent);
-
-            spriteBatch.Begin();
-
-            spriteBatch.FillRectangle(rectangle, fillColor);
-            spriteBatch.DrawThickRectangle(rectangle, outlineColor, thickness);
-
-            spriteBatch.End();
-            graphicsDevice.SetRenderTarget(null);
-
-            Point origin = new Point(-lt.X, -lt.Y);
-            var tmpFrame = new Frame((Texture2D)renderTarget, origin, 0, delay, true);
             var tmpFrameAnimationData = new FrameAnimationData();
-            tmpFrameAnimationData.Frames.Add(tmpFrame);
+            var outlineColor = baseColor.ToXnaColor();
+            foreach (var item in alphaTimeline)
+            {
+                var alpha = item.Alpha;
+                var length = item.Delay;
+                var lt = item.LT;
+                var rb = item.RB;
+                var width = -lt.X + rb.X;
+                var height = -lt.Y + rb.Y;
+                Point origin = new Point(-lt.X, -lt.Y);
+
+                if (length <= 0) continue;
+                if (width <= 0 || height <= 0)
+                {
+                    tmpFrameAnimationData.Frames.Add(new Frame(null, origin, 0, length, true));
+                    continue;
+                }
+
+                var fillColor = System.Drawing.Color.FromArgb((255 * alpha / 100), baseColor).ToXnaColor();
+
+                using SpriteBatchEx spriteBatch = new SpriteBatchEx(graphicsDevice);
+                Rectangle rectangle = new Rectangle(0, 0, width, height);
+
+                RenderTarget2D renderTarget = new RenderTarget2D(graphicsDevice, width, height, false, SurfaceFormat.Bgra32, DepthFormat.None, 0, Microsoft.Xna.Framework.Graphics.RenderTargetUsage.DiscardContents);
+                graphicsDevice.SetRenderTarget(renderTarget);
+                graphicsDevice.Clear(Color.Transparent);
+
+                spriteBatch.Begin();
+
+                spriteBatch.FillRectangle(rectangle, fillColor);
+                spriteBatch.DrawThickRectangle(rectangle, outlineColor, thickness);
+
+                spriteBatch.End();
+                graphicsDevice.SetRenderTarget(null);
+
+                var tmpFrame = new Frame((Texture2D)renderTarget, origin, 0, length, true);
+                tmpFrameAnimationData.Frames.Add(tmpFrame);
+            }
 
             if (tmpFrameAnimationData.Frames.Count > 0)
                 return tmpFrameAnimationData;
@@ -127,37 +138,103 @@ namespace WzComparerR2.Animation
                 return null;
         }
 
-        public static FrameAnimationData CreateCircleData(Point pos, int radius, int delay, GraphicsDevice graphicsDevice, Color fillColor, Color outlineColor)
+        public static FrameAnimationData CreateCircleData(GraphicsDevice graphicsDevice, int radius, System.Drawing.Color baseColor, IEnumerable<TimelineData> alphaTimeline)
         {
             int thickness = 2;
-            var x = pos.X;
-            var y = pos.Y;
 
-            if (radius <= 0)
-            {
-                MessageBoxEx.Show("您輸入的半徑不正確。", "範圍設定錯誤");
-                return null;
-            }
-
-            using var bmp = new System.Drawing.Bitmap(radius * 2, radius * 2);
-            using (var g = System.Drawing.Graphics.FromImage(bmp))
-            {
-                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                using (var brush = new System.Drawing.SolidBrush(System.Drawing.Color.FromArgb(fillColor.A, fillColor.R, fillColor.G, fillColor.B)))
-                {
-                    g.FillEllipse(brush, 0, 0, radius * 2, radius * 2);
-                }
-                using (var pen = new System.Drawing.Pen(System.Drawing.Color.FromArgb(outlineColor.A, outlineColor.R, outlineColor.G, outlineColor.B), thickness))
-                {
-                    int inset = thickness / 2;
-                    g.DrawEllipse(pen, inset, inset, radius * 2 - thickness, radius * 2 - thickness);
-                }
-            }
-
-            Point origin = new Point(-x + radius, -y + radius);
-            var tmpFrame = new Frame(bmp.ToTexture(graphicsDevice), origin, 0, delay, true);
             var tmpFrameAnimationData = new FrameAnimationData();
-            tmpFrameAnimationData.Frames.Add(tmpFrame);
+            var outlineColor = baseColor;
+            foreach (var item in alphaTimeline)
+            {
+                var alpha = item.Alpha;
+                var length = item.Delay;
+                var pos = item.LT;
+                var x = pos.X;
+                var y = pos.Y;
+                Point origin = new Point(-x + radius, -y + radius);
+
+                if (length <= 0) continue;
+                if (radius <= 0)
+                {
+                    tmpFrameAnimationData.Frames.Add(new Frame(null, origin, 0, length, true));
+                    continue;
+                }
+
+                var fillColor = System.Drawing.Color.FromArgb((255 * alpha / 100), baseColor);
+
+                using var bmp = new System.Drawing.Bitmap(radius * 2, radius * 2);
+                using (var g = System.Drawing.Graphics.FromImage(bmp))
+                {
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    using (var brush = new System.Drawing.SolidBrush(fillColor))
+                    {
+                        g.FillEllipse(brush, 0, 0, radius * 2, radius * 2);
+                    }
+                    using (var pen = new System.Drawing.Pen(outlineColor, thickness))
+                    {
+                        int inset = thickness / 2;
+                        g.DrawEllipse(pen, inset, inset, radius * 2 - thickness, radius * 2 - thickness);
+                    }
+                }
+
+                var tmpFrame = new Frame(bmp.ToTexture(graphicsDevice), origin, 0, length, true);
+                tmpFrameAnimationData.Frames.Add(tmpFrame);
+            }
+
+            if (tmpFrameAnimationData.Frames.Count > 0)
+                return tmpFrameAnimationData;
+            else
+                return null;
+        }
+
+        public static FrameAnimationData CreatePolygonData(GraphicsDevice graphicsDevice, IEnumerable<Point> vertices, System.Drawing.Color baseColor, IEnumerable<TimelineData> alphaTimeline)
+        {
+            int thickness = 2;
+
+            var tmpFrameAnimationData = new FrameAnimationData();
+            var outlineColor = baseColor;
+            var rx = vertices.Min(p => p.X);
+            var ry = vertices.Min(p => p.Y);
+            var rw = vertices.Max(p => p.X) - rx;
+            var rh = vertices.Max(p => p.Y) - ry;
+
+            System.Drawing.Point[] drawingVertices = vertices.Select(p => new System.Drawing.Point(p.X - rx, p.Y - ry)).ToArray();
+
+            foreach (var item in alphaTimeline)
+            {
+                var alpha = item.Alpha;
+                var length = item.Delay;
+                var pos = item.LT;
+                var x = pos.X;
+                var y = pos.Y;
+                Point origin = new Point(-x - rx, -y - ry);
+
+                if (length <= 0) continue;
+                if (rw <= 0 || rh <= 0)
+                {
+                    tmpFrameAnimationData.Frames.Add(new Frame(null, origin, 0, length, true));
+                    continue;
+                }
+
+                var fillColor = System.Drawing.Color.FromArgb((255 * alpha / 100), baseColor);
+
+                using var bmp = new System.Drawing.Bitmap(rw, rh);
+                using (var g = System.Drawing.Graphics.FromImage(bmp))
+                {
+                    g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    using (var brush = new System.Drawing.SolidBrush(fillColor))
+                    {
+                        g.FillPolygon(brush, drawingVertices);
+                    }
+                    using (var pen = new System.Drawing.Pen(outlineColor, thickness))
+                    {
+                        g.DrawPolygon(pen, drawingVertices);
+                    }
+                }
+
+                var tmpFrame = new Frame(bmp.ToTexture(graphicsDevice), origin, 0, length, true);
+                tmpFrameAnimationData.Frames.Add(tmpFrame);
+            }
 
             if (tmpFrameAnimationData.Frames.Count > 0)
                 return tmpFrameAnimationData;
@@ -177,6 +254,24 @@ namespace WzComparerR2.Animation
             int baseDelayAll = 0;
             int addDelayAll = 0;
             int globalDelay = 0;
+
+            // dispose useless textures
+            for (int i = 0; i < frameStart; i++)
+            {
+                var frameD = addData.Frames[i];
+                if (frameD.Texture != null && !frameD.Texture.IsDisposed)
+                {
+                    frameD.Texture.Dispose();
+                }
+            }
+            for (int i = frameEnd + 1; i < addData.Frames.Count; i++)
+            {
+                var frameD = addData.Frames[i];
+                if (frameD.Texture != null && !frameD.Texture.IsDisposed)
+                {
+                    frameD.Texture.Dispose();
+                }
+            }
 
             foreach (var frame in baseData.Frames)
             {
@@ -287,7 +382,7 @@ namespace WzComparerR2.Animation
                         frameD.Texture.Dispose();
                     }
                 }
-                for (int i = 0; i < addCount; i++)
+                for (int i = frameStart; i < addCount; i++)
                 {
                     var frameD = addData.Frames[i];
                     if (frameD.Texture != null && !frameD.Texture.IsDisposed)
@@ -328,6 +423,11 @@ namespace WzComparerR2.Animation
             {
                 newOrigin = new Point(frame2.Origin.X, frame2.Origin.Y);
                 return CopyTexture(graphicsDevice, texture2);
+            }
+            else if (texture2 == null)
+            {
+                newOrigin = new Point(frame1.Origin.X, frame1.Origin.Y);
+                return CopyTexture(graphicsDevice, texture1);
             }
 
             int dl = Math.Max(frame2.Origin.X - frame1.Origin.X, 0);
@@ -381,6 +481,84 @@ namespace WzComparerR2.Animation
             graphicsDevice.SetRenderTarget(null);
 
             return renderTarget;
+        }
+
+        public static void ApplyMovement(GraphicsDevice graphicsDevice, FrameAnimationData data, int speedX, int speedY, int goX, int goY, bool fullMove, int start, ref int end)
+        {
+            var result = new List<Frame>();
+            var dispose = new List<Frame>();
+            var interval = 30;
+            var dx = speedX / 1000f * interval;
+            var dy = speedY / 1000f * interval;
+            var count = 0;
+            var e = end;
+            bool repeated = false;
+
+            for (var i = 0; i < start; i++)
+            {
+                var frame = data.Frames[i];
+                result.Add(frame);
+            }
+            for (var i = start; i < e + 1; i++)
+            {
+                var oFrame = data.Frames[i];
+                var frame = new Frame(oFrame.Texture, oFrame.Origin, oFrame.Z, oFrame.Delay, oFrame.Blend);
+                while (frame.Delay > 0)
+                {
+                    bool finishX = Math.Abs(dx * count) >= goX;
+                    bool finishY = Math.Abs(dy * count) >= goY;
+                    int x = finishX ? frame.Origin.X - (dx >= 0 ? goX : -goX) : (int)(frame.Origin.X - dx * count);
+                    int y = finishY ? frame.Origin.Y - (dy >= 0 ? goY : -goY) : (int)(frame.Origin.Y - dy * count);
+                    var temp = new Frame(CopyTexture(graphicsDevice, frame.Texture), new Point(x, y), frame.Z, interval, frame.Blend);
+                    result.Add(temp);
+
+                    frame.Delay -= interval;
+                    if (finishX && finishY)
+                    {
+                        temp = new Frame(CopyTexture(graphicsDevice, frame.Texture), new Point(x, y), frame.Z, frame.Delay, frame.Blend);
+                        result.Add(temp);
+                        e = i;
+                        break;
+                    }
+                    count++;
+                    if (i == e && fullMove && frame.Delay <= 0 && (!finishX || !finishY))
+                    {
+                        i = start - 1;
+                        repeated = true;
+                    }
+                }
+                dispose.Add(oFrame);
+            }
+            if (!repeated)
+            {
+                for (var i = e + 1; i < data.Frames.Count; i++)
+                {
+                    var frame = data.Frames[i];
+                    int x = frame.Origin.X - (dx >= 0 ? goX : -goX);
+                    int y = frame.Origin.Y - (dy >= 0 ? goY : -goY);
+                    frame.Origin = new Point(x, y);
+                    result.Add(frame);
+                }
+            }
+
+            foreach (var frame in dispose)
+            {
+                if (frame.Texture != null && !frame.Texture.IsDisposed)
+                {
+                    frame.Texture.Dispose();
+                }
+            }
+
+            end += result.Count - data.Frames.Count;
+            data.Frames = result;
+        }
+
+        public struct TimelineData
+        {
+            public Point LT;
+            public Point RB;
+            public int Alpha;
+            public int Delay;
         }
     }
 

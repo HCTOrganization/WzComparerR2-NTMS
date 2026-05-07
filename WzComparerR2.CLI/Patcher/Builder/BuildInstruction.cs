@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.IO;
-
-namespace WzComparerR2.Patcher.Builder
+﻿namespace WzComparerR2.Patcher.Builder
 {
     /// <summary>
     /// 表示一条重构文件的指令。
