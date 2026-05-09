@@ -1217,6 +1217,10 @@ namespace WzComparerR2.MapRender
                     {
                         spineAni.SelectedAnimationName = aniName;
                     }
+                    else
+                    {
+                        spineAni.SelectedAnimationIndex = -1;
+                    }
                     return spineAni;
 
                 case MsCustomSpriteData msSpriteData:
