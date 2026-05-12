@@ -387,6 +387,18 @@ namespace WzComparerR2
                 case 4:
                     this.buttonItemGMS.Checked = true;
                     break;
+                case 5:
+                    this.buttonItemGMSC.Checked = true;
+                    break;
+                case 6:
+                    this.buttonItemGMSC.Checked = true;
+                    break;
+                case 7:
+                    this.buttonItemCMS.Checked = true;
+                    break;
+                case 8:
+                    this.buttonItemCMSC.Checked = true;
+                    break;
             }
         }
 
@@ -3695,16 +3707,21 @@ namespace WzComparerR2
                     frm.Show();
                     return;
             }
-
-            if (!IsUriSchemeRegistered(ngmProtocol))
+            switch (preferredRegion)
             {
-                ngmInstallPrompt(ngmProtocol);
-                return;
-            }
-            else
-            {
-                try
-                {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                    if (!IsUriSchemeRegistered(ngmProtocol))
+                    {
+                        ngmInstallPrompt(ngmProtocol);
+                        return;
+                    }
+                    else
+                    {
+                        try
+                        {
 #if NET6_0_OR_GREATER
                     Process.Start(new ProcessStartInfo
                     {
@@ -3712,15 +3729,19 @@ namespace WzComparerR2
                         FileName = ngmProtocol + "://launch/ -mode:install -game:'" + gameCode + "'",
                     });
 #else
-                    Process.Start(ngmProtocol + "://launch/ -mode:install -game:'" + gameCode + "'");
+                            Process.Start(ngmProtocol + "://launch/ -mode:install -game:'" + gameCode + "'");
 #endif
-                }
-                catch
-                {
-                    ngmInstallPrompt(ngmProtocol);
-                }
+                        }
+                        catch
+                        {
+                            ngmInstallPrompt(ngmProtocol);
+                        }
+                    }
+                    return;
+                default:
+                    MessageBoxEx.Show(this, "Not implemented", "注意");
+                    break;
             }
-            return;
         }
 
         private void buttonGameStart_Click(object sender, EventArgs e)
@@ -3746,6 +3767,10 @@ namespace WzComparerR2
                     ngmProtocol = "nxl";
                     gameCode = "10100";
                     break;
+                case 5:
+                    ngmProtocol = "nxl";
+                    gameCode = "59822";
+                    break;
             }
 
             if (!IsUriSchemeRegistered(ngmProtocol))
@@ -3757,15 +3782,39 @@ namespace WzComparerR2
             {
                 try
                 {
+                    switch (preferredRegion)
+                    {
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 3:
 #if NET6_0_OR_GREATER
                     Process.Start(new ProcessStartInfo
                     {
                         UseShellExecute = true,
-                        FileName = preferredRegion == 4 ? ngmProtocol + "://games/" + gameCode + "?partnerkey=3267" : ngmProtocol + "://launch/ -mode:launch -game:'" + gameCode + "'",
+                        FileName = ngmProtocol + "://launch/ -mode:launch -game:'" + gameCode + "'",
                     });
 #else
-                    Process.Start(preferredRegion == 4 ? ngmProtocol + "://games/" + gameCode + "?partnerkey=3267" : ngmProtocol + "://launch/ -mode:launch -game:'" + gameCode + "'");
+                            Process.Start(ngmProtocol + "://launch/ -mode:launch -game:'" + gameCode + "'");
 #endif
+                            break;
+                        case 4:
+                        case 5:
+
+#if NET6_0_OR_GREATER
+                    Process.Start(new ProcessStartInfo
+                    {
+                        UseShellExecute = true,
+                        FileName = ngmProtocol + "://games/" + gameCode + "?partnerkey=3267",
+                    });
+#else
+                            Process.Start(ngmProtocol + "://games/" + gameCode + "?partnerkey=3267");
+#endif
+                            break;
+                        default:
+                            MessageBoxEx.Show(this, "Not implemented", "注意");
+                            break;
+                    }
                 }
                 catch
                 {
@@ -3784,6 +3833,9 @@ namespace WzComparerR2
             this.buttonItemKMST.Checked = false;
             this.buttonItemMSN.Checked = false;
             this.buttonItemGMS.Checked = false;
+            this.buttonItemGMSC.Checked = false;
+            this.buttonItemCMS.Checked = false;
+            this.buttonItemCMSC.Checked = false;
             ConfigManager.Save();
         }
 
@@ -3796,6 +3848,9 @@ namespace WzComparerR2
             this.buttonItemKMST.Checked = false;
             this.buttonItemMSN.Checked = false;
             this.buttonItemGMS.Checked = false;
+            this.buttonItemGMSC.Checked = false;
+            this.buttonItemCMS.Checked = false;
+            this.buttonItemCMSC.Checked = false;
             ConfigManager.Save();
         }
 
@@ -3808,6 +3863,9 @@ namespace WzComparerR2
             this.buttonItemKMST.Checked = true;
             this.buttonItemMSN.Checked = false;
             this.buttonItemGMS.Checked = false;
+            this.buttonItemGMSC.Checked = false;
+            this.buttonItemCMS.Checked = false;
+            this.buttonItemCMSC.Checked = false;
             ConfigManager.Save();
         }
 
@@ -3820,6 +3878,9 @@ namespace WzComparerR2
             this.buttonItemKMST.Checked = false;
             this.buttonItemMSN.Checked = true;
             this.buttonItemGMS.Checked = false;
+            this.buttonItemGMSC.Checked = false;
+            this.buttonItemCMS.Checked = false;
+            this.buttonItemCMSC.Checked = false;
             ConfigManager.Save();
         }
 
@@ -3832,6 +3893,54 @@ namespace WzComparerR2
             this.buttonItemKMST.Checked = false;
             this.buttonItemMSN.Checked = false;
             this.buttonItemGMS.Checked = true;
+            this.buttonItemGMSC.Checked = false;
+            this.buttonItemCMS.Checked = false;
+            this.buttonItemCMSC.Checked = false;
+            ConfigManager.Save();
+        }
+
+        private void buttonItemGMSC_Click(object sender, EventArgs e)
+        {
+            ConfigManager.Reload();
+            WcR2Config.Default.PreferredClientRegion = 5;
+            this.buttonItemJMS.Checked = false;
+            this.buttonItemKMS.Checked = false;
+            this.buttonItemKMST.Checked = false;
+            this.buttonItemMSN.Checked = false;
+            this.buttonItemGMS.Checked = false;
+            this.buttonItemGMSC.Checked = true;
+            this.buttonItemCMS.Checked = false;
+            this.buttonItemCMSC.Checked = false;
+            ConfigManager.Save();
+        }
+
+        private void buttonItemCMS_Click(object sender, EventArgs e)
+        {
+            ConfigManager.Reload();
+            WcR2Config.Default.PreferredClientRegion = 6;
+            this.buttonItemJMS.Checked = false;
+            this.buttonItemKMS.Checked = false;
+            this.buttonItemKMST.Checked = false;
+            this.buttonItemMSN.Checked = false;
+            this.buttonItemGMS.Checked = false;
+            this.buttonItemGMSC.Checked = false;
+            this.buttonItemCMS.Checked = true;
+            this.buttonItemCMSC.Checked = false;
+            ConfigManager.Save();
+        }
+
+        private void buttonItemCMSC_Click(object sender, EventArgs e)
+        {
+            ConfigManager.Reload();
+            WcR2Config.Default.PreferredClientRegion = 7;
+            this.buttonItemJMS.Checked = false;
+            this.buttonItemKMS.Checked = false;
+            this.buttonItemKMST.Checked = false;
+            this.buttonItemMSN.Checked = false;
+            this.buttonItemGMS.Checked = false;
+            this.buttonItemGMSC.Checked = false;
+            this.buttonItemCMS.Checked = false;
+            this.buttonItemCMSC.Checked = true;
             ConfigManager.Save();
         }
 
