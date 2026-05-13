@@ -4546,6 +4546,13 @@ namespace WzComparerR2
             StringResult sr = new StringResult();
             string altAutoDesc = null;
             var wzfType = wzf.Type; // temp workaround
+            // Clear previous record
+            tooltipQuickView.NodeName = string.Empty;
+            tooltipQuickView.Desc = string.Empty;
+            tooltipQuickView.Pdesc = string.Empty;
+            tooltipQuickView.AutoDesc = string.Empty;
+            tooltipQuickView.Hdesc = string.Empty;
+            tooltipQuickView.DescLeftAlign = string.Empty;
             // temp workaround start
             if (wzfType == Wz_Type.Unknown)
             {

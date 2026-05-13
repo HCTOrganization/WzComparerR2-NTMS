@@ -1293,6 +1293,7 @@ namespace WzComparerR2
             this.buttonItemCMS.Name = "buttonItemCMS";
             this.buttonItemCMS.Text = "CMS";
             this.buttonItemCMS.Tooltip = "CMS";
+            this.buttonItemCMS.Enabled = false;
             this.buttonItemCMS.Click += new System.EventHandler(this.buttonItemCMS_Click);
             // 
             // buttonItemCMSC
@@ -1301,6 +1302,7 @@ namespace WzComparerR2
             this.buttonItemCMSC.Name = "buttonItemCMSC";
             this.buttonItemCMSC.Text = "CMS懷舊服";
             this.buttonItemCMSC.Tooltip = "CMS懷舊服";
+            this.buttonItemCMSC.Enabled = false;
             this.buttonItemCMSC.Click += new System.EventHandler(this.buttonItemCMSC_Click);
             // 
             // ribbonBar4
