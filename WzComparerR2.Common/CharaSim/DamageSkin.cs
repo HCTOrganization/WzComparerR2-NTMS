@@ -72,39 +72,43 @@ namespace WzComparerR2.CharaSim
 
             DamageSkin damageSkin = new DamageSkin();
 
-            damageSkin.DamageSkinID = Convert.ToInt32(damageSkinNode.Text);
-
-            foreach (Wz_Node subNode in damageSkinNode.Nodes)
+            if (int.TryParse(damageSkinNode.Text, out int damageSkinID))
             {
-                switch (subNode.Text)
-                {
-                    case "desc":
-                        damageSkin.Desc = subNode.GetValue<string>();
-                        break;
-                    case "extractID":
-                        damageSkin.ExtractItemID = subNode.GetValue<int>();
-                        break;
-                    case "sample":
-                        damageSkin.Sample = BitmapOrigin.CreateFromNode(subNode, findNode);
-                        break;
-                    case "effect":
-                        foreach (Wz_Node effectNode in subNode.Nodes)
-                        {
-                            GetDamageSkinData(effectNode, damageSkin, findNode);
-                        }
-                        break;
-                    // Legacy below
-                    case "NoRed0":
-                    case "NoRed1":
-                    case "NoCri0":
-                    case "NoCri1":
-                    case "NoCustom":
-                        GetDamageSkinData(subNode, damageSkin, findNode);
-                        break;
-                }
-            }
+                damageSkin.DamageSkinID = damageSkinID;
 
-            return damageSkin;
+                foreach (Wz_Node subNode in damageSkinNode.Nodes)
+                {
+                    switch (subNode.Text)
+                    {
+                        case "desc":
+                            damageSkin.Desc = subNode.GetValue<string>();
+                            break;
+                        case "extractID":
+                            damageSkin.ExtractItemID = subNode.GetValue<int>();
+                            break;
+                        case "sample":
+                            damageSkin.Sample = BitmapOrigin.CreateFromNode(subNode, findNode);
+                            break;
+                        case "effect":
+                            foreach (Wz_Node effectNode in subNode.Nodes)
+                            {
+                                GetDamageSkinData(effectNode, damageSkin, findNode);
+                            }
+                            break;
+                        // Legacy below
+                        case "NoRed0":
+                        case "NoRed1":
+                        case "NoCri0":
+                        case "NoCri1":
+                        case "NoCustom":
+                            GetDamageSkinData(subNode, damageSkin, findNode);
+                            break;
+                    }
+                }
+                return damageSkin;
+            }
+            else return null;
+
         }
 
         private static void GetDamageSkinData(Wz_Node effectNode, DamageSkin damageSkin, GlobalFindNodeFunction findNode)

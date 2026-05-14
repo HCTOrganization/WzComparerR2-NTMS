@@ -3693,6 +3693,7 @@ namespace WzComparerR2
                     gameCode = "106690@d811";
                     break;
                 case 4:
+                case 5:
                     foreach (Form form in Application.OpenForms)
                     {
                         if (form is FrmGMSDownloader && !form.IsDisposed)
