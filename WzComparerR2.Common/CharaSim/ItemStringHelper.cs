@@ -1083,6 +1083,8 @@ namespace WzComparerR2.CharaSim
                 case 43: return GetGearTypeString(GearType.yeouiGem);
                 case 44: return GetGearTypeString(GearType.ornament);
                 case 45: return GetGearTypeString(GearType.fanTassel);
+                case 50: return GetGearTypeString(GearType.kodachi);
+                case 52: return GetGearTypeString(GearType.boxingSky);
 
                 default: return GetGearTypeString(GearType.astra);
             }
