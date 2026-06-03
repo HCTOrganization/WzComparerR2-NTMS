@@ -2898,16 +2898,30 @@ namespace WzComparerR2
             }
         }
 
-        private void tsmi1UpdateStringLinker_Click(object sender, EventArgs e)
+        private async void tsmi1UpdateStringLinker_Click(object sender, EventArgs e)
         {
             Wz_Node stringNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("String");
             Wz_Node itemNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Item");
             Wz_Node etcNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Etc");
             Wz_Node questNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Quest");
 
-            QueryPerformance.Start();
-            bool r = this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz()) && stringLinker.Update(stringNode, itemNode, etcNode, questNode); //reset(needed?) and update
-            QueryPerformance.End();
+            bool r = false;
+
+            btnItemOpenWz.Enabled = false;
+            btnItemOpenImg.Enabled = false;
+            buttonItemClose.Enabled = false;
+            buttonItemCloseAll.Enabled = false;
+            buttonItemSearchWz.Enabled = false;
+            buttonItemSearchString.Enabled = false;
+            galleryContainerRecent.Enabled = false;
+
+            await Task.Run(() =>
+            {
+                QueryPerformance.Start();
+                labelItemStatus.Text = "StringLinker更新中...";
+                r = this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz()) && stringLinker.Update(stringNode, itemNode, etcNode, questNode); //reset(needed?) and update
+                QueryPerformance.End();
+            });
             if (r)
             {
                 double ms = (Math.Round(QueryPerformance.GetLastInterval(), 4) * 1000);
@@ -2917,6 +2931,15 @@ namespace WzComparerR2
             {
                 MessageBoxEx.Show("StringLinker更新失敗。", "錯誤");
             }
+
+
+            btnItemOpenWz.Enabled = true;
+            btnItemOpenImg.Enabled = true;
+            buttonItemClose.Enabled = true;
+            buttonItemCloseAll.Enabled = true;
+            buttonItemSearchWz.Enabled = true;
+            buttonItemSearchString.Enabled = true;
+            galleryContainerRecent.Enabled = true;
         }
 
         private async void tsmi1ExportSound_Click(object sender, EventArgs e)
