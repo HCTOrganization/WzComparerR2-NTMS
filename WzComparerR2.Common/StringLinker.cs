@@ -507,6 +507,7 @@ namespace WzComparerR2.Common
                         if (!image.TryExtract()) break;
                         foreach (Wz_Node tree in image.Node.Nodes)
                         {
+                            Wz_Node test_tree = TryLocateUolNode(tree);
                             if (tree.ResolveUol() is not Wz_Node linkNode)
                             {
                                 continue;
