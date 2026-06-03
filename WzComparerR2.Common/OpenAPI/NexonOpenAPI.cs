@@ -162,88 +162,26 @@ namespace WzComparerR2.OpenAPI
             {
                 default:
                     return avatarCode;
-                case "CMS":
+                case "ChangseopMS":
+                case "ZipanguMS":
+                case "TerryMS_Continent":
+                case "TerryMS_Island":
+                case "TerryMS_Peninsula":
+                    serviceBackend = "https://api.hikaricalyx.com/LWA/v1/GetAvatarCode";
                     break;
-                case "KMS":
-                    serviceBackend = "https://maple.dakgg.io/api/v1/bypass/characters/" + Uri.EscapeDataString(characterName); // Used Maple GG API
-                    break;
-                case "JMS":
-                    serviceBackend = $"{jmsBaseUrl}/community/avatar/search/?writer=" + Uri.EscapeDataString(characterName);
-                    break;
-                case "GMS-NA":
+                case "InkwellMS_NA":
                     serviceBackend = "https://www.nexon.com/api/maplestory/no-auth/ranking/v2/na?type=overall&id=weekly&character_name=" + Uri.EscapeDataString(characterName);
                     break;
-                case "GMS-EU":
+                case "InkwellMS_EU":
                     serviceBackend = "https://www.nexon.com/api/maplestory/no-auth/ranking/v2/eu?type=overall&id=weekly&character_name=" + Uri.EscapeDataString(characterName);
                     break;
-                case "MSEA":
-                    serviceBackend = "https://msea.dakgg.io/api/v1/bypass/characters/" + Uri.EscapeDataString(characterName); // Used Maple GG API
-                    break;
-                case "TMS":
-                    serviceBackend = "https://tw-event.beanfun.com/MapleStory/api/UnionWebRank/GetRank";
-                    break;
-                case "MSN":
+                case "TunerMS":
                     serviceBackend = "https://msu.io/navigator/api/navigator/search?keyword=" + Uri.EscapeDataString(characterName);
                     break;
             }
             try
             {
-                if (region == "JMS")
-                {
-                    var client = new HttpClient();
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
-                    string rankingAvatarCode = await client.GetStringAsync("https://api.hikaricalyx.com/WcR2-JMS/v1/GetRankingChar?CharacterName=" + b64CharName);
-                    if (!string.IsNullOrEmpty(rankingAvatarCode))
-                    {
-                        avatarCode = rankingAvatarCode;
-                        return avatarCode;
-                    }
-                    bool isUnderMaintenance = await isJMSUnderMaintenance();
-                    if (isUnderMaintenance)
-                    {
-                        throw new Exception("JMS現在正在維護中。");
-                    }
-                    string html = await client.GetStringAsync(serviceBackend);
-                    HtmlDocument doc = new HtmlDocument();
-                    doc.LoadHtml(html);
-
-                    var avatarLinks = doc.DocumentNode.SelectNodes("//a[@href]")
-                        ?.Select(node => WebUtility.HtmlDecode(node.GetAttributeValue("href", "")))
-                        .Where(href => href.StartsWith("/mypage/avatar"))
-                        .Select(href => $"{jmsBaseUrl}{href}")
-                        .ToList();
-
-                    if (avatarLinks != null && avatarLinks.Count == 2)
-                    {
-                        string avatarHtml = await client.GetStringAsync(avatarLinks[0]);
-                        HtmlDocument avatarDoc = new HtmlDocument();
-                        avatarDoc.LoadHtml(avatarHtml);
-
-                        avatarCode = avatarDoc.DocumentNode.SelectNodes("//img[@src]")
-                            ?.Select(node => node.GetAttributeValue("src", ""))
-                            .FirstOrDefault(src => src.StartsWith("//avatar-maplestory.nexon.co.jp")).Split('/').Last().Replace(".png", "");
-                    }
-                    else if (avatarLinks.Count > 2)
-                    {
-                        EdgeWebView webView = new EdgeWebView();
-                        EdgeWebView.webViewUri = serviceBackend;
-                        EdgeWebView.customCheckUri = "https://maplestory.nexon.co.jp";
-                        EdgeWebView.customCheckCondition = "https://maplestory.nexon.co.jp/mypage/avatar";
-                        webView.ShowDialog();
-                        string avatarHtml = await client.GetStringAsync(webView.currentUri);
-                        HtmlDocument avatarDoc = new HtmlDocument();
-                        avatarDoc.LoadHtml(avatarHtml);
-
-                        avatarCode = avatarDoc.DocumentNode.SelectNodes("//img[@src]")
-                            ?.Select(node => node.GetAttributeValue("src", ""))
-                            .FirstOrDefault(src => src.StartsWith("//avatar-maplestory.nexon.co.jp")).Split('/').Last().Replace(".png", "");
-                    }
-                    else
-                    {
-                        throw new Exception("找不到角色。請在JMS官方網站上註冊您的代表角色。");
-                    }
-                }
-                else if (region.StartsWith("GMS"))
+                if (region.StartsWith("InkwellMS"))
                 {
                     var client = new HttpClient();
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
@@ -265,94 +203,7 @@ namespace WzComparerR2.OpenAPI
                         avatarCode = "";
                     }
                 }
-                else if (region == "MSEA" || region == "KMS")
-                {
-                    var client = new HttpClient();
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
-                    var response = await client.GetAsync(serviceBackend);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var json = await response.Content.ReadAsStringAsync();
-                        using JsonDocument doc = JsonDocument.Parse(json);
-                        JsonElement root = doc.RootElement;
-                        if (root.TryGetProperty("data", out JsonElement dataElement) &&
-                            dataElement.TryGetProperty("characterBasic", out JsonElement characterBasicElement) &&
-                            characterBasicElement.TryGetProperty("character_image", out JsonElement characterImageElement))
-                        {
-                            avatarCode = characterImageElement.GetString().Split('/').Last();
-                        }
-                    }
-                    else
-                    {
-                        avatarCode = "";
-                    }
-                }
-                else if (region == "TMS")
-                {
-                    var client = new HttpClient();
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
-                    string jsonPayload = $"{{\"RankType\":1,\"GameWorldId\":\"-1\",\"CharacterName\":\"{characterName}\"}}";
-                    var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync(serviceBackend, content);
-                    if (response.IsSuccessStatusCode)
-                    {
-                        var json = await response.Content.ReadAsStringAsync();
-                        using JsonDocument doc = JsonDocument.Parse(json);
-                        JsonElement root = doc.RootElement;
-                        if (root.TryGetProperty("Data", out JsonElement dataElement))
-                        {
-                            try
-                            {
-                                dataElement.TryGetProperty("CharacterLookCipherText", out JsonElement characterLookCipherText);
-                                avatarCode = characterLookCipherText.GetString();
-                            }
-                            catch
-                            {
-                                avatarCode = "";
-                            }
-                        }
-                    }
-                    else
-                    {
-                        avatarCode = "";
-                    }
-                    if (string.IsNullOrEmpty(avatarCode))
-                    {
-                        string client_checksum = ChecksumCalculation();
-                        client.DefaultRequestHeaders.Add("Checksum", client_checksum);
-                        string jsonPayload2 = $"{{\"ign\":\"{characterName}\",\"region\":\"TerryMS_Island\"}}";
-                        var content2 = new StringContent(jsonPayload2, Encoding.UTF8, "application/json");
-                        var response2 = await client.PostAsync(secondaryServiceBackend, content2);
-                        if (response2.IsSuccessStatusCode)
-                        {
-                            var json2 = await response2.Content.ReadAsStringAsync();
-                            using JsonDocument doc2 = JsonDocument.Parse(json2);
-                            JsonElement root2 = doc2.RootElement;
-                            if (root2.TryGetProperty("status", out JsonElement resultStatus))
-                            {
-                                switch (resultStatus.GetString())
-                                {
-                                    case "Ok":
-                                        if (root2.TryGetProperty("avatarCode", out JsonElement avatarCodeElement2))
-                                        {
-                                            avatarCode = avatarCodeElement2.GetString();
-                                        }
-                                        break;
-                                    case "Fail":
-                                        if (root2.TryGetProperty("reason_nt", out JsonElement messageElement))
-                                        {
-                                            System.Windows.Forms.Clipboard.SetText(client_checksum);
-                                            throw new Exception(messageElement.GetString());
-                                        }
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-                        }
-                    }
-                }
-                else if (region == "MSN")
+                else if (region == "TunerMS")
                 {
                     var client = new HttpClient();
                     client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
@@ -374,42 +225,42 @@ namespace WzComparerR2.OpenAPI
                         avatarCode = "";
                     }
                 }
-                else if (region == "CMS")
+                else
                 {
-                    var client = new HttpClient();
-                    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36");
-                    string client_checksum = ChecksumCalculation();
-                    client.DefaultRequestHeaders.Add("Checksum", client_checksum);
-                    string jsonPayload = $"{{\"ign\":\"{characterName}\",\"region\":\"TerryMS_Continent\"}}";
-                    var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
-                    var response = await client.PostAsync(secondaryServiceBackend, content);
-                    if (response.IsSuccessStatusCode)
+                    if (region == "ZipanguMS")
                     {
-                        var json = await response.Content.ReadAsStringAsync();
-                        using JsonDocument doc = JsonDocument.Parse(json);
-                        JsonElement root = doc.RootElement;
-                        if (root.TryGetProperty("status", out JsonElement resultStatus))
+                        bool isUnderMaintenance = await isJMSUnderMaintenance();
+                        if (isUnderMaintenance)
                         {
-                            switch (resultStatus.GetString())
-                            {
-                                case "Ok":
-                                    if (root.TryGetProperty("avatarCode", out JsonElement avatarCodeElement2))
-                                    {
-                                        avatarCode = avatarCodeElement2.GetString();
-                                    }
-                                    break;
-                                case "Fail":
-                                    if (root.TryGetProperty("reason_nt", out JsonElement messageElement))
-                                    {
-                                        System.Windows.Forms.Clipboard.SetText(client_checksum);
-                                        throw new Exception(messageElement.GetString());
-                                    }
-                                    break;
-                                default:
-                                    break;
-                            }
+                            throw new Exception("JMS現在正在維護中。");
                         }
                     }
+                    var client = new HttpClient();
+                    client.DefaultRequestHeaders.Add("User-Agent", "WzComparerR2-NTMS/1.0");
+                    var body = new
+                    {
+                        ign = characterName,
+                        region = region
+                    };
+                    string json = JsonSerializer.Serialize(body);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                    HttpResponseMessage resp =
+                        await client.PostAsync(serviceBackend, content);
+
+                    resp.EnsureSuccessStatusCode();
+                    string respJson = await resp.Content.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(respJson);
+                    string status = doc.RootElement.GetProperty("status").GetString();
+                    if (status == "Ok")
+                    {
+                        avatarCode = doc.RootElement.GetProperty("avatarCode").GetString();
+                    }
+                    else
+                    {
+                        throw new Exception(doc.RootElement.GetProperty("reason_nt").GetString());
+                    }
+
                 }
             }
             catch (Exception ex)
