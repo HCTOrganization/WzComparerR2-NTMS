@@ -2744,6 +2744,16 @@ namespace WzComparerR2.Avatar.UI
                             ToastNotification.Show(this, $"警告: {ex.Message}", null, 3000, eToastGlowColor.Orange, eToastPosition.TopCenter);
                         }
                         break;
+                    case 9: // Custom 3
+                        this.API = new NexonOpenAPI("-", "KMS");
+                        avatarCode = dlg.CharaName;
+                        await Type3(avatarCode);
+                        break;
+                    case 10: // Custom 4
+                        this.API = new NexonOpenAPI("-", "KMS");
+                        avatarCode = dlg.CharaName;
+                        await Type4("0x" + avatarCode);
+                        break;
                 }
             }
 

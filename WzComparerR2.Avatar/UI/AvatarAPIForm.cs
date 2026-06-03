@@ -26,6 +26,8 @@ namespace WzComparerR2.Avatar.UI
                 new ComboItem("MSEA"){ Value = 6 },
                 new ComboItem("TMS"){ Value = 7 },
                 new ComboItem("MSN"){ Value = 8 },
+                new ComboItem("特殊3"){ Value = 9 },
+                new ComboItem("特殊4"){ Value = 10 },
             });
         }
 
@@ -80,33 +82,36 @@ namespace WzComparerR2.Avatar.UI
 
         private void textBoxX1_TextChanged(object sender, EventArgs e)
         {
-            string text = textBoxX1.Text;
-            int fullWidthCount = 0;
-            int halfWidthCount = 0;
-            string filteredText = "";
-
-            foreach (char c in text)
+            if (selectedRegion < 9)
             {
-                if (IsEmoji(c))
-                    continue;
-                else if (IsFullWidth(c))
-                    fullWidthCount++;
-                else
-                    halfWidthCount++;
+                string text = textBoxX1.Text;
+                int fullWidthCount = 0;
+                int halfWidthCount = 0;
+                string filteredText = "";
 
-                filteredText += c;
-            }
+                foreach (char c in text)
+                {
+                    if (IsEmoji(c))
+                        continue;
+                    else if (IsFullWidth(c))
+                        fullWidthCount++;
+                    else
+                        halfWidthCount++;
 
-            if (fullWidthCount * 2 + halfWidthCount > 12)
-            {
-                filteredText = filteredText.Substring(0, filteredText.Length - 1);
-            }
+                    filteredText += c;
+                }
 
-            if (textBoxX1.Text != filteredText)
-            {
-                int cursorPos = textBoxX1.SelectionStart;
-                textBoxX1.Text = filteredText;
-                textBoxX1.SelectionStart = Math.Min(cursorPos, textBoxX1.Text.Length);
+                if (fullWidthCount * 2 + halfWidthCount > 12)
+                {
+                    filteredText = filteredText.Substring(0, filteredText.Length - 1);
+                }
+
+                if (textBoxX1.Text != filteredText)
+                {
+                    int cursorPos = textBoxX1.SelectionStart;
+                    textBoxX1.Text = filteredText;
+                    textBoxX1.SelectionStart = Math.Min(cursorPos, textBoxX1.Text.Length);
+                }
             }
 
             ComboItem selectedItem = (ComboItem)cmbRegion.SelectedItem;
@@ -124,6 +129,7 @@ namespace WzComparerR2.Avatar.UI
         private void cmbRegion_SelectedIndexChanged(object sender, EventArgs e)
         {
             buttonX1.Enabled = textBoxX1.Text.Length > 0;
+            textBoxX1.MaxLength = 12;
             ComboItem selectedItem = (ComboItem)cmbRegion.SelectedItem;
             if (selectedItem == null)
             {
@@ -153,6 +159,12 @@ namespace WzComparerR2.Avatar.UI
                 //    labelX1.Text = "僅可讀取聯盟戰地排行榜中列出的角色。";
                 //    labelX1.Visible = true;
                 //    break;
+                case 9:
+                case 10:
+                    textBoxX1.MaxLength = 0;
+                    labelX1.Text = "如果不明白該選項的用途，請勿使用。";
+                    labelX1.Visible = true;
+                    break;
                 default:
                     labelX1.Visible = false;
                     break;
