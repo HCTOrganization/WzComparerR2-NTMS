@@ -135,6 +135,7 @@ namespace WzComparerR2.Avatar.UI
             this.btnEnableAutosave = new DevComponents.DotNetBar.ButtonItem();
             this.btnSpecifySavePath = new DevComponents.DotNetBar.ButtonItem();
             this.btnExport = new DevComponents.DotNetBar.ButtonItem();
+            this.btnExportLwa = new DevComponents.DotNetBar.ButtonItem();
             this.btnZoom = new DevComponents.DotNetBar.ButtonItem();
             this.dockSite3 = new DevComponents.DotNetBar.DockSite();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
@@ -751,7 +752,8 @@ namespace WzComparerR2.Avatar.UI
             this.btnLock,
             this.btnSaveAsGif,
             this.btnSaveOptions,
-            this.btnExport});
+            this.btnExport,
+            this.btnExportLwa});
             this.bar3.Location = new System.Drawing.Point(0, 0);
             this.bar3.Name = "bar3";
             this.bar3.Size = new System.Drawing.Size(168, 27);
@@ -1136,6 +1138,14 @@ namespace WzComparerR2.Avatar.UI
             this.btnSaveAsGif.Tooltip = "保存";
             this.btnSaveAsGif.Click += new System.EventHandler(this.btnSaveAsGif_Click);
             // 
+            // btnExportLwa
+            // 
+            this.btnExportLwa.Image = global::WzComparerR2.Avatar.Properties.Resources.lwa;
+            this.btnExportLwa.Name = "btnExportLwa";
+            this.btnExportLwa.Tooltip = "LWAのQRコードをエクスポート";
+            this.btnExportLwa.Click += new System.EventHandler(this.btnExportLwa_Click);
+            this.btnExportLwa.Enabled = false;
+            // 
             // btnSaveOptions
             // 
             this.btnSaveOptions.AutoExpandOnClick = true;
@@ -1350,6 +1360,7 @@ namespace WzComparerR2.Avatar.UI
         private DevComponents.DotNetBar.ButtonItem btnCustomPreset;
         private DevComponents.DotNetBar.ButtonItem btnAPI;
         private DevComponents.DotNetBar.ButtonItem btnSaveAsGif;
+        private DevComponents.DotNetBar.ButtonItem btnExportLwa;
         private DevComponents.DotNetBar.ButtonItem btnSaveOptions;
         private DevComponents.DotNetBar.ButtonItem btnEnableAutosave;
         private DevComponents.DotNetBar.ButtonItem btnSpecifySavePath;

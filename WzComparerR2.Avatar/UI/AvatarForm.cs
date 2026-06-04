@@ -2497,6 +2497,15 @@ namespace WzComparerR2.Avatar.UI
             SaveGif(sender, e, chkBodyPlay.Checked, chkEmotionPlay.Checked, chkTamingPlay.Checked);
         }
 
+        private async void btnExportLwa_Click(object sender, EventArgs e)
+        {
+#if NET6_0_OR_GREATER
+#else
+            ToastNotification.Show(this, $"この機能を使用するには、.NET 6.0 または .NET 8.0 バージョンを使用する必要があります。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+            return;
+#endif
+        }
+
         private async void btnAPI_Click(object sender, EventArgs e)
         {
 #if NET6_0_OR_GREATER
