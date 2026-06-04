@@ -1144,7 +1144,6 @@ namespace WzComparerR2.Avatar.UI
             this.btnExportLwa.Name = "btnExportLwa";
             this.btnExportLwa.Tooltip = "LWAのQRコードをエクスポート";
             this.btnExportLwa.Click += new System.EventHandler(this.btnExportLwa_Click);
-            this.btnExportLwa.Enabled = false;
             // 
             // btnSaveOptions
             // 

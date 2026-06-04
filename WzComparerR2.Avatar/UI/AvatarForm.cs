@@ -2499,6 +2499,10 @@ namespace WzComparerR2.Avatar.UI
 
         private async void btnExportLwa_Click(object sender, EventArgs e)
         {
+            string code = GetAllPartsTag();
+            var API = new OpenAPI.AvatarCodeEncoder();
+            string avatarCode = API.ConvertCsvToAvatarCode(code);
+            Clipboard.SetText(avatarCode);
 #if NET6_0_OR_GREATER
 #else
             ToastNotification.Show(this, $"この機能を使用するには、.NET 6.0 または .NET 8.0 バージョンを使用する必要があります。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
