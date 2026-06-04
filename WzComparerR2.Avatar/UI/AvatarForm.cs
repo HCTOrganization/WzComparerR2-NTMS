@@ -2541,11 +2541,25 @@ namespace WzComparerR2.Avatar.UI
                     case 8: regionCode = "TunerMS"; break;
                     case 9:
                         avatarCode = dlg.CharaName;
-                        await Type3(avatarCode);
+                        try
+                        {
+                            await Type3(avatarCode);
+                        }
+                        catch
+                        {
+
+                        }
                         return;
                     case 10:
                         avatarCode = dlg.CharaName;
-                        await Type4(avatarCode);
+                        try
+                        {
+                            await Type4(avatarCode);
+                        }
+                        catch
+                        {
+
+                        }
                         return;
                 }
                 if (dlg.selectedRegion == 8)
