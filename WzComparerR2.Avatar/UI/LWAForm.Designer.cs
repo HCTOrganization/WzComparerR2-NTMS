@@ -84,7 +84,7 @@ namespace WzComparerR2.Avatar.UI
             this.txtIGN.Name = "txtIGN";
             this.txtIGN.Size = new System.Drawing.Size(205, 21);
             this.txtIGN.TabIndex = 4;
-            this.txtIGN.WatermarkText = "ララザひつじ";
+            this.txtIGN.WatermarkText = "WzComparerR2";
             // 
             // btnGenerate
             // 
@@ -125,7 +125,6 @@ namespace WzComparerR2.Avatar.UI
             this.Controls.Add(this.btnGenerate);
             this.Controls.Add(this.btnSaveQR);
             this.DoubleBuffered = true;
-            this.Font = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.MaximizeBox = false;
             this.MaximumSize = new System.Drawing.Size(584, 356);
