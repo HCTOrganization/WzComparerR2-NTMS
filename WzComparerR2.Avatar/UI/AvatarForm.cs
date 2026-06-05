@@ -2535,7 +2535,7 @@ namespace WzComparerR2.Avatar.UI
                         return;
                     case 1: regionCode = "ChangseopMS"; break;
                     case 2: regionCode = "ZipanguMS"; break;
-                    case 3: regionCode = "TerryMS_Peninsula"; break;
+                    case 3: regionCode = "TerryMS_Continent"; break;
                     case 4: regionCode = "InkwellMS_NA"; break;
                     case 5: regionCode = "InkwellMS_EU"; break;
                     case 6: regionCode = "TerryMS_Peninsula"; break;
