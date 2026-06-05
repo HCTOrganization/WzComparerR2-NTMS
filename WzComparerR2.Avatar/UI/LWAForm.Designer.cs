@@ -1,0 +1,153 @@
+﻿using DevComponents.DotNetBar;
+using System.Windows.Forms;
+
+namespace WzComparerR2.Avatar.UI
+{
+    partial class LWAForm
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.picPreview = new System.Windows.Forms.PictureBox();
+            this.picQR = new System.Windows.Forms.PictureBox();
+            this.labelIGN = new DevComponents.DotNetBar.LabelX();
+            this.txtIGN = new DevComponents.DotNetBar.Controls.TextBoxX();
+            this.btnGenerate = new DevComponents.DotNetBar.ButtonX();
+            this.btnSaveQR = new DevComponents.DotNetBar.ButtonX();
+            ((System.ComponentModel.ISupportInitialize)(this.picPreview)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picQR)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // picPreview
+            // 
+            this.picPreview.Location = new System.Drawing.Point(4, 4);
+            this.picPreview.Name = "picPreview";
+            this.picPreview.Size = new System.Drawing.Size(256, 256);
+            this.picPreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picPreview.TabIndex = 0;
+            this.picPreview.TabStop = false;
+            // 
+            // picQR
+            // 
+            this.picQR.Location = new System.Drawing.Point(264, 4);
+            this.picQR.Name = "picQR";
+            this.picQR.Size = new System.Drawing.Size(256, 256);
+            this.picQR.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picQR.TabIndex = 1;
+            this.picQR.TabStop = false;
+            // 
+            // labelIGN
+            // 
+            this.labelIGN.AutoSize = true;
+            this.labelIGN.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.labelIGN.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.labelIGN.Location = new System.Drawing.Point(4, 267);
+            this.labelIGN.Name = "labelIGN";
+            this.labelIGN.Size = new System.Drawing.Size(51, 16);
+            this.labelIGN.TabIndex = 3;
+            this.labelIGN.Text = "キャラ名";
+            // 
+            // txtIGN
+            // 
+            // 
+            // 
+            // 
+            this.txtIGN.Border.Class = "TextBoxBorder";
+            this.txtIGN.Border.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.txtIGN.Location = new System.Drawing.Point(56, 264);
+            this.txtIGN.Name = "txtIGN";
+            this.txtIGN.Size = new System.Drawing.Size(205, 21);
+            this.txtIGN.TabIndex = 4;
+            this.txtIGN.WatermarkText = "ララザひつじ";
+            // 
+            // btnGenerate
+            // 
+            this.btnGenerate.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.btnGenerate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnGenerate.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnGenerate.Location = new System.Drawing.Point(206, 289);
+            this.btnGenerate.Name = "btnGenerate";
+            this.btnGenerate.Size = new System.Drawing.Size(55, 19);
+            this.btnGenerate.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.btnGenerate.TabIndex = 5;
+            this.btnGenerate.Text = "生成";
+            this.btnGenerate.Click += new System.EventHandler(this.btnGenerate_Click);
+            // 
+            // btnSaveQR
+            // 
+            this.btnSaveQR.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.btnSaveQR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSaveQR.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnSaveQR.Enabled = false;
+            this.btnSaveQR.Location = new System.Drawing.Point(264, 289);
+            this.btnSaveQR.Name = "btnSaveQR";
+            this.btnSaveQR.Size = new System.Drawing.Size(55, 19);
+            this.btnSaveQR.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.btnSaveQR.TabIndex = 6;
+            this.btnSaveQR.Text = "保存";
+            this.btnSaveQR.Click += new System.EventHandler(this.btnSaveQR_Click);
+            // 
+            // LWAForm
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(525, 313);
+            this.Controls.Add(this.picPreview);
+            this.Controls.Add(this.picQR);
+            this.Controls.Add(this.labelIGN);
+            this.Controls.Add(this.txtIGN);
+            this.Controls.Add(this.btnGenerate);
+            this.Controls.Add(this.btnSaveQR);
+            this.DoubleBuffered = true;
+            this.Font = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.MaximizeBox = false;
+            this.MaximumSize = new System.Drawing.Size(584, 356);
+            this.MinimizeBox = false;
+            this.Name = "LWAForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            this.Text = "樂天世界冒險QR生成器";
+            this.TopMost = true;
+            ((System.ComponentModel.ISupportInitialize)(this.picPreview)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picQR)).EndInit();
+            this.Load += new System.EventHandler(this.LWAForm_Load);
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
+        }
+
+        #endregion
+        private DevComponents.DotNetBar.ButtonX btnSaveQR;
+        private DevComponents.DotNetBar.ButtonX btnGenerate;
+        private DevComponents.DotNetBar.Controls.TextBoxX txtIGN;
+        private DevComponents.DotNetBar.LabelX labelIGN;
+        private System.Windows.Forms.PictureBox picQR;
+        private System.Windows.Forms.PictureBox picPreview;
+    }
+}

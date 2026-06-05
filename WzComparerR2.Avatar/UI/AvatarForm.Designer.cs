@@ -1142,7 +1142,7 @@ namespace WzComparerR2.Avatar.UI
             // 
             this.btnExportLwa.Image = global::WzComparerR2.Avatar.Properties.Resources.lwa;
             this.btnExportLwa.Name = "btnExportLwa";
-            this.btnExportLwa.Tooltip = "LWAのQRコードをエクスポート";
+            this.btnExportLwa.Tooltip = "樂天世界冒險QR生成器";
             this.btnExportLwa.Click += new System.EventHandler(this.btnExportLwa_Click);
             // 
             // btnSaveOptions
