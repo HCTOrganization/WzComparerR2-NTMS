@@ -509,7 +509,9 @@ namespace WzComparerR2.CharaSim
             return (_type >= 140 && _type <= 149)
                 || (_type >= 152 && _type <= 159)
                 || type == GearType.boxingCannon
-                || type == GearType.chakram;
+                || type == GearType.chakram
+                || type == GearType.spear
+                || type == GearType.gram;
         }
 
         public static bool IsMechanicGear(GearType type)
@@ -658,6 +660,10 @@ namespace WzComparerR2.CharaSim
                     return GearType.boxingCannon;
                 case 1404:
                     return GearType.chakram;
+                case 1432:
+                    return GearType.spear;
+                case 1433:
+                    return GearType.gram;
                 case 1712:
                     return GearType.arcaneSymbol;
                 case 1713:

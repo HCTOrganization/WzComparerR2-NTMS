@@ -325,6 +325,10 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         boxingSky = 135286,
         /// <summary>
+        /// keir 135_88
+        /// </summary>
+        keir = 135288,
+        /// <summary>
         /// 手腕护带 135_90
         /// </summary>
         viperWristband = 135290,
@@ -461,9 +465,13 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         thBlunt = 142,
         /// <summary>
-        /// 枪 143
+        /// 枪 1432
         /// </summary>
-        spear = 143,
+        spear = 1432,
+        /// <summary>
+        /// gram 1433
+        /// </summary>
+        gram = 1433,
         /// <summary>
         /// 矛 144
         /// </summary>
