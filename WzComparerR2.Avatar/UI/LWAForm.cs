@@ -14,6 +14,10 @@ namespace WzComparerR2.Avatar.UI
         public LWAForm()
         {
             InitializeComponent();
+#if NET6_0_OR_GREATER
+            // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
+            this.Font = new Font(new FontFamily("SimSun"), 9f);
+#endif
         }
 
         public string avatarCode { get; set; }
