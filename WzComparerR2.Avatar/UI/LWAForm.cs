@@ -1,5 +1,4 @@
-﻿using QRCoder;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -7,6 +6,8 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ZXing;
+using ZXing.QrCode;
 namespace WzComparerR2.Avatar.UI
 {
     public partial class LWAForm : DevComponents.DotNetBar.Office2007Form
@@ -33,14 +34,33 @@ namespace WzComparerR2.Avatar.UI
             if (string.IsNullOrEmpty(targetIGN)) targetIGN = Uri.EscapeDataString(txtIGN.WatermarkText);
             string craftedQrCodeMsg = $"01/{avatarCode}|{targetIGN}|0|1|1|1";
 
-            using (var qrGenerator = new QRCodeGenerator())
-            using (var qrData = qrGenerator.CreateQrCode(craftedQrCodeMsg, QRCodeGenerator.ECCLevel.Q))
-            using (var qrCode = new QRCode(qrData))
+            var options = new QrCodeEncodingOptions
             {
-                Bitmap qrImage = qrCode.GetGraphic(20);
-                picQR.Image = qrImage;
-                btnSaveQR.Enabled = true;
+                Width = 1200,
+                Height = 1200,
+                Margin = 1,
+                ErrorCorrection = ZXing.QrCode.Internal.ErrorCorrectionLevel.M
+            };
+            var writer = new BarcodeWriterPixelData
+            {
+                Format = BarcodeFormat.QR_CODE,
+                Options = options
+            };
+
+            var pixelData = writer.Write(craftedQrCodeMsg);
+            Bitmap qrImage = new Bitmap(pixelData.Width, pixelData.Height, PixelFormat.Format32bppArgb);
+            var bmpData = qrImage.LockBits(new Rectangle(0, 0, qrImage.Width, qrImage.Height),
+                                          ImageLockMode.WriteOnly, qrImage.PixelFormat);
+            try
+            {
+                System.Runtime.InteropServices.Marshal.Copy(pixelData.Pixels, 0, bmpData.Scan0, pixelData.Pixels.Length);
             }
+            finally
+            {
+                qrImage.UnlockBits(bmpData);
+            }
+            picQR.Image = qrImage;
+            btnSaveQR.Enabled = true;
         }
 
         private void btnSaveQR_Click(object sender, EventArgs e)
