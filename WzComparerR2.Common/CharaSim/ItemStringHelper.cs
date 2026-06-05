@@ -1085,6 +1085,8 @@ namespace WzComparerR2.CharaSim
                 case 45: return GetGearTypeString(GearType.fanTassel);
                 case 50: return GetGearTypeString(GearType.kodachi);
                 case 52: return GetGearTypeString(GearType.boxingSky);
+                case 53: return GetGearTypeString(GearType.compass);
+                case 54: return GetGearTypeString(GearType.gram);
 
                 default: return GetGearTypeString(GearType.astra);
             }
@@ -1141,6 +1143,8 @@ namespace WzComparerR2.CharaSim
                 case 43: return GetExtraJobReqString(GearType.yeouiGem);
                 case 44: return GetExtraJobReqString(GearType.ornament);
                 case 45: return GetExtraJobReqString(GearType.fanTassel);
+                case 53: return GetExtraJobReqString(GearType.compass);
+                case 54: return GetExtraJobReqString(GearType.keir);
 
                 default: return GetExtraJobReqString(GearType.astra);
             }
