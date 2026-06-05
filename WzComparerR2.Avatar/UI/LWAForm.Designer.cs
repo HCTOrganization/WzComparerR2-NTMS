@@ -71,7 +71,7 @@ namespace WzComparerR2.Avatar.UI
             this.labelIGN.Name = "labelIGN";
             this.labelIGN.Size = new System.Drawing.Size(51, 16);
             this.labelIGN.TabIndex = 3;
-            this.labelIGN.Text = "キャラ名";
+            this.labelIGN.Text = "角色名";
             // 
             // txtIGN
             // 
