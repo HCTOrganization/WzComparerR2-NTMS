@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -6,16 +6,22 @@ using System.Text;
 
 namespace WzComparerR2.OpenAPI
 {
+    /// <summary>
+    /// Encodes equipment CSV data into MapleStory avatar codes.
+    /// Direct port of the verified Python implementation.
+    /// </summary>
     public class AvatarCodeEncoder
     {
         private const int AVATAR_BYTES = 128;
         private const int AVATAR_VERSION = 40;
         private const int DEFAULT_ID = 1023;
 
-        private static readonly byte[] AES_KEY = [0x10, 0x04, 0x3F, 0x11, 0x17, 0xCD, 0x12, 0x15, 0x5D, 0x8E, 0x7A, 0x19, 0x80, 0x11, 0x4F, 0x14];
-        private static readonly byte[] AES_IV = [0x11, 0x17, 0xCD, 0x10, 0x04, 0x3F, 0x8E, 0x7A, 0x12, 0x15, 0x80, 0x11, 0x5D, 0x19, 0x4F, 0x10];
+        private static readonly byte[] AES_KEY = { 0x10, 0x04, 0x3F, 0x11, 0x17, 0xCD, 0x12, 0x15, 0x5D, 0x8E, 0x7A, 0x19, 0x80, 0x11, 0x4F, 0x14 };
+        private static readonly byte[] AES_IV = { 0x11, 0x17, 0xCD, 0x10, 0x04, 0x3F, 0x8E, 0x7A, 0x12, 0x15, 0x80, 0x11, 0x5D, 0x19, 0x4F, 0x10 };
 
-        private readonly int[] WEAPONS_KMS = [-1, 130, 131, 132, 133, 137, 138, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, -1, 134, 152, 153, -1, 136, 121, 122, 123, 124, 156, 157, 126, 158, 127, 128, 159, 129, 121, 1214, 1404, 1215];
+        private static readonly int[] WEAPONS_KMS = { -1, 130, 131, 132, 133, 137, 138, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, -1,
+                                                       134, 152, 153, -1, 136, 121, 122, 123, 124, 156, 157, 126, 158, 127, 128, 159, 129, 121,
+                                                       1214, 1404, 1215 };
 
         public string ConvertCsvToAvatarCode(string equipIdCsv)
         {
@@ -26,187 +32,334 @@ namespace WzComparerR2.OpenAPI
             return BytesToAvatarCode(encrypted);
         }
 
-        private AvatarData CreateDefaultAvatar()
+        private Dictionary<string, object> CreateDefaultAvatar()
         {
-            var values = new AvatarValues
+            return new Dictionary<string, object>
             {
-                Gender = 0,
-                SkinID = DEFAULT_ID,
-                FaceID = DEFAULT_ID,
-                HairID = DEFAULT_ID,
-                CapID = DEFAULT_ID,
-                FaceAccID = DEFAULT_ID,
-                EyeAccID = DEFAULT_ID,
-                EarAccID = DEFAULT_ID,
-                CoatID = DEFAULT_ID,
-                PantsID = DEFAULT_ID,
-                ShoesID = DEFAULT_ID,
-                GlovesID = DEFAULT_ID,
-                CapeID = DEFAULT_ID,
-                ShieldID = DEFAULT_ID,
-                CashWeaponID = DEFAULT_ID,
-                WeaponID = DEFAULT_ID,
-                EmotionFaceAccID = DEFAULT_ID,
-                RingID1 = DEFAULT_ID,
-                RingID2 = DEFAULT_ID,
-                RingID3 = DEFAULT_ID,
-                RingID4 = DEFAULT_ID,
-                // Default flags
-                IsNotBlade = 1,
-                SubWeaponType = 0,
-                IsSubWeapon = 0,
-                IsCashWeapon = 0
+                ["version"] = AVATAR_VERSION,
+                ["values"] = new Dictionary<string, int>
+                {
+                    ["gender"] = 0,
+                    ["skinID"] = DEFAULT_ID,
+                    ["face10k"] = 0,
+                    ["faceID"] = DEFAULT_ID,
+                    ["faceGender"] = 0,
+                    ["hair10k"] = 0,
+                    ["hairID"] = DEFAULT_ID,
+                    ["hairGender"] = 0,
+                    ["capID"] = DEFAULT_ID,
+                    ["capGender"] = 0,
+                    ["faceAccID"] = DEFAULT_ID,
+                    ["faceAccGender"] = 0,
+                    ["eyeAccID"] = DEFAULT_ID,
+                    ["eyeAccGender"] = 0,
+                    ["earAccID"] = DEFAULT_ID,
+                    ["earAccGender"] = 0,
+                    ["isLongCoat"] = 0,
+                    ["coatID"] = DEFAULT_ID,
+                    ["coatGender"] = 0,
+                    ["pantsID"] = DEFAULT_ID,
+                    ["pantsGender"] = 0,
+                    ["shoesID"] = DEFAULT_ID,
+                    ["shoesGender"] = 0,
+                    ["glovesID"] = DEFAULT_ID,
+                    ["glovesGender"] = 0,
+                    ["capeID"] = DEFAULT_ID,
+                    ["capeGender"] = 0,
+                    ["subWeaponType"] = 0,
+                    ["shieldID"] = DEFAULT_ID,
+                    ["shieldGender"] = 0,
+                    ["isCashWeapon"] = 0,
+                    ["cashWeaponID"] = DEFAULT_ID,
+                    ["cashWeaponGender"] = 0,
+                    ["weaponID"] = DEFAULT_ID,
+                    ["weaponGender"] = 0,
+                    ["weaponType"] = 0,
+                    ["earType"] = 0,
+                    ["mixHairColor"] = 0,
+                    ["mixHairRatio"] = 0,
+                    ["mixFaceInfo"] = 0,
+                    ["unknown1"] = 0,
+                    ["jobWingTailType"] = 0,
+                    ["jobWingTailTypeDetail"] = 0,
+                    ["unknown2"] = 0,
+                    ["eventJob"] = 0,
+                    ["unknown2_2"] = 0,
+                    ["weaponMotionType"] = 0,
+                    ["unknown3"] = 0,
+                    ["showEffectFlags"] = 0,
+                    ["unknown3_2"] = 0,
+                    ["emotionFaceAccID"] = DEFAULT_ID,
+                    ["emotionFaceAccGender"] = 0,
+                    ["ringID1"] = DEFAULT_ID,
+                    ["ringGender1"] = 0,
+                    ["ringID2"] = DEFAULT_ID,
+                    ["ringGender2"] = 0,
+                    ["ringID3"] = DEFAULT_ID,
+                    ["ringGender3"] = 0,
+                    ["ringID4"] = DEFAULT_ID,
+                    ["ringGender4"] = 0,
+                }
             };
-
-            return new AvatarData { Version = AVATAR_VERSION, Values = values };
         }
 
-        private void ApplyEquipIdCsv(AvatarData data, string rawCsv)
+        private void ApplyEquipIdCsv(Dictionary<string, object> avatar, string rawCsv)
         {
             var fields = rawCsv.Split(',').Select(f => f.Trim()).ToArray();
-            var v = data.Values;
+            if (fields.Length < 16)
+                throw new ArgumentException($"Equipment ID list requires at least 16 fields, got {fields.Length}");
 
+            var v = (Dictionary<string, int>)avatar["values"];
+            v["mixFaceInfo"] = 0;
+            v["mixHairColor"] = 0;
+            v["mixHairRatio"] = 0;
+
+            void ApplyField(int index, string slot, bool allowFormula = false)
+            {
+                if (index >= fields.Length) return;
+                string field = fields[index].Trim();
+                if (string.IsNullOrEmpty(field)) return;
+
+                // Parse formulas like "1001+1*50"
+                if (field.Contains("+") && allowFormula)
+                {
+                    var parts = field.Split('+');
+                    var itemIdStr = parts[0].Trim();
+                    var formulaStr = parts.Length > 1 ? parts[1].Trim() : "";
+                    
+                    if (formulaStr.Contains("*"))
+                    {
+                        try
+                        {
+                            var formula = formulaStr.Split('*');
+                            int mixColor = int.Parse(formula[0]);
+                            int mixRatio = int.Parse(formula[1]);
+                            
+                            if (slot == "face")
+                                v["mixFaceInfo"] = mixColor * 100 + mixRatio;
+                            else if (slot == "hair")
+                            {
+                                v["mixHairColor"] = mixColor;
+                                v["mixHairRatio"] = mixRatio;
+                            }
+                        }
+                        catch { }
+                    }
+                    field = itemIdStr;
+                }
+
+                Process(field, v, slot);
+            }
+
+            // Process fields in order
+            ApplyField(1, "skin");
+            ApplyField(2, "face", true);
+            ApplyField(3, "hair", true);
+            ApplyField(4, "cap");
+            ApplyField(5, "coat");
+            ApplyField(6, "coat");
+            ApplyField(7, "pants");
+            ApplyField(8, "shoes");
+            ApplyField(9, "gloves");
+            ApplyField(10, "shield");
+            ApplyField(11, "cape");
+
+            // Weapon handling
             bool hasCashWeapon = false;
             bool hasRegularWeapon = false;
 
-            // Skin
-            if (fields.Length > 1) ProcessItemId(fields[1], v, "skin");
-
-            // Face + Hair
-            if (fields.Length > 2) ProcessItemId(fields[2], v, "face");
-            if (fields.Length > 3) ProcessItemId(fields[3], v, "hair");
-
-            // Other slots
-            if (fields.Length > 4) ProcessItemId(fields[4], v, "cap");
-            if (fields.Length > 5) ProcessItemId(fields[5], v, "coat");
-            if (fields.Length > 6) ProcessItemId(fields[6], v, "coat");
-            if (fields.Length > 7) ProcessItemId(fields[7], v, "pants");
-            if (fields.Length > 8) ProcessItemId(fields[8], v, "shoes");
-            if (fields.Length > 9) ProcessItemId(fields[9], v, "gloves");
-            if (fields.Length > 10) ProcessItemId(fields[10], v, "shield");
-            if (fields.Length > 11) ProcessItemId(fields[11], v, "cape");
-
-            // === Weapon / Cash Weapon handling with special rule ===
-            if (fields.Length > 12)
+            if (fields.Length > 12 && !string.IsNullOrEmpty(fields[12]))
             {
-                string weaponField = fields[12];
-
-                if (!string.IsNullOrEmpty(weaponField))
+                string weapon = fields[12];
+                if (weapon.StartsWith("170"))
                 {
-                    if (weaponField.StartsWith("170"))
-                    {
-                        hasCashWeapon = true;
-                        ProcessItemId(weaponField, v, "cashWeapon");
-                    }
-                    else
-                    {
-                        ProcessItemId(weaponField, v, "weapon");
-                        if (IsRegularWeapon(weaponField))
-                            hasRegularWeapon = true;
-                    }
+                    hasCashWeapon = true;
+                    Process(weapon, v, "cashWeapon");
+                }
+                else
+                {
+                    Process(weapon, v, "weapon");
+                    hasRegularWeapon = IsRegularWeapon(weapon);
                 }
             }
 
-            // Special Rule: If cash weapon exists but no regular weapon → add 1372243
             if (hasCashWeapon && !hasRegularWeapon)
-            {
-                ProcessItemId("1372243", v, "weapon");
-            }
+                Process("1372243", v, "weapon");
 
-            // Remaining slots
-            if (fields.Length > 13) ProcessItemId(fields[13], v, "earAcc");
-            if (fields.Length > 14) ProcessItemId(fields[14], v, "faceAcc");
-            if (fields.Length > 15) ProcessItemId(fields[15], v, "eyeAcc");
+            // Accessories
+            ApplyField(13, "earAcc");
+            ApplyField(14, "faceAcc");
+            ApplyField(15, "eyeAcc");
 
+            // Rings
             for (int i = 1; i <= 4; i++)
             {
                 int idx = 24 + i;
-                if (fields.Length > idx)
-                    ProcessItemId(fields[idx], v, $"ring{i}");
+                if (idx < fields.Length && !string.IsNullOrEmpty(fields[idx]))
+                    ApplyField(idx, $"ring{i}");
             }
         }
 
         private bool IsRegularWeapon(string idStr)
         {
-            if (!int.TryParse(idStr, out int id)) return false;
-            return id >= 1210000 && id <= 1689999;
+            try
+            {
+                int id = int.Parse(idStr.Split('+')[0]);
+                return id >= 1210000 && id <= 1689999;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
-        private void ProcessItemId(string raw, AvatarValues v, string slot)
+        private void Process(string raw, Dictionary<string, int> v, string slot)
         {
             if (string.IsNullOrEmpty(raw)) return;
 
-            // Handle formula like "55074+5*50"
-            string idPart = raw.Split('+')[0].Trim();
+            var idPart = raw.Split('+')[0].Trim();
             if (!int.TryParse(idPart, out int id)) return;
 
             int prefix = id / 10000;
             int gender = (id % 10000) / 1000;
             int baseId = id % 1000;
 
-            switch (prefix)
+            // Skin
+            if (prefix == 0 || prefix == 1)
+                v["skinID"] = baseId;
+            // Face
+            else if (prefix == 2 || prefix == 5 || prefix == 8)
             {
-                case 0:
-                case 1:
-                    v.SkinID = baseId; break;
-                case 2:
-                case 5:
-                case 8:
-                    v.FaceID = baseId; v.FaceGender = gender; v.Face10k = prefix == 5 ? 1 : 0; break;
-                case 3:
-                case 4:
-                case 6:
-                case 7:
-                    v.HairID = baseId; v.HairGender = gender; v.Hair10k = prefix; break;
-                case 100:
-                    v.CapID = baseId; v.CapGender = gender; break;
-                case 101:
-                    if (slot == "emotionFaceAcc") { v.EmotionFaceAccID = baseId; v.EmotionFaceAccGender = gender; }
-                    else { v.FaceAccID = baseId; v.FaceAccGender = gender; }
-                    break;
-                case 102: v.EyeAccID = baseId; v.EyeAccGender = gender; break;
-                case 103: v.EarAccID = baseId; v.EarAccGender = gender; break;
-                case 104: v.CoatID = baseId; v.CoatGender = gender; v.IsLongCoat = 0; break;
-                case 105: v.CoatID = baseId; v.CoatGender = gender; v.IsLongCoat = 1; break;
-                case 106: v.PantsID = baseId; v.PantsGender = gender; break;
-                case 107: v.ShoesID = baseId; v.ShoesGender = gender; break;
-                case 108: v.GlovesID = baseId; v.GlovesGender = gender; break;
-                case 110: v.CapeID = baseId; v.CapeGender = gender; break;
-                case 109: v.ShieldID = baseId; v.ShieldGender = gender; v.SubWeaponType = 1; v.IsNotBlade = 1; v.IsSubWeapon = 0; break;
-                case 134: v.ShieldID = baseId; v.ShieldGender = gender; v.SubWeaponType = 2; v.IsNotBlade = 0; v.IsSubWeapon = 0; break;
-                case 135: v.ShieldID = baseId; v.ShieldGender = gender; v.SubWeaponType = 3; v.IsNotBlade = 1; v.IsSubWeapon = 1; break;
-                case 172: v.ShieldID = baseId; v.ShieldGender = gender; v.SubWeaponType = 4; v.IsNotBlade = 1; v.IsSubWeapon = 0; break;
-                case 170: v.CashWeaponID = baseId; v.CashWeaponGender = gender; v.IsCashWeapon = 1; break;
+                v["faceID"] = baseId;
+                v["faceGender"] = gender;
+                v["face10k"] = (prefix == 5) ? 1 : 0;
             }
-
-            if (prefix >= 121 && prefix <= 168)
+            // Hair
+            else if (prefix == 3 || prefix == 4 || prefix == 6 || prefix == 7)
             {
-                int weaponType = Array.IndexOf(WEAPONS_KMS, prefix);
-                if (weaponType != -1)
+                v["hairID"] = baseId;
+                v["hairGender"] = gender;
+                v["hair10k"] = prefix;
+            }
+            // Cap
+            else if (prefix == 100)
+            {
+                v["capID"] = baseId;
+                v["capGender"] = gender;
+            }
+            // Face Accessory
+            else if (prefix == 101)
+            {
+                if (slot == "emotionFaceAcc")
                 {
-                    v.WeaponID = baseId;
-                    v.WeaponGender = gender;
-                    v.WeaponType = weaponType;
+                    v["emotionFaceAccID"] = baseId;
+                    v["emotionFaceAccGender"] = gender;
+                }
+                else
+                {
+                    v["faceAccID"] = baseId;
+                    v["faceAccGender"] = gender;
                 }
             }
-
-            if (prefix == 111 && slot.StartsWith("ring"))
+            // Eye Accessory
+            else if (prefix == 102)
             {
-                int ringIdx = int.Parse(slot.Substring(4));
-                switch (ringIdx)
+                v["eyeAccID"] = baseId;
+                v["eyeAccGender"] = gender;
+            }
+            // Ear Accessory
+            else if (prefix == 103)
+            {
+                v["earAccID"] = baseId;
+                v["earAccGender"] = gender;
+            }
+            // Coat (short)
+            else if (prefix == 104)
+            {
+                v["coatID"] = baseId;
+                v["coatGender"] = gender;
+                v["isLongCoat"] = 0;
+            }
+            // Coat (long)
+            else if (prefix == 105)
+            {
+                v["coatID"] = baseId;
+                v["coatGender"] = gender;
+                v["isLongCoat"] = 1;
+            }
+            // Pants
+            else if (prefix == 106)
+            {
+                v["pantsID"] = baseId;
+                v["pantsGender"] = gender;
+            }
+            // Shoes
+            else if (prefix == 107)
+            {
+                v["shoesID"] = baseId;
+                v["shoesGender"] = gender;
+            }
+            // Gloves
+            else if (prefix == 108)
+            {
+                v["glovesID"] = baseId;
+                v["glovesGender"] = gender;
+            }
+            // Cape
+            else if (prefix == 110)
+            {
+                v["capeID"] = baseId;
+                v["capeGender"] = gender;
+            }
+            // Shield / Blade
+            else if (prefix == 109 || prefix == 134 || prefix == 135 || prefix == 172)
+            {
+                v["shieldID"] = baseId;
+                v["shieldGender"] = gender;
+                if (prefix == 109)
+                    v["subWeaponType"] = 1;
+                else if (prefix == 134)
+                    v["subWeaponType"] = 2;
+                else if (prefix == 135)
+                    v["subWeaponType"] = 3;
+                else if (prefix == 172)
+                    v["subWeaponType"] = 4;
+            }
+            // Cash Weapon
+            else if (prefix == 170)
+            {
+                v["cashWeaponID"] = baseId;
+                v["cashWeaponGender"] = gender;
+                v["isCashWeapon"] = 1;
+            }
+            // Regular Weapons
+            else if (prefix >= 121 && prefix <= 168)
+            {
+                int wt = Array.IndexOf(WEAPONS_KMS, prefix);
+                if (wt != -1)
                 {
-                    case 1: v.RingID1 = baseId; v.RingGender1 = gender; break;
-                    case 2: v.RingID2 = baseId; v.RingGender2 = gender; break;
-                    case 3: v.RingID3 = baseId; v.RingGender3 = gender; break;
-                    case 4: v.RingID4 = baseId; v.RingGender4 = gender; break;
+                    v["weaponID"] = baseId;
+                    v["weaponGender"] = gender;
+                    v["weaponType"] = wt;
                 }
+            }
+            // Rings
+            else if (prefix == 111 && slot.StartsWith("ring"))
+            {
+                try
+                {
+                    int idx = int.Parse(slot[4].ToString());
+                    v[$"ringID{idx}"] = baseId;
+                    v[$"ringGender{idx}"] = gender;
+                }
+                catch { }
             }
         }
 
-        private byte[] PackAvatarBytes(AvatarData data)
+        private byte[] PackAvatarBytes(Dictionary<string, object> avatar)
         {
+            var v = (Dictionary<string, int>)avatar["values"];
             var bytes = new byte[AVATAR_BYTES];
-            var v = data.Values;
             int offset = 0;
 
             void Write(int value, int bits)
@@ -219,135 +372,120 @@ namespace WzComparerR2.OpenAPI
                 }
             }
 
-            Write(v.Gender, 1);
-            Write(v.SkinID, 10);
-            Write(v.Face10k, 1);
-            Write(v.FaceID, 10);
-            Write(v.FaceGender, 4);
-            Write(v.Hair10k, 4);
-            Write(v.HairID, 10);
-            Write(v.HairGender, 4);
-            Write(v.CapID, 10);
-            Write(v.CapGender, 3);
-            Write(v.FaceAccID, 10);
-            Write(v.FaceAccGender, 2);
-            Write(v.EyeAccID, 10);
-            Write(v.EyeAccGender, 2);
-            Write(v.EarAccID, 10);
-            Write(v.EarAccGender, 2);
-            Write(v.IsLongCoat, 1);
-            Write(v.CoatID, 10);
-            Write(v.CoatGender, 4);
-            Write(v.PantsID, 10);
-            Write(v.PantsGender, 2);
-            Write(v.ShoesID, 10);
-            Write(v.ShoesGender, 4);
-            Write(v.GlovesID, 10);
-            Write(v.GlovesGender, 2);
-            Write(v.CapeID, 10);
-            Write(v.CapeGender, 4);
-
-            Write(v.SubWeaponType, 3);
-            if (v.SubWeaponType != 0)
+            int Get(string key, int defaultVal = 0)
             {
-                Write(v.ShieldID, 10);
-                Write(v.ShieldGender, 4);
+                return v.ContainsKey(key) ? v[key] : defaultVal;
             }
 
-            Write(v.Uk2_1, 1);
-            Write(v.IsCashWeapon, 1);
-            if (v.IsCashWeapon == 1)
+            // Write all fields exactly as per Python implementation
+            Write(Get("gender", 0), 1);
+            Write(Get("skinID", DEFAULT_ID), 10);
+            Write(Get("face10k", 0), 1);
+            Write(Get("faceID", DEFAULT_ID), 10);
+            Write(Get("faceGender", 0), 4);
+            Write(Get("hair10k", 0), 4);
+            Write(Get("hairID", DEFAULT_ID), 10);
+            Write(Get("hairGender", 0), 4);
+            Write(Get("capID", DEFAULT_ID), 10);
+            Write(Get("capGender", 0), 3);
+            Write(Get("faceAccID", DEFAULT_ID), 10);
+            Write(Get("faceAccGender", 0), 2);
+            Write(Get("eyeAccID", DEFAULT_ID), 10);
+            Write(Get("eyeAccGender", 0), 2);
+            Write(Get("earAccID", DEFAULT_ID), 10);
+            Write(Get("earAccGender", 0), 2);
+            Write(Get("isLongCoat", 0), 1);
+            Write(Get("coatID", DEFAULT_ID), 10);
+            Write(Get("coatGender", 0), 4);
+            Write(Get("pantsID", DEFAULT_ID), 10);
+            Write(Get("pantsGender", 0), 2);
+            Write(Get("shoesID", DEFAULT_ID), 10);
+            Write(Get("shoesGender", 0), 4);
+            Write(Get("glovesID", DEFAULT_ID), 10);
+            Write(Get("glovesGender", 0), 2);
+            Write(Get("capeID", DEFAULT_ID), 10);
+            Write(Get("capeGender", 0), 4);
+
+            Write(Get("subWeaponType", 0), 3);
+            if (Get("subWeaponType", 0) != 0)
             {
-                Write(v.CashWeaponID, 10);
-                Write(v.CashWeaponGender, 2);
+                Write(Get("shieldID", DEFAULT_ID), 10);
+                Write(Get("shieldGender", 0), 4);
             }
 
-            Write(v.WeaponID, 10);
-            Write(v.WeaponGender, 2);
-            Write(v.WeaponType, 8);
-            Write(v.EarType, 4);
-            Write(v.MixHairColor, 4);
-            Write(v.MixHairRatio, 8);
-            Write(v.MixFaceInfo, 10);
-            Write(v.Unknown1, 4);
-            Write(v.JobWingTailType, 8);
-            Write(v.JobWingTailTypeDetail, 2);
-            Write(v.Unknown2, 6);
-            Write(v.EventJob, 3);
-            Write(v.Unknown2_2, 21);
-            Write(v.WeaponMotionType, 2);
-            Write(v.Unknown3, 11);
-            Write(v.ShowEffectFlags, 4);
-            Write(v.Unknown3_2, 3);
-            Write(v.EmotionFaceAccID, 10);
-            Write(v.EmotionFaceAccGender, 2);
+            Write(0, 1); // uk2_1
+            Write(Get("isCashWeapon", 0), 1);
+            if (Get("isCashWeapon", 0) == 1)
+            {
+                Write(Get("cashWeaponID", DEFAULT_ID), 10);
+                Write(Get("cashWeaponGender", 0), 2);
+            }
 
-            // Rings
-            Write(v.RingID1, 10); Write(v.RingGender1, 4);
-            Write(v.RingID2, 10); Write(v.RingGender2, 4);
-            Write(v.RingID3, 10); Write(v.RingGender3, 4);
-            Write(v.RingID4, 10); Write(v.RingGender4, 4);
+            Write(Get("weaponID", DEFAULT_ID), 10);
+            Write(Get("weaponGender", 0), 2);
+            Write(Get("weaponType", 0), 8);
+            Write(Get("earType", 0), 4);
+            Write(Get("mixHairColor", 0), 4);
+            Write(Get("mixHairRatio", 0), 8);
+            Write(Get("mixFaceInfo", 0), 10);
+            Write(Get("unknown1", 0), 4);
+            Write(Get("jobWingTailType", 0), 8);
+            Write(Get("jobWingTailTypeDetail", 0), 2);
+            Write(Get("unknown2", 0), 6);
+            Write(Get("eventJob", 0), 3);
+            Write(Get("unknown2_2", 0), 21);
+            Write(Get("weaponMotionType", 0), 2);
+            Write(Get("unknown3", 0), 11);
+            Write(Get("showEffectFlags", 0), 4);
+            Write(Get("unknown3_2", 0), 3);
+            Write(Get("emotionFaceAccID", DEFAULT_ID), 10);
+            Write(Get("emotionFaceAccGender", 0), 2);
 
-            // Version byte
+            // Prisms (all default to 0/not set)
+            for (int pIdx = 0; pIdx < 12; pIdx++)
+                Write(0, 1); // hasPrism for each type = 0 (no prisms)
+
+            Write(Get("ringID1", DEFAULT_ID), 10);
+            Write(Get("ringGender1", 0), 4);
+            Write(Get("ringID2", DEFAULT_ID), 10);
+            Write(Get("ringGender2", 0), 4);
+            Write(Get("ringID3", DEFAULT_ID), 10);
+            Write(Get("ringGender3", 0), 4);
+            Write(Get("ringID4", DEFAULT_ID), 10);
+            Write(Get("ringGender4", 0), 4);
+
             bytes[AVATAR_BYTES - AVATAR_BYTES / 16 - 1] = AVATAR_VERSION;
-
             return bytes;
         }
 
-        private byte[] AesEncryptNoPadding(byte[] plainBytes)
+        private byte[] AesEncryptNoPadding(byte[] data)
         {
-            using var aes = Aes.Create();
-            aes.Key = AES_KEY;
-            aes.IV = AES_IV;
-            aes.Mode = CipherMode.CBC;
-            aes.Padding = PaddingMode.None;
+            using (var aes = Aes.Create())
+            {
+                aes.Key = AES_KEY;
+                aes.IV = AES_IV;
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.None;
 
-            using var encryptor = aes.CreateEncryptor();
-            return encryptor.TransformFinalBlock(plainBytes, 0, plainBytes.Length);
+                using (var encryptor = aes.CreateEncryptor())
+                {
+                    return encryptor.TransformFinalBlock(data, 0, data.Length);
+                }
+            }
         }
 
         private string BytesToAvatarCode(byte[] bytes)
         {
+            const string chars = "ABCDEFGHIJKLMNOP";
             var sb = new StringBuilder();
-            foreach (byte b in bytes)
+
+            foreach (var b in bytes)
             {
-                sb.Append((char)('A' + (b >> 4)));
-                sb.Append((char)('A' + (b & 0x0F)));
+                sb.Append(chars[(b >> 4) & 0xF]);
+                sb.Append(chars[b & 0xF]);
             }
+
             return sb.ToString();
-        }
-
-        // Data classes
-        private class AvatarData
-        {
-            public int Version { get; set; }
-            public AvatarValues Values { get; set; } = new();
-        }
-
-        private class AvatarValues
-        {
-            public int Gender, SkinID, Face10k, FaceID, FaceGender;
-            public int Hair10k, HairID, HairGender;
-            public int CapID, CapGender;
-            public int FaceAccID, FaceAccGender;
-            public int EyeAccID, EyeAccGender;
-            public int EarAccID, EarAccGender;
-            public int IsLongCoat, CoatID, CoatGender;
-            public int PantsID, PantsGender;
-            public int ShoesID, ShoesGender;
-            public int GlovesID, GlovesGender;
-            public int CapeID, CapeGender;
-            public int SubWeaponType, ShieldID, ShieldGender;
-            public int IsNotBlade, IsSubWeapon;
-            public int IsCashWeapon, CashWeaponID, CashWeaponGender;
-            public int WeaponID, WeaponGender, WeaponType;
-            public int EarType, MixHairColor, MixHairRatio, MixFaceInfo;
-            public int Uk2_1, Unknown1, JobWingTailType, JobWingTailTypeDetail;
-            public int Unknown2, EventJob, Unknown2_2, WeaponMotionType;
-            public int Unknown3, ShowEffectFlags, Unknown3_2;
-            public int EmotionFaceAccID, EmotionFaceAccGender;
-            public int RingID1, RingGender1, RingID2, RingGender2;
-            public int RingID3, RingGender3, RingID4, RingGender4;
         }
     }
 }

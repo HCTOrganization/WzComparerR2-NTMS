@@ -46,7 +46,7 @@ namespace WzComparerR2.Avatar.UI
             this.picPreview.Location = new System.Drawing.Point(4, 4);
             this.picPreview.Name = "picPreview";
             this.picPreview.Size = new System.Drawing.Size(256, 256);
-            this.picPreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.picPreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.picPreview.TabIndex = 0;
             this.picPreview.TabStop = false;
             // 
@@ -67,7 +67,7 @@ namespace WzComparerR2.Avatar.UI
             // 
             // 
             this.labelIGN.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.labelIGN.Location = new System.Drawing.Point(4, 267);
+            this.labelIGN.Location = new System.Drawing.Point(4, 265);
             this.labelIGN.Name = "labelIGN";
             this.labelIGN.Size = new System.Drawing.Size(51, 16);
             this.labelIGN.TabIndex = 3;
