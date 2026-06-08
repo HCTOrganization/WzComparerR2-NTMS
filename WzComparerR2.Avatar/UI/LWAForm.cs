@@ -67,7 +67,7 @@ namespace WzComparerR2.Avatar.UI
         {
             using (SaveFileDialog dlg = new SaveFileDialog())
             {
-                dlg.Title = "QRコードを保存";
+                dlg.Title = "保存QR碼";
                 dlg.Filter = "PNG (*.png)|*.png";
                 dlg.CheckPathExists = true;
                 dlg.DefaultExt = "txt";
