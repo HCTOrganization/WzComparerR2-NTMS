@@ -394,10 +394,10 @@ namespace WzComparerR2
                     this.buttonItemGMSC.Checked = true;
                     break;
                 case 7:
-                    this.buttonItemCMS.Checked = true;
+                    this.buttonItemGMSPTS.Checked = true;
                     break;
                 case 8:
-                    this.buttonItemCMSC.Checked = true;
+                    this.buttonItemCMS.Checked = true;
                     break;
             }
         }
@@ -3716,20 +3716,14 @@ namespace WzComparerR2
                     gameCode = "106690@d811";
                     break;
                 case 4:
+                    gameCode = "10100";
+                    break;
                 case 5:
-                    foreach (Form form in Application.OpenForms)
-                    {
-                        if (form is FrmGMSDownloader && !form.IsDisposed)
-                        {
-                            form.Show();
-                            form.BringToFront();
-                            return;
-                        }
-                    }
-                    FrmGMSDownloader frm = new FrmGMSDownloader();
-                    frm.Owner = this;
-                    frm.Show();
-                    return;
+                    gameCode = "59822";
+                    break;
+                case 6:
+                    gameCode = "40600";
+                    break;
             }
             switch (preferredRegion)
             {
@@ -3761,6 +3755,26 @@ namespace WzComparerR2
                             ngmInstallPrompt(ngmProtocol);
                         }
                     }
+                    return;
+                case 4:
+                case 5:
+                case 6:
+                    foreach (Form form in Application.OpenForms)
+                    {
+                        if (form is FrmGMSDownloader && !form.IsDisposed)
+                        {
+                            form.Show();
+                            form.BringToFront();
+                            return;
+                        }
+                    }
+                    FrmGMSDownloader frm = new FrmGMSDownloader();
+                    frm.Owner = this;
+                    if (int.TryParse(gameCode, out int x))
+                    {
+                        frm.gameCode = x;
+                    }
+                    frm.Show();
                     return;
                 default:
                     MessageBoxEx.Show(this, "Not implemented", "注意");
@@ -3794,6 +3808,10 @@ namespace WzComparerR2
                 case 5:
                     ngmProtocol = "nxl";
                     gameCode = "59822";
+                    break;
+                case 6:
+                    ngmProtocol = "nxl";
+                    gameCode = "40600";
                     break;
             }
 
@@ -3858,8 +3876,8 @@ namespace WzComparerR2
             this.buttonItemMSN.Checked = false;
             this.buttonItemGMS.Checked = false;
             this.buttonItemGMSC.Checked = false;
+            this.buttonItemGMSPTS.Checked = false;
             this.buttonItemCMS.Checked = false;
-            this.buttonItemCMSC.Checked = false;
             ConfigManager.Save();
         }
 
@@ -3873,8 +3891,8 @@ namespace WzComparerR2
             this.buttonItemMSN.Checked = false;
             this.buttonItemGMS.Checked = false;
             this.buttonItemGMSC.Checked = false;
+            this.buttonItemGMSPTS.Checked = false;
             this.buttonItemCMS.Checked = false;
-            this.buttonItemCMSC.Checked = false;
             ConfigManager.Save();
         }
 
@@ -3888,8 +3906,8 @@ namespace WzComparerR2
             this.buttonItemMSN.Checked = false;
             this.buttonItemGMS.Checked = false;
             this.buttonItemGMSC.Checked = false;
+            this.buttonItemGMSPTS.Checked = false;
             this.buttonItemCMS.Checked = false;
-            this.buttonItemCMSC.Checked = false;
             ConfigManager.Save();
         }
 
@@ -3903,8 +3921,8 @@ namespace WzComparerR2
             this.buttonItemMSN.Checked = true;
             this.buttonItemGMS.Checked = false;
             this.buttonItemGMSC.Checked = false;
+            this.buttonItemGMSPTS.Checked = false;
             this.buttonItemCMS.Checked = false;
-            this.buttonItemCMSC.Checked = false;
             ConfigManager.Save();
         }
 
@@ -3918,8 +3936,8 @@ namespace WzComparerR2
             this.buttonItemMSN.Checked = false;
             this.buttonItemGMS.Checked = true;
             this.buttonItemGMSC.Checked = false;
+            this.buttonItemGMSPTS.Checked = false;
             this.buttonItemCMS.Checked = false;
-            this.buttonItemCMSC.Checked = false;
             ConfigManager.Save();
         }
 
@@ -3933,12 +3951,12 @@ namespace WzComparerR2
             this.buttonItemMSN.Checked = false;
             this.buttonItemGMS.Checked = false;
             this.buttonItemGMSC.Checked = true;
+            this.buttonItemGMSPTS.Checked = false;
             this.buttonItemCMS.Checked = false;
-            this.buttonItemCMSC.Checked = false;
             ConfigManager.Save();
         }
 
-        private void buttonItemCMS_Click(object sender, EventArgs e)
+        private void buttonItemGMSPTS_Click(object sender, EventArgs e)
         {
             ConfigManager.Reload();
             WcR2Config.Default.PreferredClientRegion = 6;
@@ -3948,12 +3966,12 @@ namespace WzComparerR2
             this.buttonItemMSN.Checked = false;
             this.buttonItemGMS.Checked = false;
             this.buttonItemGMSC.Checked = false;
-            this.buttonItemCMS.Checked = true;
-            this.buttonItemCMSC.Checked = false;
+            this.buttonItemGMSPTS.Checked = true;
+            this.buttonItemCMS.Checked = false;
             ConfigManager.Save();
         }
 
-        private void buttonItemCMSC_Click(object sender, EventArgs e)
+        private void buttonItemCMS_Click(object sender, EventArgs e)
         {
             ConfigManager.Reload();
             WcR2Config.Default.PreferredClientRegion = 7;
@@ -3963,8 +3981,8 @@ namespace WzComparerR2
             this.buttonItemMSN.Checked = false;
             this.buttonItemGMS.Checked = false;
             this.buttonItemGMSC.Checked = false;
-            this.buttonItemCMS.Checked = false;
-            this.buttonItemCMSC.Checked = true;
+            this.buttonItemGMSPTS.Checked = false;
+            this.buttonItemCMS.Checked = true;
             ConfigManager.Save();
         }
 

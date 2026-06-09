@@ -104,8 +104,8 @@ namespace WzComparerR2
             this.buttonItemMSN = new DevComponents.DotNetBar.ButtonItem();
             this.buttonItemGMS = new DevComponents.DotNetBar.ButtonItem();
             this.buttonItemGMSC = new DevComponents.DotNetBar.ButtonItem();
+            this.buttonItemGMSPTS = new DevComponents.DotNetBar.ButtonItem();
             this.buttonItemCMS = new DevComponents.DotNetBar.ButtonItem();
-            this.buttonItemCMSC = new DevComponents.DotNetBar.ButtonItem();
             this.ribbonBar4 = new DevComponents.DotNetBar.RibbonBar();
             this.itemContainer10 = new DevComponents.DotNetBar.ItemContainer();
             this.itemContainer8 = new DevComponents.DotNetBar.ItemContainer();
@@ -1233,8 +1233,8 @@ namespace WzComparerR2
             this.buttonItemKMST,
             this.buttonItemGMS,
             this.buttonItemGMSC,
+            this.buttonItemGMSPTS,
             this.buttonItemCMS,
-            this.buttonItemCMSC,
             this.buttonItemMSN});
             this.buttonItemGameStart.Text = "啟動遊戲";
             this.buttonItemGameStart.Click += new System.EventHandler(this.buttonGameStart_Click);
@@ -1289,21 +1289,20 @@ namespace WzComparerR2
             // 
             // buttonItemCMS
             // 
+            this.buttonItemGMSPTS.AutoCheckOnClick = true;
+            this.buttonItemGMSPTS.Name = "buttonItemGMSPTS";
+            this.buttonItemGMSPTS.Text = "GMS PTS";
+            this.buttonItemGMSPTS.Tooltip = "GMS PTS";
+            this.buttonItemGMSPTS.Click += new System.EventHandler(this.buttonItemGMSPTS_Click);
+            // 
+            // buttonItemCMS
+            // 
             this.buttonItemCMS.AutoCheckOnClick = true;
             this.buttonItemCMS.Name = "buttonItemCMS";
             this.buttonItemCMS.Text = "CMS";
             this.buttonItemCMS.Tooltip = "CMS";
             this.buttonItemCMS.Enabled = false;
             this.buttonItemCMS.Click += new System.EventHandler(this.buttonItemCMS_Click);
-            // 
-            // buttonItemCMSC
-            // 
-            this.buttonItemCMSC.AutoCheckOnClick = true;
-            this.buttonItemCMSC.Name = "buttonItemCMSC";
-            this.buttonItemCMSC.Text = "CMS懷舊服";
-            this.buttonItemCMSC.Tooltip = "CMS懷舊服";
-            this.buttonItemCMSC.Enabled = false;
-            this.buttonItemCMSC.Click += new System.EventHandler(this.buttonItemCMSC_Click);
             // 
             // ribbonBar4
             // 
@@ -4099,8 +4098,8 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ButtonItem buttonItemMSN;
         private DevComponents.DotNetBar.ButtonItem buttonItemGMS;
         private DevComponents.DotNetBar.ButtonItem buttonItemGMSC;
+        private DevComponents.DotNetBar.ButtonItem buttonItemGMSPTS;
         private DevComponents.DotNetBar.ButtonItem buttonItemCMS;
-        private DevComponents.DotNetBar.ButtonItem buttonItemCMSC;
         private DevComponents.DotNetBar.ItemContainer itemContainer41;
         private DevComponents.DotNetBar.ButtonItem buttonItemLoadChara;
         private DevComponents.DotNetBar.ButtonItem buttonItemSaveChara;
