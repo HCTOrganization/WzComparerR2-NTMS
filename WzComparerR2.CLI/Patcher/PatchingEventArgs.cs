@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WzComparerR2.Patcher
+namespace WzComparerR2.CLI.Patcher
 {
     public class PatchingEventArgs : EventArgs
     {

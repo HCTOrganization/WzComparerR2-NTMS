@@ -2,7 +2,7 @@
 using System.IO;
 using System.Text;
 
-namespace WzComparerR2.Patcher.Builder
+namespace WzComparerR2.CLI.Patcher.Builder
 {
     public class WzPatcherReader
     {

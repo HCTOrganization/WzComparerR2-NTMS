@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace WzComparerR2.Patcher
+namespace WzComparerR2.CLI.Patcher
 {
     public class PatchPartContext
     {

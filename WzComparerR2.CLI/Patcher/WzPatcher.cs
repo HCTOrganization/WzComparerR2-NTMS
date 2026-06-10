@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
-using WzComparerR2.Patcher.Builder;
-using PartialStream = WzComparerR2.Patcher.Builder.PartialStream;
+using WzComparerR2.CLI.Patcher.Builder;
+using PartialStream = WzComparerR2.CLI.Patcher.Builder.PartialStream;
 
-namespace WzComparerR2.Patcher
+namespace WzComparerR2.CLI.Patcher
 {
     public class WzPatcher : IDisposable
     {

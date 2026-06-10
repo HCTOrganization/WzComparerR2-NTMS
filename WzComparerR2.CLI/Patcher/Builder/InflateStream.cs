@@ -3,7 +3,7 @@ using System.Buffers;
 using System.IO;
 using System.IO.Compression;
 
-namespace WzComparerR2.Patcher.Builder
+namespace WzComparerR2.CLI.Patcher.Builder
 {
     public class InflateStream : Stream
     {

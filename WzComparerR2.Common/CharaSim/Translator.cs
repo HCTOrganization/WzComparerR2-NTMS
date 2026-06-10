@@ -3,24 +3,23 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Runtime.CompilerServices;
+using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using static System.Net.Mime.MediaTypeNames;
 using CsvHelper;
 using CsvHelper.Configuration;
 using DevComponents.DotNetBar;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using WzComparerR2.Config;
-using System.Security.Cryptography;
 
 namespace WzComparerR2.CharaSim
 {
     public class Translator
     {
+        private static readonly HttpClient _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+
         // L2C stands for Language to Currency
         private static Dictionary<string, string> dictL2C = new Dictionary<string, string>()
         {
@@ -82,40 +81,23 @@ namespace WzComparerR2.CharaSim
 
         private static JArray GTranslate(string text, string desiredLanguage)
         {
-            var request = (HttpWebRequest)WebRequest.Create(GTranslateBaseURL + "?client=gtx&format=text&sl=auto&tl=" + desiredLanguage);
-            request.Method = "POST";
-            request.ContentType = "application/x-www-form-urlencoded";
-            request.Timeout = 15000;
-            var postData = "q=" + Uri.EscapeDataString(text);
-            var byteArray = System.Text.Encoding.UTF8.GetBytes(postData);
-            request.ContentLength = byteArray.Length;
-            Stream newStream = request.GetRequestStream();
-            newStream.Write(byteArray, 0, byteArray.Length);
-            newStream.Close();
             try
             {
-                var response = (HttpWebResponse)request.GetResponse();
-                var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
+                var postData = new StringContent("q=" + Uri.EscapeDataString(text), Encoding.UTF8, "application/x-www-form-urlencoded");
+                var response = _httpClient.PostAsync(GTranslateBaseURL + "?client=gtx&format=text&sl=auto&tl=" + desiredLanguage, postData).Result;
+                var responseString = response.Content.ReadAsStringAsync().Result;
                 return JArray.Parse(responseString);
             }
             catch
             {
                 return JArray.Parse($"[[\"{text}\",\"{desiredLanguage}\"]]");
-            }            
+            }
         }
 
         private static string OAITranslate(string text, string desiredLanguage, bool singleLine = false)
         {
             if (string.IsNullOrEmpty(DefaultOpenAISystemMessage)) DefaultOpenAISystemMessage = "You are an automated translator for a community game engine, and I only need translated result in output.";
             if (string.IsNullOrEmpty(OAITranslateBaseURL)) OAITranslateBaseURL = "https://api.openai.com/v1";
-            var request = (HttpWebRequest)WebRequest.Create(OAITranslateBaseURL + "/chat/completions");
-            request.Method = "POST";
-            request.ContentType = "application/json";
-            if (!string.IsNullOrEmpty(DefaultTranslateAPIKey))
-            {
-                JObject reqHeaders = JObject.Parse(DefaultTranslateAPIKey);
-                foreach (var property in reqHeaders.Properties()) request.Headers.Add(property.Name, property.Value.ToString());
-            }
             var postData = new JObject(
                 new JProperty("model", DefaultLanguageModel),
                 new JProperty("messages", new JArray(
@@ -135,15 +117,18 @@ namespace WzComparerR2.CharaSim
                 postData.Add(new JProperty("temperature", DefaultLMTemperature));
                 postData.Add(new JProperty("max_tokens", DefaultMaximumToken));
             }
-            var byteArray = System.Text.Encoding.UTF8.GetBytes(postData.ToString());
-            request.ContentLength = byteArray.Length;
-            Stream newStream = request.GetRequestStream();
-            newStream.Write(byteArray, 0, byteArray.Length);
-            newStream.Close();
             try
             {
-                var response = (HttpWebResponse)request.GetResponse();
-                var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
+                var requestMessage = new HttpRequestMessage(HttpMethod.Post, OAITranslateBaseURL + "/chat/completions");
+                requestMessage.Content = new StringContent(postData.ToString(), Encoding.UTF8, "application/json");
+                if (!string.IsNullOrEmpty(DefaultTranslateAPIKey))
+                {
+                    JObject reqHeaders = JObject.Parse(DefaultTranslateAPIKey);
+                    foreach (var property in reqHeaders.Properties())
+                        requestMessage.Headers.TryAddWithoutValidation(property.Name, property.Value.ToString());
+                }
+                var response = _httpClient.SendAsync(requestMessage).Result;
+                var responseString = response.Content.ReadAsStringAsync().Result;
                 JObject jrResponse = JObject.Parse(responseString);
                 string responseResult = jrResponse.SelectToken("choices[0].message.content").ToString();
                 if (responseResult.Contains("</think>"))
@@ -173,7 +158,6 @@ namespace WzComparerR2.CharaSim
                 {
                     return responseResult;
                 }
-                
             }
             catch (Exception e)
             {
@@ -233,13 +217,13 @@ namespace WzComparerR2.CharaSim
 
         private static JObject MTranslate(string text, string engine, string sourceLanguage, string desiredLanguage)
         {
-            var request = (HttpWebRequest)WebRequest.Create(DefaultMozhiBackend + "/api/translate?engine=" + engine + "&from=" + sourceLanguage + "&to=" + desiredLanguage + "&text=" + Uri.EscapeDataString(text));
-            request.Accept = "application/json";
-            request.Timeout = 15000;
             try
             {
-                var response = (HttpWebResponse)request.GetResponse();
-                var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
+                var requestMessage = new HttpRequestMessage(HttpMethod.Get,
+                    DefaultMozhiBackend + "/api/translate?engine=" + engine + "&from=" + sourceLanguage + "&to=" + desiredLanguage + "&text=" + Uri.EscapeDataString(text));
+                requestMessage.Headers.Accept.ParseAdd("application/json");
+                var response = _httpClient.SendAsync(requestMessage).Result;
+                var responseString = response.Content.ReadAsStringAsync().Result;
                 return JObject.Parse(responseString);
             }
             catch
@@ -250,23 +234,19 @@ namespace WzComparerR2.CharaSim
 
         private static JObject NTranslate(string text, string desiredLanguage)
         {
-            var request = (HttpWebRequest)WebRequest.Create(NTranslateBaseURL + "/nmt/v1");
-            request.Method = "POST";
-            request.Accept = "application/json";
-            request.ContentType = "application/x-www-form-urlencoded";
-            request.Headers["X-NCP-APIGW-API-KEY-ID"] = GetKeyValue("X-NCP-APIGW-API-KEY-ID");
-            request.Headers["X-NCP-APIGW-API-KEY"] = GetKeyValue("X-NCP-APIGW-API-KEY-ID");
-            request.Timeout = 15000;
-            var postData = "source=auto&target=" + desiredLanguage + "text=" + Uri.EscapeDataString(text);
-            var byteArray = System.Text.Encoding.UTF8.GetBytes(postData);
-            request.ContentLength = byteArray.Length;
-            Stream newStream = request.GetRequestStream();
-            newStream.Write(byteArray, 0, byteArray.Length);
-            newStream.Close();
             try
             {
-                var response = (HttpWebResponse)request.GetResponse();
-                var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
+                var postContent = new StringContent(
+                    "source=auto&target=" + desiredLanguage + "&text=" + Uri.EscapeDataString(text),
+                    Encoding.UTF8,
+                    "application/x-www-form-urlencoded");
+                var requestMessage = new HttpRequestMessage(HttpMethod.Post, NTranslateBaseURL + "/nmt/v1");
+                requestMessage.Headers.Accept.ParseAdd("application/json");
+                requestMessage.Headers.TryAddWithoutValidation("X-NCP-APIGW-API-KEY-ID", GetKeyValue("X-NCP-APIGW-API-KEY-ID"));
+                requestMessage.Headers.TryAddWithoutValidation("X-NCP-APIGW-API-KEY", GetKeyValue("X-NCP-APIGW-API-KEY"));
+                requestMessage.Content = postContent;
+                var response = _httpClient.SendAsync(requestMessage).Result;
+                var responseString = response.Content.ReadAsStringAsync().Result;
                 return JObject.Parse(responseString);
             }
             catch
@@ -599,13 +579,12 @@ namespace WzComparerR2.CharaSim
                 foreach (string bURL in CurrencyBaseURL)
                 {
                     string fetchURL = bURL + DefaultDesiredCurrency + ".min.json";
-                    var request = (HttpWebRequest)WebRequest.Create(fetchURL);
-                    request.Accept = "application/json";
                     try
                     {
-                        var response = (HttpWebResponse)request.GetResponse();
-                        var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
-                        ExchangeTable = responseString;
+                        var requestMessage = new HttpRequestMessage(HttpMethod.Get, fetchURL);
+                        requestMessage.Headers.Accept.ParseAdd("application/json");
+                        var response = _httpClient.SendAsync(requestMessage).Result;
+                        ExchangeTable = response.Content.ReadAsStringAsync().Result;
                         break;
                     }
                     catch

@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -20,6 +21,13 @@ namespace WzComparerR2.Comparer
 {
     public class EasyComparer
     {
+        private static readonly HttpClient _httpClient = new HttpClient(
+            new HttpClientHandler { AllowAutoRedirect = true })
+        {
+            Timeout = TimeSpan.FromSeconds(15),
+            DefaultRequestHeaders = { { "User-Agent", "WzComparerR2-JMS/1.0" } }
+        };
+
         public EasyComparer()
         {
             this.Comparer = new WzFileComparer();
@@ -203,14 +211,9 @@ namespace WzComparerR2.Comparer
                             foreach (string item in new string[] { "Item", "Map", "Mob", "Npc", "Skill", "Achievement" })
                             {
                                 StateInfo = string.Format("正在下載KMS的{0}資料庫...", item);
-                                var request = (HttpWebRequest)WebRequest.Create(string.Format("https://raw.githubusercontent.com/HikariCalyx/KMSContent/refs/heads/main/{0}ID.txt", item));
-                                request.Method = "GET";
-                                request.UserAgent = "WzComparerR2-NTMS/1.0";
-                                request.Timeout = 15000;
                                 try
                                 {
-                                    var response = (HttpWebResponse)request.GetResponse();
-                                    var responseString = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
+                                    var responseString = _httpClient.GetStringAsync(string.Format("https://raw.githubusercontent.com/HikariCalyx/KMSContent/refs/heads/main/{0}ID.txt", item)).Result;
                                     foreach (string line in responseString.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                                     {
                                         if (line.StartsWith("#")) continue;
@@ -241,14 +244,9 @@ namespace WzComparerR2.Comparer
                             foreach (string item in new string[] { "Effect", "MapBack", "MapObj", "MapTile", "MapWorldMap", "MobBossPattern" })
                             {
                                 StateInfo = string.Format("正在下載KMS的{0}資料庫...", item);
-                                var request = (HttpWebRequest)WebRequest.Create(string.Format("https://raw.githubusercontent.com/HikariCalyx/KMSContent/refs/heads/main/{0}ImgList.txt", item));
-                                request.Method = "GET";
-                                request.UserAgent = "WzComparerR2-NTMS/1.0";
-                                request.Timeout = 15000;
                                 try
                                 {
-                                    var response = (HttpWebResponse)request.GetResponse();
-                                    var responseString = new StreamReader(response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
+                                    var responseString = _httpClient.GetStringAsync(string.Format("https://raw.githubusercontent.com/HikariCalyx/KMSContent/refs/heads/main/{0}ImgList.txt", item)).Result;
                                     foreach (string line in responseString.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
                                     {
                                         if (line.StartsWith("#")) continue;

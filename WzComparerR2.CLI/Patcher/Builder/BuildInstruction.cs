@@ -1,4 +1,4 @@
-﻿namespace WzComparerR2.Patcher.Builder
+﻿namespace WzComparerR2.CLI.Patcher.Builder
 {
     /// <summary>
     /// 表示一条重构文件的指令。

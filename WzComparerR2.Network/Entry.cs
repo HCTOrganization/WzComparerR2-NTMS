@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -24,6 +24,8 @@ namespace WzComparerR2.Network
         {
             DefaultServer = Encoding.UTF8.GetString(Convert.FromBase64String("d2Mua2FnYW1pYS5jb20="));
         }
+
+        private static readonly HttpClient _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
 
         public static readonly string DefaultServer;
 
@@ -331,7 +333,6 @@ namespace WzComparerR2.Network
             try
             {
                 Log.Warn(message);
-                // Log.Info("AIの応答を待っています...");
                 bool isThinking = false;
                 StringBuilder responseResult = new StringBuilder();
                 ((JArray)AIChatJson["messages"]).Add(new JObject(
@@ -344,23 +345,16 @@ namespace WzComparerR2.Network
                     postData.Add(new JProperty("temperature", LMTemperature));
                     postData.Add(new JProperty("max_tokens", MaximumToken));
                 }
-                var request = (HttpWebRequest)WebRequest.Create(AIBaseURL + "/chat/completions");
-                request.Method = "POST";
-                request.ContentType = "application/json";
+                var requestMessage = new HttpRequestMessage(HttpMethod.Post, AIBaseURL + "/chat/completions");
+                requestMessage.Content = new StringContent(postData.ToString(), Encoding.UTF8, "application/json");
                 if (!string.IsNullOrEmpty(APIKeyJSON))
                 {
                     JObject reqHeaders = JObject.Parse(APIKeyJSON);
-                    foreach (var property in reqHeaders.Properties()) request.Headers.Add(property.Name, property.Value.ToString());
+                    foreach (var property in reqHeaders.Properties())
+                        requestMessage.Headers.TryAddWithoutValidation(property.Name, property.Value.ToString());
                 }
-                //var byteArray = System.Text.Encoding.UTF8.GetBytes(postData.ToString());
-                //request.ContentLength = byteArray.Length;
-                using (var writer = new StreamWriter(request.GetRequestStream()))
-                {
-                    writer.Write(postData.ToString());
-                    writer.Flush();
-                }
-                using (var resp = await request.GetResponseAsync())
-                using (var stream = resp.GetResponseStream())
+                using (var resp = await _httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead))
+                using (var stream = await resp.Content.ReadAsStreamAsync())
                 using (var reader = new StreamReader(stream))
                 {
                     Log.WriteTimeStamp();

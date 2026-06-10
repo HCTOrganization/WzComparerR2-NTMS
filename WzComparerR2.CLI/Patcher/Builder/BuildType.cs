@@ -1,4 +1,4 @@
-﻿namespace WzComparerR2.Patcher.Builder
+﻿namespace WzComparerR2.CLI.Patcher.Builder
 {
     public enum BuildType
     {

@@ -7,7 +7,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net;
+using System.Net.Http;
 using System.Resources;
 using System.Text;
 using System.Windows.Forms;
@@ -17,6 +17,8 @@ namespace WzComparerR2
 {
     public partial class FrmSetupWizard : DevComponents.DotNetBar.Office2007Form
     {
+        private static readonly HttpClient _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+
         public FrmSetupWizard(bool isDarkMode = false)
         {
 #if NET6_0_OR_GREATER
@@ -605,31 +607,20 @@ namespace WzComparerR2
 
         private void buttonXCheck2_Click(object sender, EventArgs e)
         {
-            ComboItem selectedItem = (ComboItem)cmbPreferredTranslateEngine.SelectedItem;
             string respText = "";
-            HttpWebRequest req;
-            string backendAddress;
-            if (string.IsNullOrEmpty(OpenAIBackend))
-            {
-                backendAddress = txtOpenAIBackend.WatermarkText;
-            }
-            else
-            {
-                backendAddress = OpenAIBackend;
-            }
+            string backendAddress = string.IsNullOrEmpty(OpenAIBackend) ? txtOpenAIBackend.WatermarkText : OpenAIBackend;
+
             switch (PreferredTranslateEngine)
             {
                 case 8:
                 case 9:
-                    req = WebRequest.Create(backendAddress + "/models") as HttpWebRequest;
-                    req.Timeout = 15000;
-                    if (!string.IsNullOrEmpty(this.OpenAPIkey))
-                    {
-                        req.Headers.Add("Authorization", "Bearer " + this.OpenAPIkey);
-                    }
                     try
                     {
-                        string respJson = new StreamReader(req.GetResponse().GetResponseStream(), Encoding.UTF8).ReadToEnd();
+                        var requestMessage = new HttpRequestMessage(HttpMethod.Get, backendAddress + "/models");
+                        if (!string.IsNullOrEmpty(this.OpenAPIkey))
+                            requestMessage.Headers.TryAddWithoutValidation("Authorization", "Bearer " + this.OpenAPIkey);
+                        var response = _httpClient.SendAsync(requestMessage).Result;
+                        string respJson = response.Content.ReadAsStringAsync().Result;
                         JObject jsonResp = JObject.Parse(respJson);
                         JArray dataArray = (JArray)jsonResp["data"];
                         StringBuilder sb = new StringBuilder();

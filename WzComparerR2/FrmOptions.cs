@@ -4,23 +4,23 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
-using System.Net;
 using System.Windows.Forms;
 using DevComponents.DotNetBar;
 using DevComponents.Editors;
-using WzComparerR2.Config;
-using System.Security.Policy;
-using System.IO;
-using Spine;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
+using Spine;
+using WzComparerR2.Config;
 
 namespace WzComparerR2
 {
     public partial class FrmOptions : DevComponents.DotNetBar.Office2007Form
     {
+        private static readonly HttpClient _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+
         public FrmOptions()
         {
             InitializeComponent();
@@ -340,20 +340,15 @@ namespace WzComparerR2
         private void buttonXCheck_Click(object sender, EventArgs e)
         {
             string respText;
-            var req = WebRequest.Create(Program.NxAPIBaseURL + "/maplestory/v1/character/list") as HttpWebRequest;
-            req.Timeout = 15000;
-            req.Accept = "application/json";
-            req.Headers.Add("x-nxopen-api-key", txtAPIkey.Text);
             try
             {
-                string respJson = new StreamReader(req.GetResponse().GetResponseStream(), Encoding.UTF8).ReadToEnd();
+                var requestMessage = new HttpRequestMessage(HttpMethod.Get, Program.NxAPIBaseURL + "/maplestory/v1/character/list");
+                requestMessage.Headers.Accept.ParseAdd("application/json");
+                requestMessage.Headers.TryAddWithoutValidation("x-nxopen-api-key", txtAPIkey.Text);
+                var response = _httpClient.SendAsync(requestMessage).Result;
+                string respJson = response.Content.ReadAsStringAsync().Result;
                 Clipboard.SetText(respJson);
                 respText = "API 金鑰有效。" + Environment.NewLine + "與此 API 金鑰關聯的字元已以 JSON 格式複製到您的剪貼簿。";
-            }
-            catch (WebException ex)
-            {
-                string respJson = new StreamReader(ex.Response.GetResponseStream(), Encoding.UTF8).ReadToEnd();
-                respText = "此 API 金鑰無效。" + Environment.NewLine + respJson;
             }
             catch (Exception ex)
             {
@@ -366,30 +361,23 @@ namespace WzComparerR2
         {
             ComboItem selectedItem = (ComboItem)cmbPreferredTranslateEngine.SelectedItem;
             string respText;
-            HttpWebRequest req;
-            string backendAddress;
-            if (string.IsNullOrEmpty(OpenAIBackend))
-            {
-                backendAddress = txtOpenAIBackend.WatermarkText;
-            }
-            else
-            {
-                backendAddress = OpenAIBackend;
-            }
+            string backendAddress = string.IsNullOrEmpty(OpenAIBackend) ? txtOpenAIBackend.WatermarkText : OpenAIBackend;
+
             switch ((int)selectedItem.Value)
             {
                 case 8:
                 case 9:
-                    req = WebRequest.Create(backendAddress + "/models") as HttpWebRequest;
-                    req.Timeout = 15000;
-                    if (!string.IsNullOrEmpty(NxSecretKey))
-                    {
-                        JObject reqHeaders = JObject.Parse(NxSecretKey);
-                        foreach (var property in reqHeaders.Properties()) req.Headers.Add(property.Name, property.Value.ToString());
-                    }
                     try
                     {
-                        string respJson = new StreamReader(req.GetResponse().GetResponseStream(), Encoding.UTF8).ReadToEnd();
+                        var requestMessage = new HttpRequestMessage(HttpMethod.Get, backendAddress + "/models");
+                        if (!string.IsNullOrEmpty(NxSecretKey))
+                        {
+                            JObject reqHeaders = JObject.Parse(NxSecretKey);
+                            foreach (var property in reqHeaders.Properties())
+                                requestMessage.Headers.TryAddWithoutValidation(property.Name, property.Value.ToString());
+                        }
+                        var response = _httpClient.SendAsync(requestMessage).Result;
+                        string respJson = response.Content.ReadAsStringAsync().Result;
                         JObject jsonResp = JObject.Parse(respJson);
                         JArray dataArray = (JArray)jsonResp["data"];
                         StringBuilder sb = new StringBuilder();
@@ -408,23 +396,15 @@ namespace WzComparerR2
                     }
                     break;
                 default:
-                    req = WebRequest.Create((cmbMozhiBackend.SelectedItem as ComboItem)?.Value + "/api/engines") as HttpWebRequest;
-                    req.Timeout = 15000;
                     try
                     {
-                        string respJson = new StreamReader(req.GetResponse().GetResponseStream(), Encoding.UTF8).ReadToEnd();
-                        if (respJson.Contains("All Engines"))
-                        {
-                            respText = "此Mozhi伺服器有效。";
-                        }
-                        else
-                        {
-                            respText = "此Mozhi伺服器無效。";
-                        }
-                    }
-                    catch (WebException ex)
-                    {
-                        respText = "此Mozhi伺服器無效。";
+                        var requestMessage = new HttpRequestMessage(HttpMethod.Get,
+                            (cmbMozhiBackend.SelectedItem as ComboItem)?.Value + "/api/engines");
+                        var response = _httpClient.SendAsync(requestMessage).Result;
+                        string respJson = response.Content.ReadAsStringAsync().Result;
+                        respText = respJson.Contains("All Engines")
+                            ? "此Mozhi伺服器有效。"
+                            : "此Mozhi伺服器無效。";
                     }
                     catch (Exception ex)
                     {

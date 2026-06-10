@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using WzComparerR2.Patcher;
+using WzComparerR2.CLI.Patcher;
 
 namespace WzComparerR2.CLI
 {

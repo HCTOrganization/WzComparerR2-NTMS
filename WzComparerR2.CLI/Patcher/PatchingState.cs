@@ -1,4 +1,4 @@
-﻿namespace WzComparerR2.Patcher
+﻿namespace WzComparerR2.CLI.Patcher
 {
     public enum PatchingState
     {

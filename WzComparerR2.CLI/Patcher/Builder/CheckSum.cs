@@ -9,7 +9,7 @@ using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 #endif
 
-namespace WzComparerR2.Patcher.Builder
+namespace WzComparerR2.CLI.Patcher.Builder
 {
     public class CheckSum
     {
