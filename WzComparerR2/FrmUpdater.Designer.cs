@@ -149,6 +149,8 @@
             this.richTextBoxEx1.Size = new System.Drawing.Size(280, 100);
             this.richTextBoxEx1.ReadOnly = true;
             this.richTextBoxEx1.TabIndex = 9;
+            this.richTextBoxEx1.DetectUrls = false;
+            this.richTextBoxEx1.MouseClick += new System.Windows.Forms.MouseEventHandler(this.RichTextBoxEx1_MouseClick);
             // 
             // elementStyle1
             // 

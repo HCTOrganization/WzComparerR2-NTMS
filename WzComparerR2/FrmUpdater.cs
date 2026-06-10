@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -14,23 +16,29 @@ namespace WzComparerR2
 {
     public partial class FrmUpdater : DevComponents.DotNetBar.Office2007Form
     {
-        public FrmUpdater() : this(new Updater())
+        public FrmUpdater() : this(new Updater(), false)
         {
         }
 
-        public FrmUpdater(Updater updater)
+        public FrmUpdater(Updater updater) : this(updater, false)
         {
-            InitializeComponent();
+        }
+
+        public FrmUpdater(Updater updater, bool isDarkMode)
+        {
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
             this.Font = new Font(new FontFamily("SimSun"), 9f);
 #endif
+            InitializeComponent();
 
+            this.IsDarkMode = isDarkMode;
             this.Updater = updater;
             this.lblCurrentVer.Text = $"{Program.WcR2MajorVersion}{BuildInfo.BuildTime}";
         }
 
         public Updater Updater { get; set; }
+        public bool IsDarkMode { get; private set; }
 
         public bool EnableAutoUpdate
         {
@@ -40,8 +48,17 @@ namespace WzComparerR2
 
         private CancellationTokenSource cts;
 
+        // Maps character range (start index) to URL for markdown [text](url) links
+        private readonly Dictionary<int, (int Length, string Url)> _linkRanges = new Dictionary<int, (int, string)>();
+
         private async void FrmUpdater_Load(object sender, EventArgs e)
         {
+            if (IsDarkMode)
+            {
+                this.richTextBoxEx1.BackColorRichTextBox = Color.FromArgb(-13816528);
+                this.richTextBoxEx1.ForeColor = Color.LightGray;
+            }
+
             var updater = this.Updater;
             if (!updater.LatestReleaseFetched)
             {
@@ -71,8 +88,8 @@ namespace WzComparerR2
             if (updater.LatestReleaseFetched)
             {
                 this.lblLatestVer.Text = updater.LatestVersionString;
-                this.AppendText(updater.Release?.ChangeTitle + Environment.NewLine, Color.Red);
-                this.AppendText(updater.Release?.Changelog, Color.Black);
+                this.AppendText(updater.Release?.ChangeTitle + Environment.NewLine, IsDarkMode ? Color.SkyBlue : Color.DarkBlue);
+                this.AppendMarkdown(updater.Release?.Changelog);
                 this.richTextBoxEx1.SelectionStart = 0;
                 if (updater.UpdateAvailable)
                 {
@@ -214,6 +231,189 @@ namespace WzComparerR2
             this.richTextBoxEx1.SelectionColor = color;
             this.richTextBoxEx1.AppendText(text);
             this.richTextBoxEx1.SelectionColor = this.richTextBoxEx1.ForeColor;
+        }
+
+        private void AppendMarkdown(string markdown)
+        {
+            if (string.IsNullOrEmpty(markdown)) return;
+
+            var rtb = this.richTextBoxEx1;
+            var baseFont = rtb.Font;
+            var lines = markdown.Replace("\r\n", "\n").Replace("\r", "\n").Split('\n');
+
+            // Derive accent colors from the RTB background so they work in both light and dark themes.
+            bool isDark = rtb.BackColor.GetBrightness() < 0.5f;
+            Color headingColor = isDark ? Color.CornflowerBlue : Color.DarkBlue;
+            Color rulerColor   = isDark ? Color.Gray        : Color.Gray;
+            Color quoteColor   = isDark ? Color.DarkGray       : Color.Gray;
+            Color linkColor    = isDark ? Color.SkyBlue         : Color.Blue;
+            Color codeColor    = isDark ? Color.LightCoral      : Color.DarkRed;
+
+            foreach (var rawLine in lines)
+            {
+                string line = rawLine;
+
+                // Horizontal rule
+                if (Regex.IsMatch(line, @"^[-*_]{3,}\s*$"))
+                {
+                    rtb.SelectionStart = rtb.TextLength;
+                    rtb.SelectionLength = 0;
+                    rtb.SelectionColor = rulerColor;
+                    rtb.AppendText(new string('─', 40) + "\n");
+                    rtb.SelectionColor = rtb.ForeColor;
+                    continue;
+                }
+
+                // ATX headings: # / ## / ###
+                var headingMatch = Regex.Match(line, @"^(#{1,3})\s+(.+)$");
+                if (headingMatch.Success)
+                {
+                    int level = headingMatch.Groups[1].Length;
+                    string content = headingMatch.Groups[2].Value;
+                    float size = level == 1 ? baseFont.Size + 4 :
+                                 level == 2 ? baseFont.Size + 2 :
+                                              baseFont.Size + 1;
+                    rtb.SelectionStart = rtb.TextLength;
+                    rtb.SelectionLength = 0;
+                    rtb.SelectionFont = new Font(baseFont.FontFamily, size, FontStyle.Bold);
+                    rtb.SelectionColor = headingColor;
+                    rtb.AppendText(content + "\n");
+                    rtb.SelectionFont = baseFont;
+                    rtb.SelectionColor = rtb.ForeColor;
+                    continue;
+                }
+
+                // Blockquote: > text
+                if (line.StartsWith("> "))
+                {
+                    string content = line.Substring(2);
+                    rtb.SelectionStart = rtb.TextLength;
+                    rtb.SelectionLength = 0;
+                    rtb.SelectionColor = quoteColor;
+                    rtb.SelectionFont = new Font(baseFont, FontStyle.Italic);
+                    rtb.AppendText("  │ " + content + "\n");
+                    rtb.SelectionFont = baseFont;
+                    rtb.SelectionColor = rtb.ForeColor;
+                    continue;
+                }
+
+                // Bullet list: - or * or + at start
+                var bulletMatch = Regex.Match(line, @"^(\s*)[-*+]\s+(.+)$");
+                if (bulletMatch.Success)
+                {
+                    string indent = bulletMatch.Groups[1].Value;
+                    string content = bulletMatch.Groups[2].Value;
+                    rtb.SelectionStart = rtb.TextLength;
+                    rtb.SelectionLength = 0;
+                    AppendInlineMarkdown(rtb, baseFont, indent + "• " + content + "\n", linkColor, codeColor);
+                    continue;
+                }
+
+                // Plain paragraph (including empty lines)
+                AppendInlineMarkdown(rtb, baseFont, line + "\n", linkColor, codeColor);
+            }
+        }
+
+        /// <summary>
+        /// Appends a single line of text, processing inline markdown:
+        /// **bold**, *italic*, `code`, [text](url), and plain text segments.
+        /// </summary>
+        private void AppendInlineMarkdown(DevComponents.DotNetBar.Controls.RichTextBoxEx rtb, Font baseFont, string line, Color linkColor, Color codeColor)
+        {
+            // Order matters: images ![...](...) must be stripped before links [...](...),
+            // and ** must be tried before * to avoid partial matches.
+            var pattern = @"(!\[.*?\]\(.*?\)|\[(.+?)\]\((https?://[^\)]+)\)|\*\*(.+?)\*\*|\*(.+?)\*|`(.+?)`)";
+            int lastIndex = 0;
+            var matches = Regex.Matches(line, pattern);
+
+            foreach (Match m in matches)
+            {
+                // Plain text before this match
+                if (m.Index > lastIndex)
+                {
+                    rtb.SelectionStart = rtb.TextLength;
+                    rtb.SelectionLength = 0;
+                    rtb.SelectionFont = baseFont;
+                    rtb.SelectionColor = rtb.ForeColor;
+                    rtb.AppendText(line.Substring(lastIndex, m.Index - lastIndex));
+                }
+
+                rtb.SelectionStart = rtb.TextLength;
+                rtb.SelectionLength = 0;
+
+                if (m.Value.StartsWith("!["))
+                {
+                    // Embedded image — skip entirely (do not render)
+                }
+                else if (m.Value.StartsWith("["))
+                {
+                    // Hyperlink: [display text](url)
+                    string displayText = m.Groups[2].Value;
+                    string url = m.Groups[3].Value;
+                    int linkStart = rtb.TextLength;
+                    rtb.SelectionFont = new Font(baseFont, FontStyle.Underline);
+                    rtb.SelectionColor = linkColor;
+                    rtb.AppendText(displayText);
+                    _linkRanges[linkStart] = (displayText.Length, url);
+                }
+                else if (m.Value.StartsWith("**"))
+                {
+                    // Bold
+                    rtb.SelectionFont = new Font(baseFont, FontStyle.Bold);
+                    rtb.SelectionColor = rtb.ForeColor;
+                    rtb.AppendText(m.Groups[4].Value);
+                }
+                else if (m.Value.StartsWith("*"))
+                {
+                    // Italic
+                    rtb.SelectionFont = new Font(baseFont, FontStyle.Italic);
+                    rtb.SelectionColor = rtb.ForeColor;
+                    rtb.AppendText(m.Groups[5].Value);
+                }
+                else if (m.Value.StartsWith("`"))
+                {
+                    // Inline code
+                    rtb.SelectionFont = new Font(FontFamily.GenericMonospace, baseFont.Size);
+                    rtb.SelectionColor = codeColor;
+                    rtb.AppendText(m.Groups[6].Value);
+                }
+
+                rtb.SelectionFont = baseFont;
+                rtb.SelectionColor = rtb.ForeColor;
+                lastIndex = m.Index + m.Length;
+            }
+
+            // Remaining plain text after last match
+            if (lastIndex < line.Length)
+            {
+                rtb.SelectionStart = rtb.TextLength;
+                rtb.SelectionLength = 0;
+                rtb.SelectionFont = baseFont;
+                rtb.SelectionColor = rtb.ForeColor;
+                rtb.AppendText(line.Substring(lastIndex));
+            }
+        }
+
+        private void RichTextBoxEx1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left) return;
+            int charIndex = this.richTextBoxEx1.GetCharIndexFromPosition(e.Location);
+            foreach (var kvp in _linkRanges)
+            {
+                if (charIndex >= kvp.Key && charIndex < kvp.Key + kvp.Value.Length)
+                {
+                    try
+                    {
+#if NET6_0_OR_GREATER
+                        Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = kvp.Value.Url });
+#else
+                        Process.Start(kvp.Value.Url);
+#endif
+                    }
+                    catch { }
+                    return;
+                }
+            }
         }
 
         private void ExtractResource(string resourceName, string outputPath)
