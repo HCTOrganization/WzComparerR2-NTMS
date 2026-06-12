@@ -2500,6 +2500,11 @@ namespace WzComparerR2.Avatar.UI
         private async void btnExportLwa_Click(object sender, EventArgs e)
         {
             string code = GetAllPartsTag();
+            if (!Regex.IsMatch(code, @"\d"))
+            {
+                ToastNotification.Show(this, $"錯誤：使用此功能前，需要創建一個紙娃娃。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                return;
+            }
             var API = new OpenAPI.AvatarCodeEncoder();
             string avatarCode = API.ConvertCsvToAvatarCode(code);
             // Clipboard.SetText(avatarCode);
