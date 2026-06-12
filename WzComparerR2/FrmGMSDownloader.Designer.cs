@@ -37,7 +37,7 @@
             this.lblUpdateContent = new DevComponents.DotNetBar.LabelX();
             this.buttonX1 = new DevComponents.DotNetBar.ButtonX();
             this.richTextBoxEx1 = new DevComponents.DotNetBar.Controls.RichTextBoxEx();
-            this.progressBarDownload = new System.Windows.Forms.ProgressBar();
+            this.progressBarX1 = new DevComponents.DotNetBar.Controls.ProgressBarX();
             this.elementStyle1 = new DevComponents.DotNetBar.ElementStyle();
             this.SuspendLayout();
             // 
@@ -145,19 +145,22 @@
             this.richTextBoxEx1.Name = "richTextBoxEx1";
             this.richTextBoxEx1.Rtf = "{\\rtf1\\ansi\\ansicpg936\\deff0\\deflang1033\\deflangfe1042{\\fonttbl{\\f0\\fnil\\fcharset" +
     "129 \\\'b5\\\'b8\\\'bf\\\'f2;}}\r\n\\viewkind4\\uc1\\pard\\lang1042\\f0\\fs18\\par\r\n}\r\n";
-            this.richTextBoxEx1.Size = new System.Drawing.Size(280, 150);
+            this.richTextBoxEx1.Size = new System.Drawing.Size(280, 175);
             this.richTextBoxEx1.ReadOnly = true;
             this.richTextBoxEx1.TabIndex = 9;
             // 
-            // progressBarDownload
+            // progressBarX1
             // 
-            this.progressBarDownload.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBarDownload.Location = new System.Drawing.Point(12, 162);
-            this.progressBarDownload.Name = "progressBarDownload";
-            this.progressBarDownload.Size = new System.Drawing.Size(280, 18);
-            this.progressBarDownload.TabIndex = 10;
-            this.progressBarDownload.Visible = false;
+            // 
+            // 
+            // 
+            this.progressBarX1.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.progressBarX1.Location = new System.Drawing.Point(12, 187);
+            this.progressBarX1.Name = "progressBarX1";
+            this.progressBarX1.Size = new System.Drawing.Size(280, 23);
+            this.progressBarX1.TabIndex = 10;
+            this.progressBarX1.TextVisible = true;
+            this.progressBarX1.Visible = false;
             // 
             // elementStyle1
             // 
@@ -170,7 +173,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(304, 221);
-            this.Controls.Add(this.progressBarDownload);
+            this.Controls.Add(this.progressBarX1);
             this.Controls.Add(this.richTextBoxEx1);
             this.Controls.Add(this.buttonX1);
             // this.Controls.Add(this.lblUpdateContent);
@@ -203,7 +206,7 @@
         private DevComponents.DotNetBar.LabelX lblUpdateContent;
         private DevComponents.DotNetBar.ButtonX buttonX1;
         private DevComponents.DotNetBar.Controls.RichTextBoxEx richTextBoxEx1;
-        private System.Windows.Forms.ProgressBar progressBarDownload;
+        private DevComponents.DotNetBar.Controls.ProgressBarX progressBarX1;
         private DevComponents.DotNetBar.ElementStyle elementStyle1;
     }
 }

@@ -3768,7 +3768,7 @@ namespace WzComparerR2
                             return;
                         }
                     }
-                    FrmGMSDownloader frm = new FrmGMSDownloader();
+                    FrmGMSDownloader frm = new FrmGMSDownloader(styleManager1.ManagerStyle == eStyle.VisualStudio2012Dark);
                     frm.Owner = this;
                     if (int.TryParse(gameCode, out int x))
                     {
