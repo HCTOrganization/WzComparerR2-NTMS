@@ -2,13 +2,25 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Net;
+using System.Net.Http;
 using System.IO;
 
 namespace WzComparerR2
 {
     public class DownloadingItem
     {
+        private static readonly HttpClient httpClient = new HttpClient
+        {
+            Timeout = TimeSpan.FromMilliseconds(15000)
+        };
+
+        static DownloadingItem()
+        {
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("WzComparerR2-NTMS/1.0");
+        }
+
         public DownloadingItem(string url, string path)
         {
             this.url = url;
@@ -20,8 +32,9 @@ namespace WzComparerR2
         DateTime lastModified;
         long fileLength;
         Thread thread;
-        WebResponse response;
+        HttpResponseMessage response;
         Stream responseStream;
+        CancellationTokenSource cancellationTokenSource;
 
         public string Url
         {
@@ -51,7 +64,6 @@ namespace WzComparerR2
             {
                 case "http":
                 case "https":
-                    ServicePointManager.SecurityProtocol = (SecurityProtocolType)(3072 | 12288); //TLS1.2/TLS1.3
                     GetFileLengthHttp();
                     break;
 
@@ -65,16 +77,20 @@ namespace WzComparerR2
         {
             try
             {
-                var req = WebRequest.Create(url) as HttpWebRequest;
-                req.UserAgent = "WzComparerR2-NTMS/1.0";
-                req.Timeout = 15000;
-                using (var resp = req.GetResponse() as HttpWebResponse)
+                using (var request = new HttpRequestMessage(HttpMethod.Head, url))
                 {
-                    this.lastModified = resp.LastModified;
-                    this.fileLength = resp.ContentLength;
+                    var resp = httpClient.SendAsync(request).GetAwaiter().GetResult();
+                    resp.EnsureSuccessStatusCode();
+                    
+                    if (resp.Content.Headers.LastModified.HasValue)
+                    {
+                        this.lastModified = resp.Content.Headers.LastModified.Value.DateTime;
+                    }
+                    this.fileLength = resp.Content.Headers.ContentLength ?? 0;
+                    resp.Dispose();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 this.fileLength = 0;
                 throw;
@@ -118,6 +134,7 @@ namespace WzComparerR2
         {
             if (thread == null)
             {
+                cancellationTokenSource = new CancellationTokenSource();
                 thread = new Thread(tryStartDownload);
                 thread.Start();
             }
@@ -127,37 +144,46 @@ namespace WzComparerR2
         {
             try
             {
-                WebRequest request = WebRequest.Create(url);
-                request.Timeout = 15000;
-                response = request.GetResponse();
-                responseStream = response.GetResponseStream();
-                response.Close();
+                var uri = new Uri(url);
+                if (uri.Scheme.ToLower() == "http" || uri.Scheme.ToLower() == "https")
+                {
+                    response = httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationTokenSource.Token).GetAwaiter().GetResult();
+                    response.EnsureSuccessStatusCode();
+                    responseStream = response.Content.ReadAsStreamAsync().GetAwaiter().GetResult();
+                }
+                else
+                {
+                    // Fallback to WebRequest for non-HTTP protocols (e.g., FTP)
+                    WebRequest request = WebRequest.Create(url);
+                    request.Timeout = 15000;
+                    var webResponse = request.GetResponse();
+                    responseStream = webResponse.GetResponseStream();
+                    webResponse.Close();
+                }
             }
-            catch (Exception)
-            {
-            }
-            finally
-            {
-            }
+            catch (Exception) { }
+            finally { }
         }
 
         public void StopDownload()
         {
-            if (response != null)
+            if (response != null || responseStream != null)
             {
                 try
                 {
-                    response.Close();
+                    cancellationTokenSource?.Cancel();
+                    responseStream?.Close();
+                    responseStream?.Dispose();
+                    response?.Dispose();
                     response = null;
-                    thread.Abort();
+                    responseStream = null;
+                    
+                    // Note: Thread.Abort is deprecated and dangerous. Using CancellationToken instead.
+                    // The thread should complete naturally when the stream is closed.
                     thread = null;
                 }
-                catch (Exception)
-                {
-                }
-                finally
-                {
-                }
+                catch (Exception) { }
+                finally { }
             }
         }
     }
