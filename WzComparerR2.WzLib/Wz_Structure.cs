@@ -88,7 +88,7 @@ namespace WzComparerR2.WzLib
                 file = new Wz_File(fileName, this);
                 if (!file.Loaded)
                 {
-                    throw new Exception("ファイルは有効な WZ ファイルではありません。");
+                    throw new Exception("這不是有效的 WZ 檔案。如確定 WZ 檔未被破壞，有可能是神昌燮又在搞事情。");
                 }
                 this.wz_files.Add(file);
                 file.TextEncoding = this.TextEncoding;
