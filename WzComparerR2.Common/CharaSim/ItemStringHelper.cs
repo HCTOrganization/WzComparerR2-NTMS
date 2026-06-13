@@ -1769,6 +1769,13 @@ namespace WzComparerR2.CharaSim
                 case 18511: return "閃耀海盜(3轉)";
                 case 18512: return "閃耀海盜(4轉)";
                 case 18514: return "閃耀海盜(6轉)";
+                
+                case 19000: return "蕾媞";
+                case 19200: return "蕾媞(1次)";
+                case 19210: return "蕾媞(2次)";
+                case 19211: return "蕾媞(3次)";
+                case 19212: return "蕾媞(4次)";
+                case 19214: return "蕾媞(6次)";
 
                 case 40000: return "5轉";
                 case 40001: return "5轉(劍士)";
