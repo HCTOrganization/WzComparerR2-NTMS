@@ -169,6 +169,10 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         longSword = 1215,
         /// <summary>
+        /// Carta 1216
+        /// </summary>
+        carta = 1216,
+        /// <summary>
         /// 灵魂手铳 122
         /// </summary>
         soulShooter = 122,
@@ -573,6 +577,10 @@ namespace WzComparerR2.CharaSim
         /// 그랜드 어센틱심볼 1714
         /// </summary>
         grandAuthenticSymbol = 1714,
+        /// <summary>
+        /// 마법깃펜 1726
+        /// </summary>
+        magicQuill = 1726,
         /// <summary>
         /// 宝玉 178
         /// </summary>

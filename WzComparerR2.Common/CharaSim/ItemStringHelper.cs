@@ -820,6 +820,9 @@ namespace WzComparerR2.CharaSim
                 case GearType.onmyoSen: return "陰陽扇";
                 case GearType.kannaReifu: return "靈符";
 
+                case GearType.carta: return "カルタ";
+                case GearType.magicQuill: return "魔法の羽ペン";
+
                 default: return null;
             }
         }
@@ -974,6 +977,9 @@ namespace WzComparerR2.CharaSim
                 case GearType.boxingCannon:
                 case GearType.boxingSky: return GetExtraJobReqString(175);
 
+                case GearType.longSword:
+                case GearType.yeouiGem: return GetExtraJobReqString(161);
+
                 case GearType.ornament: return GetExtraJobReqString(162);
 
                 //18xxx
@@ -983,8 +989,8 @@ namespace WzComparerR2.CharaSim
                 case GearType.celestialLight:
                 case GearType.compass: return GetExtraJobReqString(182);
 
-                case GearType.longSword:
-                case GearType.yeouiGem: return GetExtraJobReqString(161);
+                case GearType.carta:
+                case GearType.magicQuill: return GetExtraJobReqString(192);
                 default: return null;
             }
         }
@@ -1028,6 +1034,7 @@ namespace WzComparerR2.CharaSim
                 case 181: return "可裝備葉里";
                 case 182: return "可裝備施亞";
                 case 183: return "可裝備艾伊爾";
+                case 192: return "可裝備蕾媞";
                 default: return null;
             }
         }
@@ -1199,6 +1206,7 @@ namespace WzComparerR2.CharaSim
                         case 16: return "阿尼瑪職業";
                         case 17: return "江湖職業";
                         case 18: return "閃耀職業";
+                        case 19: return "魔族職業";
 
                     }
                 }
@@ -1840,7 +1848,7 @@ namespace WzComparerR2.CharaSim
                             case 16: jobName = "5轉(阿尼瑪)"; break;
                             case 17: jobName = "5轉(江湖)"; break;
                             case 18: jobName = "5轉(閃耀)"; break;
-                            case 19: jobName = "5轉(惡魔族)"; break;
+                            case 19: jobName = "5轉(魔族)"; break;
                         }
                     }
                     else
