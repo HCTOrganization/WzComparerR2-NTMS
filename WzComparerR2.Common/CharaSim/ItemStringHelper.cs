@@ -1840,6 +1840,7 @@ namespace WzComparerR2.CharaSim
                             case 16: jobName = "5轉(阿尼瑪)"; break;
                             case 17: jobName = "5轉(江湖)"; break;
                             case 18: jobName = "5轉(閃耀)"; break;
+                            case 19: jobName = "5轉(惡魔族)"; break;
                         }
                     }
                     else
