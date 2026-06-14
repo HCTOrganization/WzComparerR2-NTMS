@@ -108,369 +108,266 @@ namespace WzComparerR2.CharaSimControl
 
         public Bitmap GetCustomSample(long inputNumber, bool useMiniSize, bool isCritical)
         {
-            string numberStr = "";
+            string numberStr = FormatNumberString(inputNumber);
+            var damageStyleParams = GetDamageStyleParameters(isCritical);
+            BitmapOrigin criticalSign = GetCriticalSign();
+
+            var drawOrder = new List<DamageSkinDrawInfo>();
+            var critInfo = InitializeCriticalInfo(criticalSign, ref damageStyleParams);
+
+            BuildDrawOrder(numberStr, drawOrder, damageStyleParams, isCritical);
+
+            return RenderDamageBitmap(drawOrder, critInfo, damageStyleParams);
+        }
+
+        /// <summary>
+        /// Formats the input number string based on the damage skin's custom type.
+        /// </summary>
+        private string FormatNumberString(long inputNumber)
+        {
             if (DisplayUnitOnSingleLine)
-            {
-                numberStr = inputNumber.ToString();
-            }
-            else
-            {
-                switch (damageSkin.CustomType)
-                {
-                    case "hangul": // CJK Detailed
-                        numberStr = ItemStringHelper.ToCJKNumberExpr(inputNumber, detailedExpr: true);
-                        break;
-                    case "hangulUnit": // CJK
-                        numberStr = ItemStringHelper.ToCJKNumberExpr(inputNumber);
-                        break;
-                    case "glUnit": // GMS
-                        numberStr = ItemStringHelper.ToThousandsNumberExpr(inputNumber, isMsea: this.AlwaysUseMseaFormat);
-                        break;
-                    case "glUnit2": // MSEA
-                        numberStr = ItemStringHelper.ToThousandsNumberExpr(inputNumber, isMsea: true);
-                        break;
-                    default:
-                        if (this.DamageSkin.MiniUnit.Count > 0) // Default to CJK format when units are available
-                        {
-                            numberStr = ItemStringHelper.ToCJKNumberExpr(inputNumber);
-                        }
-                        else
-                        {
-                            numberStr = inputNumber.ToString();
-                        }
-                        break;
-                }
-            }
+                return inputNumber.ToString();
 
-            BitmapOrigin criticalSign = new BitmapOrigin();
-            if (this.damageSkin.BigCriticalDigit.ContainsKey("effect3"))
+            switch (damageSkin.CustomType)
             {
-                criticalSign = this.damageSkin.BigCriticalDigit["effect3"];
+                case "hangul": // CJK Detailed
+                    return ItemStringHelper.ToCJKNumberExpr(inputNumber, detailedExpr: true);
+                case "hangulUnit": // CJK
+                    return ItemStringHelper.ToCJKNumberExpr(inputNumber);
+                case "glUnit": // GMS
+                    return ItemStringHelper.ToThousandsNumberExpr(inputNumber, isMsea: this.AlwaysUseMseaFormat);
+                case "glUnit2": // MSEA
+                    return ItemStringHelper.ToThousandsNumberExpr(inputNumber, isMsea: true);
+                default:
+                    return this.DamageSkin.MiniUnit.Count > 0
+                        ? ItemStringHelper.ToCJKNumberExpr(inputNumber)
+                        : inputNumber.ToString();
             }
+        }
 
-            int totalWidth = 0;
-            int maxHeight = 0;
+        /// <summary>
+        /// Gets the critical sign bitmap if available.
+        /// </summary>
+        private BitmapOrigin GetCriticalSign()
+        {
+            return this.damageSkin.BigCriticalDigit.TryGetValue("effect3", out var sign) ? sign : new BitmapOrigin();
+        }
 
-            var nums_1 = isCritical ? this.damageSkin.BigCriticalDigit : this.damageSkin.BigDigit;
-            var nums_0 = isCritical ? this.damageSkin.MiniCriticalDigit : this.damageSkin.MiniDigit;
-            var units_1 = isCritical ? this.damageSkin.BigCriticalUnit : this.damageSkin.BigUnit;
-            var units_0 = isCritical ? this.damageSkin.MiniCriticalUnit : this.damageSkin.MiniUnit;
-            var digitSpacing_1 = (isCritical ? this.damageSkin.BigCriticalDigitSpacing : this.damageSkin.BigDigitSpacing);
-            var digitSpacing_0 = (isCritical ? this.damageSkin.MiniCriticalDigitSpacing : this.damageSkin.MiniDigitSpacing);
-            var unitSpacing_1 = (isCritical ? this.damageSkin.BigCriticalUnitSpacing : this.damageSkin.BigUnitSpacing);
-            var unitSpacing_0 = (isCritical ? this.damageSkin.MiniCriticalUnitSpacing : this.damageSkin.MiniUnitSpacing);
-            var digitBottomFix_1 = (isCritical ? this.DamageSkin.BigCriticalDigitBottomFix : this.DamageSkin.BigDigitBottomFix);
-            var digitBottomFix_0 = (isCritical ? this.DamageSkin.MiniCriticalDigitBottomFix : this.DamageSkin.MiniDigitBottomFix);
-            var unitBottomFix_1 = (isCritical ? this.DamageSkin.BigCriticalUnitBottomFix : this.DamageSkin.BigUnitBottomFix);
-            var unitBottomFix_0 = (isCritical ? this.DamageSkin.MiniCriticalUnitBottomFix : this.DamageSkin.MiniUnitBottomFix);
-            var unitDotSpace_1 = (isCritical ? this.DamageSkin.BigCriticalUnitDotSpace : this.DamageSkin.BigUnitDotSpace);
-            var unitDotSpace_0 = (isCritical ? this.DamageSkin.MiniCriticalUnitDotSpace : this.DamageSkin.MiniUnitDotSpace);
+        /// <summary>
+        /// Encapsulates all damage style parameters for Big/Mini and Critical variants.
+        /// </summary>
+        private class DamageStyleParams
+        {
+            public Dictionary<string, BitmapOrigin> NumsBig { get; set; }
+            public Dictionary<string, BitmapOrigin> NumsMini { get; set; }
+            public Dictionary<string, BitmapOrigin> UnitsBig { get; set; }
+            public Dictionary<string, BitmapOrigin> UnitsMini { get; set; }
+            public int DigitSpacingBig { get; set; }
+            public int DigitSpacingMini { get; set; }
+            public int UnitSpacingBig { get; set; }
+            public int UnitSpacingMini { get; set; }
+            public int UnitDotSpaceBig { get; set; }
+            public int UnitDotSpaceMini { get; set; }
+            public bool DigitBottomFixBig { get; set; }
+            public bool DigitBottomFixMini { get; set; }
+            public bool UnitBottomFixBig { get; set; }
+            public bool UnitBottomFixMini { get; set; }
+        }
+
+        /// <summary>
+        /// Gets damage style parameters based on critical state.
+        /// </summary>
+        private DamageStyleParams GetDamageStyleParameters(bool isCritical)
+        {
+            const int EXTRA_SPACING = 30;
+
+            var numsBig = isCritical ? this.damageSkin.BigCriticalDigit : this.damageSkin.BigDigit;
+            var numsMini = isCritical ? this.damageSkin.MiniCriticalDigit : this.damageSkin.MiniDigit;
+            var unitsBig = isCritical ? this.damageSkin.BigCriticalUnit : this.damageSkin.BigUnit;
+            var unitsMini = isCritical ? this.damageSkin.MiniCriticalUnit : this.damageSkin.MiniUnit;
+
+            var digitSpacingBig = isCritical ? this.damageSkin.BigCriticalDigitSpacing : this.damageSkin.BigDigitSpacing;
+            var digitSpacingMini = isCritical ? this.damageSkin.MiniCriticalDigitSpacing : this.damageSkin.MiniDigitSpacing;
+            var unitSpacingBig = isCritical ? this.damageSkin.BigCriticalUnitSpacing : this.damageSkin.BigUnitSpacing;
+            var unitSpacingMini = isCritical ? this.damageSkin.MiniCriticalUnitSpacing : this.damageSkin.MiniUnitSpacing;
+            var unitDotSpaceBig = isCritical ? this.DamageSkin.BigCriticalUnitDotSpace : this.DamageSkin.BigUnitDotSpace;
+            var unitDotSpaceMini = isCritical ? this.DamageSkin.MiniCriticalUnitDotSpace : this.DamageSkin.MiniUnitDotSpace;
 
             if (!UseInGameSpacing)
             {
-                digitSpacing_0 += 30;
-                digitSpacing_1 += 30;
-                unitSpacing_0 += 30;
-                unitSpacing_1 += 30;
-                unitDotSpace_0 += 30;
-                unitDotSpace_1 += 30;
+                digitSpacingBig += EXTRA_SPACING;
+                digitSpacingMini += EXTRA_SPACING;
+                unitSpacingBig += EXTRA_SPACING;
+                unitSpacingMini += EXTRA_SPACING;
+                unitDotSpaceBig += EXTRA_SPACING;
+                unitDotSpaceMini += EXTRA_SPACING;
             }
 
-            int wave_height = 0;
-            List<DamageSkinDrawInfo> drawOrder = new List<DamageSkinDrawInfo>();
-            DamageSkinDrawInfo critInfo = null;
-
-            if (isCritical && criticalSign.Bitmap != null)
+            return new DamageStyleParams
             {
-                critInfo = new DamageSkinDrawInfo(criticalSign, -criticalSign.Origin.X, -criticalSign.Origin.Y, false);
-                maxHeight = Math.Max(maxHeight, critInfo.Y + critInfo.Height);
+                NumsBig = numsBig,
+                NumsMini = numsMini,
+                UnitsBig = unitsBig,
+                UnitsMini = unitsMini,
+                DigitSpacingBig = digitSpacingBig,
+                DigitSpacingMini = digitSpacingMini,
+                UnitSpacingBig = unitSpacingBig,
+                UnitSpacingMini = unitSpacingMini,
+                UnitDotSpaceBig = unitDotSpaceBig,
+                UnitDotSpaceMini = unitDotSpaceMini,
+                DigitBottomFixBig = isCritical ? this.DamageSkin.BigCriticalDigitBottomFix : this.DamageSkin.BigDigitBottomFix,
+                DigitBottomFixMini = isCritical ? this.DamageSkin.MiniCriticalDigitBottomFix : this.DamageSkin.MiniDigitBottomFix,
+                UnitBottomFixBig = isCritical ? this.DamageSkin.BigCriticalUnitBottomFix : this.DamageSkin.BigUnitBottomFix,
+                UnitBottomFixMini = isCritical ? this.DamageSkin.MiniCriticalUnitBottomFix : this.DamageSkin.MiniUnitBottomFix,
+            };
+        }
+
+        /// <summary>
+        /// Initializes critical sign info if available.
+        /// </summary>
+        private DamageSkinDrawInfo InitializeCriticalInfo(BitmapOrigin criticalSign, ref DamageStyleParams damageStyleParams)
+        {
+            if (criticalSign.Bitmap != null)
+            {
+                return new DamageSkinDrawInfo(criticalSign, -criticalSign.Origin.X, -criticalSign.Origin.Y, false);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Maps unit characters to their corresponding unit keys.
+        /// </summary>
+        private static readonly Dictionary<char, string> UnitCharacterMap = new()
+        {
+            { '十', "0" }, { '십', "0" }, { '.', "0" },
+            { '百', "1" }, { '백', "1" }, { 'K', "1" },
+            { '千', "2" }, { '천', "2" }, { 'M', "2" },
+            { '万', "3" }, { '萬', "3" }, { '만', "3" }, { 'B', "3" },
+            { '億', "4" }, { '亿', "4" }, { '억', "4" }, { 'T', "4" },
+            { '兆', "5" }, { '조', "5" }, { 'Q', "5" },
+            { '京', "6" }, { '경', "6" }
+        };
+
+        /// <summary>
+        /// Resolves unit bitmap and spacing for a given character.
+        /// </summary>
+        private (BitmapOrigin bitmap, int spacing, bool bottomFix) ResolveUnitCharacter(
+            char character, bool isFirstUnit, DamageStyleParams damageStyleParams)
+        {
+            const int FALLBACK_SPACING = 10;
+            const int FALLBACK_SIZE = 20;
+
+            if (!UnitCharacterMap.TryGetValue(character, out var unitKey))
+                return (new BitmapOrigin(), FALLBACK_SPACING, false);
+
+            var unitBig = isFirstUnit ? damageStyleParams.UnitsBig : damageStyleParams.UnitsBig;
+            var unitMini = !isFirstUnit ? damageStyleParams.UnitsMini : damageStyleParams.UnitsMini;
+            var spacingBig = character == '.' ? damageStyleParams.UnitDotSpaceBig : damageStyleParams.UnitSpacingBig;
+            var spacingMini = character == '.' ? damageStyleParams.UnitDotSpaceMini : damageStyleParams.UnitSpacingMini;
+
+            if (isFirstUnit && unitBig.ContainsKey(unitKey))
+            {
+                return (unitBig[unitKey], spacingBig, damageStyleParams.UnitBottomFixBig);
+            }
+            if (!isFirstUnit && unitMini.ContainsKey(unitKey))
+            {
+                return (unitMini[unitKey], spacingMini, damageStyleParams.UnitBottomFixMini);
             }
 
-            // Calculate total width and max height
+            // Fallback for unavailable units
+            return character switch
+            {
+                'T' => (new BitmapOrigin(Resource.Unit_T, FALLBACK_SIZE, FALLBACK_SIZE), FALLBACK_SPACING, true),
+                '兆' or '조' => (new BitmapOrigin(Resource.Unit_E12, FALLBACK_SIZE, FALLBACK_SIZE), FALLBACK_SPACING, true),
+                'Q' => (new BitmapOrigin(Resource.Unit_Q, FALLBACK_SIZE, FALLBACK_SIZE), FALLBACK_SPACING, true),
+                '京' or '경' => (new BitmapOrigin(Resource.Unit_E16, FALLBACK_SIZE, FALLBACK_SIZE), FALLBACK_SPACING, true),
+                _ => (new BitmapOrigin(), FALLBACK_SPACING, false)
+            };
+        }
+
+        /// <summary>
+        /// Builds the draw order by parsing the number string and resolving bitmap resources.
+        /// </summary>
+        private void BuildDrawOrder(string numberStr, List<DamageSkinDrawInfo> drawOrder,
+            DamageStyleParams damageStyleParams, bool isCritical)
+        {
+            const int MAX_UNIT_WIDTH = 50;
+            const int MAX_DIGIT_WIDTH = 35;
+            const int WAVE_HEIGHT = 0;
+
+            int totalWidth = 0;
+            int maxHeight = 0;
             bool firstNum = true;
             bool firstUnit = true;
-            bool bottomFix = false;
             int count = 0;
-            int spacing = 0;
-            BitmapOrigin tmpBmp = new BitmapOrigin();
-            DamageSkinDrawInfo tmpInfo = null;
+
             foreach (char c in numberStr)
             {
+                BitmapOrigin tmpBmp = new BitmapOrigin();
+                int spacing = 0;
+                bool bottomFix = false;
                 bool isUnit = true;
-                string character = c.ToString();
-                switch (character)
+
+                if (char.IsDigit(c))
                 {
-                    case "0":
-                    case "1":
-                    case "2":
-                    case "3":
-                    case "4":
-                    case "5":
-                    case "6":
-                    case "7":
-                    case "8":
-                    case "9":
-                        if (firstNum)
-                        {
-                            firstNum = false;
-                            tmpBmp = nums_1[character];
-                            spacing = digitSpacing_1;
-                            bottomFix = digitBottomFix_1;
-                        }
-                        else
-                        {
-                            tmpBmp = nums_0[character];
-                            spacing = digitSpacing_0;
-                            bottomFix = digitBottomFix_0;
-                        }
+                    var nums = firstNum ? damageStyleParams.NumsBig : damageStyleParams.NumsMini;
+                    var spacing_val = firstNum ? damageStyleParams.DigitSpacingBig : damageStyleParams.DigitSpacingMini;
+                    var bottomFix_val = firstNum ? damageStyleParams.DigitBottomFixBig : damageStyleParams.DigitBottomFixMini;
+
+                    if (nums.TryGetValue(c.ToString(), out var digit))
+                    {
+                        tmpBmp = digit;
+                        spacing = spacing_val;
+                        bottomFix = bottomFix_val;
                         isUnit = false;
-                        break;
-
-                    case "十":
-                    case "십":
-                    case ".":
-                        if (firstUnit)
-                        {
-                            if (units_1.ContainsKey("0"))
-                            {
-                                firstUnit = false;
-                                tmpBmp = units_1["0"];
-                                if (character == ".") spacing = unitDotSpace_1;
-                                else spacing = unitSpacing_1;
-                                bottomFix = unitBottomFix_1;
-                            }
-                        }
-                        else
-                        {
-                            if (units_0.ContainsKey("0"))
-                            {
-                                tmpBmp = units_1["0"];
-                                if (character == ".") spacing = unitDotSpace_0;
-                                else spacing = unitSpacing_0;
-                                bottomFix = unitBottomFix_0;
-                            }
-                        }
-                        break;
-
-                    case "百":
-                    case "백":
-                    case "K":
-                        if (firstUnit)
-                        {
-                            if (units_1.ContainsKey("1"))
-                            {
-                                firstUnit = false;
-                                tmpBmp = units_1["1"];
-                                spacing = unitSpacing_1;
-                                bottomFix = unitBottomFix_1;
-                            }
-                        }
-                        else
-                        {
-                            if (units_0.ContainsKey("1"))
-                            {
-                                tmpBmp = units_1["1"];
-                                spacing = unitSpacing_0;
-                                bottomFix = unitBottomFix_0;
-                            }
-                        }
-                        break;
-
-                    case "千":
-                    case "천":
-                    case "M":
-                        if (firstUnit)
-                        {
-                            if (units_1.ContainsKey("2"))
-                            {
-                                firstUnit = false;
-                                tmpBmp = units_1["2"];
-                                spacing = unitSpacing_1;
-                                bottomFix = unitBottomFix_1;
-                            }
-                        }
-                        else
-                        {
-                            if (units_0.ContainsKey("2"))
-                            {
-                                tmpBmp = units_1["2"];
-                                spacing = unitSpacing_0;
-                                bottomFix = unitBottomFix_0;
-                            }
-                        }
-                        break;
-
-                    case "万":
-                    case "萬":
-                    case "만":
-                    case "B":
-                        if (firstUnit)
-                        {
-                            if (units_1.ContainsKey("3"))
-                            {
-                                firstUnit = false;
-                                tmpBmp = units_1["3"];
-                                spacing = unitSpacing_1;
-                                bottomFix = unitBottomFix_1;
-                            }
-                        }
-                        else
-                        {
-                            if (units_0.ContainsKey("3"))
-                            {
-                                tmpBmp = units_1["3"];
-                                spacing = unitSpacing_0;
-                                bottomFix = unitBottomFix_0;
-                            }
-                        }
-                        break;
-
-                    case "億":
-                    case "亿":
-                    case "억":
-                    case "T":
-                        if (firstUnit)
-                        {
-                            if (units_1.ContainsKey("4"))
-                            {
-                                firstUnit = false;
-                                tmpBmp = units_1["4"];
-                                spacing = unitSpacing_1;
-                                bottomFix = unitBottomFix_1;
-                            }
-                            else if (character == "T")
-                            {
-                                tmpBmp = new BitmapOrigin(Resource.Unit_T, 20, 20);
-                                spacing = 10;
-                                bottomFix = true;
-                            }
-                        }
-                        else
-                        {
-                            if (units_0.ContainsKey("4"))
-                            {
-                                tmpBmp = units_1["4"];
-                                spacing = unitSpacing_0;
-                                bottomFix = unitBottomFix_0;
-                            }
-                            else if (character == "T")
-                            {
-                                tmpBmp = new BitmapOrigin(Resource.Unit_T, 20, 20);
-                                spacing = 10;
-                                bottomFix = true;
-                            }
-                        }
-                        break;
-
-
-                    case "兆":
-                    case "조":
-                    case "Q":
-                        if (firstUnit)
-                        {
-                            if (units_1.ContainsKey("5"))
-                            {
-                                firstUnit = false;
-                                tmpBmp = units_1["5"];
-                                spacing = unitSpacing_1;
-                                bottomFix = unitBottomFix_1;
-                            }
-                            else if (character == "兆" || character == "조")
-                            {
-                                tmpBmp = new BitmapOrigin(Resource.Unit_E12, 20, 20);
-                                spacing = 10;
-                                bottomFix = true;
-                            }
-                            else if (character == "Q")
-                            {
-                                tmpBmp = new BitmapOrigin(Resource.Unit_Q, 20, 20);
-                                spacing = 10;
-                                bottomFix = true;
-                            }
-                        }
-                        else
-                        {
-                            if (units_0.ContainsKey("5"))
-                            {
-                                tmpBmp = units_1["5"];
-                                spacing = unitSpacing_0;
-                                bottomFix = unitBottomFix_0;
-                            }
-                            else if (character == "兆" || character == "조")
-                            {
-                                tmpBmp = new BitmapOrigin(Resource.Unit_E12, 20, 20);
-                                spacing = 10;
-                                bottomFix = true;
-                            }
-                            else if (character == "Q")
-                            {
-                                tmpBmp = new BitmapOrigin(Resource.Unit_Q, 20, 20);
-                                spacing = 10;
-                                bottomFix = true;
-                            }
-                        }
-                        break;
-
-                    case "京":
-                    case "경":
-                        if (firstUnit)
-                        {
-                            if (units_1.ContainsKey("6"))
-                            {
-                                tmpBmp = units_1["6"];
-                                spacing = unitSpacing_1;
-                                bottomFix = unitBottomFix_1;
-                            }
-                            else if (character == "京" || character == "경")
-                            {
-                                tmpBmp = new BitmapOrigin(Resource.Unit_E16, 20, 20);
-                                spacing = 10;
-                                bottomFix = true;
-                            }
-                        }
-                        else
-                        {
-                            if (units_0.ContainsKey("6"))
-                            {
-                                tmpBmp = units_1["6"];
-                                spacing = unitSpacing_0;
-                                bottomFix = unitBottomFix_0;
-                            }
-                            else if (character == "京" || character == "경")
-                            {
-                                tmpBmp = new BitmapOrigin(Resource.Unit_E16, 20, 20);
-                                spacing = 10;
-                                bottomFix = true;
-                            }
-                        }
-                        break;
-
-                    default:
-                        tmpBmp.Bitmap = null;
-                        break;
+                        firstNum = false;
+                    }
+                }
+                else
+                {
+                    var (unitBmp, unitSpacing, unitBottomFix) = ResolveUnitCharacter(c, firstUnit, damageStyleParams);
+                    if (unitBmp.Bitmap != null)
+                    {
+                        tmpBmp = unitBmp;
+                        spacing = unitSpacing;
+                        bottomFix = unitBottomFix;
+                        firstUnit = false;
+                    }
                 }
 
                 if (tmpBmp.Bitmap != null)
                 {
-                    tmpInfo = new DamageSkinDrawInfo(tmpBmp, totalWidth - tmpBmp.Origin.X, 0 - tmpBmp.Origin.Y - (count++ % 2 != 0 ? wave_height : 0), isUnit, bottomFix);
-                    if (tmpInfo.BottomFix)
-                        tmpInfo.Y = -tmpBmp.Bitmap.Height;
+                    var drawInfo = new DamageSkinDrawInfo(tmpBmp, totalWidth - tmpBmp.Origin.X,
+                        0 - tmpBmp.Origin.Y - (count++ % 2 != 0 ? WAVE_HEIGHT : 0), isUnit, bottomFix);
 
-                    if (tmpInfo.IsUnit)
-                        totalWidth += Math.Min(tmpInfo.Width, 50) + spacing;
-                    else
-                        totalWidth += Math.Min(tmpInfo.Width, 35) + spacing;
-                    maxHeight = Math.Max(maxHeight, tmpInfo.Y + tmpInfo.Height);
+                    if (drawInfo.BottomFix)
+                        drawInfo.Y = -tmpBmp.Bitmap.Height;
 
-                    drawOrder.Add(tmpInfo);
+                    int widthLimit = isUnit ? MAX_UNIT_WIDTH : MAX_DIGIT_WIDTH;
+                    totalWidth += Math.Min(drawInfo.Width, widthLimit) + spacing;
+                    maxHeight = Math.Max(maxHeight, drawInfo.Y + drawInfo.Height);
+
+                    drawOrder.Add(drawInfo);
                 }
             }
+        }
 
-            var firstDraw = drawOrder.FirstOrDefault();
+        /// <summary>
+        /// Renders the final damage bitmap from the draw order.
+        /// </summary>
+        private Bitmap RenderDamageBitmap(List<DamageSkinDrawInfo> drawOrder, DamageSkinDrawInfo critInfo, DamageStyleParams damageStyleParams)
+        {
+            if (drawOrder.Count == 0)
+                return new Bitmap(1, 1);
+
+            var firstDraw = drawOrder[0];
             int offsetX = -firstDraw.X;
             int offsetY = -drawOrder.Min(info => info.Y);
-            int digitBaseY1 = drawOrder.Where(info => !info.IsUnit).Min(info => info.Y);
-            int digitBaseY2 = drawOrder.Where(info => !info.IsUnit).Max(info => info.Y + info.Height);
+
+            var digitInfos = drawOrder.Where(info => !info.IsUnit).ToList();
+            int digitBaseY1 = digitInfos.Count > 0 ? digitInfos.Min(info => info.Y) : 0;
+            int digitBaseY2 = digitInfos.Count > 0 ? digitInfos.Max(info => info.Y + info.Height) : 0;
+
             if (critInfo != null)
             {
                 critInfo.X = firstDraw.X + firstDraw.OriginX + critInfo.X;
@@ -478,31 +375,32 @@ namespace WzComparerR2.CharaSimControl
                 offsetX = Math.Max(offsetX, -critInfo.X);
                 offsetY = Math.Max(offsetY, -critInfo.Y);
             }
-            totalWidth = drawOrder.LastOrDefault().X + drawOrder.LastOrDefault().Width;
-            totalWidth += offsetX;
-            maxHeight += offsetY;
 
-            Bitmap finalBitmap = new Bitmap(totalWidth, maxHeight);
+            int totalWidth = drawOrder.Last().X + drawOrder.Last().Width + offsetX;
+            int maxHeight = drawOrder.Max(info => info.Y + info.Height) + offsetY;
+
+            var finalBitmap = new Bitmap(totalWidth, maxHeight);
 
             using (Graphics g = Graphics.FromImage(finalBitmap))
             {
                 g.Clear(Color.Transparent);
+
                 if (critInfo != null)
                 {
                     g.DrawImage(critInfo.Bmp, offsetX + critInfo.X, offsetY + critInfo.Y);
                 }
+
                 foreach (var drawInfo in drawOrder)
                 {
-                    if (drawInfo.IsUnit)
+                    int drawY = offsetY + drawInfo.Y;
+                    if (drawInfo.IsUnit && digitInfos.Count > 0)
                     {
-                        g.DrawImage(drawInfo.Bmp, offsetX + drawInfo.X, offsetY + Math.Min(Math.Max(drawInfo.Y, digitBaseY1), digitBaseY2 - drawInfo.Height));
+                        drawY = offsetY + Math.Min(Math.Max(drawInfo.Y, digitBaseY1), digitBaseY2 - drawInfo.Height);
                     }
-                    else
-                    {
-                        g.DrawImage(drawInfo.Bmp, offsetX + drawInfo.X, offsetY + drawInfo.Y);
-                    }
+                    g.DrawImage(drawInfo.Bmp, offsetX + drawInfo.X, drawY);
                 }
             }
+
             return finalBitmap;
         }
 
