@@ -16,12 +16,18 @@ using WzComparerR2.Config;
 
 namespace WzComparerR2.CharaSim
 {
+    /// <summary>
+    /// Provides translation, localization, and currency conversion services.
+    /// Supports multiple translation engines including Google Translate, Naver Papago, Mozhi, and OpenAI-compatible APIs.
+    /// </summary>
     public class Translator
     {
         private static readonly HttpClient _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
 
-        // L2C stands for Language to Currency
-        private static Dictionary<string, string> dictL2C = new Dictionary<string, string>()
+        #region Static Mappings
+
+        // Language to Currency mapping
+        private static readonly Dictionary<string, string> LanguageToCurrency = new Dictionary<string, string>()
         {
             { "ja", "jpy" },
             { "ko", "krw" },
@@ -30,7 +36,7 @@ namespace WzComparerR2.CharaSim
             { "zh-TW", "twd" }
         };
 
-        private static Dictionary<string, string> dictC2L = new Dictionary<string, string>()
+        private static readonly Dictionary<string, string> CurrencyToLanguage = new Dictionary<string, string>()
         {
             { "jpy", "ja" },
             { "krw", "ko" },
@@ -40,8 +46,8 @@ namespace WzComparerR2.CharaSim
             { "sgd", "en" }
         };
 
-        // Language Model Expression
-        private static Dictionary<string, string> dictL2LM = new Dictionary<string, string>()
+        // Language code to localized language name
+        private static readonly Dictionary<string, string> LanguageNames = new Dictionary<string, string>()
         {
             { "ja", "Japanese" },
             { "ko", "Korean" },
@@ -51,7 +57,8 @@ namespace WzComparerR2.CharaSim
             { "yue", "Cantonese" }
         };
 
-        private static Dictionary<string, string> dictCurrencyName = new Dictionary<string, string>()
+        // Currency code to localized currency symbol
+        private static readonly Dictionary<string, string> CurrencySymbols = new Dictionary<string, string>()
         {
             { "jpy", "日圓" },
             { "krw", "韓幣" },
@@ -67,37 +74,191 @@ namespace WzComparerR2.CharaSim
             { "myr", "馬來林吉特" },
         };
 
-        private static string GTranslateBaseURL = "https://translate.googleapis.com/translate_a/t";
-        private static string NTranslateBaseURL = "https://naveropenapi.apigw.ntruss.com";
-        private static string GlossaryTablePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache", "Glossary.csv");
-        public static string OAITranslateBaseURL { get; set; }
+        // Translation engine names indexed by engine ID
+        private static readonly Dictionary<int, string> EngineNames = new Dictionary<int, string>()
+        {
+            { 0, "google" },
+            { 1, "mozhi-google" },
+            { 2, "mozhi-deepl" },
+            { 3, "mozhi-duckduckgobing" },
+            { 4, "mozhi-mymemory" },
+            { 5, "mozhi-yandex" },
+            { 6, "naver" },
+            { 9, "openai" }
+        };
 
-        private static List<string> CurrencyBaseURL = new List<string>()
+        // Mozhi engines that require special configuration
+        private static readonly HashSet<int> MozhiEngines = new HashSet<int> { 1, 2, 3, 4, 5 };
+
+        #endregion
+
+        #region API Endpoints
+
+        private const string GTranslateBaseURL = "https://translate.googleapis.com/translate_a/t";
+        private const string NTranslateBaseURL = "https://naveropenapi.apigw.ntruss.com";
+        private const string GlossaryTablePath = "TranslationCache/Glossary.csv";
+
+        private static readonly List<string> CurrencyBaseURLs = new List<string>()
         {
             "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/",
             "https://latest.currency-api.pages.dev/v1/currencies/",
             "https://registry.npmmirror.com/@fawazahmed0/currency-api/latest/files/v1/currencies/"
         };
 
-        private static JArray GTranslate(string text, string desiredLanguage)
+        public static string OAITranslateBaseURL { get; set; }
+
+        #endregion
+
+        #region Helper Methods - Path Management
+
+        /// <summary>
+        /// Gets the translation cache directory path for the specified engine.
+        /// </summary>
+        private static string GetEngineCachePath(int engineId, string languageCode = null)
+        {
+            string engineName = GetEngineName(engineId);
+            string fileName = engineId == 9 && !string.IsNullOrEmpty(languageCode)
+                ? $"{DefaultLanguageModel}_{languageCode}.json"
+                : $"{languageCode}.json";
+            return Path.Combine(GetTranslationCacheBasePath(), engineName, fileName);
+        }
+
+        /// <summary>
+        /// Gets the engine name for the given engine ID.
+        /// </summary>
+        private static string GetEngineName(int engineId)
+        {
+            return EngineNames.TryGetValue(engineId, out var name) ? name : EngineNames[0];
+        }
+
+        /// <summary>
+        /// Gets the base translation cache directory path.
+        /// </summary>
+        private static string GetTranslationCacheBasePath()
+        {
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache");
+        }
+
+        /// <summary>
+        /// Gets the full glossary table path.
+        /// </summary>
+        private static string GetGlossaryTableFullPath()
+        {
+            return Path.Combine(GetTranslationCacheBasePath(), GlossaryTablePath);
+        }
+
+        #endregion
+
+        #region Helper Methods - Configuration
+
+        /// <summary>
+        /// Gets the language name for the given language code.
+        /// </summary>
+        private static string GetLanguageName(string languageCode)
+        {
+            return LanguageNames.TryGetValue(languageCode, out var name) ? name : "Unknown";
+        }
+
+        /// <summary>
+        /// Gets the currency symbol for the given currency code.
+        /// </summary>
+        private static string GetCurrencySymbol(string currencyCode)
+        {
+            return CurrencySymbols.TryGetValue(currencyCode, out var symbol) ? symbol : currencyCode;
+        }
+
+        /// <summary>
+        /// Determines if the engine is a Mozhi-based engine.
+        /// </summary>
+        private static bool IsMozhiEngine(int engineId)
+        {
+            return MozhiEngines.Contains(engineId);
+        }
+
+        /// <summary>
+        /// Gets the Mozhi engine code for the given engine ID.
+        /// </summary>
+        private static string GetMozhiEngineCode(int engineId)
+        {
+            return engineId switch
+            {
+                1 => "google",
+                2 => "deepl",
+                3 => "duckduckgo",
+                4 => "mymemory",
+                5 => "yandex",
+                _ => "google"
+            };
+        }
+
+        #endregion
+
+        #region Helper Methods - Error Handling
+
+        /// <summary>
+        /// Logs translation errors for debugging purposes.
+        /// </summary>
+        private static void LogTranslationError(string engine, string text, Exception ex)
+        {
+            // TODO: Implement proper logging using NetworkLogger or similar
+            // For now, this is a placeholder for future logging implementation
+        }
+
+        #endregion
+
+        #region Translation Methods
+
+        /// <summary>
+        /// Translates text using Google Translate API.
+        /// </summary>
+        private static string GTranslate(string text, string desiredLanguage)
         {
             try
             {
                 var postData = new StringContent("q=" + Uri.EscapeDataString(text), Encoding.UTF8, "application/x-www-form-urlencoded");
                 var response = _httpClient.PostAsync(GTranslateBaseURL + "?client=gtx&format=text&sl=auto&tl=" + desiredLanguage, postData).Result;
                 var responseString = response.Content.ReadAsStringAsync().Result;
-                return JArray.Parse(responseString);
+                var result = JArray.Parse(responseString);
+                return result[0][0].ToString();
             }
-            catch
+            catch (Exception ex)
             {
-                return JArray.Parse($"[[\"{text}\",\"{desiredLanguage}\"]]");
+                LogTranslationError("GTranslate", text, ex);
+                return text;
             }
         }
 
+        /// <summary>
+        /// Detects the language of the given text using Google Translate API.
+        /// </summary>
+        private static string GTranslateDetect(string text, string desiredLanguage)
+        {
+            try
+            {
+                var postData = new StringContent("q=" + Uri.EscapeDataString(text), Encoding.UTF8, "application/x-www-form-urlencoded");
+                var response = _httpClient.PostAsync(GTranslateBaseURL + "?client=gtx&format=text&sl=auto&tl=" + desiredLanguage, postData).Result;
+                var responseString = response.Content.ReadAsStringAsync().Result;
+                var result = JArray.Parse(responseString);
+                return result[0][1].ToString();
+            }
+            catch (Exception ex)
+            {
+                LogTranslationError("GTranslateDetect", text, ex);
+                return "ja";
+            }
+        }
+
+        /// <summary>
+        /// Translates text using OpenAI-compatible API.
+        /// </summary>
         private static string OAITranslate(string text, string desiredLanguage, bool singleLine = false)
         {
-            if (string.IsNullOrEmpty(DefaultOpenAISystemMessage)) DefaultOpenAISystemMessage = "You are an automated translator for a community game engine, and I only need translated result in output.";
-            if (string.IsNullOrEmpty(OAITranslateBaseURL)) OAITranslateBaseURL = "https://api.openai.com/v1";
+            if (string.IsNullOrEmpty(DefaultOpenAISystemMessage))
+                DefaultOpenAISystemMessage = "You are an automated translator for a community game engine, and I only need translated result in output.";
+            
+            if (string.IsNullOrEmpty(OAITranslateBaseURL))
+                OAITranslateBaseURL = "https://api.openai.com/v1";
+
             var postData = new JObject(
                 new JProperty("model", DefaultLanguageModel),
                 new JProperty("messages", new JArray(
@@ -107,102 +268,132 @@ namespace WzComparerR2.CharaSim
                     ),
                     new JObject(
                         new JProperty("role", "user"),
-                        new JProperty("content", "Please translate following in-game content into " + dictL2LM[desiredLanguage] + ": " + text)
+                        new JProperty("content", $"Please translate following in-game content into {GetLanguageName(desiredLanguage)}: {text}")
                     )
                 )),
                 new JProperty("stream", false)
             );
+
             if (IsExtraParamEnabled)
             {
                 postData.Add(new JProperty("temperature", DefaultLMTemperature));
                 postData.Add(new JProperty("max_tokens", DefaultMaximumToken));
             }
+
             try
             {
                 var requestMessage = new HttpRequestMessage(HttpMethod.Post, OAITranslateBaseURL + "/chat/completions");
                 requestMessage.Content = new StringContent(postData.ToString(), Encoding.UTF8, "application/json");
+                
                 if (!string.IsNullOrEmpty(DefaultTranslateAPIKey))
                 {
-                    JObject reqHeaders = JObject.Parse(DefaultTranslateAPIKey);
+                    var reqHeaders = JObject.Parse(DefaultTranslateAPIKey);
                     foreach (var property in reqHeaders.Properties())
                         requestMessage.Headers.TryAddWithoutValidation(property.Name, property.Value.ToString());
                 }
+
                 var response = _httpClient.SendAsync(requestMessage).Result;
                 var responseString = response.Content.ReadAsStringAsync().Result;
-                JObject jrResponse = JObject.Parse(responseString);
+                var jrResponse = JObject.Parse(responseString);
                 string responseResult = jrResponse.SelectToken("choices[0].message.content").ToString();
-                if (responseResult.Contains("</think>"))
-                {
-                    responseResult = responseResult.Split(new String[] { "</think>\n\n" }, StringSplitOptions.None)[1];
-                }
-                if (responseResult.Contains("**\""))
-                {
-                    responseResult = responseResult.Split(new String[] { "**" }, StringSplitOptions.None)[1];
-                }
-                if (responseResult.Contains(text))
-                {
-                    responseResult = responseResult.Split(new String[] { "**" }, StringSplitOptions.None)[1];
-                }
-                if (responseResult.Contains("：\n\n") || responseResult.Contains(":\n\n") || responseResult.Contains(": \n\n"))
-                {
-                    // TO DO: Put extra output to NetworkLogger.
-                    responseResult = responseResult.Split(new String[] { "\n\n" }, StringSplitOptions.None)[1];
-                    if (responseResult.Contains("\r")) responseResult = responseResult.Split(new String[] { "\r" }, StringSplitOptions.None)[0];
-                    if (responseResult.Contains("\n")) responseResult = responseResult.Split(new String[] { "\n" }, StringSplitOptions.None)[0];
-                }
+
+                // Clean up response text
+                responseResult = CleanOpenAIResponse(responseResult);
+
                 if (singleLine)
                 {
-                    return responseResult.Replace("\r\n", " ").Replace("\n", "").Replace("  ", " ").Replace("\"", "");
+                    return responseResult.Replace("\r\n", " ").Replace("\n", " ").Replace("  ", " ").Replace("\"", "").Trim();
                 }
-                else
-                {
-                    return responseResult;
-                }
+
+                return responseResult;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
+                LogTranslationError("OAITranslate", text, ex);
                 return text;
             }
         }
 
-        public static bool IsKoreanStringPresent(string checkString)
+        /// <summary>
+        /// Cleans up OpenAI response by removing artifacts and formatting.
+        /// </summary>
+        private static string CleanOpenAIResponse(string response)
         {
-            if (string.IsNullOrEmpty(checkString)) return false;
-            return checkString.Any(c => (c >= '\uAC00' && c <= '\uD7A3'));
+            if (response.Contains("</think>"))
+            {
+                response = response.Split(new[] { "</think>\n\n" }, StringSplitOptions.None)[1];
+            }
+
+            if (response.Contains("**\""))
+            {
+                response = response.Split(new[] { "**" }, StringSplitOptions.None)[1];
+            }
+
+            if (response.Contains("：\n\n") || response.Contains(":\n\n") || response.Contains(": \n\n"))
+            {
+                response = response.Split(new[] { "\n\n" }, StringSplitOptions.None)[1];
+                if (response.Contains("\r"))
+                    response = response.Split(new[] { "\r" }, StringSplitOptions.None)[0];
+                if (response.Contains("\n"))
+                    response = response.Split(new[] { "\n" }, StringSplitOptions.None)[0];
+            }
+
+            return response;
         }
 
-        public static string FullWidthKatakana(string inputString, bool ConvertHiragana=true)
+        /// <summary>
+        /// Translates text using Mozhi backend.
+        /// </summary>
+        private static JObject MTranslate(string text, string engine, string sourceLanguage, string desiredLanguage)
         {
-            if (string.IsNullOrEmpty(inputString))
+            try
             {
-                return inputString;
+                var requestMessage = new HttpRequestMessage(HttpMethod.Get,
+                    $"{DefaultMozhiBackend}/api/translate?engine={engine}&from={sourceLanguage}&to={desiredLanguage}&text={Uri.EscapeDataString(text)}");
+                requestMessage.Headers.Accept.ParseAdd("application/json");
+                var response = _httpClient.SendAsync(requestMessage).Result;
+                var responseString = response.Content.ReadAsStringAsync().Result;
+                return JObject.Parse(responseString);
             }
-            else
+            catch (Exception ex)
             {
-                StringBuilder sb = new StringBuilder();
-
-                if (ConvertHiragana)
-                {
-                    foreach (char c in inputString)
-                    {
-                        if (c >= 'ぁ' && c <= 'ゖ')
-                        {
-                            sb.Append((char)(c + 0x60));
-                        }
-                        else
-                        {
-                            sb.Append(c);
-                        }
-                    }
-                }
-                else
-                {
-                    sb.Append(inputString);
-                }
-                return sb.ToString().Normalize(NormalizationForm.FormKC);
+                LogTranslationError("MTranslate", text, ex);
+                return JObject.Parse($"{{\"translated-text\": \"{text}\"}}");
             }
         }
 
+        /// <summary>
+        /// Translates text using Naver Papago API.
+        /// </summary>
+        private static JObject NTranslate(string text, string desiredLanguage)
+        {
+            try
+            {
+                var postContent = new StringContent(
+                    $"source=auto&target={desiredLanguage}&text={Uri.EscapeDataString(text)}",
+                    Encoding.UTF8,
+                    "application/x-www-form-urlencoded");
+                
+                var requestMessage = new HttpRequestMessage(HttpMethod.Post, NTranslateBaseURL + "/nmt/v1");
+                requestMessage.Headers.Accept.ParseAdd("application/json");
+                requestMessage.Headers.TryAddWithoutValidation("X-NCP-APIGW-API-KEY-ID", GetKeyValue("X-NCP-APIGW-API-KEY-ID"));
+                requestMessage.Headers.TryAddWithoutValidation("X-NCP-APIGW-API-KEY", GetKeyValue("X-NCP-APIGW-API-KEY"));
+                requestMessage.Content = postContent;
+                
+                var response = _httpClient.SendAsync(requestMessage).Result;
+                var responseString = response.Content.ReadAsStringAsync().Result;
+                return JObject.Parse(responseString);
+            }
+            catch (Exception ex)
+            {
+                LogTranslationError("NTranslate", text, ex);
+                return JObject.Parse("{\"message\": {\"result\": {\"translatedText\": \"無效的Naver API金鑰\"}}}");
+            }
+        }
+
+        /// <summary>
+        /// Gets a value from the JSON API key configuration.
+        /// </summary>
         private static string GetKeyValue(string jsonDictKey)
         {
             try
@@ -215,389 +406,501 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        private static JObject MTranslate(string text, string engine, string sourceLanguage, string desiredLanguage)
+        #endregion
+
+        #region Text Utilities
+
+        /// <summary>
+        /// Checks if the string contains Korean characters.
+        /// </summary>
+        public static bool IsKoreanStringPresent(string checkString)
         {
-            try
-            {
-                var requestMessage = new HttpRequestMessage(HttpMethod.Get,
-                    DefaultMozhiBackend + "/api/translate?engine=" + engine + "&from=" + sourceLanguage + "&to=" + desiredLanguage + "&text=" + Uri.EscapeDataString(text));
-                requestMessage.Headers.Accept.ParseAdd("application/json");
-                var response = _httpClient.SendAsync(requestMessage).Result;
-                var responseString = response.Content.ReadAsStringAsync().Result;
-                return JObject.Parse(responseString);
-            }
-            catch
-            {
-                return JObject.Parse("{\"translated-text\": \"" + text + "\"}");
-            }
+            if (string.IsNullOrEmpty(checkString))
+                return false;
+            return checkString.Any(c => c >= '\uAC00' && c <= '\uD7A3');
         }
 
-        private static JObject NTranslate(string text, string desiredLanguage)
+        /// <summary>
+        /// Converts Hiragana to Katakana and normalizes to full-width form.
+        /// </summary>
+        public static string FullWidthKatakana(string inputString, bool ConvertHiragana = true)
         {
-            try
-            {
-                var postContent = new StringContent(
-                    "source=auto&target=" + desiredLanguage + "&text=" + Uri.EscapeDataString(text),
-                    Encoding.UTF8,
-                    "application/x-www-form-urlencoded");
-                var requestMessage = new HttpRequestMessage(HttpMethod.Post, NTranslateBaseURL + "/nmt/v1");
-                requestMessage.Headers.Accept.ParseAdd("application/json");
-                requestMessage.Headers.TryAddWithoutValidation("X-NCP-APIGW-API-KEY-ID", GetKeyValue("X-NCP-APIGW-API-KEY-ID"));
-                requestMessage.Headers.TryAddWithoutValidation("X-NCP-APIGW-API-KEY", GetKeyValue("X-NCP-APIGW-API-KEY"));
-                requestMessage.Content = postContent;
-                var response = _httpClient.SendAsync(requestMessage).Result;
-                var responseString = response.Content.ReadAsStringAsync().Result;
-                return JObject.Parse(responseString);
-            }
-            catch
-            {
-                return JObject.Parse("{\"message\": {\"result\": {\"translatedText\": \"無効なNaver APIキー\"}}}");
-            }
-        }
+            if (string.IsNullOrEmpty(inputString))
+                return inputString;
 
-        public static string MergeString(string text1, string text2, int newLineCounts=0, bool oneLineSeparatorRequired=false, bool bracketRequiredForText2=false)
-        {
-            if (text1 == text2)
+            if (ConvertHiragana)
             {
-                return text1;
-            }
-            else if (!string.IsNullOrEmpty(text1) && !string.IsNullOrEmpty(text2))
-            {
-                string resultStr;
-                switch (DefaultPreferredLayout)
+                var sb = new StringBuilder();
+                foreach (char c in inputString)
                 {
-                    case 1:
-                        resultStr = text2;
-                        if (newLineCounts == 0 && oneLineSeparatorRequired) resultStr += " / ";
-                        if (newLineCounts == 0 && bracketRequiredForText2) resultStr += " ";
-                        while (newLineCounts > 0)
-                        {
-                            resultStr += Environment.NewLine;
-                            newLineCounts--;
-                        }
-                        if (bracketRequiredForText2) resultStr += "(";
-                        resultStr += text1;
-                        if (bracketRequiredForText2) resultStr += ")";
-                        break;
-                    case 2:
-                        resultStr = text1;
-                        if (newLineCounts == 0 && oneLineSeparatorRequired) resultStr += " / ";
-                        if (newLineCounts == 0 && bracketRequiredForText2) resultStr += " ";
-                        while (newLineCounts > 0)
-                        {
-                            resultStr += Environment.NewLine;
-                            newLineCounts--;
-                        }
-                        if (bracketRequiredForText2) resultStr += "(";
-                        resultStr += text2;
-                        if (bracketRequiredForText2) resultStr += ")";
-                        break;
-                    case 3:
-                        resultStr = text2;
-                        break;
-                    default:
-                        resultStr = text1;
-                        break;
+                    if (c >= 'ぁ' && c <= 'ゖ')
+                        sb.Append((char)(c + 0x60));
+                    else
+                        sb.Append(c);
                 }
-                return resultStr;
+                return sb.ToString().Normalize(NormalizationForm.FormKC);
             }
             else
             {
-                return text1;
+                return inputString.Normalize(NormalizationForm.FormKC);
             }
         }
 
-        public static string TranslateString(string orgText, bool titleCase=false)
+        /// <summary>
+        /// Converts hash-based color tags to HTML tags for translation.
+        /// </summary>
+        public static string ConvHashTagToHTMLTag(string orgText)
         {
-            if (string.IsNullOrEmpty(orgText) || orgText == "(null)") return orgText;
-            bool isMozhiUsed = false;
-            string mozhiEngine = "";
+            if (string.IsNullOrEmpty(orgText))
+                return orgText;
+
+            return orgText
+                .Replace("#c", "<CHL>")
+                .Replace("#", "</CHL>")
+                .Replace("\\r\\n", "<BR/>")
+                .Replace("\\n", "<BR/>");
+        }
+
+        /// <summary>
+        /// Converts HTML tags back to hash-based color tags after translation.
+        /// </summary>
+        public static string ConvHTMLTagToHashTag(string orgText)
+        {
+            if (string.IsNullOrEmpty(orgText))
+                return orgText;
+
+            return Regex.Replace(
+                Regex.Replace(
+                    Regex.Replace(
+                        Regex.Replace(
+                            orgText.Replace("< ", "<").Replace(" >", ">"),
+                            "<CHL>", "#c", RegexOptions.IgnoreCase),
+                        "</CHL>", "#", RegexOptions.IgnoreCase),
+                    "<BR/>", "\r\n", RegexOptions.IgnoreCase),
+                "CHL>", "#c", RegexOptions.IgnoreCase);
+        }
+
+        #endregion
+
+        #region Main Translation API
+
+        /// <summary>
+        /// Translates the given text using the configured translation engine.
+        /// </summary>
+        public static string TranslateString(string orgText, bool titleCase = false)
+        {
+            if (string.IsNullOrEmpty(orgText) || orgText == "(null)")
+                return orgText;
+
+            // Check cache first
             string translatedText = TryFetchCachedTranslationResult(orgText);
-            string sourceLanguage = "auto";
-            string targetLanguage = DefaultDesiredLanguage;
-            if (!String.IsNullOrEmpty(translatedText))
-            {
-                if (titleCase && targetLanguage == "en")
-                {
-                    CultureInfo cultureInfo = Thread.CurrentThread.CurrentCulture;
-                    TextInfo textInfo = cultureInfo.TextInfo;
-                    translatedText = textInfo.ToTitleCase(translatedText);
-                }
-                return translatedText;
-            }
+            if (!string.IsNullOrEmpty(translatedText))
+                return ApplyTitleCase(translatedText, titleCase);
+
+            // Preprocess with glossary
             string glossaryText = GlossaryPreProcess(orgText);
-            switch (DefaultPreferredTranslateEngine)
-            {
-                //0: Google (Non-Mozhi)
-                default:
-                case 0:
-                    JArray responseArr = GTranslate(ConvHashTagToHTMLTag(glossaryText), Translator.DefaultDesiredLanguage);
-                    translatedText = responseArr[0][0].ToString().Replace("＃", "#");
-                    break;
-                //1: Google (Mozhi)
-                case 1:
-                    isMozhiUsed = true;
-                    mozhiEngine = "google";
-                    break;
-                //2: DeepL (Mozhi)
-                case 2:
-                    isMozhiUsed = true;
-                    sourceLanguage = "en";
-                    if (targetLanguage.Contains("zh") || targetLanguage == "yue") targetLanguage = "zh";
-                    mozhiEngine = "deepl";
-                    break;
-                //3: DuckDuckGo / Bing (Mozhi)
-                case 3:
-                    isMozhiUsed = true;
-                    if (targetLanguage == "zh-CN") targetLanguage = "zh";
-                    mozhiEngine = "duckduckgo";
-                    break;
-                //4: MyMemory (Mozhi)
-                case 4:
-                    isMozhiUsed = true;
-                    sourceLanguage = "Autodetect";
-                    if (targetLanguage.Contains("zh") || targetLanguage == "yue") targetLanguage = "zh";
-                    mozhiEngine = "mymemory";
-                    break;
-                //5: Yandex (Mozhi)
-                case 5:
-                    isMozhiUsed = true;
-                    if (targetLanguage.Contains("zh") || targetLanguage == "yue") targetLanguage = "zh";
-                    mozhiEngine = "yandex";
-                    break;
-                //6: Naver Papago (Non-Mozhi)
-                case 6:
-                    if (targetLanguage == "yue") targetLanguage = "zh-TW";
-                    JObject responseObj = NTranslate(ConvHashTagToHTMLTag(glossaryText), Translator.DefaultDesiredLanguage);
-                    translatedText = responseObj.SelectToken("message.result.translatedText").ToString();
-                    break;
-                //9: OpenAI Compatible
-                case 9:
-                    if (titleCase && targetLanguage == "en")
-                    {
-                        translatedText = OAITranslate(ConvHashTagToHTMLTag(glossaryText), Translator.DefaultDesiredLanguage, true);
-                    }
-                    else
-                    {
-                        translatedText = OAITranslate(ConvHashTagToHTMLTag(glossaryText), Translator.DefaultDesiredLanguage);
-                    }
-                    break;
-            }
-            if (isMozhiUsed)
-            {
-                translatedText = MTranslate(ConvHashTagToHTMLTag(glossaryText), mozhiEngine, sourceLanguage, targetLanguage).SelectToken("translated-text").ToString().Replace("＃", "#");
-            }
+            string targetLanguage = DefaultDesiredLanguage;
+
+            // Translate using configured engine
+            translatedText = TranslateWithEngine(ConvHashTagToHTMLTag(glossaryText), targetLanguage);
+
+            // Post-process with glossary
             translatedText = GlossaryPostProcess(translatedText, targetLanguage);
-            if (titleCase && targetLanguage == "en")
-            {
-                CultureInfo cultureInfo = Thread.CurrentThread.CurrentCulture;
-                TextInfo textInfo = cultureInfo.TextInfo;
-                translatedText = textInfo.ToTitleCase(translatedText);
-            }
             translatedText = ConvHTMLTagToHashTag(translatedText);
+            translatedText = ApplyTitleCase(translatedText, titleCase);
+
+            // Cache and return
             CacheTranslationResult(orgText, translatedText);
             return translatedText;
         }
 
+        /// <summary>
+        /// Applies title case formatting to English text if requested.
+        /// </summary>
+        private static string ApplyTitleCase(string text, bool titleCase)
+        {
+            if (titleCase && DefaultDesiredLanguage == "en")
+            {
+                var cultureInfo = Thread.CurrentThread.CurrentCulture;
+                var textInfo = cultureInfo.TextInfo;
+                return textInfo.ToTitleCase(text);
+            }
+            return text;
+        }
+
+        /// <summary>
+        /// Translates text using the configured engine with appropriate language mappings.
+        /// </summary>
+        private static string TranslateWithEngine(string text, string targetLanguage)
+        {
+            return DefaultPreferredTranslateEngine switch
+            {
+                0 => GTranslate(text, targetLanguage).Replace("＃", "#"),
+                1 => MTranslateWithEngine(text, "google", targetLanguage),
+                2 => DeepLTranslateWithEngine(text, targetLanguage),
+                3 => DuckDuckGoTranslateWithEngine(text, targetLanguage),
+                4 => MyMemoryTranslateWithEngine(text, targetLanguage),
+                5 => YandexTranslateWithEngine(text, targetLanguage),
+                6 => NTranslate(text, NormalizeLanguageForNaver(targetLanguage)).SelectToken("message.result.translatedText").ToString(),
+                9 => OAITranslate(text, targetLanguage),
+                _ => GTranslate(text, targetLanguage).Replace("＃", "#")
+            };
+        }
+
+        /// <summary>
+        /// Translates using Mozhi with Google engine.
+        /// </summary>
+        private static string MTranslateWithEngine(string text, string engine, string targetLanguage)
+        {
+            return MTranslate(text, engine, "auto", targetLanguage).SelectToken("translated-text").ToString().Replace("＃", "#");
+        }
+
+        /// <summary>
+        /// Translates using Mozhi with DeepL engine.
+        /// </summary>
+        private static string DeepLTranslateWithEngine(string text, string targetLanguage)
+        {
+            var normalizedLang = targetLanguage.Contains("zh") || targetLanguage == "yue" ? "zh" : targetLanguage;
+            return MTranslate(text, "deepl", "en", normalizedLang).SelectToken("translated-text").ToString().Replace("＃", "#");
+        }
+
+        /// <summary>
+        /// Translates using Mozhi with DuckDuckGo engine.
+        /// </summary>
+        private static string DuckDuckGoTranslateWithEngine(string text, string targetLanguage)
+        {
+            var normalizedLang = targetLanguage == "zh-CN" ? "zh" : targetLanguage;
+            return MTranslate(text, "duckduckgo", "auto", normalizedLang).SelectToken("translated-text").ToString().Replace("＃", "#");
+        }
+
+        /// <summary>
+        /// Translates using Mozhi with MyMemory engine.
+        /// </summary>
+        private static string MyMemoryTranslateWithEngine(string text, string targetLanguage)
+        {
+            var normalizedLang = targetLanguage.Contains("zh") || targetLanguage == "yue" ? "zh" : targetLanguage;
+            return MTranslate(text, "mymemory", "Autodetect", normalizedLang).SelectToken("translated-text").ToString().Replace("＃", "#");
+        }
+
+        /// <summary>
+        /// Translates using Mozhi with Yandex engine.
+        /// </summary>
+        private static string YandexTranslateWithEngine(string text, string targetLanguage)
+        {
+            var normalizedLang = targetLanguage.Contains("zh") || targetLanguage == "yue" ? "zh" : targetLanguage;
+            return MTranslate(text, "yandex", "auto", normalizedLang).SelectToken("translated-text").ToString().Replace("＃", "#");
+        }
+
+        /// <summary>
+        /// Normalizes language code for Naver API compatibility.
+        /// </summary>
+        private static string NormalizeLanguageForNaver(string lang)
+        {
+            return lang == "yue" ? "zh-TW" : lang;
+        }
+
+        /// <summary>
+        /// Detects the language of the given text.
+        /// </summary>
+        public static string GetLanguage(string orgText)
+        {
+            if (string.IsNullOrEmpty(orgText) || orgText == "(null)")
+                return "ja";
+
+            return DefaultPreferredTranslateEngine switch
+            {
+                0 => GTranslateDetect(orgText, DefaultDesiredLanguage),
+                1 => MTranslate(orgText, "google", "auto", DefaultDesiredLanguage).SelectToken("detected").ToString(),
+                2 => DetectWithDeepL(orgText),
+                3 => DetectWithDuckDuckGo(orgText),
+                4 => DetectWithMyMemory(orgText),
+                5 => DetectWithYandex(orgText),
+                6 => NTranslate(orgText, NormalizeLanguageForNaver(DefaultDesiredLanguage)).SelectToken("message.result.srcLangType").ToString(),
+                _ => "ja"
+            };
+        }
+
+        private static string DetectWithDeepL(string text) => 
+            MTranslate(text, "deepl", "en", "zh").SelectToken("detected").ToString();
+
+        private static string DetectWithDuckDuckGo(string text) => 
+            MTranslate(text, "duckduckgo", "auto", "zh").SelectToken("detected").ToString();
+
+        private static string DetectWithMyMemory(string text) => 
+            MTranslate(text, "mymemory", "Autodetect", "zh").SelectToken("detected").ToString();
+
+        private static string DetectWithYandex(string text) => 
+            MTranslate(text, "yandex", "auto", "zh").SelectToken("detected").ToString();
+
+        #endregion
+
+        #region String Merging
+
+        /// <summary>
+        /// Merges two strings based on layout preference.
+        /// </summary>
+        public static string MergeString(string text1, string text2, int newLineCounts = 0, bool oneLineSeparatorRequired = false, bool bracketRequiredForText2 = false)
+        {
+            if (text1 == text2)
+                return text1;
+
+            if (string.IsNullOrEmpty(text1) || string.IsNullOrEmpty(text2))
+                return text1;
+
+            return DefaultPreferredLayout switch
+            {
+                1 => MergeStringLayout1(text1, text2, newLineCounts, oneLineSeparatorRequired, bracketRequiredForText2),
+                2 => MergeStringLayout2(text1, text2, newLineCounts, oneLineSeparatorRequired, bracketRequiredForText2),
+                3 => text2,
+                _ => text1
+            };
+        }
+
+        private static string MergeStringLayout1(string text1, string text2, int newLineCounts, bool oneLineSeparatorRequired, bool bracketRequiredForText2)
+        {
+            var sb = new StringBuilder(text2);
+            
+            if (newLineCounts == 0 && oneLineSeparatorRequired)
+                sb.Append(" / ");
+            if (newLineCounts == 0 && bracketRequiredForText2)
+                sb.Append(" ");
+
+            for (int i = 0; i < newLineCounts; i++)
+                sb.Append(Environment.NewLine);
+
+            if (bracketRequiredForText2)
+                sb.Append("(");
+            
+            sb.Append(text1);
+            
+            if (bracketRequiredForText2)
+                sb.Append(")");
+
+            return sb.ToString();
+        }
+
+        private static string MergeStringLayout2(string text1, string text2, int newLineCounts, bool oneLineSeparatorRequired, bool bracketRequiredForText2)
+        {
+            var sb = new StringBuilder(text1);
+            
+            if (newLineCounts == 0 && oneLineSeparatorRequired)
+                sb.Append(" / ");
+            if (newLineCounts == 0 && bracketRequiredForText2)
+                sb.Append(" ");
+
+            for (int i = 0; i < newLineCounts; i++)
+                sb.Append(Environment.NewLine);
+
+            if (bracketRequiredForText2)
+                sb.Append("(");
+            
+            sb.Append(text2);
+            
+            if (bracketRequiredForText2)
+                sb.Append(")");
+
+            return sb.ToString();
+        }
+
+        #endregion
+
+        #region CSV/Index Lookup
+
+        /// <summary>
+        /// Tries to get a translated string from CSV index for the given object ID.
+        /// </summary>
         public static bool TryCheckStringIndex(int objectID, string indexType, out string translateResult)
         {
             string targetLanguage = DefaultDesiredLanguage;
-            string typeIndex = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "TranslationCache", String.Format("{0}_{1}.csv", indexType, targetLanguage));
+            string typeIndex = Path.Combine(GetTranslationCacheBasePath(), $"{indexType}_{targetLanguage}.csv");
+            
             if (File.Exists(typeIndex))
             {
-                CsvLookup csvLookup = new CsvLookup(typeIndex);
-                translateResult = csvLookup.GetNameById(objectID);
-                return (!String.IsNullOrEmpty(translateResult));
-            }
-            else
-            {
-                translateResult = "";
-                return false;
-            }
-        }
-
-        public static string ConvHashTagToHTMLTag(string orgText)
-        {
-            if (!string.IsNullOrEmpty(orgText))
-            {
-                return orgText.Replace("#c", "<CHL>").Replace("#", "</CHL>").Replace("\\r\\n", "<BR/>").Replace("\\n", "<BR/>");
-            }
-            else
-            {
-                return orgText;
-            }
-        }
-
-        public static string ConvHTMLTagToHashTag(string orgText)
-        {
-            if (!string.IsNullOrEmpty(orgText))
-            {
-                return Regex.Replace(
-                    Regex.Replace(
-                        Regex.Replace(
-                            Regex.Replace(
-                                orgText.Replace("< ", "<").Replace(" >", ">"), 
-                                "<CHL>", "#c", RegexOptions.IgnoreCase),
-                            "</CHL>", "#", RegexOptions.IgnoreCase),
-                        "<BR/>", "\r\n", RegexOptions.IgnoreCase),
-                    "CHL>", "#c", RegexOptions.IgnoreCase);
-            }
-            else
-            {
-                return orgText;
-            }
-        }
-
-        public static string GetLanguage(string orgText)
-        {
-            if (string.IsNullOrEmpty(orgText) || orgText == "(null)") return "ja";
-            bool isMozhiUsed = false;
-            string mozhiEngine = "";
-            string orgLanguage = "";
-            string sourceLanguage = "auto";
-            string targetLanguage = DefaultDesiredLanguage;
-            switch (DefaultPreferredTranslateEngine)
-            {
-                //0: Google (Non-Mozhi)
-                default:
-                case 0:
-                    JArray responseArr = GTranslate(orgText, Translator.DefaultDesiredLanguage);
-                    orgLanguage = responseArr[0][1].ToString();
-                    break;
-                //1: Google (Mozhi)
-                case 1:
-                    isMozhiUsed = true;
-                    mozhiEngine = "google";
-                    break;
-                //2: DeepL (Mozhi)
-                case 2:
-                    isMozhiUsed = true;
-                    sourceLanguage = "en";
-                    if (targetLanguage.Contains("zh") || targetLanguage == "yue") targetLanguage = "zh";
-                    mozhiEngine = "deepl";
-                    break;
-                //3: DuckDuckGo / Bing (Mozhi)
-                case 3:
-                    isMozhiUsed = true;
-                    if (targetLanguage == "zh-CN") targetLanguage = "zh";
-                    mozhiEngine = "duckduckgo";
-                    break;
-                //4: MyMemory (Mozhi)
-                case 4:
-                    isMozhiUsed = true;
-                    sourceLanguage = "Autodetect";
-                    if (targetLanguage.Contains("zh") || targetLanguage == "yue") targetLanguage = "zh";
-                    mozhiEngine = "mymemory";
-                    break;
-                //5: Yandex (Mozhi)
-                case 5:
-                    isMozhiUsed = true;
-                    if (targetLanguage.Contains("zh") || targetLanguage == "yue") targetLanguage = "zh";
-                    mozhiEngine = "yandex";
-                    break;
-                //6: Naver Papago (Non-Mozhi)
-                case 6:
-                    if (targetLanguage == "yue") targetLanguage = "zh-TW";
-                    JObject responseObj = NTranslate(orgText, Translator.DefaultDesiredLanguage);
-                    orgLanguage = responseObj.SelectToken("message.result.srcLangType").ToString();
-                    break;
-            }
-            if (isMozhiUsed)
-            {
-                orgLanguage = MTranslate(orgText, mozhiEngine, sourceLanguage, targetLanguage).SelectToken("detected").ToString();
-            }
-            return orgLanguage;
-        }
-
-        public static string GetConvertedCurrency(int pointValue, string sourceLanguage)
-        {
-            if (DefaultDesiredCurrency == "none")
-            {
-                return null;
-            }
-            UpdateExchangeTable();
-            if (String.IsNullOrEmpty(ExchangeTable))
-            {
-                return null;
-            }
-            double irlPrice;
-            string sourceCurrency;
-            switch (sourceLanguage)
-            {
-                case "zh-CN":
-                    irlPrice = pointValue / 100.00; break; // CMSでは100ポイントあたり1元
-                case "en":
-                    irlPrice = pointValue / 1000.00; break; // GMSでは1000ポイントあたり1ドル
-                default:
-                    irlPrice = pointValue; break;
-            }
-            JObject exTable = JObject.Parse(ExchangeTable);
-            if (DefaultDetectCurrency == "auto")
-            {
-                sourceCurrency = dictL2C[sourceLanguage];
-            }
-            else
-            {
-                sourceCurrency = DefaultDetectCurrency;
-            }
-            double exchangeMultipler = 1;
-            double.TryParse(exTable.SelectToken(DefaultDesiredCurrency + "." + sourceCurrency).ToString(), out exchangeMultipler);
-            double convertedPrice = irlPrice / exchangeMultipler;
-            switch (DefaultDesiredCurrency)
-            {
-                case "jpy":
-                case "krw":
-                    return "約" + Math.Round(convertedPrice).ToString() + dictCurrencyName[DefaultDesiredCurrency];
-                default:
-                    return "約" + convertedPrice.ToString("0.##") + dictCurrencyName[DefaultDesiredCurrency];
-            }
-        }
-
-        public static string ConvertCurrencyToLang(string currency)
-        {
-            try
-            {
-                return dictC2L[currency];
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public static bool IsDesiredLanguage(string orgText)
-        {
-            if (string.IsNullOrEmpty(orgText)) return true;
-            JArray response = GTranslate(orgText, Translator.DefaultDesiredLanguage);
-            return (response[0][1].ToString() == DefaultDesiredLanguage);
-        }
-
-        public static void UpdateExchangeTable()
-        {
-            if (String.IsNullOrEmpty(ExchangeTable))
-            {
-                foreach (string bURL in CurrencyBaseURL)
+                try
                 {
-                    string fetchURL = bURL + DefaultDesiredCurrency + ".min.json";
-                    try
-                    {
-                        var requestMessage = new HttpRequestMessage(HttpMethod.Get, fetchURL);
-                        requestMessage.Headers.Accept.ParseAdd("application/json");
-                        var response = _httpClient.SendAsync(requestMessage).Result;
-                        ExchangeTable = response.Content.ReadAsStringAsync().Result;
-                        break;
-                    }
-                    catch
-                    {
-                        continue;
-                    }
+                    var csvLookup = new CsvLookup(typeIndex);
+                    translateResult = csvLookup.GetNameById(objectID);
+                    return !string.IsNullOrEmpty(translateResult);
+                }
+                catch
+                {
+                    translateResult = "";
+                    return false;
+                }
+            }
+
+            translateResult = "";
+            return false;
+        }
+
+        #endregion
+
+        #region Tooltip Processing
+
+        /// <summary>
+        /// Processes and translates AFRM tooltip text before copying.
+        /// </summary>
+        public static string AfrmTooltipTranslateBeforeCopy(string orgText)
+        {
+            var preTranslateDict = ConvAfrmTooltipPreTextToDict(orgText);
+            var postTranslateContent = new StringBuilder();
+            var untranslatedContent = new StringBuilder();
+
+            // Process cached translations
+            foreach (string tag in preTranslateDict.Keys.ToList())
+            {
+                string translatedContent = TryFetchCachedTranslationResult(preTranslateDict[tag]);
+                if (!string.IsNullOrEmpty(translatedContent))
+                {
+                    preTranslateDict.Remove(tag);
+                    postTranslateContent.AppendLine($"<{tag}>{translatedContent}</{tag}>");
+                }
+            }
+
+            // Translate remaining content
+            if (preTranslateDict.Count > 1)
+            {
+                foreach (string tag in preTranslateDict.Keys.ToList())
+                {
+                    untranslatedContent.AppendLine($"<{tag}>{preTranslateDict[tag]}</{tag}>");
+                }
+                postTranslateContent.AppendLine(TranslateString(untranslatedContent.ToString()));
+            }
+            else if (preTranslateDict.Count == 1)
+            {
+                string tag = preTranslateDict.Keys.ToList()[0];
+                postTranslateContent.AppendLine($"<{tag}>{TranslateString(preTranslateDict[tag])}</{tag}>");
+            }
+
+            // Reformat output
+            var postTranslateDict = ConvAfrmTooltipPreTextToDict(postTranslateContent.ToString());
+            postTranslateContent.Clear();
+
+            foreach (string tag in new[] { "name", "desc", "pdesc", "autodesc", "hdesc", "descleftalign" })
+            {
+                if (!orgText.Contains($"<{tag}>"))
+                    continue;
+                postTranslateContent.AppendLine($"<{tag}>{postTranslateDict[tag]}</{tag}>");
+            }
+
+            return postTranslateContent.ToString();
+        }
+
+        /// <summary>
+        /// Extracts AFRM tooltip tags and their content into a dictionary.
+        /// </summary>
+        private static Dictionary<string, string> ConvAfrmTooltipPreTextToDict(string orgText)
+        {
+            var dict = new Dictionary<string, string>();
+            foreach (string tag in new[] { "name", "desc", "pdesc", "autodesc", "hdesc", "descleftalign" })
+            {
+                string startTag = $"<{tag}>";
+                string endTag = $"</{tag}>";
+                if (!orgText.Contains(startTag))
+                    continue;
+
+                int tagIndex = orgText.IndexOf(startTag) + startTag.Length;
+                int endIndex = orgText.IndexOf(endTag);
+                dict[tag] = orgText.Substring(tagIndex, endIndex - tagIndex);
+            }
+            return dict;
+        }
+
+        /// <summary>
+        /// Waits for the glossary CSV file to be released (not in use by another process).
+        /// </summary>
+        public static void WaitingForGlossaryTableRelease()
+        {
+            string glossaryPath = GetGlossaryTableFullPath();
+            if (!File.Exists(glossaryPath))
+                return;
+
+            bool fileOccupied = true;
+            while (fileOccupied)
+            {
+                FileStream fs = null;
+                try
+                {
+                    fs = new FileStream(glossaryPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
+                    fileOccupied = false;
+                }
+                catch
+                {
+                    MessageBoxEx.Show("請關閉Glossary.csv編輯。\r\n確認關閉後，請點OK。", "注意");
+                }
+                finally
+                {
+                    fs?.Close();
                 }
             }
         }
 
+        #endregion
+
+        #region Cache Management
+
+        /// <summary>
+        /// Attempts to fetch a cached translation result for the given text.
+        /// </summary>
+        private static string TryFetchCachedTranslationResult(string orgText)
+        {
+            string cachePath = GetEngineCachePath(DefaultPreferredTranslateEngine, DefaultDesiredLanguage);
+
+            if (!File.Exists(cachePath))
+                return "";
+
+            try
+            {
+                var currentTranslationCache = JObject.Parse(File.ReadAllText(cachePath));
+                string checksum = GetSha256Checksum(orgText);
+                var token = currentTranslationCache.SelectToken($"['{checksum}']");
+                return token?.ToString() ?? "";
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// Caches a translation result for future use.
+        /// </summary>
+        private static void CacheTranslationResult(string orgText, string translatedText)
+        {
+            // Don't cache if text hasn't changed
+            if (orgText.Contains("\r\n") && orgText == translatedText)
+                return;
+
+            string cachePath = GetEngineCachePath(DefaultPreferredTranslateEngine, DefaultDesiredLanguage);
+            var currentTranslationCache = new JObject();
+
+            try
+            {
+                if (File.Exists(cachePath))
+                {
+                    string content = File.ReadAllText(cachePath);
+                    if (!string.IsNullOrEmpty(content))
+                        currentTranslationCache = JObject.Parse(content);
+                }
+
+                string checksum = GetSha256Checksum(orgText);
+                currentTranslationCache[checksum] = translatedText;
+                
+                Directory.CreateDirectory(Path.GetDirectoryName(cachePath));
+                File.WriteAllText(cachePath, currentTranslationCache.ToString());
+            }
+            catch (Exception ex)
+            {
+                LogTranslationError("CacheTranslationResult", orgText, ex);
+            }
+        }
+
+        /// <summary>
+        /// Initializes all cache directories for translation engines.
+        /// </summary>
         public static void InitializeCache()
         {
-            string[] pathList = new string[]
+            var cacheDirs = new[]
             {
                 "google",
                 "mozhi-google",
@@ -608,211 +911,54 @@ namespace WzComparerR2.CharaSim
                 "naver",
                 "openai"
             };
-            foreach (string targetPath in pathList)
+
+            string basePath = GetTranslationCacheBasePath();
+            foreach (string dir in cacheDirs)
             {
-                string createPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "TranslationCache", targetPath);
-                if (!File.Exists(createPath))
+                string createPath = Path.Combine(basePath, dir);
+                if (!Directory.Exists(createPath))
                 {
-                    System.IO.Directory.CreateDirectory(createPath);
+                    Directory.CreateDirectory(createPath);
                 }
             }
         }
 
-        public static string AfrmTooltipTranslateBeforeCopy(string orgText)
-        {
-            Dictionary<string, string> preTranslateDict = ConvAfrmTooltipPreTextToDict(orgText);
-            StringBuilder postTranslateContent = new StringBuilder();
-            StringBuilder untranslatedContent = new StringBuilder();
-            foreach (string tag in preTranslateDict.Keys.ToList())
-            {
-                string startTag = "<" + tag + ">";
-                string endTag = "</" + tag + ">";
-                string translatedContent = TryFetchCachedTranslationResult(preTranslateDict[tag]);
-                if (!String.IsNullOrEmpty(translatedContent))
-                {
-                    preTranslateDict.Remove(tag);
-                    postTranslateContent.AppendLine(startTag + translatedContent + endTag);
-                }
-            }
-            if (preTranslateDict.Count > 1)
-            {
-                foreach (string tag in preTranslateDict.Keys.ToList())
-                {
-                    string startTag = "<" + tag + ">";
-                    string endTag = "</" + tag + ">";
-                    untranslatedContent.AppendLine(startTag + preTranslateDict[tag] + endTag);
-                }
-                postTranslateContent.AppendLine(TranslateString(untranslatedContent.ToString()));
-            }
-            else if (preTranslateDict.Count == 1)
-            {
-                string tag = preTranslateDict.Keys.ToList()[0];
-                string startTag = "<" + tag + ">";
-                string endTag = "</" + tag + ">";
-                postTranslateContent.AppendLine(startTag + TranslateString(preTranslateDict[tag]) + endTag);
-            }
-            Dictionary<string, string> postTranslateDict = ConvAfrmTooltipPreTextToDict(postTranslateContent.ToString());
-            postTranslateContent.Clear();
-            foreach (string tag in new String[] { "name", "desc", "pdesc", "autodesc", "hdesc", "descleftalign" })
-            {
-                string startTag = "<" + tag + ">";
-                string endTag = "</" + tag + ">";
-                if (!orgText.Contains(startTag)) continue;
-                postTranslateContent.AppendLine(startTag + postTranslateDict[tag] + endTag);
-            }
-            return postTranslateContent.ToString();
-        }
+        #endregion
 
-        public static void WaitingForGlossaryTableRelease()
-        {
-            bool fileOccupied = true;
-            if (File.Exists(GlossaryTablePath))
-            {
-                FileStream fs = null;
-                while (fileOccupied)
-                {
-                    try
-                    {
-                        fs = new FileStream(GlossaryTablePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-                        fileOccupied = false;
-                    }
-                    catch
-                    {
-                        MessageBoxEx.Show("請關閉Glossary.csv編輯。\r\n確認關閉後，請點OK。", "注意");
-                    }
-                }
-                fs.Close();
-            }
-            return;
-        }
+        #region Glossary Management
 
-        private static Dictionary<string, string> ConvAfrmTooltipPreTextToDict(string orgText)
-        {
-            Dictionary<string, string> dict = new Dictionary<string, string>();
-            foreach (string tag in new String[] { "name", "desc", "pdesc", "autodesc", "hdesc", "descleftalign" })
-            {
-                string startTag = "<" + tag + ">";
-                string endTag = "</" + tag + ">";
-                if (!orgText.Contains(startTag)) continue;
-                int tagIndex = orgText.IndexOf(startTag) + startTag.Length;
-                dict.Add(tag, orgText.Substring(tagIndex, orgText.IndexOf(endTag) - tagIndex));
-            }
-            return dict;
-        }
-
-        private static string TryFetchCachedTranslationResult(string orgText)
-        {
-            string cachePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "TranslationCache");
-            switch (DefaultPreferredTranslateEngine)
-            {
-                default:
-                case 0:
-                    cachePath = Path.Combine(cachePath, "google", DefaultDesiredLanguage + ".json");
-                    break;
-                case 1:
-                    cachePath = Path.Combine(cachePath, "mozhi-google", DefaultDesiredLanguage + ".json");
-                    break;
-                case 2:
-                    cachePath = Path.Combine(cachePath, "mozhi-deepl", DefaultDesiredLanguage + ".json");
-                    break;
-                case 3:
-                    cachePath = Path.Combine(cachePath, "mozhi-duckduckgobing", DefaultDesiredLanguage + ".json");
-                    break;
-                case 4:
-                    cachePath = Path.Combine(cachePath, "mozhi-mymemory", DefaultDesiredLanguage + ".json");
-                    break;
-                case 5:
-                    cachePath = Path.Combine(cachePath, "mozhi-yandex", DefaultDesiredLanguage + ".json");
-                    break;
-                case 6:
-                    cachePath = Path.Combine(cachePath, "naver", DefaultDesiredLanguage + ".json");
-                    break;
-                case 9:
-                    cachePath = Path.Combine(cachePath, "openai", DefaultLanguageModel + "_" + DefaultDesiredLanguage + ".json");
-                    break;
-            }
-            if (File.Exists(cachePath))
-            {
-                try
-                {
-                    JObject currentTranslationCache = JObject.Parse(File.ReadAllText(cachePath));
-                    string translatedResult = currentTranslationCache.SelectToken(String.Format("['{0}']", GetSha256Checksum(orgText))).ToString();
-                    return translatedResult;
-                }
-                catch
-                {
-                    return "";
-                }
-            }
-            else
-            {
-                return "";
-            }
-        }
-
-        private static void CacheTranslationResult(string orgText, string translatedText)
-        {
-            if (orgText.Contains("\r\n") && (orgText == translatedText)) return;
-            JObject currentTranslationCache = new JObject();
-            string cachePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "TranslationCache");
-            switch (DefaultPreferredTranslateEngine)
-            {
-                default:
-                case 0:
-                    cachePath = Path.Combine(cachePath, "google", DefaultDesiredLanguage + ".json");
-                    break;
-                case 1:
-                    cachePath = Path.Combine(cachePath, "mozhi-google", DefaultDesiredLanguage + ".json");
-                    break;
-                case 2:
-                    cachePath = Path.Combine(cachePath, "mozhi-deepl", DefaultDesiredLanguage + ".json");
-                    break;
-                case 3:
-                    cachePath = Path.Combine(cachePath, "mozhi-duckduckgobing", DefaultDesiredLanguage + ".json");
-                    break;
-                case 4:
-                    cachePath = Path.Combine(cachePath, "mozhi-mymemory", DefaultDesiredLanguage + ".json");
-                    break;
-                case 5:
-                    cachePath = Path.Combine(cachePath, "mozhi-yandex", DefaultDesiredLanguage + ".json");
-                    break;
-                case 6:
-                    cachePath = Path.Combine(cachePath, "naver", DefaultDesiredLanguage + ".json");
-                    break;
-                case 9:
-                    cachePath = Path.Combine(cachePath, "openai", DefaultLanguageModel + "_" + DefaultDesiredLanguage + ".json");
-                    break;
-            }
-            if (File.Exists(cachePath))
-            {
-                string content = File.ReadAllText(cachePath);
-                if (!String.IsNullOrEmpty(content)) currentTranslationCache = JObject.Parse(content);
-            }   
-            currentTranslationCache.Add(new JProperty(GetSha256Checksum(orgText), translatedText));
-            File.WriteAllText(cachePath, currentTranslationCache.ToString());
-        }
-
+        /// <summary>
+        /// Checks if a glossary table is available for use.
+        /// </summary>
         private static bool UseGlossaryTable()
         {
-            return File.Exists(GlossaryTablePath);
+            return File.Exists(GetGlossaryTableFullPath());
         }
 
+        /// <summary>
+        /// Loads glossary data and creates a mapping from terms to identifiers.
+        /// </summary>
         private static Dictionary<string, string> GlossaryToIdentifier()
         {
             var glossary = new Dictionary<string, string>();
-            if (UseGlossaryTable())
+            
+            if (!UseGlossaryTable())
+                return glossary;
+
+            try
             {
-                using (var reader = new StreamReader(GlossaryTablePath))
-                using (var csv = new CsvReader(reader, new CsvConfiguration(System.Globalization.CultureInfo.InvariantCulture)))
+                using (var reader = new StreamReader(GetGlossaryTableFullPath()))
+                using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
                 {
                     csv.Read();
                     csv.ReadHeader();
+                    
                     while (csv.Read())
                     {
                         string identifier = csv.GetField("identifier");
-                        foreach (var column in new[] { "ko", "ja", "zh-CN", "zh-TW", "en" })
+                        foreach (var langCode in new[] { "ko", "ja", "zh-CN", "zh-TW", "en" })
                         {
-                            string word = csv.GetField(column);
+                            string word = csv.GetField(langCode);
                             if (!string.IsNullOrEmpty(word))
                             {
                                 glossary[word] = identifier;
@@ -820,24 +966,33 @@ namespace WzComparerR2.CharaSim
                         }
                     }
                 }
-                return glossary;
             }
-            else
+            catch (Exception ex)
             {
-                return glossary;
+                LogTranslationError("GlossaryToIdentifier", "", ex);
             }
+
+            return glossary;
         }
 
+        /// <summary>
+        /// Loads glossary data and creates a mapping from identifiers to terms in the specified language.
+        /// </summary>
         private static Dictionary<string, string> IdentifierToGlossary(string langcode)
         {
             var glossary = new Dictionary<string, string>();
-            if (UseGlossaryTable())
+            
+            if (!UseGlossaryTable())
+                return glossary;
+
+            try
             {
-                using (var reader = new StreamReader(GlossaryTablePath))
-                using (var csv = new CsvReader(reader, new CsvConfiguration(System.Globalization.CultureInfo.InvariantCulture)))
+                using (var reader = new StreamReader(GetGlossaryTableFullPath()))
+                using (var csv = new CsvReader(reader, new CsvConfiguration(CultureInfo.InvariantCulture)))
                 {
                     csv.Read();
                     csv.ReadHeader();
+                    
                     while (csv.Read())
                     {
                         string identifier = csv.GetField("identifier");
@@ -848,63 +1003,177 @@ namespace WzComparerR2.CharaSim
                         }
                     }
                 }
-                return glossary;
             }
-            else
+            catch (Exception ex)
             {
-                return glossary;
+                LogTranslationError("IdentifierToGlossary", "", ex);
             }
+
+            return glossary;
         }
 
+        /// <summary>
+        /// Preprocesses text by replacing glossary terms with identifiers before translation.
+        /// </summary>
         private static string GlossaryPreProcess(string orgText)
         {
-            if (UseGlossaryTable())
-            {
-                string processedText = orgText;
-                foreach (var pair in GlossaryToIdentifier())
-                {
-                    processedText = Regex.Replace(processedText, pair.Key, pair.Value, RegexOptions.IgnoreCase);
-                }
-                return processedText;
-            }
-            else
-            {
+            if (!UseGlossaryTable())
                 return orgText;
+
+            string processedText = orgText;
+            foreach (var pair in GlossaryToIdentifier())
+            {
+                processedText = Regex.Replace(processedText, Regex.Escape(pair.Key), pair.Value, RegexOptions.IgnoreCase);
             }
+
+            return processedText;
         }
 
+        /// <summary>
+        /// Post-processes text by replacing identifiers back with glossary terms in the target language.
+        /// </summary>
         private static string GlossaryPostProcess(string postText, string langcode)
         {
-            if (UseGlossaryTable())
-            {
-                string processedText = postText;
-                foreach (var pair in IdentifierToGlossary(langcode))
-                {
-                    if (langcode == "en" || langcode == "ko") processedText = Regex.Replace(processedText, pair.Key, pair.Value + " ", RegexOptions.IgnoreCase);
-                    else processedText = Regex.Replace(processedText, pair.Key, pair.Value, RegexOptions.IgnoreCase);
-                    // workaround for Google Translate Fault
-                    processedText = Regex.Replace(processedText, pair.Key.Replace("_0", "_"), pair.Value + " ", RegexOptions.IgnoreCase);
-                    // workaround for OpenAI Translate Fault
-                    processedText = Regex.Replace(processedText, pair.Key.Replace("<", "</"), "", RegexOptions.IgnoreCase);
-
-                }
-                if (langcode == "en" || langcode == "ko") processedText = processedText.Replace("  ", " ");
-                return processedText;
-            }
-            else
-            {
+            if (!UseGlossaryTable())
                 return postText;
+
+            string processedText = postText;
+            var glossary = IdentifierToGlossary(langcode);
+
+            foreach (var pair in glossary)
+            {
+                string pattern = Regex.Escape(pair.Key);
+                string replacement = pair.Value + (langcode == "en" || langcode == "ko" ? " " : "");
+                processedText = Regex.Replace(processedText, pattern, replacement, RegexOptions.IgnoreCase);
+
+                // Workarounds for translation engine faults
+                string altPattern = Regex.Escape(pair.Key.Replace("_0", "_"));
+                processedText = Regex.Replace(processedText, altPattern, replacement, RegexOptions.IgnoreCase);
+
+                string brokenPattern = Regex.Escape(pair.Key.Replace("<", "</"));
+                processedText = Regex.Replace(processedText, brokenPattern, "", RegexOptions.IgnoreCase);
+            }
+
+            // Clean up extra spaces
+            if (langcode == "en" || langcode == "ko")
+                processedText = processedText.Replace("  ", " ");
+
+            return processedText;
+        }
+
+        #endregion
+
+        #region Currency Conversion
+
+        /// <summary>
+        /// Converts a point value to the desired currency based on the source language.
+        /// </summary>
+        public static string GetConvertedCurrency(int pointValue, string sourceLanguage)
+        {
+            if (DefaultDesiredCurrency == "none")
+                return null;
+
+            UpdateExchangeTable();
+
+            if (string.IsNullOrEmpty(ExchangeTable))
+                return null;
+
+            double irlPrice = ConvertPointsToCurrency(pointValue, sourceLanguage);
+            var exTable = JObject.Parse(ExchangeTable);
+
+            string sourceCurrency = DefaultDetectCurrency == "auto"
+                ? LanguageToCurrency.TryGetValue(sourceLanguage, out var cur) ? cur : sourceLanguage
+                : DefaultDetectCurrency;
+
+            double exchangeMultiplier = 1.0;
+            double.TryParse(exTable.SelectToken($"{DefaultDesiredCurrency}.{sourceCurrency}")?.ToString() ?? "1", out exchangeMultiplier);
+
+            double convertedPrice = irlPrice / exchangeMultiplier;
+
+            return DefaultDesiredCurrency switch
+            {
+                "jpy" or "krw" => $"約{Math.Round(convertedPrice)}{GetCurrencySymbol(DefaultDesiredCurrency)}",
+                _ => $"約{convertedPrice:0.##}{GetCurrencySymbol(DefaultDesiredCurrency)}"
+            };
+        }
+
+        /// <summary>
+        /// Converts point values to real currency based on source language conventions.
+        /// </summary>
+        private static double ConvertPointsToCurrency(int pointValue, string sourceLanguage)
+        {
+            return sourceLanguage switch
+            {
+                "zh-CN" => pointValue / 100.0,  // CMS: 100 points = 1 CNY
+                "en" => pointValue / 1000.0,    // GMS: 1000 points = 1 USD
+                _ => pointValue
+            };
+        }
+
+        /// <summary>
+        /// Converts a currency code to its corresponding language code.
+        /// </summary>
+        public static string ConvertCurrencyToLang(string currency)
+        {
+            return CurrencyToLanguage.TryGetValue(currency, out var lang) ? lang : null;
+        }
+
+        /// <summary>
+        /// Checks if the given text is in the desired language.
+        /// </summary>
+        public static bool IsDesiredLanguage(string orgText)
+        {
+            if (string.IsNullOrEmpty(orgText))
+                return true;
+
+            string detectedLang = GTranslateDetect(orgText, DefaultDesiredLanguage);
+            return detectedLang == DefaultDesiredLanguage;
+        }
+
+        /// <summary>
+        /// Fetches and updates the exchange rate table from remote sources.
+        /// </summary>
+        public static void UpdateExchangeTable()
+        {
+            if (!string.IsNullOrEmpty(ExchangeTable))
+                return;
+
+            foreach (string baseUrl in CurrencyBaseURLs)
+            {
+                string fetchURL = baseUrl + DefaultDesiredCurrency + ".min.json";
+                try
+                {
+                    var requestMessage = new HttpRequestMessage(HttpMethod.Get, fetchURL);
+                    requestMessage.Headers.Accept.ParseAdd("application/json");
+                    var response = _httpClient.SendAsync(requestMessage).Result;
+                    if (response.IsSuccessStatusCode)
+                    {
+                        ExchangeTable = response.Content.ReadAsStringAsync().Result;
+                        return;
+                    }
+                }
+                catch
+                {
+                    continue;
+                }
             }
         }
 
+        #endregion
+
+        #region Utility Methods
+
+        /// <summary>
+        /// Computes the SHA256 checksum of the given input string.
+        /// </summary>
         private static string GetSha256Checksum(string input)
         {
-            using (SHA256 sha256 = SHA256.Create())
+            using (var sha256 = SHA256.Create())
             {
                 byte[] inputBytes = Encoding.UTF8.GetBytes(input);
                 byte[] hashBytes = sha256.ComputeHash(inputBytes);
 
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 foreach (byte b in hashBytes)
                 {
                     sb.Append(b.ToString("x2"));
@@ -914,84 +1183,68 @@ namespace WzComparerR2.CharaSim
             }
         }
 
-        public static Dictionary<string, string> loadDict(string jsonFilePath)
+        /// <summary>
+        /// Loads a dictionary from a JSON file.
+        /// </summary>
+        public static Dictionary<string, string> LoadDict(string jsonFilePath)
         {
             var result = new Dictionary<string, string>();
-            if (File.Exists(jsonFilePath))
+            
+            if (!File.Exists(jsonFilePath))
+                return result;
+
+            try
             {
-                try
+                var jsonObj = JObject.Parse(File.ReadAllText(jsonFilePath));
+                foreach (var pair in jsonObj)
                 {
-                    JObject jsonObj = JObject.Parse(File.ReadAllText(jsonFilePath));
-                    foreach (var pair in jsonObj)
-                    {
-                        result[pair.Key] = pair.Value.ToString();
-                    }
-                }
-                catch
-                {
-                    return result;
+                    result[pair.Key] = pair.Value.ToString();
                 }
             }
+            catch (Exception ex)
+            {
+                LogTranslationError("LoadDict", jsonFilePath, ex);
+            }
+
             return result;
         }
 
-        public static void saveDict(string jsonFilePath, Dictionary<string, string> dict)
+        /// <summary>
+        /// Saves a dictionary to a JSON file.
+        /// </summary>
+        public static void SaveDict(string jsonFilePath, Dictionary<string, string> dict)
         {
-            JObject jsonObj = new JObject();
-            foreach (var pair in dict)
+            try
             {
-                jsonObj[pair.Key] = pair.Value;
-            }
-            File.WriteAllText(jsonFilePath, jsonObj.ToString());
-        }
-
-        public class SkillRecord
-        {
-            public int ID { get; set; }
-            public string Name { get; set; }
-        }
-
-        public sealed class RecordMap : ClassMap<SkillRecord>
-        {
-            public RecordMap()
-            {
-                Map(m => m.ID).Name("skillID");
-                Map(m => m.Name).Name("skillName");
-            }
-        }
-
-        public class CsvLookup
-        {
-            private readonly Dictionary<int, string> _idNameDict;
-
-            public CsvLookup(string csvPath)
-            {
-                _idNameDict = new Dictionary<int, string>();
-
-                using (var reader = new StreamReader(csvPath))
-                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+                var jsonObj = new JObject();
+                foreach (var pair in dict)
                 {
-                    csv.Context.RegisterClassMap<RecordMap>();
-                    var records = csv.GetRecords<SkillRecord>();
-
-                    foreach (var record in records)
-                    {
-                        if (!_idNameDict.ContainsKey(record.ID))
-                        {
-                            _idNameDict[record.ID] = record.Name;
-                        }
-                    }
+                    jsonObj[pair.Key] = pair.Value;
                 }
+                
+                Directory.CreateDirectory(Path.GetDirectoryName(jsonFilePath));
+                File.WriteAllText(jsonFilePath, jsonObj.ToString());
             }
-
-            public string GetNameById(int id)
+            catch (Exception ex)
             {
-                return _idNameDict.TryGetValue(id, out var name) ? name : null;
+                LogTranslationError("SaveDict", jsonFilePath, ex);
             }
         }
 
+        /// <summary>
+        /// Backward compatibility wrapper for loadDict (lowercase).
+        /// </summary>
+        public static Dictionary<string, string> loadDict(string jsonFilePath) => LoadDict(jsonFilePath);
+
+        /// <summary>
+        /// Backward compatibility wrapper for saveDict (lowercase).
+        /// </summary>
+        public static void saveDict(string jsonFilePath, Dictionary<string, string> dict) => SaveDict(jsonFilePath, dict);
+
+        #endregion
 
         #region Global Settings
+
         public static string ExchangeTable { get; set; }
         public static string DefaultDesiredLanguage { get; set; }
         public static string DefaultMozhiBackend { get; set; }
@@ -1006,7 +1259,68 @@ namespace WzComparerR2.CharaSim
         public static double DefaultLMTemperature { get; set; }
         public static int DefaultMaximumToken { get; set; }
         public static bool IsExtraParamEnabled { get; set; }
+
         #endregion
     }
 
+    #region Helper Classes
+
+    /// <summary>
+    /// Represents a skill record with ID and name.
+    /// </summary>
+    public class SkillRecord
+    {
+        public int ID { get; set; }
+        public string Name { get; set; }
+    }
+
+    /// <summary>
+    /// CsvHelper mapping class for SkillRecord.
+    /// </summary>
+    public sealed class RecordMap : ClassMap<SkillRecord>
+    {
+        public RecordMap()
+        {
+            Map(m => m.ID).Name("skillID");
+            Map(m => m.Name).Name("skillName");
+        }
+    }
+
+    /// <summary>
+    /// Provides CSV lookup functionality for ID-to-name mappings.
+    /// </summary>
+    public class CsvLookup
+    {
+        private readonly Dictionary<int, string> _idNameDict;
+
+        public CsvLookup(string csvPath)
+        {
+            _idNameDict = new Dictionary<int, string>();
+
+            using (var reader = new StreamReader(csvPath))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            {
+                csv.Context.RegisterClassMap<RecordMap>();
+                var records = csv.GetRecords<SkillRecord>();
+
+                foreach (var record in records)
+                {
+                    if (!_idNameDict.ContainsKey(record.ID))
+                    {
+                        _idNameDict[record.ID] = record.Name;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the name for the given ID, or null if not found.
+        /// </summary>
+        public string GetNameById(int id)
+        {
+            return _idNameDict.TryGetValue(id, out var name) ? name : null;
+        }
+    }
+
+    #endregion
 }
