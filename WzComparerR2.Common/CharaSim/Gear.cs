@@ -324,6 +324,7 @@ namespace WzComparerR2.CharaSim
                 //case GearType.shield:
                 case GearType.demonShield:
                 case GearType.soulShield:
+                case GearType.magicQuill:
                     return true;
 
                 default:
@@ -340,6 +341,10 @@ namespace WzComparerR2.CharaSim
             switch (gearID / 10000)
             {
                 case 172:
+                    if (gearID / 1000 == 1726)
+                    {
+                        return new int[] { 1726007, 1726008, 1726009 }.Contains(gearID);
+                    }
                     return true;
 
                 default:
@@ -349,9 +354,6 @@ namespace WzComparerR2.CharaSim
                         case 1342121:
                         case 1342122:
                         case 1342123:
-                        case 1726007:
-                        case 1726008:
-                        case 1726009:
                             return true;
                         default: return false;
                     }
@@ -724,6 +726,8 @@ namespace WzComparerR2.CharaSim
 
         public static int GetAstraIndex(Dictionary<int, AstraSubWeaponInfo> loadedAstraSubWeapons, int id)
         {
+            if (id / 1000 == 1726)
+                return (id % 10) - 7;
             if (id / 10000 == 172)
                 return id % 10;
 
