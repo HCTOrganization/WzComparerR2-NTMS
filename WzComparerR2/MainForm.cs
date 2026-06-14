@@ -6058,7 +6058,7 @@ namespace WzComparerR2
 
                             // Initialize VCore Dictionary
                             Dictionary<int, List<int>> FifthJobSkillToJobID = new Dictionary<int, List<int>>();
-                            Wz_Node vCoreData = PluginManager.FindWz("Etc\\VcoreNew.img\\vSkill\\CoreData") ?? PluginManager.FindWz("Etc\\VCore.img\\CoreData");
+                            Wz_Node vCoreData = PluginManager.FindWz("Etc\\VCore.img\\CoreData") ?? PluginManager.FindWz("Etc\\VCore.img\\vSkill\\CoreData");
                             if (vCoreData != null)
                             {
                                 foreach (Wz_Node data in vCoreData.Nodes)
