@@ -26,6 +26,7 @@ namespace WzComparerR2.WzLib
         GMS = 3,
         KMST1198 = 4,
         KMST1199 = 5,
+        KMST1202 = 6,
     }
 
     public class Wz_Crypto
@@ -336,12 +337,12 @@ namespace WzComparerR2.WzLib
 
         public class Pkg2DirStringKey : IWzDecrypter
         {
-            public Pkg2DirStringKey(uint baseKey)
+            public Pkg2DirStringKey(ulong baseKey)
             {
                 this.baseKey = baseKey;
             }
 
-            private uint baseKey;
+            private ulong baseKey;
             private byte[] keys;
 
             public byte this[int index]
@@ -426,6 +427,20 @@ namespace WzComparerR2.WzLib
             {
                 uint baseHash = hash1 ^ hashVersion ^ 0x6D4C3B2A;
                 return Mix(Mix(baseHash) ^ 0x4F4CB34A);
+            }
+        }
+
+        // KMST1202
+        public class Pkg2DirStringKeyV3 : Pkg2DirStringKey, IWzDecrypter
+        {
+            public Pkg2DirStringKeyV3(ulong hash1, ulong hashVersion) : base(ConvertKey(hash1, hashVersion))
+            {
+            }
+
+            private static ulong ConvertKey(ulong hash1, ulong hashVersion)
+            {
+                ulong baseHash = hash1 ^ hashVersion ^ 0x66B57FEE317FD3DF;
+                return baseHash;
             }
         }
 

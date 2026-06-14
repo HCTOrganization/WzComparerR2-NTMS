@@ -19,7 +19,7 @@ namespace WzComparerR2.WzLib.Compatibility
         public Wz_CryptoKeyType CryptoKeyType { get; }
         public abstract IWzVersionIterator CreateIterator(Wz_File wzFile);
         public abstract bool TryDetect(Wz_File wzFile, WzPreReadResult preReadResult, IWzVersionIterator iterator);
-        public abstract IWzImageOffsetCalc CreateOffsetCalc(Wz_File wzFile, uint hashVersion);
+        public abstract IWzImageOffsetCalc CreateOffsetCalc(Wz_File wzFile, ulong hashVersion);
 
         public virtual IWzImageOffsetCalc CreateOffsetCalc(Wz_File wzFile)
         {
@@ -104,6 +104,7 @@ namespace WzComparerR2.WzLib.Compatibility
         private static readonly WzVersionProfile[] allProfiles = new WzVersionProfile[]
         {
             new Pkg1Profile(),
+            new Pkg2Profile(1202, WzFileFormat.Pkg2Kmst1202, Pkg2OffsetVersion.KMST1202, Wz_CryptoKeyType.KMST1202, new Pkg2HashVersionCalcV6()),
             new Pkg2Profile(1201, WzFileFormat.Pkg2Kmst1201, Pkg2OffsetVersion.KMST1199, Wz_CryptoKeyType.KMST1199, new Pkg2HashVersionCalcV4()),
             new Pkg2Profile(1200, WzFileFormat.Pkg2Kmst1198, Pkg2OffsetVersion.KMST1199, Wz_CryptoKeyType.KMST1199, new Pkg2HashVersionCalcV5()),
             new Pkg2Profile(1199, WzFileFormat.Pkg2Kmst1198, Pkg2OffsetVersion.KMST1199, Wz_CryptoKeyType.KMST1199, new Pkg2HashVersionCalcV4()),
@@ -157,9 +158,9 @@ namespace WzComparerR2.WzLib.Compatibility
                 (f, hv) => this.CreateOffsetCalc(f, hv));
         }
 
-        public override IWzImageOffsetCalc CreateOffsetCalc(Wz_File wzFile, uint hashVersion)
+        public override IWzImageOffsetCalc CreateOffsetCalc(Wz_File wzFile, ulong hashVersion)
         {
-            return new Pkg1OffsetCalc((uint)wzFile.Header.HeaderSize, hashVersion);
+            return new Pkg1OffsetCalc((uint)wzFile.Header.HeaderSize, (uint)hashVersion);
         }
 
         public override void DetectCryptoKeyType(Wz_File wzFile, Wz_Crypto crypto, WzPreReadResult preReadResult, out Wz_CryptoKeyType pkg1KeyType, out Wz_CryptoKeyType pkg2KeyType)
@@ -205,7 +206,7 @@ namespace WzComparerR2.WzLib.Compatibility
         public override IWzVersionIterator CreateIterator(Wz_File wzFile)
         {
             var pkg2 = (Wz_Header.WzPkg2Header)wzFile.Header;
-            uint hash1 = pkg2.Hash1, hash2 = pkg2.Hash2;
+            ulong hash1 = pkg2.Hash1, hash2 = pkg2.Hash2;
             var calc = this.HashVersionCalc;
             return new Pkg2VersionIterator(
                 this.WzVersion,
@@ -222,15 +223,16 @@ namespace WzComparerR2.WzLib.Compatibility
                 (f, hv) => this.CreateOffsetCalc(f, hv));
         }
 
-        public override IWzImageOffsetCalc CreateOffsetCalc(Wz_File wzFile, uint hashVersion)
+        public override IWzImageOffsetCalc CreateOffsetCalc(Wz_File wzFile, ulong hashVersion)
         {
             uint headerLen = (uint)wzFile.Header.HeaderSize;
-            uint hash1 = ((Wz_Header.WzPkg2Header)wzFile.Header).Hash1;
+            var hash1 = ((Wz_Header.WzPkg2Header)wzFile.Header).Hash1;
             return this.OffsetVersion switch
             {
-                Pkg2OffsetVersion.KMST1196 => new Pkg2OffsetCalcV1(headerLen, hashVersion, hash1),
-                Pkg2OffsetVersion.KMST1198 => new Pkg2OffsetCalcV2(headerLen, hashVersion, hash1),
-                Pkg2OffsetVersion.KMST1199 => new Pkg2OffsetCalcV3(headerLen, hashVersion, hash1),
+                Pkg2OffsetVersion.KMST1196 => new Pkg2OffsetCalcV1(headerLen, (uint)hashVersion, (uint)hash1),
+                Pkg2OffsetVersion.KMST1198 => new Pkg2OffsetCalcV2(headerLen, (uint)hashVersion, (uint)hash1),
+                Pkg2OffsetVersion.KMST1199 => new Pkg2OffsetCalcV3(headerLen, (uint)hashVersion, (uint)hash1),
+                Pkg2OffsetVersion.KMST1202 => new Pkg2OffsetCalcV4(headerLen, hashVersion, hash1),
                 _ => throw new ArgumentOutOfRangeException(nameof(OffsetVersion)),
             };
         }
@@ -261,8 +263,8 @@ namespace WzComparerR2.WzLib.Compatibility
             }
             else if (this.WzVersion >= 1199 && wzFile.Header.VersionChecked)
             {
-                uint hash1 = (wzFile.Header as Wz_Header.WzPkg2Header)?.Hash1 ?? 0;
-                uint hashVersion = wzFile.Header.HashVersion;
+                uint hash1 = (uint)((wzFile.Header as Wz_Header.WzPkg2Header)?.Hash1 ?? 0);
+                uint hashVersion = (uint)wzFile.Header.HashVersion;
                 if (TryMatchKey(rawBytes, WzStringEncoding.UTF16, new Wz_Crypto.Pkg2DirStringKeyV2(hash1, hashVersion)))
                     pkg2KeyType = Wz_CryptoKeyType.KMST1199;
             }
@@ -287,17 +289,24 @@ namespace WzComparerR2.WzLib.Compatibility
             }
 
             IWzDecrypter pkg2Keys;
+            bool shortSize = false;
             if (this.CryptoKeyType == Wz_CryptoKeyType.KMST1199)
             {
                 var pkg2 = (Wz_Header.WzPkg2Header)wzFile.Header;
-                pkg2Keys = new Wz_Crypto.Pkg2DirStringKeyV2(pkg2.Hash1, wzFile.Header.HashVersion);
+                pkg2Keys = new Wz_Crypto.Pkg2DirStringKeyV2((uint)pkg2.Hash1, (uint)wzFile.Header.HashVersion);
+            }
+            else if (this.CryptoKeyType == Wz_CryptoKeyType.KMST1202)
+            {
+                var pkg2 = (Wz_Header.WzPkg2Header)wzFile.Header;
+                pkg2Keys = new Wz_Crypto.Pkg2DirStringKeyV3(pkg2.Hash1, wzFile.Header.HashVersion);
+                shortSize = true;
             }
             else
             {
                 pkg2Keys = crypto.Pkg2Keys;
             }
             var pkg1Keys = crypto.Pkg1Keys ?? crypto.GetKeys(Wz_CryptoKeyType.BMS);
-            return new Pkg2KmstDirStringReader(pkg2Keys, pkg1Keys);
+            return new Pkg2KmstDirStringReader(pkg2Keys, pkg1Keys, shortSize);
         }
     }
 

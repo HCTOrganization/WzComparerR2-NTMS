@@ -124,7 +124,13 @@ namespace WzComparerR2.WzLib
             if (signature != Wz_Header.PKG1 && signature != Wz_Header.PKG2)
             {
                 // KMST1201: use rand num header instead of signature
-                if (this.TryReadPkg2KMST1201Header(fileName, out var header))
+                Wz_Header.WzPkg2Header header;
+                if (this.TryReadPkg2KMST1201Header(fileName, out header))
+                {
+                    this.Header = header;
+                    return true;
+                }
+                if (this.TryReadPkg2KMST1202Header(fileName, out header))
                 {
                     this.Header = header;
                     return true;
@@ -221,6 +227,41 @@ namespace WzComparerR2.WzLib
 
             uint hash1 = MathHelper.GatherAsUInt32(buffer, hash1Offsets);
             uint hash2 = MathHelper.GatherAsUInt32(buffer, hash2Offsets);
+            uint dataSize = MathHelper.GatherAsUInt32(buffer, dataSizeOffsets);
+
+            if (dataSize != (uint)expectedDataSize)
+                return false;
+
+            header = new Wz_Header.WzPkg2Header(Wz_Header.PKG2, null, fileName, headerLen, dataSize, fileSize, headerLen, hash1, hash2);
+            header.Capabilities |= Wz_Capabilities.Pkg2RandomHeader;
+            this.fileStream.Position = headerLen;
+            return true;
+        }
+
+        private bool TryReadPkg2KMST1202Header(string fileName, out Wz_Header.WzPkg2Header header)
+        {
+            const int headerLen = 150;
+            ReadOnlySpan<int> hash1Offsets = stackalloc int[] { 0x48, 0x24, 0x0F, 0x31, 0x46, 0x47, 0x63, 0x67 };
+            ReadOnlySpan<int> hash2Offsets = stackalloc int[] { 0x8E, 0x8C, 0x93, 0x0E, 0x64, 0x7B, 0x2E, 0x4D };
+            ReadOnlySpan<int> dataSizeOffsets = stackalloc int[] { 0x12, 0x09, 0x02, 0x95 };
+
+            header = null;
+            long fileSize = this.fileStream.Length;
+            if (fileSize < headerLen)
+            {
+                return false;
+            }
+
+            long expectedDataSize = fileSize - headerLen;
+            if (expectedDataSize > uint.MaxValue)
+                return false;
+
+            this.fileStream.Position = 0;
+            Span<byte> buffer = stackalloc byte[headerLen];
+            this.fileStream.ReadExactly(buffer);
+
+            ulong hash1 = MathHelper.GatherAsUInt64(buffer, hash1Offsets);
+            ulong hash2 = MathHelper.GatherAsUInt64(buffer, hash2Offsets);
             uint dataSize = MathHelper.GatherAsUInt32(buffer, dataSizeOffsets);
 
             if (dataSize != (uint)expectedDataSize)
@@ -412,10 +453,17 @@ namespace WzComparerR2.WzLib
         {
             var dirReader = ((Wz_Header.WzPkg2Header)this.Header).DirStringReader;
             var pkg2Calc = this.OffsetCalc as IPkg2ImageOffsetCalc;
-            int encryptedEntryCount = reader.ReadCompressedInt32();
+            long encryptedEntryCount = 0;
+            if (this.Header.WzVersion >= 1202)
+                encryptedEntryCount = reader.ReadCompressedInt64();
+            else
+            {
+                encryptedEntryCount = reader.ReadCompressedInt32();
+                encryptedEntryCount &= 0xFFFFFFFF;
+            }
             int entryCount = pkg2Calc?.DecryptEntryCount(encryptedEntryCount) ?? 0;
-
-            List<Pkg2DirEntry> entries = new();
+            
+            List <Pkg2DirEntry> entries = new();
             for (int i = 0; i < entryCount; i++)
             {
                 byte nodeType = reader.ReadByte();
@@ -440,8 +488,15 @@ namespace WzComparerR2.WzLib
                 });
             }
 
-            int encryptedOffsetCount = reader.ReadCompressedInt32();
-            if (encryptedOffsetCount == encryptedEntryCount && entries.Count > 0)
+            if (this.Header.WzVersion < 1202)
+            {
+                long encryptedOffsetCount = reader.ReadCompressedInt32();
+                encryptedOffsetCount &= 0xFFFFFFFF;
+                if (encryptedOffsetCount != encryptedEntryCount)
+                    return;
+            }
+
+            if (entries.Count > 0)
             {
                 Span<Pkg2DirEntry> list = CollectionsMarshal.AsSpan(entries);
                 for (int i = 0; i < list.Length; i++)

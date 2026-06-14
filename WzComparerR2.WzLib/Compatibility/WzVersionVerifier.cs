@@ -18,7 +18,7 @@ namespace WzComparerR2.WzLib.Compatibility
         bool TryGetNextVersion();
         void Reset();
         int WzVersion { get; }
-        uint HashVersion { get; }
+        ulong HashVersion { get; }
         bool IsMatch(int wzVersion, uint hashVersion);
     }
 
@@ -64,7 +64,7 @@ namespace WzComparerR2.WzLib.Compatibility
         private bool IsFixed => this.fixedWzVersion >= 0;
 
         public int WzVersion { get; private set; }
-        public uint HashVersion { get; private set; }
+        public ulong HashVersion { get; private set; }
 
         private static uint CalcEncryptedVersion(uint hashVersion)
         {
@@ -129,7 +129,7 @@ namespace WzComparerR2.WzLib.Compatibility
     /// </summary>
     public class Pkg2VersionIterator : IWzVersionIterator
     {
-        public Pkg2VersionIterator(int wzVersion, Func<IReadOnlyList<uint>> candidatesFactory, Func<uint, bool> verifier)
+        public Pkg2VersionIterator(int wzVersion, Func<IReadOnlyList<ulong>> candidatesFactory, Func<uint, bool> verifier)
         {
             this.wzVersion = wzVersion;
             this.candidatesFactory = candidatesFactory;
@@ -138,13 +138,13 @@ namespace WzComparerR2.WzLib.Compatibility
         }
 
         private readonly int wzVersion;
-        private readonly Func<IReadOnlyList<uint>> candidatesFactory;
+        private readonly Func<IReadOnlyList<ulong>> candidatesFactory;
         private readonly Func<uint, bool> verifier;
-        private IReadOnlyList<uint> candidates;
+        private IReadOnlyList<ulong> candidates;
         private int index;
 
         public int WzVersion => wzVersion;
-        public uint HashVersion { get; private set; }
+        public ulong HashVersion { get; private set; }
 
         public bool TryGetNextVersion()
         {
@@ -176,8 +176,8 @@ namespace WzComparerR2.WzLib.Compatibility
     /// </summary>
     public interface IPkg2HashVersionCalc
     {
-        IReadOnlyList<uint> CalcCandidates(uint hash1, uint hash2);
-        bool Verify(uint hash1, uint hash2, uint hashVersion);
+        IReadOnlyList<ulong> CalcCandidates(ulong hash1, ulong hash2);
+        bool Verify(ulong hash1, ulong hash2, ulong hashVersion);
     }
 
     /// <summary>
@@ -185,14 +185,14 @@ namespace WzComparerR2.WzLib.Compatibility
     /// </summary>
     public sealed class Pkg2HashVersionCalcV1 : IPkg2HashVersionCalc
     {
-        public IReadOnlyList<uint> CalcCandidates(uint hash1, uint hash2)
+        public IReadOnlyList<ulong> CalcCandidates(ulong hash1, ulong hash2)
         {
-            return new[] { ROL(hash1, 7) ^ hash2 };
+            return new ulong[] { ROL((uint)hash1, 7) ^ (uint)hash2 };
         }
 
-        public bool Verify(uint hash1, uint hash2, uint hashVersion)
+        public bool Verify(ulong hash1, ulong hash2, ulong hashVersion)
         {
-            return hashVersion == (ROL(hash1, 7) ^ hash2);
+            return hashVersion == (ROL((uint)hash1, 7) ^ hash2);
         }
     }
 
@@ -201,14 +201,14 @@ namespace WzComparerR2.WzLib.Compatibility
     /// </summary>
     public sealed class Pkg2HashVersionCalcV2 : IPkg2HashVersionCalc
     {
-        public IReadOnlyList<uint> CalcCandidates(uint hash1, uint hash2)
+        public IReadOnlyList<ulong> CalcCandidates(ulong hash1, ulong hash2)
         {
-            List<uint> results = new List<uint>();
+            List<ulong> results = new List<ulong>();
             Pkg2BacktrackSolver.BacktrackParameters p = new Pkg2BacktrackSolver.BacktrackParameters
             {
-                Hash1 = hash1,
+                Hash1 = (uint)hash1,
                 LowBitLen = 5,
-                Target = hash2,
+                Target = (uint)hash2,
                 Carries = stackalloc uint[33],
                 LhsBits = stackalloc uint[32],
                 Validator = (v) => Verify(hash1, hash2, v),
@@ -226,10 +226,10 @@ namespace WzComparerR2.WzLib.Compatibility
             return results;
         }
 
-        public bool Verify(uint hash1, uint hash2, uint hashVersion)
+        public bool Verify(ulong hash1, ulong hash2, ulong hashVersion)
         {
-            uint lt = ROL(hash1 ^ (hashVersion + Pkg2BacktrackSolver.Magic), (int)(hashVersion & 0x1F));
-            return (lt ^ hashVersion) == hash2;
+            uint lt = ROL((uint)hash1 ^ ((uint)hashVersion + Pkg2BacktrackSolver.Magic), (int)(hashVersion & 0x1F));
+            return (lt ^ (uint)hashVersion) == (uint)hash2;
         }
     }
 
@@ -238,14 +238,14 @@ namespace WzComparerR2.WzLib.Compatibility
     /// </summary>
     public sealed class Pkg2HashVersionCalcV3 : IPkg2HashVersionCalc
     {
-        public IReadOnlyList<uint> CalcCandidates(uint hash1, uint hash2)
+        public IReadOnlyList<ulong> CalcCandidates(ulong hash1, ulong hash2)
         {
-            List<uint> results = new List<uint>();
+            List<ulong> results = new List<ulong>();
             Pkg2BacktrackSolver.BacktrackParameters p = new Pkg2BacktrackSolver.BacktrackParameters
             {
-                Hash1 = hash1,
+                Hash1 = (uint)hash1,
                 LowBitLen = 4,
-                Target = (~hash2) ^ hash1,
+                Target = (~(uint)hash2) ^ (uint)hash1,
                 Carries = stackalloc uint[33],
                 LhsBits = stackalloc uint[32],
                 Validator = (v) => Verify(hash1, hash2, v),
@@ -263,10 +263,10 @@ namespace WzComparerR2.WzLib.Compatibility
             return results;
         }
 
-        public bool Verify(uint hash1, uint hash2, uint hashVersion)
+        public bool Verify(ulong hash1, ulong hash2, ulong hashVersion)
         {
-            uint lt = ROL(hash1 ^ (hashVersion + Pkg2BacktrackSolver.Magic), (int)((hashVersion & 0xF) + (hash1 & 0xF)));
-            return ~(lt ^ hashVersion ^ hash1) == hash2;
+            uint lt = ROL((uint)hash1 ^ ((uint)hashVersion + Pkg2BacktrackSolver.Magic), (int)((hashVersion & 0xF) + (hash1 & 0xF)));
+            return ~(lt ^ (uint)hashVersion ^ (uint)hash1) == (uint)hash2;
         }
     }
 
@@ -277,17 +277,17 @@ namespace WzComparerR2.WzLib.Compatibility
     {
         private const uint magic = Pkg2BacktrackSolver.Magic;
 
-        public IReadOnlyList<uint> CalcCandidates(uint hash1, uint hash2)
+        public IReadOnlyList<ulong> CalcCandidates(ulong hash1, ulong hash2)
         {
-            uint target = ~hash2;
+            uint target = ~(uint)hash2;
             return CalcCandidatesCore(hash1, target);
         }
 
-        protected IReadOnlyList<uint> CalcCandidatesCore(uint hash1, uint target)
+        protected IReadOnlyList<ulong> CalcCandidatesCore(ulong hash1, ulong target)
         {
-            uint hash1Low4 = hash1 & 0xF;
+            uint hash1Low4 = (uint)hash1 & 0xF;
 
-            List<uint> results = new List<uint>();
+            List<ulong> results = new List<ulong>();
             object lockObj = new object();
 
             Parallel.For(0, 256, (int chunk) =>
@@ -298,9 +298,9 @@ namespace WzComparerR2.WzLib.Compatibility
 #if NET6_0_OR_GREATER
                 if (Avx2.IsSupported)
                 {
-                    Vector256<uint> hash1Vec = Vector256.Create(hash1);
+                    Vector256<uint> hash1Vec = Vector256.Create((uint)hash1);
                     Vector256<uint> hash1Low4Vec = Vector256.Create(hash1Low4);
-                    Vector256<uint> targetVec = Vector256.Create(target);
+                    Vector256<uint> targetVec = Vector256.Create((uint)target);
 
                     var hashVersion = Avx2.Add(Vector256.Create((uint)chunk << 24), Vector256.Create(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u));
 
@@ -353,9 +353,9 @@ namespace WzComparerR2.WzLib.Compatibility
                 }
                 else if (Sse41.IsSupported)
                 {
-                    Vector128<uint> hash1Vec = Vector128.Create(hash1);
+                    Vector128<uint> hash1Vec = Vector128.Create((uint)hash1);
                     Vector128<uint> hash1Low4Vec = Vector128.Create(hash1Low4);
-                    Vector128<uint> targetVec = Vector128.Create(target);
+                    Vector128<uint> targetVec = Vector128.Create((uint)target);
 
                     var hashVersion = Sse2.Add(Vector128.Create(start), Vector128.Create(0u, 1u, 2u, 3u));
 
@@ -413,12 +413,12 @@ namespace WzComparerR2.WzLib.Compatibility
                 else
                 {
 #endif
-                    for (uint i = 0; i < count; i++)
+                for (uint i = 0; i < count; i++)
                     {
                         uint hashVersion = start + i;
-                        uint preHash = hash1 ^ hashVersion;
+                        uint preHash = (uint)hash1 ^ hashVersion;
                         uint mixedHash = Mix(preHash ^ 0x6D4C3B2A) ^ 0x91E10DA5;
-                        uint lt = ROL(hash1 ^ ((ushort)mixedHash + hashVersion + magic), (int)(((mixedHash ^ hashVersion) & 0xF) + hash1Low4));
+                        uint lt = ROL((uint)hash1 ^ ((ushort)mixedHash + hashVersion + magic), (int)(((mixedHash ^ hashVersion) & 0xF) + hash1Low4));
                         if ((lt ^ (preHash + mixedHash)) == target)
                         {
                             lock (lockObj)
@@ -435,12 +435,12 @@ namespace WzComparerR2.WzLib.Compatibility
             return results;
         }
 
-        public bool Verify(uint hash1, uint hash2, uint hashVersion)
+        public bool Verify(ulong hash1, ulong hash2, ulong hashVersion)
         {
-            uint preHash = hash1 ^ hashVersion;
+            uint preHash = (uint)hash1 ^ (uint)hashVersion;
             uint mixedHash = Mix(preHash ^ 0x6D4C3B2A) ^ 0x91E10DA5;
-            uint lt = ROL(hash1 ^ ((ushort)mixedHash + hashVersion + magic), (int)(((mixedHash ^ hashVersion) & 0xF) + (hash1 & 0xF)));
-            return (lt ^ (preHash + mixedHash)) == ~hash2;
+            uint lt = ROL((uint)hash1 ^ ((ushort)mixedHash + (uint)hashVersion + magic), (int)(((mixedHash ^ hashVersion) & 0xF) + (hash1 & 0xF)));
+            return (lt ^ (preHash + mixedHash)) == ~(uint)hash2;
         }
     }
 
@@ -452,18 +452,49 @@ namespace WzComparerR2.WzLib.Compatibility
         private const uint magic = Pkg2BacktrackSolver.Magic;
         private const uint magicV5 = 0x2A2C818B;
 
-        public new IReadOnlyList<uint> CalcCandidates(uint hash1, uint hash2)
+        public new IReadOnlyList<ulong> CalcCandidates(ulong hash1, ulong hash2)
         {
-            uint target = hash2 ^ magicV5;
+            uint target = (uint)hash2 ^ magicV5;
             return CalcCandidatesCore(hash1, target);
         }
 
-        public new bool Verify(uint hash1, uint hash2, uint hashVersion)
+        public new bool Verify(ulong hash1, ulong hash2, ulong hashVersion)
         {
-            uint preHash = hash1 ^ hashVersion;
+            uint preHash = (uint)hash1 ^ (uint)hashVersion;
             uint mixedHash = Mix(preHash ^ 0x6D4C3B2A) ^ 0x91E10DA5;
-            uint lt = ROL(hash1 ^ ((ushort)mixedHash + hashVersion + magic), (int)(((mixedHash ^ hashVersion) & 0xF) + (hash1 & 0xF)));
-            return (lt ^ (preHash + mixedHash) ^ magicV5) == hash2;
+            uint lt = ROL((uint)hash1 ^ ((ushort)mixedHash + (uint)hashVersion + magic), (int)(((mixedHash ^ hashVersion) & 0xF) + (hash1 & 0xF)));
+            return (lt ^ (preHash + mixedHash) ^ magicV5) == (uint)hash2;
+        }
+    }
+
+    public sealed class Pkg2HashVersionCalcV6 : IPkg2HashVersionCalc, IWzVersionIterator
+    {
+        public IReadOnlyList<ulong> CalcCandidates(ulong hash1, ulong hash2)
+        {
+            return new ulong[] { 0x8F08109B6A61D954 };
+        }
+
+        public bool Verify(ulong hash1, ulong hash2, ulong hashVersion)
+        {
+            return (hash1 ^ hashVersion ^ 0x33BBBB3333BBBB33 ^ 0x9876543210FEDCBA) == hash2;
+        }
+
+        public int WzVersion { get; private set; }
+        public ulong HashVersion { get; private set; }
+
+        public bool TryGetNextVersion()
+        {
+            return true;
+        }
+
+        public void Reset()
+        {
+
+        }
+
+        public bool IsMatch(int wzVersion, uint hashVersion)
+        {
+            return true;
         }
     }
 
@@ -544,7 +575,7 @@ namespace WzComparerR2.WzLib.Compatibility
             public Span<uint> Carries;
             public Span<uint> LhsBits;
             public Func<uint, bool> Validator;
-            public List<uint> Results;
+            public List<ulong> Results;
         }
     }
 

@@ -144,7 +144,7 @@ namespace WzComparerR2.WzLib
                     // Cache on success
                     if (matchedProfile != null)
                     {
-                        var entry = new Wz_Crypto.KnownProfileEntry(matchedProfile.Name, file.Header.WzVersion, file.Header.HashVersion);
+                        var entry = new Wz_Crypto.KnownProfileEntry(matchedProfile.Name, file.Header.WzVersion, (uint)file.Header.HashVersion);
                         int idx = this.encryption.KnownProfiles.FindIndex(e => e.ProfileName == entry.ProfileName
                             && e.WzVersion == file.Header.WzVersion
                             && e.HashVersion == file.Header.HashVersion);

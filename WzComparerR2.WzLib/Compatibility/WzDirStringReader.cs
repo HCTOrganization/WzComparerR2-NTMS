@@ -33,18 +33,20 @@ namespace WzComparerR2.WzLib.Compatibility
     /// </summary>
     internal sealed class Pkg2KmstDirStringReader : IPkg2DirStringReader
     {
-        public Pkg2KmstDirStringReader(IWzDecrypter pkg2Keys, IWzDecrypter pkg1Keys)
+        public Pkg2KmstDirStringReader(IWzDecrypter pkg2Keys, IWzDecrypter pkg1Keys, bool shortSize)
         {
             this.pkg2Keys = pkg2Keys;
             this.pkg1Keys = pkg1Keys;
+            this.shortSize = shortSize;
         }
 
         private readonly IWzDecrypter pkg2Keys;
         private readonly IWzDecrypter pkg1Keys;
+        private readonly bool shortSize;
 
         public string ReadName(WzBinaryReader reader, bool isFirstEntry)
         {
-            return isFirstEntry ? reader.ReadPkg2DirString(pkg2Keys) : reader.ReadString(pkg1Keys);
+            return isFirstEntry ? reader.ReadPkg2DirString(pkg2Keys, shortSize) : reader.ReadString(pkg1Keys);
         }
     }
 }

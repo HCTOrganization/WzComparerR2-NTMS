@@ -50,15 +50,15 @@ namespace WzComparerR2.WzLib
 
         public class WzPkg2Header : Wz_Header
         {
-            public WzPkg2Header(string signature, string copyright, string fileName, int headerSize, long dataSize, long fileSize, long dataStartPosition, uint hash1, uint hash2)
+            public WzPkg2Header(string signature, string copyright, string fileName, int headerSize, long dataSize, long fileSize, long dataStartPosition, ulong hash1, ulong hash2)
                 : base(signature, copyright, fileName, headerSize, dataSize, fileSize, dataStartPosition)
             {
                 this.Hash1 = hash1;
                 this.Hash2 = hash2;
             }
 
-            public uint Hash1 { get; }
-            public uint Hash2 { get; }
+            public ulong Hash1 { get; }
+            public ulong Hash2 { get; }
 
             /// <summary>
             /// The PKG2 directory string reader assigned during crypto detection, used for dir tree reading.
@@ -82,7 +82,7 @@ namespace WzComparerR2.WzLib
         public Wz_Capabilities Capabilities { get; internal set; }
 
         public int WzVersion { get; internal set; }
-        public uint HashVersion { get; internal set; }
+        public ulong HashVersion { get; internal set; }
 
         public bool HasCapabilities(Wz_Capabilities cap)
         {

@@ -142,11 +142,11 @@ namespace WzComparerR2.WzLib.Utilities
         }
 
         // Introduced in KMST1198
-        public string ReadPkg2DirString(IWzDecrypter decrypter)
+        public string ReadPkg2DirString(IWzDecrypter decrypter, bool shortSize)
         {
             long currentPos = this.BaseStream.Position;
 
-            int size = this.ReadSByte();
+            int size = shortSize ? this.ReadInt16() : this.ReadSByte();
             if (size < 0)
             {
                 size = -size;

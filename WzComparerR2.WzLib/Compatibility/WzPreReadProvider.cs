@@ -24,6 +24,7 @@ namespace WzComparerR2.WzLib.Compatibility
             new Pkg2PreReader(WzFileFormat.Pkg2Kmst1196, false),
             new Pkg2PreReader(WzFileFormat.Pkg2Kmst1198, true),
             new Pkg2PreReader(WzFileFormat.Pkg2Kmst1201, true, true),
+            new Pkg2PreReader(WzFileFormat.Pkg2Kmst1202, true, true),
         };
 
         public static IReadOnlyList<IWzPreReader> All => readers;
@@ -119,8 +120,6 @@ namespace WzComparerR2.WzLib.Compatibility
             this.supportRandomHeader = supportRandomHeader;
         }
 
-        
-
         private readonly WzFileFormat format;
         private readonly bool isPkg2DirString;
         private readonly bool supportRandomHeader;
@@ -131,7 +130,7 @@ namespace WzComparerR2.WzLib.Compatibility
             if (!wzFile.Header.IsPkg2)
                 return false;
 
-            if ( wzFile.Header.HasCapabilities(Wz_Capabilities.Pkg2RandomHeader) && !this.supportRandomHeader)
+            if (wzFile.Header.HasCapabilities(Wz_Capabilities.Pkg2RandomHeader) && !this.supportRandomHeader)
             {
                 return false;
             }
@@ -145,7 +144,10 @@ namespace WzComparerR2.WzLib.Compatibility
                 {
                     Pkg2DirEntryCounts = new List<Pkg2DirEntryCount>(),
                 };
-                ReadTree(reader, result, this.isPkg2DirString);
+                if (this.format == WzFileFormat.Pkg2Kmst1202)
+                    ReadTree2(reader, result, this.isPkg2DirString, wzFile.Header as Wz_Header.WzPkg2Header);
+                else
+                    ReadTree(reader, result, this.isPkg2DirString);
                 result.DirEndPosition = reader.BaseStream.Position;
                 return true;
             }
@@ -224,6 +226,67 @@ namespace WzComparerR2.WzLib.Compatibility
                 ReadTree(reader, result, isPkg2DirString);
         }
 
+        private static void ReadTree2(WzBinaryReader reader, WzPreReadResult result, bool isPkg2DirString, Wz_Header.WzPkg2Header header)
+        {
+            ulong hashVerison = 0x8F08109B6A61D954;
+            var verCalc = new Pkg2HashVersionCalcV6();
+            if (!verCalc.Verify(header.Hash1, header.Hash2, hashVerison))
+                throw new InvalidDataException("KMST1202 wz verification failed");
+
+            long encryptedEntryCount = reader.ReadCompressedInt64();
+            var offsetCalc =  new Pkg2OffsetCalcV4((uint)header.HeaderSize, hashVerison, header.Hash1);
+
+            var temp = new List<Pkg2TempEntry>();
+            int count = offsetCalc.DecryptEntryCount(encryptedEntryCount);
+            for (int i = 0; i < count; ++i)
+            {
+                byte nodeType = reader.ReadByte();
+                if (nodeType == 0x03 || nodeType == 0x04)
+                {
+                    if (result.FirstStringRawBytes == null && temp.Count == 0)
+                    {
+                        result.FirstStringRawBytes = WzPreReadHelper.ReadStringRawBytes2(reader, isPkg2DirString, out var enc);
+                        result.FirstStringEncoding = enc;
+                    }
+                    else if (isPkg2DirString && result.SecondStringRawBytes == null && temp.Count == 1)
+                    {
+                        result.SecondStringRawBytes = WzPreReadHelper.ReadStringRawBytes(reader, false, out var enc);
+                        result.SecondStringEncoding = enc;
+                    }
+                    else
+                        WzPreReadHelper.SkipString(reader);
+
+                    int size = reader.ReadCompressedInt32();
+                    reader.ReadCompressedInt32();
+                    temp.Add(new Pkg2TempEntry { NodeType = nodeType, DataLength = size });
+                }
+            }
+
+            result.Pkg2DirEntryCounts.Add(new Pkg2DirEntryCount
+            {
+                EncryptedEntryCount = encryptedEntryCount,
+                ActualEntryCount = temp.Count,
+            });
+
+            int dirCount = 0;
+            for (int i = 0; i < temp.Count; i++)
+            {
+                uint offsetPos = (uint)reader.BaseStream.Position;
+                uint hashedOffset = reader.ReadUInt32();
+                result.Nodes.Add(new WzPreReadNodeInfo
+                {
+                    NodeType = temp[i].NodeType,
+                    DataLength = temp[i].DataLength,
+                    HashedOffsetPosition = offsetPos,
+                    HashedOffset = hashedOffset,
+                });
+                if (temp[i].NodeType == 0x03) dirCount++;
+            }
+
+            for (int i = 0; i < dirCount; i++)
+                ReadTree2(reader, result, isPkg2DirString, header);
+        }
+
         private struct Pkg2TempEntry
         {
             public int NodeType;
@@ -240,6 +303,33 @@ namespace WzComparerR2.WzLib.Compatibility
         public static byte[] ReadStringRawBytes(this WzBinaryReader reader, bool isPkg2DirString, out WzStringEncoding encoding)
         {
             sbyte lenPrefix = reader.ReadSByte();
+            if (isPkg2DirString)
+            {
+                encoding = WzStringEncoding.UTF16;
+                if (lenPrefix < 0) return reader.ReadBytes((-lenPrefix) * 2);
+                if (lenPrefix == 0) return Array.Empty<byte>();
+                throw new InvalidDataException("Unexpected positive length in pkg2 dir string.");
+            }
+
+            if (lenPrefix < 0)
+            {
+                encoding = WzStringEncoding.ASCII;
+                int size = lenPrefix == -128 ? reader.ReadInt32() : -lenPrefix;
+                return reader.ReadBytes(size);
+            }
+            if (lenPrefix > 0)
+            {
+                encoding = WzStringEncoding.UTF16;
+                int size = lenPrefix == 127 ? reader.ReadInt32() : lenPrefix;
+                return reader.ReadBytes(size * 2);
+            }
+            encoding = WzStringEncoding.Unknown;
+            return Array.Empty<byte>();
+        }
+
+        public static byte[] ReadStringRawBytes2(this WzBinaryReader reader, bool isPkg2DirString, out WzStringEncoding encoding)
+        {
+            short lenPrefix = reader.ReadInt16();
             if (isPkg2DirString)
             {
                 encoding = WzStringEncoding.UTF16;
@@ -312,6 +402,7 @@ namespace WzComparerR2.WzLib.Compatibility
         Pkg2Kmst1196,
         Pkg2Kmst1198,
         Pkg2Kmst1201,
+        Pkg2Kmst1202,
     }
 
     public enum WzStringEncoding
@@ -356,7 +447,7 @@ namespace WzComparerR2.WzLib.Compatibility
 
     public struct Pkg2DirEntryCount
     {
-        public int EncryptedEntryCount;
+        public long EncryptedEntryCount;
         public int ActualEntryCount;
     }
 
