@@ -102,164 +102,208 @@ namespace WzComparerR2
         private async void btnExport_Click(object sender, EventArgs e)
         {
             if (advTreeMap.Nodes.Count == 0) return;
+
             using (FolderBrowserDialog dlg = new FolderBrowserDialog())
             {
                 dlg.Description = "請選擇要匯出的資料夾。";
-                if (DialogResult.OK == dlg.ShowDialog())
+                if (DialogResult.OK != dlg.ShowDialog()) return;
+
+                DialogResult result1 = MessageBoxEx.Show("是否需要使用MapleWiki格式匯出？", "確認", MessageBoxButtons.YesNoCancel);
+                if (result1 == DialogResult.Cancel) return;
+
+                SetControlsEnabled(false);
+                picWorldArchiveImg.Image = null;
+
+                try
                 {
-                    DialogResult result1 = MessageBoxEx.Show("是否需要使用MapleWiki格式匯出？", "確認", MessageBoxButtons.YesNoCancel);
-                    if (result1 == DialogResult.Cancel) return;
-                    cmbRegion.Enabled = false;
-                    cmbType.Enabled = false;
-                    advTreeMap.Enabled = false;
-                    advTreeLife.Enabled = false;
-                    btnTranslate.Enabled = false;
-                    btnCopyMapleStoryWikiFormat.Enabled = false;
-                    btnLocateExtraIllust.Enabled = false;
-                    btnExport.Enabled = false;
-                    picWorldArchiveImg.Image = null;
-                    await Task.Run(() =>
-                    {
-                        var worldDescNode = EtcWaNode.FindNodeByPath($"collectionInfo\\{this.regionID}\\worldDesc", true);
-                        if (worldDescNode != null)
-                        {
-                            string text = worldDescNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n");
-                            if (result1 == DialogResult.Yes)
-                            {
-                                StringBuilder sb = new StringBuilder();
-                                sb.AppendLine("{{World Archive Description");
-                                sb.AppendLine($"|MapQuote={text.Replace("\r\n", "<br />").Replace("\n", "<br />")}");
-                                sb.AppendLine("}}");
-                                File.WriteAllText(Path.Combine(dlg.SelectedPath, "worldDesc.txt"), sb.ToString());
-                            }
-                            else
-                            {
-                                File.WriteAllText(Path.Combine(dlg.SelectedPath, "worldDesc.txt"), text);
-                            }
-                        }
-                        var worldIllustNode = UiWaNode.FindNodeByPath($"regionSelect\\main\\world\\{this.regionID}", true);
-                        if (worldIllustNode != null)
-                        {
-                            BitmapOrigin bo = BitmapOrigin.CreateFromNode(worldIllustNode, PluginManager.FindWz);
-                            bo.Bitmap.Save(Path.Combine(dlg.SelectedPath, "worldIllust.png"));
-                        }
-                        foreach (Node i in advTreeMap.Nodes)
-                        {
-                            UpdateText($"匯出中: {i.Text}\r\n{advTreeMap.Nodes.IndexOf(i) + 1} / {advTreeMap.Nodes.Count}");
-                            string currentWorkDir = Path.Combine(dlg.SelectedPath, i.Text);
-                            if (!Directory.Exists(currentWorkDir))
-                            {
-                                Directory.CreateDirectory(currentWorkDir);
-                            }
-                            Wz_Node targetNode = i.Tag as Wz_Node;
-                            if (Int32.TryParse(targetNode.Text, out int mapID))
-                            {
-                                Wz_Node descNode = EtcWaNode.FindNodeByPath($"collectionInfo\\{this.regionID}\\{mapID}\\regionDesc", true);
-                                if (descNode != null)
-                                {
-                                    string text = descNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n");
-                                    if (result1 == DialogResult.Yes)
-                                    {
-                                        StringBuilder sb = new StringBuilder();
-                                        sb.AppendLine("{{World Archive Description");
-                                        sb.AppendLine($"|MapQuote={text.Replace("\r\n", "<br />").Replace("\n", "<br />")}");
-                                        sb.AppendLine("}}");
-                                        File.WriteAllText(Path.Combine(currentWorkDir, "mapDesc.txt"), sb.ToString());
-                                    }
-                                    else
-                                    {
-                                        File.WriteAllText(Path.Combine(currentWorkDir, "mapDesc.txt"), text);
-                                    }
-                                }
-                                Wz_Node illustNode = UiWaNode.FindNodeByPath($"detail\\main\\regionillust\\{this.regionID}\\{mapID}", true);
-                                if (illustNode != null)
-                                {
-                                    BitmapOrigin bo = BitmapOrigin.CreateFromNode(illustNode, PluginManager.FindWz);
-                                    bo.Bitmap.Save(Path.Combine(currentWorkDir, "mapIllust.png"));
-                                }
-                                foreach (var j in new string[] { "npc", "mob" })
-                                {
-                                    var lifeNodes = targetNode.FindNodeByPath(j);
-                                    if (lifeNodes != null)
-                                    {
-                                        if (!Directory.Exists(Path.Combine(currentWorkDir, j)))
-                                        {
-                                            Directory.CreateDirectory(Path.Combine(currentWorkDir, j));
-                                        }
-                                        foreach (var node in lifeNodes.Nodes)
-                                        {
-                                            Wz_Node idNode = node.FindNodeByPath("id");
-                                            if (idNode != null)
-                                            {
-                                                foreach (var id in idNode.Nodes)
-                                                {
-                                                    var lifeID = id.GetValue<int>();
-                                                    StringResult sr;
-                                                    switch (j)
-                                                    {
-                                                        case "npc":
-                                                            if (this.stringLinker == null || !this.stringLinker.StringNpc.TryGetValue(lifeID, out sr))
-                                                            {
-                                                                sr = new StringResult();
-                                                                sr.Name = "未知的NPC";
-                                                            }
-                                                            break;
-                                                        case "mob":
-                                                            if (this.stringLinker == null || !this.stringLinker.StringMob.TryGetValue(lifeID, out sr))
-                                                            {
-                                                                sr = new StringResult();
-                                                                sr.Name = "未知的怪物";
-                                                            }
-                                                            break;
-                                                        default:
-                                                            sr = new StringResult();
-                                                            sr.Name = "(null)";
-                                                            break;
-                                                    }
-                                                    var lifeDescNode = node.FindNodeByPath("desc");
-                                                    if (lifeDescNode != null)
-                                                    {
-                                                        string text = lifeDescNode.GetValue<string>().Replace("\\r", "\r").Replace("\\n", "\n");
-                                                        if (result1 == DialogResult.Yes)
-                                                        {
-                                                            var quotes = QuoteParser.Parse(text);
-                                                            StringBuilder sb = new StringBuilder();
-                                                            sb.AppendLine("{{World Archive Description");
-                                                            int quoteIndex = 1;
-                                                            foreach (var k in quotes)
-                                                            {
-                                                                foreach (var l in k.Value)
-                                                                {
-                                                                    sb.AppendLine($"|Quote{quoteIndex}={l}");
-                                                                    sb.AppendLine($"|QuoteCitation{quoteIndex}={k.Key}");
-                                                                    quoteIndex++;
-                                                                }
-                                                            }
-                                                            sb.AppendLine("}}");
-                                                            File.WriteAllText(Path.Combine(currentWorkDir, $"{RemoveInvalidFileNameChars(sr.Name)}.txt"), sb.ToString());
-                                                        }
-                                                        else
-                                                        {
-                                                            File.WriteAllText(Path.Combine(currentWorkDir, j, $"{lifeID}_{RemoveInvalidFileNameChars(sr.Name)}.txt"), text);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
+                    await Task.Run(() => ExportArchiveData(dlg.SelectedPath, result1 == DialogResult.Yes));
                     UpdateText("匯出完成。");
-                    cmbRegion.Enabled = true;
-                    cmbType.Enabled = true;
-                    advTreeMap.Enabled = true;
-                    advTreeLife.Enabled = true;
-                    btnCopyMapleStoryWikiFormat.Enabled = true;
-                    btnExport.Enabled = true;
+                }
+                finally
+                {
+                    SetControlsEnabled(true);
                 }
             }
+        }
+
+        private void SetControlsEnabled(bool enabled)
+        {
+            cmbRegion.Enabled = enabled;
+            cmbType.Enabled = enabled;
+            advTreeMap.Enabled = enabled;
+            advTreeLife.Enabled = enabled;
+            btnTranslate.Enabled = enabled;
+            btnCopyMapleStoryWikiFormat.Enabled = enabled;
+            btnLocateExtraIllust.Enabled = enabled;
+            btnExport.Enabled = enabled;
+        }
+
+        private void ExportArchiveData(string basePath, bool useWikiFormat)
+        {
+            ExportWorldDescription(basePath, useWikiFormat);
+            ExportWorldIllustration(basePath);
+
+            int mapIndex = 0;
+            foreach (Node mapNode in advTreeMap.Nodes)
+            {
+                mapIndex++;
+                UpdateText($"匯出中: {mapNode.Text}\r\n{mapIndex} / {advTreeMap.Nodes.Count}");
+                ExportMapData(basePath, mapNode, useWikiFormat);
+            }
+        }
+
+        private void ExportWorldDescription(string basePath, bool useWikiFormat)
+        {
+            var worldDescNode = EtcWaNode.FindNodeByPath($"collectionInfo\\{this.regionID}\\worldDesc", true);
+            if (worldDescNode == null) return;
+
+            string text = NormalizeLineEndings(worldDescNode.GetValue<string>());
+            string content = useWikiFormat ? FormatAsWikiBlock("MapQuote", text) : text;
+            File.WriteAllText(Path.Combine(basePath, "worldDesc.txt"), content);
+        }
+
+        private void ExportWorldIllustration(string basePath)
+        {
+            var worldIllustNode = UiWaNode.FindNodeByPath($"regionSelect\\main\\world\\{this.regionID}", true);
+            if (worldIllustNode == null) return;
+
+            BitmapOrigin bo = BitmapOrigin.CreateFromNode(worldIllustNode, PluginManager.FindWz);
+            bo.Bitmap.Save(Path.Combine(basePath, "worldIllust.png"));
+        }
+
+        private void ExportMapData(string basePath, Node mapNode, bool useWikiFormat)
+        {
+            string mapDirectory = Path.Combine(basePath, mapNode.Text);
+            Directory.CreateDirectory(mapDirectory);
+
+            Wz_Node targetNode = mapNode.Tag as Wz_Node;
+            if (!Int32.TryParse(targetNode.Text, out int mapID)) return;
+
+            ExportMapDescription(mapDirectory, mapID, useWikiFormat);
+            ExportMapIllustration(mapDirectory, mapID);
+            ExportLifeData(mapDirectory, targetNode, mapID, useWikiFormat);
+        }
+
+        private void ExportMapDescription(string mapDirectory, int mapID, bool useWikiFormat)
+        {
+            var descNode = EtcWaNode.FindNodeByPath($"collectionInfo\\{this.regionID}\\{mapID}\\regionDesc", true);
+            if (descNode == null) return;
+
+            string text = NormalizeLineEndings(descNode.GetValue<string>());
+            string content = useWikiFormat ? FormatAsWikiBlock("MapQuote", text) : text;
+            File.WriteAllText(Path.Combine(mapDirectory, "mapDesc.txt"), content);
+        }
+
+        private void ExportMapIllustration(string mapDirectory, int mapID)
+        {
+            var illustNode = UiWaNode.FindNodeByPath($"detail\\main\\regionillust\\{this.regionID}\\{mapID}", true);
+            if (illustNode == null) return;
+
+            BitmapOrigin bo = BitmapOrigin.CreateFromNode(illustNode, PluginManager.FindWz);
+            bo.Bitmap.Save(Path.Combine(mapDirectory, "mapIllust.png"));
+        }
+
+        private void ExportLifeData(string mapDirectory, Wz_Node targetNode, int mapID, bool useWikiFormat)
+        {
+            foreach (string lifeType in new[] { "npc", "mob" })
+            {
+                var lifeNodes = targetNode.FindNodeByPath(lifeType);
+                if (lifeNodes == null) continue;
+
+                string lifeDirectory = Path.Combine(mapDirectory, lifeType);
+                Directory.CreateDirectory(lifeDirectory);
+
+                foreach (var node in lifeNodes.Nodes)
+                {
+                    ExportLifeInstance(lifeDirectory, node, lifeType, useWikiFormat);
+                }
+            }
+        }
+
+        private void ExportLifeInstance(string lifeDirectory, Wz_Node node, string lifeType, bool useWikiFormat)
+        {
+            var idNode = node.FindNodeByPath("id");
+            if (idNode == null) return;
+
+            foreach (var id in idNode.Nodes)
+            {
+                int lifeID = id.GetValue<int>();
+                StringResult sr = GetLifeStringResult(lifeID, lifeType);
+                var lifeDescNode = node.FindNodeByPath("desc");
+
+                if (lifeDescNode == null) continue;
+
+                string text = NormalizeLineEndings(lifeDescNode.GetValue<string>());
+
+                if (useWikiFormat)
+                {
+                    var quotes = QuoteParser.Parse(text);
+                    string content = FormatAsWikiBlockWithQuotes(quotes);
+                    File.WriteAllText(Path.Combine(lifeDirectory, $"{RemoveInvalidFileNameChars(sr.Name)}.txt"), content);
+                }
+                else
+                {
+                    File.WriteAllText(Path.Combine(lifeDirectory, $"{lifeID}_{RemoveInvalidFileNameChars(sr.Name)}.txt"), text);
+                }
+            }
+        }
+
+        private StringResult GetLifeStringResult(int lifeID, string lifeType)
+        {
+            StringResult sr = null;
+
+            if (this.stringLinker != null)
+            {
+                switch (lifeType)
+                {
+                    case "npc":
+                        this.stringLinker.StringNpc.TryGetValue(lifeID, out sr);
+                        break;
+                    case "mob":
+                        this.stringLinker.StringMob.TryGetValue(lifeID, out sr);
+                        break;
+                }
+            }
+
+            if (sr != null) return sr;
+
+            sr = new StringResult();
+            sr.Name = lifeType == "npc" ? "未知的NPC" : lifeType == "mob" ? "未知的怪物" : "(null)";
+            return sr;
+        }
+
+        private string NormalizeLineEndings(string input)
+        {
+            return input.Replace("\\r", "\r").Replace("\\n", "\n");
+        }
+
+        private string FormatAsWikiBlock(string key, string value)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("{{World Archive Description");
+            sb.AppendLine($"|{key}={value.Replace("\r\n", "<br />").Replace("\n", "<br />")}");
+            sb.AppendLine("}}");
+            return sb.ToString();
+        }
+
+        private string FormatAsWikiBlockWithQuotes(Dictionary<string, List<string>> quotes)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("{{World Archive Description");
+
+            int quoteIndex = 1;
+            foreach (var quoteGroup in quotes)
+            {
+                foreach (var quote in quoteGroup.Value)
+                {
+                    sb.AppendLine($"|Quote{quoteIndex}={quote}");
+                    sb.AppendLine($"|QuoteCitation{quoteIndex}={quoteGroup.Key}");
+                    quoteIndex++;
+                }
+            }
+
+            sb.AppendLine("}}");
+            return sb.ToString();
         }
 
         private void btnLocateExtraIllust_Click(object sender, EventArgs e)
@@ -703,16 +747,10 @@ namespace WzComparerR2
             var lifeNode = this.advTreeMap.SelectedNode.Tag as Wz_Node;
             if (lifeNode != null)
             {
-                Wz_Node lifeNodes = null;
-                switch (TypeID)
-                {
-                    case 0:
-                        lifeNodes = lifeNode.FindNodeByPath("npc");
-                        break;
-                    case 1:
-                        lifeNodes = lifeNode.FindNodeByPath("mob");
-                        break;
-                }
+                string lifeType = TypeID == 0 ? "npc" : TypeID == 1 ? "mob" : null;
+                if (lifeType == null) return;
+
+                Wz_Node lifeNodes = lifeNode.FindNodeByPath(lifeType);
                 if (lifeNodes != null)
                 {
                     foreach (var node in lifeNodes.Nodes)
@@ -723,28 +761,7 @@ namespace WzComparerR2
                             foreach (var id in idNode.Nodes)
                             {
                                 var lifeID = id.GetValue<int>();
-                                StringResult sr;
-                                switch (TypeID)
-                                {
-                                    case 0:
-                                        if (this.stringLinker == null || !this.stringLinker.StringNpc.TryGetValue(lifeID, out sr))
-                                        {
-                                            sr = new StringResult();
-                                            sr.Name = "未知的NPC";
-                                        }
-                                        break;
-                                    case 1:
-                                        if (this.stringLinker == null || !this.stringLinker.StringMob.TryGetValue(lifeID, out sr))
-                                        {
-                                            sr = new StringResult();
-                                            sr.Name = "未知的怪物";
-                                        }
-                                        break;
-                                    default:
-                                        sr = new StringResult();
-                                        sr.Name = "(null)";
-                                        break;
-                                }
+                                StringResult sr = GetLifeStringResult(lifeID, lifeType);
                                 var newNode = new Node($"{sr.Name} ({lifeID})");
                                 newNode.Tag = new KeyValuePair<int, Wz_Node>(lifeID, node);
                                 this.advTreeLife.Nodes.Add(newNode);
