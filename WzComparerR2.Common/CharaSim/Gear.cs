@@ -349,6 +349,9 @@ namespace WzComparerR2.CharaSim
                         case 1342121:
                         case 1342122:
                         case 1342123:
+                        case 1726007:
+                        case 1726008:
+                        case 1726009:
                             return true;
                         default: return false;
                     }
