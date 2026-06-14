@@ -820,8 +820,8 @@ namespace WzComparerR2.CharaSim
                 case GearType.onmyoSen: return "陰陽扇";
                 case GearType.kannaReifu: return "靈符";
 
-                case GearType.carta: return "カルタ";
-                case GearType.magicQuill: return "魔法の羽ペン";
+                case GearType.carta: return "卡塔";
+                case GearType.magicQuill: return "魔法羽毛筆";
 
                 default: return null;
             }

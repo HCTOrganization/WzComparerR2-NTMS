@@ -648,6 +648,8 @@ namespace WzComparerR2.CharaSim
                     return GearType.breathShooter;
                 case 1215:
                     return GearType.longSword;
+                case 1216:
+                    return GearType.carta;
                 case 1252:
                     return GearType.memorialStaff;
                 case 1253:
@@ -670,6 +672,8 @@ namespace WzComparerR2.CharaSim
                     return GearType.authenticSymbol;
                 case 1714:
                     return GearType.grandAuthenticSymbol;
+                case 1726:
+                    return GearType.magicQuill;
             }
             if (code / 10000 == 135)
             {
