@@ -802,6 +802,7 @@ namespace WzComparerR2.CharaSimControl
                 {
                     foreach (Wz_Node commandNode in PluginManager.FindWz("Item\\Pet\\" + item.ItemID + ".img\\interact", this.SourceWzFile).Nodes)
                     {
+                        if (commandNode.Nodes["command"] == null) continue;
                         foreach (string command in petDialog?.Nodes[commandNode.Nodes["command"].GetValue<string>()].GetValueEx<string>(null)?.Split('|') ?? Enumerable.Empty<string>())
                         {
                             int l0;
