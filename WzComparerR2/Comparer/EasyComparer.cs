@@ -2181,6 +2181,11 @@ namespace WzComparerR2.Comparer
                         gearNodePath = String.Format(@"Character\NT_Beauty\{0:D}.img", gearID);
                         categoryPath = "MSN_Cosmetic_外形";
                     }
+                    else if (Regex.IsMatch(gearID, "^0184")) // 判断开头是否是0184
+                    {
+                        gearNodePath = String.Format(@"Character\EquipBag\{0:D}.img", gearID);
+                        categoryPath = "EquipBag_裝備背包";
+                    }
                     else if (gearID.StartsWith("018")) // 判断开头是否是018
                     {
                         gearNodePath = String.Format(@"Character\PetEquip\{0:D}.img", gearID);
@@ -2466,6 +2471,11 @@ namespace WzComparerR2.Comparer
                     {
                         gearNodePath = String.Format(@"Character\NT_Beauty\{0:D}.img", gearID);
                         categoryPath = "MSN_Cosmetic_外形";
+                    }
+                    else if (Regex.IsMatch(gearID, "^0184")) // 判断开头是否是0184
+                    {
+                        gearNodePath = String.Format(@"Character\EquipBag\{0:D}.img", gearID);
+                        categoryPath = "EquipBag_裝備背包";
                     }
                     else if (gearID.StartsWith("018")) // 判断开头是否是018
                     {

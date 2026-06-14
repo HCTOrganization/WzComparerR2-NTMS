@@ -444,6 +444,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.authenticSymbol:
                 case GearType.grandAuthenticSymbol:
                 case GearType.petEquip:
+                case GearType.equipBag:
                     return false;
                 default:
                     return true;
@@ -747,6 +748,7 @@ namespace WzComparerR2.CharaSim
                 case GearType.bit:
                 case GearType.jewel:
                 case GearType.astra:
+                case GearType.equipBag:
                     return 2;
                 case GearType.hair:
                 case GearType.hair2:
