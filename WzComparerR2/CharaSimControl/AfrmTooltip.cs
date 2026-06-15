@@ -70,8 +70,8 @@ namespace WzComparerR2.CharaSimControl
         private Bitmap DamageSkinSampleCriticalBitmap;
         private Bitmap DamageSkinExtraBitmap;
         private Bitmap DamageSkinUnitBitmap;
-        private FrmWaiting WaitingForm = new FrmWaiting();
         private static readonly SemaphoreSlim TranslateSemaphore = new SemaphoreSlim(1, 1);
+        public Action<string> OnStatusUpdate { get; set; }
 
         public Object TargetItem
         {
@@ -328,15 +328,14 @@ namespace WzComparerR2.CharaSimControl
             if (Translator.IsTranslateEnabled)
             {
                 Translator.WaitingForGlossaryTableRelease();
-                WaitingForm.UpdateMessage("翻譯中...");
-                WaitingForm.Show();
+                OnStatusUpdate?.Invoke("翻譯中...");
                 await Task.Run(() =>
                 {
                     TranslateSemaphore.Wait();
                     this.Bitmap = renderer.Render();
                     TranslateSemaphore.Release();
                 });
-                WaitingForm.Hide();
+                OnStatusUpdate?.Invoke("");
             }
             else
             {
@@ -594,25 +593,17 @@ namespace WzComparerR2.CharaSimControl
             if (!String.IsNullOrEmpty(this.DescLeftAlign)) sb.AppendLine("<descleftalign>" + this.DescLeftAlign + "</descleftalign>");
             string translatedResult = "";
             Translator.WaitingForGlossaryTableRelease();
-            WaitingForm.UpdateMessage("翻譯中...");
+            OnStatusUpdate?.Invoke("翻譯中...");
             try
             {
-                WaitingForm.Show();
                 await Task.Run(() => { translatedResult = Translator.AfrmTooltipTranslateBeforeCopy(sb.ToString()); });
                 Clipboard.SetText(translatedResult);
-                WaitingForm.Hide();
+                OnStatusUpdate?.Invoke("");
                 sb.Clear();
             }
             finally
             {
-                if (WaitingForm.InvokeRequired)
-                {
-                    WaitingForm.Invoke(new Action(() => WaitingForm.Hide()));
-                }
-                else
-                {
-                    WaitingForm.Hide();
-                }
+                OnStatusUpdate?.Invoke("");
             }
         }
 

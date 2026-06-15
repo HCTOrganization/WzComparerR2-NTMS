@@ -112,6 +112,10 @@ namespace WzComparerR2
             tooltipQuickView.KeyDown += new KeyEventHandler(afrm_KeyDown);
             tooltipQuickView.ShowID = true;
             tooltipQuickView.ShowMenu = true;
+            tooltipQuickView.OnStatusUpdate = (status) =>
+            {
+                labelItemStatus.Text = status;
+            };
 
             string[] images = new string[] { "dir", "mp3", "num", "png", "str", "uol", "vector", "img", "rawdata", "convex", "video" };
             foreach (string img in images)
@@ -2651,9 +2655,9 @@ namespace WzComparerR2
                 {
                     Directory.CreateDirectory(Path.Combine(exportedFolder, node.FullPathToFile));
                 }
-                FrmWaiting WaitingForm = new FrmWaiting();
-                WaitingForm.UpdateMessage("匯出中");
-                WaitingForm.Show(this);
+                labelItemStatus.Text = "匯出中";
+                progressBarItem1.Value = 0;
+                progressBarItem1.Visible = true;
                 await Task.Run(() =>
                 {
                     foreach (Wz_Node wz_Node in node.Nodes)
@@ -2664,7 +2668,7 @@ namespace WzComparerR2
                             try
                             {
                                 string fileName = Path.Combine(Path.Combine(exportedFolder, node.FullPathToFile), wzImage.Name);
-                                dumpImgToFile(wzImage, fileName, WaitingForm);
+                                dumpImgToFile(wzImage, fileName);
                             }
                             catch (Exception ex)
                             {
@@ -2674,11 +2678,11 @@ namespace WzComparerR2
                         }
                         else
                         {
-                            recurseImgDirectory(wz_Node, exportedFolder, WaitingForm);
+                            recurseImgDirectory(wz_Node, exportedFolder);
                         }
                     }
                 });
-                WaitingForm.Close();
+                progressBarItem1.Visible = false;
                 labelItemStatus.Text = "已匯出: " + exportedFolder;
             }
             else
@@ -2688,7 +2692,7 @@ namespace WzComparerR2
             }
         }
 
-        private void dumpImgToFile(Wz_Image img, string path, FrmWaiting frmWaiting)
+        private void dumpImgToFile(Wz_Image img, string path)
         {
             if (img == null || string.IsNullOrEmpty(path))
             {
@@ -2696,7 +2700,10 @@ namespace WzComparerR2
             }
             try
             {
-                frmWaiting.UpdateMessage("匯出中: " + img.Name);
+                this.Invoke((System.Windows.Forms.MethodInvoker)(() =>
+                {
+                    labelItemStatus.Text = "匯出中: " + img.Name;
+                }));
                 using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write))
                 {
                     var s = img.OpenRead();
@@ -2710,7 +2717,7 @@ namespace WzComparerR2
             }
         }
 
-        private void recurseImgDirectory(Wz_Node node, string directory, FrmWaiting frmWaiting)
+        private void recurseImgDirectory(Wz_Node node, string directory)
         {
             if (!Directory.Exists(Path.Combine(directory, node.FullPathToFile)))
             {
@@ -2724,7 +2731,7 @@ namespace WzComparerR2
                     string fileName = Path.Combine(Path.Combine(directory, node.FullPathToFile), subImg.Name);
                     try
                     {
-                        dumpImgToFile(subImg, fileName, frmWaiting);
+                        dumpImgToFile(subImg, fileName);
                     }
                     catch (Exception ex)
                     {
@@ -2734,7 +2741,7 @@ namespace WzComparerR2
                 }
                 else
                 {
-                    recurseImgDirectory(subNode, directory, frmWaiting);
+                    recurseImgDirectory(subNode, directory);
                 }
             }
         }
@@ -2798,9 +2805,9 @@ namespace WzComparerR2
             //     {
             //         Directory.CreateDirectory(Path.Combine(exportedFolder, node.FullPathToFile));
             //     }
-            //     FrmWaiting WaitingForm = new FrmWaiting();
-            //     WaitingForm.UpdateMessage("匯出中");
-            //     WaitingForm.Show(this);
+            //     labelItemStatus.Text = "匯出中";
+            //     progressBarItem1.Value = 0;
+            //     progressBarItem1.Visible = true;
 
             //     await Task.Run(() =>
             //     {
@@ -2812,7 +2819,7 @@ namespace WzComparerR2
             //                 try
             //                 {
             //                     string fileName = Path.Combine(Path.Combine(exportedFolder, node.FullPathToFile), wzImage.Name + ".xml");
-            //                     dumpXmlToFile(wz_Node, fileName, WaitingForm);
+            //                     dumpXmlToFile(wz_Node, fileName);
             //                 }
             //                 catch (Exception ex)
             //                 {
@@ -2822,11 +2829,11 @@ namespace WzComparerR2
             //             }
             //             else
             //             {
-            //                 recurseXmlDirectory(wz_Node, exportedFolder, WaitingForm);
+            //                 recurseXmlDirectory(wz_Node, exportedFolder);
             //             }
             //         }
             //     });
-            //     WaitingForm.Close();
+            //     progressBarItem1.Visible = false;
             //     labelItemStatus.Text = "已匯出: " + exportedFolder;
             // }
             else
@@ -2836,7 +2843,7 @@ namespace WzComparerR2
             }
         }
 
-        private void dumpXmlToFile(Wz_Node node, string path, FrmWaiting frmWaiting)
+        private void dumpXmlToFile(Wz_Node node, string path)
         {
             if (node == null || string.IsNullOrEmpty(path))
             {
@@ -2844,7 +2851,10 @@ namespace WzComparerR2
             }
             try
             {
-                frmWaiting.UpdateMessage("匯出中: " + node.GetValue<Wz_Image>().Name);
+                this.Invoke((System.Windows.Forms.MethodInvoker)(() =>
+                {
+                    labelItemStatus.Text = "匯出中: " + node.GetValue<Wz_Image>().Name;
+                }));
                 using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write))
                 {
                     var xsetting = new XmlWriterSettings()
@@ -2869,7 +2879,7 @@ namespace WzComparerR2
             }
         }
 
-        private void recurseXmlDirectory(Wz_Node node, string directory, FrmWaiting frmWaiting)
+        private void recurseXmlDirectory(Wz_Node node, string directory)
         {
             if (!Directory.Exists(Path.Combine(directory, node.FullPathToFile)))
             {
@@ -2883,7 +2893,7 @@ namespace WzComparerR2
                     string fileName = Path.Combine(Path.Combine(directory, node.FullPathToFile), subImg.Name + ".xml");
                     try
                     {
-                        dumpXmlToFile(subNode, fileName, frmWaiting);
+                        dumpXmlToFile(subNode, fileName);
                     }
                     catch (Exception ex)
                     {
@@ -2893,7 +2903,7 @@ namespace WzComparerR2
                 }
                 else
                 {
-                    recurseXmlDirectory(subNode, directory, frmWaiting);
+                    recurseXmlDirectory(subNode, directory);
                 }
             }
         }
@@ -2958,14 +2968,14 @@ namespace WzComparerR2
                 {
                     Directory.CreateDirectory(exportedFolder);
                 }
-                FrmWaiting WaitingForm = new FrmWaiting();
-                WaitingForm.UpdateMessage("匯出中");
-                WaitingForm.Show(this);
+                labelItemStatus.Text = "匯出中";
+                progressBarItem1.Value = 0;
+                progressBarItem1.Visible = true;
                 await Task.Run(() =>
                 {
-                    BatchExportSound(soundNode.GetValue<Wz_Image>().Node, exportedFolder, WaitingForm);
+                    BatchExportSound(soundNode.GetValue<Wz_Image>().Node, exportedFolder);
                 });
-                WaitingForm.Close();
+                progressBarItem1.Visible = false;
                 labelItemStatus.Text = "匯出完成至: " + exportedFolder;
             }
             else
@@ -2983,9 +2993,9 @@ namespace WzComparerR2
                         {
                             Directory.CreateDirectory(exportedFolder);
                         }
-                        FrmWaiting WaitingForm = new FrmWaiting();
-                        WaitingForm.UpdateMessage("匯出中");
-                        WaitingForm.Show(this);
+                        labelItemStatus.Text = "匯出中";
+                        progressBarItem1.Value = 0;
+                        progressBarItem1.Visible = true;
                         await Task.Run(() =>
                         {
                             foreach (var img in soundNode.Nodes)
@@ -3001,25 +3011,28 @@ namespace WzComparerR2
                                     {
                                         Directory.CreateDirectory(Path.Combine(exportedFolder, img.Text));
                                     }
-                                    BatchExportSound(image.Node, Path.Combine(exportedFolder, img.Text), WaitingForm);
+                                    BatchExportSound(image.Node, Path.Combine(exportedFolder, img.Text));
                                 }
                             }
                         });
-                        WaitingForm.Close();
+                        progressBarItem1.Visible = false;
                         labelItemStatus.Text = "匯出完成至: " + exportedFolder;
                     }
                 }
             }
         }
 
-        private void BatchExportSound(Wz_Node node, string path, FrmWaiting waiting)
+        private void BatchExportSound(Wz_Node node, string path)
         {
             foreach (Wz_Node child in node.Nodes)
             {
                 if (child.Value is Wz_Sound sound)
                 {
                     string soundName = child.Text;
-                    waiting.UpdateMessage($"匯出中: {soundName}");
+                    this.Invoke((System.Windows.Forms.MethodInvoker)(() =>
+                    {
+                        labelItemStatus.Text = $"匯出中: {soundName}";
+                    }));
                     byte[] soundData = sound.ExtractSound();
                     if (soundData == null || soundData.Length <= 0)
                     {
@@ -3052,7 +3065,7 @@ namespace WzComparerR2
                     {
                         Directory.CreateDirectory(subDirPath);
                     }
-                    BatchExportSound(child, subDirPath, waiting);
+                    BatchExportSound(child, subDirPath);
                 }
             }
         }
