@@ -178,7 +178,6 @@
             this.txtOpenAISystemMessage.Size = new System.Drawing.Size(178, 50);
             this.txtOpenAISystemMessage.ScrollBars = System.Windows.Forms.ScrollBars.Both;
             this.txtOpenAISystemMessage.TabIndex = 11;
-            this.txtOpenAISystemMessage.WatermarkText = "You are an automated translator for a community game engine, and I only need translated result in output.";
             // 
             // chkOpenAIExtraOption
             // 

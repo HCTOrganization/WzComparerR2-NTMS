@@ -253,8 +253,9 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         private static string OAITranslate(string text, string desiredLanguage, bool singleLine = false)
         {
-            if (string.IsNullOrEmpty(DefaultOpenAISystemMessage))
-                DefaultOpenAISystemMessage = "You are an automated translator for a community game engine, and I only need translated result in output.";
+            bool sysMsgDefined = !string.IsNullOrEmpty(DefaultOpenAISystemMessage);
+            if (!sysMsgDefined)
+                DefaultOpenAISystemMessage = string.Format("You are an automated translator, and your response should only have translated result in {0} while keeping formatting indicators untouched. If the source language is already in {0}, just response the original text.", GetLanguageName(desiredLanguage));
             
             if (string.IsNullOrEmpty(OAITranslateBaseURL))
                 OAITranslateBaseURL = "https://api.openai.com/v1";
@@ -268,7 +269,7 @@ namespace WzComparerR2.CharaSim
                     ),
                     new JObject(
                         new JProperty("role", "user"),
-                        new JProperty("content", $"Please translate following in-game content into {GetLanguageName(desiredLanguage)}: {text}")
+                        new JProperty("content", sysMsgDefined ? $"Please translate following in-game content into {GetLanguageName(desiredLanguage)}: {text}" : text)
                     )
                 )),
                 new JProperty("stream", false)
