@@ -32,10 +32,7 @@ namespace WzComparerR2.WzLib
         private List<Wz_File> mergedWzFiles;
         private Wz_File ownerWzFile;
 
-        /// <summary>
-        /// The offset calculator assigned during version detection, used for dir tree reading and image offset calculation.
-        /// </summary>
-        internal IWzImageOffsetCalc OffsetCalc { get; set; }
+        internal WzFileReadContext ReadContext { get; set; }
 
         public Encoding TextEncoding { get; set; }
 
@@ -123,14 +120,14 @@ namespace WzComparerR2.WzLib
             string signature = new string(br.ReadChars(4));
             if (signature != Wz_Header.PKG1 && signature != Wz_Header.PKG2)
             {
-                // KMST1201: use rand num header instead of signature
-                Wz_Header.WzPkg2Header header;
-                if (this.TryReadPkg2KMST1201Header(fileName, out header))
+                // KMST1202: 150-byte random header carrying 64-bit hashes
+                if (this.TryReadPkg2KMST1202Header(fileName, out var header64))
                 {
-                    this.Header = header;
+                    this.Header = header64;
                     return true;
                 }
-                if (this.TryReadPkg2KMST1202Header(fileName, out header))
+                // KMST1201: use rand num header instead of signature
+                if (this.TryReadPkg2KMST1201Header(fileName, out var header))
                 {
                     this.Header = header;
                     return true;
@@ -238,7 +235,7 @@ namespace WzComparerR2.WzLib
             return true;
         }
 
-        private bool TryReadPkg2KMST1202Header(string fileName, out Wz_Header.WzPkg2Header header)
+        private bool TryReadPkg2KMST1202Header(string fileName, out Wz_Header.WzPkg2Header64 header)
         {
             const int headerLen = 150;
             ReadOnlySpan<int> hash1Offsets = stackalloc int[] { 0x48, 0x24, 0x0F, 0x31, 0x46, 0x47, 0x63, 0x67 };
@@ -260,15 +257,14 @@ namespace WzComparerR2.WzLib
             Span<byte> buffer = stackalloc byte[headerLen];
             this.fileStream.ReadExactly(buffer);
 
-            ulong hash1 = MathHelper.GatherAsUInt64(buffer, hash1Offsets);
-            ulong hash2 = MathHelper.GatherAsUInt64(buffer, hash2Offsets);
             uint dataSize = MathHelper.GatherAsUInt32(buffer, dataSizeOffsets);
-
             if (dataSize != (uint)expectedDataSize)
                 return false;
 
-            header = new Wz_Header.WzPkg2Header(Wz_Header.PKG2, null, fileName, headerLen, dataSize, fileSize, headerLen, hash1, hash2);
-            header.Capabilities |= Wz_Capabilities.Pkg2RandomHeader;
+            ulong hash1 = MathHelper.GatherAsUInt64(buffer, hash1Offsets);
+            ulong hash2 = MathHelper.GatherAsUInt64(buffer, hash2Offsets);
+
+            header = new Wz_Header.WzPkg2Header64(Wz_Header.PKG2, null, fileName, headerLen, dataSize, fileSize, headerLen, hash1, hash2);
             this.fileStream.Position = headerLen;
             return true;
         }
@@ -431,8 +427,8 @@ namespace WzComparerR2.WzLib
                     case 0x02:
                     case 0x04:
                         Wz_Image img = new Wz_Image(name, size, cs32, hashOffset, pos, this);
-                        if (this.OffsetCalc != null)
-                            img.Offset = this.OffsetCalc.CalcOffset(pos, hashOffset);
+                        if (this.ReadContext?.OffsetCalc != null)
+                            img.Offset = this.ReadContext.OffsetCalc.CalcOffset(pos, hashOffset);
                         Wz_Node childNode = parent.Nodes.Add(name);
                         childNode.Value = img;
                         img.OwnerNode = childNode;
@@ -441,8 +437,8 @@ namespace WzComparerR2.WzLib
 
                     case 0x03:
                         var dir = new Wz_Directory(name, size, cs32, hashOffset, pos, this);
-                        if (this.OffsetCalc != null)
-                            dir.Offset = this.OffsetCalc.CalcOffset(pos, hashOffset);
+                        if (this.ReadContext?.OffsetCalc != null)
+                            dir.Offset = this.ReadContext.OffsetCalc.CalcOffset(pos, hashOffset);
                         dirs.Add(dir);
                         break;
                 }
@@ -451,26 +447,22 @@ namespace WzComparerR2.WzLib
 
         private void ReadDirTreePkg2(WzBinaryReader reader, Wz_Node parent, ref List<Wz_Directory> dirs)
         {
-            var dirReader = ((Wz_Header.WzPkg2Header)this.Header).DirStringReader;
-            var pkg2Calc = this.OffsetCalc as IPkg2ImageOffsetCalc;
-            long encryptedEntryCount = 0;
-            if (this.Header.WzVersion >= 1202)
-                encryptedEntryCount = reader.ReadCompressedInt64();
-            else
+            var context = this.ReadContext;
+            if (context == null)
             {
-                encryptedEntryCount = reader.ReadCompressedInt32();
-                encryptedEntryCount &= 0xFFFFFFFF;
+                throw new InvalidOperationException("PKG2 dir tree reading requires a detected read context.");
             }
-            int entryCount = pkg2Calc?.DecryptEntryCount(encryptedEntryCount) ?? 0;
-            
-            List <Pkg2DirEntry> entries = new();
+            var rule = context.Pkg2DirTreeRule ?? throw new InvalidOperationException("PKG2 dir tree reading requires a PKG2 read rule.");
+            int entryCount = rule.ReadEntryCount(reader, context.OffsetCalc);
+
+            List<Pkg2DirEntry> entries = new();
             for (int i = 0; i < entryCount; i++)
             {
                 byte nodeType = reader.ReadByte();
                 string name;
                 if (nodeType == 0x03 || nodeType == 0x04)
                 {
-                    name = dirReader.ReadName(reader, entries.Count == 0);
+                    name = context.DirStringReader.ReadName(reader, entries.Count == 0);
                 }
                 else
                 {
@@ -488,15 +480,7 @@ namespace WzComparerR2.WzLib
                 });
             }
 
-            if (this.Header.WzVersion < 1202)
-            {
-                long encryptedOffsetCount = reader.ReadCompressedInt32();
-                encryptedOffsetCount &= 0xFFFFFFFF;
-                if (encryptedOffsetCount != encryptedEntryCount)
-                    return;
-            }
-
-            if (entries.Count > 0)
+            if (rule.ShouldReadOffsets(reader, context.OffsetCalc, entries.Count))
             {
                 Span<Pkg2DirEntry> list = CollectionsMarshal.AsSpan(entries);
                 for (int i = 0; i < list.Length; i++)
@@ -508,8 +492,8 @@ namespace WzComparerR2.WzLib
                     {
                         case 0x04:
                             Wz_Image img = new Wz_Image(entry.Name, entry.DataLength, entry.Checksum, hashOffset, pos, this);
-                            if (this.OffsetCalc != null)
-                                img.Offset = this.OffsetCalc.CalcOffset(pos, hashOffset);
+                            if (context.OffsetCalc != null)
+                                img.Offset = context.OffsetCalc.CalcOffset(pos, hashOffset);
                             Wz_Node childNode = parent.Nodes.Add(entry.Name);
                             childNode.Value = img;
                             img.OwnerNode = childNode;
@@ -518,8 +502,8 @@ namespace WzComparerR2.WzLib
 
                         case 0x03:
                             var dir = new Wz_Directory(entry.Name, entry.DataLength, entry.Checksum, hashOffset, pos, this);
-                            if (this.OffsetCalc != null)
-                                dir.Offset = this.OffsetCalc.CalcOffset(pos, hashOffset);
+                            if (context.OffsetCalc != null)
+                                dir.Offset = context.OffsetCalc.CalcOffset(pos, hashOffset);
                             dirs.Add(dir);
                             break;
                     }
@@ -639,8 +623,7 @@ namespace WzComparerR2.WzLib
 
             wz_File.ownerWzFile = this;
         }
-
-
+        
         private struct Pkg2DirEntry
         {
             public int NodeType;

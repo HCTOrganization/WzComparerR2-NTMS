@@ -1,7 +1,6 @@
 using System;
 using WzComparerR2.WzLib.Utilities;
 using static WzComparerR2.WzLib.Utilities.MathHelper;
-using static WzComparerR2.WzLib.Wz_Header;
 
 namespace WzComparerR2.WzLib.Compatibility
 {
@@ -14,16 +13,30 @@ namespace WzComparerR2.WzLib.Compatibility
     }
 
     /// <summary>
-    /// Factory delegate for creating offset calculators during version detection.
+    /// Extended offset calculator for PKG2.
     /// </summary>
-    public delegate IWzImageOffsetCalc OffsetCalcFactory(Wz_File wzFile, ulong hashVersion);
+    public interface IPkg2ImageOffsetCalc : IWzImageOffsetCalc
+    {
+    }
 
     /// <summary>
     /// Extended offset calculator for PKG2, also handles entry count decryption.
     /// </summary>
-    public interface IPkg2ImageOffsetCalc : IWzImageOffsetCalc
+    public interface IPkg2ImageOffsetCalc<TEncryptedEntryCount> : IPkg2ImageOffsetCalc
     {
-        int DecryptEntryCount(long encryptedEntryCount);
+        int DecryptEntryCount(TEncryptedEntryCount encryptedEntryCount);
+    }
+
+    internal static class Pkg2ImageOffsetCalcHelper
+    {
+        public static int DecryptEntryCount(IPkg2ImageOffsetCalc calc, long encryptedEntryCount)
+        {
+            if (calc is IPkg2ImageOffsetCalc<int> calc32)
+                return calc32.DecryptEntryCount(checked((int)encryptedEntryCount));
+            if (calc is IPkg2ImageOffsetCalc<long> calc64)
+                return calc64.DecryptEntryCount(encryptedEntryCount);
+            throw new NotSupportedException($"Unsupported PKG2 offset calculator type: {calc.GetType().FullName}");
+        }
     }
 
     /// <summary>
@@ -72,7 +85,7 @@ namespace WzComparerR2.WzLib.Compatibility
     /// <summary>
     /// PKG2 offset calculation for KMST 1196-1197 (V1).
     /// </summary>
-    public sealed class Pkg2OffsetCalcV1 : IPkg2ImageOffsetCalc
+    public sealed class Pkg2OffsetCalcV1 : IPkg2ImageOffsetCalc<int>
     {
         public Pkg2OffsetCalcV1(uint headerLen, uint hashVersion, uint hash1)
         {
@@ -99,7 +112,7 @@ namespace WzComparerR2.WzLib.Compatibility
             return offset;
         }
 
-        public int DecryptEntryCount(long encryptedEntryCount)
+        public int DecryptEntryCount(int encryptedEntryCount)
         {
             return (int)(encryptedEntryCount ^ ((this.hash1 << 24) + (0x7F4A7C15 * this.hashVersion)));
         }
@@ -108,7 +121,7 @@ namespace WzComparerR2.WzLib.Compatibility
     /// <summary>
     /// PKG2 offset calculation for KMST 1198 (V2).
     /// </summary>
-    public sealed class Pkg2OffsetCalcV2 : IPkg2ImageOffsetCalc
+    public sealed class Pkg2OffsetCalcV2 : IPkg2ImageOffsetCalc<int>
     {
         public Pkg2OffsetCalcV2(uint headerLen, uint hashVersion, uint hash1)
         {
@@ -135,7 +148,7 @@ namespace WzComparerR2.WzLib.Compatibility
             return offset;
         }
 
-        public int DecryptEntryCount(long encryptedEntryCount)
+        public int DecryptEntryCount(int encryptedEntryCount)
         {
             return (int)(encryptedEntryCount ^ ((this.hash1 << 16) - (0x21524111 * this.hashVersion)));
         }
@@ -144,7 +157,7 @@ namespace WzComparerR2.WzLib.Compatibility
     /// <summary>
     /// PKG2 offset calculation for KMST 1199 (V3).
     /// </summary>
-    public sealed class Pkg2OffsetCalcV3 : IPkg2ImageOffsetCalc
+    public sealed class Pkg2OffsetCalcV3 : IPkg2ImageOffsetCalc<int>
     {
         public Pkg2OffsetCalcV3(uint headerLen, uint hashVersion, uint hash1)
         {
@@ -178,46 +191,55 @@ namespace WzComparerR2.WzLib.Compatibility
             return offset;
         }
 
-        public int DecryptEntryCount(long encryptedEntryCount)
+        public int DecryptEntryCount(int encryptedEntryCount)
         {
             return (int)(encryptedEntryCount ^ ((this.hash1 << 16) + (this.mixedHash & 0x7fffffff) - (0x21524111 * this.hashVersion)));
         }
     }
-    public sealed class Pkg2OffsetCalcV4 : IPkg2ImageOffsetCalc
+
+    /// <summary>
+    /// 64-bit PKG2 offset calculation for KMST 1202.
+    /// </summary>
+    public sealed class Pkg2OffsetCalc64V1 : IPkg2ImageOffsetCalc<long>
     {
-        public Pkg2OffsetCalcV4(uint headerLen, ulong hashVersion, ulong hash1)
+        public Pkg2OffsetCalc64V1(uint headerLen, ulong hash1, ulong hashVersion)
         {
+            // client only use low 32bits.
             this.headerLen = headerLen;
-            this.hashVersion = hashVersion;
             this.hash1 = hash1;
+            this.hashVersionFull = hashVersion;
+            this.preHash = (uint)hash1 ^ (uint)hashVersion;
+            this.mixedHash = this.preHash ^ 0x33BBBB33;
         }
 
         private readonly uint headerLen;
-        private readonly ulong hashVersion;
         private readonly ulong hash1;
+        private readonly ulong hashVersionFull;
+        private readonly uint preHash;
+        private readonly uint mixedHash;
 
         public uint CalcOffset(uint filePos, uint hashedOffset)
         {
-            hashedOffset = ~hashedOffset;
-            var hash1_32 = (uint)hash1;
-            var hashver_32 = (uint)hashVersion;
-
-
-            var v10 = (uint)((0x1010101 * hash1_32)
-              ^ (0x9E3779B9 * (hashver_32 ^ hash1_32 ^ 0x33BBBB33))
-              ^ (((hashver_32 ^ hash1_32) + (hashver_32 ^ hash1_32 ^ 0x94587BA0))
-               * ~(filePos - headerLen)
-               - 0x581C3F6D));
-
-            var a5 = headerLen + (hashedOffset ^ ROL(v10,19));
-
-            return a5;
+            uint offset = filePos - this.headerLen;
+            offset = ~offset;
+            offset *= this.preHash + (this.mixedHash ^ 0xA7E3C093);
+            offset -= 0x581C3F6D;
+            offset ^= (uint)this.hash1 * 0x01010101;
+            offset ^= this.mixedHash * 0x9E3779B9;
+            offset = ROL(offset, 19);
+            offset ^= ~hashedOffset;
+            offset += this.headerLen;
+            return offset;
         }
 
         public int DecryptEntryCount(long encryptedEntryCount)
         {
-            return (int)(((ulong)encryptedEntryCount ^ hash1 ^ hashVersion ^ 0x550EC4DD02C468EC) >> 16);
+            ulong dirCount = ((ulong)encryptedEntryCount ^ this.hash1 ^ this.hashVersionFull ^ 0x550EC4DD02C468ECUL) >> 16;
+            if (dirCount > int.MaxValue)
+            {
+                throw new ArgumentOutOfRangeException(nameof(encryptedEntryCount), "64-bit PKG2 dir count exceeds supported range.");
+            }
+            return (int)dirCount;
         }
     }
 }
-
