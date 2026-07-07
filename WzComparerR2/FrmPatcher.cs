@@ -282,6 +282,10 @@ namespace WzComparerR2
                 MessageBoxEx.Show("您沒有權限更新此資料夾中安裝的遊戲。\r\n\r\n請以系統管理員身分執行WzComparerR2。", "錯誤", MessageBoxButtons.OK);
                 return;
             }
+            if (!this.ValidateKeepOldWzBeforePatch())
+            {
+                return;
+            }
             if (this.patcherSession != null)
             {
                 if (this.patcherSession.State == PatcherTaskState.WaitForContinue)
@@ -674,7 +678,7 @@ namespace WzComparerR2
         private void buttonXOpen4_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog dlg = new FolderBrowserDialog();
-            dlg.Description = "メイプルストーリーフォルダーを選択してください。";
+            dlg.Description = "請選擇楓之谷資料夾。";
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
                 txtMSFolder2.Text = dlg.SelectedPath;
@@ -764,6 +768,74 @@ namespace WzComparerR2
             }
         }
 
+        private bool ValidateKeepOldWzBeforePatch()
+        {
+            if (!this.chkKeepOldWz.Checked)
+            {
+                return true;
+            }
+
+            string backupDir = Path.Combine(this.txtMSFolder.Text, "DataBk");
+            if (!Directory.Exists(backupDir))
+            {
+                return true;
+            }
+
+            bool hasAnyEntries;
+            try
+            {
+                hasAnyEntries = Directory.EnumerateFileSystemEntries(backupDir).Any();
+            }
+            catch (Exception ex)
+            {
+                MessageBoxEx.Show(this, "檢查 DataBk 資料夾時發生錯誤。\r\n" + ex.Message, "錯誤", MessageBoxButtons.OK);
+                return false;
+            }
+
+            if (!hasAnyEntries)
+            {
+                return true;
+            }
+
+            bool hasOpenedFiles = _mainFormReference.openedWz
+                .SelectMany(openedWzStructure => openedWzStructure.wz_files)
+                .Any(wzFile => wzFile.FileStream.Name.StartsWith(backupDir, StringComparison.OrdinalIgnoreCase));
+            if (hasOpenedFiles)
+            {
+                MessageBoxEx.Show(this,
+                    "KeepOldWz 模式已啟用，找到現有的 DataBk 資料夾。\r\n" +
+                    "因為 DataBk 內的檔案正在使用中，無法繼續處理。\r\n" +
+                    "請關閉 DataBk 資料夾內開啟的檔案後再重新執行。",
+                    "確認", MessageBoxButtons.OK);
+                return false;
+            }
+
+            var result = MessageBoxEx.Show(this,
+                "KeepOldWz 模式已啟用，找到現有的 DataBk 資料夾（非空）。\r\n" +
+                "繼續操作將會自動刪除現有的 DataBk 資料夾。\r\n\r\n" +
+                "是否繼續？",
+                "確認",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+            if (result != DialogResult.Yes)
+            {
+                return false;
+            }
+
+            try
+            {
+                RemoveReadOnlyAttributesRecursively(backupDir);
+                Directory.Delete(backupDir, true);
+            }
+            catch (Exception ex)
+            {
+                MessageBoxEx.Show(this, "刪除現有的 DataBk 資料夾失敗。\r\n" + ex.Message, "錯誤", MessageBoxButtons.OK);
+                return false;
+            }
+
+            return true;
+        }
+
         private void PrepareKeepOldWz(PatcherSession session, Action<string> logFunc)
         {
             if (!session.KeepOldWz)
@@ -776,20 +848,20 @@ namespace WzComparerR2
 
             if (!Directory.Exists(dataDir))
             {
-                logFunc("KeepOldWz: Data 資料夾不存在，跳過。\r\n");
+                logFunc("保留舊版WZ檔：Data 資料夾不存在，跳過。\r\n");
                 return;
             }
 
             if (Directory.Exists(backupDir))
             {
-                logFunc("KeepOldWz: 既存的 DataBk 資料夾正在刪除中...\r\n");
+                logFunc("保留舊版WZ檔：既存的 DataBk 資料夾正在刪除中...\r\n");
                 RemoveReadOnlyAttributesRecursively(backupDir);
                 Directory.Delete(backupDir, true);
             }
 
-            logFunc("KeepOldWz: Data 資料夾正在重新命名為 DataBk...\r\n");
+            logFunc("保留舊版WZ檔：Data 資料夾正在重新命名為 DataBk...\r\n");
             Directory.Move(dataDir, backupDir);
-            logFunc("KeepOldWz: 完了\r\n");
+            logFunc("保留舊版WZ檔：完成\r\n");
         }
 
         private void RestoreMissingDataFilesFromBackup(PatcherSession session, IEnumerable<PatchPartContext> patchParts, Action<string> logFunc)
@@ -803,7 +875,7 @@ namespace WzComparerR2
             string backupDir = Path.Combine(session.MSFolder, "DataBk");
             if (!Directory.Exists(backupDir))
             {
-                logFunc("KeepOldWz: DataBk 資料夾不存在，跳過補齊缺失的檔案。\r\n");
+                logFunc("保留舊版WZ檔：DataBk 資料夾不存在，跳過補齊缺失的檔案。\r\n");
                 return;
             }
 
@@ -865,7 +937,7 @@ namespace WzComparerR2
                 copiedCount++;
             }
 
-            logFunc($"KeepOldWz: DataBk 資料夾中已複製 {copiedCount} 個缺失的檔案。\r\n");
+            logFunc($"保留舊版WZ檔：DataBk 資料夾中已複製 {copiedCount} 個缺失的檔案。\r\n");
         }
 
         private static void RemoveReadOnlyAttributesRecursively(string directoryPath)

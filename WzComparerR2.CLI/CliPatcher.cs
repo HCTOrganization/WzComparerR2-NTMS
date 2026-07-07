@@ -103,6 +103,12 @@ namespace WzComparerR2.CLI
 
         public void ApplyPatch(string patchFile, string gameDirectory, bool immediatePatch, bool verbose, bool keepOldWz)
         {
+            if (!this.ValidateKeepOldWzBeforePatch(gameDirectory, keepOldWz))
+            {
+                Console.WriteLine("Patch cancelled.");
+                return;
+            }
+
             var session = new PatcherSession()
             {
                 PatchFile = patchFile,
@@ -115,6 +121,34 @@ namespace WzComparerR2.CLI
             session.PatchExecTask = Task.Run(() => this.ExecutePatchAsync(session, session.CancellationToken, verbose));
             this.patcherSession = session;
             Task.WaitAny(session.PatchExecTask);
+        }
+
+        private bool ValidateKeepOldWzBeforePatch(string gameDirectory, bool keepOldWz)
+        {
+            if (!keepOldWz)
+            {
+                return true;
+            }
+
+            string backupDir = Path.Combine(gameDirectory, "DataBk");
+            if (!Directory.Exists(backupDir))
+            {
+                return true;
+            }
+
+            try
+            {
+                RemoveReadOnlyAttributesRecursively(backupDir);
+                Directory.Delete(backupDir, true);
+                Console.WriteLine("Existing DataBk directory has been deleted.");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: Failed to delete existing DataBk directory. {ex.Message}");
+                Console.WriteLine("Please close processes using files under DataBk and try again.");
+                return false;
+            }
         }
 
         private static int ReadYNC(ConsoleKeyInfo cki)
