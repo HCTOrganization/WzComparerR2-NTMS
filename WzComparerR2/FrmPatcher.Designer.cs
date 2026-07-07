@@ -513,7 +513,7 @@ namespace WzComparerR2
             this.chkKeepOldWz.Name = "chkKeepOldWz";
             this.chkKeepOldWz.Size = new System.Drawing.Size(85, 16);
             this.chkKeepOldWz.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo10.BodyText = "這是「WZ比較」功能專用的特別補丁應用模式。\r\n使用此模式時，舊的WZ文件不會被新的WZ文件覆蓋，而是會移動到遊戲目錄內的DataBk目錄中。\r\n\r\n啟用此模式後，「即時更新」將無法使用。";
+            superTooltipInfo10.BodyText = "這是「WZ比較」功能專用的特別補丁應用模式。\r\n使用此模式時，舊的WZ檔案不會被新的WZ檔案覆蓋，而是會移動到遊戲目錄內的DataBk目錄中。\r\n\r\n啟用此模式後，「即時更新」將無法使用。";
             superTooltipInfo10.Color = DevComponents.DotNetBar.eTooltipColor.System;
             superTooltipInfo10.CustomSize = new System.Drawing.Size(250, 180);
             superTooltipInfo10.FooterVisible = false;
