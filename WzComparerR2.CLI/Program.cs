@@ -108,6 +108,7 @@ namespace WzComparerR2.CLI
                         bool immediatePatch = args.Contains("--immediate");
                         bool verbose = args.Contains("--verbose");
                         bool overrideMode = args.Contains("--override");
+                        bool keepOldWz = args.Contains("--keep-old-wz");
                         string patchFile = args[2];
                         string gameDirectory = args[3];
                         if (gameDirectory.Contains("\""))
@@ -117,6 +118,7 @@ namespace WzComparerR2.CLI
                             immediatePatch = gameDirParse.Contains(" --immediate") || args.Contains("--immediate");
                             verbose = gameDirParse.Contains(" --verbose") || args.Contains("--verbose");
                             overrideMode = gameDirParse.Contains(" --override") || args.Contains("--override");
+                            keepOldWz = gameDirParse.Contains(" --keep-old-wz") || args.Contains("--keep-old-wz");
                         }
                         if (!File.Exists(patchFile))
                         {
@@ -146,7 +148,7 @@ namespace WzComparerR2.CLI
                         try
                         {
                             patcher.OverrideMode = overrideMode;
-                            patcher.ApplyPatch(patchFile, gameDirectory, immediatePatch, verbose);
+                            patcher.ApplyPatch(patchFile, gameDirectory, immediatePatch, verbose, keepOldWz);
                         }
                         catch (Exception ex)
                         {
@@ -312,18 +314,19 @@ namespace WzComparerR2.CLI
                     Console.WriteLine("    wcr2cli patch find KMS-Minor 403 1 4");
                     break;
                 case "apply":
-                    Console.WriteLine("    wcr2cli patch apply [patch_file_path] [game_installation_path] [--immediate] [--verbose] [--override]");
+                    Console.WriteLine("    wcr2cli patch apply [patch_file_path] [game_installation_path] [--immediate] [--verbose] [--override] [--keep-old-wz]");
                     Console.WriteLine("");
                     Console.WriteLine("Supplying \"--immediate\" switch will enable Immediate Patch.");
                     Console.WriteLine("Supplying \"--verbose\" switch will enable verbose output (not implemented yet).");
                     Console.WriteLine("Supplying \"--override\" switch will accept any confirmation message automatically.");
+                    Console.WriteLine("Supplying \"--keep-old-wz\" switch will rename Data to DataBk right before applying files from temp directory.");
                     Console.WriteLine("");
                     Console.WriteLine("Both patch file path and game installation path must be absolute path.");
                     Console.WriteLine("If the path contains spaces, the path must be wrapped by a pair of quotes.");
                     Console.WriteLine("");
                     Console.WriteLine("Example:");
                     Console.WriteLine("");
-                    Console.WriteLine("    wcr2cli patch apply E:\\Downloads\\00269to00270.patch \"N:\\Games\\MapleStory TW\" --immediate");
+                    Console.WriteLine("    wcr2cli patch apply E:\\Downloads\\00269to00270.patch \"N:\\Games\\MapleStory TW\" --immediate --keep-old-wz");
                     break;
                 case "gms_check":
                     Console.WriteLine("    wcr2cli gms check");

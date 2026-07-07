@@ -63,7 +63,7 @@ namespace WzComparerR2
             this.chkOutputRemovedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOutputAddedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.cmbComparePng = new DevComponents.DotNetBar.Controls.ComboBoxEx();
-            this.chkOutputPng = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkKeepOldWz = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkCompare = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.panelEx2 = new DevComponents.DotNetBar.PanelEx();
             this.superTabControl1 = new DevComponents.DotNetBar.SuperTabControl();
@@ -363,8 +363,8 @@ namespace WzComparerR2
             //this.expandablePanel2.Controls.Add(this.chkOutputRemovedImg);
             //this.expandablePanel2.Controls.Add(this.chkOutputAddedImg);
             //this.expandablePanel2.Controls.Add(this.cmbComparePng);
-            //this.expandablePanel2.Controls.Add(this.chkOutputPng);
             //this.expandablePanel2.Controls.Add(this.chkCompare);
+            this.expandablePanel2.Controls.Add(this.chkKeepOldWz);
             this.expandablePanel2.Controls.Add(this.panelEx2);
             this.expandablePanel2.Controls.Add(this.buttonXPatch);
             this.expandablePanel2.Controls.Add(this.chkDeadPatch);
@@ -501,29 +501,26 @@ namespace WzComparerR2
             this.superTooltip1.SetSuperTooltip(this.cmbComparePng, superTooltipInfo9);
             this.cmbComparePng.TabIndex = 12;
             // 
-            // chkOutputPng
+            // chkKeepOldWz
             // 
-            this.chkOutputPng.AutoSize = true;
-            this.chkOutputPng.BackColor = System.Drawing.Color.Transparent;
+            this.chkKeepOldWz.AutoSize = true;
+            this.chkKeepOldWz.BackColor = System.Drawing.Color.Transparent;
             // 
             // 
             // 
-            this.chkOutputPng.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkOutputPng.Checked = true;
-            this.chkOutputPng.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkOutputPng.CheckValue = "Y";
-            this.chkOutputPng.Location = new System.Drawing.Point(208, 111);
-            this.chkOutputPng.Name = "chkOutputPng";
-            this.chkOutputPng.Size = new System.Drawing.Size(85, 16);
-            this.chkOutputPng.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            superTooltipInfo10.BodyText = "PNGファイルと音声ファイルを表示します。";
+            this.chkKeepOldWz.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkKeepOldWz.Location = new System.Drawing.Point(200, 87);
+            this.chkKeepOldWz.Name = "chkKeepOldWz";
+            this.chkKeepOldWz.Size = new System.Drawing.Size(85, 16);
+            this.chkKeepOldWz.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            superTooltipInfo10.BodyText = "這是「WZ比較」功能專用的特別補丁應用模式。\r\n使用此模式時，舊的WZ文件不會被新的WZ文件覆蓋，而是會移動到遊戲目錄內的DataBk目錄中。\r\n\r\n啟用此模式後，「即時更新」將無法使用。";
             superTooltipInfo10.Color = DevComponents.DotNetBar.eTooltipColor.System;
-            superTooltipInfo10.CustomSize = new System.Drawing.Size(180, 80);
+            superTooltipInfo10.CustomSize = new System.Drawing.Size(250, 180);
             superTooltipInfo10.FooterVisible = false;
-            superTooltipInfo10.HeaderText = "PNGと音声";
-            this.superTooltip1.SetSuperTooltip(this.chkOutputPng, superTooltipInfo10);
-            this.chkOutputPng.TabIndex = 11;
-            this.chkOutputPng.Text = "PNGと音声";
+            superTooltipInfo10.HeaderText = "保留舊版WZ檔";
+            this.superTooltip1.SetSuperTooltip(this.chkKeepOldWz, superTooltipInfo10);
+            this.chkKeepOldWz.TabIndex = 11;
+            this.chkKeepOldWz.Text = "保留舊版WZ檔";
             // 
             // chkCompare
             // 
@@ -1027,7 +1024,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ButtonX buttonXCheck;
         private DevComponents.AdvTree.ColumnHeader columnHeader6;
         private DevComponents.DotNetBar.Controls.ComboBoxEx cmbComparePng;
-        private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputPng;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkKeepOldWz;
         private DevComponents.DotNetBar.SuperTooltip superTooltip1;
         private DevComponents.DotNetBar.ExpandablePanel expandablePanel3;
         private DevComponents.DotNetBar.LabelX labelX3;

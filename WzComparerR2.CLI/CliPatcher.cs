@@ -101,14 +101,15 @@ namespace WzComparerR2.CLI
             }
         }
 
-        public void ApplyPatch(string patchFile, string gameDirectory, bool immediatePatch, bool verbose)
+        public void ApplyPatch(string patchFile, string gameDirectory, bool immediatePatch, bool verbose, bool keepOldWz)
         {
             var session = new PatcherSession()
             {
                 PatchFile = patchFile,
                 MSFolder = gameDirectory,
                 PrePatch = immediatePatch,
-                DeadPatch = immediatePatch,
+                DeadPatch = immediatePatch && !keepOldWz,
+                KeepOldWz = keepOldWz,
             };
             session.LoggingFileName = Path.Combine(session.MSFolder, $"wcpatcher_{DateTime.Now:yyyyMMdd_HHmmssfff}.log");
             session.PatchExecTask = Task.Run(() => this.ExecutePatchAsync(session, session.CancellationToken, verbose));
@@ -288,6 +289,7 @@ namespace WzComparerR2.CLI
                 AppendStateText("應用更新\r\n");
                 var sw = Stopwatch.StartNew();
                 patcher.Patch(session.MSFolder, cancellationToken);
+                this.RestoreMissingDataFilesFromBackup(session, patcher.PatchParts, AppendStateText);
                 sw.Stop();
                 AppendStateText("結束\r\n");
                 session.State = PatcherTaskState.Complete;
@@ -331,6 +333,8 @@ namespace WzComparerR2.CLI
             public string CompareFolder;
             public bool PrePatch;
             public bool DeadPatch;
+            public bool KeepOldWz;
+            public bool KeepOldWzPrepared;
 
             public Task PatchExecTask;
             public string LoggingFileName;
@@ -453,6 +457,11 @@ namespace WzComparerR2.CLI
                     }
                     break;
                 case PatchingState.ApplyFile:
+                    if (session.KeepOldWz && !session.KeepOldWzPrepared)
+                    {
+                        this.PrepareKeepOldWz(session, logFunc);
+                        session.KeepOldWzPrepared = true;
+                    }
                     logFunc($"檔案應用: {e.Part.FileName}\r\n");
                     break;
                 case PatchingState.FileSkipped:
@@ -480,6 +489,142 @@ namespace WzComparerR2.CLI
             else
             {
                 return $"{size:N0} 位元組 ({targetbytes:0.##} {sizes[order]})";
+            }
+        }
+
+        private void PrepareKeepOldWz(PatcherSession session, Action<string> logFunc)
+        {
+            if (!session.KeepOldWz)
+            {
+                return;
+            }
+
+            string dataDir = Path.Combine(session.MSFolder, "Data");
+            string backupDir = Path.Combine(session.MSFolder, "DataBk");
+
+            if (!Directory.Exists(dataDir))
+            {
+                logFunc("KeepOldWz: Data 資料夾不存在，跳過。\r\n");
+                return;
+            }
+
+            if (Directory.Exists(backupDir))
+            {
+                logFunc("KeepOldWz: 既存的 DataBk 資料夾正在刪除中...\r\n");
+                RemoveReadOnlyAttributesRecursively(backupDir);
+                Directory.Delete(backupDir, true);
+            }
+
+            logFunc("KeepOldWz: Data 資料夾正在重新命名為 DataBk...\r\n");
+            Directory.Move(dataDir, backupDir);
+            logFunc("KeepOldWz: 完了\r\n");
+        }
+
+        private void RestoreMissingDataFilesFromBackup(PatcherSession session, IEnumerable<PatchPartContext> patchParts, Action<string> logFunc)
+        {
+            if (!session.KeepOldWz)
+            {
+                return;
+            }
+
+            string dataDir = Path.Combine(session.MSFolder, "Data");
+            string backupDir = Path.Combine(session.MSFolder, "DataBk");
+            if (!Directory.Exists(backupDir))
+            {
+                logFunc("KeepOldWz: DataBk 資料夾不存在，跳過補齊缺失的檔案。\r\n");
+                return;
+            }
+
+            Directory.CreateDirectory(dataDir);
+            var deletedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var deletedDirs = new List<string>();
+            foreach (var part in patchParts.Where(p => p.Type == 2))
+            {
+                var fileName = (part.FileName ?? string.Empty).Replace('/', '\\');
+                if (!fileName.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var relativePath = fileName.Substring("Data\\".Length).TrimEnd('\\');
+                if (string.IsNullOrEmpty(relativePath))
+                {
+                    continue;
+                }
+
+                if (fileName.EndsWith("\\", StringComparison.Ordinal))
+                {
+                    deletedDirs.Add(relativePath);
+                }
+                else
+                {
+                    deletedFiles.Add(relativePath);
+                }
+            }
+
+            int copiedCount = 0;
+            foreach (string backupFile in Directory.EnumerateFiles(backupDir, "*", SearchOption.AllDirectories))
+            {
+                string relativePath = backupFile.Substring(backupDir.Length)
+                    .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    .Replace('/', '\\');
+                if (deletedFiles.Contains(relativePath))
+                {
+                    continue;
+                }
+                if (deletedDirs.Any(dir => relativePath.Equals(dir, StringComparison.OrdinalIgnoreCase)
+                    || relativePath.StartsWith(dir + "\\", StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
+
+                string targetFile = Path.Combine(dataDir, relativePath);
+                if (File.Exists(targetFile))
+                {
+                    continue;
+                }
+
+                string targetDir = Path.GetDirectoryName(targetFile);
+                if (!string.IsNullOrEmpty(targetDir))
+                {
+                    Directory.CreateDirectory(targetDir);
+                }
+                File.Copy(backupFile, targetFile, false);
+                copiedCount++;
+            }
+
+            logFunc($"KeepOldWz: DataBk 資料夾中已複製 {copiedCount} 個缺失的檔案。\r\n");
+        }
+
+        private static void RemoveReadOnlyAttributesRecursively(string directoryPath)
+        {
+            if (!Directory.Exists(directoryPath))
+            {
+                return;
+            }
+
+            foreach (string filePath in Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories))
+            {
+                var attr = File.GetAttributes(filePath);
+                if ((attr & FileAttributes.ReadOnly) != 0)
+                {
+                    File.SetAttributes(filePath, attr & ~FileAttributes.ReadOnly);
+                }
+            }
+
+            foreach (string dirPath in Directory.EnumerateDirectories(directoryPath, "*", SearchOption.AllDirectories))
+            {
+                var attr = File.GetAttributes(dirPath);
+                if ((attr & FileAttributes.ReadOnly) != 0)
+                {
+                    File.SetAttributes(dirPath, attr & ~FileAttributes.ReadOnly);
+                }
+            }
+
+            var rootAttr = File.GetAttributes(directoryPath);
+            if ((rootAttr & FileAttributes.ReadOnly) != 0)
+            {
+                File.SetAttributes(directoryPath, rootAttr & ~FileAttributes.ReadOnly);
             }
         }
 

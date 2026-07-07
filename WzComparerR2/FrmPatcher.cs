@@ -12,7 +12,6 @@ using System.Windows.Forms;
 using DevComponents.AdvTree;
 using DevComponents.DotNetBar;
 using DevComponents.Editors;
-using WzComparerR2.Comparer;
 using WzComparerR2.Config;
 using WzComparerR2.Patcher;
 using WzComparerR2.WzLib;
@@ -54,12 +53,6 @@ namespace WzComparerR2
             }
             if (comboBoxEx1.Items.Count > 0)
                 comboBoxEx1.SelectedIndex = 0;
-
-            foreach (WzPngComparison comp in Enum.GetValues(typeof(WzPngComparison)))
-            {
-                cmbComparePng.Items.Add(comp);
-            }
-            cmbComparePng.SelectedItem = WzPngComparison.SizeAndDataLength;
         }
 
         private MainForm _mainFormReference;
@@ -302,24 +295,14 @@ namespace WzComparerR2
                     return;
                 }
             }
-            string compareFolder = null;
-            if (chkCompare.Checked)
-            {
-                FolderBrowserDialog dlg = new FolderBrowserDialog();
-                dlg.Description = "比較結果の保存先フォルダーを選択してください。";
-                if (dlg.ShowDialog(this) != DialogResult.OK)
-                {
-                    return;
-                }
-                compareFolder = dlg.SelectedPath;
-            }
 
             var session = new PatcherSession()
             {
                 PatchFile = txtPatchFile.Text,
                 MSFolder = txtMSFolder.Text,
                 PrePatch = chkPrePatch.Checked,
-                DeadPatch = chkDeadPatch.Checked,
+                DeadPatch = chkDeadPatch.Checked && !chkKeepOldWz.Checked,
+                KeepOldWz = chkKeepOldWz.Checked,
             };
             session.LoggingFileName = Path.Combine(session.MSFolder, $"wcpatcher_{DateTime.Now:yyyyMMdd_HHmmssfff}.log");
             session.PatchExecTask = Task.Run(() => this.ExecutePatchAsync(session, session.CancellationToken));
@@ -353,6 +336,7 @@ namespace WzComparerR2
                 patcher = new WzPatcher(session.PatchFile);
                 this.chkPrePatch.Enabled = false;
                 this.chkDeadPatch.Enabled = false;
+                this.chkKeepOldWz.Enabled = false;
                 this.txtPatchFile.Enabled = false;
                 this.txtMSFolder.Enabled = false;
                 this.buttonXOpen1.Enabled = false;
@@ -515,6 +499,7 @@ namespace WzComparerR2
                 AppendStateText("應用更新\r\n");
                 var sw = Stopwatch.StartNew();
                 patcher.Patch(session.MSFolder, cancellationToken);
+                this.RestoreMissingDataFilesFromBackup(session, patcher.PatchParts, AppendStateText);
                 sw.Stop();
                 AppendStateText("結束\r\n");
                 session.State = PatcherTaskState.Complete;
@@ -538,6 +523,7 @@ namespace WzComparerR2
             {
                 this.chkPrePatch.Enabled = true;
                 this.chkDeadPatch.Enabled = true;
+                this.chkKeepOldWz.Enabled = true;
                 this.txtPatchFile.Enabled = true;
                 this.txtMSFolder.Enabled = true;
                 this.buttonXOpen1.Enabled = true;
@@ -636,6 +622,11 @@ namespace WzComparerR2
                     }
                     break;
                 case PatchingState.ApplyFile:
+                    if (session.KeepOldWz && !session.KeepOldWzPrepared)
+                    {
+                        this.PrepareKeepOldWz(session, logFunc);
+                        session.KeepOldWzPrepared = true;
+                    }
                     logFunc($"檔案應用: {e.Part.FileName}\r\n");
                     break;
                 case PatchingState.FileSkipped:
@@ -773,6 +764,142 @@ namespace WzComparerR2
             }
         }
 
+        private void PrepareKeepOldWz(PatcherSession session, Action<string> logFunc)
+        {
+            if (!session.KeepOldWz)
+            {
+                return;
+            }
+
+            string dataDir = Path.Combine(session.MSFolder, "Data");
+            string backupDir = Path.Combine(session.MSFolder, "DataBk");
+
+            if (!Directory.Exists(dataDir))
+            {
+                logFunc("KeepOldWz: Data 資料夾不存在，跳過。\r\n");
+                return;
+            }
+
+            if (Directory.Exists(backupDir))
+            {
+                logFunc("KeepOldWz: 既存的 DataBk 資料夾正在刪除中...\r\n");
+                RemoveReadOnlyAttributesRecursively(backupDir);
+                Directory.Delete(backupDir, true);
+            }
+
+            logFunc("KeepOldWz: Data 資料夾正在重新命名為 DataBk...\r\n");
+            Directory.Move(dataDir, backupDir);
+            logFunc("KeepOldWz: 完了\r\n");
+        }
+
+        private void RestoreMissingDataFilesFromBackup(PatcherSession session, IEnumerable<PatchPartContext> patchParts, Action<string> logFunc)
+        {
+            if (!session.KeepOldWz)
+            {
+                return;
+            }
+
+            string dataDir = Path.Combine(session.MSFolder, "Data");
+            string backupDir = Path.Combine(session.MSFolder, "DataBk");
+            if (!Directory.Exists(backupDir))
+            {
+                logFunc("KeepOldWz: DataBk 資料夾不存在，跳過補齊缺失的檔案。\r\n");
+                return;
+            }
+
+            Directory.CreateDirectory(dataDir);
+            var deletedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var deletedDirs = new List<string>();
+            foreach (var part in patchParts.Where(p => p.Type == 2))
+            {
+                var fileName = (part.FileName ?? string.Empty).Replace('/', '\\');
+                if (!fileName.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var relativePath = fileName.Substring("Data\\".Length).TrimEnd('\\');
+                if (string.IsNullOrEmpty(relativePath))
+                {
+                    continue;
+                }
+
+                if (fileName.EndsWith("\\", StringComparison.Ordinal))
+                {
+                    deletedDirs.Add(relativePath);
+                }
+                else
+                {
+                    deletedFiles.Add(relativePath);
+                }
+            }
+
+            int copiedCount = 0;
+            foreach (string backupFile in Directory.EnumerateFiles(backupDir, "*", SearchOption.AllDirectories))
+            {
+                string relativePath = backupFile.Substring(backupDir.Length)
+                    .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    .Replace('/', '\\');
+                if (deletedFiles.Contains(relativePath))
+                {
+                    continue;
+                }
+                if (deletedDirs.Any(dir => relativePath.Equals(dir, StringComparison.OrdinalIgnoreCase)
+                    || relativePath.StartsWith(dir + "\\", StringComparison.OrdinalIgnoreCase)))
+                {
+                    continue;
+                }
+
+                string targetFile = Path.Combine(dataDir, relativePath);
+                if (File.Exists(targetFile))
+                {
+                    continue;
+                }
+
+                string targetDir = Path.GetDirectoryName(targetFile);
+                if (!string.IsNullOrEmpty(targetDir))
+                {
+                    Directory.CreateDirectory(targetDir);
+                }
+                File.Copy(backupFile, targetFile, false);
+                copiedCount++;
+            }
+
+            logFunc($"KeepOldWz: DataBk 資料夾中已複製 {copiedCount} 個缺失的檔案。\r\n");
+        }
+
+        private static void RemoveReadOnlyAttributesRecursively(string directoryPath)
+        {
+            if (!Directory.Exists(directoryPath))
+            {
+                return;
+            }
+
+            foreach (string filePath in Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories))
+            {
+                var attr = File.GetAttributes(filePath);
+                if ((attr & FileAttributes.ReadOnly) != 0)
+                {
+                    File.SetAttributes(filePath, attr & ~FileAttributes.ReadOnly);
+                }
+            }
+
+            foreach (string dirPath in Directory.EnumerateDirectories(directoryPath, "*", SearchOption.AllDirectories))
+            {
+                var attr = File.GetAttributes(dirPath);
+                if ((attr & FileAttributes.ReadOnly) != 0)
+                {
+                    File.SetAttributes(dirPath, attr & ~FileAttributes.ReadOnly);
+                }
+            }
+
+            var rootAttr = File.GetAttributes(directoryPath);
+            if ((rootAttr & FileAttributes.ReadOnly) != 0)
+            {
+                File.SetAttributes(directoryPath, rootAttr & ~FileAttributes.ReadOnly);
+            }
+        }
+
         private static bool HasWritePermission(string directoryPath)
         {
             try
@@ -796,9 +923,10 @@ namespace WzComparerR2
 
             public string PatchFile;
             public string MSFolder;
-            public string CompareFolder;
             public bool PrePatch;
             public bool DeadPatch;
+            public bool KeepOldWz;
+            public bool KeepOldWzPrepared;
 
             public Task PatchExecTask;
             public string LoggingFileName;
