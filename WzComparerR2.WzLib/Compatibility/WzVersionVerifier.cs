@@ -13,18 +13,20 @@ using static WzComparerR2.WzLib.Utilities.MathHelper;
 namespace WzComparerR2.WzLib.Compatibility
 {
     #region Version iterators
-    public interface IWzVersionIterator<THashVersion>
+    public interface IWzVersionIterator
     {
         bool TryGetNextVersion();
+        void Reset();
         int WzVersion { get; }
-        THashVersion HashVersion { get; }
+        ulong HashVersion { get; }
+        bool IsMatch(int wzVersion, uint hashVersion);
     }
 
     /// <summary>
     /// PKG1 version iterator. Supports ordinal iteration (matching encrypted version byte)
     /// and fixed mode (for encverMissing, wzVersion = 777).
     /// </summary>
-    public class Pkg1VersionIterator : IWzVersionIterator<uint>
+    public class Pkg1VersionIterator : IWzVersionIterator
     {
         private readonly int encryptedVersion;
         private readonly int fixedWzVersion;
@@ -62,7 +64,7 @@ namespace WzComparerR2.WzLib.Compatibility
         private bool IsFixed => this.fixedWzVersion >= 0;
 
         public int WzVersion { get; private set; }
-        public uint HashVersion { get; private set; }
+        public ulong HashVersion { get; private set; }
 
         private static uint CalcEncryptedVersion(uint hashVersion)
         {
@@ -70,7 +72,7 @@ namespace WzComparerR2.WzLib.Compatibility
                 ^ ((hashVersion >> 24) & 0xFF)
                 ^ ((hashVersion >> 16) & 0xFF)
                 ^ ((hashVersion >> 8) & 0xFF)
-                ^ (hashVersion & 0xFF);
+                ^ ((hashVersion) & 0xFF);
         }
 
         public bool TryGetNextVersion()
@@ -98,28 +100,51 @@ namespace WzComparerR2.WzLib.Compatibility
                     return true;
                 }
             }
-            
+
             return false;
         }
 
+        public bool IsMatch(int wzVersion, uint hashVersion)
+        {
+            if (IsFixed)
+                return wzVersion == fixedWzVersion && hashVersion == fixedHashVersion;
+
+            if (Wz_Header.CalcHashVersion(wzVersion) != hashVersion)
+                return false;
+            return CalcEncryptedVersion(hashVersion) == (uint)this.encryptedVersion;
+        }
+
+        public void Reset()
+        {
+            startVersion = -1;
+            WzVersion = 0;
+            HashVersion = 0;
+            hasReturned = false;
+        }
     }
 
-    public class Pkg2VersionIterator : IWzVersionIterator<uint>
+    /// <summary>
+    /// PKG2 version iterator. Candidates are lazily computed on first iteration.
+    /// IsMatch uses a lightweight O(1) verify function, avoiding expensive candidate enumeration.
+    /// </summary>
+    public class Pkg2VersionIterator : IWzVersionIterator
     {
-        public Pkg2VersionIterator(int wzVersion, Func<IReadOnlyList<uint>> candidatesFactory)
+        public Pkg2VersionIterator(int wzVersion, Func<IReadOnlyList<ulong>> candidatesFactory, Func<uint, bool> verifier)
         {
             this.wzVersion = wzVersion;
             this.candidatesFactory = candidatesFactory;
+            this.verifier = verifier;
             this.index = -1;
         }
 
         private readonly int wzVersion;
-        private readonly Func<IReadOnlyList<uint>> candidatesFactory;
-        private IReadOnlyList<uint> candidates;
+        private readonly Func<IReadOnlyList<ulong>> candidatesFactory;
+        private readonly Func<uint, bool> verifier;
+        private IReadOnlyList<ulong> candidates;
         private int index;
 
         public int WzVersion => wzVersion;
-        public uint HashVersion { get; private set; }
+        public ulong HashVersion { get; private set; }
 
         public bool TryGetNextVersion()
         {
@@ -132,46 +157,58 @@ namespace WzComparerR2.WzLib.Compatibility
             return false;
         }
 
+        public bool IsMatch(int wzVersion, uint hashVersion)
+        {
+            if (wzVersion != this.wzVersion)
+                return false;
+            return this.verifier(hashVersion);
+        }
+
+        public void Reset()
+        {
+            this.index = -1;
+            this.HashVersion = 0;
+        }
     }
 
     /// <summary>
     /// Computes hash version candidates and verifies cached versions for PKG2 files.
     /// </summary>
-    public interface IPkg2HashVersionCalc<THash>
+    public interface IPkg2HashVersionCalc
     {
-        IReadOnlyList<THash> CalcCandidates(THash hash1, THash hash2);
-        bool Verify(THash hash1, THash hash2, THash hashVersion);
+        IReadOnlyList<ulong> CalcCandidates(ulong hash1, ulong hash2);
+        bool Verify(ulong hash1, ulong hash2, ulong hashVersion);
     }
 
     /// <summary>
     /// PKG2 hash version calculation for KMST 1196 (V1).
     /// </summary>
-    public sealed class Pkg2HashVersionCalcV1 : IPkg2HashVersionCalc<uint>
+    public sealed class Pkg2HashVersionCalcV1 : IPkg2HashVersionCalc
     {
-        public IReadOnlyList<uint> CalcCandidates(uint hash1, uint hash2)
+        public IReadOnlyList<ulong> CalcCandidates(ulong hash1, ulong hash2)
         {
-            return new[] { ROL(hash1, 7) ^ hash2 };
+            return new ulong[] { ROL((uint)hash1, 7) ^ (uint)hash2 };
         }
 
-        public bool Verify(uint hash1, uint hash2, uint hashVersion)
+        public bool Verify(ulong hash1, ulong hash2, ulong hashVersion)
         {
-            return hashVersion == (ROL(hash1, 7) ^ hash2);
+            return hashVersion == (ROL((uint)hash1, 7) ^ hash2);
         }
     }
 
     /// <summary>
     /// PKG2 hash version calculation for KMST 1197 (V2). Uses backtrack solver.
     /// </summary>
-    public sealed class Pkg2HashVersionCalcV2 : IPkg2HashVersionCalc<uint>
+    public sealed class Pkg2HashVersionCalcV2 : IPkg2HashVersionCalc
     {
-        public IReadOnlyList<uint> CalcCandidates(uint hash1, uint hash2)
+        public IReadOnlyList<ulong> CalcCandidates(ulong hash1, ulong hash2)
         {
-            List<uint> results = new List<uint>();
+            List<ulong> results = new List<ulong>();
             Pkg2BacktrackSolver.BacktrackParameters p = new Pkg2BacktrackSolver.BacktrackParameters
             {
-                Hash1 = hash1,
+                Hash1 = (uint)hash1,
                 LowBitLen = 5,
-                Target = hash2,
+                Target = (uint)hash2,
                 Carries = stackalloc uint[33],
                 LhsBits = stackalloc uint[32],
                 Validator = (v) => Verify(hash1, hash2, v),
@@ -189,26 +226,26 @@ namespace WzComparerR2.WzLib.Compatibility
             return results;
         }
 
-        public bool Verify(uint hash1, uint hash2, uint hashVersion)
+        public bool Verify(ulong hash1, ulong hash2, ulong hashVersion)
         {
-            uint lt = ROL(hash1 ^ (hashVersion + Pkg2BacktrackSolver.Magic), (int)(hashVersion & 0x1F));
-            return (lt ^ hashVersion) == hash2;
+            uint lt = ROL((uint)hash1 ^ ((uint)hashVersion + Pkg2BacktrackSolver.Magic), (int)(hashVersion & 0x1F));
+            return (lt ^ (uint)hashVersion) == (uint)hash2;
         }
     }
 
     /// <summary>
     /// PKG2 hash version calculation for KMST 1198 (V3). Uses backtrack solver.
     /// </summary>
-    public sealed class Pkg2HashVersionCalcV3 : IPkg2HashVersionCalc<uint>
+    public sealed class Pkg2HashVersionCalcV3 : IPkg2HashVersionCalc
     {
-        public IReadOnlyList<uint> CalcCandidates(uint hash1, uint hash2)
+        public IReadOnlyList<ulong> CalcCandidates(ulong hash1, ulong hash2)
         {
-            List<uint> results = new List<uint>();
+            List<ulong> results = new List<ulong>();
             Pkg2BacktrackSolver.BacktrackParameters p = new Pkg2BacktrackSolver.BacktrackParameters
             {
-                Hash1 = hash1,
+                Hash1 = (uint)hash1,
                 LowBitLen = 4,
-                Target = (~hash2) ^ hash1,
+                Target = (~(uint)hash2) ^ (uint)hash1,
                 Carries = stackalloc uint[33],
                 LhsBits = stackalloc uint[32],
                 Validator = (v) => Verify(hash1, hash2, v),
@@ -226,31 +263,31 @@ namespace WzComparerR2.WzLib.Compatibility
             return results;
         }
 
-        public bool Verify(uint hash1, uint hash2, uint hashVersion)
+        public bool Verify(ulong hash1, ulong hash2, ulong hashVersion)
         {
-            uint lt = ROL(hash1 ^ (hashVersion + Pkg2BacktrackSolver.Magic), (int)((hashVersion & 0xF) + (hash1 & 0xF)));
-            return ~(lt ^ hashVersion ^ hash1) == hash2;
+            uint lt = ROL((uint)hash1 ^ ((uint)hashVersion + Pkg2BacktrackSolver.Magic), (int)((hashVersion & 0xF) + (hash1 & 0xF)));
+            return ~(lt ^ (uint)hashVersion ^ (uint)hash1) == (uint)hash2;
         }
     }
 
     /// <summary>
     /// PKG2 hash version calculation for KMST 1199 (V4). Uses parallel brute-force with SIMD.
     /// </summary>
-    public class Pkg2HashVersionCalcV4 : IPkg2HashVersionCalc<uint>
+    public class Pkg2HashVersionCalcV4 : IPkg2HashVersionCalc
     {
         private const uint magic = Pkg2BacktrackSolver.Magic;
 
-        public IReadOnlyList<uint> CalcCandidates(uint hash1, uint hash2)
+        public IReadOnlyList<ulong> CalcCandidates(ulong hash1, ulong hash2)
         {
-            uint target = ~hash2;
+            uint target = ~(uint)hash2;
             return CalcCandidatesCore(hash1, target);
         }
 
-        protected IReadOnlyList<uint> CalcCandidatesCore(uint hash1, uint target)
+        protected IReadOnlyList<ulong> CalcCandidatesCore(ulong hash1, ulong target)
         {
-            uint hash1Low4 = hash1 & 0xF;
+            uint hash1Low4 = (uint)hash1 & 0xF;
 
-            List<uint> results = new List<uint>();
+            List<ulong> results = new List<ulong>();
             object lockObj = new object();
 
             Parallel.For(0, 256, (int chunk) =>
@@ -261,9 +298,9 @@ namespace WzComparerR2.WzLib.Compatibility
 #if NET6_0_OR_GREATER
                 if (Avx2.IsSupported)
                 {
-                    Vector256<uint> hash1Vec = Vector256.Create(hash1);
+                    Vector256<uint> hash1Vec = Vector256.Create((uint)hash1);
                     Vector256<uint> hash1Low4Vec = Vector256.Create(hash1Low4);
-                    Vector256<uint> targetVec = Vector256.Create(target);
+                    Vector256<uint> targetVec = Vector256.Create((uint)target);
 
                     var hashVersion = Avx2.Add(Vector256.Create((uint)chunk << 24), Vector256.Create(0u, 1u, 2u, 3u, 4u, 5u, 6u, 7u));
 
@@ -316,9 +353,9 @@ namespace WzComparerR2.WzLib.Compatibility
                 }
                 else if (Sse41.IsSupported)
                 {
-                    Vector128<uint> hash1Vec = Vector128.Create(hash1);
+                    Vector128<uint> hash1Vec = Vector128.Create((uint)hash1);
                     Vector128<uint> hash1Low4Vec = Vector128.Create(hash1Low4);
-                    Vector128<uint> targetVec = Vector128.Create(target);
+                    Vector128<uint> targetVec = Vector128.Create((uint)target);
 
                     var hashVersion = Sse2.Add(Vector128.Create(start), Vector128.Create(0u, 1u, 2u, 3u));
 
@@ -376,12 +413,12 @@ namespace WzComparerR2.WzLib.Compatibility
                 else
                 {
 #endif
-                    for (uint i = 0; i < count; i++)
+                for (uint i = 0; i < count; i++)
                     {
                         uint hashVersion = start + i;
-                        uint preHash = hash1 ^ hashVersion;
+                        uint preHash = (uint)hash1 ^ hashVersion;
                         uint mixedHash = Mix(preHash ^ 0x6D4C3B2A) ^ 0x91E10DA5;
-                        uint lt = ROL(hash1 ^ ((ushort)mixedHash + hashVersion + magic), (int)(((mixedHash ^ hashVersion) & 0xF) + hash1Low4));
+                        uint lt = ROL((uint)hash1 ^ ((ushort)mixedHash + hashVersion + magic), (int)(((mixedHash ^ hashVersion) & 0xF) + hash1Low4));
                         if ((lt ^ (preHash + mixedHash)) == target)
                         {
                             lock (lockObj)
@@ -398,53 +435,66 @@ namespace WzComparerR2.WzLib.Compatibility
             return results;
         }
 
-        public bool Verify(uint hash1, uint hash2, uint hashVersion)
+        public bool Verify(ulong hash1, ulong hash2, ulong hashVersion)
         {
-            uint preHash = hash1 ^ hashVersion;
+            uint preHash = (uint)hash1 ^ (uint)hashVersion;
             uint mixedHash = Mix(preHash ^ 0x6D4C3B2A) ^ 0x91E10DA5;
-            uint lt = ROL(hash1 ^ ((ushort)mixedHash + hashVersion + magic), (int)(((mixedHash ^ hashVersion) & 0xF) + (hash1 & 0xF)));
-            return (lt ^ (preHash + mixedHash)) == ~hash2;
+            uint lt = ROL((uint)hash1 ^ ((ushort)mixedHash + (uint)hashVersion + magic), (int)(((mixedHash ^ hashVersion) & 0xF) + (hash1 & 0xF)));
+            return (lt ^ (preHash + mixedHash)) == ~(uint)hash2;
         }
     }
 
     /// <summary>
     /// PKG2 hash version calculation for KMST 1200 (V5). Similar to V4.
     /// </summary>
-    public sealed class Pkg2HashVersionCalcV5 : Pkg2HashVersionCalcV4, IPkg2HashVersionCalc<uint>
+    public sealed class Pkg2HashVersionCalcV5 : Pkg2HashVersionCalcV4, IPkg2HashVersionCalc
     {
         private const uint magic = Pkg2BacktrackSolver.Magic;
         private const uint magicV5 = 0x2A2C818B;
 
-        public new IReadOnlyList<uint> CalcCandidates(uint hash1, uint hash2)
+        public new IReadOnlyList<ulong> CalcCandidates(ulong hash1, ulong hash2)
         {
-            uint target = hash2 ^ magicV5;
+            uint target = (uint)hash2 ^ magicV5;
             return CalcCandidatesCore(hash1, target);
         }
 
-        public new bool Verify(uint hash1, uint hash2, uint hashVersion)
+        public new bool Verify(ulong hash1, ulong hash2, ulong hashVersion)
         {
-            uint preHash = hash1 ^ hashVersion;
+            uint preHash = (uint)hash1 ^ (uint)hashVersion;
             uint mixedHash = Mix(preHash ^ 0x6D4C3B2A) ^ 0x91E10DA5;
-            uint lt = ROL(hash1 ^ ((ushort)mixedHash + hashVersion + magic), (int)(((mixedHash ^ hashVersion) & 0xF) + (hash1 & 0xF)));
-            return (lt ^ (preHash + mixedHash) ^ magicV5) == hash2;
+            uint lt = ROL((uint)hash1 ^ ((ushort)mixedHash + (uint)hashVersion + magic), (int)(((mixedHash ^ hashVersion) & 0xF) + (hash1 & 0xF)));
+            return (lt ^ (preHash + mixedHash) ^ magicV5) == (uint)hash2;
         }
     }
 
-    /// <summary>
-    /// 64-bit PKG2 hash version calculation for KMST 1202.
-    /// </summary>
-    public sealed class Pkg2HashVersionCalc64V1 : IPkg2HashVersionCalc<ulong>
+    public sealed class Pkg2HashVersionCalcV6 : IPkg2HashVersionCalc, IWzVersionIterator
     {
-        private const ulong Magic = 0xABCDEF0123456789UL;
-
         public IReadOnlyList<ulong> CalcCandidates(ulong hash1, ulong hash2)
         {
-            return new[] { hash1 ^ hash2 ^ Magic };
+            return new ulong[] { 0x8F08109B6A61D954 };
         }
 
         public bool Verify(ulong hash1, ulong hash2, ulong hashVersion)
         {
-            return hashVersion == (hash1 ^ hash2 ^ Magic);
+            return (hash1 ^ hashVersion ^ 0x33BBBB3333BBBB33 ^ 0x9876543210FEDCBA) == hash2;
+        }
+
+        public int WzVersion { get; private set; }
+        public ulong HashVersion { get; private set; }
+
+        public bool TryGetNextVersion()
+        {
+            return true;
+        }
+
+        public void Reset()
+        {
+
+        }
+
+        public bool IsMatch(int wzVersion, uint hashVersion)
+        {
+            return true;
         }
     }
 
@@ -525,7 +575,7 @@ namespace WzComparerR2.WzLib.Compatibility
             public Span<uint> Carries;
             public Span<uint> LhsBits;
             public Func<uint, bool> Validator;
-            public List<uint> Results;
+            public List<ulong> Results;
         }
     }
 
@@ -533,19 +583,13 @@ namespace WzComparerR2.WzLib.Compatibility
 
     #region Shared detection helpers
 
-    public static class WzFormatDetector
+    public static class WzVersionDetectHelper
     {
-        public static bool TryDetect<THeader, THash>(Wz_File wzFile, WzPreReadResult preReadResult, IWzFormatProfile<THeader, THash> profile)
-            where THeader : Wz_Header
+        public static bool FastDetectWithPreReadNodes(Wz_File wzFile, WzPreReadResult preReadResult,
+            IWzVersionIterator iterator, OffsetCalcFactory createOffsetCalc)
         {
-            if (!profile.CanHandle(wzFile, out var header) || preReadResult.Format != profile.Format)
-                return false;
-
-            var iterator = profile.CreateVersionIterator(header);
             var nodes = preReadResult.Nodes;
-            bool hasOffsetSamples = nodes.Count > 0;
-            bool hasEntryCountSamples = HasPkg2EntryCountSamples(preReadResult);
-            if (!hasOffsetSamples && !hasEntryCountSamples)
+            if (nodes.Count == 0)
                 return false;
 
             var imageSizes = new SizeRange[nodes.Count];
@@ -553,14 +597,17 @@ namespace WzComparerR2.WzLib.Compatibility
 
             while (iterator.TryGetNextVersion())
             {
-                var calc = profile.CreateOffsetCalc(header, iterator.HashVersion);
+                var calc = createOffsetCalc(wzFile, iterator.HashVersion);
+
                 if (!ValidateEntryCountsIfPkg2(preReadResult, calc))
                     continue;
 
-                if (!hasOffsetSamples || ValidateOffsets(nodes, imageSizes, fileLen, preReadResult.DirStartPosition, preReadResult.DirEndPosition, calc))
+                if (ValidateOffsets(nodes, imageSizes, fileLen, preReadResult.DirStartPosition, preReadResult.DirEndPosition, calc))
                 {
-                    header.WzVersion = iterator.WzVersion;
-                    wzFile.ReadContext = profile.CreateReadContext(header, iterator.HashVersion, calc);
+                    wzFile.Header.WzVersion = iterator.WzVersion;
+                    wzFile.Header.HashVersion = iterator.HashVersion;
+                    wzFile.Header.VersionChecked = true;
+                    wzFile.OffsetCalc = calc;
                     return true;
                 }
             }
@@ -568,38 +615,25 @@ namespace WzComparerR2.WzLib.Compatibility
             return false;
         }
 
-        private static bool HasPkg2EntryCountSamples(WzPreReadResult preReadResult)
+        public static bool FastDetectSingleVersion(Wz_File wzFile, WzPreReadResult preReadResult,
+            int wzVersion, uint hashVersion, OffsetCalcFactory createOffsetCalc)
         {
-            return preReadResult.Pkg2DirEntryCounts != null && preReadResult.Pkg2DirEntryCounts.Count > 0;
-        }
-
-        public static bool TryDetectCached<THeader, THash>(Wz_File wzFile, WzPreReadResult preReadResult,
-            IWzFormatProfile<THeader, THash> profile, WzProfileCacheEntry cacheEntry)
-            where THeader : Wz_Header
-        {
-            if (!profile.CanHandle(wzFile, out var header) || preReadResult.Format != profile.Format)
-                return false;
-            if (!profile.TryResolveCache(header, cacheEntry, out int wzVersion, out THash hashVersion))
-                return false;
-
             var nodes = preReadResult.Nodes;
             if (nodes.Count == 0)
-            {
-                var emptyCalc = profile.CreateOffsetCalc(header, hashVersion);
-                header.WzVersion = wzVersion;
-                wzFile.ReadContext = profile.CreateReadContext(header, hashVersion, emptyCalc);
-                return true;
-            }
+                return false;
 
             var imageSizes = new SizeRange[nodes.Count];
             long fileLen = wzFile.FileStream.Length;
-            var calc = profile.CreateOffsetCalc(header, hashVersion);
+
+            var calc = createOffsetCalc(wzFile, hashVersion);
 
             if (ValidateEntryCountsIfPkg2(preReadResult, calc)
                 && ValidateOffsets(nodes, imageSizes, fileLen, preReadResult.DirStartPosition, preReadResult.DirEndPosition, calc))
             {
-                header.WzVersion = wzVersion;
-                wzFile.ReadContext = profile.CreateReadContext(header, hashVersion, calc);
+                wzFile.Header.WzVersion = wzVersion;
+                wzFile.Header.HashVersion = hashVersion;
+                wzFile.Header.VersionChecked = true;
+                wzFile.OffsetCalc = calc;
                 return true;
             }
 
@@ -613,7 +647,7 @@ namespace WzComparerR2.WzLib.Compatibility
 
             foreach (var ec in preReadResult.Pkg2DirEntryCounts)
             {
-                if (Pkg2ImageOffsetCalcHelper.DecryptEntryCount(pkg2Calc, ec.EncryptedEntryCount) != ec.ActualEntryCount)
+                if (pkg2Calc.DecryptEntryCount(ec.EncryptedEntryCount) != ec.ActualEntryCount)
                     return false;
             }
             return true;

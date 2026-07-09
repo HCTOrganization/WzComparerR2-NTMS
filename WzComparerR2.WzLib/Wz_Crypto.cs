@@ -7,7 +7,6 @@ using System.Security.Cryptography;
 using AES = System.Security.Cryptography.Aes;
 using System.Collections.Specialized;
 using System.Text.RegularExpressions;
-using WzComparerR2.WzLib.Compatibility;
 using WzComparerR2.WzLib.Utilities;
 
 #if NET6_0_OR_GREATER
@@ -27,6 +26,7 @@ namespace WzComparerR2.WzLib
         GMS = 3,
         KMST1198 = 4,
         KMST1199 = 5,
+        KMST1202 = 6,
     }
 
     public class Wz_Crypto
@@ -47,7 +47,11 @@ namespace WzComparerR2.WzLib
             this.UseListWz = false;
             this.Pkg1EncType = Wz_CryptoKeyType.Unknown;
             this.List.Clear();
+            this.KnownProfiles.Clear();
         }
+
+        // Known version cache: populated after successful detection, used as fast path for subsequent files.
+        public List<KnownProfileEntry> KnownProfiles { get; } = new();
 
         public bool ListContains(string name)
         {
@@ -426,7 +430,7 @@ namespace WzComparerR2.WzLib
             }
         }
 
-        // KMST1202, use 64-bit key
+        // KMST1202
         public class Pkg2DirStringKeyV3 : Pkg2DirStringKey, IWzDecrypter
         {
             public Pkg2DirStringKeyV3(ulong hash1, ulong hashVersion) : base(ConvertKey(hash1, hashVersion))
@@ -435,8 +439,23 @@ namespace WzComparerR2.WzLib
 
             private static ulong ConvertKey(ulong hash1, ulong hashVersion)
             {
-                return hash1 ^ hashVersion ^ 0x66B57FEE317FD3DF;
+                ulong baseHash = hash1 ^ hashVersion ^ 0x66B57FEE317FD3DF;
+                return baseHash;
             }
+        }
+
+        public class KnownProfileEntry
+        {
+            public KnownProfileEntry(string profileName, int wzVersion, uint hashVersion)
+            {
+                this.ProfileName = profileName;
+                this.WzVersion = wzVersion;
+                this.HashVersion = hashVersion;
+            }
+
+            public string ProfileName { get; }
+            public int WzVersion { get; }
+            public uint HashVersion { get; }
         }
     }
 }

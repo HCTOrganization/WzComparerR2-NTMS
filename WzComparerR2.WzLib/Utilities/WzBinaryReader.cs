@@ -142,44 +142,11 @@ namespace WzComparerR2.WzLib.Utilities
         }
 
         // Introduced in KMST1198
-        public string ReadPkg2DirString(IWzDecrypter decrypter)
+        public string ReadPkg2DirString(IWzDecrypter decrypter, bool shortSize)
         {
             long currentPos = this.BaseStream.Position;
 
-            int size = this.ReadSByte();
-            if (size < 0)
-            {
-                size = -size;
-                int byteSize = size * 2;
-                var buffer = ArrayPool<byte>.Shared.Rent(byteSize);
-                try
-                {
-                    this.BaseStream.ReadExactly(buffer, 0, byteSize);
-                    decrypter.Decrypt(buffer.AsSpan(0, byteSize));
-                    Span<char> chars = MemoryMarshal.Cast<byte, char>(buffer.AsSpan(0, byteSize));
-                    return this.stringPool != null ? this.stringPool.GetOrAdd(currentPos, chars) : chars.ToString();
-                }
-                finally
-                {
-                    ArrayPool<byte>.Shared.Return(buffer);
-                }
-            }
-            else if (size > 0)
-            {
-                throw new Exception($"Unexpected string length: {size}");
-            }
-            else
-            {
-                return string.Empty;
-            }
-        }
-
-        // Introduced in KMST1202, 16bit length prefix string
-        public string ReadPkg2DirStringV2(IWzDecrypter decrypter)
-        {
-            long currentPos = this.BaseStream.Position;
-
-            int size = this.ReadInt16();
+            int size = shortSize ? this.ReadInt16() : this.ReadSByte();
             if (size < 0)
             {
                 size = -size;
