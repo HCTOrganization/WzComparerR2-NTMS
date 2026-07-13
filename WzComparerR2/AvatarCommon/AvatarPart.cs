@@ -38,6 +38,8 @@ namespace WzComparerR2.AvatarCommon
         public int GroupCount { get; set; }
         public List<int> GroupTamingID { get; set; }
         public List<Wz_Vector> GroupBodyRelMove { get; set; }
+        public Wz_Node RandomChairInfoNode { get; set; }
+        public int RandomChairCount { get; set; }
         public string ISlot { get; private set; }
         public string VSlot { get; private set; }
         public BitmapOrigin Icon { get; private set; }
@@ -177,7 +179,7 @@ namespace WzComparerR2.AvatarCommon
 
         private void LoadMixNodes()
         {
-            this.MixNodes = new Wz_Node[8];
+            this.MixNodes = new Wz_Node[9];
 
             string dir;
             int baseID;
@@ -201,13 +203,14 @@ namespace WzComparerR2.AvatarCommon
                 return;
             }
 
-            for (int i = 0; i <= 7; i++)
+            for (int i = 0; i < this.MixNodes.Length; i++)
             {
                 this.MixNodes[i] = PluginBase.PluginManager.FindWz(string.Format(@"Character\{0}\{1:D8}.img", dir, baseID + i * multiplier));
             }
             if (this.MixNodes[0] == null)
             {
                 this.MixNodes[0] = PluginBase.PluginManager.FindWz(string.Format(@"Character\{0}\{1:D8}.img", dir, baseID + 8 * multiplier));
+                this.MixNodes[8] = null;
             }
         }
     }

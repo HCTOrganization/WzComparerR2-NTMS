@@ -42,48 +42,95 @@ namespace WzComparerR2.AvatarCommon
                     var a = srcRow[x * 4 + 3];
                     var rgb = new RGB(r, g, b);
                     var hsv = new HSV(0, 0, 0);
-                    SetHSVfromRGB(ref rgb, ref hsv);
+                    //SetHSVfromRGB_v1(ref rgb, ref hsv);
+                    SetHSVfromRGB_v2(ref rgb, ref hsv);
 
-                    bool convert = CheckColorType(type, (int)hsv.Hue);
+                    bool convert = CheckColorType(type, ref hsv);
+                    bool not16bitcolor = false;
                     if ((rgb.R == 0 && rgb.G == 0 && rgb.B == 0) || (rgb.R == 255 && rgb.G == 255 && rgb.B == 255) || a == 0)
                     {
                         convert = false;
                     }
                     if (convert)
                     {
+                        if (rgb.R % 17 != 0 || rgb.G % 17 != 0 || rgb.B % 17 != 0)
+                        {
+                            not16bitcolor = true;
+                        }
 
+                        { // v2
+                            // hue
+                            hsv.Hue = (hsv.Hue + hue) % 360;
+
+                            // saturation
+                            float ds = 0f;
+                            float dv = 0f;
+                            if (saturation < 100)
+                            {
+                                ds = (saturation - 100) / 100f * hsv.Saturation;
+                                dv = (saturation - 100) / 100f * hsv.Saturation * hsv.Brightness / 2;
+                            }
+                            else if (hsv.Saturation > 0 && hsv.Brightness < 1)
+                            {
+                                ds = (saturation - 100) / 100f * (2 - hsv.Saturation) * (1 - hsv.Brightness);
+                                dv = (saturation - 100) / 100f * (1 - hsv.Saturation) * hsv.Brightness;
+                            }
+                            float temp_saturation = Clamp(hsv.Saturation + ds, 0f, 1f);
+                            float temp_brightness = Clamp(hsv.Brightness + dv, 0f, 1f);
+
+                            // brightness
+                            float ds2 = 0f;
+                            float dv2 = 0f;
+                            if (brightness < 100)
+                            {
+                                dv2 = (brightness - 100) / 100f * hsv.Saturation * temp_brightness;
+                            }
+                            else if (hsv.Brightness > 0)
+                            {
+                                ds2 = (brightness - 100) / 100f * -temp_saturation;
+                                dv2 = (brightness - 100) / 100f * (15 - 12 * hsv.Saturation) / 15 * (1 - temp_brightness);
+                            }
+                            hsv.Saturation = Clamp(temp_saturation + ds2, 0f, 1f);
+                            hsv.Brightness = Clamp(temp_brightness + dv2, 0f, 1f);
+
+                            SetRGBfromHSV_v2(ref rgb, ref hsv, isEffect || not16bitcolor);
+                        }
+                        /* { // v1
                         if (hue > 0)
                         {
                             hsv.Hue = (hsv.Hue + hue) % 360;
-                            SetRGBfromHSV(ref rgb, ref hsv, isEffect);
+                            SetRGBfromHSV_v1(ref rgb, ref hsv, isEffect || not16bitcolor);
                         }
 
                         RGB addRGB = new RGB(0, 0, 0);
-                        bool[] breakUpperBound = [isEffect || rgb.R > 238, isEffect || rgb.G > 238, isEffect || rgb.B > 238];
+                        bool[] breakUpperBound = [isEffect || not16bitcolor || rgb.R > 238, isEffect || not16bitcolor || rgb.G > 238, isEffect || not16bitcolor || rgb.B > 238];
 
                         if (saturation != 100 && hsv.Saturation != 0)
                         {
-                            var ds = (saturation - 100) / 100f;
-                            hsv.Saturation = Clamp(hsv.Saturation + ds, 0, 1);
+                            if (saturation > 100)
+                                hsv.Saturation = Clamp(hsv.Saturation + (saturation - 100) / 100f, 0, 1);
+                            else
+                                hsv.Saturation = hsv.Saturation * saturation / 100f;
 
-                            SetRGBfromHSV(ref rgb, ref hsv, false, doRounding: false);
+                            SetRGBfromHSV_v1(ref rgb, ref hsv, false, doRounding: false);
                         }
 
                         if (brightness != 100)
                         {
-                            addRGB = CalcBrightness(ref rgb, brightness, isEffect);
+                            addRGB = CalcBrightness(ref rgb, brightness, isEffect || not16bitcolor);
                         }
 
                         rgb.R = Clamp(rgb.R + addRGB.R, 0, breakUpperBound[0] ? 255 : 238);
                         rgb.G = Clamp(rgb.G + addRGB.G, 0, breakUpperBound[1] ? 255 : 238);
                         rgb.B = Clamp(rgb.B + addRGB.B, 0, breakUpperBound[2] ? 255 : 238);
 
-                        if (!isEffect)
+                        if (!(isEffect || not16bitcolor))
                         {
                             rgb.R = (int)ApplyStep(rgb.R);
                             rgb.G = (int)ApplyStep(rgb.G);
                             rgb.B = (int)ApplyStep(rgb.B);
                         }
+                        } */
                     }
 
                     dstRow[x * 4] = (byte)rgb.B;
@@ -110,26 +157,25 @@ namespace WzComparerR2.AvatarCommon
             return true;
         }
 
-        private static void SetHSVfromRGB(ref RGB rgb, ref HSV hsv)
+        private static void SetHSVfromRGB_v2(ref RGB rgb, ref HSV hsv)
         {
-            var r = rgb.R / 255f;
-            var g = rgb.G / 255f;
-            var b = rgb.B / 255f;
+            float r = rgb.R / 255f;
+            float g = rgb.G / 255f;
+            float b = rgb.B / 255f;
 
-            var max = Math.Max(r, Math.Max(g, b));
-            var min = Math.Min(r, Math.Min(g, b));
-            var mid = r + g + b - max - min;
-            var d = max - min;
-            rgb.Gap = d * 255;
-            rgb.Max = max * 255;
-            rgb.Min = min * 255;
-            rgb.Gray = max == min;
+            float max = Math.Max(r, Math.Max(g, b));
+            float min = Math.Min(r, Math.Min(g, b));
+            float d = max - min;
 
-            hsv.Brightness = (max + min) / 2;
+            hsv.Brightness = max;
 
-            if (hsv.Brightness > 0 && hsv.Brightness < 1)
+            if (hsv.Brightness > 0)
             {
-                hsv.Saturation = d / (1 - Math.Abs(2 * hsv.Brightness - 1));
+                hsv.Saturation = d / hsv.Brightness;
+            }
+            else
+            {
+                hsv.Saturation = 0;
             }
 
             if (rgb.R == rgb.G && rgb.G == rgb.B)
@@ -159,7 +205,112 @@ namespace WzComparerR2.AvatarCommon
             }
         }
 
-        private static void SetRGBfromHSV(ref RGB rgb, ref HSV hsv, bool step, bool doRounding = true)
+        private static void SetRGBfromHSV_v2(ref RGB rgb, ref HSV hsv, bool step, bool doRounding = true)
+        {
+            float r = 0, g = 0, b = 0;
+
+            float c = hsv.Brightness * hsv.Saturation;
+            float x = c * (1 - Math.Abs(((hsv.Hue / 60) % 2f) - 1));
+            float m = hsv.Brightness - c;
+
+            switch ((int)hsv.Hue / 60)
+            {
+
+                case 0:
+                    r = c;
+                    g = x;
+                    break;
+                case 1:
+                    r = x;
+                    g = c;
+                    break;
+                case 2:
+                    g = c;
+                    b = x;
+                    break;
+                case 3:
+                    g = x;
+                    b = c;
+                    break;
+                case 4:
+                    b = c;
+                    r = x;
+                    break;
+                case 5:
+                    b = x;
+                    r = c;
+                    break;
+            }
+
+            if (doRounding)
+            {
+                rgb.R = (int)(ApplyStep((r + m) * 255, step: (step ? 1f : 17f)));
+                rgb.G = (int)(ApplyStep((g + m) * 255, step: (step ? 1f : 17f)));
+                rgb.B = (int)(ApplyStep((b + m) * 255, step: (step ? 1f : 17f)));
+            }
+            else
+            {
+                rgb.R = (r + m) * 255;
+                rgb.G = (g + m) * 255;
+                rgb.B = (b + m) * 255;
+            }
+        }
+
+        #region v1
+        private static void SetHSVfromRGB_v1(ref RGB rgb, ref HSV hsv)
+        {
+            var r = rgb.R / 255f;
+            var g = rgb.G / 255f;
+            var b = rgb.B / 255f;
+
+            var max = Math.Max(r, Math.Max(g, b));
+            var min = Math.Min(r, Math.Min(g, b));
+            var mid = r + g + b - max - min;
+            var d = max - min;
+            rgb.Gap = d * 255;
+            rgb.Max = max * 255;
+            rgb.Min = min * 255;
+            rgb.Gray = max == min;
+
+            hsv.Brightness = (max + min) / 2;
+
+            if (hsv.Brightness > 0 && hsv.Brightness < 1)
+            {
+                hsv.Saturation = d / (1 - Math.Abs(2 * hsv.Brightness - 1));
+            }
+            else
+            {
+                hsv.Saturation = 0;
+            }
+
+            if (rgb.R == rgb.G && rgb.G == rgb.B)
+            {
+                hsv.Hue = 0;
+            }
+            else
+            {
+                if (r == max)
+                {
+                    hsv.Hue = (g - b) / d;
+                }
+                else if (g == max)
+                {
+                    hsv.Hue = 2f + (b - r) / d;
+                }
+                else if (b == max)
+                {
+                    hsv.Hue = 4f + (r - g) / d;
+                }
+                hsv.Hue *= 60f;
+
+                if (hsv.Hue < 0f)
+                {
+                    hsv.Hue += 360f;
+                }
+            }
+        }
+
+        private static void SetRGBfromHSV_v1(ref RGB rgb, ref HSV hsv, bool step, bool doRounding = true)
         {
             float r = 0, g = 0, b = 0;
 
@@ -276,10 +427,12 @@ namespace WzComparerR2.AvatarCommon
 
             return addRGB;
         }
+        #endregion
 
-        private static bool CheckColorType(int type, int hue)
+        private static bool CheckColorType(int type, ref HSV hsv)
         {
             bool convert = true;
+            int hue = (int)hsv.Hue;
             switch (type)
             {
                 case 0:
@@ -287,7 +440,7 @@ namespace WzComparerR2.AvatarCommon
                     break;
                 case 1:
                     // 빨간색 계열
-                    if (hue >= 30 && hue <= 330) convert = false;
+                    if ((hue >= 30 && hue <= 330) || hsv.Saturation == 0) convert = false;
                     break;
                 case 2:
                     // 노란색 계열

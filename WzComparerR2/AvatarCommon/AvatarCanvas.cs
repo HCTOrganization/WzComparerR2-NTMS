@@ -33,6 +33,7 @@ namespace WzComparerR2.AvatarCommon
             this.GroupChair = "0";
             this.ShowWeaponEffect = true;
             this.ShowWeaponJumpEffect = true;
+            this.HideBody = false;
 
             SetRing = new Action<AvatarPart>[]
             {
@@ -69,6 +70,7 @@ namespace WzComparerR2.AvatarCommon
         public bool ShowHairShade { get; set; }
         public bool ShowWeaponEffect { get; set; }
         public bool ShowWeaponJumpEffect { get; set; }
+        public bool HideBody { get; set; }
         public bool ApplyBRM { get; set; }
         public int WeaponIndex { get; set; }
         public int WeaponType { get; set; }
@@ -765,6 +767,17 @@ namespace WzComparerR2.AvatarCommon
                     }
                 }
             }
+            else
+            {
+                if (emotion == "default")
+                {
+                    return new ActionFrame() { Action = emotion };
+                }
+                else
+                {
+                    return new ActionFrame(emotion, 0);
+                }
+            }
 
             return null;
         }
@@ -994,6 +1007,21 @@ namespace WzComparerR2.AvatarCommon
                 }
             }
 
+            if (this.FaceAccessory != null && this.FaceAccessory.Visible)
+            {
+                var fixedEmotion = this.FaceAccessory.Node.FindNodeByPath(@"info\fixedEmotion").GetValueEx<string>(null);
+                if (!string.IsNullOrEmpty(fixedEmotion))
+                {
+                    var info = fixedEmotion.Split('/');
+                    emotionName = info[0];
+                    faceFrame = 0;
+                    if (info.Length > 1)
+                    {
+                        int.TryParse(info[1], out faceFrame);
+                    }
+                }
+            }
+
             if (!string.IsNullOrEmpty(actionName))
             {
                 bodyAction = GetActionFrame(actionName, bodyFrame);
@@ -1054,17 +1082,17 @@ namespace WzComparerR2.AvatarCommon
         public Bone CreateFrame(ActionFrame bodyAction, ActionFrame faceAction, ActionFrame tamingAction, ActionFrame[] effectActions)
         {
             //获取所有部件
-            Tuple<Wz_Node, Wz_Node, int, PrismDataCollection>[] playerNodes = LinkPlayerParts(bodyAction, faceAction);
-            Tuple<Wz_Node, Wz_Node, int, PrismDataCollection>[] tamingNodes = LinkTamingParts(tamingAction);
-            List<Tuple<Wz_Node, Wz_Node, int, PrismDataCollection>> effectNodes = []; // find effect nodes
-            List<Tuple<Wz_Node, Wz_Node, int, PrismDataCollection>> chairEffectNodes = []; // find chair effect nodes
-            List<Tuple<Wz_Node, Wz_Node, int, PrismDataCollection>> chairNodes = []; // find chair nodes
-            List<Tuple<Wz_Node, Wz_Node, int, PrismDataCollection>> groupTamingNodes = []; // find group taming nodes
+            AvatarFrameData[] playerNodes = LinkPlayerParts(bodyAction, faceAction);
+            AvatarFrameData[] tamingNodes = LinkTamingParts(tamingAction);
+            List<AvatarFrameData> effectNodes = []; // find effect nodes
+            List<AvatarFrameData> chairEffectNodes = []; // find chair effect nodes
+            List<AvatarFrameData> chairNodes = []; // find chair nodes
+            List<AvatarFrameData> groupTamingNodes = []; // find group taming nodes
             for (int i = 0; i < PartLength; i++)
             {
                 if (this.Parts[i] != null)
                 {
-                    List<Tuple<Wz_Node, Wz_Node, int, PrismDataCollection>> tmpNode = null;
+                    List<AvatarFrameData> tmpNode = null;
                     PrismDataCollection prismData = this.Parts[i].PrismData;
                     switch (i)
                     {
@@ -1177,19 +1205,19 @@ namespace WzComparerR2.AvatarCommon
             }
         }
 
-        private void CreateBone(Bone root, Tuple<Wz_Node, Wz_Node, int, PrismDataCollection>[] frameNodes, bool? bodyFace = null, bool groupTamingNode = false, bool effectNode = false, bool chairNode = false, bool groupTamingExists = false)
+        private void CreateBone(Bone root, AvatarFrameData[] frameNodes, bool? bodyFace = null, bool groupTamingNode = false, bool effectNode = false, bool chairNode = false, bool groupTamingExists = false)
         {
             bool face = true;
 
-            foreach (Tuple<Wz_Node, Wz_Node, int, PrismDataCollection> partNode in frameNodes)
+            foreach (AvatarFrameData partNode in frameNodes)
             {
-                Wz_Node linkPartNode = partNode.Item1;
+                Wz_Node linkPartNode = partNode.FrameNode;
                 while (linkPartNode.Value is Wz_Uol)
                 {
                     linkPartNode = linkPartNode.GetValue<Wz_Uol>().HandleUol(linkPartNode);
                 }
 
-                Wz_Node linkPartMixNode = partNode.Item2;
+                Wz_Node linkPartMixNode = partNode.MixFrameNode;
                 while (linkPartMixNode?.Value is Wz_Uol)
                 {
                     linkPartMixNode = linkPartMixNode.GetValue<Wz_Uol>().HandleUol(linkPartMixNode);
@@ -1210,7 +1238,7 @@ namespace WzComparerR2.AvatarCommon
                     else
                     {
                         skin.Image = BitmapOrigin.CreateFromNode(linkPartNode, PluginBase.PluginManager.FindWz);
-                        PrismDataCollection prismData = partNode.Item4;
+                        PrismDataCollection prismData = partNode.PrismData;
                         if (prismData.Valid)
                         {
                             var prism = Prism.Apply(skin.Image, prismData.Get(PrismDataCollection.PrismDataType.Default), true);
@@ -1360,7 +1388,7 @@ namespace WzComparerR2.AvatarCommon
                             case "effect":
                                 if (childNode.FullPathToFile.StartsWith("Character\\Weapon"))
                                 {
-                                    if (partNode.Item4.IsValid(PrismDataCollection.PrismDataType.WeaponEffect))
+                                    if (partNode.PrismData.IsValid(PrismDataCollection.PrismDataType.WeaponEffect))
                                         pidx = PrismDataCollection.PrismDataType.WeaponEffect;
 
                                     if (childNode.FullPathToFile.Contains("jump"))
@@ -1409,49 +1437,52 @@ namespace WzComparerR2.AvatarCommon
                         Skin skin = new Skin();
                         skin.Name = childNode.Text;
 
-                        if (SkinCache.ContainsKey(linkNode.FullPathToFile))
+                        if (!(partNode.IsBodyPart && this.HideBody))
                         {
-                            skin.Image = SkinCache[linkNode.FullPathToFile];
-                        }
-                        else
-                        {
-                            skin.Image = BitmapOrigin.CreateFromNode(linkNode, PluginBase.PluginManager.FindWz);
-                            if (partNode.Item2 != null)
+                            if (SkinCache.ContainsKey(linkNode.FullPathToFile))
                             {
-                                Wz_Node childMixNode = linkPartMixNode?.Nodes[childNode.Text];
-                                Wz_Node linkMixNode = childMixNode;
-                                while (linkMixNode?.Value is Wz_Uol uol)
+                                skin.Image = SkinCache[linkNode.FullPathToFile];
+                            }
+                            else
+                            {
+                                skin.Image = BitmapOrigin.CreateFromNode(linkNode, PluginBase.PluginManager.FindWz);
+                                if (partNode.MixFrameNode != null)
                                 {
-                                    linkMixNode = uol.HandleUol(linkMixNode);
-                                }
-                                if (linkMixNode == null)
-                                {
-                                    continue;
-                                }
-                                if (childMixNode.Text == "hairShade")
-                                {
-                                    linkMixNode = childMixNode.FindNodeByPath("0");
+                                    Wz_Node childMixNode = linkPartMixNode?.Nodes[childNode.Text];
+                                    Wz_Node linkMixNode = childMixNode;
+                                    while (linkMixNode?.Value is Wz_Uol uol)
+                                    {
+                                        linkMixNode = uol.HandleUol(linkMixNode);
+                                    }
                                     if (linkMixNode == null)
                                     {
                                         continue;
                                     }
-                                }
+                                    if (childMixNode.Text == "hairShade")
+                                    {
+                                        linkMixNode = childMixNode.FindNodeByPath("0");
+                                        if (linkMixNode == null)
+                                        {
+                                            continue;
+                                        }
+                                    }
 
-                                var mix = new BitmapOrigin(MixBitmaps(skin.Image.Bitmap, BitmapOrigin.CreateFromNode(linkMixNode, PluginBase.PluginManager.FindWz).Bitmap, partNode.Item3), skin.Image.Origin);
-                                skin.Image.Bitmap.Dispose();
-                                skin.Image = mix;
-                            }
-                            PrismDataCollection prismData = partNode.Item4;
-                            if (prismData.Valid)
-                            {
-                                var prism = Prism.Apply(skin.Image, prismData.Get(pidx));
-                                if (prism.Bitmap != null)
-                                {
+                                    var mix = new BitmapOrigin(MixBitmaps(skin.Image.Bitmap, BitmapOrigin.CreateFromNode(linkMixNode, PluginBase.PluginManager.FindWz).Bitmap, partNode.MixRatio), skin.Image.Origin);
                                     skin.Image.Bitmap.Dispose();
-                                    skin.Image = prism;
+                                    skin.Image = mix;
                                 }
+                                PrismDataCollection prismData = partNode.PrismData;
+                                if (prismData.Valid)
+                                {
+                                    var prism = Prism.Apply(skin.Image, prismData.Get(pidx));
+                                    if (prism.Bitmap != null)
+                                    {
+                                        skin.Image.Bitmap.Dispose();
+                                        skin.Image = prism;
+                                    }
+                                }
+                                SkinCache.Add(linkNode.FullPathToFile, skin.Image);
                             }
-                            SkinCache.Add(linkNode.FullPathToFile, skin.Image);
                         }
 
                         var zNode = linkNode.FindNodeByPath("z");
@@ -1667,6 +1698,7 @@ namespace WzComparerR2.AvatarCommon
                 {
                     var layer = new AvatarLayer();
                     var bmp = skin.Image.Bitmap;
+                    if (bmp == null) continue;
                     var position = new Point(pos.X + skin.Offset.X - skin.Image.Origin.X,
                         pos.Y + skin.Offset.Y - skin.Image.Origin.Y);
 
@@ -1694,7 +1726,7 @@ namespace WzComparerR2.AvatarCommon
                         layer.ZIndex = this.ZMap.IndexOf(skin.Z);
                         if (layer.ZIndex < 0)
                         {
-                            layer.ZIndex = this.ZMap.Count;
+                            layer.ZIndex = string.Equals(skin.Z, "default", StringComparison.OrdinalIgnoreCase) ? 0 : this.ZMap.Count;
                         }
                     }
                     else
@@ -1775,10 +1807,10 @@ namespace WzComparerR2.AvatarCommon
             }
         }
 
-        private Tuple<Wz_Node, Wz_Node, int, PrismDataCollection>[] LinkPlayerParts(ActionFrame bodyAction, ActionFrame faceAction)
+        private AvatarFrameData[] LinkPlayerParts(ActionFrame bodyAction, ActionFrame faceAction)
         {
             //寻找所有部件
-            List<Tuple<Wz_Node, Wz_Node, int, PrismDataCollection>> partNode = new List<Tuple<Wz_Node, Wz_Node, int, PrismDataCollection>>();
+            List<AvatarFrameData> partNode = new List<AvatarFrameData>();
 
             //链接人
             if (this.Body != null && this.Head != null && bodyAction != null
@@ -1786,7 +1818,7 @@ namespace WzComparerR2.AvatarCommon
             {
                 //身体
                 Wz_Node bodyNode = FindBodyActionNode(bodyAction);
-                partNode.Add(Tuple.Create(bodyNode, (Wz_Node)null, 100, this.Head.PrismData));
+                partNode.Add(new AvatarFrameData(bodyNode, null, 100, this.Head.PrismData, true));
 
                 //计算面向
                 bool? face = bodyAction.Face; //扩展动作规定头部
@@ -1817,28 +1849,23 @@ namespace WzComparerR2.AvatarCommon
                         headNode = FindActionFrameNode(this.Head.Node, headAction);
                     }
                 }
-                partNode.Add(Tuple.Create(headNode, (Wz_Node)null, 100, this.Head.PrismData));
+                partNode.Add(new AvatarFrameData(headNode, null, 100, this.Head.PrismData));
 
                 //脸
                 if (this.Face != null && this.Face.Visible && faceAction != null)
                 {
                     if ((face ?? true) && !invisibleFace)
                     {
-                        if (this.Face.IsMixing)
-                        {
-                            partNode.Add(Tuple.Create(FindActionFrameNode(this.Face.Node, faceAction), FindActionFrameNode(this.Face.MixNodes[this.Face.MixColor], faceAction), this.Face.MixOpacity, new PrismDataCollection()));
-                        }
-                        else
-                        {
-                            partNode.Add(Tuple.Create(FindActionFrameNode(this.Face.Node, faceAction), (Wz_Node)null, 100, new PrismDataCollection()));
-                        }
+                        Wz_Node mixFaceNode = this.Face.IsMixing ? FindActionFrameNode(this.Face.MixNodes[this.Face.MixColor], faceAction) : null;
+                        int mixFaceRatio = this.Face.IsMixing ? this.Face.MixOpacity : 100;
+                        partNode.Add(new AvatarFrameData(FindActionFrameNode(this.Face.Node, faceAction), mixFaceNode, mixFaceRatio, new PrismDataCollection()));
                     }
                 }
                 //毛
                 if (headNode != null && this.Hair != null && this.Hair.Visible)
                 {
-                    var hairNode = FindActionFrameNode(this.Hair.Node, bodyAction);
-                    var mixHairNode = FindActionFrameNode(this.Hair.MixNodes[this.Hair.MixColor], bodyAction);
+                    Wz_Node hairNode = FindActionFrameNode(this.Hair.Node, bodyAction);
+                    Wz_Node mixHairNode = FindActionFrameNode(this.Hair.MixNodes[this.Hair.MixColor], bodyAction);
                     if (hairNode == null)
                     {
                         string actName = this.GetHairActionName(bodyAction.Action, face);
@@ -1847,16 +1874,11 @@ namespace WzComparerR2.AvatarCommon
                             ActionFrame hairAction = new ActionFrame() { Action = actName, Frame = 0 };
                             hairNode = FindActionFrameNode(this.Hair.Node, hairAction);
                             mixHairNode = FindActionFrameNode(this.Hair.MixNodes[this.Hair.MixColor], hairAction);
-                        }  
+                        }
                     }
-                    if (this.Hair.IsMixing)
-                    {
-                        partNode.Add(Tuple.Create(hairNode, mixHairNode, this.Hair.MixOpacity, new PrismDataCollection()));
-                    }
-                    else
-                    {
-                        partNode.Add(Tuple.Create(hairNode, (Wz_Node)null, 100, new PrismDataCollection()));
-                    }
+                    mixHairNode = this.Hair.IsMixing ? mixHairNode : null;
+                    int mixHairRatio = this.Hair.IsMixing ? this.Hair.MixOpacity : 100;
+                    partNode.Add(new AvatarFrameData(hairNode, mixHairNode, mixHairRatio, new PrismDataCollection()));
                 }
                 //cap
                 if (headNode != null && this.Cap != null && this.Cap.Visible)
@@ -1871,40 +1893,41 @@ namespace WzComparerR2.AvatarCommon
                             capNode = FindActionFrameNode(this.Cap.Node, capAction);
                         }
                     }
-                    partNode.Add(Tuple.Create(capNode, (Wz_Node)null, 100, this.Cap.PrismData));
+                    partNode.Add(new AvatarFrameData(capNode, null, 100, this.Cap.PrismData));
                 }
                 //其他部件
                 for (int i = 5; i < 16; i++)
                 {
+                    if (this.HideBody && i <= 12) continue; // HideBody 체크 시, Body 관련 장비 로드 x
                     var part = this.Parts[i];
                     if (part != null && part.Visible)
                     {
                         if (i == 12 && Gear.GetGearType(part.ID.Value) == GearType.cashWeapon) //点装武器
                         {
                             var wpNode = part.Node.FindNodeByPath(this.WeaponType.ToString());
-                            partNode.Add(Tuple.Create(FindActionFrameNode(wpNode, bodyAction), (Wz_Node)null, 100, part.PrismData));
+                            partNode.Add(new AvatarFrameData(FindActionFrameNode(wpNode, bodyAction), null, 100, part.PrismData));
                         }
                         else if (i == 14) //脸
                         {
                             if (face ?? true)
                             {
-                                partNode.Add(Tuple.Create(FindActionFrameNode(part.Node, faceAction), (Wz_Node)null, 100, part.PrismData));
+                                partNode.Add(new AvatarFrameData(FindActionFrameNode(part.Node, faceAction), null, 100, part.PrismData));
                             }
                         }
                         else //其他部件
                         {
-                            partNode.Add(Tuple.Create(FindActionFrameNode(part.Node, bodyAction), (Wz_Node)null, 100, part.PrismData));
+                            partNode.Add(new AvatarFrameData(FindActionFrameNode(part.Node, bodyAction), null, 100, part.PrismData));
                         }
                     }
                 }
             }
 
-            partNode.RemoveAll(node => node.Item1 == null);
+            partNode.RemoveAll(node => node.FrameNode == null);
 
             return partNode.ToArray();
         }
 
-        private Tuple<Wz_Node, Wz_Node, int, PrismDataCollection>[] LinkTamingParts(ActionFrame tamingAction)
+        private AvatarFrameData[] LinkTamingParts(ActionFrame tamingAction)
         {
             List<Wz_Node> partNode = new List<Wz_Node>();
             var prismInfo = new PrismDataCollection();
@@ -1923,10 +1946,10 @@ namespace WzComparerR2.AvatarCommon
 
             partNode.RemoveAll(node => node == null);
 
-            return partNode.Select(node => Tuple.Create(node, (Wz_Node)null, 100, prismInfo)).ToArray();
+            return partNode.Select(node => new AvatarFrameData(node, null, 100, prismInfo)).ToArray();
         }
 
-        private List<Tuple<Wz_Node, Wz_Node, int, PrismDataCollection>> LinkGroupTamingParts(ActionFrame tamingAction, PrismDataCollection prismInfo)
+        private List<AvatarFrameData> LinkGroupTamingParts(ActionFrame tamingAction, PrismDataCollection prismInfo)
         {
             List<Wz_Node> partNode = new List<Wz_Node>();
 
@@ -1948,10 +1971,10 @@ namespace WzComparerR2.AvatarCommon
 
             partNode.RemoveAll(node => node == null);
 
-            return partNode.Select(node => Tuple.Create(node, (Wz_Node)null, 100, prismInfo)).ToList();
+            return partNode.Select(node => new AvatarFrameData(node, null, 100, prismInfo)).ToList();
         }
 
-        private List<Tuple<Wz_Node, Wz_Node, int, PrismDataCollection>> LinkEffectParts(ActionFrame aFrame, Wz_Node effNode, bool visible, PrismDataCollection prismInfo) // find effect nodes
+        private List<AvatarFrameData> LinkEffectParts(ActionFrame aFrame, Wz_Node effNode, bool visible, PrismDataCollection prismInfo) // find effect nodes
         {
             List<Wz_Node> partNode = new List<Wz_Node>();
 
@@ -1963,7 +1986,7 @@ namespace WzComparerR2.AvatarCommon
 
             partNode.RemoveAll(node => node == null);
 
-            return partNode.Select(node => Tuple.Create(node, (Wz_Node)null, 100, prismInfo)).ToList();
+            return partNode.Select(node => new AvatarFrameData(node, (Wz_Node)null, 100, prismInfo)).ToList();
         }
 
         private Wz_Node FindBodyActionNode(ActionFrame actionFrame)
