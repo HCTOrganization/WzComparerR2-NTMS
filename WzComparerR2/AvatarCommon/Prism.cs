@@ -12,15 +12,20 @@ namespace WzComparerR2.AvatarCommon
     {
         public static BitmapOrigin Apply(BitmapOrigin src, PrismData prismData, bool isEffect = false)
         {
-            return Apply(src, prismData.Type, prismData.Hue, prismData.Saturation, prismData.Brightness, isEffect);
+            return Apply(src, prismData.Type, prismData.Hue, prismData.Saturation, prismData.Brightness, isEffect, prismData.ConvertPureBlack);
         }
 
-        public static BitmapOrigin Apply(BitmapOrigin src, int type, int hue, int saturation, int brightness, bool isEffect = false)
+        public static BitmapOrigin Apply(BitmapOrigin src, int type, int hue, int saturation, int brightness, bool isEffect = false, bool convertPureBlack = false)
         {
-            return new BitmapOrigin(Apply(src.Bitmap, type, hue, saturation, brightness, isEffect), src.Origin);
+            return new BitmapOrigin(Apply(src.Bitmap, type, hue, saturation, brightness, isEffect, convertPureBlack), src.Origin);
         }
 
-        public static unsafe Bitmap Apply(Bitmap src, int type, int hue, int saturation, int brightness, bool isEffect = false)
+        public static Bitmap Apply(Bitmap src, PrismData prismData, bool isEffect = false)
+        {
+            return Apply(src, prismData.Type, prismData.Hue, prismData.Saturation, prismData.Brightness, isEffect, prismData.ConvertPureBlack);
+        }
+
+        public static unsafe Bitmap Apply(Bitmap src, int type, int hue, int saturation, int brightness, bool isEffect = false, bool convertPureBlack = false)
         {
             if (src == null) return null;
             if (!Valid(type, hue, saturation, brightness))
@@ -29,6 +34,24 @@ namespace WzComparerR2.AvatarCommon
             var dst = new Bitmap(src.Width, src.Height, PixelFormat.Format32bppArgb);
             var srcData = src.LockBits(new Rectangle(0, 0, src.Width, src.Height), ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
             var dstData = dst.LockBits(new Rectangle(0, 0, dst.Width, dst.Height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+
+            // 16/32비트 색상 검사
+            bool not16bitcolor = false;
+            for (int y = 0; y < srcData.Height; y++)
+            {
+                byte* srcRow = (byte*)srcData.Scan0 + y * srcData.Stride;
+                for (int x = 0; x < srcData.Width; x++)
+                {
+                    var b = srcRow[x * 4];
+                    var g = srcRow[x * 4 + 1];
+                    var r = srcRow[x * 4 + 2];
+                    if (r % 17 != 0 || g % 17 != 0 || b % 17 != 0)
+                    {
+                        not16bitcolor = true;
+                        break;
+                    }
+                }
+            }
 
             for (int y = 0; y < srcData.Height; y++)
             {
@@ -45,19 +68,13 @@ namespace WzComparerR2.AvatarCommon
                     //SetHSVfromRGB_v1(ref rgb, ref hsv);
                     SetHSVfromRGB_v2(ref rgb, ref hsv);
 
-                    bool convert = CheckColorType(type, ref hsv);
-                    bool not16bitcolor = false;
-                    if ((rgb.R == 0 && rgb.G == 0 && rgb.B == 0) || (rgb.R == 255 && rgb.G == 255 && rgb.B == 255) || a == 0)
+                    bool convert = (convertPureBlack && hsv.Saturation == 0) ? true : CheckColorType(type, ref hsv);
+                    if ((!convertPureBlack && rgb.R == 0 && rgb.G == 0 && rgb.B == 0) || (rgb.R == 255 && rgb.G == 255 && rgb.B == 255) || a == 0)
                     {
                         convert = false;
                     }
                     if (convert)
                     {
-                        if (rgb.R % 17 != 0 || rgb.G % 17 != 0 || rgb.B % 17 != 0)
-                        {
-                            not16bitcolor = true;
-                        }
-
                         { // v2
                             // hue
                             hsv.Hue = (hsv.Hue + hue) % 360;
@@ -85,7 +102,7 @@ namespace WzComparerR2.AvatarCommon
                             {
                                 dv2 = (brightness - 100) / 100f * hsv.Saturation * temp_brightness;
                             }
-                            else if (hsv.Brightness > 0)
+                            else
                             {
                                 ds2 = (brightness - 100) / 100f * -temp_saturation;
                                 dv2 = (brightness - 100) / 100f * (15 - 12 * hsv.Saturation) / 15 * (1 - temp_brightness);

@@ -316,7 +316,7 @@ namespace WzComparerR2.Avatar.UI
                 return;
             }
 
-            AvatarPart part = this.avatar.AddTamingPart(imgNode, forceIcon, forceID, isSkill, brm);
+            ChairPart part = this.avatar.AddTamingPart(imgNode, forceIcon, forceID, isSkill, brm);
             if (part != null)
             {
                 OnNewPartAdded(part);
@@ -346,7 +346,7 @@ namespace WzComparerR2.Avatar.UI
                 return;
             }
 
-            AvatarPart part = this.avatar.AddChairPart(imgNode, forceIcon, forceID, brm, forceAct);
+            ChairPart part = this.avatar.AddChairPart(imgNode, forceIcon, forceID, brm, forceAct);
             if (part != null)
             {
                 if (part.GroupCount > 0)
@@ -499,6 +499,22 @@ namespace WzComparerR2.Avatar.UI
                 return;
             }
 
+            if (FindCustomOrigin(out Point origin))
+            {
+                this.txtCustomOriginX.Enabled = true;
+                this.txtCustomOriginY.Enabled = true;
+                this.chkCustomOriginObj0.Enabled = true;
+                this.chkCustomOriginObj1.Enabled = true;
+                SetTxtCustomOrigin(origin);
+            }
+            else
+            {
+                this.txtCustomOriginX.Enabled = false;
+                this.txtCustomOriginY.Enabled = false;
+                this.chkCustomOriginObj0.Enabled = false;
+                this.chkCustomOriginObj1.Enabled = false;
+            }
+
             string newPartsTag = GetAllPartsTag();
             if (this.partsTag != newPartsTag)
             {
@@ -555,7 +571,7 @@ namespace WzComparerR2.Avatar.UI
                 this.avatar.WeaponType,
                 this.avatar.WeaponIndex,
                 this.avatar.GroupChair,
-                this.avatar.ActionName,
+                this.avatar.CustomOriginString,
                 string.Join("_", effectFrames),
                 string.Join("_", this.avatar.EffectVisibles));
 
@@ -595,7 +611,7 @@ namespace WzComparerR2.Avatar.UI
                     if (prismValid)
                     {
                         var prismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
-                        partsID[i] += $"+{prismData.Type}h{prismData.Hue}s{prismData.Saturation}v{prismData.Brightness}";
+                        partsID[i] += $"+{prismData.Type}h{prismData.Hue}s{prismData.Saturation}v{prismData.Brightness}{(prismData.ConvertPureBlack ? "PB" : "")}";
                     }
                     if (prism2Valid)
                     {
@@ -604,11 +620,17 @@ namespace WzComparerR2.Avatar.UI
                             partsID[i] += $"+0h0s100v100";
                         }
                         var prismData = part.PrismData.Get(PrismDataCollection.PrismDataType.WeaponEffect);
-                        partsID[i] += $"+{prismData.Type}h{prismData.Hue}s{prismData.Saturation}v{prismData.Brightness}";
+                        partsID[i] += $"+{prismData.Type}h{prismData.Hue}s{prismData.Saturation}v{prismData.Brightness}{(prismData.ConvertPureBlack ? "PB" : "")}";
                     }
                 }
             }
-            return string.Join(",", partsID);
+
+            string ret = string.Join(",", partsID);
+            if (!string.IsNullOrEmpty(this.avatar.CustomOriginString))
+            {
+                ret += $",{this.avatar.CustomOriginString}";
+            }
+            return ret;
         }
 
         void AddPart(string imgPath)
@@ -848,8 +870,27 @@ namespace WzComparerR2.Avatar.UI
         {
             if (this.avatar.Taming == null && this.avatar.Chair != null)
             {
-                string forceAction = this.avatar.Chair.Node.FindNodeByPath("info\\sitAction").GetValueEx<string>("sit");
+                string forceAction = string.Empty;
+                Wz_Node sitActionNode = this.avatar.Chair.Node.FindNodeByPath("info\\sitAction");
+                if (sitActionNode != null)
+                {
+                    forceAction = sitActionNode.GetValueEx<string>("sit");
+                }
+                else if (this.avatar.Chair.Node.FindNodeByPath("info\\removeBody").GetValueEx<int>(0) != 0)
+                {
+                    forceAction = "hideBody";
+                }
+                else if (this.avatar.Chair.CustomChairType == CustomChairType.ScaleAvatarChair)
+                {
+                    forceAction = "stand1";
+                }
+                else
+                {
+                    forceAction = "sit";
+                }
+
                 int fixFrameIdx = this.avatar.Chair.Node.FindNodeByPath("info\\fixFrameIdx").GetValueEx<int>(-1);
+                if (fixFrameIdx < 0) fixFrameIdx = this.avatar.Chair.Node.FindNodeByPath("info\\fixActionFrame").GetValueEx<int>(-1);
                 if (fixFrameIdx >= 0)
                 {
                     this.FixBodyAction(forceAction, fixFrameIdx);
@@ -860,7 +901,9 @@ namespace WzComparerR2.Avatar.UI
                 }
 
                 int forceEmotion = this.avatar.Chair.Node.FindNodeByPath("info\\sitEmotion").GetValueEx<int>(-1);
-                this.SelectEmotionByIndex(forceEmotion);
+                string forceEmotionName = forceEmotion < AvatarCanvas.EmotionTable.Count ? AvatarCanvas.EmotionTable[forceEmotion] : string.Empty;
+                if (!string.IsNullOrEmpty(forceEmotionName))
+                    this.FixEmotion(forceEmotionName, -1);
             }
         }
 
@@ -886,7 +929,7 @@ namespace WzComparerR2.Avatar.UI
                     else
                     {
                         var prismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
-                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, prismData.Type, prismData.Hue, prismData.Saturation, prismData.Brightness);
+                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, prismData);
                         btn.SetIcon(icon, part.HasPrism);
                     }
                     btn.Tag = part;
@@ -919,6 +962,7 @@ namespace WzComparerR2.Avatar.UI
                     btn.labelHue.MouseDown += LabelHue_MouseDown;
                     btn.labelSaturation.MouseDown += LabelSaturation_MouseDown;
                     btn.labelBrightness.MouseDown += LabelBrightness_MouseDown;
+                    btn.chkConvertPureBlack.CheckedChanged += ChkConvertPureBlack_CheckedChanged;
                     itemPanel1.Items.Add(btn);
                 }
             }
@@ -946,6 +990,10 @@ namespace WzComparerR2.Avatar.UI
                     if (index > -1)
                     {
                         this.avatar.Parts[index] = null;
+                        if (!this.avatar.Parts.Any(p => p != null && p.CustomOriginMap.Count > 0))
+                        {
+                            this.avatar.ClearCustomOrigin();
+                        }
                         this.FillAvatarParts();
                         this.UpdateDisplay();
                     }
@@ -1135,7 +1183,7 @@ namespace WzComparerR2.Avatar.UI
                     if (part != avatar.Head && btn.PrismIndex == 0)
                     {
                         var iconPrismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
-                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, iconPrismData.Type, iconPrismData.Hue, iconPrismData.Saturation, iconPrismData.Brightness);
+                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, iconPrismData);
                         btn.SetIcon(icon, part.HasPrism);
                     }
                 }
@@ -1158,7 +1206,7 @@ namespace WzComparerR2.Avatar.UI
                     if (part != avatar.Head && btn.PrismIndex == 0)
                     {
                         var iconPrismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
-                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, iconPrismData.Type, iconPrismData.Hue, iconPrismData.Saturation, iconPrismData.Brightness);
+                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, iconPrismData);
                         btn.SetIcon(icon, part.HasPrism);
                     }
 
@@ -1184,7 +1232,7 @@ namespace WzComparerR2.Avatar.UI
                     if (part != avatar.Head && btn.PrismIndex == 0)
                     {
                         var iconPrismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
-                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, iconPrismData.Type, iconPrismData.Hue, iconPrismData.Saturation, iconPrismData.Brightness);
+                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, iconPrismData);
                         btn.SetIcon(icon, part.HasPrism);
                     }
 
@@ -1210,7 +1258,7 @@ namespace WzComparerR2.Avatar.UI
                     if (part != avatar.Head && btn.PrismIndex == 0)
                     {
                         var iconPrismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
-                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, iconPrismData.Type, iconPrismData.Hue, iconPrismData.Saturation, iconPrismData.Brightness);
+                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, iconPrismData);
                         btn.SetIcon(icon, part.HasPrism);
                     }
 
@@ -1249,6 +1297,28 @@ namespace WzComparerR2.Avatar.UI
                 slider.Value = 0;
             }
         }
+        
+        private void ChkConvertPureBlack_CheckedChanged(object sender, EventArgs e)
+        {
+            var btn = (sender as BaseItem).Parent as AvatarPartButtonItem;
+            if (btn != null)
+            {
+                var part = btn.Tag as AvatarPart;
+                if (part != null)
+                {
+                    btn.PrismConvertPureBlackChanged(btn.chkConvertPureBlack.Checked);
+                    if (this.isUpdatingBtnItem) return;
+                    this.UpdateDisplay();
+                    this.SetButtonText(part, btn);
+                    if (part != avatar.Head && btn.PrismIndex == 0)
+                    {
+                        var iconPrismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
+                        using Bitmap icon = Prism.Apply(part.Icon.Bitmap, iconPrismData);
+                        btn.SetIcon(icon, part.HasPrism);
+                    }
+                }
+            }
+        }
 
         private void SetButtonText(AvatarPart part, AvatarPartButtonItem btn)
         {
@@ -1277,7 +1347,7 @@ namespace WzComparerR2.Avatar.UI
                     if (part.PrismData.IsValid(PrismDataCollection.PrismDataType.Default))
                     {
                         var prismData = part.PrismData.Get(PrismDataCollection.PrismDataType.Default);
-                        text += string.Format("\r\n{0}\r\n色調 {1}, 飽和度 {2}, 亮度 {3}\r\n{4}+{5}h{6}s{7}v{8}",
+                        text += string.Format("\r\n{0}\r\n色調 {1}, 飽和度 {2}, 亮度 {3}\r\n{4}+{5}h{6}s{7}v{8}{9}",
                             prismData.GetColorType(),
                             prismData.Hue,
                             $"{(prismData.Saturation > 100 ? "+" : "")}{prismData.Saturation - 100}",
@@ -1286,12 +1356,13 @@ namespace WzComparerR2.Avatar.UI
                             prismData.Type,
                             prismData.Hue,
                             prismData.Saturation,
-                            prismData.Brightness);
+                            prismData.Brightness,
+                            (prismData.ConvertPureBlack ? "PB" : ""));
                     }
                     if (part.PrismData.IsValid(PrismDataCollection.PrismDataType.WeaponEffect))
                     {
                         var prismData2 = part.PrismData.Get(PrismDataCollection.PrismDataType.WeaponEffect);
-                        text += string.Format("\r\n武器效果: {0}\r\n色調 {1}, 飽和度 {2}, 亮度 {3}\r\n{4}+{5}h{6}s{7}v{8}",
+                        text += string.Format("\r\n武器效果: {0}\r\n色調 {1}, 飽和度 {2}, 亮度 {3}\r\n{4}+{5}h{6}s{7}v{8}{9}",
                         prismData2.GetColorType(),
                         prismData2.Hue,
                         $"{(prismData2.Saturation > 100 ? "+" : "")}{prismData2.Saturation - 100}",
@@ -1300,7 +1371,8 @@ namespace WzComparerR2.Avatar.UI
                         prismData2.Type,
                         prismData2.Hue,
                         prismData2.Saturation,
-                        prismData2.Brightness);
+                        prismData2.Brightness,
+                        (prismData2.ConvertPureBlack ? "PB" : ""));
                     }
                 }
             }
@@ -1356,7 +1428,10 @@ namespace WzComparerR2.Avatar.UI
             if (actionItem != null)
             {
                 var frames = avatar.GetActionFrames(actionItem.Text);
-                FillComboItems(cmbBodyFrame, frames);
+
+                string[] repeatMidActionList = ["stand1", "stand2", "alert"];
+                bool repeatMidAction = repeatMidActionList.Contains(frames.FirstOrDefault().Action);
+                FillComboItems(cmbBodyFrame, frames, repeatMidAction);
             }
             else
             {
@@ -1446,7 +1521,7 @@ namespace WzComparerR2.Avatar.UI
             FillComboItems(comboBox, _items);
         }
 
-        private void FillComboItems(ComboBoxEx comboBox, IEnumerable<ActionFrame> frames)
+        private void FillComboItems(ComboBoxEx comboBox, IEnumerable<ActionFrame> frames, bool repeatMidAction = false)
         {
             List<ComboItem> items = new List<ComboItem>();
             int i = 0;
@@ -1457,6 +1532,12 @@ namespace WzComparerR2.Avatar.UI
                 item.Tag = f;
                 items.Add(item);
             }
+
+            if (repeatMidAction && items.Count == 3)
+            {
+                items.Add(items[1]);
+            }
+
             FillComboItems(comboBox, items);
         }
 
@@ -1845,6 +1926,167 @@ namespace WzComparerR2.Avatar.UI
             this.avatarContainer1.ClearAllCache();
             this.avatar.ClearSkinCache();
             UpdateDisplay();
+        }
+
+        private void btnBodyFloating_Click(object sender, EventArgs e)
+        {
+            if (this.cmbActionBody.Items.Count <= 0 || this.avatar.Body == null || this.avatar.Head == null)
+            {
+                return;
+            }
+
+            var btn = sender as ButtonX;
+            var curAction = this.cmbActionBody.SelectedItem.ToString();
+            var nextAction = "";
+            switch (curAction)
+            {
+                case "stand1_floating":
+                    nextAction = "stand1";
+                    break;
+                case "stand2_floating":
+                    nextAction = "stand2";
+                    break;
+
+                case "stand2":
+                case "walk2":
+                    nextAction = "stand2_floating";
+                    break;
+
+                default:
+                    nextAction = "stand1_floating";
+                    break;
+            }
+
+            var index = this.cmbActionBody.FindString(nextAction);
+            if (index > -1)
+            {
+                this.cmbActionBody.SelectedIndex = index;
+            }
+            else
+            {
+                ToastNotification.Show(this, $"{nextAction} アクションが見つかりません。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+            }
+        }
+        
+        private void TxtCustomOrigin_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+            if (e.KeyCode is Keys.Left or Keys.Right or Keys.Down or Keys.Up)
+            {
+                e.IsInputKey = true;
+            }
+        }
+
+        private void TxtCustomOrigin_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (sender is not DevComponents.Editors.IntegerInput input
+                || !(e.KeyCode is Keys.Left or Keys.Right or Keys.Down or Keys.Up))
+                return;
+
+            int step = input.Increment;
+            int dir = (input.Tag as string) == "X" ? -1 : 1;
+
+            switch (e.KeyCode)
+            {
+                case Keys.Left:
+                case Keys.Down:
+                    dir *= -1;
+                    break;
+
+                case Keys.Right:
+                case Keys.Up:
+                    break;
+
+                default:
+                    return;
+            }
+            input.Value = Math.Min(input.MaxValue, Math.Max(input.MinValue, input.Value + step * dir));
+
+            e.Handled = true;
+            e.SuppressKeyPress = true;
+        }
+
+        private void ChkCustomOriginObj_ValueChanged(object sender, EventArgs e)
+        {
+            if (FindCustomOrigin(out Point origin))
+            {
+                SetTxtCustomOrigin(origin);
+                UpdateDisplay();
+            }
+        }
+
+        private void TxtCustomOriginX_ValueChanged(object sender, EventArgs e)
+        {
+            int x = txtCustomOriginX.Value;
+
+            int id = -1;
+            if (this.chkCustomOriginObj0.Checked)
+            {
+                id = 0;
+            }
+            else if (this.chkCustomOriginObj1.Checked)
+            {
+                id = 1;
+            }
+            if (this.avatar.CustomOrigin.ContainsKey(id.ToString()))
+            {
+                var prev = this.avatar.CustomOrigin[id.ToString()];
+                var next = new Point(x, prev.Y);
+                this.avatar.CustomOrigin[id.ToString()] = next;
+                SetTxtCustomOrigin(next);
+                UpdateDisplay();
+            }
+        }
+
+        private void TxtCustomOriginY_ValueChanged(object sender, EventArgs e)
+        {
+            int y = txtCustomOriginY.Value;
+
+            int id = -1;
+            if (this.chkCustomOriginObj0.Checked)
+            {
+                id = 0;
+            }
+            else if (this.chkCustomOriginObj1.Checked)
+            {
+                id = 1;
+            }
+            if (this.avatar.CustomOrigin.ContainsKey(id.ToString()))
+            {
+                var prev = this.avatar.CustomOrigin[id.ToString()];
+                var next = new Point(prev.X, y);
+                this.avatar.CustomOrigin[id.ToString()] = next;
+                SetTxtCustomOrigin(next);
+                UpdateDisplay();
+            }
+        }
+
+        private bool FindCustomOrigin(out Point origin)
+        {
+            origin = Point.Empty;
+            int id = -1;
+            if (this.chkCustomOriginObj0.Checked)
+            {
+                id = 0;
+            }
+            else if (this.chkCustomOriginObj1.Checked)
+            {
+                id = 1;
+            }
+            if (this.avatar.CustomOrigin.ContainsKey(id.ToString()))
+            {
+                origin = this.avatar.CustomOrigin[id.ToString()];
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private void SetTxtCustomOrigin(Point origin)
+        {
+            this.txtCustomOriginX.Value = origin.X;
+            this.txtCustomOriginY.Value = origin.Y;
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -2663,7 +2905,8 @@ namespace WzComparerR2.Avatar.UI
                     $"{res.Shield + GetPrismCode(res.ShieldPrismInfo)}," +
                     $"{res.Weapon + GetPrismCode(res.WeaponPrismInfo)}," +
                     $"{res.CashWeapon + GetPrismCode(res.WeaponPrismInfo)}," +
-                    $"{res.Ring1},{res.Ring2},{res.Ring3},{res.Ring4}";
+                    $"{res.Ring1},{res.Ring2},{res.Ring3},{res.Ring4}," +
+                    GetCustomOriginCode(res);
                 LoadCode(code, 0);
 
                 this.SuspendUpdateDisplay();
@@ -2881,7 +3124,7 @@ namespace WzComparerR2.Avatar.UI
             {
                 if (prism.Brightness > 0 && prism.Saturation > 0 && prism.Hue >= 0)
                 {
-                    return $"+{prism.ColorType}h{prism.Hue}s{prism.Saturation}v{prism.Brightness}";
+                    return $"+{prism.ColorType}h{prism.Hue}s{prism.Saturation}v{prism.Brightness}{(prism.ConvertPureBlack ? "PB" : "")}";
                 }
                 else
                 {
@@ -2897,6 +3140,20 @@ namespace WzComparerR2.Avatar.UI
             ret += GetPrismCode(prisms.Prism1, true);
             ret += GetPrismCode(prisms.Prism2);
             return ret;
+        }
+
+        private string GetCustomOriginCode(UnpackedAvatarData data)
+        {
+            List<string> ret = new();
+            for (int i = 0; i < data.CustomOrigin.Length; i++)
+            {
+                CustomOriginInfo cur = data.CustomOrigin[i];
+                if (cur.Valid)
+                {
+                    ret.Add($"co{i}x{cur.Origin.X}y{cur.Origin.Y}");
+                }
+            }
+            return string.Join(",", ret);
         }
 #endif
 
@@ -3259,8 +3516,17 @@ namespace WzComparerR2.Avatar.UI
         public void LoadCode(string code, int loadType)
         {
             chairName = "";
+            this.avatar.ClearCustomOrigin();
             //解析
-            var matches = Regex.Matches(code, @"s?(\d+)(\+([0-8])\*(\d{1,2}))?((\+(\d+)h(\d+)s(\d+)v(\d+)){0,2})([,\s]|$)");
+            var matches = Regex.Matches(code,
+                @"(?:"
+                    + @"s?(?<id>\d+)"
+                    + @"(?<mix>\+(?<mixColor>[0-8])\*(?<mixRate>\d{1,2}))?"
+                    + @"(?<prism>(?:\+\d+h\d+s\d+v\d+(?:PB)?){0,2})"
+                    + @"|"
+                    + @"(?<co>co(?<coID>\d+)x(?<coX>-?\d+)y(?<coY>-?\d+))"
+                + @")(?=[,\s]|$)"
+            );
             if (matches.Count <= 0)
             {
                 ToastNotification.Show(this, $"錯誤: 沒有與道具 ID 相符的道具。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
@@ -3302,20 +3568,20 @@ namespace WzComparerR2.Avatar.UI
             foreach (Match m in matches)
             {
                 int gearID;
-                if (Int32.TryParse(m.Result("$1"), out gearID))
+                if (m.Groups["id"].Success && Int32.TryParse(m.Groups["id"].Value, out gearID))
                 {
                     Wz_Node imgNode = FindNodeByGearID(characWz, gearID);
                     if (imgNode != null)
                     {
                         var part = this.avatar.AddPart(imgNode);
-                        if (m.Groups.Count >= 4 && Int32.TryParse(m.Result("$3"), out int mixColor) && Int32.TryParse(m.Result("$4"), out int mixOpacity))
+                        if (m.Groups["mixColor"].Success && m.Groups["mixRate"].Success && Int32.TryParse(m.Groups["mixColor"].Value, out int mixColor) && Int32.TryParse(m.Groups["mixRate"].Value, out int mixOpacity))
                         {
                             part.MixColor = mixColor;
                             part.MixOpacity = mixOpacity;
                         }
-                        if (m.Groups.Count >= 10)
+                        if (m.Groups["prism"].Success)
                         {
-                            LoadCode_ApplyPrism(part, m.Groups[5].Value);
+                            LoadCode_ApplyPrism(part, m.Groups["prism"].Value);
                         }
                         OnNewPartAdded(part);
                         continue;
@@ -3336,9 +3602,9 @@ namespace WzComparerR2.Avatar.UI
                                 if (tamingMobNode != null)
                                 {
                                     var part = this.avatar.AddTamingPart(tamingMobNode, BitmapOrigin.CreateFromNode(imgNode.Nodes["icon"], PluginBase.PluginManager.FindWz), gearID, true);
-                                    if (m.Groups.Count >= 10)
+                                    if (m.Groups["prism"].Success)
                                     {
-                                        LoadCode_ApplyPrism(part, m.Groups[6].Value);
+                                        LoadCode_ApplyPrism(part, m.Groups["prism"].Value);
                                     }
                                     OnNewPartAdded(part);
                                 }
@@ -3367,9 +3633,9 @@ namespace WzComparerR2.Avatar.UI
 
                                 this.avatar.RemoveChairPart();
                                 var part = this.avatar.AddTamingPart(tamingMobNode, BitmapOrigin.CreateFromNode(tamingMobNode.FindNodeByPath("info\\icon"), PluginBase.PluginManager.FindWz), tamingMobID, false, brm);
-                                if (m.Groups.Count >= 10)
+                                if (m.Groups["prism"].Success)
                                 {
-                                    LoadCode_ApplyPrism(part, m.Groups[6].Value);
+                                    LoadCode_ApplyPrism(part, m.Groups["prism"].Value);
                                 }
                                 OnNewPartAdded(part);
                             }
@@ -3391,9 +3657,9 @@ namespace WzComparerR2.Avatar.UI
 
                             if (removeTamingPart) RemoveTamingPart();
                             var part = this.avatar.AddChairPart(imgNode, BitmapOrigin.CreateFromNode(imgNode.FindNodeByPath("info\\icon"), PluginBase.PluginManager.FindWz), gearID, brm, fb);
-                            if (m.Groups.Count >= 10)
+                            if (m.Groups["priprismsmAll"].Success)
                             {
-                                LoadCode_ApplyPrism(part, m.Groups[6].Value);
+                                LoadCode_ApplyPrism(part, m.Groups["prism"].Value);
                             }
                             OnNewPartAdded(part);
                         }
@@ -3401,9 +3667,9 @@ namespace WzComparerR2.Avatar.UI
                         if (gearID / 10000 == 501) // effect items
                         {
                             var part = this.avatar.AddEffectPart(imgNode);
-                            if (m.Groups.Count >= 10)
+                            if (m.Groups["prism"].Success)
                             {
-                                LoadCode_ApplyPrism(part, m.Groups[6].Value);
+                                LoadCode_ApplyPrism(part, m.Groups["prism"].Value);
                             }
                             OnNewPartAdded(part);
                         }
@@ -3413,6 +3679,15 @@ namespace WzComparerR2.Avatar.UI
                     {
                         failList.Add(gearID);
                     }
+                }
+
+                // customOrigin 세팅
+                if (m.Groups["co"].Success)
+                {
+                    string id = m.Groups["coID"].Value;
+                    int x = int.Parse(m.Groups["coX"].Value);
+                    int y = int.Parse(m.Groups["coY"].Value);
+                    this.avatar.CustomOrigin[id] = new Point(x, y);
                 }
             }
 
@@ -3451,7 +3726,7 @@ namespace WzComparerR2.Avatar.UI
 
         private void LoadCode_ApplyPrism(AvatarPart part, string prismStr)
         {
-            var prismMatches = Regex.Matches(prismStr, @"\+(\d+)h(\d+)s(\d+)v(\d+)");
+            var prismMatches = Regex.Matches(prismStr, @"\+(\d+)h(\d+)s(\d+)v(\d+)(PB)?");
             if (prismMatches.Count >= 2)
             {
                 GearType partType = Gear.GetGearType(part.ID.Value);
@@ -3463,7 +3738,7 @@ namespace WzComparerR2.Avatar.UI
                         && Int32.TryParse(prismMatch.Groups[3].Value, out int saturation)
                         && Int32.TryParse(prismMatch.Groups[4].Value, out int brightness))
                     {
-                        part.PrismData.Set(PrismDataCollection.PrismDataType.WeaponEffect, type, hue, saturation, brightness);
+                        part.PrismData.Set(PrismDataCollection.PrismDataType.WeaponEffect, type, hue, saturation, brightness, prismMatch.Groups[5].Success);
                     }
                 }
             }
@@ -3475,7 +3750,7 @@ namespace WzComparerR2.Avatar.UI
                     && Int32.TryParse(prismMatch.Groups[3].Value, out int saturation)
                     && Int32.TryParse(prismMatch.Groups[4].Value, out int brightness))
                 {
-                    part.PrismData.Set(PrismDataCollection.PrismDataType.Default, type, hue, saturation, brightness);
+                    part.PrismData.Set(PrismDataCollection.PrismDataType.Default, type, hue, saturation, brightness, prismMatch.Groups[5].Success);
                 }
             }
         }

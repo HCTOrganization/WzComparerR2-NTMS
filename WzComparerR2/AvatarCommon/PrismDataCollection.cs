@@ -64,16 +64,16 @@ namespace WzComparerR2.AvatarCommon
             }
         }
 
-        public void Set(PrismDataType datatype, int type, int hue, int saturation, int brightness)
+        public void Set(PrismDataType datatype, int type, int hue, int saturation, int brightness, bool convertPureBlack)
         {
             switch (datatype)
             {
                 case PrismDataType.Default:
-                    this.PrismData_Default.Set(type, hue, saturation, brightness);
+                    this.PrismData_Default.Set(type, hue, saturation, brightness, convertPureBlack);
                     break;
 
                 case PrismDataType.WeaponEffect:
-                    this.PrismData_WeaponEffect.Set(type, hue, saturation, brightness);
+                    this.PrismData_WeaponEffect.Set(type, hue, saturation, brightness, convertPureBlack);
                     break;
             }
         }
@@ -93,9 +93,8 @@ namespace WzComparerR2.AvatarCommon
         public PrismDataCollection Clone()
         {
             var ret = new PrismDataCollection();
-            ret.PrismData_Default = new PrismData(this.PrismData_Default.Type, this.PrismData_Default.Hue, this.PrismData_Default.Saturation, this.PrismData_Default.Brightness);
-            ret.PrismData_WeaponEffect = new PrismData(this.PrismData_WeaponEffect.Type, this.PrismData_WeaponEffect.Hue, this.PrismData_WeaponEffect.Saturation, this.PrismData_WeaponEffect.Brightness);
-
+            ret.PrismData_Default = this.PrismData_Default.Clone();
+            ret.PrismData_WeaponEffect = this.PrismData_WeaponEffect.Clone();
             return ret;
         }
 

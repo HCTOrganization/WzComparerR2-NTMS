@@ -17,6 +17,7 @@ namespace WzComparerR2.Avatar.UI
         {
             InitializeComponent();
             this.chkShowEffect.Name += ID.ToString();
+            this.chkConvertPureBlack.Name += ID.ToString();
             this.SubItems.Add(this.chkShowEffect);
             this.PrismData = pdc.Clone();
             this.PrismIndex = 0;
@@ -115,6 +116,7 @@ namespace WzComparerR2.Avatar.UI
                 this.labelSaturation.Text = $"飽和度({(saturation > 100 ? "+" : "")}{saturation - 100})";
                 this.labelBrightness.Text = $"亮度({(brightness > 100 ? "+" : "")}{brightness - 100})";
                 this.rdoPrismType0.Checked = true;
+                this.chkConvertPureBlack.Checked = false;
             }
         }
 
@@ -143,6 +145,7 @@ namespace WzComparerR2.Avatar.UI
             this.labelHue.Text = $"色調({hue})";
             this.labelSaturation.Text = $"飽和度({(saturation > 100 ? "+" : "")}{saturation - 100})";
             this.labelBrightness.Text = $"亮度({(brightness > 100 ? "+" : "")}{brightness - 100})";
+            this.chkConvertPureBlack.Checked = prismData.ConvertPureBlack;
 
             CheckBoxItem[] rdoPrismType = { this.rdoPrismType0, this.rdoPrismType1, this.rdoPrismType2, this.rdoPrismType3, this.rdoPrismType4, this.rdoPrismType5, this.rdoPrismType6 };
             for (int i = 0; i < rdoPrismType.Length; i++)
@@ -167,6 +170,7 @@ namespace WzComparerR2.Avatar.UI
             this.SubItems.Add(this.sliderSaturation);
             this.SubItems.Add(this.labelBrightness);
             this.SubItems.Add(this.sliderBrightness);
+            this.SubItems.Add(this.chkConvertPureBlack);
         }
 
         public void PrismIndexChanged(int value)
@@ -245,6 +249,21 @@ namespace WzComparerR2.Avatar.UI
 
                 prismData.Brightness = value;
                 partPrismData.Brightness = value;
+            }
+        }
+
+        public void PrismConvertPureBlackChanged(bool value)
+        {
+            var part = this.Tag as AvatarPart;
+            if (part != null)
+            {
+                PrismDataCollection.PrismDataType pidx = 0;
+                Enum.TryParse(this.PrismIndex.ToString(), out pidx);
+                PrismData prismData = this.PrismData.Get(pidx);
+                PrismData partPrismData = part.PrismData.Get(pidx);
+
+                prismData.ConvertPureBlack = value;
+                partPrismData.ConvertPureBlack = value;
             }
         }
 

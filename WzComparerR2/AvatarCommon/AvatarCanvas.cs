@@ -8,6 +8,7 @@ using System.Linq;
 using WzComparerR2.WzLib;
 using WzComparerR2.CharaSim;
 using System.Text.RegularExpressions;
+using System.Drawing.Drawing2D;
 
 namespace WzComparerR2.AvatarCommon
 {
@@ -77,8 +78,22 @@ namespace WzComparerR2.AvatarCommon
         public int EarType { get; set; }
         public string CapType { get; set; }
         public string GroupChair { get; set; }
+        public float fAvatarScale { get { return this.Chair?.CustomChairAvatarScale / 100f ?? 1f; } }
         public Action<AvatarPart>[] SetRing { get; }
         public Func<AvatarPart>[] GetRing { get; }
+        public Dictionary<string, Point> CustomOrigin { get; set; } = new();
+        public string CustomOriginString
+        {
+            get
+            {
+                List<string> ret = new();
+                foreach (var kv in CustomOrigin)
+                {
+                    ret.Add($"co{kv.Key}x{kv.Value.X}y{kv.Value.Y}");
+                }
+                return string.Join(",", ret);
+            }
+        }
 
         public const int PartLength = 29;
         public const int LayerSlotLength = PartLength + 4;
@@ -417,7 +432,7 @@ namespace WzComparerR2.AvatarCommon
                 case GearType.taming:
                 case GearType.taming2:
                 case GearType.taming3:
-                case GearType.tamingChair: this.Taming = part; break;
+                case GearType.tamingChair: this.Taming = part as ChairPart; break;
                 case GearType.saddle: this.Saddle = part; break;
                 case GearType.pendant: this.Pendant = part; break;
                 case GearType.belt: this.Belt = part; break;
@@ -448,6 +463,15 @@ namespace WzComparerR2.AvatarCommon
                     break;
             }
 
+            if (part == this.EyeAccessory && part.CustomOriginMap.Count > 0)
+            {
+                foreach (var kv in part.CustomOriginMap)
+                {
+                    Point origin = part.Node?.FindNodeByPath($"default\\{kv.Key}\\origin").GetValueEx<Wz_Vector>(null);
+                    this.CustomOrigin[kv.Value] = origin;
+                }
+            }
+
             return part;
         }
 
@@ -463,14 +487,14 @@ namespace WzComparerR2.AvatarCommon
         /// TamingMob 아이템을 추가합니다.
         /// </summary>
         /// <returns>추가된 AvatarPart.</returns>
-        public AvatarPart AddTamingPart(Wz_Node imgNode, BitmapOrigin forceIcon, int forceID, bool isSkill, Wz_Vector brm = null)
+        public ChairPart AddTamingPart(Wz_Node imgNode, BitmapOrigin forceIcon, int forceID, bool isSkill, Wz_Vector brm = null)
         {
             Wz_Node infoNode = imgNode.FindNodeByPath("info");
             if (infoNode == null)
             {
                 return null;
             }
-            AvatarPart part = new AvatarPart(imgNode, forceIcon, forceID, isSkill);
+            ChairPart part = new ChairPart(imgNode, forceIcon, forceID, isSkill);
             part.GroupBodyRelMove.Add(brm);
 
             this.Taming = part;
@@ -490,27 +514,30 @@ namespace WzComparerR2.AvatarCommon
         /// 의자 아이템을 추가합니다.
         /// </summary>
         /// <returns>추가된 AvatarPart.</returns>
-        public AvatarPart AddChairPart(Wz_Node imgNode, BitmapOrigin forceIcon, int forceID, Wz_Vector brm, bool forceAct)
+        public ChairPart AddChairPart(Wz_Node imgNode, BitmapOrigin forceIcon, int forceID, Wz_Vector brm, bool forceAct)
         {
             Wz_Node infoNode = imgNode.FindNodeByPath("info");
             if (infoNode == null)
             {
                 return null;
             }
-            AvatarPart part = new AvatarPart(imgNode, forceIcon, forceID, false);
+            ChairPart part = new ChairPart(imgNode, forceIcon, forceID, false);
             part.ForceAction = forceAct;
             part.GroupBodyRelMove.Add(brm);
             part.LoadChairEffectNode();
             this.Chair = part;
 
-            part.GroupActionNode = GetGroupNode(imgNode);
-            part.GroupCount = CheckGroupChairCount(part.GroupActionNode);
-            part.LoadGroupTaming();
-
-            //part.RandomChairInfoNode = GetRandomChairInfoNode(imgNode);
-            //part.RandomChairCount = CheckRandomChairCount(part.GroupActionNode);
+            SetGroupChairInfo(part);
+            SetCustomChairInfo(part);
 
             return part;
+        }
+
+        private void SetGroupChairInfo(ChairPart part)
+        {
+            part.GroupActionNode = GetGroupNode(part.Node);
+            part.GroupCount = CheckGroupChairCount(part.GroupActionNode);
+            part.LoadGroupTaming();
         }
 
         /// <summary>
@@ -549,7 +576,7 @@ namespace WzComparerR2.AvatarCommon
         /// <summary>
         /// 다인 의자의 인원 수를 변경하고, 이에 따라서 Taming Part 또는 Chair Part의 속성을 수정합니다.
         /// </summary>
-        public AvatarPart GroupChairChanged(string value)
+        public ChairPart GroupChairChanged(string value)
         {
             this.GroupChair = value;
 
@@ -585,37 +612,33 @@ namespace WzComparerR2.AvatarCommon
             return null;
         }
 
-        /// <summary>
-        /// 의자 아이템이 랜덤 의자인지 확인합니다.
-        /// </summary>
-        /// <returns>랜덤 의자의 정보가 담긴 Wz_Node. (customChair/randomChairInfo)</returns>
-        private Wz_Node GetRandomChairInfoNode(Wz_Node chairNode)
+        private void SetCustomChairInfo(ChairPart part)
+        {
+            part.CustomChairInfoNode = GetCustomChairInfoNode(part.Node);
+            if (part.CustomChairInfoNode != null)
+            {
+                if (Enum.TryParse<CustomChairType>(part.CustomChairInfoNode?.FindNodeByPath("type").GetValueEx<string>(string.Empty), true, out var type))
+                {
+                    part.CustomChairType = type;
+                }
+                if (part.CustomChairType == CustomChairType.ScaleAvatarChair)
+                {
+                    part.CustomChairAvatarScale = part.CustomChairInfoNode.FindNodeByPath("scaleAvatar\\scale").GetValueEx<int>(100);
+                }
+            }
+            part.LoadGroupTaming();
+        }
+
+        private Wz_Node GetCustomChairInfoNode(Wz_Node chairNode)
         {
             foreach (var child in chairNode.FindNodeByPath("info").Nodes ?? Enumerable.Empty<Wz_Node>())
             {
-                if (Regex.Match(child.Text, "customChair", RegexOptions.IgnoreCase).Success)
+                if (string.Equals(child.Text, "customChair", StringComparison.OrdinalIgnoreCase))
                 {
-                    foreach (var customChairNode in child.Nodes ?? Enumerable.Empty<Wz_Node>())
-                    {
-                        foreach (var dir in new[] { "randomChairInfo" })
-                        {
-                            if (customChairNode.Text.Contains(dir))
-                            {
-                                return customChairNode;
-                            }
-                        }
-                    }
+                    return child;
                 }
             }
             return null;
-        }
-
-        /// <summary>
-        /// 랜덤 의자의 종류 개수를 찾습니다.
-        /// </summary>
-        private int CheckRandomChairCount(Wz_Node randomChairNode)
-        {
-            return randomChairNode?.Nodes?.Count ?? 0;
         }
 
         /// <summary>
@@ -1093,33 +1116,33 @@ namespace WzComparerR2.AvatarCommon
                 if (this.Parts[i] != null)
                 {
                     List<AvatarFrameData> tmpNode = null;
-                    PrismDataCollection prismData = this.Parts[i].PrismData;
+                    AvatarPart curPart = this.Parts[i];
                     switch (i)
                     {
                         case IndexChairLayer1:
-                            tmpNode = LinkEffectParts(effectActions[i], this.Chair.Node, this.Chair.Visible, prismData);
+                            tmpNode = LinkEffectParts(effectActions[i], this.Chair.Node, this.Chair.Visible, curPart, applyAvatarScale: false);
                             chairNodes.AddRange(tmpNode);
-                            tmpNode = LinkEffectParts(effectActions[IndexChairLayer2], this.Chair.Node, this.Chair.Visible, prismData);
+                            tmpNode = LinkEffectParts(effectActions[IndexChairLayer2], this.Chair.Node, this.Chair.Visible, curPart, applyAvatarScale: false);
                             chairNodes.AddRange(tmpNode);
 
-                            tmpNode = LinkEffectParts(effectActions[IndexChairEffectLayer1], this.Chair.EffectNode?.FindNodeByPath("0"), this.Chair.Visible && this.Chair.EffectVisible, prismData);
+                            tmpNode = LinkEffectParts(effectActions[IndexChairEffectLayer1], this.Chair.EffectNode?.FindNodeByPath("0"), this.Chair.Visible && this.Chair.EffectVisible, curPart, applyAvatarScale: false);
                             chairEffectNodes.AddRange(tmpNode);
-                            tmpNode = LinkEffectParts(effectActions[IndexChairEffectLayer2], this.Chair.EffectNode?.FindNodeByPath("1"), this.Chair.Visible && this.Chair.EffectVisible, prismData);
+                            tmpNode = LinkEffectParts(effectActions[IndexChairEffectLayer2], this.Chair.EffectNode?.FindNodeByPath("1"), this.Chair.Visible && this.Chair.EffectVisible, curPart, applyAvatarScale: false);
                             chairEffectNodes.AddRange(tmpNode);
 
-                            tmpNode = LinkGroupTamingParts(tamingAction, prismData);
+                            tmpNode = LinkGroupTamingParts(tamingAction, curPart);
                             groupTamingNodes.AddRange(tmpNode);
                             break;
 
                         case IndexEffectLayer1:
-                            tmpNode = LinkEffectParts(effectActions[i], this.Effect.EffectNode?.FindNodeByPath("effect"), this.Effect.Visible && this.Effect.EffectVisible, prismData);
+                            tmpNode = LinkEffectParts(effectActions[i], this.Effect.EffectNode?.FindNodeByPath("effect"), this.Effect.Visible && this.Effect.EffectVisible, curPart);
                             effectNodes.AddRange(tmpNode);
-                            tmpNode = LinkEffectParts(effectActions[IndexEffectLayer2], this.Effect.EffectNode?.FindNodeByPath("effect2"), this.Effect.Visible && this.Effect.EffectVisible, prismData);
+                            tmpNode = LinkEffectParts(effectActions[IndexEffectLayer2], this.Effect.EffectNode?.FindNodeByPath("effect2"), this.Effect.Visible && this.Effect.EffectVisible, curPart);
                             effectNodes.AddRange(tmpNode);
                             break;
 
                         default:
-                            tmpNode = LinkEffectParts(effectActions[i], this.Parts[i].EffectNode, this.Parts[i].Visible && this.Parts[i].EffectVisible, prismData);
+                            tmpNode = LinkEffectParts(effectActions[i], this.Parts[i].EffectNode, this.Parts[i].Visible && this.Parts[i].EffectVisible, curPart);
                             effectNodes.AddRange(tmpNode);
                             break;
                     }
@@ -1247,6 +1270,10 @@ namespace WzComparerR2.AvatarCommon
                                 skin.Image.Bitmap.Dispose();
                                 skin.Image = prism;
                             }
+                        }
+                        if (partNode.ApplyAvatarScale)
+                        {
+                            ApplyScale(skin, this.fAvatarScale);
                         }
                         SkinCache.Add(linkPartNode.FullPathToFile, skin.Image);
                     }
@@ -1481,6 +1508,18 @@ namespace WzComparerR2.AvatarCommon
                                         skin.Image = prism;
                                     }
                                 }
+                                if (this.CustomOrigin.Count > 0 && partNode.CustomOriginMap.Count > 0)
+                                {
+                                    if (partNode.CustomOriginMap.TryGetValue(childNode.Text, out string id)
+                                        && this.CustomOrigin.TryGetValue(id, out Point newOrigin))
+                                    {
+                                        skin.Image = new BitmapOrigin(skin.Image.Bitmap, newOrigin);
+                                    }
+                                }
+                                if (partNode.ApplyAvatarScale)
+                                {
+                                    ApplyScale(skin, this.fAvatarScale);
+                                }
                                 SkinCache.Add(linkNode.FullPathToFile, skin.Image);
                             }
                         }
@@ -1515,6 +1554,10 @@ namespace WzComparerR2.AvatarCommon
                             {
                                 string mapName = map.Text;
                                 Point mapOrigin = map.GetValue<Wz_Vector>();
+                                if (partNode.ApplyAvatarScale)
+                                {
+                                    mapOrigin = new Point((int)(mapOrigin.X * this.fAvatarScale), (int)(mapOrigin.Y * this.fAvatarScale));
+                                }
 
                                 if (mapName == "muzzle") //特殊处理 忽略
                                 {
@@ -1818,7 +1861,7 @@ namespace WzComparerR2.AvatarCommon
             {
                 //身体
                 Wz_Node bodyNode = FindBodyActionNode(bodyAction);
-                partNode.Add(new AvatarFrameData(bodyNode, null, 100, this.Head.PrismData, true));
+                partNode.Add(new AvatarFrameData(bodyNode, null, 100, this.Head, isBodyPart: true));
 
                 //计算面向
                 bool? face = bodyAction.Face; //扩展动作规定头部
@@ -1849,7 +1892,7 @@ namespace WzComparerR2.AvatarCommon
                         headNode = FindActionFrameNode(this.Head.Node, headAction);
                     }
                 }
-                partNode.Add(new AvatarFrameData(headNode, null, 100, this.Head.PrismData));
+                partNode.Add(new AvatarFrameData(headNode, null, 100, this.Head));
 
                 //脸
                 if (this.Face != null && this.Face.Visible && faceAction != null)
@@ -1858,7 +1901,7 @@ namespace WzComparerR2.AvatarCommon
                     {
                         Wz_Node mixFaceNode = this.Face.IsMixing ? FindActionFrameNode(this.Face.MixNodes[this.Face.MixColor], faceAction) : null;
                         int mixFaceRatio = this.Face.IsMixing ? this.Face.MixOpacity : 100;
-                        partNode.Add(new AvatarFrameData(FindActionFrameNode(this.Face.Node, faceAction), mixFaceNode, mixFaceRatio, new PrismDataCollection()));
+                        partNode.Add(new AvatarFrameData(FindActionFrameNode(this.Face.Node, faceAction), mixFaceNode, mixFaceRatio, this.Face));
                     }
                 }
                 //毛
@@ -1878,7 +1921,7 @@ namespace WzComparerR2.AvatarCommon
                     }
                     mixHairNode = this.Hair.IsMixing ? mixHairNode : null;
                     int mixHairRatio = this.Hair.IsMixing ? this.Hair.MixOpacity : 100;
-                    partNode.Add(new AvatarFrameData(hairNode, mixHairNode, mixHairRatio, new PrismDataCollection()));
+                    partNode.Add(new AvatarFrameData(hairNode, mixHairNode, mixHairRatio, this.Hair));
                 }
                 //cap
                 if (headNode != null && this.Cap != null && this.Cap.Visible)
@@ -1893,7 +1936,7 @@ namespace WzComparerR2.AvatarCommon
                             capNode = FindActionFrameNode(this.Cap.Node, capAction);
                         }
                     }
-                    partNode.Add(new AvatarFrameData(capNode, null, 100, this.Cap.PrismData));
+                    partNode.Add(new AvatarFrameData(capNode, null, 100, this.Cap));
                 }
                 //其他部件
                 for (int i = 5; i < 16; i++)
@@ -1905,18 +1948,18 @@ namespace WzComparerR2.AvatarCommon
                         if (i == 12 && Gear.GetGearType(part.ID.Value) == GearType.cashWeapon) //点装武器
                         {
                             var wpNode = part.Node.FindNodeByPath(this.WeaponType.ToString());
-                            partNode.Add(new AvatarFrameData(FindActionFrameNode(wpNode, bodyAction), null, 100, part.PrismData));
+                            partNode.Add(new AvatarFrameData(FindActionFrameNode(wpNode, bodyAction), null, 100, part));
                         }
                         else if (i == 14) //脸
                         {
                             if (face ?? true)
                             {
-                                partNode.Add(new AvatarFrameData(FindActionFrameNode(part.Node, faceAction), null, 100, part.PrismData));
+                                partNode.Add(new AvatarFrameData(FindActionFrameNode(part.Node, faceAction), null, 100, part));
                             }
                         }
                         else //其他部件
                         {
-                            partNode.Add(new AvatarFrameData(FindActionFrameNode(part.Node, bodyAction), null, 100, part.PrismData));
+                            partNode.Add(new AvatarFrameData(FindActionFrameNode(part.Node, bodyAction), null, 100, part));
                         }
                     }
                 }
@@ -1929,27 +1972,27 @@ namespace WzComparerR2.AvatarCommon
 
         private AvatarFrameData[] LinkTamingParts(ActionFrame tamingAction)
         {
-            List<Wz_Node> partNode = new List<Wz_Node>();
+            List<Tuple<Wz_Node, AvatarPart>> partNode = new List<Tuple<Wz_Node, AvatarPart>>();
             var prismInfo = new PrismDataCollection();
 
             //链接马
             if (this.Taming != null && this.Taming.Visible && tamingAction != null)
             {
-                partNode.Add(FindActionFrameNode(this.Taming.Node, tamingAction));
+                partNode.Add(new Tuple<Wz_Node, AvatarPart>(FindActionFrameNode(this.Taming.Node, tamingAction), this.Taming));
                 if (this.Saddle != null && this.Saddle.Visible)
                 {
                     var saddleNode = this.Saddle.Node.FindNodeByPath(false, this.Taming.ID.ToString());
-                    partNode.Add(FindActionFrameNode(saddleNode, tamingAction));
+                    partNode.Add(new Tuple<Wz_Node, AvatarPart>(FindActionFrameNode(saddleNode, tamingAction), this.Saddle));
                 }
                 prismInfo = this.Taming.PrismData;
             }
 
             partNode.RemoveAll(node => node == null);
 
-            return partNode.Select(node => new AvatarFrameData(node, null, 100, prismInfo)).ToArray();
+            return partNode.Select(node => new AvatarFrameData(node.Item1, null, 100, node.Item2, applyAvatarScale: false)).ToArray();
         }
 
-        private List<AvatarFrameData> LinkGroupTamingParts(ActionFrame tamingAction, PrismDataCollection prismInfo)
+        private List<AvatarFrameData> LinkGroupTamingParts(ActionFrame tamingAction, AvatarPart part)
         {
             List<Wz_Node> partNode = new List<Wz_Node>();
 
@@ -1971,10 +2014,10 @@ namespace WzComparerR2.AvatarCommon
 
             partNode.RemoveAll(node => node == null);
 
-            return partNode.Select(node => new AvatarFrameData(node, null, 100, prismInfo)).ToList();
+            return partNode.Select(node => new AvatarFrameData(node, null, 100, part, applyAvatarScale: false)).ToList();
         }
 
-        private List<AvatarFrameData> LinkEffectParts(ActionFrame aFrame, Wz_Node effNode, bool visible, PrismDataCollection prismInfo) // find effect nodes
+        private List<AvatarFrameData> LinkEffectParts(ActionFrame aFrame, Wz_Node effNode, bool visible, AvatarPart part, bool applyAvatarScale = true) // find effect nodes
         {
             List<Wz_Node> partNode = new List<Wz_Node>();
 
@@ -1986,7 +2029,7 @@ namespace WzComparerR2.AvatarCommon
 
             partNode.RemoveAll(node => node == null);
 
-            return partNode.Select(node => new AvatarFrameData(node, (Wz_Node)null, 100, prismInfo)).ToList();
+            return partNode.Select(node => new AvatarFrameData(node, (Wz_Node)null, 100, part, applyAvatarScale: applyAvatarScale)).ToList();
         }
 
         private Wz_Node FindBodyActionNode(ActionFrame actionFrame)
@@ -2164,6 +2207,42 @@ namespace WzComparerR2.AvatarCommon
             return resultBitmap;
         }
 
+        private void ApplyScale(Skin skin, float scale)
+        {
+            if (skin.Image.Bitmap == null || scale == 1f) return;
+
+            BitmapOrigin scaled = ResizeBitmap(skin.Image, scale);
+            if (scaled.Bitmap != null)
+            {
+                skin.Image.Bitmap.Dispose();
+                skin.Image = scaled;
+            }
+        }
+
+        private static BitmapOrigin ResizeBitmap(BitmapOrigin bitmapOrigin, float scale)
+        {
+            if (bitmapOrigin.Bitmap == null || scale <= 0 || scale == 1f) return bitmapOrigin;
+
+            int newWidth = Math.Max(1, (int)Math.Round(bitmapOrigin.Bitmap.Width * scale));
+            int newHeight = Math.Max(1, (int)Math.Round(bitmapOrigin.Bitmap.Height * scale));
+
+            Bitmap newBitmap = new Bitmap(newWidth, newHeight, PixelFormat.Format32bppArgb);
+
+            using (Graphics g = Graphics.FromImage(newBitmap))
+            {
+                g.CompositingMode = CompositingMode.SourceCopy;
+                g.CompositingQuality = CompositingQuality.HighSpeed;
+                g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                g.PixelOffsetMode = PixelOffsetMode.Half;
+                g.SmoothingMode = SmoothingMode.None;
+
+                g.DrawImage(bitmapOrigin.Bitmap, new Rectangle(0, 0, newWidth, newHeight), new Rectangle(0, 0, bitmapOrigin.Bitmap.Width, bitmapOrigin.Bitmap.Height), GraphicsUnit.Pixel);
+            }
+            Point newOrigin = new Point((int)Math.Round(bitmapOrigin.Origin.X * scale), (int)Math.Round(bitmapOrigin.Origin.Y * scale));
+
+            return new BitmapOrigin(newBitmap, newOrigin);
+        }
+
         private byte BlendColors(byte baseColor, float baseOpacity, byte mixColor, float mixOpacity)
         {
             return (byte)((byte)((float)((baseColor >> 4) * baseOpacity) + (float)((mixColor >> 4) * mixOpacity)) * 17);
@@ -2206,6 +2285,11 @@ namespace WzComparerR2.AvatarCommon
                 }
             }
             this.SkinCache.Clear();
+        }
+
+        public void ClearCustomOrigin()
+        {
+            this.CustomOrigin.Clear();
         }
 
         #region parts
@@ -2356,9 +2440,9 @@ namespace WzComparerR2.AvatarCommon
         /// <summary>
         /// 骑宠
         /// </summary>
-        public AvatarPart Taming
+        public ChairPart Taming
         {
-            get { return this.Parts[16]; }
+            get { return this.Parts[16] as ChairPart; }
             set { this.Parts[16] = value; }
         }
 
@@ -2374,9 +2458,9 @@ namespace WzComparerR2.AvatarCommon
         /// <summary>
         /// Chair
         /// </summary>
-        public AvatarPart Chair
+        public ChairPart Chair
         {
-            get { return this.Parts[18]; }
+            get { return this.Parts[18] as ChairPart; }
             set { this.Parts[18] = value; }
         }
 
@@ -2483,8 +2567,17 @@ namespace WzComparerR2.AvatarCommon
             "proneStab", "prone",
             "heal", "fly", "jump", "sit", "ladder", "rope"
         };
+        private static readonly string[] emotionTable = new[]
+        {
+            "default", "hit", "smile", "troubled", "cry",
+            "angry", "bewildered", "stunned", "vomit", "oops",
+            "cheers", "chu", "wink", "pain", "glitter",
+            "blaze", "shine", "love", "despair", "hum",
+            "bowing", "hot", "dam", "qBlue",
+        };
 
         public static readonly ReadOnlyCollection<string> BaseActions = new ReadOnlyCollection<string>(baseActions);
+        public static readonly ReadOnlyCollection<string> EmotionTable = new ReadOnlyCollection<string>(emotionTable);
 
         public static readonly string[] HairColor = new[] { "黑色", "紅色", "橙色", "黃色", "綠色", "藍色", "紫色", "棕色" };
         public static readonly string[] FaceColor = new[] { "黑色", "藍色", "紅色", "綠色", "棕色", "祖母綠", "紫色", "紫水晶" };
