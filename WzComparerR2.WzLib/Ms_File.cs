@@ -156,7 +156,7 @@ namespace WzComparerR2.WzLib
                 int unk1 = snowReader.ReadInt32();
                 int unk2 = snowReader.ReadInt32();
                 byte[] entryKey = snowReader.ReadBytes(16);
-
+                
                 var entry = new Ms_Entry(entryName, checkSum, flags, startPos, size, sizeAligned, unk1, unk2, entryKey);
                 entry.CalculatedCheckSum = flags + startPos + size + sizeAligned + unk1 + entryKey.Sum(b => (int)b);
                 this.Entries.Add(entry);

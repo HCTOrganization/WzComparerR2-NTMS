@@ -354,6 +354,7 @@ namespace WzComparerR2.WzLib
 
                 Wz_TextureFormat.ARGB8888 or
                 Wz_TextureFormat.RGBA1010102 => width * height * 4,
+
                 Wz_TextureFormat.DXT3 or
                 Wz_TextureFormat.DXT5 => ((width + 3) / 4) * ((height + 3) / 4) * 16,
 
@@ -361,8 +362,11 @@ namespace WzComparerR2.WzLib
                 Wz_TextureFormat.BC7 => width * (height & ~3),
 
                 Wz_TextureFormat.DXT1 => ((width + 3) / 4) * ((height + 3) / 4) * 8,
+
                 Wz_TextureFormat.A8 => width * height,
+
                 Wz_TextureFormat.RGBA32Float => width * height * 16,
+
                 _ => throw new ArgumentException($"Unknown texture format {(int)format}.")
             };
         }
@@ -384,6 +388,6 @@ namespace WzComparerR2.WzLib
         RGBA1010102 = 2562,
         DXT1 = 4097,
         BC7 = 4098,
-        RGBA32Float = 4100
+        RGBA32Float = 4100,
     }
 }
