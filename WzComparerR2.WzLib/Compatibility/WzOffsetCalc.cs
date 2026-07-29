@@ -27,6 +27,14 @@ namespace WzComparerR2.WzLib.Compatibility
         int DecryptEntryCount(TEncryptedEntryCount encryptedEntryCount);
     }
 
+    /// <summary>
+    /// Optional PKG2 capability for formats that encrypt image length/checksum fields.
+    /// </summary>
+    public interface IPkg2ImageLengthCalc
+    {
+        int CalcLength(uint filePos, int encryptedValue);
+    }
+
     internal static class Pkg2ImageOffsetCalcHelper
     {
         public static int DecryptEntryCount(IPkg2ImageOffsetCalc calc, long encryptedEntryCount)
@@ -198,55 +206,9 @@ namespace WzComparerR2.WzLib.Compatibility
     }
 
     /// <summary>
-    /// 64-bit PKG2 offset calculation for KMST 1204 (200-byte header).
-    /// Uses hash3 = hash2 ^ 0x9876543210FEDCBA for the XOR terms instead of mixedHash.
-    /// </summary>
-    public sealed class Pkg2OffsetCalc64V2 : IPkg2ImageOffsetCalc<long>
-    {
-        public Pkg2OffsetCalc64V2(uint headerLen, ulong hash1, ulong hashVersion, ulong hash2)
-        {
-            this.headerLen = headerLen;
-            this.hash1 = hash1;
-            this.hashVersionFull = hashVersion;
-            this.preHash = (uint)hash1 ^ (uint)hashVersion;
-            this.hash3Lo = (uint)hash2 ^ 0x10FEDCBAu; // low 32 bits of (hash2 ^ 0x9876543210FEDCBA)
-        }
-
-        private readonly uint headerLen;
-        private readonly ulong hash1;
-        private readonly ulong hashVersionFull;
-        private readonly uint preHash;
-        private readonly uint hash3Lo;
-
-        public uint CalcOffset(uint filePos, uint hashedOffset)
-        {
-            uint offset = filePos - this.headerLen;
-            offset = ~offset;
-            offset *= this.preHash + (this.hash3Lo ^ 0xA7E3C093);
-            offset -= 0x581C3F6D;
-            offset ^= (uint)this.hash1 * 0x01010101;
-            offset ^= this.hash3Lo * 0x9E3779B9;
-            offset = ROL(offset, 19);
-            offset ^= ~hashedOffset;
-            offset += this.headerLen;
-            return offset;
-        }
-
-        public int DecryptEntryCount(long encryptedEntryCount)
-        {
-            ulong dirCount = ((ulong)encryptedEntryCount ^ this.hash1 ^ this.hashVersionFull ^ 0x550EC4DD02C468ECUL) >> 16;
-            if (dirCount > int.MaxValue)
-            {
-                throw new ArgumentOutOfRangeException(nameof(encryptedEntryCount), "64-bit PKG2 dir count exceeds supported range.");
-            }
-            return (int)dirCount;
-        }
-    }
-
-    /// <summary>
     /// 64-bit PKG2 offset calculation for KMST 1202.
     /// </summary>
-    public sealed class Pkg2OffsetCalc64V1 : IPkg2ImageOffsetCalc<long>
+    public sealed class Pkg2OffsetCalc64V1 : IPkg2ImageOffsetCalc<long>, IPkg2ImageLengthCalc
     {
         public Pkg2OffsetCalc64V1(uint headerLen, ulong hash1, ulong hashVersion)
         {
@@ -266,16 +228,26 @@ namespace WzComparerR2.WzLib.Compatibility
 
         public uint CalcOffset(uint filePos, uint hashedOffset)
         {
-            uint offset = filePos - this.headerLen;
-            offset = ~offset;
-            offset *= this.preHash + (this.mixedHash ^ 0xA7E3C093);
-            offset -= 0x581C3F6D;
-            offset ^= (uint)this.hash1 * 0x01010101;
-            offset ^= this.mixedHash * 0x9E3779B9;
-            offset = ROL(offset, 19);
+            uint offset = this.CalcSharedKey(filePos);
             offset ^= ~hashedOffset;
             offset += this.headerLen;
             return offset;
+        }
+
+        public int CalcLength(uint filePos, int encryptedValue)
+        {
+            return encryptedValue ^ unchecked((int)this.CalcSharedKey(filePos));
+        }
+
+        private uint CalcSharedKey(uint filePos)
+        {
+            uint key = filePos - this.headerLen;
+            key = ~key;
+            key *= (this.preHash + (this.mixedHash ^ 0xA7E3C093));
+            key -= 0x581C3F6D;
+            key ^= (uint)this.hash1 * 0x01010101;
+            key ^= this.mixedHash * 0x9E3779B9;
+            return ROL(key, 19);
         }
 
         public int DecryptEntryCount(long encryptedEntryCount)

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -120,16 +120,16 @@ namespace WzComparerR2.WzLib
             string signature = new string(br.ReadChars(4));
             if (signature != Wz_Header.PKG1 && signature != Wz_Header.PKG2)
             {
-                // KMST1202: 150-byte random header carrying 64-bit hashes
-                if (this.TryReadPkg2KMST1202Header(fileName, out var header64))
+                // KMST1204: 200-byte random header carrying 64-bit hashes
+                if (this.TryReadPkg2KMST1204Header(fileName, out var header64))
                 {
                     this.Header = header64;
                     return true;
                 }
-                // KMST1204: 200-byte random header carrying 64-bit hashes
-                if (this.TryReadPkg2KMST1204Header(fileName, out var header64v1))
+                // KMST1202: 150-byte random header carrying 64-bit hashes
+                if (this.TryReadPkg2KMST1202Header(fileName, out header64))
                 {
-                    this.Header = header64v1;
+                    this.Header = header64;
                     return true;
                 }
                 // KMST1201: use rand num header instead of signature
@@ -247,32 +247,7 @@ namespace WzComparerR2.WzLib
             ReadOnlySpan<int> hash1Offsets = stackalloc int[] { 0x48, 0x24, 0x0F, 0x31, 0x46, 0x47, 0x63, 0x67 };
             ReadOnlySpan<int> hash2Offsets = stackalloc int[] { 0x8E, 0x8C, 0x93, 0x0E, 0x64, 0x7B, 0x2E, 0x4D };
             ReadOnlySpan<int> dataSizeOffsets = stackalloc int[] { 0x12, 0x09, 0x02, 0x95 };
-
-            header = null;
-            long fileSize = this.fileStream.Length;
-            if (fileSize < headerLen)
-            {
-                return false;
-            }
-
-            long expectedDataSize = fileSize - headerLen;
-            if (expectedDataSize > uint.MaxValue)
-                return false;
-
-            this.fileStream.Position = 0;
-            Span<byte> buffer = stackalloc byte[headerLen];
-            this.fileStream.ReadExactly(buffer);
-
-            uint dataSize = MathHelper.GatherAsUInt32(buffer, dataSizeOffsets);
-            if (dataSize != (uint)expectedDataSize)
-                return false;
-
-            ulong hash1 = MathHelper.GatherAsUInt64(buffer, hash1Offsets);
-            ulong hash2 = MathHelper.GatherAsUInt64(buffer, hash2Offsets);
-
-            header = new Wz_Header.WzPkg2Header64(Wz_Header.PKG2, null, fileName, headerLen, dataSize, fileSize, headerLen, hash1, hash2);
-            this.fileStream.Position = headerLen;
-            return true;
+            return this.TryReadPkg2RandomHeader64(fileName, headerLen, hash1Offsets, hash2Offsets, dataSizeOffsets, out header);
         }
 
         private bool TryReadPkg2KMST1204Header(string fileName, out Wz_Header.WzPkg2Header64 header)
@@ -281,7 +256,11 @@ namespace WzComparerR2.WzLib
             ReadOnlySpan<int> hash1Offsets = stackalloc int[] { 0x1E, 0x1A, 0x10, 0x01, 0x0F, 0x48, 0xC5, 0x99 };
             ReadOnlySpan<int> hash2Offsets = stackalloc int[] { 0x64, 0x6C, 0x25, 0x16, 0x0A, 0x03, 0xA2, 0xAA };
             ReadOnlySpan<int> dataSizeOffsets = stackalloc int[] { 0x14, 0xB0, 0xB6, 0xB7 };
+            return this.TryReadPkg2RandomHeader64(fileName, headerLen, hash1Offsets, hash2Offsets, dataSizeOffsets, out header);
+        }
 
+        private bool TryReadPkg2RandomHeader64(string fileName, int headerLen, ReadOnlySpan<int> hash1Offsets, ReadOnlySpan<int> hash2Offsets, ReadOnlySpan<int> dataSizeOffsets, out Wz_Header.WzPkg2Header64 header)
+        {
             header = null;
             long fileSize = this.fileStream.Length;
             if (fileSize < headerLen)
@@ -425,7 +404,7 @@ namespace WzComparerR2.WzLib
                             }
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                     }
                 }
@@ -495,9 +474,6 @@ namespace WzComparerR2.WzLib
             var rule = context.Pkg2DirTreeRule ?? throw new InvalidOperationException("PKG2 dir tree reading requires a PKG2 read rule.");
             int entryCount = rule.ReadEntryCount(reader, context.OffsetCalc);
 
-            bool isEncryptedSize = this.Header is Wz_Header.WzPkg2Header64 h64 && h64.HeaderSize == 200;
-            uint headerSize = (uint)this.Header.HeaderSize;
-
             List<Pkg2DirEntry> entries = new();
             for (int i = 0; i < entryCount; i++)
             {
@@ -512,19 +488,15 @@ namespace WzComparerR2.WzLib
                     throw new Exception($"Unknown type {nodeType} in WzDirTree.");
                 }
 
-                uint sizePos = (uint)this.fileStream.Position;
+                uint sizePosition = (uint)this.fileStream.Position;
                 int size = reader.ReadCompressedInt32();
-                uint cs32Pos = (uint)this.fileStream.Position;
+                uint checksumPosition = (uint)this.fileStream.Position;
                 int cs32 = reader.ReadCompressedInt32();
-
-                if (isEncryptedSize)
+                if (context.LengthCalc != null)
                 {
-                    uint sizeKey = context.OffsetCalc.CalcOffset(sizePos, 0xFFFFFFFF) - headerSize;
-                    uint cs32Key = context.OffsetCalc.CalcOffset(cs32Pos, 0xFFFFFFFF) - headerSize;
-                    size = (int)((uint)size ^ sizeKey);
-                    cs32 = (int)((uint)cs32 ^ cs32Key);
+                    size = context.LengthCalc.CalcLength(sizePosition, size);
+                    cs32 = context.LengthCalc.CalcLength(checksumPosition, cs32);
                 }
-
                 entries.Add(new Pkg2DirEntry
                 {
                     NodeType = nodeType,

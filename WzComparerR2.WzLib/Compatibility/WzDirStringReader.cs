@@ -10,6 +10,15 @@ namespace WzComparerR2.WzLib.Compatibility
         string ReadName(WzBinaryReader reader, bool isFirstEntry);
     }
 
+    public enum Pkg2EntryNameVersion
+    {
+        KMST1196,
+        KMST1198,
+        KMST1199,
+        KMST1202,
+        KMST1204,
+    }
+
     /// <summary>
     /// PKG2 legacy (KMST 1196-1197): all entries use ReadString with the same key.
     /// </summary>
@@ -49,46 +58,33 @@ namespace WzComparerR2.WzLib.Compatibility
     }
 
     /// <summary>
-    /// 64-bit PKG2: first entry uses ReadPkg2DirStringV2 (16bit length) with pkg2 key, rest use ReadString with pkg1 key.
+    /// 64-bit PKG2: entries can use ReadPkg2DirStringV2 (16bit length) with pkg2 key, depending on the format version.
     /// </summary>
     internal sealed class Pkg2MixedKeyDirStringReader64 : IPkg2DirStringReader
     {
-        public Pkg2MixedKeyDirStringReader64(IWzDecrypter firstNameKey, IWzDecrypter pkg1Keys)
+        public Pkg2MixedKeyDirStringReader64(IWzDecrypter firstNameKey, IWzDecrypter pkg1Keys, bool allNamesUseV2 = false)
         {
             this.firstNameKey = firstNameKey;
             this.pkg1Keys = pkg1Keys;
+            this.allNamesUseV2 = allNamesUseV2;
         }
 
         private readonly IWzDecrypter firstNameKey;
         private readonly IWzDecrypter pkg1Keys;
+        private readonly bool allNamesUseV2;
 
         public string ReadName(WzBinaryReader reader, bool isFirstEntry)
         {
-            return isFirstEntry ? reader.ReadPkg2DirStringV2(firstNameKey) : reader.ReadString(pkg1Keys);
-        }
-    }
+            if (this.allNamesUseV2 || isFirstEntry)
+            {
+                 // The reader's base stream must start from dirStartOffset.
+                if (this.firstNameKey is IWzStatefulDecrypter statefulDecrypter)
+                    statefulDecrypter.ApplyState((ulong)reader.BaseStream.Position);
 
-    /// <summary>
-    /// 64-bit PKG2 (200-byte header): all entries use ReadPkg2DirStringV2 with position-dependent key.
-    /// key = baseKey ^ (0x9E3779B97F4A7C15 * dataRelativePos)
-    /// where dataRelativePos is the position within the PartialStream (already = absolutePos - headerSize).
-    /// </summary>
-    internal sealed class Pkg2PosDependentDirStringReader64 : IPkg2DirStringReader
-    {
-        public Pkg2PosDependentDirStringReader64(ulong baseKey)
-        {
-            this.baseKey = baseKey;
-        }
+                return reader.ReadPkg2DirStringV2(firstNameKey);
+            }
 
-        private readonly ulong baseKey;
-        private const ulong Multiplier = 0x9E3779B97F4A7C15UL;
-
-        public string ReadName(WzBinaryReader reader, bool isFirstEntry)
-        {
-            long curPos = reader.BaseStream.Position;
-            ulong posKey = this.baseKey ^ (Multiplier * (ulong)curPos);
-            var key = new Wz_Crypto.Pkg2DirStringKey(posKey);
-            return reader.ReadPkg2DirStringV2(key);
+            return reader.ReadString(pkg1Keys);
         }
     }
 }
