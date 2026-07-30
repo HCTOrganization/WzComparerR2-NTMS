@@ -644,9 +644,9 @@ namespace WzComparerR2.Avatar.UI
             // 
             this.btnBodyFloating.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
             this.btnBodyFloating.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
-            this.btnBodyFloating.Location = new System.Drawing.Point(173, 82);
+            this.btnBodyFloating.Location = new System.Drawing.Point(207, 84);
             this.btnBodyFloating.Name = "btnBodyFloating";
-            this.btnBodyFloating.Size = new System.Drawing.Size(70, 20);
+            this.btnBodyFloating.Size = new System.Drawing.Size(64, 19);
             this.btnBodyFloating.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.btnBodyFloating.TabIndex = 11;
             this.btnBodyFloating.Text = "浮遊效果";
