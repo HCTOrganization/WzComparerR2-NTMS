@@ -206,7 +206,7 @@ namespace WzComparerR2
 #else
             ExtractResource("WzComparerR2.Updater.exe.config", Path.Combine(wcR2Folder, "Updater.exe.config"));
 #endif
-            RunProgram("Updater.exe", "\"" + assetFileName + "\"");
+            RunProgram(Path.Combine(wcR2Folder, "Updater.exe"), "\"" + assetFileName + "\"");
         }
 
         private void RunProgram(string url, string argument)
