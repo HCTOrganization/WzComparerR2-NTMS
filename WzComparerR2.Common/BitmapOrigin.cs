@@ -67,7 +67,12 @@ namespace WzComparerR2
                     return new Rectangle(this.OpOrigin, this.bitmap.Size);
             }
         }
-        // public static BitmapOrigin CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode)
+
+        public BitmapOrigin Clone()
+        {
+            return new BitmapOrigin(new Bitmap(this.bitmap), this.origin);
+        }
+
         public static BitmapOrigin CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, Wz_File wzf = null)
         {
             BitmapOrigin bp = new BitmapOrigin();

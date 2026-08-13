@@ -12,6 +12,9 @@ using WzComparerR2.CharaSim;
 using WzComparerR2.Common;
 using WzComparerR2.WzLib;
 using Resource = CharaSimResource.Resource;
+using DevComponents.DotNetBar;
+using Newtonsoft.Json.Linq;
+using WzComparerR2.Rendering;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -761,10 +764,15 @@ namespace WzComparerR2.CharaSimControl
 
                 BitmapOrigin appearance;
                 int morphID = android?.Nodes["info"]?.Nodes["morphID"]?.GetValueEx<int>(0) ?? 0;
+                const float MaxSampleWidth = 274f;
                 if (Gear.ToolTipPreview.Bitmap != null)
                 {
-                    appearance = Gear.ToolTipPreview;
+                    appearance = Gear.ToolTipPreview.Clone();
                     Gear.AndroidBitmap = appearance.Bitmap;
+                    if (appearance.Bitmap.Width > MaxSampleWidth)
+                    {
+                        appearance = BitmapUtils.ResizeBitmap(appearance, MaxSampleWidth / appearance.Bitmap.Width);
+                    }
                     g.DrawImage(appearance.Bitmap, (bitmap.Width - appearance.Bitmap.Width) / 2 + 13, picH);
                     picH += appearance.Bitmap.Height;
                 }
@@ -802,15 +810,18 @@ namespace WzComparerR2.CharaSimControl
                         this.avatar.ClearCanvas();
                     }
 
-                    var imgrect = new Rectangle(Math.Max(appearance.Origin.X - 50, 0),
-                        Math.Max(appearance.Origin.Y - 100, 0),
-                        Math.Min(appearance.Bitmap.Width, appearance.Origin.X + 50) - Math.Max(appearance.Origin.X - 50, 0),
-                        Math.Min(appearance.Origin.Y, 100));
-
-                    g.DrawImage(appearance.Bitmap, 90 - Math.Min(appearance.Origin.X, 50), picH + Math.Max(80 - appearance.Origin.Y, 0), imgrect, GraphicsUnit.Pixel);
-                    Gear.AndroidBitmap = appearance.Bitmap;
-
-                    picH += 102;
+                    if (appearance.Bitmap != null)
+                    {
+                        if (appearance.Bitmap.Width > MaxSampleWidth)
+                        {
+                            BitmapOrigin resizedAppearance = BitmapUtils.ResizeBitmap(appearance, MaxSampleWidth / appearance.Bitmap.Width);
+                            appearance.Bitmap.Dispose();
+                            appearance = resizedAppearance;
+                        }
+                        g.DrawImage(appearance.Bitmap, 90 - Math.Min(appearance.Origin.X, 50), picH + Math.Max(80 - appearance.Origin.Y, 0));
+                        picH += Math.Max(100, appearance.Bitmap.Height) + 2;
+                        Gear.AndroidBitmap = appearance.Bitmap;
+                    }
                 }
                 //BitmapOrigin appearance = BitmapOrigin.CreateFromNode(PluginBase.PluginManager.FindWz(morphID != 0 ? string.Format("Morph/{0:D4}.img/stand/0", morphID) : "Npc/0010300.img/stand/0"), PluginBase.PluginManager.FindWz);
 
