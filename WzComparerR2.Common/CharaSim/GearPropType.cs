@@ -155,6 +155,7 @@ namespace WzComparerR2.CharaSim
         incPADlv,
         incMADlv,
         incCriticaldamage,
+        incCriticaldamageF,
 
         Option,
         OptionToMob,
