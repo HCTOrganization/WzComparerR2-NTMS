@@ -1135,7 +1135,7 @@ namespace WzComparerR2.CharaSimControl
                 hasThirdContents = true;
                 hasOptionPart = true;
 
-                DateTime time = DateTime.Now.AddDays(7d);
+                DateTime time = DateTime.Now.AddDays((Gear.Props.TryGetValue(GearPropType.masterSpecial, out value) && value > 0) ? 190d : 7d);
                 var text = $"#$e{ItemStringHelper.GetGearPropString3(GearPropType.abilityTimeLimited, value)[0]} : {time.ToString("yyyy年 M月 d日 HH時 mm分可以用")}" +
                     $"{ItemStringHelper.GetGearPropString3(GearPropType.notExtend, value)[0]}#";
 
