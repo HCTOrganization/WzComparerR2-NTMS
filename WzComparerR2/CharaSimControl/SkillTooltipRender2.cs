@@ -157,7 +157,7 @@ namespace WzComparerR2.CharaSimControl
             };
 
             // Initialize skillCommon Dictionary
-            Dictionary<string, string> skillCommon = new Dictionary<string, string>(Skill.Common);
+            Dictionary<string, string> skillCommon = Skill.GetCommon(Skill.Level);
             if (Skill.PerJobAttackInfo.Count > 0)
             {
                 var perJobInfo = Skill.PerJobAttackInfo.ElementAt(Skill.PerJobIndex).Value;
@@ -621,9 +621,15 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
-            if (ShowDelay && Skill.Action.Count > 0)
+            if (ShowDelay)
             {
-                foreach (string action in Skill.Action)
+                List<string> actions = new List<string>(Skill.Action);
+                if (skillCommon.TryGetValue("action", out string levelAction) && !string.IsNullOrEmpty(levelAction) && !actions.Contains(levelAction))
+                {
+                    actions.Add(levelAction);
+                }
+
+                foreach (string action in actions)
                 {
                     string colortag = "";
                     if (doHighlight && DiffSkillTags[Skill.SkillID.ToString()].Contains(action))

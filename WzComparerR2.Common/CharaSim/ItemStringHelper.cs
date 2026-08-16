@@ -82,7 +82,8 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incMMP: return "MaxMP： " + sign + value;
                 case GearPropType.incMMPr: return "MaxMP： " + sign + value + "%";
                 case GearPropType.incMDF: return "MaxDF : " + sign + value;
-                case GearPropType.incPAD: return "攻擊力 : " + sign + value;
+                case GearPropType.incPAD: 
+                case GearPropType.incWAT: return "攻擊力 : " + sign + value;
                 case GearPropType.incPADr: return "攻擊力 : " + sign + value + "%";
                 case GearPropType.incMAD: return "魔法攻擊力 : " + sign + value;
                 case GearPropType.incMADr: return "魔法攻擊力 : " + sign + value + "%";
@@ -99,8 +100,10 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incCraft: return "手藝 : " + sign + value;
                 case GearPropType.damR:
                 case GearPropType.incDAMr: return "總傷害 : " + sign + value + "%";
-                case GearPropType.incCr: return "爆擊率 : " + sign + value + "%";
-                case GearPropType.incCDr: return "爆擊傷害 : " + sign + value + "%";
+                case GearPropType.incCr: 
+                case GearPropType.incCRT: return "爆擊率 : " + sign + value + "%";
+                case GearPropType.incCDr: 
+                case GearPropType.incCRD: return "爆擊傷害 : " + sign + value + "%";
                 case GearPropType.knockback: return "直接打擊時，以 " + value + "%的機率強弓";
                 //case GearPropType.incPVPDamage: return "Battle Mode ATT " + sign + " " + value;
                 case GearPropType.incPQEXPr: return "组隊任務經驗值增加" + value + "%";
@@ -158,10 +161,7 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incAD: return "攻撃力/魔力" + sign + value;
                 case GearPropType.incPDD_incMDD: return "防禦力" + sign + value;
                 case GearPropType.incACC_incEVA: return "命中/迴避率 :" + sign + value;
-                case GearPropType.incCRT: return "爆擊率 :" + sign + value;
-                case GearPropType.incCRD: return "爆擊傷害: " + sign + value;
-
-                case GearPropType.incARC: return "ARC : " + sign + value;
+                case GearPropType.incPDD_incMDD: return "防御力" + sign + value;
                 case GearPropType.incAUT: return "AUT : " + sign + value;
 
                 case GearPropType.incCHUC: return "星力 : " + sign + value;
