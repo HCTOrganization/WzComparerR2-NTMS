@@ -33,8 +33,10 @@ namespace WzComparerR2.CharaSim
                     case "item":
                         foreach (Wz_Node itemNode in subNode.Nodes)
                         {
-                            int itemID = Convert.ToInt32(itemNode.Value);
-                            exclusiveEquip.Items.Add(itemID);
+                            if (Int32.TryParse(itemNode.Value.ToString(), out int itemID)) // change logic for MSN v24
+                            {
+                                exclusiveEquip.Items.Add(itemID);
+                            }
                         }
                         break;
                     case "msg":
