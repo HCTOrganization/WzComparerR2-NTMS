@@ -25,6 +25,12 @@ namespace WzComparerR2.WzLib.Utilities
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static uint ROL(uint v, int n) => (v << n) | (v >> (32 - n));
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong ROL8(ulong v, int n) => (v << n) | (v >> (64 - n));
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong ROR8(ulong v, int n) => (v >> n) | (v << (64 - n));
+
         const byte M8 = 0xAA;
         const ushort M16 = 0xAAAA;
 

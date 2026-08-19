@@ -20,6 +20,7 @@ namespace WzComparerR2.WzLib.Compatibility
     {
         private static readonly IWzPreReader[] readers = new IWzPreReader[]
         {
+            new Pkg2PreReader64(WzFileFormat.Pkg2Kmst1205, 163, true, true),
             new Pkg2PreReader64(WzFileFormat.Pkg2Kmst1204, 200, true, true),
             new Pkg2PreReader64(WzFileFormat.Pkg2Kmst1202, 150, false, false),
             new Pkg2PreReader(WzFileFormat.Pkg2Kmst1201, true, true),
@@ -202,7 +203,9 @@ namespace WzComparerR2.WzLib.Compatibility
                     {
                         try
                         {
-                            rule.ReadEntryName(reader, result, context, entries.Count);
+                            if (rule.Format != WzFileFormat.Pkg2Kmst1205)
+                                rule.ReadEntryName(reader, result, context, entries.Count);
+
                             uint sizePosition = (uint)reader.BaseStream.Position;
                             int size = reader.ReadCompressedInt32();
                             if (rule.ValidateImageLength && (size < 0 || (nodeType == 0x03 && size != 0)))
@@ -211,6 +214,10 @@ namespace WzComparerR2.WzLib.Compatibility
                                 break;
                             }
                             reader.ReadCompressedInt32();
+
+                            if (rule.Format == WzFileFormat.Pkg2Kmst1205)
+                                rule.ReadEntryName(reader, result, context, entries.Count);
+
                             entries.Add(new Pkg2PreReadEntry
                             {
                                 NodeType = nodeType,
@@ -717,6 +724,7 @@ namespace WzComparerR2.WzLib.Compatibility
         Pkg2Kmst1201,
         Pkg2Kmst1202,
         Pkg2Kmst1204,
+        Pkg2Kmst1205,
     }
 
     public enum WzStringEncoding
