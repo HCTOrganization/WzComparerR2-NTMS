@@ -1053,6 +1053,10 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (hasTuc)
             {
+                if (CharaSimLoader.LoadedGmsTucBlacklistItems.Count > 0 && !CharaSimLoader.LoadedGmsTucBlacklistItems.Contains(Gear.ItemID))
+                {
+                    value += 1;
+                }
                 GearGraphics.DrawString(g, "可使用卷軸次數 : " + value + (Gear.Cash ? "" : " #c(可恢復次數：0)#"), GearGraphics.EquipDetailFont, orange3FontColorTable, 13, 248, ref picH, 16);
                 hasPart2 = true;
             }
