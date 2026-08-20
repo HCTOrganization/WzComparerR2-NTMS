@@ -161,7 +161,6 @@ namespace WzComparerR2.CharaSim
                 case GearPropType.incAD: return "攻撃力/魔力" + sign + value;
                 case GearPropType.incPDD_incMDD: return "防禦力" + sign + value;
                 case GearPropType.incACC_incEVA: return "命中/迴避率 :" + sign + value;
-                case GearPropType.incPDD_incMDD: return "防御力" + sign + value;
                 case GearPropType.incAUT: return "AUT : " + sign + value;
 
                 case GearPropType.incCHUC: return "星力 : " + sign + value;
