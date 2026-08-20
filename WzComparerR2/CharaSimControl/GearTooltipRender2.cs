@@ -1053,7 +1053,7 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (hasTuc)
             {
-                if (CharaSimLoader.LoadedGmsTucBlacklistItems.Count > 0 && !CharaSimLoader.LoadedGmsTucBlacklistItems.Contains(Gear.ItemID))
+                if (CharaSimLoader.LoadedGmsTucBlacklistItems.Count > 0 && !CharaSimLoader.LoadedGmsTucBlacklistItems.Contains(Gear.ItemID) && !Gear.Props.ContainsKey(GearPropType.onlyUpgrade))
                 {
                     value += 1;
                 }

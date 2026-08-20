@@ -1525,7 +1525,7 @@ namespace WzComparerR2.CharaSimControl
             int tuc = 0;
             bool enhanceable = Gear.GetBooleanValue(GearPropType.setExtraOption);
             Gear.Props.TryGetValue(GearPropType.tuc, out tuc);
-            if (CharaSimLoader.LoadedGmsTucBlacklistItems.Count > 0 && !CharaSimLoader.LoadedGmsTucBlacklistItems.Contains(Gear.ItemID))
+            if (CharaSimLoader.LoadedGmsTucBlacklistItems.Count > 0 && !CharaSimLoader.LoadedGmsTucBlacklistItems.Contains(Gear.ItemID) && !Gear.Props.ContainsKey(GearPropType.onlyUpgrade))
             {
                 tuc += 1;
             }
