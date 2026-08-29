@@ -81,7 +81,7 @@ namespace WzComparerR2.OpenAPI
             if (id == -1) return "";
 
             var ret = "";
-            ret += GetValue("face50k") != 0 ? 5 : 2;
+            ret += GetValue("face10k") != 0 ? 5 : 2;
             ret += GetValue("faceGender");
             ret += id.ToString().PadLeft(3, '0');
             return ret;
