@@ -1,16 +1,15 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using WzComparerR2.CharaSim;
 using ZXing;
 using ZXing.QrCode;
@@ -168,7 +167,24 @@ namespace WzComparerR2.Avatar.UI
                     continue;
                 }
 
+                // Generic weapon slots are represented as GearType.weapon/subWeapon (-1/-2) in the avatar model.
+                // The canonical prefix table lives in NexonOpenAPI.Utils.WeaponsKMS for avatar-code serialization,
+                // but the LWA API still expects the slot to be emitted as part "WP" instead of being discarded.
                 GearType gearType = Gear.GetGearType(itemId);
+
+                // Weapons are represented by many concrete gear types (e.g. 1222000 -> soulShooter / 122xx family)
+                // and not only by the synthetic GearType.weapon/subWeapon sentinels.
+                if (Gear.IsWeapon(gearType) || Gear.IsSubWeapon(gearType) || Gear.IsCashWeapon(gearType))
+                {
+                    equipItems.Add(new JObject
+                    {
+                        ["part"] = "WP",
+                        ["itemId"] = itemId,
+                        ["isVisible"] = "true"
+                    });
+                    continue;
+                }
+
                 if (!partMap.TryGetValue(gearType, out string partName))
                 {
                     continue;
