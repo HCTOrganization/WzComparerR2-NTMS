@@ -2742,7 +2742,7 @@ namespace WzComparerR2.Avatar.UI
         private async void btnExportLwa_Click(object sender, EventArgs e)
         {
 #if !NET8_0_OR_GREATER
-            ToastNotification.Show(this, $"エラー: LWA機能は .NET 8.0 でのみ利用できます。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+            ToastNotification.Show(this, $"錯誤：若要使用 LWA 功能，您必須使用 .NET 8.0 版本。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
             return;
 #endif
             string code = GetAllPartsTag();
