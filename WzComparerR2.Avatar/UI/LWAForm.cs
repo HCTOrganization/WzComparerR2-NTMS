@@ -157,6 +157,10 @@ namespace WzComparerR2.Avatar.UI
             foreach (string rawValue in csvValues)
             {
                 string trimmed = rawValue.Trim();
+                if (trimmed.Contains("+"))
+                {
+                    trimmed = trimmed.Split('+')[0]; // Remove prism suffix
+                }
                 if (string.IsNullOrEmpty(trimmed) || !int.TryParse(trimmed, out int itemId))
                 {
                     continue;
