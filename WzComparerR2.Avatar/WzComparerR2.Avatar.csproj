@@ -49,6 +49,8 @@
       <HintPath>..\References\DevComponents.DotNetBar2.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="tls-client-sharp" Version="1.0.0" Condition="'$(TargetFramework)' == 'net8.0-windows'" />
     <PackageReference Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsVersion)" ExcludeAssets="runtime" />
     <PackageReference Include="ZXing.Net" Version="0.16.11" />
   </ItemGroup>
