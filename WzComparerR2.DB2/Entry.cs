@@ -20,8 +20,6 @@ namespace WzComparerR2.DB2
         }
 
         private RibbonBar barDB2;
-        private RibbonBar barIcons;
-        private RibbonBar barPicViewer;
 
         private DB2Form db2Form;
         private IconsForm iconsForm;
@@ -31,9 +29,11 @@ namespace WzComparerR2.DB2
         {
             Db2Host.Context = this.Context;
 
-            this.barDB2 = AddButton("DB2", "MapleStoryDB2", 100, btnDB2_Click, out _);
-            this.barIcons = AddButton("Icons", "圖示預覽", 66, btnIcons_Click, out _);
-            this.barPicViewer = AddButton("Pic Viewer", "圖片瀏覽", 66, btnPicViewer_Click, out _);
+            // 三個按鈕共用同一個 RibbonBar（標題為 DB2），而非各自佔一欄。
+            this.barDB2 = AddButtons("DB2",
+                ("MapleStoryDB2", (EventHandler)btnDB2_Click),
+                ("圖示預覽", btnIcons_Click),
+                ("圖片瀏覽", btnPicViewer_Click));
 
             this.Context.MainStyleChanged += Context_MainStyleChanged;
         }
@@ -71,22 +71,42 @@ namespace WzComparerR2.DB2
             }
         }
 
-        private RibbonBar AddButton(string barText, string buttonText, int buttonWidth, EventHandler onClick, out ButtonItem button)
+        /// <summary>
+        /// 建立一個 RibbonBar，並把所有按鈕垂直堆在同一欄裡。
+        ///
+        /// 版面沿用主程式 MainForm 的 ribbonBar9（遊戲更新程式）作法：
+        /// 外層一個 LayoutOrientation = Vertical 的 ItemContainer，
+        /// 每個按鈕再各包一層 ItemContainer 當作一列。
+        /// </summary>
+        private RibbonBar AddButtons(string barText, params (string text, EventHandler onClick)[] buttons)
         {
             var bar = this.Context.AddRibbonBar("Tools", barText);
-            button = new ButtonItem("", buttonText)
+            bar.AutoOverflowEnabled = true;
+            bar.ContainerControlProcessDialogKey = true;
+
+            var rows = new ItemContainer
             {
-                FixedSize = new System.Drawing.Size(buttonWidth, 65),
-                // FixedSize 讓按鈕比文字寬，而預設的「圖片在左」版面會把文字推到左邊靠齊。
-                // 改成「圖片在上」文字就會置中，但沒有圖片時整塊會貼齊頂端，
-                // 因此補一張透明佔位圖把文字帶回垂直中央。
-                ImagePosition = eImagePosition.Top,
-                Image = new System.Drawing.Bitmap(1, 20),
-                AutoDisposeImages = true,
+                Name = "itemContainerDB2",
+                LayoutOrientation = eOrientation.Vertical,
             };
-            button.Click += onClick;
-            bar.Items.Add(button);
-            bar.Width = buttonWidth + 10;
+
+            foreach (var def in buttons)
+            {
+                var button = new ButtonItem("", def.text)
+                {
+                    SubItemsExpandWidth = 16,
+                };
+                button.Click += def.onClick;
+
+                var row = new ItemContainer();
+                row.SubItems.Add(button);
+                rows.SubItems.Add(row);
+            }
+
+            bar.Items.Add(rows);
+            // RibbonPanel 只會自動量測 Dock 過的 bar，外掛的 bar 是絕對定位，
+            // 所以自己依內容算一次寬度。
+            bar.Width = Math.Max(1, bar.GetAutoSizeWidth());
             return bar;
         }
 

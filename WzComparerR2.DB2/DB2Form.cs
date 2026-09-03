@@ -19,6 +19,7 @@ using WzComparerR2.Controls;
 using WzComparerR2.Common;
 using System.Threading;
 using System.Reflection;
+using DevComponents.DotNetBar;
 
 namespace WzComparerR2.DB2
 {
@@ -216,284 +217,19 @@ namespace WzComparerR2.DB2
 
         string GetTypes(string ID)
         {
-            switch (int.Parse(ID) / 10000)
+            StringBuilder sb = new StringBuilder();
+            sb.Append("種類: ");
+            if (int.TryParse(ID, out int gearID))
             {
-                case 101:
-                    return "種類: 臉飾,";
-                    break;
-                case 102:
-                    return "種類: 眼飾,";
-                    break;
-                case 103:
-                    return "種類: 耳環,";
-                    break;
-                case 112:
-                    return "種類: 墜飾,";
-                    break;
-                case 113:
-                    return "種類: 腰帶,";
-                    break;
-                case 114:
-                    return "種類: 勳章,";
-                    break;
-                case 115:
-                    return "種類: 肩飾,";
-                    break;
-                case 116:
-                    return "種類: 口袋道具,";
-                    break;
-                case 118:
-                    return "種類: 胸章,";
-                    break;
-                case 119:
-                    return "種類: 徽章,";
-                    break;
-                case 121:
-                    return "種類: 閃亮克魯,";
-                    break;
-                case 122:
-                    return "種類: 靈魂射手";
-                    break;
-                case 123:
-                    return "種類: 魔劍,";
-                    break;
-                case 124:
-                    return "種類: 能量劍,";
-                    break;
-                case 125:
-                    return "種類: 幻獸棍棒,";
-                    break;
-                case 130:
-                    return "種類: 單手劍,";
-                    break;
-                case 131:
-                    return "種類: 單手斧,";
-                    break;
-                case 132:
-                    return "種類: 單手棍,";
-                    break;
-                case 133:
-                    return "種類: 短劍,";
-                    break;
-                case 134:
-                    return "種類: 雙刀,";
-                    break;
-                case 136:
-                    return "種類: 手杖,";
-                    break;
-                case 137:
-                    return "種類: 短杖,";
-                    break;
-                case 138:
-                    return "種類: 長杖,";
-                    break;
-                case 140:
-                    return "種類: 雙手劍,";
-                    break;
-                case 141:
-                    return "種類: 雙手斧,";
-                    break;
-                case 142:
-                    return "種類: 雙手棍,";
-                    break;
-                case 143:
-                    return "種類: 槍,";
-                    break;
-                case 144:
-                    return "種類: 矛,";
-                    break;
-                case 145:
-                    return "種類: 弓,";
-                    break;
-                case 146:
-                    return "種類: 弩,";
-                    break;
-                case 147:
-                    return "種類: 拳套,";
-                    break;
-                case 148:
-                    return "種類: 指虎,";
-                    break;
-                case 149:
-                    return "種類: 火槍,";
-                    break;
-                case 150:
-                    return "種類: 採藥,";
-                    break;
-                case 151:
-                    return "種類: 採礦,";
-                    break;
-                case 152:
-                    return "種類: 雙弩槍,";
-                    break;
-                case 153:
-                    return "種類: 加農砲,";
-                    break;
-                case 154:
-                    return "種類: 太刀,";
-                    break;
-                case 155:
-                    return "種類: 扇子,";
-                    break;
-                case 156:
-                    return "種類: 琉,";
-                    break;
-                case 157:
-                    return "種類: 璃,";
-                    break;
-                case 158:
-                    return "種類: 机甲手枪,";
-                    break;
-                case 159:
-                    return "種類: 古代之弓,";
-                    break;
-                case 170:
-                    return "種類: 點裝,";
-                    break;
-                case 194:
-                    return "種類:龍魔頭盔";
-                    break;
-                case 195:
-                    return "種類:龍魔項鍊";
-                    break;
-                case 196:
-                    return "種類:龍魔翅膀";
-                    break;
-                case 197:
-                    return "種類:龍魔尾巴";
-                    break;
-                case 135:
-                    switch (int.Parse(ID.Trim()) / 10)
-                    {
-                        case 135200:
-                            return "種類:魔法箭,";
-                            break;
-                        case 135210:
-                            return "種類:卡牌,";
-                            break;
-                        case 135220:
-                            return "種類:墜飾,";
-                            break;
-                        case 135221:
-                            return "種類:念珠,";
-                            break;
-                        case 135222:
-                            return "種類:鐵鍊,";
-                            break;
-                        case 135223:
-                            return "種類:魔导书(火毒),";
-                            break;
-                        case 135224:
-                            return "種類:魔导书(冰雷),";
-                            break;
-                        case 135225:
-                            return "種類:魔导书(牧师),";
-                            break;
-                        case 135226:
-                            return "種類:箭失 ,";
-                            break;
-                        case 135227:
-                            return "種類:指虎,";
-                            break;
-                        case 135228:
-                            return "種類:短劍用劍套,";
-                            break;
-                        case 135229:
-                            return "種類:护身符,";
-                            break;
-                        case 135230:
-                            return "種類:寶盒,";
-                            break;
-                        case 135240:
-                            return "種類:寶石,";
-                            break;
-                        case 135250:
-                            return "種類:龍之精水,";
-                            break;
-                        case 135260:
-                            return "種類:靈魂之環,";
-                            break;
-                        case 135270:
-                            return "種類:連發槍,";
-                            break;
-                        case 135280:
-                            return "種類:太刀,";
-                            break;
-                        case 135281:
-                            return "種類:哨子,";
-                            break;
-                        case 135282:
-                            return "種類:拳爪,";
-                            break;
-                        case 135286:
-                            return "種類:拳環,";
-                            break;
-                        case 135290:
-                            return "種類:手腕护带,";
-                            break;
-                        case 135291:
-                            return "種類:望远镜 ,";
-                            break;
-                        case 135292:
-                            return "種類:火藥桶 ,";
-                            break;
-                        case 135293:
-                            return "種類:砝码,";
-                            break;
-                        case 135294:
-                            return "種類:文件,";
-                            break;
-                        case 135295:
-                            return "種類:魔法珠子,";
-                            break;
-                        case 135296:
-                            return "種類:箭矢,";
-                            break;
-                        case 135297:
-                            return "種類:寶石,";
-                            break;
-                        case 135298:
-                            return "種類:火藥桶,";
-                            break;
-                        case 135300:
-                            return "種類:控制器,";
-                            break;
-                        case 135310:
-                            return "種類:狐狸寶珠,";
-                            break;
-                        case 135320:
-                            return "種類:棋子,";
-                            break;
-                        case 135330:
-                            return "種類:武器傳送裝置,";
-                            break;
-                        case 135340:
-                            return "種類:裝填,";
-                            break;
-                        case 135350:
-                            return "種類:魔力翅膀,";
-                            break;
-                        case 135360:
-                            return "種類:精气珠,";
-                            break;
-                        case 135370:
-                            return "種類:遗物,";
-                            break;
-                        case 135400:
-                            return "種類:手鐲,";
-                            break;
-                        default:
-                            return "";
-                            break;
-                    }
-                    break;
-                default:
-                    return "";
-                    break;
+                GearType type = Gear.GetGearType(gearID);
+                sb.Append(ItemStringHelper.GetGearTypeString(type));
             }
-
-
-            return null;
+            else
+            {
+                sb.Append("不明");
+            }
+            sb.Append(",");
+            return sb.ToString();
         }
 
         string ToData(Wz_Node E)
@@ -505,77 +241,47 @@ namespace WzComparerR2.DB2
                 case "tradeAvailable":
                     if (E.ValueToInt() == 1)
                         return "神奇剪刀";
-                    if (E.ValueToInt() == 2)
+                    else if (E.ValueToInt() == 2)
                         return "白金剪刀";
-                    break;
+                    else break;
+
 
                 case "reqJob":
-                    switch (E.ValueToInt())
+                    int reqJob = E.ValueToInt();
+                    if (reqJob <= 0)
                     {
-                        case 0:
-                            return "全職業";
-                            break;
-                        case 1:
-                            return "劍士";
-                            break;
-                        case 2:
-                            return "法師";
-                            break;
-                        case 3:
-                            return "劍士&法師";
-                            break;
-                        case 4:
-                            return "弓箭手";
-                            break;
-                        case 8:
-                            return "盜賊";
-                            break;
-                        case 9:
-                            return "劍士&盜賊";
-                            break;
-                        case 13:
-                            return "劍士&弓手&盜賊";
-                            break;
-                        case 16:
-                            return "海盜";
-                            break;
-                        case 24:
-                            return "傑諾";
-                            break;
-                        default:
-                            return "";
-                            break;
-
+                        switch (reqJob)
+                        {
+                            case -1: return "初心者";
+                            case 0: return "共用";
+                        }
+                    }
+                    else
+                    {
+                        char[] bits = Convert.ToString(reqJob, 2).ToCharArray();
+                        List<string> returnList = new List<string>();
+                        Array.Reverse(bits);
+                        for (int i = 0; i < bits.Length; i++)
+                        {
+                            if (bits[i] == '1')
+                            {
+                                switch (i)
+                                {
+                                    case 0: returnList.Add("劍士"); break;
+                                    case 1: returnList.Add("法師"); break;
+                                    case 2: returnList.Add("弓手"); break;
+                                    case 3: returnList.Add("盜賊"); break;
+                                    case 4: returnList.Add("海盜"); break;
+                                }
+                            }
+                        }
+                        return string.Join("&", returnList);
                     }
                     break;
 
                 case "attackSpeed":
-                    switch (E.ValueToInt())
-                    {
-                        case 3:
-                            return "更快(3)";
-                            break;
-                        case 4:
-                            return "快(4)";
-                            break;
-                        case 5:
-                            return "快(5)";
-                            break;
-                        case 6:
-                            return "普通(6)";
-                            break;
-                        case 7:
-                            return "慢(7)";
-                            break;
-                        case 8:
-                            return "慢(8)";
-                            break;
-                        case 9:
-                            return "比較慢(9)";
-                            break;
-
-                    }
-                    break;
+                    int attackSpeed = E.ValueToInt();
+                    return $"{ItemStringHelper.GetAttackSpeedString(attackSpeed)}({attackSpeed})";
 
                 case "bdR":
                 case "incBDR":
@@ -584,13 +290,12 @@ namespace WzComparerR2.DB2
                 case "damR":
                 case "nbdR":
                     return E.ValueToStr() + "%";
-                    break;
                 case "cash":
                     if (E.ValueToInt() == 0)
                         return "";
-                    if (E.ValueToInt() == 1)
+                    else if (E.ValueToInt() == 1)
                         return "點裝";
-                    break;
+                    else break;
                 case "addition":
                     if (E.HasNode("mobcategory"))
                         return "怪物剋星";
@@ -604,20 +309,18 @@ namespace WzComparerR2.DB2
                         return "獵殺特效";
                     else if (E.HasNode("statinc"))
                         return "追加能力";
-                    break;
+                    else break;
                 case "variableStat":
                     if (E.HasNode("incPAD"))
                         return "攻撃力増加率：" + E.GetNode("incPAD").Value.ToString();
-                    break;
+                    else break;
                 case "incRMAI":
                 case "incRMAL":
                 case "incRMAF":
                 case "incRMAS":
                     return (E.ValueToInt() - 100).ToString() + "%";
-                    break;
                 default:
                     return E.ValueToStr();
-                    break;
             }
 
             return null;
@@ -721,7 +424,7 @@ namespace WzComparerR2.DB2
             var Dir = TabPage(tabIndex).Name;
             if (GetNode("Character/" + Dir) == null)
             {
-                MessageBox.Show(Dir + "  not found");
+                MessageBoxEx.Show(this, Dir + "  not found");
                 return;
             }
 
@@ -970,25 +673,18 @@ namespace WzComparerR2.DB2
             {
                 case "L":
                     return "雷";
-                    break;
                 case "F":
                     return "火";
-                    break;
                 case "I":
                     return "冰";
-                    break;
                 case "S":
                     return "毒";
-                    break;
                 case "D":
                     return "暗";
-                    break;
                 case "P":
-                    return "物理";
-                    break;
+                    return "物";
                 case "H":
                     return "聖";
-                    break;
             }
             return null;
         }
@@ -999,13 +695,10 @@ namespace WzComparerR2.DB2
             {
                 case "1":
                     return "免疫";
-                    break;
                 case "2":
                     return "抵抗";
-                    break;
                 case "3":
                     return "弱點";
-                    break;
             }
             return null;
         }
@@ -1478,7 +1171,7 @@ namespace WzComparerR2.DB2
 
             if (GetNode("Character/Familiar") == null)
             {
-                MessageBox.Show("Familiar  not found");
+                MessageBoxEx.Show(this, "沒有找到萌獸");
                 return;
             }
             Wz_Node CardEntry;
@@ -1696,7 +1389,7 @@ namespace WzComparerR2.DB2
 
             }
             else
-                MessageBox.Show(Grid.Parent.Name + ".BIN" + " not found");
+                MessageBoxEx.Show(this, Grid.Parent.Name + ".BIN" + " not found");
         }
 
 
@@ -1802,7 +1495,6 @@ namespace WzComparerR2.DB2
                 case 35:
                 case 36:
                     return "Item.wz";
-                    break;
 
                 case 3:
                 case 4:
@@ -1826,34 +1518,25 @@ namespace WzComparerR2.DB2
                 case 32:
                 case 34:
                     return "Character.wz";
-                    break;
                 case 17:
                 case 18:
                 case 19:
                     return "Map.wz";
-                    break;
                 case 20:
                     return "Mob.wz";
-                    break;
                 case 21:
                     return "Mob001.wz";
-                    break;
                 case 22:
                     return "Mob2.wz";
-                    break;
                 case 23:
                     return "Skill.wz";
-                    break;
 
                 case 24:
                     return "Npc.wz";
-                    break;
                 case 33:
                     return "Morph.wz";
-                    break;
                 case 37:
                     return "Reactor.wz";
-                    break;
             }
             return "";
         }
@@ -1862,7 +1545,7 @@ namespace WzComparerR2.DB2
         {
             if (PluginManager.FindWz(Wz_Type.Base) == null)
             {
-                MessageBox.Show("沒有開啟Base.wz");
+                MessageBoxEx.Show(this, "沒有開啟Base.wz");
                 return;
             }
 
@@ -1958,7 +1641,7 @@ namespace WzComparerR2.DB2
         private void SaveButton_Click(object sender, EventArgs e)
         {
             Grid.SaveBin(System.Environment.CurrentDirectory + "\\" + Grid.Parent.Name + ".BIN");
-            MessageBox.Show("儲存 " + Grid.Parent.Name + ".BIN 完成");
+            MessageBoxEx.Show(this, "儲存 " + Grid.Parent.Name + ".BIN 完成");
         }
         string Trim(string s)
         {
@@ -2027,69 +1710,51 @@ namespace WzComparerR2.DB2
             {
                 case 0:
                     return "Item/Cash/" + LeftStr(ID, 4) + ".img/" + ID;
-                    break;
                 case 1:
                     return "Item/Consume/" + LeftStr(ID, 4) + ".img/" + ID;
-                    break;
 
                 case 2:
                     return "Item/Special/0" + LeftStr(ID, 3) + ".img/" + ID;
                 case 33:
                 case 35:
                     return "Item/Consume/" + LeftStr(ID, 4) + ".img/" + ID;
-                    break;
 
                 case 3:
                     return "Character/Weapon/" + ID + ".img";
-                    break;
                 case 4:
                     return "Character/Cap/" + ID + ".img";
-                    break;
                 case 5:
                     return "Character/Coat/" + ID + ".img";
-                    break;
                 case 6:
                     return "Character/Longcoat/" + ID + ".img";
-                    break;
 
                 case 7:
                     return "Character/Pants/" + ID + ".img";
-                    break;
                 case 8:
                     return "Character/Shoes/" + ID + ".img";
-                    break;
                 case 9:
                     return "Character/Glove/" + ID + ".img";
-                    break;
                 case 10:
                     return "Character/Ring/" + ID + ".img";
-                    break;
 
                 case 11:
                     return "Character/Cape/" + ID + ".img";
-                    break;
 
                 case 12:
                     return "Character/Accessory/" + ID + ".img";
-                    break;
                 case 13:
                     return "Character/Shield/" + ID + ".img";
-                    break;
                 case 14:
                     return "Character/TamingMob/" + ID + ".img";
-                    break;
                 case 15:
                     return "Character/Hair/" + ID + ".img";
-                    break;
 
                 case 16:
                     return "Character/Face/" + ID + ".img";
-                    break;
                 case 20:
                 case 21:
                 case 22:
                     return "Mob/" + ID + ".img";
-                    break;
 
                 case 23:
 
@@ -2103,13 +1768,10 @@ namespace WzComparerR2.DB2
                         default:
                             return "Skill/" + (int.Parse(ID) / 10000).ToString() + ".img/skill/" + ID;
                     }
-                    break;
                 case 24:
                     return "Npc/" + ID + ".img";
-                    break;
                 case 25:
                     return "Item/Pet/" + ID + ".img";
-                    break;
 
                 case 26:
                     //   if(Arc.ItemWz == null)
@@ -2120,7 +1782,6 @@ namespace WzComparerR2.DB2
                         {
                             case "03015":
                                 return "Item/Install/" + LeftStr(ID, 6) + ".img/" + ID;
-                                break;
                             case "03010":
                             case "03011":
                             case "03012":
@@ -2130,44 +1791,34 @@ namespace WzComparerR2.DB2
                             case "03017":
                             case "03018":
                                 return "Item/Install/" + LeftStr(ID, 5) + ".img/" + ID;
-                                break;
                             default:
                                 return "Item/Install/" + LeftStr(ID, 4) + ".img/" + ID;
-                                break;
                         }
                     }
                     else
                     {
                         return "Item/Install/" + LeftStr(ID, 4) + ".img/" + ID;
                     }
-                    break;
 
                 case 27:
                     return "Character/Android/" + ID + ".img";
-                    break;
                 case 28:
                     return "Character/Mechanic/" + ID + ".img";
-                    break;
 
                 case 29:
                     return "Character/PetEquip/" + ID + ".img";
-                    break;
 
                 case 30:
                     return "Character/Bits/" + ID + ".img";
-                    break;
 
                 case 31:
                     return "Character/MonsterBattle/" + ID + ".img";
-                    break;
 
                 case 32:
                     return "Character/Totem/" + ID + ".img";
-                    break;
 
                 case 36:
                     return "Item/Etc/" + LeftStr(ID, 4) + ".img/" + ID;
-                    break;
             }
             /*
             switch (LeftStr(ID, 2))
@@ -2212,12 +1863,10 @@ namespace WzComparerR2.DB2
             {
                 case 2:
                     return "Character/Face/" + ID + ".img";
-                    break;
                 case 3:
                 case 4:
                 case 6:
                     return "Character/Hair/" + ID + ".img";
-                    break;
                 case 101:
                 case 102:
                 case 103:
@@ -2229,72 +1878,52 @@ namespace WzComparerR2.DB2
                 case 118:
                 case 119:
                     return "Character/Accessory/" + ID + ".img";
-                    break;
                 case 120:
                     return "Character/Totem/" + ID + ".img";
-                    break;
                 case 100:
                     return "Character/Cap/" + ID + ".img";
-                    break;
                 case 110:
                     return "Character/Cape/" + ID + ".img";
-                    break;
                 case 104:
                     return "Character/Coat/" + ID + ".img";
-                    break;
                 case 105:
                     return "Character/Longcoat/" + ID + ".img";
-                    break;
                 case 106:
                     return "Character/Pants/" + ID + ".img";
-                    break;
                 case 107:
                     return "Character/Shoes/" + ID + ".img";
-                    break;
                 case 108:
                     return "Character/Glove/" + ID + ".img";
                 case 109:
-                    return "Character/Shield/" + ID + ".img"; 
-                    break;
+                    return "Character/Shield/" + ID + ".img";
 
                 case 111:
                     return "Character/Ring/" + ID + ".img";
-                    break;
 
                 case 161:
                     return "Character/Mechanic/" + ID + ".img";
-                    break;
 
                 case 166:
                 case 167:
                     return "Character/Android/" + ID + ".img";
-                    break;
                 case 168:
                     return "Character/Bits/" + ID + ".img";
-                    break;
                 case int n when (n >=121 && n <=170):
                     return "Character/Weapon/" + ID + ".img";
-                    break;
                 case int n when (n >= 190 && n <= 199):
                     return "Character/TamingMob/" + ID + ".img";
-                    break;
                 case 180:
                     return "Character/PetEquip/" + ID + ".img";
-                    break;
                 case 996:
                 case 997:
                     return "Character/Familiar/" + ID + ".img";
-                    break;
                 case int n when (n >= 200 && n <= 294):
                     return  "Item/Consume/" + LeftStr(ID, 4) + ".img/" + ID;
-                    break;
                 case int n when (n >= 400 && n <= 446):
                     return "Item/Etc/" + LeftStr(ID, 4) + ".img/" + ID;
-                    break;
 
                 case 500:
                     return "Item/Pet/" + ID + ".img";
-                    break;
 
 
             }
@@ -2461,7 +2090,7 @@ namespace WzComparerR2.DB2
                 }
                 catch (System.Runtime.InteropServices.ExternalException)
                 {
-                    MessageBox.Show("The Clipboard could not be accessed. Please try again.");
+                    MessageBoxEx.Show(this, "The Clipboard could not be accessed. Please try again.");
                 }
             }
         }
@@ -2497,7 +2126,7 @@ namespace WzComparerR2.DB2
             if (!soundPlayer.Init())
             {
                 //  Un4seen.Bass.BASSError error = soundPlayer.GetLastError();
-                //  MessageBox.Show("Bass初始化失败！\r\n\r\nerrorCode : " + (int)error + "(" + error + ")","虫子");
+                //  MessageBoxEx.Show(this, "Bass初始化失败！\r\n\r\nerrorCode : " + (int)error + "(" + error + ")","虫子");
             }
             for (int i = 0; i <= 38; i++)
             {

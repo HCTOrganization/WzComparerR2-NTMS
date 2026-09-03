@@ -245,7 +245,7 @@
             "圖騰",
             "變身",
             "萌獸",
-            "傷害字形",
+            "傷害字型",
             "其他",
             "Reactor",
             "音樂"});
@@ -1143,7 +1143,7 @@
             this.tabItemDamageSkin.GlobalItem = false;
             this.tabItemDamageSkin.ImageIndex = 30;
             this.tabItemDamageSkin.Name = "tabItemDamageSkin";
-            this.tabItemDamageSkin.Text = "傷害字形";
+            this.tabItemDamageSkin.Text = "傷害字型";
             // 
             // Etc
             // 
