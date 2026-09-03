@@ -324,7 +324,8 @@ namespace WzComparerR2.DB2
                 else
                     Icon = null;
 
-                var CardName = GetNode("String/Consume.img/" + CardID).GetValue2("name","");
+                // var CardName = GetNode("String/Consume.img/" + CardID).GetValue2("name", "");
+                if (string.IsNullOrEmpty(CardID) || Icon == null) continue;
                 ImageList.Add((Icon, "0" + CardID));
             }
         }

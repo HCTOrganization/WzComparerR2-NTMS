@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows.Forms;
+﻿using DevComponents.DotNetBar;
 using WzComparerR2.Common;
 using WzComparerR2.Controls;
 using WzComparerR2.PluginBase;
@@ -59,7 +58,7 @@ namespace WzComparerR2.DB2
         {
             if (PluginManager.FindWz(Wz_Type.Base) == null)
             {
-                MessageBox.Show("沒有開啟Base.wz");
+                MessageBoxEx.Show("沒有開啟Base.wz");
                 return false;
             }
             return true;
