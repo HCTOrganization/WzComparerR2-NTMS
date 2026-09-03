@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 using DevComponents.DotNetBar;
 
@@ -100,6 +100,46 @@ namespace WzComparerR2.DB2
             bool dark = IsDarkMode;
             listBox.BackColor = dark ? DarkBackColor : Color.White;
             listBox.ForeColor = dark ? DarkForeColor : Color.Black;
+        }
+
+        /// <summary>
+        /// 快顯選單同樣不會跟著 StyleManager，深色樣式下必須換掉繪製器，
+        /// 否則會以系統色畫成白底。
+        /// </summary>
+        public static void Apply(ToolStrip toolStrip)
+        {
+            if (toolStrip == null)
+            {
+                return;
+            }
+
+            if (IsDarkMode)
+            {
+                toolStrip.Renderer = new ToolStripProfessionalRenderer(new DarkColorTable());
+                toolStrip.BackColor = DarkHeaderBackColor;
+                toolStrip.ForeColor = DarkForeColor;
+            }
+            else
+            {
+                toolStrip.RenderMode = ToolStripRenderMode.ManagerRenderMode;
+                toolStrip.BackColor = SystemColors.Control;
+                toolStrip.ForeColor = SystemColors.ControlText;
+            }
+        }
+
+        private sealed class DarkColorTable : ProfessionalColorTable
+        {
+            public override Color ToolStripDropDownBackground => DarkHeaderBackColor;
+            public override Color ImageMarginGradientBegin => DarkHeaderBackColor;
+            public override Color ImageMarginGradientMiddle => DarkHeaderBackColor;
+            public override Color ImageMarginGradientEnd => DarkHeaderBackColor;
+            public override Color MenuItemSelected => DarkSelectionBackColor;
+            public override Color MenuItemSelectedGradientBegin => DarkSelectionBackColor;
+            public override Color MenuItemSelectedGradientEnd => DarkSelectionBackColor;
+            public override Color MenuItemBorder => DarkSelectionBackColor;
+            public override Color MenuBorder => DarkGridColor;
+            public override Color SeparatorDark => DarkGridColor;
+            public override Color SeparatorLight => DarkGridColor;
         }
     }
 }

@@ -2426,6 +2426,7 @@ namespace WzComparerR2.DB2
 
             ContextMenuStrip m = new ContextMenuStrip();
             m.Items.Add("Copy");
+            Db2Theme.Apply(m);
             m.Show(grid, new Point(e.X, e.Y));
 
             if (grid.GetCellCount(DataGridViewElementStates.Selected) > 0)

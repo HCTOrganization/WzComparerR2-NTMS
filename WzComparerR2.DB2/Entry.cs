@@ -77,6 +77,12 @@ namespace WzComparerR2.DB2
             button = new ButtonItem("", buttonText)
             {
                 FixedSize = new System.Drawing.Size(buttonWidth, 65),
+                // FixedSize 讓按鈕比文字寬，而預設的「圖片在左」版面會把文字推到左邊靠齊。
+                // 改成「圖片在上」文字就會置中，但沒有圖片時整塊會貼齊頂端，
+                // 因此補一張透明佔位圖把文字帶回垂直中央。
+                ImagePosition = eImagePosition.Top,
+                Image = new System.Drawing.Bitmap(1, 20),
+                AutoDisposeImages = true,
             };
             button.Click += onClick;
             bar.Items.Add(button);
