@@ -63,12 +63,26 @@ namespace WzComparerR2.DB2
 
         public static string ImgName(this Wz_Node Node)
         {
-            return Node.GetNodeWzImage().Name;
+            try
+            {
+                return Node.GetNodeWzImage().Name;
+            }
+            catch
+            {
+                return "(null)";
+            }
         }
 
         public static string ImgID(this Wz_Node Node)
         {
-            return Node.GetNodeWzImage().Name.Replace(".img", "");
+            try
+            {
+                return Node.GetNodeWzImage().Name.Replace(".img", "");
+            }
+            catch
+            {
+                return "0";
+            }
         }
 
         public static T GetValue2<T>(this Wz_Node Node, string Path, T DefaultValue)
@@ -79,8 +93,9 @@ namespace WzComparerR2.DB2
 
         public static Wz_Node FindNodeByPathA(this Wz_Node Node, string FullPath, bool ExtractImage)
         {
-            string[] Patten = FullPath.Split('/');
-            return Node.FindNodeByPath(ExtractImage, Patten);
+            string[] Pattern = FullPath.Split('/');
+            if (Node == null) return null;
+            return Node.FindNodeByPath(ExtractImage, Pattern);
         }
 
         public static string FullPathToFileEx(this Wz_Node Node)
