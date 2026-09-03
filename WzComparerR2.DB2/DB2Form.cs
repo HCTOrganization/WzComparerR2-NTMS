@@ -1710,6 +1710,10 @@ namespace WzComparerR2.DB2
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (!gridsReady)
+            {
+                return;
+            }
             if (comboBox1.Text == "Load From BIN")
             {
 
@@ -2298,25 +2302,45 @@ namespace WzComparerR2.DB2
             return null;
         }
 
+        /// <summary>
+        /// 下拉選單改成 DropDownList 之後，未選取時 Text 會是空字串，
+        /// 因此一律走安全解析，避免 int.Parse 直接丟例外。
+        /// </summary>
+        private static int ParseOr(string text, int fallback)
+        {
+            return int.TryParse(text, out int value) && value > 0 ? value : fallback;
+        }
+
+        private const int DefaultCellFontSize = 11;
+
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Grid.DefaultCellStyle.Font = new System.Drawing.Font("微軟正黑體", int.Parse(comboBox2.Text));
-            SearchGrid.DefaultCellStyle.Font = new System.Drawing.Font("微軟正黑體", int.Parse(comboBox2.Text));
+            if (!gridsReady)
+            {
+                return;
+            }
+            var font = new System.Drawing.Font("微軟正黑體", ParseOr(comboBox2.Text, DefaultCellFontSize));
+            Grid.DefaultCellStyle.Font = font;
+            SearchGrid.DefaultCellStyle.Font = font;
         }
 
         private void comboBox3_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Grid.RowTemplate.Height = int.Parse(comboBox3.Text);
-            //  SearchGrid.RowTemplate.Height = int.Parse(comboBox3.Text);
+            if (!gridsReady)
+            {
+                return;
+            }
+            Grid.RowTemplate.Height = ParseOr(comboBox3.Text, Grid.RowTemplate.Height);
             LoadButton_Click(sender, e);
-
-
         }
 
         private void comboBox4_SelectedIndexChanged(object sender, EventArgs e)
         {
 
-            tabControl1.SelectedTabIndex = comboBox4.SelectedIndex;
+            if (comboBox4.SelectedIndex >= 0)
+            {
+                tabControl1.SelectedTabIndex = comboBox4.SelectedIndex;
+            }
 
         }
 
@@ -2455,7 +2479,7 @@ namespace WzComparerR2.DB2
             {
                 column.SortMode = DataGridViewColumnSortMode.NotSortable;
             }
-            grid.DefaultCellStyle.Font = new System.Drawing.Font("微軟正黑體", int.Parse(comboBox2.Text));
+            grid.DefaultCellStyle.Font = new System.Drawing.Font("微軟正黑體", ParseOr(comboBox2.Text, DefaultCellFontSize));
         }
 
         private void Form1_Load(object sender, EventArgs e)

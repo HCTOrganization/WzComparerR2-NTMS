@@ -175,6 +175,9 @@
             // 
             // comboBox2
             // 
+            this.comboBox2.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox2.FormattingEnabled = true;
             this.comboBox2.Items.AddRange(new object[] {
             "6",
@@ -200,6 +203,9 @@
             this.comboBox4.DropDownHeight = 500;
             this.comboBox4.DropDownWidth = 40;
             this.comboBox4.Font = new System.Drawing.Font("微軟正黑體", 7.8F);
+            this.comboBox4.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.comboBox4.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox4.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox4.FormattingEnabled = true;
             this.comboBox4.IntegralHeight = false;
             this.comboBox4.ItemHeight = 17;
@@ -266,6 +272,9 @@
             // 
             // comboBox3
             // 
+            this.comboBox3.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.comboBox3.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox3.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox3.FormattingEnabled = true;
             this.comboBox3.Items.AddRange(new object[] {
             "15",
@@ -339,6 +348,9 @@
             // comboBox1
             // 
             this.comboBox1.Font = new System.Drawing.Font("微軟正黑體", 9F);
+            this.comboBox1.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.comboBox1.FormattingEnabled = true;
             this.comboBox1.ItemHeight = 19;
             this.comboBox1.Items.AddRange(new object[] {

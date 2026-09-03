@@ -41,6 +41,7 @@ namespace WzComparerR2.DB2
             return Db2Host.GetNode(Path);
         }
         List<(Bitmap, string)> ImageList;
+        private FormWindowState lastWindowState;
         bool[] HasLoaded = new bool[34];
         DataGridView[] ImageGrids = new DataGridView[34];
         DataGridView ShowImageGrid;
@@ -389,7 +390,9 @@ namespace WzComparerR2.DB2
             // dataViewImages.Rows.Clear();
             // dataViewImages.Columns.Clear();
             // dataViewImages.Refresh();
-            int numColumnsForWidth = (dataViewImages.Width - 10) / (GridSize + 20);
+            // 記住格子邊長，視窗縮放時 ReflowGrid 需要它重新排版。
+            dataViewImages.Tag = GridSize;
+            int numColumnsForWidth = Math.Max(1, (dataViewImages.ClientSize.Width - ScrollBarAllowance) / (GridSize + 20));
             int numRows = 0;
             int numImages = ImageList.Count;
             numRows = numImages / numColumnsForWidth;
@@ -460,10 +463,10 @@ namespace WzComparerR2.DB2
             for(int i = 0;i < 34;i++)
             {
                 ImageGrids[i] = new DataGridView();
-                ImageGrids[i].Width = 620;
-                ImageGrids[i].Height = 470;
                 ImageGrids[i].ColumnHeadersVisible = false;
                 ImageGrids[i].RowHeadersVisible = false;
+                ImageGrids[i].ScrollBars = ScrollBars.Vertical;
+                SizeGrid(ImageGrids[i]);
                 Db2Theme.Apply(ImageGrids[i]);
 
                 ImageGrids[i].CellClick += (s,e2) =>
@@ -495,6 +498,23 @@ namespace WzComparerR2.DB2
             }
             ShowImageGrid = ImageGrids[0];
             Db2Theme.Apply(this.listBox1);
+
+            // 清單靠左撐滿高度，表格填滿剩下的空間。
+            listBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom;
+            this.lastWindowState = this.WindowState;
+            this.Resize += (s, e1) =>
+            {
+                LayoutChildren();
+                // 最大化／還原不會觸發 ResizeEnd，這裡補一次重排。
+                if(this.WindowState != this.lastWindowState)
+                {
+                    this.lastWindowState = this.WindowState;
+                    ReflowGrid(ShowImageGrid);
+                }
+            };
+            // 拖曳邊框的過程只調整大小，放開滑鼠才重排，避免中途卡頓。
+            this.ResizeEnd += (s, e1) => ReflowGrid(ShowImageGrid);
+            LayoutChildren();
 
             if(!System.Windows.Forms.SystemInformation.TerminalServerSession)
             {
@@ -699,6 +719,85 @@ namespace WzComparerR2.DB2
             ShowImageGrid.Focus();
         }
 
+        /// <summary>捲軸與外框預留的寬度。</summary>
+        private const int ScrollBarAllowance = 24;
+
+        private const int GridMargin = 10;
+
+        /// <summary>把清單與圖示表格撐滿目前的視窗。</summary>
+        private void LayoutChildren()
+        {
+            if(this.ClientSize.Width <= 0 || this.ClientSize.Height <= 0)
+                return;
+
+            listBox1.Top = GridMargin;
+            listBox1.Height = Math.Max(50,this.ClientSize.Height - GridMargin * 2);
+
+            SizeGrid(ShowImageGrid);
+        }
+
+        private void SizeGrid(DataGridView grid)
+        {
+            if(grid == null || this.ClientSize.Width <= 0)
+                return;
+
+            int left = listBox1.Right + 8;
+            grid.Left = left;
+            grid.Top = GridMargin;
+            grid.Width = Math.Max(100,this.ClientSize.Width - left - GridMargin);
+            grid.Height = Math.Max(100,this.ClientSize.Height - GridMargin * 2);
+        }
+
+        /// <summary>
+        /// 依表格目前的寬度重新排版圖示。
+        /// 圖片本身已經放在儲存格裡，所以直接把既有內容取出來重排，不必重讀 WZ。
+        /// </summary>
+        private void ReflowGrid(DataGridView grid)
+        {
+            if(grid == null || !(grid.Tag is int gridSize) || grid.Columns.Count == 0)
+                return;
+
+            int cell = gridSize + 20;
+            int columns = Math.Max(1,(grid.ClientSize.Width - ScrollBarAllowance) / cell);
+            if(columns == grid.Columns.Count)
+                return;
+
+            var items = new List<(object Value, string Tip)>();
+            foreach(DataGridViewRow row in grid.Rows)
+                foreach(DataGridViewCell cellItem in row.Cells)
+                    if(cellItem.Value != null)
+                        items.Add((cellItem.Value, cellItem.ToolTipText));
+
+            if(items.Count == 0)
+                return;
+
+            grid.SuspendLayout();
+            grid.Rows.Clear();
+            grid.Columns.Clear();
+
+            for(int i = 0;i < columns;i++)
+            {
+                grid.Columns.Add(new DataGridViewImageColumn());
+                grid.Columns[i].Width = cell;
+            }
+
+            int rows = (items.Count + columns - 1) / columns;
+            for(int i = 0;i < rows;i++)
+            {
+                grid.Rows.Add();
+                grid.Rows[i].Height = cell;
+            }
+
+            for(int i = 0;i < items.Count;i++)
+            {
+                var target = grid.Rows[i / columns].Cells[i % columns];
+                target.Value = items[i].Value;
+                target.ToolTipText = items[i].Tip;
+            }
+
+            grid.ResumeLayout();
+        }
+
         private void listBox1_SelectedIndexChanged(object sender,EventArgs e)
         {
             if(PluginManager.FindWz(Wz_Type.Base) == null)
@@ -708,6 +807,10 @@ namespace WzComparerR2.DB2
             }
             var SelectIndex = listBox1.SelectedIndex;
             ShowImageGrid.Parent = null;
+
+            // 先把即將載入的表格調整成目前視窗大小，
+            // LoadImages 是依表格寬度決定欄數的，順序反了就會排錯。
+            SizeGrid(ImageGrids[SelectIndex]);
             var Graphic = this.CreateGraphics();
             var Font = new System.Drawing.Font(FontFamily.GenericSansSerif,20,FontStyle.Bold);
             Graphic.DrawString("Loading...",Font,Brushes.Black,100,100);
@@ -862,10 +965,10 @@ namespace WzComparerR2.DB2
             //  ImageGrids[SelectIndex].ResumeLayout();
             ShowImageGrid = ImageGrids[SelectIndex];
             ShowImageGrid.Parent = this;
-            ShowImageGrid.Left = 80;
-            ShowImageGrid.Top = 10;
             ShowImageGrid.AllowUserToResizeColumns = false;
             ShowImageGrid.AllowUserToResizeRows = false;
+            SizeGrid(ShowImageGrid);
+            ReflowGrid(ShowImageGrid);
             ShowImageGrid.Focus();
 
 

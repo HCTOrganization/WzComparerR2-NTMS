@@ -74,7 +74,7 @@ namespace WzComparerR2.DB2
             this.listBox1.Location = new System.Drawing.Point(9, 9);
             this.listBox1.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(62, 472);
+            this.listBox1.Size = new System.Drawing.Size(80, 472);
             this.listBox1.TabIndex = 4;
             this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
@@ -85,7 +85,7 @@ namespace WzComparerR2.DB2
             this.ClientSize = new System.Drawing.Size(714, 498);
             this.Controls.Add(this.listBox1);
             this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
-            this.MaximumSize = new System.Drawing.Size(732, 544);
+            this.MinimumSize = new System.Drawing.Size(420, 320);
             this.Name = "IconsForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "圖示預覽";
