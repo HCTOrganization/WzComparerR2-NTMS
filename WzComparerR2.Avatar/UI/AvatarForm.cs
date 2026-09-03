@@ -900,7 +900,7 @@ namespace WzComparerR2.Avatar.UI
                     this.SelectBodyAction(forceAction);
                 }
 
-                int forceEmotion = this.avatar.Chair.Node.FindNodeByPath("info\\sitEmotion").GetValueEx<int>(-1);
+                int forceEmotion = this.avatar.Chair.Node.FindNodeByPath("info\\sitEmotion").GetValueEx<int>(0);
                 string forceEmotionName = forceEmotion < AvatarCanvas.EmotionTable.Count ? AvatarCanvas.EmotionTable[forceEmotion] : string.Empty;
                 if (!string.IsNullOrEmpty(forceEmotionName))
                     this.FixEmotion(forceEmotionName, -1);
