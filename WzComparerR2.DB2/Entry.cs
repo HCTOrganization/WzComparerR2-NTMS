@@ -1,0 +1,137 @@
+﻿using System;
+using System.Windows.Forms;
+using DevComponents.DotNetBar;
+using WzComparerR2.PluginBase;
+
+namespace WzComparerR2.DB2
+{
+    /// <summary>
+    /// MapleStoryDB2 外掛進入點。
+    ///
+    /// 提供三個以清單／圖示瀏覽 WZ 內容的視窗：
+    /// MapleStoryDB2（分類資料表）、圖示預覽、圖片瀏覽。
+    /// 功能移植自 WzComparerR2-Plus (WzComparerR2++)。
+    /// </summary>
+    public class Entry : PluginEntry
+    {
+        public Entry(PluginContext context)
+            : base(context)
+        {
+        }
+
+        private RibbonBar barDB2;
+        private RibbonBar barIcons;
+        private RibbonBar barPicViewer;
+
+        private DB2Form db2Form;
+        private IconsForm iconsForm;
+        private ImageViewerForm imageViewerForm;
+
+        protected override void OnLoad()
+        {
+            Db2Host.Context = this.Context;
+
+            this.barDB2 = AddButton("DB2", "MapleStoryDB2", 100, btnDB2_Click, out _);
+            this.barIcons = AddButton("Icons", "圖示預覽", 66, btnIcons_Click, out _);
+            this.barPicViewer = AddButton("Pic Viewer", "圖片瀏覽", 66, btnPicViewer_Click, out _);
+
+            this.Context.MainStyleChanged += Context_MainStyleChanged;
+        }
+
+        protected override void OnUnload()
+        {
+            this.Context.MainStyleChanged -= Context_MainStyleChanged;
+
+            MapRenderLauncher.Close();
+
+            DisposeForm(ref this.db2Form);
+            DisposeForm(ref this.iconsForm);
+            DisposeForm(ref this.imageViewerForm);
+
+            Db2Host.Context = null;
+        }
+
+        /// <summary>
+        /// 主程式切換樣式（例如切到 VisualStudio2012Dark）時，
+        /// 讓已經開啟的視窗跟著換色。
+        /// </summary>
+        private void Context_MainStyleChanged(object sender, EventArgs e)
+        {
+            if (this.db2Form != null && !this.db2Form.IsDisposed)
+            {
+                this.db2Form.ApplyTheme();
+            }
+            if (this.iconsForm != null && !this.iconsForm.IsDisposed)
+            {
+                this.iconsForm.ApplyTheme();
+            }
+            if (this.imageViewerForm != null && !this.imageViewerForm.IsDisposed)
+            {
+                this.imageViewerForm.ApplyTheme();
+            }
+        }
+
+        private RibbonBar AddButton(string barText, string buttonText, int buttonWidth, EventHandler onClick, out ButtonItem button)
+        {
+            var bar = this.Context.AddRibbonBar("Tools", barText);
+            button = new ButtonItem("", buttonText)
+            {
+                FixedSize = new System.Drawing.Size(buttonWidth, 65),
+                // FixedSize 讓按鈕比文字寬，而預設的「圖片在左」版面會把文字推到左邊靠齊。
+                // 改成「圖片在上」文字就會置中，但沒有圖片時整塊會貼齊頂端，
+                // 因此補一張透明佔位圖把文字帶回垂直中央。
+                ImagePosition = eImagePosition.Top,
+                Image = new System.Drawing.Bitmap(1, 20),
+                AutoDisposeImages = true,
+            };
+            button.Click += onClick;
+            bar.Items.Add(button);
+            bar.Width = buttonWidth + 10;
+            return bar;
+        }
+
+        private void btnDB2_Click(object sender, EventArgs e)
+        {
+            ShowForm(ref this.db2Form, () => new DB2Form());
+        }
+
+        private void btnIcons_Click(object sender, EventArgs e)
+        {
+            if (Db2Host.RequireBaseWz())
+            {
+                ShowForm(ref this.iconsForm, () => new IconsForm());
+            }
+        }
+
+        private void btnPicViewer_Click(object sender, EventArgs e)
+        {
+            if (Db2Host.RequireBaseWz())
+            {
+                ShowForm(ref this.imageViewerForm, () => new ImageViewerForm());
+            }
+        }
+
+        private static void ShowForm<T>(ref T form, Func<T> factory) where T : Form
+        {
+            if (form == null || form.IsDisposed)
+            {
+                form = factory();
+            }
+            form.Show();
+            form.BringToFront();
+        }
+
+        private static void DisposeForm<T>(ref T form) where T : Form
+        {
+            if (form != null)
+            {
+                if (!form.IsDisposed)
+                {
+                    // 各表單的 FormClosing 會取消關閉改為隱藏，因此直接 Dispose。
+                    form.Dispose();
+                }
+                form = null;
+            }
+        }
+    }
+}

@@ -620,6 +620,9 @@ namespace WzComparerR2
                 this.clbRootNode.BackColor = System.Drawing.Color.White;
                 this.clbRootNode.ForeColor = System.Drawing.Color.Black;
             }
+
+            // 讓外掛（例如 MapleStoryDB2）能跟著切換配色。
+            this.mainStyleChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void styleColorPicker_SelectedColorChanged(object sender, EventArgs e)
@@ -5347,6 +5350,19 @@ namespace WzComparerR2
             get { return advTree3.SelectedNode.AsWzNode(); }
         }
 
+        bool PluginContextProvider.SelectNode(Wz_Node node)
+        {
+            if (node == null)
+            {
+                return false;
+            }
+            if (this.InvokeRequired)
+            {
+                return (bool)this.Invoke(new Func<Wz_Node, bool>(((PluginContextProvider)this).SelectNode), node);
+            }
+            return this.OnSelectedWzNode(node);
+        }
+
         private EventHandler<WzNodeEventArgs> selectedNode1Changed;
         private EventHandler<WzNodeEventArgs> selectedNode2Changed;
         private EventHandler<WzNodeEventArgs> selectedNode3Changed;
@@ -5391,6 +5407,19 @@ namespace WzComparerR2
         AlphaForm PluginContextProvider.DefaultTooltipWindow
         {
             get { return this.tooltipQuickView; }
+        }
+
+        eStyle PluginContextProvider.MainStyle
+        {
+            get { return this.styleManager1.ManagerStyle; }
+        }
+
+        private EventHandler mainStyleChanged;
+
+        event EventHandler PluginContextProvider.MainStyleChanged
+        {
+            add { mainStyleChanged += value; }
+            remove { mainStyleChanged -= value; }
         }
 
         private void RegisterPluginEvents()
