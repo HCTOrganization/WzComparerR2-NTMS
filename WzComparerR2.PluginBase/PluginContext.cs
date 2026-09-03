@@ -89,6 +89,31 @@ namespace WzComparerR2.PluginBase
         }
 
         /// <summary>
+        /// 主視窗目前套用的 DotNetBar 樣式。
+        /// </summary>
+        public eStyle MainStyle
+        {
+            get { return this.contextProvider.MainStyle; }
+        }
+
+        /// <summary>
+        /// 主視窗目前是否為深色樣式（VisualStudio2012Dark）。
+        /// </summary>
+        public bool IsDarkMode
+        {
+            get { return this.MainStyle == eStyle.VisualStudio2012Dark; }
+        }
+
+        /// <summary>
+        /// 主視窗樣式變更時發生，外掛可藉此同步更新自己的視窗配色。
+        /// </summary>
+        public event EventHandler MainStyleChanged
+        {
+            add { contextProvider.MainStyleChanged += value; }
+            remove { contextProvider.MainStyleChanged -= value; }
+        }
+
+        /// <summary>
         /// 在主視窗的 WZ 樹狀圖中選取指定節點，使其成為目前節點。
         /// </summary>
         /// <param name="node">要選取的節點。</param>
