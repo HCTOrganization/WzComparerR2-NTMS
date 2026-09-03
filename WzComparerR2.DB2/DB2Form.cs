@@ -24,14 +24,38 @@ namespace WzComparerR2.DB2
 {
 
 
-    public partial class DB2Form : Form
+    public partial class DB2Form : DevComponents.DotNetBar.Office2007Form
     {
         public DB2Form()
         {
             InitializeComponent();
             Instance = this;
+            Db2Theme.Apply(this);
         }
         public static DB2Form Instance;
+
+        /// <summary>
+        /// 取得指定索引分頁所附掛的面板，等同舊版的 tabControl1.TabPages[index]。
+        /// </summary>
+        private DevComponents.DotNetBar.SuperTabControlPanel TabPage(int index)
+        {
+            return ((DevComponents.DotNetBar.SuperTabItem)this.tabControl1.Tabs[index]).AttachedControl
+                as DevComponents.DotNetBar.SuperTabControlPanel;
+        }
+
+        /// <summary>Form1_Load 建立完所有 DataViewer 之後才為 true。</summary>
+        private bool gridsReady;
+
+        /// <summary>依主程式目前的樣式重新套用配色，主程式切換樣式時由 Entry 呼叫。</summary>
+        public void ApplyTheme()
+        {
+            Db2Theme.Apply(this);
+            for (int i = 0; i < DataGrid.Length; i++)
+            {
+                Db2Theme.Apply(DataGrid[i]);
+                Db2Theme.Apply(TempGrid[i]);
+            }
+        }
         List<string> ColList, ColList1, RowList;
         Dictionary<int, List<string>> RowList1;
         int Row1 = -1;
@@ -112,7 +136,7 @@ namespace WzComparerR2.DB2
 
         void LoadItem()
         {
-            var ItemDir = tabControl1.TabPages[tabIndex].Name;
+            var ItemDir = TabPage(tabIndex).Name;
             Wz_Node Child;
             switch (ItemDir)
             {
@@ -694,7 +718,7 @@ namespace WzComparerR2.DB2
             ToName.Add("critical", "會心一擊");
             ToName.Add("mobdie", "獵殺特效");
             ToName.Add("statinc", "追加能力");
-            var Dir = tabControl1.TabPages[tabIndex].Name;
+            var Dir = TabPage(tabIndex).Name;
             if (GetNode("Character/" + Dir) == null)
             {
                 MessageBox.Show(Dir + "  not found");
@@ -1620,14 +1644,37 @@ namespace WzComparerR2.DB2
                     {
                         if (LeftStr(Iter2.Text, 3) == "Bgm" || LeftStr(Iter2.Text, 4) == "PL_3" || LeftStr(Iter2.Text, 4) == "PL_B" || LeftStr(Iter2.Text, 4) == "PL_C" || LeftStr(Iter2.Text, 4) == "PL_M")
                         {
-                            foreach (var Iter3 in GetNode(Iter2.FullPathToFile2()).Nodes)
-                                Grid.Rows.Add(Iter3.GetPath());
+                            var imgNode = GetNode(Iter2.FullPathToFile2());
+                            if (imgNode != null)
+                            {
+                                AddMusicRows(imgNode);
+                            }
                         }
                     }
                 }
             }
 
             Grid.Sort(Grid.Columns[0], System.ComponentModel.ListSortDirection.Ascending);
+        }
+
+        /// <summary>
+        /// 遞迴列出 img 底下所有音檔。
+        /// PL_MONAD.img 這類 img 會把音檔再包一層資料夾（例如 effectSound/），
+        /// 只取第一層的話會把資料夾當成音檔，點下去自然播不出來。
+        /// </summary>
+        void AddMusicRows(Wz_Node node)
+        {
+            foreach (var child in node.Nodes)
+            {
+                if (child.Value is Wz_Sound)
+                {
+                    Grid.Rows.Add(child.GetPath());
+                }
+                else if (child.Nodes.Count > 0)
+                {
+                    AddMusicRows(child);
+                }
+            }
         }
         DataViewer[] DataGrid = new DataViewer[39];
         DataViewer[] TempGrid = new DataViewer[39];
@@ -1681,18 +1728,25 @@ namespace WzComparerR2.DB2
 
         }
 
-        private void tabControl1_Selected(object sender, TabControlEventArgs e)
+        private void tabControl1_SelectedTabChanged(object sender, DevComponents.DotNetBar.SuperTabStripSelectedTabChangedEventArgs e)
         {
             // NTMS 版的 FrmMapRender2 沒有公開的 form 欄位，切換分頁時不再隱藏地圖視窗。
 
+            // SuperTabControl 在建立分頁的過程中就會觸發本事件，
+            // 此時 Form1_Load 尚未建立 DataViewer，必須先擋掉。
+            if (!gridsReady)
+            {
+                return;
+            }
+
             Row1 = -1;
-            tabIndex = tabControl1.SelectedIndex;
+            tabIndex = tabControl1.SelectedTabIndex;
             Grid = DataGrid[tabIndex];
             SearchGrid = TempGrid[tabIndex];
             Grid.Visible = true;
             SearchGrid.Visible = false;
             SearchBox.Clear();
-            comboBox4.SelectedIndex = tabControl1.SelectedIndex;
+            comboBox4.SelectedIndex = tabControl1.SelectedTabIndex;
 
             switch (Grid.DefaultGridType)
             {
@@ -2262,7 +2316,7 @@ namespace WzComparerR2.DB2
         private void comboBox4_SelectedIndexChanged(object sender, EventArgs e)
         {
 
-            tabControl1.SelectedIndex = comboBox4.SelectedIndex;
+            tabControl1.SelectedTabIndex = comboBox4.SelectedIndex;
 
         }
 
@@ -2304,13 +2358,18 @@ namespace WzComparerR2.DB2
                 }
                 else if (tabIndex == 38)
                 {
-                    Wz_Sound sound = null;
-                    if (GetNode("Sound/" + SelectID) != null)
-                        sound = (Wz_Sound)GetNode("Sound/" + SelectID).Value;
+                    // SelectID 是 img 內的相對路徑，例如 PL_MONAD.img/effectSound/Caravan_Bad。
+                    var soundNode = GetNode("Sound/" + SelectID);
+                    if (!(soundNode?.Value is Wz_Sound sound))
+                    {
+                        // 不是音檔（例如仍是資料夾節點）就不播放。
+                        return;
+                    }
                     soundPlayer.UnLoad();
                     byte[] data = sound.ExtractSound();
                     if (data == null || data.Length <= 0)
                     {
+                        // Wz_SoundType.Binary 之類無法解析的資料，ExtractSound 會傳回 null。
                         return;
                     }
                     soundPlayer.PreLoad(data);
@@ -2426,9 +2485,9 @@ namespace WzComparerR2.DB2
                     case 26:
                     case 36:
                         DataGrid[i] = new DataViewer(GridType.Item);
-                        DataGrid[i].Parent = tabControl1.TabPages[i];
+                        DataGrid[i].Parent = TabPage(i);
                         TempGrid[i] = new DataViewer(GridType.Item);
-                        TempGrid[i].Parent = tabControl1.TabPages[i];
+                        TempGrid[i].Parent = TabPage(i);
                         break;
 
                     case 3:
@@ -2452,70 +2511,70 @@ namespace WzComparerR2.DB2
                     case 31:
                     case 32:
                         DataGrid[i] = new DataViewer(GridType.Normal);
-                        DataGrid[i].Parent = tabControl1.TabPages[i];
+                        DataGrid[i].Parent = TabPage(i);
                         TempGrid[i] = new DataViewer(GridType.Normal);
-                        TempGrid[i].Parent = tabControl1.TabPages[i];
+                        TempGrid[i].Parent = TabPage(i);
                         break;
 
                     case 17:
                     case 18:
                     case 19:
                         DataGrid[i] = new DataViewer(GridType.Map);
-                        DataGrid[i].Parent = tabControl1.TabPages[i];
+                        DataGrid[i].Parent = TabPage(i);
                         TempGrid[i] = new DataViewer(GridType.Map);
-                        TempGrid[i].Parent = tabControl1.TabPages[i];
+                        TempGrid[i].Parent = TabPage(i);
                         break;
                     case 20:
                     case 21:
                     case 22:
                         DataGrid[i] = new DataViewer(GridType.Mob);
-                        DataGrid[i].Parent = tabControl1.TabPages[i];
+                        DataGrid[i].Parent = TabPage(i);
                         TempGrid[i] = new DataViewer(GridType.Mob);
-                        TempGrid[i].Parent = tabControl1.TabPages[i];
+                        TempGrid[i].Parent = TabPage(i);
                         break;
                     case 23:
 
                         DataGrid[i] = new DataViewer(GridType.Skill);
-                        DataGrid[i].Parent = tabControl1.TabPages[i];
+                        DataGrid[i].Parent = TabPage(i);
                         TempGrid[i] = new DataViewer(GridType.Skill);
-                        TempGrid[i].Parent = tabControl1.TabPages[i];
+                        TempGrid[i].Parent = TabPage(i);
                         break;
                     case 24:
                         DataGrid[i] = new DataViewer(GridType.Npc);
-                        DataGrid[i].Parent = tabControl1.TabPages[i];
+                        DataGrid[i].Parent = TabPage(i);
                         TempGrid[i] = new DataViewer(GridType.Npc);
-                        TempGrid[i].Parent = tabControl1.TabPages[i];
+                        TempGrid[i].Parent = TabPage(i);
                         break;
                     case 33:
                         DataGrid[i] = new DataViewer(GridType.Morph);
-                        DataGrid[i].Parent = tabControl1.TabPages[i];
+                        DataGrid[i].Parent = TabPage(i);
                         TempGrid[i] = new DataViewer(GridType.Morph);
-                        TempGrid[i].Parent = tabControl1.TabPages[i];
+                        TempGrid[i].Parent = TabPage(i);
                         break;
                     case 34:
                         DataGrid[i] = new DataViewer(GridType.Familiar);
-                        DataGrid[i].Parent = tabControl1.TabPages[i];
+                        DataGrid[i].Parent = TabPage(i);
                         TempGrid[i] = new DataViewer(GridType.Familiar);
-                        TempGrid[i].Parent = tabControl1.TabPages[i];
+                        TempGrid[i].Parent = TabPage(i);
                         break;
                     case 35:
                         DataGrid[i] = new DataViewer(GridType.DamageSkin);
-                        DataGrid[i].Parent = tabControl1.TabPages[i];
+                        DataGrid[i].Parent = TabPage(i);
                         TempGrid[i] = new DataViewer(GridType.DamageSkin);
-                        TempGrid[i].Parent = tabControl1.TabPages[i];
+                        TempGrid[i].Parent = TabPage(i);
                         break;
                     case 37:
                         DataGrid[i] = new DataViewer(GridType.Reactor);
-                        DataGrid[i].Parent = tabControl1.TabPages[i];
+                        DataGrid[i].Parent = TabPage(i);
                         TempGrid[i] = new DataViewer(GridType.Reactor);
-                        TempGrid[i].Parent = tabControl1.TabPages[i];
+                        TempGrid[i].Parent = TabPage(i);
                         break;
 
                     case 38:
                         DataGrid[i] = new DataViewer(GridType.Music);
-                        DataGrid[i].Parent = tabControl1.TabPages[i];
+                        DataGrid[i].Parent = TabPage(i);
                         TempGrid[i] = new DataViewer(GridType.Music);
-                        TempGrid[i].Parent = tabControl1.TabPages[i];
+                        TempGrid[i].Parent = TabPage(i);
                         break;
 
 
@@ -2555,10 +2614,14 @@ namespace WzComparerR2.DB2
             label4.Font = new Font("微軟正黑體", (float)Size12);
             label6.Font = new Font("微軟正黑體", (float)Size12);
 
+            gridsReady = true;
+            ApplyTheme();
+
             SearchBox.Font = new Font("微軟正黑體", (float)Size11);
             LoadButton.Font = new Font("微軟正黑體", (float)Size12);
             SaveButton.Font = new Font("微軟正黑體", (float)Size12);
-            tabControl1.Font = new Font("微軟正黑體", (float)Size13);
+            tabControl1.TabFont = new Font("微軟正黑體", (float)Size13);
+            tabControl1.SelectedTabFont = new Font("微軟正黑體", (float)Size13, FontStyle.Bold);
 
         }
 

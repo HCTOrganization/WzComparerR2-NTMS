@@ -31,9 +31,9 @@ namespace WzComparerR2.DB2
         {
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
-            this.label1 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.label1 = new DevComponents.DotNetBar.LabelX();
+            this.button1 = new DevComponents.DotNetBar.ButtonX();
+            this.button2 = new DevComponents.DotNetBar.ButtonX();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -66,29 +66,35 @@ namespace WzComparerR2.DB2
             // label1
             // 
             this.label1.AutoSize = true;
+            this.label1.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
             this.label1.Location = new System.Drawing.Point(289, 12);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(0, 15);
+            this.label1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.label1.TabIndex = 2;
             // 
             // button1
             // 
+            this.button1.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.button1.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
             this.button1.Location = new System.Drawing.Point(857, 8);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(98, 25);
             this.button1.TabIndex = 3;
+            this.button1.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.button1.Text = "儲存單張";
-            this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // button2
             // 
+            this.button2.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.button2.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
             this.button2.Location = new System.Drawing.Point(972, 8);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(98, 25);
             this.button2.TabIndex = 4;
+            this.button2.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.button2.Text = "全部儲存";
-            this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // ImageViewerForm
@@ -117,8 +123,8 @@ namespace WzComparerR2.DB2
 
         private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.DataGridView dataGridView1;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
+        private DevComponents.DotNetBar.LabelX label1;
+        private DevComponents.DotNetBar.ButtonX button1;
+        private DevComponents.DotNetBar.ButtonX button2;
     }
 }

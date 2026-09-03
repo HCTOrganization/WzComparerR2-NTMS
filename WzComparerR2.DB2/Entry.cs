@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Windows.Forms;
 using DevComponents.DotNetBar;
 using WzComparerR2.PluginBase;
@@ -34,10 +34,14 @@ namespace WzComparerR2.DB2
             this.barDB2 = AddButton("DB2", "MapleStoryDB2", 100, btnDB2_Click, out _);
             this.barIcons = AddButton("Icons", "圖示預覽", 66, btnIcons_Click, out _);
             this.barPicViewer = AddButton("Pic Viewer", "圖片瀏覽", 66, btnPicViewer_Click, out _);
+
+            this.Context.MainStyleChanged += Context_MainStyleChanged;
         }
 
         protected override void OnUnload()
         {
+            this.Context.MainStyleChanged -= Context_MainStyleChanged;
+
             MapRenderLauncher.Close();
 
             DisposeForm(ref this.db2Form);
@@ -45,6 +49,26 @@ namespace WzComparerR2.DB2
             DisposeForm(ref this.imageViewerForm);
 
             Db2Host.Context = null;
+        }
+
+        /// <summary>
+        /// 主程式切換樣式（例如切到 VisualStudio2012Dark）時，
+        /// 讓已經開啟的視窗跟著換色。
+        /// </summary>
+        private void Context_MainStyleChanged(object sender, EventArgs e)
+        {
+            if (this.db2Form != null && !this.db2Form.IsDisposed)
+            {
+                this.db2Form.ApplyTheme();
+            }
+            if (this.iconsForm != null && !this.iconsForm.IsDisposed)
+            {
+                this.iconsForm.ApplyTheme();
+            }
+            if (this.imageViewerForm != null && !this.imageViewerForm.IsDisposed)
+            {
+                this.imageViewerForm.ApplyTheme();
+            }
         }
 
         private RibbonBar AddButton(string barText, string buttonText, int buttonWidth, EventHandler onClick, out ButtonItem button)

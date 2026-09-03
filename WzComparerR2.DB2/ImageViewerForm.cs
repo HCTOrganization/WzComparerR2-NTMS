@@ -12,14 +12,21 @@ using WzComparerR2.Common;
 using WzComparerR2.PluginBase;
 namespace WzComparerR2.DB2
 {
-    public partial class ImageViewerForm:Form
+    public partial class ImageViewerForm : DevComponents.DotNetBar.Office2007Form
     {
         public ImageViewerForm()
         {
             InitializeComponent();
             Instance = this;
+            Db2Theme.Apply(this);
         }
         public static ImageViewerForm Instance;
+
+        /// <summary>依主程式目前的樣式重新套用配色。</summary>
+        public void ApplyTheme()
+        {
+            Db2Theme.Apply(this);
+        }
         List<(Bitmap, string)> ImageList;
         Wz_Node GetNode(string Path)
         {

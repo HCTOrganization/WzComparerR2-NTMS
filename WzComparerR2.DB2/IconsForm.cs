@@ -17,14 +17,25 @@ using System.Reflection;
 
 namespace WzComparerR2.DB2
 {
-    public partial class IconsForm:Form
+    public partial class IconsForm : DevComponents.DotNetBar.Office2007Form
     {
         public IconsForm()
         {
             InitializeComponent();
             Instance = this;
+            Db2Theme.Apply(this);
         }
         public static IconsForm Instance;
+
+        /// <summary>依主程式目前的樣式重新套用配色。</summary>
+        public void ApplyTheme()
+        {
+            Db2Theme.Apply(this);
+            foreach (var grid in ImageGrids)
+            {
+                Db2Theme.Apply(grid);
+            }
+        }
         Wz_Node GetNode(string Path)
         {
             return Db2Host.GetNode(Path);
@@ -453,7 +464,7 @@ namespace WzComparerR2.DB2
                 ImageGrids[i].Height = 470;
                 ImageGrids[i].ColumnHeadersVisible = false;
                 ImageGrids[i].RowHeadersVisible = false;
-                ImageGrids[i].GridColor = Color.LightGray;
+                Db2Theme.Apply(ImageGrids[i]);
 
                 ImageGrids[i].CellClick += (s,e2) =>
                 {
@@ -483,6 +494,7 @@ namespace WzComparerR2.DB2
                 };
             }
             ShowImageGrid = ImageGrids[0];
+            Db2Theme.Apply(this.listBox1);
 
             if(!System.Windows.Forms.SystemInformation.TerminalServerSession)
             {
