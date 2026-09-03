@@ -20,6 +20,8 @@ namespace WzComparerR2.PluginBase
         StringLinker DefaultStringLinker { get; }
         AlphaForm DefaultTooltipWindow { get; }
 
+        bool SelectNode(Wz_Node node);
+
         event EventHandler<WzNodeEventArgs> SelectedNode1Changed;
         event EventHandler<WzNodeEventArgs> SelectedNode2Changed;
         event EventHandler<WzNodeEventArgs> SelectedNode3Changed;

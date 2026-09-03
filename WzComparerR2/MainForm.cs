@@ -5347,6 +5347,19 @@ namespace WzComparerR2
             get { return advTree3.SelectedNode.AsWzNode(); }
         }
 
+        bool PluginContextProvider.SelectNode(Wz_Node node)
+        {
+            if (node == null)
+            {
+                return false;
+            }
+            if (this.InvokeRequired)
+            {
+                return (bool)this.Invoke(new Func<Wz_Node, bool>(((PluginContextProvider)this).SelectNode), node);
+            }
+            return this.OnSelectedWzNode(node);
+        }
+
         private EventHandler<WzNodeEventArgs> selectedNode1Changed;
         private EventHandler<WzNodeEventArgs> selectedNode2Changed;
         private EventHandler<WzNodeEventArgs> selectedNode3Changed;
