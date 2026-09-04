@@ -1669,45 +1669,86 @@ namespace WzComparerR2.DB2
             return sb.ToString();
         }
 
+        /// <summary>検索の実行を遅延させるデバウンス用タイマー(初回呼び出し時に生成)。</summary>
+        private System.Windows.Forms.Timer searchDelayTimer;
+
+        /// <summary>
+        /// キー入力のたびに呼び出し、タイマーを 1 秒にリセットする。
+        /// これにより連続入力中は検索が走らず、入力が 1 秒止まった時点で一度だけ検索される。
+        /// </summary>
+        void RestartSearchDelay()
+        {
+            if (searchDelayTimer == null)
+            {
+                searchDelayTimer = new System.Windows.Forms.Timer();
+                searchDelayTimer.Interval = 1000;
+                searchDelayTimer.Tick += (s, e) =>
+                {
+                    // WinForms の Timer は停止するまで繰り返し発火するため、
+                    // 一度発火したら先に止めて、検索は 1 回だけ実行する。
+                    searchDelayTimer.Stop();
+                    PerformSearch();
+                };
+            }
+            searchDelayTimer.Stop();
+            searchDelayTimer.Start();
+        }
+
         private void SearchBox_TextChanged(object sender, EventArgs e)
+        {
+            if (Trim(SearchBox.Text) == "")
+            {
+                // 空になった場合は待機を止め、即座に元のグリッドへ戻す。
+                searchDelayTimer?.Stop();
+                SearchGrid.Rows.Clear();
+                Grid.Visible = true;
+                SearchGrid.Visible = false;
+            }
+            else
+            {
+                // 入力が止まってから 1 秒後に検索を実行する。
+                RestartSearchDelay();
+            }
+        }
+
+        /// <summary>デバウンス用タイマー経過後に、実際の絞り込み検索を実行する。</summary>
+        void PerformSearch()
         {
             var SearchStr = Trim(SearchBox.Text);
             if (SearchStr == "")
             {
                 Grid.Visible = true;
                 SearchGrid.Visible = false;
+                return;
             }
-            else
-            {
-                // 検索文字列とセル内容の両方を先に正規化(仮名→全角カタカナ、英数字→半角)してから比較する。
-                // これにより、どの仮名表記や全角／半角の表記で入力しても、同じ発音のデータに一致する。
-                var SearchNorm = NormalizeSearchText(SearchStr);
 
-                SearchGrid.Rows.Clear();
-                var Row = new DataGridViewRow();
-                for (int i = 0; i < Grid.RowCount; i++)
+            // 検索文字列とセル内容の両方を先に正規化(仮名→全角カタカナ、英数字→半角)してから比較する。
+            // これにより、どの仮名表記や全角／半角の表記で入力しても、同じ発音のデータに一致する。
+            var SearchNorm = NormalizeSearchText(SearchStr);
+
+            SearchGrid.Rows.Clear();
+            var Row = new DataGridViewRow();
+            for (int i = 0; i < Grid.RowCount; i++)
+            {
+                for (int j = 0; j < Grid.Columns.Count; j++)
                 {
-                    for (int j = 0; j < Grid.Columns.Count; j++)
+                    if (Grid.Rows[i].Cells[j].Value is string)
                     {
-                        if (Grid.Rows[i].Cells[j].Value is string)
+                        var CellNorm = NormalizeSearchText(Grid.Rows[i].Cells[j].Value.ToString());
+                        if (CellNorm.IndexOf(SearchNorm, StringComparison.OrdinalIgnoreCase) >= 0)
                         {
-                            var CellNorm = NormalizeSearchText(Grid.Rows[i].Cells[j].Value.ToString());
-                            if (CellNorm.IndexOf(SearchNorm, StringComparison.OrdinalIgnoreCase) >= 0)
-                            {
-                                Row = (DataGridViewRow)Grid.Rows[i].Clone();
-                                for (int j2 = 0; j2 < Grid.Columns.Count; j2++)
-                                    Row.Cells[j2].Value = Grid.Rows[i].Cells[j2].Value;
-                                SearchGrid.Rows.Add(Row);
-                                break;
-                            }
+                            Row = (DataGridViewRow)Grid.Rows[i].Clone();
+                            for (int j2 = 0; j2 < Grid.Columns.Count; j2++)
+                                Row.Cells[j2].Value = Grid.Rows[i].Cells[j2].Value;
+                            SearchGrid.Rows.Add(Row);
+                            break;
                         }
                     }
                 }
-                Grid.Visible = false;
-                SearchGrid.Visible = true;
-                SearchGrid.Refresh();
             }
-
+            Grid.Visible = false;
+            SearchGrid.Visible = true;
+            SearchGrid.Refresh();
         }
         bool FileExists(string Name)
         {
