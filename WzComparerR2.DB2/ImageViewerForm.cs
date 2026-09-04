@@ -157,12 +157,19 @@ namespace WzComparerR2.DB2
         {
             if(Entry != null)
             {
-                if(Entry.Value is Wz_Png || Entry.Value is Wz_Uol)
-                    if(Entry.Text != "\\")
-                        if(GetNode(Entry.FullPathToFile2()).Value is Wz_Png)
-                            ImageList.Add((GetNode(Entry.FullPathToFile2()).ExtractPng(), Entry.FullPathToFile2()));
-                foreach(var E in Entry.Nodes)
-                    if(!(E.Value is Wz_Image))
+                if (Entry.Value is Wz_Png || Entry.Value is Wz_Uol)
+                    if (Entry.Text != "\\")
+                        try
+                        {
+                            if (GetNode(Entry.FullPathToFile2()).Value is Wz_Png)
+                                ImageList.Add((GetNode(Entry.FullPathToFile2()).ExtractPng(), Entry.FullPathToFile2()));
+                        }
+                        catch
+                        {
+                            return;
+                        }
+                foreach (var E in Entry.Nodes)
+                    if (!(E.Value is Wz_Image))
                         DumpPngs(E);
             }
         }

@@ -62,10 +62,14 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="IconsForm.designer.cs">
-      <DependentUpon>IconsForm.cs</DependentUpon>
+      <DependentUpon>IconsForm.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
     </Compile>
     <EmbeddedResource Update="IconsForm.resx">
       <DependentUpon>IconsForm.cs</DependentUpon>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>IconsForm.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <Compile Update="ImageViewerForm.cs">
       <SubType>Form</SubType>
