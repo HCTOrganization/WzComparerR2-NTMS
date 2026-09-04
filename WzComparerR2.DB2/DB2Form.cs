@@ -1636,6 +1636,35 @@ namespace WzComparerR2.DB2
 
             return s.Trim(' ');
         }
+
+        /// <summary>
+        /// 検索用テキストを「半角英数字＋全角カタカナ」の形に統一して正規化する。
+        /// これにより、ひらがな／全角カタカナ／半角カタカナ、および全角／半角英数字の
+        /// 表記ゆれを吸収し、同じ発音のデータをあいまいに一致させられるようにする。
+        /// 現在は仮名と英数字のみを対象とし、漢字変換は行わない。
+        /// </summary>
+        static string NormalizeSearchText(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            // 先に NFKC で変換する：
+            // ・半角カタカナ(ｱｲｳ/ｶﾞ等、濁音・半濁音含む) → 全角カタカナ(アイウ/ガ等)
+            // ・全角英数字(ＡＢＣ１２３等) → 半角英数字(ABC123等)
+            text = text.Normalize(NormalizationForm.FormKC);
+
+            // ひらがな(U+3041..U+3096)を +0x60 ずらして全角カタカナ(U+30A1..U+30F6)にする。
+            StringBuilder sb = new StringBuilder(text.Length);
+            foreach (char c in text)
+            {
+                if (c >= '\u3041' && c <= '\u3096')
+                    sb.Append((char)(c + 0x60));
+                else
+                    sb.Append(c);
+            }
+            return sb.ToString();
+        }
+
         private void SearchBox_TextChanged(object sender, EventArgs e)
         {
             var SearchStr = Trim(SearchBox.Text);
@@ -1646,6 +1675,10 @@ namespace WzComparerR2.DB2
             }
             else
             {
+                // 検索文字列とセル内容の両方を先に正規化(仮名→全角カタカナ、英数字→半角)してから比較する。
+                // これにより、どの仮名表記や全角／半角の表記で入力しても、同じ発音のデータに一致する。
+                var SearchNorm = NormalizeSearchText(SearchStr);
+
                 SearchGrid.Rows.Clear();
                 var Row = new DataGridViewRow();
                 for (int i = 0; i < Grid.RowCount; i++)
@@ -1654,7 +1687,8 @@ namespace WzComparerR2.DB2
                     {
                         if (Grid.Rows[i].Cells[j].Value is string)
                         {
-                            if (Grid.Rows[i].Cells[j].Value.ToString().IndexOf(SearchStr, StringComparison.OrdinalIgnoreCase) >= 0)
+                            var CellNorm = NormalizeSearchText(Grid.Rows[i].Cells[j].Value.ToString());
+                            if (CellNorm.IndexOf(SearchNorm, StringComparison.OrdinalIgnoreCase) >= 0)
                             {
                                 Row = (DataGridViewRow)Grid.Rows[i].Clone();
                                 for (int j2 = 0; j2 < Grid.Columns.Count; j2++)
