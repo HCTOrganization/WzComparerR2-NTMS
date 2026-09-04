@@ -1,6 +1,6 @@
-﻿using System;
+﻿using DevComponents.DotNetBar;
+using System;
 using System.Windows.Forms;
-using DevComponents.DotNetBar;
 using WzComparerR2.PluginBase;
 
 namespace WzComparerR2.DB2

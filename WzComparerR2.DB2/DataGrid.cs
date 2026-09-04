@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
-using System.Windows.Forms;
-using System.Reflection;
 using System.IO;
-using System.Drawing;
+using System.Reflection;
+using System.Windows.Forms;
 
 namespace WzComparerR2.DB2
 {
@@ -20,7 +15,7 @@ namespace WzComparerR2.DB2
             RowTemplate.Height = 80;
             DefaultCellStyle.WrapMode = DataGridViewTriState.True;
             ColumnHeadersHeight = 28;
-            this.MultiSelect = false;    
+            this.MultiSelect = false;
             DefaultCellStyle.Font = new System.Drawing.Font("微軟正黑體", 11);
             var ID = new DataGridViewTextBoxColumn();
             ID.DataPropertyName = "ID";
@@ -276,7 +271,7 @@ namespace WzComparerR2.DB2
         Familiar,
         DamageSkin,
         Reactor,
-        Music 
+        Music
     }
 
     public static class DataGridViewExtension

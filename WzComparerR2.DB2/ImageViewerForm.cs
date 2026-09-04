@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using WzComparerR2.WzLib;
-using WzComparerR2.Common;
-using WzComparerR2.PluginBase;
 namespace WzComparerR2.DB2
 {
     public partial class ImageViewerForm : DevComponents.DotNetBar.Office2007Form
@@ -33,13 +26,13 @@ namespace WzComparerR2.DB2
             return Db2Host.GetNode(Path);
         }
 
-        string LeftStr(string s,int count)
+        string LeftStr(string s, int count)
         {
-            if(count > s.Length)
+            if (count > s.Length)
                 count = s.Length;
-            return s.Substring(0,count);
+            return s.Substring(0, count);
         }
-        void LoadImages(DataGridView dataViewImages,int GridSize,bool Resize = false)
+        void LoadImages(DataGridView dataViewImages, int GridSize, bool Resize = false)
         {
             //dataViewImages.Rows.Clear();
             //dataViewImages.Columns.Clear();
@@ -49,25 +42,25 @@ namespace WzComparerR2.DB2
             int numImages = ImageList.Count;
             numRows = numImages / numColumnsForWidth;
             // Do we have a an overfill for a row
-            if(numImages % numColumnsForWidth > 0)
+            if (numImages % numColumnsForWidth > 0)
             {
                 numRows += 1;
             }
             // Catch when we have less images than the maximum number of columns for the DataGridView width
-            if(numImages < numColumnsForWidth)
+            if (numImages < numColumnsForWidth)
             {
                 numColumnsForWidth = numImages;
             }
             int numGeneratedCells = numRows * numColumnsForWidth;
             // Dynamically create the columns
-            for(int index = 0;index < numColumnsForWidth;index++)
+            for (int index = 0; index < numColumnsForWidth; index++)
             {
                 DataGridViewImageColumn dataGridViewColumn = new DataGridViewImageColumn();
                 dataViewImages.Columns.Add(dataGridViewColumn);
                 dataViewImages.Columns[index].Width = GridSize + 20;
             }
             // Create the rows
-            for(int index = 0;index < numRows;index++)
+            for (int index = 0; index < numRows; index++)
             {
                 dataViewImages.Rows.Add();
                 dataViewImages.Rows[index].Height = GridSize + 20;
@@ -76,19 +69,19 @@ namespace WzComparerR2.DB2
             int columnIndex = 0;
             int rowIndex = 0;
             Image image;
-            for(int index = 0;index < ImageList.Count;index++)
+            for (int index = 0; index < ImageList.Count; index++)
             {
                 image = ImageList[index].Item1;
-                if(Resize)
+                if (Resize)
                 {
-                    if(image.Width > 90 || image.Height > 90)
-                        image = IconsForm.ResizeImage2(image,80,80);
+                    if (image.Width > 90 || image.Height > 90)
+                        image = IconsForm.ResizeImage2(image, 80, 80);
                 }
                 dataViewImages.Rows[rowIndex].Cells[columnIndex].Value = image;
                 dataViewImages.Rows[rowIndex].Cells[columnIndex].ToolTipText = ImageList[index].Item2;
 
                 // Have we reached the end column? if so then start on the next row
-                if(columnIndex == numColumnsForWidth - 1)
+                if (columnIndex == numColumnsForWidth - 1)
                 {
                     rowIndex++;
                     columnIndex = 0;
@@ -99,10 +92,10 @@ namespace WzComparerR2.DB2
                 }
             }
         }
-        private void ImageViewerForm_Load(object sender,EventArgs e)
+        private void ImageViewerForm_Load(object sender, EventArgs e)
         {
 
-            this.FormClosing += (s,e1) =>
+            this.FormClosing += (s, e1) =>
            {
                this.Hide();
                e1.Cancel = true;
@@ -111,43 +104,43 @@ namespace WzComparerR2.DB2
 
             ImageList = new List<(Bitmap, string)>();
 
-            foreach(var Iter in Db2Host.TreeNode.Nodes)
+            foreach (var Iter in Db2Host.TreeNode.Nodes)
             {
-                var Text1 = LeftStr(Iter.Text,2);
-                switch(Text1)
+                var Text1 = LeftStr(Iter.Text, 2);
+                switch (Text1)
                 {
-                case "Ma":
-                    foreach(var Iter2 in Iter.Nodes)
-                    {
-                        if(Iter2.Text == "Obj" || Iter2.Text == "Tile" || Iter2.Text == "Back")
+                    case "Ma":
+                        foreach (var Iter2 in Iter.Nodes)
                         {
-                            foreach(var Iter3 in Iter2.Nodes)
+                            if (Iter2.Text == "Obj" || Iter2.Text == "Tile" || Iter2.Text == "Back")
                             {
-                                var L1 = Iter3.FullPathToFile;
-                                L1 = L1.Replace(Iter.Text,"Map");
-                                listBox1.Items.Add(L1);
+                                foreach (var Iter3 in Iter2.Nodes)
+                                {
+                                    var L1 = Iter3.FullPathToFile;
+                                    L1 = L1.Replace(Iter.Text, "Map");
+                                    listBox1.Items.Add(L1);
 
+                                }
                             }
                         }
-                    }
 
-                    break;
-                case "Sk":
-                    foreach(var Iter2 in Iter.Nodes)
-                    {
-                        var L1 = Iter2.FullPathToFile;
-                        L1 = L1.Replace(Iter.Text,"Skill");
-                        listBox1.Items.Add(L1);
-                    }
+                        break;
+                    case "Sk":
+                        foreach (var Iter2 in Iter.Nodes)
+                        {
+                            var L1 = Iter2.FullPathToFile;
+                            L1 = L1.Replace(Iter.Text, "Skill");
+                            listBox1.Items.Add(L1);
+                        }
 
-                    break;
-                case "Ef":
-                case "UI":
-                    foreach(var Iter2 in Iter.Nodes)
-                    {
-                        listBox1.Items.Add(Iter2.FullPathToFile);
-                    }
-                    break;
+                        break;
+                    case "Ef":
+                    case "UI":
+                        foreach (var Iter2 in Iter.Nodes)
+                        {
+                            listBox1.Items.Add(Iter2.FullPathToFile);
+                        }
+                        break;
                 }
 
             }
@@ -155,7 +148,7 @@ namespace WzComparerR2.DB2
 
         void DumpPngs(Wz_Node Entry)
         {
-            if(Entry != null)
+            if (Entry != null)
             {
                 if (Entry.Value is Wz_Png || Entry.Value is Wz_Uol)
                     if (Entry.Text != "\\")
@@ -173,72 +166,72 @@ namespace WzComparerR2.DB2
                         DumpPngs(E);
             }
         }
-         string LPath;
-        private void listBox1_SelectedIndexChanged(object sender,EventArgs e)
+        string LPath;
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             label1.Text = "";
             dataGridView1.Rows.Clear();
             dataGridView1.Columns.Clear();
             dataGridView1.Refresh();
             var Graphic = dataGridView1.CreateGraphics();
-            var Font = new System.Drawing.Font(FontFamily.GenericSansSerif,20,FontStyle.Bold);
-            Graphic.DrawString("Loading...",Font,Brushes.Black,100,100);
+            var Font = new System.Drawing.Font(FontFamily.GenericSansSerif, 20, FontStyle.Bold);
+            Graphic.DrawString("Loading...", Font, Brushes.Black, 100, 100);
             ImageList.Clear();
             DumpPngs(GetNode(listBox1.SelectedItem.ToString()));
-            LoadImages(dataGridView1,80,true);
-            if(ImageList.Count == 0)
+            LoadImages(dataGridView1, 80, true);
+            if (ImageList.Count == 0)
                 dataGridView1.Refresh();
             Db2Host.SelectNode(GetNode(listBox1.SelectedItem.ToString()));
-            LPath=listBox1.SelectedItem.ToString();
-            LPath=LPath.Replace("\\",".");
+            LPath = listBox1.SelectedItem.ToString();
+            LPath = LPath.Replace("\\", ".");
 
         }
 
-        private void dataGridView1_CellClick(object sender,DataGridViewCellEventArgs e)
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             var Path = dataGridView1.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText;
-            if(GetNode(Path) != null)
+            if (GetNode(Path) != null)
             {
                 label1.Text = Path;
                 Db2Host.SelectNode(GetNode(Path));
             }
         }
 
-        private void button1_Click(object sender,EventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
-            if(label1.Text == "")
+            if (label1.Text == "")
                 return;
             var dlg = new FolderBrowserDialog();
             dlg.SelectedPath = System.Environment.CurrentDirectory;
             dlg.Description = "選擇儲存路徑";
-            if((dlg.ShowDialog(new Form() { TopMost = true }) != DialogResult.OK))
+            if ((dlg.ShowDialog(new Form() { TopMost = true }) != DialogResult.OK))
                 return;
             var Path1 = label1.Text;
             var Path2 = Path1;
-            Path2 = Path2.Replace("/",".");
-            if(GetNode(label1.Text).Value is Wz_Png)
+            Path2 = Path2.Replace("/", ".");
+            if (GetNode(label1.Text).Value is Wz_Png)
                 GetNode(label1.Text).ExtractPng().Save(dlg.SelectedPath + "\\" + Path2 + ".png");
         }
-       
-        void DumpPngs(string FolderName,Wz_Node Entry)
+
+        void DumpPngs(string FolderName, Wz_Node Entry)
         {
-            if(Entry != null)
+            if (Entry != null)
             {
-                if(Entry.Value is Wz_Png || Entry.Value is Wz_Uol)
+                if (Entry.Value is Wz_Png || Entry.Value is Wz_Uol)
                     GetNode(Entry.FullPathToFile2()).ExtractPng().Save(FolderName + "\\" + Entry.FullPathToFile2D() + ".png");
-                foreach(var E in Entry.Nodes)
-                    if(!(E.Value is Wz_Image))
-                        DumpPngs(FolderName,E);
+                foreach (var E in Entry.Nodes)
+                    if (!(E.Value is Wz_Image))
+                        DumpPngs(FolderName, E);
             }
         }
-        private void button2_Click(object sender,EventArgs e)
+        private void button2_Click(object sender, EventArgs e)
         {
             var dlg = new FolderBrowserDialog();
             dlg.SelectedPath = System.Environment.CurrentDirectory;
             dlg.Description = "選擇儲存路徑";
-            if((dlg.ShowDialog(new Form() { TopMost = true }) != DialogResult.OK))
+            if ((dlg.ShowDialog(new Form() { TopMost = true }) != DialogResult.OK))
                 return;
-            DumpPngs(dlg.SelectedPath,GetNode(listBox1.SelectedItem.ToString()));
+            DumpPngs(dlg.SelectedPath, GetNode(listBox1.SelectedItem.ToString()));
 
         }
     }

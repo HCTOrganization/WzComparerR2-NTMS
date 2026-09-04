@@ -1,25 +1,13 @@
-﻿using System;
+﻿using DevComponents.DotNetBar;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using WzComparerR2.WzLib;
-using WzComparerR2.PluginBase;
 using System.Text.RegularExpressions;
-using WzComparerR2;
-using WzComparerR2.Common;
-using WzComparerR2.CharaSimControl;
+using System.Windows.Forms;
 using WzComparerR2.CharaSim;
-using System.Runtime.InteropServices;
-using WzComparerR2.Controls;
-using WzComparerR2.Common;
-using System.Threading;
-using System.Reflection;
-using DevComponents.DotNetBar;
+using WzComparerR2.PluginBase;
+using WzComparerR2.WzLib;
 
 namespace WzComparerR2.DB2
 {
@@ -92,7 +80,7 @@ namespace WzComparerR2.DB2
         }
         void DumpData2(Wz_Node Entry)
         {
-            
+
             Dump2(Entry);
             string FinalStr = "";
             var S = Entry.GetPathD() + ".";

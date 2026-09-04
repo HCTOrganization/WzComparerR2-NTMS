@@ -1,8 +1,8 @@
-﻿using System;
+﻿using DevComponents.DotNetBar;
+using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using DevComponents.DotNetBar;
 
 namespace WzComparerR2.DB2
 {
