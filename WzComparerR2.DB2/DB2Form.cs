@@ -1486,7 +1486,7 @@ namespace WzComparerR2.DB2
                     DataGrid[i].Rows.Clear();
                     DataGrid[i].Refresh();
                 }
-                ShowLoading("Loading…");
+                ShowLoading("載入中…");
                 Application.DoEvents();
                 Grid.LoadBin(BinFile);
             });
@@ -1671,7 +1671,7 @@ namespace WzComparerR2.DB2
             // 載入仍在 UI 執行緒上進行，但每加一批列就會讓出訊息迴圈，視窗不會「沒有回應」。
             RunLoadWithUi(() =>
             {
-                ShowLoading("Loading…");
+                ShowLoading("載入中…");
                 Application.DoEvents();
 
                 switch (tabIndex)
