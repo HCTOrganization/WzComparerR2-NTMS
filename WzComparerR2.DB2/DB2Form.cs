@@ -20,7 +20,7 @@ namespace WzComparerR2.DB2
             InitializeComponent();
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("SimSun"), 9f);
+            this.Font = new Font(new FontFamily("微軟正黑體"), 9f);
 #endif
             Instance = this;
             Db2Theme.Apply(this);
@@ -38,6 +38,18 @@ namespace WzComparerR2.DB2
 
         /// <summary>Form1_Load 建立完所有 DataViewer 之後才為 true。</summary>
         private bool gridsReady;
+
+        /// <summary>載入中旗標：避免 DoEvents 造成的重入，也避免重複按下載入。</summary>
+        private bool isLoading;
+
+        /// <summary>載入中覆疊在表格上的「Loading…」文字（結束即移除）。</summary>
+        private Label loadingOverlay;
+
+        /// <summary>RowsAdded 累計列數，達到 LoadPumpInterval 就讓出一次訊息迴圈。</summary>
+        private int loadPumpCount;
+
+        /// <summary>每新增多少列就呼叫一次 Application.DoEvents，讓視窗保持可回應。</summary>
+        private const int LoadPumpInterval = 100;
 
         /// <summary>依主程式目前的樣式重新套用配色，主程式切換樣式時由 Entry 呼叫。</summary>
         public void ApplyTheme()
@@ -1364,24 +1376,120 @@ namespace WzComparerR2.DB2
         DataViewer[] DataGrid = new DataViewer[39];
         DataViewer[] TempGrid = new DataViewer[39];
 
+        /// <summary>載入期間停用會觸發重入的控制項（按鈕/搜尋/下拉/分頁）。</summary>
+        void SetLoadingState(bool busy)
+        {
+            isLoading = busy;
+            if (busy)
+            {
+                // 新一輪載入從零開始計算，避免沿用上次殘留的計數。
+                loadPumpCount = 0;
+            }
+            LoadButton.Enabled = !busy;
+            SaveButton.Enabled = !busy;
+            SearchBox.Enabled = !busy;
+            comboBox1.Enabled = !busy;
+            comboBox2.Enabled = !busy;
+            comboBox3.Enabled = !busy;
+            comboBox4.Enabled = !busy;
+            tabControl1.Enabled = !busy;
+        }
+
+        /// <summary>
+        /// 在目前 Grid 上方顯示置中「Loading…」覆疊文字（順便擋住半載入的表格）。
+        /// 深色樣式以淺灰顯示，淺色樣式以深灰顯示。
+        /// </summary>
+        Label ShowLoading(string text)
+        {
+            bool dark = Db2Theme.IsDarkMode;
+            if (loadingOverlay == null || loadingOverlay.IsDisposed)
+            {
+                loadingOverlay = new Label();
+                loadingOverlay.Dock = DockStyle.Fill;
+                loadingOverlay.TextAlign = ContentAlignment.MiddleCenter;
+                loadingOverlay.Font = new Font("微軟正黑體", 18f, FontStyle.Bold);
+            }
+
+            loadingOverlay.BackColor = dark ? Db2Theme.DarkBackColor : Color.White;
+            loadingOverlay.ForeColor = Color.LightGray;
+            loadingOverlay.Text = text;
+            loadingOverlay.Visible = true;
+
+            var parent = Grid?.Parent;
+            if (parent != null && loadingOverlay.Parent != parent)
+            {
+                loadingOverlay.Parent = parent;
+            }
+            loadingOverlay.BringToFront();
+            return loadingOverlay;
+        }
+
+        /// <summary>每累積一定列數就更新覆疊文字上的進度。</summary>
+        void UpdateLoadingText()
+        {
+            if (loadingOverlay == null || loadingOverlay.IsDisposed || !loadingOverlay.Visible)
+            {
+                return;
+            }
+            int n = Grid?.RowCount ?? 0;
+            loadingOverlay.Text = "載入中… (" + n.ToString() + ")";
+        }
+
+        /// <summary>移除並釋放覆疊文字。</summary>
+        void HideLoading()
+        {
+            if (loadingOverlay == null)
+            {
+                return;
+            }
+            if (!loadingOverlay.IsDisposed)
+            {
+                loadingOverlay.Visible = false;
+                loadingOverlay.Parent = null;
+                loadingOverlay.Dispose();
+            }
+            loadingOverlay = null;
+        }
+
+        /// <summary>
+        /// 以「保持 UI 可回應」的方式執行載入：
+        /// 先停用重入來源，執行 action（載入過程會定期讓出訊息迴圈），
+        /// 最後無論成敗都移除覆疊文字並恢復控制項。
+        /// </summary>
+        void RunLoadWithUi(Action action)
+        {
+            SetLoadingState(true);
+            try
+            {
+                action();
+            }
+            finally
+            {
+                HideLoading();
+                SetLoadingState(false);
+            }
+        }
+
         void LoadBIN()
         {
             var BinFile = System.Environment.CurrentDirectory + "\\" + Grid.Parent.Name + ".BIN";
-            if (System.IO.File.Exists(BinFile))
+            if (!System.IO.File.Exists(BinFile))
+            {
+                MessageBoxEx.Show(this, Grid.Parent.Name + ".BIN" + " not found");
+                return;
+            }
+
+            RunLoadWithUi(() =>
             {
                 for (int i = 0; i <= 38; i++)
                 {
                     DataGrid[i].Rows.Clear();
                     DataGrid[i].Refresh();
-                    var Graphic = DataGrid[i].CreateGraphics();
-                    var Font = new System.Drawing.Font(FontFamily.GenericSansSerif, 20, FontStyle.Bold);
-                    Graphic.DrawString("Loading...", Font, Brushes.Black, 300, 200);
                 }
+                ShowLoading("Loading…");
+                Application.DoEvents();
                 Grid.LoadBin(BinFile);
-
-            }
-            else
-                MessageBoxEx.Show(this, Grid.Parent.Name + ".BIN" + " not found");
+            });
         }
 
 
@@ -1396,6 +1504,10 @@ namespace WzComparerR2.DB2
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (!gridsReady)
+            {
+                return;
+            }
+            if (isLoading)
             {
                 return;
             }
@@ -1424,6 +1536,10 @@ namespace WzComparerR2.DB2
             // SuperTabControl 在建立分頁的過程中就會觸發本事件，
             // 此時 Form1_Load 尚未建立 DataViewer，必須先擋掉。
             if (!gridsReady)
+            {
+                return;
+            }
+            if (isLoading)
             {
                 return;
             }
@@ -1535,6 +1651,10 @@ namespace WzComparerR2.DB2
 
         private void LoadButton_Click(object sender, EventArgs e)
         {
+            if (isLoading)
+            {
+                return;
+            }
             if (PluginManager.FindWz(Wz_Type.Base) == null)
             {
                 MessageBoxEx.Show(this, "沒有開啟Base.wz");
@@ -1546,11 +1666,16 @@ namespace WzComparerR2.DB2
             Grid.Refresh();
             RowList.Clear();
             ColList.Clear();
-            var Graphic = Grid.CreateGraphics();
-            var Font = new System.Drawing.Font(FontFamily.GenericSansSerif, 20, FontStyle.Bold);
-            Graphic.DrawString("Loading...", Font, Brushes.Black, 300, 200);
-            switch (tabIndex)
+
+            // 用覆疊文字取代畫在 Graphics 上的 "Loading..."（深色下淺灰、結束即移除），
+            // 載入仍在 UI 執行緒上進行，但每加一批列就會讓出訊息迴圈，視窗不會「沒有回應」。
+            RunLoadWithUi(() =>
             {
+                ShowLoading("Loading…");
+                Application.DoEvents();
+
+                switch (tabIndex)
+                {
                 case 0:
                 case 1:
                 case 2:
@@ -1627,7 +1752,7 @@ namespace WzComparerR2.DB2
 
 
             }
-
+            });
         }
 
         private void SaveButton_Click(object sender, EventArgs e)
@@ -1696,6 +1821,10 @@ namespace WzComparerR2.DB2
 
         private void SearchBox_TextChanged(object sender, EventArgs e)
         {
+            if (isLoading)
+            {
+                return;
+            }
             if (Trim(SearchBox.Text) == "")
             {
                 // 空になった場合は待機を止め、即座に元のグリッドへ戻す。
@@ -2026,12 +2155,20 @@ namespace WzComparerR2.DB2
             {
                 return;
             }
+            if (isLoading)
+            {
+                return;
+            }
             Grid.RowTemplate.Height = ParseOr(comboBox3.Text, Grid.RowTemplate.Height);
             LoadButton_Click(sender, e);
         }
 
         private void comboBox4_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (isLoading)
+            {
+                return;
+            }
 
             if (comboBox4.SelectedIndex >= 0)
             {
@@ -2055,6 +2192,10 @@ namespace WzComparerR2.DB2
 
         void CellClick(DataViewer DataGrid, DataGridViewCellEventArgs e)
         {
+            if (isLoading)
+            {
+                return;
+            }
             if (e.RowIndex == -1)
                 return;
             if (e.RowIndex >= Grid.RowCount)
@@ -2126,6 +2267,22 @@ namespace WzComparerR2.DB2
             grid.CellClick += (s, e) => CellClick((DataViewer)s, e);
             grid.Scroll += (s, e) => GridScroll();
             grid.MouseClick += (s, e) => GridMouseClick((DataViewer)s, e);
+
+            // 大量 Rows.Add 會在載入時匯集到這裡：每累積一定列數就讓出訊息迴圈，
+            // 讓視窗持續重繪並更新進度文字，避免整支程式看起來像「沒有回應」。
+            grid.RowsAdded += (s, e) =>
+            {
+                if (isLoading && ReferenceEquals(s, Grid))
+                {
+                    loadPumpCount += e.RowCount;
+                    if (loadPumpCount >= LoadPumpInterval)
+                    {
+                        loadPumpCount = 0;
+                        UpdateLoadingText();
+                        Application.DoEvents();
+                    }
+                }
+            };
 
             grid.DefaultCellStyle.SelectionBackColor = Color.LightCyan;
             grid.DefaultCellStyle.SelectionForeColor = Color.Black;

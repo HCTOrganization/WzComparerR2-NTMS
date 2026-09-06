@@ -12,7 +12,7 @@ namespace WzComparerR2.DB2
             InitializeComponent();
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("SimSun"), 9f);
+            this.Font = new Font(new FontFamily("微軟正黑體"), 9f);
 #endif
             Instance = this;
             Db2Theme.Apply(this);
