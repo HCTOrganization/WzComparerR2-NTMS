@@ -1767,31 +1767,14 @@ namespace WzComparerR2.DB2
         }
 
         /// <summary>
-        /// 検索用テキストを「半角英数字＋全角カタカナ」の形に統一して正規化する。
-        /// これにより、ひらがな／全角カタカナ／半角カタカナ、および全角／半角英数字の
-        /// 表記ゆれを吸収し、同じ発音のデータをあいまいに一致させられるようにする。
-        /// 現在は仮名と英数字のみを対象とし、漢字変換は行わない。
+        /// 検索用テキストを「半角英数字＋全角カタカナ＋簡体字」の形に統一して正規化する。
+        /// ひらがな／全角カタカナ／半角カタカナ、全角／半角英数字、簡体字／繁体字の表記ゆれを
+        /// 吸収して、同じ意味・発音のデータに一致させられるようにする。
+        /// 実装は WzComparerR2.Common の Translator.NormalizeForSearch に集約している。
         /// </summary>
         static string NormalizeSearchText(string text)
         {
-            if (string.IsNullOrEmpty(text))
-                return text;
-
-            // 先に NFKC で変換する：
-            // ・半角カタカナ(ｱｲｳ/ｶﾞ等、濁音・半濁音含む) → 全角カタカナ(アイウ/ガ等)
-            // ・全角英数字(ＡＢＣ１２３等) → 半角英数字(ABC123等)
-            text = text.Normalize(NormalizationForm.FormKC);
-
-            // ひらがな(U+3041..U+3096)を +0x60 ずらして全角カタカナ(U+30A1..U+30F6)にする。
-            StringBuilder sb = new StringBuilder(text.Length);
-            foreach (char c in text)
-            {
-                if (c >= '\u3041' && c <= '\u3096')
-                    sb.Append((char)(c + 0x60));
-                else
-                    sb.Append(c);
-            }
-            return sb.ToString();
+            return Translator.NormalizeForSearch(text);
         }
 
         /// <summary>検索の実行を遅延させるデバウンス用タイマー(初回呼び出し時に生成)。</summary>
@@ -1851,8 +1834,9 @@ namespace WzComparerR2.DB2
                 return;
             }
 
-            // 検索文字列とセル内容の両方を先に正規化(仮名→全角カタカナ、英数字→半角)してから比較する。
-            // これにより、どの仮名表記や全角／半角の表記で入力しても、同じ発音のデータに一致する。
+            // 検索文字列とセル内容の両方を先に正規化(仮名→全角カタカナ、英数字→半角、
+            // 繁体字→簡体字)してから比較する。これにより、仮名・全角／半角・簡体字／繁体字の
+            // どの表記で入力しても、同じ発音・意味のデータに一致する。
             var SearchNorm = NormalizeSearchText(SearchStr);
 
             SearchGrid.Rows.Clear();

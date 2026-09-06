@@ -3566,19 +3566,41 @@ namespace WzComparerR2
             return null;
         }
 
+        /// <summary>CJK 統合漢字(簡体字/繁体字・漢字)を 1 文字でも含むかを判定する。</summary>
+        private static bool HasCjkIdeograph(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return false;
+            foreach (char c in text)
+            {
+                if ((c >= '\u3400' && c <= '\u4DBF') || (c >= '\u4E00' && c <= '\u9FFF'))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private IEnumerable<KeyValuePair<int, StringResult>> searchStringLinker(IEnumerable<Dictionary<int, StringResult>> dicts, string key, bool exact, bool isRegex, bool ignoreArticles)
         {
-            string fullWidthKey = Translator.FullWidthKatakana(key); 
+            // 元のキーに加え、かな・全角/半角・簡体字/繁体字まで正規化したキーも用意する。
+            string fullWidthKey = Translator.FullWidthKatakana(key);
+            string cnKey = Translator.NormalizeForSearch(key);
+            bool cnKeyHasHan = HasCjkIdeograph(key);
+
             string[] match = (key).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             string[] match2 = (fullWidthKey).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            string[] matchCn = (cnKey).Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             string[] articles = { "a", "an", "the" };
             if (ignoreArticles)
             {
                 match = match.Where(word => !articles.Contains(word.ToLower())).ToArray();
                 match2 = match2.Where(word => !articles.Contains(word.ToLower())).ToArray();
+                matchCn = matchCn.Where(word => !articles.Contains(word.ToLower())).ToArray();
             }
             Regex re = null;
             Regex fullWidthRe = null;
+            Regex cnRe = null;
             if (isRegex)
             {
                 if (ignoreArticles)
@@ -3589,11 +3611,21 @@ namespace WzComparerR2
                     fullWidthPattern = $@"\b{fullWidthPattern}\b";
                     re = new Regex(pattern, RegexOptions.IgnoreCase);
                     fullWidthRe = new Regex(fullWidthPattern, RegexOptions.IgnoreCase);
+                    if (cnKeyHasHan && matchCn.Length > 0)
+                    {
+                        string cnPattern = string.Join(@"\s+(?:a|an|the)?\s*", matchCn.Select(Regex.Escape));
+                        cnPattern = $@"\b{cnPattern}\b";
+                        cnRe = new Regex(cnPattern, RegexOptions.IgnoreCase);
+                    }
                 }
                 else
                 {
                     re = new Regex(key, RegexOptions.IgnoreCase);
                     fullWidthRe = new Regex(fullWidthKey, RegexOptions.IgnoreCase);
+                    if (cnKeyHasHan)
+                    {
+                        cnRe = new Regex(cnKey, RegexOptions.IgnoreCase);
+                    }
                 }
             }
 
@@ -3603,12 +3635,27 @@ namespace WzComparerR2
                 {
                     if (exact)
                     {
+                        // 従来の完全一致＋かな正規化での一致。
                         if (kv.Key.ToString() == key || kv.Value.Name == key || Translator.FullWidthKatakana(kv.Value.Name) == fullWidthKey)
+                        {
                             yield return kv;
+                        }
+                        // 簡体字／繁体字の相互一致(クエリに漢字がある場合のみ)。
+                        else if (cnKeyHasHan && !string.IsNullOrEmpty(kv.Value.Name) && Translator.NormalizeForSearch(kv.Value.Name) == cnKey)
+                        {
+                            yield return kv;
+                        }
                     }
                     else if (isRegex)
                     {
-                        if (re.IsMatch(kv.Key.ToString()) || (!string.IsNullOrEmpty(kv.Value.Name) && re.IsMatch(kv.Value.Name)) || (!string.IsNullOrEmpty(kv.Value.Name) && fullWidthRe.IsMatch(Translator.FullWidthKatakana(kv.Value.Name))))
+                        if (re.IsMatch(kv.Key.ToString())
+                            || (!string.IsNullOrEmpty(kv.Value.Name) && re.IsMatch(kv.Value.Name))
+                            || (!string.IsNullOrEmpty(kv.Value.Name) && fullWidthRe.IsMatch(Translator.FullWidthKatakana(kv.Value.Name))))
+                        {
+                            yield return kv;
+                        }
+                        // 簡体字／繁体字の相互一致。
+                        else if (cnRe != null && !string.IsNullOrEmpty(kv.Value.Name) && cnRe.IsMatch(Translator.NormalizeForSearch(kv.Value.Name)))
                         {
                             yield return kv;
                         }
@@ -3625,6 +3672,22 @@ namespace WzComparerR2
                                 break;
                             }
                         }
+
+                        // 簡体字／繁体字の相互一致(AND)。クエリに漢字が含まれる場合のみ判定する。
+                        if (!r && cnKeyHasHan && !string.IsNullOrEmpty(kv.Value.Name) && matchCn.Length > 0)
+                        {
+                            r = true;
+                            string nameCn = Translator.NormalizeForSearch(kv.Value.Name);
+                            foreach (string str in matchCn)
+                            {
+                                if (!nameCn.Contains(str))
+                                {
+                                    r = false;
+                                    break;
+                                }
+                            }
+                        }
+
                         if (r)
                         {
                             yield return kv;

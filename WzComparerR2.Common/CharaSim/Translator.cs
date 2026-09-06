@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -445,6 +446,75 @@ namespace WzComparerR2.CharaSim
             {
                 return inputString.Normalize(NormalizationForm.FormKC);
             }
+        }
+
+        private const uint LCMAP_SIMPLIFIED_CHINESE = 0x02000000;
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern int LCMapStringEx(string lpLocaleName, uint dwMapFlags,
+            string lpSrcStr, int cchSrc, StringBuilder lpDestStr, int cchDest,
+            IntPtr lpVersionInformation, IntPtr lpReserved, IntPtr sortHandle);
+
+        /// <summary>
+        /// Converts Traditional Chinese characters to Simplified Chinese using the Windows
+        /// NLS LCMapStringEx API (Windows only; on failure the input is returned unchanged).
+        /// Only the many-to-one "traditional → simplified" direction is used, because several
+        /// traditional glyphs (e.g. 髮/發) collapse into one simplified glyph (发), which makes
+        /// fuzzy search matching more consistent. Note: ambiguous characters such as 後 are
+        /// only converted when they appear in Windows' built-in phrase list.
+        /// </summary>
+        private static string ToSimplifiedChinese(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+
+            // Skip the P/Invoke when the string contains no CJK Unified Ideograph (Basic + Ext-A).
+            bool hasHan = false;
+            foreach (char c in text)
+            {
+                if ((c >= '\u3400' && c <= '\u4DBF') || (c >= '\u4E00' && c <= '\u9FFF'))
+                {
+                    hasHan = true;
+                    break;
+                }
+            }
+            if (!hasHan)
+                return text;
+
+            try
+            {
+                int len = LCMapStringEx(null, LCMAP_SIMPLIFIED_CHINESE, text, -1, null, 0,
+                    IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+                if (len <= 1)
+                    return text;
+
+                var sb = new StringBuilder(len);
+                LCMapStringEx(null, LCMAP_SIMPLIFIED_CHINESE, text, -1, sb, len,
+                    IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+                return sb.ToString();
+            }
+            catch
+            {
+                // On failure keep the original string.
+                return text;
+            }
+        }
+
+        /// <summary>
+        /// Normalizes text for fuzzy searching: kana is unified to full-width katakana,
+        /// full-width alphanumerics to half-width, and Traditional Chinese to Simplified
+        /// Chinese. Both the search keyword and the candidate text should be passed through
+        /// this method before comparing, so hiragana/katakana and simplified/traditional
+        /// spellings of the same text can match each other.
+        /// </summary>
+        public static string NormalizeForSearch(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+            // FullWidthKatakana already handles hiragana→katakana and NFKC
+            // (half-width kana → full-width, full-width alnum → half-width).
+            string normalized = FullWidthKatakana(text);
+            return ToSimplifiedChinese(normalized);
         }
 
         /// <summary>
