@@ -275,8 +275,8 @@ namespace WzComparerR2.CharaSimControl
                 g.DrawString("1", GearGraphics.FamiliarLevelFont, Brushes.White, new Point(261 + lDelta, 341 + tDelta));
 
                 // Draw Attribute
-                Bitmap fAttribute = PreAssembleAttribute[familiar.FamiliarAttribute];
-                Point attrPoint = PreAssembleAttributeOffsets[familiar.FamiliarAttribute];
+                Bitmap fAttribute = PreAssembleAttribute.TryGetValue(familiar.FamiliarAttribute, out Bitmap bmp) ? bmp : PreAssembleAttribute["N"];
+                Point attrPoint = PreAssembleAttributeOffsets.TryGetValue(familiar.FamiliarAttribute, out Point pnt) ? pnt : PreAssembleAttributeOffsets["N"];
                 g.DrawImage(fAttribute, attrPoint.X + lDelta, attrPoint.Y + tDelta, new Rectangle(0, 0, fAttribute.Width, fAttribute.Height), GraphicsUnit.Pixel);
 
                 // Draw Category
@@ -294,7 +294,7 @@ namespace WzComparerR2.CharaSimControl
             { "H", Resource.Familiar__InfoWnd_Attribute_AttrVariation_Holy },
             { "I", Resource.Familiar__InfoWnd_Attribute_AttrVariation_Ice },
             { "L", Resource.Familiar__InfoWnd_Attribute_AttrVariation_Lighting },
-            { "N", Resource.Familiar__InfoWnd_Attribute_AttrVariation_Fire },
+            { "N", Resource.Familiar__InfoWnd_Attribute_AttrVariation_None },
             { "P", Resource.Familiar__InfoWnd_Attribute_AttrVariation_Poison }
         };
 
@@ -305,7 +305,7 @@ namespace WzComparerR2.CharaSimControl
             { "H", new Point(332, 62) },
             { "I", new Point(334, 65) },
             { "L", new Point(335, 64) },
-            { "N", new Point(337, 65) },
+            { "N", new Point(337, 67) },
             { "P", new Point(336, 64) }
         };
 
@@ -443,8 +443,8 @@ namespace WzComparerR2.CharaSimControl
                 g.DrawString("1", GearGraphics.FamiliarLevelFont, Brushes.White, new Point(332 + lDelta, 226 + tDelta));
 
                 // Draw Attribute
-                Bitmap fAttribute = PostAssembleAttribute[familiar.FamiliarAttribute];
-                Point attrPoint = PostAssembleAttributeOffsets[familiar.FamiliarAttribute];
+                Bitmap fAttribute = PostAssembleAttribute.TryGetValue(familiar.FamiliarAttribute, out Bitmap bmp) ? bmp : PostAssembleAttribute["N"];
+                Point attrPoint = PostAssembleAttributeOffsets.TryGetValue(familiar.FamiliarAttribute, out Point pnt) ? pnt : PostAssembleAttributeOffsets["N"];
                 g.DrawImage(fAttribute, attrPoint.X + lDelta, attrPoint.Y + tDelta, new Rectangle(0, 0, fAttribute.Width, fAttribute.Height), GraphicsUnit.Pixel);
 
                 // Draw Category
@@ -462,7 +462,7 @@ namespace WzComparerR2.CharaSimControl
             { "H", Resource.Familiar2025__InfoWnd_attribute_AttrVariation_Holy },
             { "I", Resource.Familiar2025__InfoWnd_attribute_AttrVariation_Ice },
             { "L", Resource.Familiar2025__InfoWnd_attribute_AttrVariation_Lighting },
-            { "N", Resource.Familiar2025__InfoWnd_attribute_AttrVariation_Fire },
+            { "N", Resource.Familiar__InfoWnd_Attribute_AttrVariation_None },
             { "P", Resource.Familiar2025__InfoWnd_attribute_AttrVariation_Poison }
         };
 
@@ -473,7 +473,7 @@ namespace WzComparerR2.CharaSimControl
             { "H", new Point(323, 62) },
             { "I", new Point(325, 65) },
             { "L", new Point(327, 66) },
-            { "N", new Point(328, 65) },
+            { "N", new Point(328, 67) },
             { "P", new Point(327, 64) }
         };
 
