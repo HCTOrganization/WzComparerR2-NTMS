@@ -43,6 +43,7 @@ namespace WzComparerR2.CharaSim
         public bool CanPotential { get; internal set; }
         public string EpicHs { get; internal set; }
         public BitmapOrigin ToolTipPreview {  get; set; }
+        public BitmapOrigin IllusionRingPreview { get; set; }
         public Bitmap AndroidBitmap { get; set; }
         public string LabelGradeTooltip { get; internal set; }
 
@@ -1395,6 +1396,16 @@ namespace WzComparerR2.CharaSim
                 gear.Star = value;
             }
             */
+
+            if (gear.Props.TryGetValue(GearPropType.illusionGrade, out value) && value >= 0)
+            {
+                Wz_Node previewNode = node.FindNodeByPath("stand1")?.FindNodeByPath("0").ResolveUol();
+
+                if (previewNode != null)
+                {
+                    gear.IllusionRingPreview = BitmapOrigin.CreateFromNode(previewNode, findNode);
+                }
+            }
 
             return gear;
         }

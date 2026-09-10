@@ -1280,6 +1280,20 @@ namespace WzComparerR2.CharaSimControl
                 }*/
             }
 
+            if (Gear.IllusionRingPreview.Bitmap != null)
+            {
+                AddLines(0, 7, ref picH, condition: secondLineNeeded);
+                secondLineNeeded = false;
+                hasThirdContents = true;
+                hasDescPart = true;
+
+                picH += 2;
+                g.DrawImage(Gear.IllusionRingPreview.Bitmap, (bitmap.Width - Gear.IllusionRingPreview.Bitmap.Width) / 2, picH);
+                Gear.AndroidBitmap = Gear.IllusionRingPreview.Bitmap;
+                picH += Gear.IllusionRingPreview.Bitmap.Height;
+                picH += 6;
+            }
+
             if (Gear.Props.TryGetValue(GearPropType.limitBreak, out value) && value > 0) //突破上限
             {
                 hasThirdContents = true;

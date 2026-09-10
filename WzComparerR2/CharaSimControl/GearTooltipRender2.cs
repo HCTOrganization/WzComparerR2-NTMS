@@ -771,6 +771,15 @@ namespace WzComparerR2.CharaSimControl
                 }
             }
 
+            if (Gear.IllusionRingPreview.Bitmap != null)
+            {
+                picH += 2;
+                g.DrawImage(Gear.IllusionRingPreview.Bitmap, (bitmap.Width - Gear.IllusionRingPreview.Bitmap.Width) / 2, picH);
+                Gear.AndroidBitmap = Gear.IllusionRingPreview.Bitmap;
+                picH += Gear.IllusionRingPreview.Bitmap.Height;
+                picH += 6;
+            }
+
             //分割线2号
             g.DrawImage(res["dotline"].Image, 0, picH);
             picH += 8;
