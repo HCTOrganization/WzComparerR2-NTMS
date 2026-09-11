@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 #if NET6_0_OR_GREATER
+using System.Numerics;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
 #endif
@@ -23,13 +24,62 @@ namespace WzComparerR2.WzLib.Utilities
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static uint ROL(uint v, int n) => (v << n) | (v >> (32 - n));
+        public static uint ROL(uint v, int n)
+        {
+    #if NET6_0_OR_GREATER
+            return BitOperations.RotateLeft(v, n);
+    #else
+            return (v << n) | (v >> (32 - n));
+    #endif
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong ROL8(ulong v, int n) => (v << n) | (v >> (64 - n));
+        public static ulong ROL(ulong v, int n)
+        {
+#if NET6_0_OR_GREATER
+            return BitOperations.RotateLeft(v, n);
+#else
+            return (v << n) | (v >> (64 - n));
+#endif
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ulong ROR8(ulong v, int n) => (v >> n) | (v << (64 - n));
+        public static uint ROR(uint v, int n)
+        {
+#if NET6_0_OR_GREATER
+            return BitOperations.RotateRight(v, n);
+#else
+            return (v >> n) | (v << (32 - n));
+#endif
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong ROR(ulong v, int n)
+        {
+#if NET6_0_OR_GREATER
+            return BitOperations.RotateRight(v, n);
+#else
+            return (v >> n) | (v << (64 - n));
+#endif
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint XorShiftRight(uint value, int shift)
+        {
+            return value ^ (value >> shift);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static ulong XorShiftRight(ulong value, int shift)
+        {
+            return value ^ (value >> shift);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint XorFold64To32(ulong value)
+        {
+            return (uint)value ^ (uint)(value >> 32);
+        }
 
         const byte M8 = 0xAA;
         const ushort M16 = 0xAAAA;
@@ -37,7 +87,7 @@ namespace WzComparerR2.WzLib.Utilities
         /// <summary>
         /// XOR each byte with (byte)(0xAA + i), widening to char.
         /// </summary>
-        public static unsafe void XorWidenToChar(ReadOnlySpan<byte> bytes, Span<char> chars)
+        public static unsafe void DecodeWzStringAscii(ReadOnlySpan<byte> bytes, Span<char> chars)
         {
             int length = bytes.Length;
             int i = 0;
@@ -113,7 +163,7 @@ namespace WzComparerR2.WzLib.Utilities
         /// <summary>
         /// XOR each char with (ushort)(0xAAAA + i).
         /// </summary>
-        public static unsafe void XorChars(ReadOnlySpan<char> input, Span<char> output)
+        public static unsafe void ApplyWzStringCharMask(ReadOnlySpan<char> input, Span<char> output)
         {
             int length = input.Length;
             int i = 0;
@@ -167,7 +217,7 @@ namespace WzComparerR2.WzLib.Utilities
         /// <summary>
         /// XOR each byte with (byte)(0xAA + i), writing to output.
         /// </summary>
-        public static unsafe void XorBytes(ReadOnlySpan<byte> input, Span<byte> output)
+        public static unsafe void ApplyWzStringByteMask(ReadOnlySpan<byte> input, Span<byte> output)
         {
             int length = input.Length;
             int i = 0;
