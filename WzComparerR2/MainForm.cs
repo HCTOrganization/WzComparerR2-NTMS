@@ -1262,6 +1262,11 @@ namespace WzComparerR2
                 // save still picture as png
                 this.OnSavePngFile(frameData.Frames[0]);
             }
+            else if (aniItem.Count == 1 && aniItem[0] is AnimationItem singleAniItem
+                && singleAniItem is ISpineAnimator && singleAniItem.Length <= 0)
+            {
+                this.OnSaveAnimationPngFile(singleAniItem, options);
+            }
             else
             {
                 // save as gif/apng
@@ -1340,6 +1345,37 @@ namespace WzComparerR2
             else
             {
                 labelItemStatus.Text = "圖片保存失敗。";
+            }
+        }
+
+        private void OnSaveAnimationPngFile(AnimationItem aniItem, bool options)
+        {
+            var config = ImageHandlerConfig.Default;
+            string aniName = this.cmbItemAniNames.SelectedItem as string;
+            string pngFileName = pictureBoxEx1.PictureName
+                + (string.IsNullOrEmpty(aniName) ? "" : ("." + aniName))
+                + ".png";
+
+            if (config.AutoSaveEnabled)
+            {
+                pngFileName = Path.Combine(config.AutoSavePictureFolder, string.Join("_", pngFileName.Replace("/", "").Replace("\\", ".").Split(Path.GetInvalidFileNameChars(), StringSplitOptions.None)));
+            }
+            else
+            {
+                var dlg = new SaveFileDialog();
+                dlg.Filter = "PNG (*.png)|*.png|全部格式 (*.*)|*.*";
+                dlg.FileName = pngFileName;
+                if (dlg.ShowDialog() != DialogResult.OK)
+                {
+                    return;
+                }
+                pngFileName = dlg.FileName;
+            }
+
+            var clonedAniItem = (AnimationItem)aniItem.Clone();
+            if (this.pictureBoxEx1.SaveAsPng(clonedAniItem, pngFileName, config, options))
+            {
+                labelItemStatus.Text = "已保存為: " + pngFileName;
             }
         }
 
