@@ -1128,13 +1128,21 @@ namespace WzComparerR2.MapRender
                 if (cy == 0) cy = renderSize.Y;
             }
 
+            float GetBackScrollOffset(BackItem back, int rate, int tileDistance)
+            {
+                double offset = (double)rate * 100 * back.View.Time / 20000.0;
+                if (tileDistance > 0)
+                    offset %= tileDistance;
+                return (float)offset;
+            }
+
             Vector2 tileOff = new Vector2(cx, cy);
             Vector2 position = new Vector2(back.X, back.Y);
 
             //计算水平卷动
             if ((back.TileMode & TileMode.ScrollHorizontal) != 0)
             {
-                position.X += ((float)back.Rx * 5 * back.View.Time / 1000) % cx;// +this.Camera.Center.X * (100 - Math.Abs(this.rx)) / 100;
+                position.X += GetBackScrollOffset(back, back.Rx, cx);
             }
             else //镜头移动比率偏移
             {
@@ -1144,7 +1152,7 @@ namespace WzComparerR2.MapRender
             //计算垂直卷动
             if ((back.TileMode & TileMode.ScrollVertical) != 0)
             {
-                position.Y += ((float)back.Ry * 5 * back.View.Time / 1000) % cy;// +this.Camera.Center.Y * (100 - Math.Abs(this.ry)) / 100;
+                position.Y += GetBackScrollOffset(back, back.Ry, cy);
             }
             else //镜头移动比率偏移
             {
