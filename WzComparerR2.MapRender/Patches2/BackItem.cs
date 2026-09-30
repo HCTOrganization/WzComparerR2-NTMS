@@ -19,6 +19,8 @@ namespace WzComparerR2.MapRender.Patches2
         public int Cy { get; set; }
         public int Rx { get; set; }
         public int Ry { get; set; }
+        public int? FlowX { get; set; }
+        public int? FlowY { get; set; }
         public int Alpha { get; set; }
         public TileMode TileMode { get; set; }
         public int ScreenMode { get; set; }
@@ -44,6 +46,8 @@ namespace WzComparerR2.MapRender.Patches2
                 Cy = node.Nodes["cy"].GetValueEx(0),
                 Rx = node.Nodes["rx"].GetValueEx(0),
                 Ry = node.Nodes["ry"].GetValueEx(0),
+                FlowX = node.Nodes["flowX"].GetValueEx<int?>(null),
+                FlowY = node.Nodes["flowY"].GetValueEx<int?>(null),
                 Alpha = node.Nodes["a"].GetValueEx(255),
 
                 TileMode = GetBackTileMode(node.Nodes["type"].GetValueEx(0)),
@@ -91,6 +95,9 @@ namespace WzComparerR2.MapRender.Patches2
             /// 动画资源。
             /// </summary>
             public object Animator { get; set; }
+
+            public int? FlowX { get; set; }
+            public int? FlowY { get; set; }
         }
     }
 }

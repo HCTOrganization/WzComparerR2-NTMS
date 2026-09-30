@@ -754,7 +754,9 @@ namespace WzComparerR2.MapRender
 
             back.View = new BackItem.ItemView()
             {
-                Animator = CreateAnimator(aniItem, back.SpineAni)
+                Animator = CreateAnimator(aniItem, back.SpineAni),
+                FlowX = back.FlowX,
+                FlowY = back.FlowY,
             };
         }
 

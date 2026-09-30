@@ -1138,25 +1138,42 @@ namespace WzComparerR2.MapRender
 
             Vector2 tileOff = new Vector2(cx, cy);
             Vector2 position = new Vector2(back.X, back.Y);
+            bool hasBackFlow = back.View.FlowX.HasValue || back.View.FlowY.HasValue;
 
             //计算水平卷动
-            if ((back.TileMode & TileMode.ScrollHorizontal) != 0)
+            if (hasBackFlow)
             {
-                position.X += GetBackScrollOffset(back, back.Rx, cx);
+                int flowX = back.View.FlowX.GetValueOrDefault();
+                int flowY = back.View.FlowY.GetValueOrDefault();
+                if (flowX != 0)
+                {
+                    position.X += GetBackScrollOffset(back, flowX, cx);
+                }
+                if (flowY != 0)
+                {
+                    position.Y += GetBackScrollOffset(back, flowY, cy);
+                }
             }
-            else //镜头移动比率偏移
+            else
             {
-                position.X += renderEnv.Camera.Center.X * (100 + back.Rx) / 100;
-            }
+                if ((back.TileMode & TileMode.ScrollHorizontal) != 0)
+                {
+                    position.X += GetBackScrollOffset(back, back.Rx, cx);
+                }
+                else //镜头移动比率偏移
+                {
+                    position.X += renderEnv.Camera.Center.X * (100 + back.Rx) / 100;
+                }
 
-            //计算垂直卷动
-            if ((back.TileMode & TileMode.ScrollVertical) != 0)
-            {
-                position.Y += GetBackScrollOffset(back, back.Ry, cy);
-            }
-            else //镜头移动比率偏移
-            {
-                position.Y += (renderEnv.Camera.Center.Y) * (100 + back.Ry) / 100;
+                //计算垂直卷动
+                if ((back.TileMode & TileMode.ScrollVertical) != 0)
+                {
+                    position.Y += GetBackScrollOffset(back, back.Ry, cy);
+                }
+                else //镜头移动比率偏移
+                {
+                    position.Y += (renderEnv.Camera.Center.Y) * (100 + back.Ry) / 100;
+                }
             }
 
             //y轴镜头调整
