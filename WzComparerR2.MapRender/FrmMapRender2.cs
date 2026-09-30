@@ -1212,6 +1212,16 @@ namespace WzComparerR2.MapRender
                             x = p.X;
                             y = p.Y;
                         }
+                        int? rx0 = null, rx1 = null;
+                        int xRangeIndex = Array.FindIndex(arguments, a => string.Equals(a, "-x", StringComparison.OrdinalIgnoreCase) || string.Equals(a, "--xrange", StringComparison.OrdinalIgnoreCase));
+                        if (xRangeIndex >= 0 && xRangeIndex + 2 < arguments.Length
+                            && int.TryParse(arguments[xRangeIndex + 1], out int rangeX0)
+                            && int.TryParse(arguments[xRangeIndex + 2], out int rangeX1)
+                            && rangeX0 < rangeX1)
+                        {
+                            rx0 = rangeX0;
+                            rx1 = rangeX1;
+                        }
                         StringResult sr;
                         string mobName = string.Empty;
                         if (this.StringLinker != null)
@@ -1219,7 +1229,7 @@ namespace WzComparerR2.MapRender
                             this.StringLinker.StringMob.TryGetValue(mobID, out sr);
                             mobName = sr?.Name ?? "(null)";
                         }
-                        if (this.mapData.SummonMob(mobID, x, y, 0, 0, -1, playRegenMotion: false))
+                        if (this.mapData.SummonMob(mobID, x, y, 0, 0, -1, rx0: rx0, rx1: rx1, playRegenMotion: false))
                         {
                             this.ui.ChatBox.AppendTextHelp($@"已召喚怪物：{mobName}({mobID})");
                         }
@@ -1232,6 +1242,7 @@ namespace WzComparerR2.MapRender
                     {
                         this.ui.ChatBox.AppendTextHelp(@"/summon (mobID) 在滑鼠所在位置召喚指定mobID的怪物");
                         this.ui.ChatBox.AppendTextHelp(@"/summon (mobID) (x) (y) 在坐標x, y召喚指定mobID的怪物");
+                        this.ui.ChatBox.AppendTextHelp(@"[-x/--xrange] (rx0) (rx1) 指定可移動範圍");
                     }
                     break;
 
