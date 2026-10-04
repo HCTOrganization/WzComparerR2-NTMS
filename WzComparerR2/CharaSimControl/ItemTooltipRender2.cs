@@ -944,7 +944,8 @@ namespace WzComparerR2.CharaSimControl
             string descLeftAlign = sr["desc_leftalign"];
             if (!string.IsNullOrEmpty(sr["h"]))
             {
-                descLeftAlign = SummaryParser.GetSkillSummary(sr["h"], 1, item.OverseasConstants, SummaryParams.Default);
+                var resolver = new DictionarySkillPropertyResolver(item.OverseasConstants);
+                descLeftAlign = SummaryParser.GetSkillSummary(sr["h"], 1, resolver, SummaryParams.Default);
             }
             long minLev = 0, maxLev = 0;
             bool willDrawExp = item.Props.TryGetValue(ItemPropType.exp_minLev, out minLev) && item.Props.TryGetValue(ItemPropType.exp_maxLev, out maxLev);
