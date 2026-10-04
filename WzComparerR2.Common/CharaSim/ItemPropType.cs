@@ -65,5 +65,6 @@ namespace WzComparerR2.CharaSim
         mintable,
         notMintable,
         cashTradeBlock,
+        noPetEquipCoupon,
     }
 }

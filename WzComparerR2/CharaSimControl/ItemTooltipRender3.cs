@@ -1233,6 +1233,11 @@ namespace WzComparerR2.CharaSimControl
                 {
                     tags.Add("#$r無法使用寵物技能捲軸和寵物名稱標籤#");
                 }
+
+                if (item.Props.TryGetValue(ItemPropType.noPetEquipCoupon, out value) && value > 0)
+                {
+                    tags.Add("#$r無法使用寵物裝備交換券#");
+                }
             }
 
             // pointCost
