@@ -34,7 +34,7 @@ namespace WzComparerR2.Common
 
         public bool Update(Wz_Node stringNode, Wz_Node itemNode, Wz_Node etcNode, Wz_Node questNode)
         {
-            if (stringNode == null || itemNode == null || etcNode == null)
+            if (stringNode == null && itemNode == null && etcNode == null && questNode == null)
                 return false;
 
             return Load(stringNode, itemNode, etcNode, questNode, update: true);
@@ -47,10 +47,6 @@ namespace WzComparerR2.Common
 
         public bool Load(Wz_File stringWz, Wz_File itemWz, Wz_File etcWz, Wz_File questWz)
         {
-            if (stringWz == null || stringWz.Node == null ||
-                itemWz == null || itemWz.Node == null ||
-                etcWz == null || etcWz.Node == null)
-                return false;
             this.Clear();
 
             return Load(stringWz?.Node, itemWz?.Node, etcWz?.Node, questWz?.Node);
@@ -59,19 +55,22 @@ namespace WzComparerR2.Common
         public bool Load(Wz_Node stringNode, Wz_Node itemNode, Wz_Node etcNode, Wz_Node questNode, bool update = false)
         {
             int id;
-            foreach (Wz_Node node in stringNode?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+            foreach (Wz_Node node in stringNode?.Nodes ?? Enumerable.Empty<Wz_Node>())
             {
                 Wz_Image image = node.Value as Wz_Image;
-                if (image == null)
-                    continue;
+                Wz_Node imgNode = node;
                 switch (node.Text)
                 {
                     case "Pet.img":
                     case "Cash.img":
                     case "Ins.img":
                     case "Consume.img":
-                        if (!image.TryExtract()) break;
-                        foreach (Wz_Node tree in image.Node.Nodes)
+                        if (image != null)
+                        {
+                            if (!image.TryExtract()) break;
+                            imgNode = image.Node;
+                        }
+                        foreach (Wz_Node tree in imgNode.Nodes)
                         {
                             Wz_Node test_tree = TryLocateUolNode(tree);
                             if (Int32.TryParse(tree.Text, out id) && tree.ResolveUol() is Wz_Node linkNode)
@@ -87,20 +86,23 @@ namespace WzComparerR2.Common
                                 strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;
                                 strResult.Desc = GetDefaultString(linkNode, "desc") ?? strResult.Desc;
                                 strResult.AutoDesc = GetDefaultString(linkNode, "autodesc") ?? strResult.AutoDesc;
-                                if (tree.FullPath == test_tree.FullPath)
+                                if (!update)
                                 {
                                     if (tree.FullPath == test_tree.FullPath)
                                     {
-                                        strResult.FullPath = tree.FullPath;
+                                        if (tree.FullPath == test_tree.FullPath)
+                                        {
+                                            strResult.FullPath = tree.FullPath;
+                                        }
+                                        else
+                                        {
+                                            strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                        }
                                     }
                                     else
                                     {
                                         strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
                                     }
-                                }
-                                else
-                                {
-                                    strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
                                 }
 
                                 AddAllValue(strResult, linkNode);
@@ -109,8 +111,12 @@ namespace WzComparerR2.Common
                         }
                         break;
                     case "Etc.img":
-                        if (!image.TryExtract()) break;
-                        foreach (Wz_Node tree0 in image.Node.Nodes)
+                        if (image != null)
+                        {
+                            if (!image.TryExtract()) break;
+                            imgNode = image.Node;
+                        }
+                        foreach (Wz_Node tree0 in imgNode.Nodes)
                         {
                             foreach (Wz_Node tree in tree0.Nodes)
                             {
@@ -127,20 +133,23 @@ namespace WzComparerR2.Common
 
                                     strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;
                                     strResult.Desc = GetDefaultString(linkNode, "desc") ?? strResult.Desc;
-                                    if (tree.FullPath == test_tree.FullPath)
+                                    if (!update)
                                     {
                                         if (tree.FullPath == test_tree.FullPath)
                                         {
-                                            strResult.FullPath = tree.FullPath;
+                                            if (tree.FullPath == test_tree.FullPath)
+                                            {
+                                                strResult.FullPath = tree.FullPath;
+                                            }
+                                            else
+                                            {
+                                                strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                            }
                                         }
                                         else
                                         {
                                             strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
                                         }
-                                    }
-                                    else
-                                    {
-                                        strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
                                     }
 
                                     AddAllValue(strResult, linkNode);
@@ -151,8 +160,12 @@ namespace WzComparerR2.Common
                         break;
                     case "Familiar.img":
                     case "FamiliarSkill.img":
-                        if (!image.TryExtract()) break;
-                        foreach (Wz_Node tree0 in image.Node.Nodes)
+                        if (image != null)
+                        {
+                            if (!image.TryExtract()) break;
+                            imgNode = image.Node;
+                        }
+                        foreach (Wz_Node tree0 in imgNode.Nodes)
                         {
                             if (tree0.Text == "skill")
                             {
@@ -171,20 +184,23 @@ namespace WzComparerR2.Common
 
                                         strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;
                                         strResult.Desc = GetDefaultString(linkNode, "desc") ?? strResult.Desc;
-                                        if (tree1.FullPath == test_tree.FullPath)
+                                        if (!update)
                                         {
                                             if (tree1.FullPath == test_tree.FullPath)
                                             {
-                                                strResult.FullPath = tree1.FullPath;
+                                                if (tree1.FullPath == test_tree.FullPath)
+                                                {
+                                                    strResult.FullPath = tree1.FullPath;
+                                                }
+                                                else
+                                                {
+                                                    strResult.FullPath = tree1.FullPath + " -> " + test_tree.FullPath;
+                                                }
                                             }
                                             else
                                             {
                                                 strResult.FullPath = tree1.FullPath + " -> " + test_tree.FullPath;
                                             }
-                                        }
-                                        else
-                                        {
-                                            strResult.FullPath = tree1.FullPath + " -> " + test_tree.FullPath;
                                         }
 
                                         AddAllValue(strResult, linkNode);
@@ -292,8 +308,12 @@ namespace WzComparerR2.Common
                         }
                         break;
                     case "Mob.img":
-                        if (!image.TryExtract()) break;
-                        foreach (Wz_Node tree in image.Node.Nodes)
+                        if (image != null)
+                        {
+                            if (!image.TryExtract()) break;
+                            imgNode = image.Node;
+                        }
+                        foreach (Wz_Node tree in imgNode.Nodes)
                         {
                             Wz_Node test_tree = TryLocateUolNode(tree);
                             if (Int32.TryParse(tree.Text, out id) && tree.ResolveUol() is Wz_Node linkNode)
@@ -307,13 +327,16 @@ namespace WzComparerR2.Common
                                 if (strResult == null) strResult = new StringResult();
 
                                 strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;
-                                if (tree.FullPath == test_tree.FullPath)
+                                if (!update)
                                 {
-                                    strResult.FullPath = tree.FullPath;
-                                }
-                                else
-                                {
-                                    strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                    if (tree.FullPath == test_tree.FullPath)
+                                    {
+                                        strResult.FullPath = tree.FullPath;
+                                    }
+                                    else
+                                    {
+                                        strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                    }
                                 }
 
                                 AddAllValue(strResult, linkNode);
@@ -322,8 +345,12 @@ namespace WzComparerR2.Common
                         }
                         break;
                     case "MonsterBook.img":
-                        if (!image.TryExtract()) break;
-                        foreach (Wz_Node tree in image.Node.Nodes)
+                        if (image != null)
+                        {
+                            if (!image.TryExtract()) break;
+                            imgNode = image.Node;
+                        }
+                        foreach (Wz_Node tree in imgNode.Nodes)
                         {
                             if (Int32.TryParse(tree.Text, out id))
                             {
@@ -349,8 +376,12 @@ namespace WzComparerR2.Common
                         }
                         break;
                     case "Npc.img":
-                        if (!image.TryExtract()) break;
-                        foreach (Wz_Node tree in image.Node.Nodes)
+                        if (image != null)
+                        {
+                            if (!image.TryExtract()) break;
+                            imgNode = image.Node;
+                        }
+                        foreach (Wz_Node tree in imgNode.Nodes)
                         {
                             Wz_Node test_tree = TryLocateUolNode(tree);
                             if (Int32.TryParse(tree.Text, out id) && tree.ResolveUol() is Wz_Node linkNode)
@@ -365,13 +396,16 @@ namespace WzComparerR2.Common
 
                                 strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;
                                 strResult.Desc = GetDefaultString(linkNode, "func") ?? strResult.Desc;
-                                if (tree.FullPath == test_tree.FullPath)
+                                if (!update)
                                 {
-                                    strResult.FullPath = tree.FullPath;
-                                }
-                                else
-                                {
-                                    strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                    if (tree.FullPath == test_tree.FullPath)
+                                    {
+                                        strResult.FullPath = tree.FullPath;
+                                    }
+                                    else
+                                    {
+                                        strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                    }
                                 }
 
                                 AddAllValue(strResult, linkNode);
@@ -380,8 +414,12 @@ namespace WzComparerR2.Common
                         }
                         break;
                     case "Map.img":
-                        if (!image.TryExtract()) break;
-                        foreach (Wz_Node tree0 in image.Node.Nodes)
+                        if (image != null)
+                        {
+                            if (!image.TryExtract()) break;
+                            imgNode = image.Node;
+                        }
+                        foreach (Wz_Node tree0 in imgNode.Nodes)
                         {
                             foreach (Wz_Node tree in tree0.Nodes)
                             {
@@ -404,13 +442,16 @@ namespace WzComparerR2.Common
                                     strResult.StreetName = streetName ?? strResult.StreetName ?? string.Empty;
                                     strResult.MapName = mapName ?? strResult.MapName ?? string.Empty;
                                     strResult.Desc = GetDefaultString(linkNode, "mapDesc") ?? strResult.Desc;
-                                    if (tree.FullPath == test_tree.FullPath)
+                                    if (!update)
                                     {
-                                        strResult.FullPath = tree.FullPath;
-                                    }
-                                    else
-                                    {
-                                        strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                        if (tree.FullPath == test_tree.FullPath)
+                                        {
+                                            strResult.FullPath = tree.FullPath;
+                                        }
+                                        else
+                                        {
+                                            strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                        }
                                     }
 
                                     AddAllValue(strResult, linkNode);
@@ -504,8 +545,12 @@ namespace WzComparerR2.Common
                         }
                         break;
                     case "Skill.img":
-                        if (!image.TryExtract()) break;
-                        foreach (Wz_Node tree in image.Node.Nodes)
+                        if (image != null)
+                        {
+                            if (!image.TryExtract()) break;
+                            imgNode = image.Node;
+                        }
+                        foreach (Wz_Node tree in imgNode.Nodes)
                         {
                             Wz_Node test_tree = TryLocateUolNode(tree);
                             if (tree.ResolveUol() is not Wz_Node linkNode)
@@ -587,13 +632,16 @@ namespace WzComparerR2.Common
                             }
                             strResult.SkillH.TrimExcess();
                             strResult.SkillpH.TrimExcess();
-                            if (tree.FullPath == test_tree.FullPath)
+                            if (!update)
                             {
-                                strResult.FullPath = tree.FullPath;
-                            }
-                            else
-                            {
-                                strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                if (tree.FullPath == test_tree.FullPath)
+                                {
+                                    strResult.FullPath = tree.FullPath;
+                                }
+                                else
+                                {
+                                    strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                }
                             }
 
                             AddAllValue(strResult, linkNode);
@@ -605,8 +653,12 @@ namespace WzComparerR2.Common
                         }
                         break;
                     case "Eqp.img":
-                        if (!image.TryExtract()) break;
-                        foreach (Wz_Node tree0 in image.Node.Nodes)
+                        if (image != null)
+                        {
+                            if (!image.TryExtract()) break;
+                            imgNode = image.Node;
+                        }
+                        foreach (Wz_Node tree0 in imgNode.Nodes)
                         {
                             foreach (Wz_Node tree1 in tree0.Nodes)
                             {
@@ -625,13 +677,16 @@ namespace WzComparerR2.Common
 
                                         strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;
                                         strResult.Desc = GetDefaultString(linkNode, "desc") ?? strResult.Desc;
-                                        if (tree.FullPath == test_tree.FullPath)
+                                        if (!update)
                                         {
-                                            strResult.FullPath = tree.FullPath;
-                                        }
-                                        else
-                                        {
-                                            strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                            if (tree.FullPath == test_tree.FullPath)
+                                            {
+                                                strResult.FullPath = tree.FullPath;
+                                            }
+                                            else
+                                            {
+                                                strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                            }
                                         }
 
                                         AddAllValue(strResult, linkNode);
@@ -644,16 +699,19 @@ namespace WzComparerR2.Common
                 }
             }
 
-            foreach (Wz_Node node in itemNode.FindNodeByPath("Special")?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+            foreach (Wz_Node node in itemNode?.FindNodeByPath("Special")?.Nodes ?? Enumerable.Empty<Wz_Node>())
             {
                 Wz_Image image = node.Value as Wz_Image;
-                if (image == null)
-                    continue;
+                Wz_Node imgNode = node;
                 switch (node.Text)
                 {
                     case "0910.img":
-                        if (!image.TryExtract()) break;
-                        foreach (Wz_Node tree in image.Node.Nodes)
+                        if (image != null)
+                        {
+                            if (!image.TryExtract()) break;
+                            imgNode = image.Node;
+                        }
+                        foreach (Wz_Node tree in imgNode.Nodes)
                         {
                             Wz_Node test_tree = TryLocateUolNode(tree);
                             if (Int32.TryParse(tree.Text, out id) && tree.ResolveUol() is Wz_Node linkNode)
@@ -668,13 +726,16 @@ namespace WzComparerR2.Common
 
                                 strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;
                                 strResult.Desc = GetDefaultString(linkNode, "desc") ?? strResult.Desc;
-                                if (tree.FullPath == test_tree.FullPath)
+                                if (!update)
                                 {
-                                    strResult.FullPath = tree.FullPath;
-                                }
-                                else
-                                {
-                                    strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                    if (tree.FullPath == test_tree.FullPath)
+                                    {
+                                        strResult.FullPath = tree.FullPath;
+                                    }
+                                    else
+                                    {
+                                        strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                    }
                                 }
 
                                 AddAllValue(strResult, linkNode);
@@ -685,16 +746,19 @@ namespace WzComparerR2.Common
                 }
             }
 
-            foreach (Wz_Node node in etcNode?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+            foreach (Wz_Node node in etcNode?.Nodes ?? Enumerable.Empty<Wz_Node>())
             {
                 Wz_Image image = node.Value as Wz_Image;
-                if (image == null)
-                    continue;
+                Wz_Node imgNode = node;
                 switch (node.Text)
                 {
                     case "SetItemInfo.img":
-                        if (!image.TryExtract()) break;
-                        foreach (Wz_Node tree in image.Node.Nodes)
+                        if (image != null)
+                        {
+                            if (!image.TryExtract()) break;
+                            imgNode = image.Node;
+                        }
+                        foreach (Wz_Node tree in imgNode.Nodes)
                         {
 
                             Wz_Node test_tree = TryLocateUolNode(tree);
@@ -709,13 +773,16 @@ namespace WzComparerR2.Common
                                 if (strResult == null) strResult = new StringResult();
 
                                 strResult.Name = GetDefaultString(linkNode, "setItemName") ?? strResult.Name ?? string.Empty;
-                                if (tree.FullPath == test_tree.FullPath)
+                                if (!update)
                                 {
-                                    strResult.FullPath = tree.FullPath;
-                                }
-                                else
-                                {
-                                    strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                    if (tree.FullPath == test_tree.FullPath)
+                                    {
+                                        strResult.FullPath = tree.FullPath;
+                                    }
+                                    else
+                                    {
+                                        strResult.FullPath = tree.FullPath + " -> " + test_tree.FullPath;
+                                    }
                                 }
 
                                 AddAllValue(strResult, linkNode);
@@ -726,13 +793,16 @@ namespace WzComparerR2.Common
                 }
             }
 
-            var achievementNode = etcNode.FindNodeByPath("Achievement\\AchievementData");
-            foreach (Wz_Node node in achievementNode?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+            var achievementNode = etcNode?.FindNodeByPath("Achievement\\AchievementData");
+            foreach (Wz_Node node in achievementNode?.Nodes ?? Enumerable.Empty<Wz_Node>())
             {
                 Wz_Image image = node.Value as Wz_Image;
-                if (image == null || !image.TryExtract())
-                    continue;
-                Wz_Node tree = image.Node;
+                Wz_Node tree = node;
+                if (image != null)
+                {
+                    if (!image.TryExtract()) continue;
+                    tree = image.Node;
+                }
                 Wz_Node infoNode = tree.FindNodeByPath("info");
                 if (Int32.TryParse(tree.Text.Replace(".img", ""), out id) && infoNode.ResolveUol() is Wz_Node linkNode && linkNode != null)
                 {
@@ -746,7 +816,7 @@ namespace WzComparerR2.Common
 
                     strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;
                     strResult.Desc = GetDefaultString(linkNode, "desc") ?? strResult.Desc;
-                    strResult.FullPath = "AchievementData\\" + tree.FullPath;
+                    if (!update) strResult.FullPath = "AchievementData\\" + tree.FullPath;
 
                     //AddAllValue(strResult, linkNode);
                     stringAchievement[id] = strResult;
@@ -761,7 +831,7 @@ namespace WzComparerR2.Common
                 {
                     Wz_Node targetNode = worldArchiveImg.Node;
                     Wz_Node infoNode = targetNode.FindNodeByPath("collectionInfo");
-                    foreach (Wz_Node node in infoNode?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+                    foreach (Wz_Node node in infoNode?.Nodes ?? Enumerable.Empty<Wz_Node>())
                     {
                         foreach (Wz_Node subNode in node.Nodes)
                         {
@@ -780,7 +850,7 @@ namespace WzComparerR2.Common
                                                     foreach (Wz_Node mobNode in subNode2.Nodes)
                                                     {
                                                         List<int> mobIDs = new List<int>();
-                                                        foreach (Wz_Node idNode in mobNode.FindNodeByPath("id")?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+                                                        foreach (Wz_Node idNode in mobNode.FindNodeByPath("id")?.Nodes ?? Enumerable.Empty<Wz_Node>())
                                                         {
                                                             var mobID = idNode.GetValueEx<int>(0);
                                                             if (mobID != 0) mobIDs.Add(mobID);
@@ -818,7 +888,7 @@ namespace WzComparerR2.Common
                                                     foreach (Wz_Node npcNode in subNode2.Nodes)
                                                     {
                                                         List<int> npcIDs = new List<int>();
-                                                        foreach (Wz_Node idNode in npcNode.FindNodeByPath("id")?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+                                                        foreach (Wz_Node idNode in npcNode.FindNodeByPath("id")?.Nodes ?? Enumerable.Empty<Wz_Node>())
                                                         {
                                                             var npcID = idNode.GetValueEx<int>(0);
                                                             if (npcID != 0) npcIDs.Add(npcID);
@@ -879,7 +949,7 @@ namespace WzComparerR2.Common
                     }
                 }
             }
-            foreach (Wz_Node node in qDataNode?.Nodes ?? new Wz_Node.WzNodeCollection(null))
+            foreach (Wz_Node node in qDataNode?.Nodes ?? Enumerable.Empty<Wz_Node>())
             {
                 Wz_Node tree = node;
                 if (node.Value is Wz_Image image)
@@ -903,7 +973,7 @@ namespace WzComparerR2.Common
 
                     strResult.Name = GetDefaultString(linkNode, "name") ?? strResult.Name ?? string.Empty;
                     strResult.Desc = GetDefaultString(linkNode, "0") ?? strResult.Desc;
-                    strResult.FullPath = (newQuestDir ? "QuestData\\" : "") + tree.FullPath;
+                    if (!update) strResult.FullPath = (newQuestDir ? "QuestData\\" : "") + tree.FullPath;
 
                     AddAllValue(strResult, linkNode);
                     stringQuest[id] = strResult;

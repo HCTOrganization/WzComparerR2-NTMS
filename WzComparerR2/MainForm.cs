@@ -2949,10 +2949,11 @@ namespace WzComparerR2
 
         private async void tsmi1UpdateStringLinker_Click(object sender, EventArgs e)
         {
-            Wz_Node stringNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("String");
-            Wz_Node itemNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Item");
-            Wz_Node etcNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Etc");
-            Wz_Node questNode = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Quest");
+            Wz_Node selectedNode = advTree1.SelectedNode?.AsWzNode();
+            Wz_Node stringNode = selectedNode?.FindNodeByPath("String") ?? selectedNode?.FindNodeByPath("String.img", true);
+            Wz_Node itemNode = selectedNode?.FindNodeByPath("Item") ?? selectedNode?.FindNodeByPath("Item.img", true);
+            Wz_Node etcNode = selectedNode?.FindNodeByPath("Etc") ?? selectedNode?.FindNodeByPath("Etc.img", true);
+            Wz_Node questNode = selectedNode?.FindNodeByPath("Quest") ?? selectedNode?.FindNodeByPath("Quest.img", true);
 
             bool r = false;
 
