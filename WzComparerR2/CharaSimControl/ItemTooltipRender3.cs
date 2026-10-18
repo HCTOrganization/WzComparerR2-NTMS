@@ -567,11 +567,21 @@ namespace WzComparerR2.CharaSimControl
                 expireTime = "";
                 if (item.ConsumableFrom != null)
                 {
-                    expireTime += "到" + string.Format("{0}年 {1}月 {2}日 {3:D2}時 {4:D2}分可以用", Convert.ToInt32(item.ConsumableFrom.Substring(0, 4)), Convert.ToInt32(item.ConsumableFrom.Substring(4, 2)), Convert.ToInt32(item.ConsumableFrom.Substring(6, 2)), Convert.ToInt32(item.ConsumableFrom.Substring(8, 2)), Convert.ToInt32(item.ConsumableFrom.Substring(10, 2)));
+                    Match match = Regex.Match(item.ConsumableFrom, @"^#DL(.+?)#$");
+                    if (match.Success)
+                    {
+                        expireTime += "到" + StringTagConverter.ConvertDateWZ2(match.Groups[1].Value, PluginManager.FindWz, this.SourceWzFile) + "可以用";
+                    }
+                    else expireTime += "到" + string.Format("{0}年 {1}月 {2}日 {3:D2}時 {4:D2}分可以用", Convert.ToInt32(item.ConsumableFrom.Substring(0, 4)), Convert.ToInt32(item.ConsumableFrom.Substring(4, 2)), Convert.ToInt32(item.ConsumableFrom.Substring(6, 2)), Convert.ToInt32(item.ConsumableFrom.Substring(8, 2)), Convert.ToInt32(item.ConsumableFrom.Substring(10, 2)));
                 }
                 if (item.EndUseDate != null)
                 {
-                    expireTime += "到" + string.Format("{0}年 {1}月 {2}日 {3:D2}時 {4:D2}分可以用", Convert.ToInt32(item.EndUseDate.Substring(0, 4)), Convert.ToInt32(item.EndUseDate.Substring(4, 2)), Convert.ToInt32(item.EndUseDate.Substring(6, 2)), Convert.ToInt32(item.EndUseDate.Substring(8, 2)), Convert.ToInt32(item.EndUseDate.Substring(10, 2)));
+                    Match match = Regex.Match(item.EndUseDate, @"^#DL(.+?)#$");
+                    if (match.Success)
+                    {
+                        expireTime += "到" + StringTagConverter.ConvertDateWZ2(match.Groups[1].Value, PluginManager.FindWz, this.SourceWzFile) + "可以用";
+                    }
+                    else expireTime += "到" + string.Format("{0}年 {1}月 {2}日 {3:D2}時 {4:D2}分可以用", Convert.ToInt32(item.EndUseDate.Substring(0, 4)), Convert.ToInt32(item.EndUseDate.Substring(4, 2)), Convert.ToInt32(item.EndUseDate.Substring(6, 2)), Convert.ToInt32(item.EndUseDate.Substring(8, 2)), Convert.ToInt32(item.EndUseDate.Substring(10, 2)));
                 }
             }
             else if ((item.Props.TryGetValue(ItemPropType.permanent, out value) && value != 0) || (item.IsPet && item.Props.TryGetValue(ItemPropType.life, out value) && value == 0))
