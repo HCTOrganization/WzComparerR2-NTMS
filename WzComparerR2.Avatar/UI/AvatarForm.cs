@@ -3574,7 +3574,23 @@ namespace WzComparerR2.Avatar.UI
                     Wz_Node imgNode = FindNodeByGearID(characWz, gearID);
                     if (imgNode != null)
                     {
-                        var part = this.avatar.AddPart(imgNode);
+                        AvatarPart part;
+                        GearType gearType = Gear.GetGearType(gearID);
+                        if (gearType == GearType.taming
+                            || gearType == GearType.taming2
+                            || gearType == GearType.taming3
+                            || gearType == GearType.tamingChair)
+                        {
+                            part = this.avatar.AddTamingPart(
+                                imgNode,
+                                BitmapOrigin.CreateFromNode(imgNode.FindNodeByPath("info\\icon"), PluginBase.PluginManager.FindWz),
+                                gearID,
+                                false);
+                        }
+                        else
+                        {
+                            part = this.avatar.AddPart(imgNode);
+                        }
                         if (m.Groups["mixColor"].Success && m.Groups["mixRate"].Success && Int32.TryParse(m.Groups["mixColor"].Value, out int mixColor) && Int32.TryParse(m.Groups["mixRate"].Value, out int mixOpacity))
                         {
                             part.MixColor = mixColor;
