@@ -16,6 +16,8 @@ namespace WzComparerR2.CharaSim
         incLUK,
         incLUKr,
         incAllStat,
+        incAllStat_incMHP,
+        incAllStat_incMHP_incMMP,
         incAllStat_incMHP25,
         incAllStat_incMHP50_incMMP50,
         statR,
