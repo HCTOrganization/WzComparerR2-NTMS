@@ -536,7 +536,7 @@
             this.chkFlipX.Size = new System.Drawing.Size(70, 17);
             this.chkFlipX.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkFlipX.TabIndex = 13;
-            this.chkFlipX.Text = "左右反転";
+            this.chkFlipX.Text = "左右反轉";
             // 
             // chkFlipY
             // 
@@ -549,7 +549,7 @@
             this.chkFlipY.Size = new System.Drawing.Size(70, 17);
             this.chkFlipY.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkFlipY.TabIndex = 14;
-            this.chkFlipY.Text = "上下反転";
+            this.chkFlipY.Text = "上下反轉";
             // 
             // superTooltip1
             // 
