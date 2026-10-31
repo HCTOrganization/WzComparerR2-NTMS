@@ -53,6 +53,8 @@
             this.txtGoY = new DevComponents.Editors.IntegerInput();
             this.txtPngDelay = new DevComponents.Editors.IntegerInput();
             this.chkFullMove = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkFlipX = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkFlipY = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.superTooltip1 = new DevComponents.DotNetBar.SuperTooltip();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel1.SuspendLayout();
@@ -115,7 +117,7 @@
             this.tableLayoutPanel1.Controls.Add(this.labelX8, 1, 4);
             this.tableLayoutPanel1.Controls.Add(this.labelX9, 1, 5);
             this.tableLayoutPanel1.Controls.Add(this.labelX10, 1, 6);
-            this.tableLayoutPanel1.Controls.Add(this.labelX7, 1, 8);
+            this.tableLayoutPanel1.Controls.Add(this.labelX7, 1, 9);
             this.tableLayoutPanel1.Controls.Add(this.txtDelayOffset, 2, 0);
             this.tableLayoutPanel1.Controls.Add(this.txtMoveX, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.txtMoveY, 4, 1);
@@ -125,17 +127,20 @@
             this.tableLayoutPanel1.Controls.Add(this.txtSpeedY, 4, 4);
             this.tableLayoutPanel1.Controls.Add(this.txtGoX, 2, 5);
             this.tableLayoutPanel1.Controls.Add(this.txtGoY, 4, 5);
-            this.tableLayoutPanel1.Controls.Add(this.txtPngDelay, 2, 8);
+            this.tableLayoutPanel1.Controls.Add(this.txtPngDelay, 2, 9);
             this.tableLayoutPanel1.Controls.Add(this.chkFullMove, 2, 6);
+            this.tableLayoutPanel1.Controls.Add(this.chkFlipX, 2, 7);
+            this.tableLayoutPanel1.Controls.Add(this.chkFlipY, 4, 7);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(9, 8);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 9;
+            this.tableLayoutPanel1.RowCount = 10;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 10F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 20F));
@@ -520,6 +525,32 @@
             this.superTooltip1.SetSuperTooltip(this.chkFullMove, superTooltipInfo2);
             this.chkFullMove.TabIndex = 9;
             // 
+            // chkFlipX
+            // 
+            // 
+            // 
+            // 
+            this.chkFlipX.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkFlipX.Location = new System.Drawing.Point(206, 181);
+            this.chkFlipX.Name = "chkFlipX";
+            this.chkFlipX.Size = new System.Drawing.Size(70, 17);
+            this.chkFlipX.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkFlipX.TabIndex = 13;
+            this.chkFlipX.Text = "左右反転";
+            // 
+            // chkFlipY
+            // 
+            // 
+            // 
+            // 
+            this.chkFlipY.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkFlipY.Location = new System.Drawing.Point(309, 181);
+            this.chkFlipY.Name = "chkFlipY";
+            this.chkFlipY.Size = new System.Drawing.Size(70, 17);
+            this.chkFlipY.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkFlipY.TabIndex = 14;
+            this.chkFlipY.Text = "上下反転";
+            // 
             // superTooltip1
             // 
             this.superTooltip1.DefaultTooltipSettings = superTooltipInfo1;
@@ -602,6 +633,8 @@
         private DevComponents.DotNetBar.LabelX labelX9;
         private DevComponents.DotNetBar.LabelX labelX10;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkFullMove;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkFlipX;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkFlipY;
         private DevComponents.DotNetBar.SuperTooltip superTooltip1;
     }
 }
