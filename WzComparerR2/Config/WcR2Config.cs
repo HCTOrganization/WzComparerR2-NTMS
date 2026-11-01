@@ -348,6 +348,16 @@ namespace WzComparerR2.Config
             set { this["DiscordChannelID"] = value; }
         }
 
+        /// <summary>
+        /// Avatar code used for the chair and riding mount examples of easy compare.
+        /// </summary>
+        [ConfigurationProperty("easyCompareAvatarCode")]
+        public ConfigItem<string> EasyCompareAvatarCode
+        {
+            get { return (ConfigItem<string>)this["easyCompareAvatarCode"]; }
+            set { this["easyCompareAvatarCode"] = value; }
+        }
+
         private static readonly HashSet<string> obsoleteElements = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
             "wzVersionVerifyMode",

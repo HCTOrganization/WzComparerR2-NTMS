@@ -250,6 +250,8 @@ namespace WzComparerR2
             this.chkSkipKMSContent = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkSkipGodChangseopDuplicatedNodes = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkPostChangesToDiscord = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkOutputChairAndRidingMount = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.btnAvatarCode = new DevComponents.DotNetBar.ButtonX();
             this.superTooltip1 = new DevComponents.DotNetBar.SuperTooltip();
             this.chkOutputRemovedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkOutputAddedImg = new DevComponents.DotNetBar.Controls.CheckBoxX();
@@ -2850,6 +2852,8 @@ namespace WzComparerR2
             this.superTabControlPanel2.Controls.Add(this.chkSkipKMSContent);
             this.superTabControlPanel2.Controls.Add(this.chkSkipGodChangseopDuplicatedNodes);
             this.superTabControlPanel2.Controls.Add(this.chkPostChangesToDiscord);
+            this.superTabControlPanel2.Controls.Add(this.chkOutputChairAndRidingMount);
+            this.superTabControlPanel2.Controls.Add(this.btnAvatarCode);
             this.superTabControlPanel2.Controls.Add(this.chkResolvePngLink);
             this.superTabControlPanel2.Controls.Add(this.chkOutputRemovedImg);
             this.superTabControlPanel2.Controls.Add(this.chkOutputAddedImg);
@@ -2959,7 +2963,7 @@ namespace WzComparerR2
             // 
             // 
             this.chkOutputMapTooltip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkOutputMapTooltip.Location = new System.Drawing.Point(550, 142);
+            this.chkOutputMapTooltip.Location = new System.Drawing.Point(550, 169);
             this.chkOutputMapTooltip.Name = "chkOutputMapTooltip";
             this.chkOutputMapTooltip.Size = new System.Drawing.Size(155, 23);
             this.chkOutputMapTooltip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -2972,7 +2976,7 @@ namespace WzComparerR2
             // 
             // 
             this.chkOutputMobTooltip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkOutputMobTooltip.Location = new System.Drawing.Point(550, 169);
+            this.chkOutputMobTooltip.Location = new System.Drawing.Point(550, 195);
             this.chkOutputMobTooltip.Name = "chkOutputMobTooltip";
             this.chkOutputMobTooltip.Size = new System.Drawing.Size(155, 23);
             this.chkOutputMobTooltip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -2985,7 +2989,7 @@ namespace WzComparerR2
             // 
             // 
             this.chkOutputNpcTooltip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkOutputNpcTooltip.Location = new System.Drawing.Point(550, 196);
+            this.chkOutputNpcTooltip.Location = new System.Drawing.Point(550, 221);
             this.chkOutputNpcTooltip.Name = "chkOutputNpcTooltip";
             this.chkOutputNpcTooltip.Size = new System.Drawing.Size(135, 23);
             this.chkOutputNpcTooltip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -2998,7 +3002,7 @@ namespace WzComparerR2
             // 
             // 
             this.chkOutputQuestTooltip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkOutputQuestTooltip.Location = new System.Drawing.Point(550, 223);
+            this.chkOutputQuestTooltip.Location = new System.Drawing.Point(550, 247);
             this.chkOutputQuestTooltip.Name = "chkOutputQuestTooltip";
             this.chkOutputQuestTooltip.Size = new System.Drawing.Size(135, 23);
             this.chkOutputQuestTooltip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -3011,7 +3015,7 @@ namespace WzComparerR2
             // 
             // 
             this.chkOutputAchvTooltip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkOutputAchvTooltip.Location = new System.Drawing.Point(550, 250);
+            this.chkOutputAchvTooltip.Location = new System.Drawing.Point(550, 273);
             this.chkOutputAchvTooltip.Name = "chkOutputAchvTooltip";
             this.chkOutputAchvTooltip.Size = new System.Drawing.Size(140, 23);
             this.chkOutputAchvTooltip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -3024,7 +3028,7 @@ namespace WzComparerR2
             // 
             // 
             this.chkShowObjectID.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowObjectID.Location = new System.Drawing.Point(550, 277);
+            this.chkShowObjectID.Location = new System.Drawing.Point(550, 299);
             this.chkShowObjectID.Name = "chkShowObjectID";
             this.chkShowObjectID.Size = new System.Drawing.Size(135, 23);
             this.chkShowObjectID.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -3038,7 +3042,7 @@ namespace WzComparerR2
             // 
             // 
             this.chkShowChangeType.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowChangeType.Location = new System.Drawing.Point(550, 304);
+            this.chkShowChangeType.Location = new System.Drawing.Point(550, 325);
             this.chkShowChangeType.Name = "chkShowChangeType";
             this.chkShowChangeType.Size = new System.Drawing.Size(135, 23);
             this.chkShowChangeType.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -3052,7 +3056,7 @@ namespace WzComparerR2
             // 
             // 
             this.chkShowPrice.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowPrice.Location = new System.Drawing.Point(550, 331);
+            this.chkShowPrice.Location = new System.Drawing.Point(550, 351);
             this.chkShowPrice.Name = "chkShowPrice";
             this.chkShowPrice.Size = new System.Drawing.Size(135, 23);
             this.chkShowPrice.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -3066,7 +3070,7 @@ namespace WzComparerR2
             // 
             // 
             this.chkShowLinkedTamingMob.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowLinkedTamingMob.Location = new System.Drawing.Point(550, 358);
+            this.chkShowLinkedTamingMob.Location = new System.Drawing.Point(550, 377);
             this.chkShowLinkedTamingMob.Name = "chkShowLinkedTamingMob";
             this.chkShowLinkedTamingMob.Size = new System.Drawing.Size(135, 23);
             this.chkShowLinkedTamingMob.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -3081,7 +3085,7 @@ namespace WzComparerR2
             // 
             // 
             this.chkSkipKMSContent.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkSkipKMSContent.Location = new System.Drawing.Point(550, 385);
+            this.chkSkipKMSContent.Location = new System.Drawing.Point(550, 403);
             this.chkSkipKMSContent.Name = "chkSkipKMSContent";
             this.chkSkipKMSContent.Size = new System.Drawing.Size(185, 23);
             this.chkSkipKMSContent.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -3096,7 +3100,7 @@ namespace WzComparerR2
             // 
             // 
             this.chkSkipGodChangseopDuplicatedNodes.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkSkipGodChangseopDuplicatedNodes.Location = new System.Drawing.Point(550, 412);
+            this.chkSkipGodChangseopDuplicatedNodes.Location = new System.Drawing.Point(550, 429);
             this.chkSkipGodChangseopDuplicatedNodes.Name = "chkSkipGodChangseopDuplicatedNodes";
             this.chkSkipGodChangseopDuplicatedNodes.Size = new System.Drawing.Size(185, 25);
             this.chkSkipGodChangseopDuplicatedNodes.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
@@ -3111,13 +3115,44 @@ namespace WzComparerR2
             // 
             // 
             this.chkPostChangesToDiscord.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkPostChangesToDiscord.Location = new System.Drawing.Point(550, 439);
+            this.chkPostChangesToDiscord.Location = new System.Drawing.Point(550, 455);
             this.chkPostChangesToDiscord.Name = "chkPostChangesToDiscord";
             this.chkPostChangesToDiscord.Size = new System.Drawing.Size(185, 25);
             this.chkPostChangesToDiscord.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
             this.chkPostChangesToDiscord.TabIndex = 26;
             this.chkPostChangesToDiscord.Text = "將變更發佈到 Discord";
             this.chkPostChangesToDiscord.Checked = true;
+            // 
+            // chkOutputChairAndRidingMount
+            // 
+            // 
+            // 
+            // 
+            this.chkOutputChairAndRidingMount.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkOutputChairAndRidingMount.Location = new System.Drawing.Point(550, 142);
+            this.chkOutputChairAndRidingMount.Name = "chkOutputChairAndRidingMount";
+            this.chkOutputChairAndRidingMount.Size = new System.Drawing.Size(185, 25);
+            this.chkOutputChairAndRidingMount.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.superTooltip1.SetSuperTooltip(this.chkOutputChairAndRidingMount, new DevComponents.DotNetBar.SuperTooltipInfo("椅子與騎乘座騎輸出", "", "將變更的椅子與騎乘座騎 (TamingMob) 以角色乘坐的動畫圖片形式輸出。\r\n輸出位置: ChairExamples / TamingMobExamples", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(240, 180)));
+            this.chkOutputChairAndRidingMount.TabIndex = 27;
+            this.chkOutputChairAndRidingMount.Text = "椅子與騎乘座騎輸出";
+            this.chkOutputChairAndRidingMount.CheckedChanged += new System.EventHandler(this.chkOutputChairAndRidingMount_CheckedChanged);
+            // 
+            // btnAvatarCode
+            // 
+            // 
+            // 
+            // 
+            this.btnAvatarCode.AccessibleRole = System.Windows.Forms.AccessibleRole.PushButton;
+            this.btnAvatarCode.ColorTable = DevComponents.DotNetBar.eButtonColor.OrangeWithBackground;
+            this.btnAvatarCode.Location = new System.Drawing.Point(390, 61);
+            this.btnAvatarCode.Name = "btnAvatarCode";
+            this.btnAvatarCode.Size = new System.Drawing.Size(135, 23);
+            this.btnAvatarCode.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.superTooltip1.SetSuperTooltip(this.btnAvatarCode, new DevComponents.DotNetBar.SuperTooltipInfo("角色外觀代碼設定", "", "指定椅子與騎乘座騎輸出所使用的角色外觀代碼。", null, null, DevComponents.DotNetBar.eTooltipColor.System, true, false, new System.Drawing.Size(200, 70)));
+            this.btnAvatarCode.TabIndex = 28;
+            this.btnAvatarCode.Text = "角色外觀代碼設定";
+            this.btnAvatarCode.Click += new System.EventHandler(this.btnAvatarCode_Click);
             // 
             // chkOutputRemovedImg
             // 
@@ -4185,6 +4220,8 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX chkSkipKMSContent;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkSkipGodChangseopDuplicatedNodes;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkPostChangesToDiscord;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkOutputChairAndRidingMount;
+        private DevComponents.DotNetBar.ButtonX btnAvatarCode;
         private DevComponents.Editors.ComboItem comboItem19;
         private DevComponents.Editors.ComboItem comboItem20;
         private DevComponents.Editors.ComboItem comboItem21;
