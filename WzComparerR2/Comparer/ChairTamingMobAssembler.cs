@@ -28,7 +28,7 @@ namespace WzComparerR2.Comparer
         /// <summary>
         /// Actions rendered for the taming mob avatar examples (action names on the TamingMob side).
         /// </summary>
-        private static readonly string[] TamingMobRenderActions = { "stand1", "walk1", "prone", "jump", "ladder", "rope" };
+        private static readonly string[] TamingMobRenderActions = { "sit", "stand", "walk1", "prone", "jump", "ladder", "rope" };
 
         /// <summary>
         /// Maps a TamingMob action name to the action name of the character body.
