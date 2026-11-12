@@ -448,7 +448,13 @@ namespace WzComparerR2.CharaSimControl
             if (String.IsNullOrEmpty(this.QuestAvailable)) this.QuestAvailable = "";
             if (String.IsNullOrEmpty(this.QuestProgress)) this.QuestProgress = "";
             if (String.IsNullOrEmpty(this.QuestComplete)) this.QuestComplete = "";
-            if (this.CopyParsedSkillString && item is Skill) this.Hdesc = this.SkillRender.ParsedHdesc;
+            if (this.CopyParsedSkillString)
+            {
+                if (item is Skill)
+                {
+                    this.Hdesc = this.SkillRender.ParsedHdesc;
+                }
+            }
 
             if (this.item is Quest)
             {
@@ -463,6 +469,11 @@ namespace WzComparerR2.CharaSimControl
             }
             else
             {
+                Quest nullQuest = new Quest();
+                nullQuest.ID = -1;
+                this.Desc = ReplaceQuestString(Desc, nullQuest);
+                this.AutoDesc = ReplaceQuestString(AutoDesc, nullQuest);
+                this.DescLeftAlign = ReplaceQuestString(DescLeftAlign, nullQuest);
                 if (this.PreferredStringCopyMethod == 2) sb.AppendLine(this.NodeID.ToString());
                 if (!String.IsNullOrEmpty(this.NodeName)) sb.AppendLine(this.NodeName);
             }
