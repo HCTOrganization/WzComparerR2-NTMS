@@ -29,11 +29,13 @@ namespace WzComparerR2.CharaSimControl
             this.menu.Items.Add(new ToolStripSeparator());
             this.menu.Items.Add(new ToolStripMenuItem("複製文字", null, tsmiCopyText_Click));
             this.menu.Items.Add(new ToolStripMenuItem("複製譯文", null, tsmiCopyTranslate_Click));
+            this.menu.Items.Add(new ToolStripMenuItem("複製交換卷內容物的ID", null, tsmiCopyPackageID_Click));
             this.menu.Items.Add(new ToolStripSeparator());
             this.menu.Items.Add(new ToolStripMenuItem("關閉 (Esc)", null, tsmiClose_Click));
             this.ContextMenuStrip = this.menu;
 
             this.Size = new Size(1, 1);
+            this.PackageIDs = new List<int>();
             this.HideOnHover = true;
             this.GearRender = new GearTooltipRender2();
             this.GearRender3 = new GearTooltipRender3();
@@ -116,6 +118,7 @@ namespace WzComparerR2.CharaSimControl
         public int NodeID { get; set; }
         public int PreferredStringCopyMethod { get; set; }
         public bool CopyParsedSkillString { get; set; }
+        private List<int> PackageIDs;
 
         public event ObjectMouseEventHandler ObjectMouseMove;
         public event EventHandler ObjectMouseLeave;
@@ -632,6 +635,16 @@ namespace WzComparerR2.CharaSimControl
             }
         }
 
+        void tsmiCopyPackageID_Click(object sender, EventArgs e)
+        {
+            PreProcessText();
+            if (this.PackageIDs.Count > 0)
+            {
+                string packageIdString = string.Join(",", this.PackageIDs);
+                Clipboard.SetText(packageIdString);
+            }
+        }
+
         void tsmiClose_Click(object sender, EventArgs e)
         {
             if (this.Bitmap != null)
@@ -897,6 +910,7 @@ namespace WzComparerR2.CharaSimControl
                         {
                             StringLinker.StringEqp.TryGetValue(id, out sr);
                         }
+                        PackageIDs.Add(id);
                         return isMapleWiki ? $"{{{{QuestTextHighlight|item|{sr?.Name ?? id.ToString()}}}}}" : $"{sr?.Name ?? id.ToString()}";
 
                     case "q":
