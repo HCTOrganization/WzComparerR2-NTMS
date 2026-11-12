@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WzComparerR2.AvatarCommon;
 using WzComparerR2.CharaSim;
 using WzComparerR2.Common;
 using WzComparerR2.Controls;
@@ -440,43 +442,9 @@ namespace WzComparerR2.CharaSimControl
         void tsmiCopyText_Click(object sender, EventArgs e)
         {
             StringBuilder sb = new StringBuilder();
-            if (String.IsNullOrEmpty(this.Desc)) this.Desc = "";
-            if (String.IsNullOrEmpty(this.Pdesc)) this.Pdesc = "";
-            if (String.IsNullOrEmpty(this.AutoDesc)) this.AutoDesc = "";
-            if (String.IsNullOrEmpty(this.Hdesc)) this.Hdesc = "";
-            if (String.IsNullOrEmpty(this.DescLeftAlign)) this.DescLeftAlign = "";
-            if (String.IsNullOrEmpty(this.QuestAvailable)) this.QuestAvailable = "";
-            if (String.IsNullOrEmpty(this.QuestProgress)) this.QuestProgress = "";
-            if (String.IsNullOrEmpty(this.QuestComplete)) this.QuestComplete = "";
-            if (this.CopyParsedSkillString)
-            {
-                if (item is Skill)
-                {
-                    this.Hdesc = this.SkillRender.ParsedHdesc;
-                }
-            }
-
-            if (this.item is Quest)
-            {
-                Desc = ReplaceQuestString(Desc, this.item as Quest);
-                Pdesc = ReplaceQuestString(Pdesc, this.item as Quest);
-                AutoDesc = ReplaceQuestString(AutoDesc, this.item as Quest);
-                Hdesc = ReplaceQuestString(Hdesc, this.item as Quest);
-                DescLeftAlign = ReplaceQuestString(DescLeftAlign, this.item as Quest);
-                QuestAvailable = ReplaceQuestString(QuestAvailable, this.item as Quest);
-                QuestProgress = ReplaceQuestString(QuestProgress, this.item as Quest);
-                QuestComplete = ReplaceQuestString(QuestComplete, this.item as Quest);
-            }
-            else
-            {
-                Quest nullQuest = new Quest();
-                nullQuest.ID = -1;
-                this.Desc = ReplaceQuestString(Desc, nullQuest);
-                this.AutoDesc = ReplaceQuestString(AutoDesc, nullQuest);
-                this.DescLeftAlign = ReplaceQuestString(DescLeftAlign, nullQuest);
-                if (this.PreferredStringCopyMethod == 2) sb.AppendLine(this.NodeID.ToString());
-                if (!String.IsNullOrEmpty(this.NodeName)) sb.AppendLine(this.NodeName);
-            }
+            PreProcessText();
+            if (this.PreferredStringCopyMethod == 2) sb.AppendLine(this.NodeID.ToString());
+            if (!String.IsNullOrEmpty(this.NodeName)) sb.AppendLine(this.NodeName);
             switch (this.PreferredStringCopyMethod)
             {
                 default:
@@ -585,9 +553,55 @@ namespace WzComparerR2.CharaSimControl
             sb.Clear();
         }
 
+        private void PreProcessText()
+        {
+            if (String.IsNullOrEmpty(this.Desc)) this.Desc = "";
+            if (String.IsNullOrEmpty(this.Pdesc)) this.Pdesc = "";
+            if (String.IsNullOrEmpty(this.AutoDesc)) this.AutoDesc = "";
+            if (String.IsNullOrEmpty(this.Hdesc)) this.Hdesc = "";
+            if (String.IsNullOrEmpty(this.DescLeftAlign)) this.DescLeftAlign = "";
+            if (String.IsNullOrEmpty(this.QuestAvailable)) this.QuestAvailable = "";
+            if (String.IsNullOrEmpty(this.QuestProgress)) this.QuestProgress = "";
+            if (String.IsNullOrEmpty(this.QuestComplete)) this.QuestComplete = "";
+            if (this.CopyParsedSkillString)
+            {
+                if (item is Skill)
+                {
+                    this.Hdesc = this.SkillRender.ParsedHdesc;
+                }
+            }
+
+            if (this.item is Quest)
+            {
+                Desc = ReplaceQuestString(Desc, this.item as Quest);
+                Pdesc = ReplaceQuestString(Pdesc, this.item as Quest);
+                AutoDesc = ReplaceQuestString(AutoDesc, this.item as Quest);
+                Hdesc = ReplaceQuestString(Hdesc, this.item as Quest);
+                DescLeftAlign = ReplaceQuestString(DescLeftAlign, this.item as Quest);
+                QuestAvailable = ReplaceQuestString(QuestAvailable, this.item as Quest);
+                QuestProgress = ReplaceQuestString(QuestProgress, this.item as Quest);
+                QuestComplete = ReplaceQuestString(QuestComplete, this.item as Quest);
+            }
+            else
+            {
+                Quest nullQuest = new Quest();
+                nullQuest.ID = -1;
+                this.Desc = ReplaceQuestString(Desc, nullQuest);
+                this.AutoDesc = ReplaceQuestString(AutoDesc, nullQuest);
+                this.DescLeftAlign = ReplaceQuestString(DescLeftAlign, nullQuest);
+                if (this.item is Item)
+                {
+                    this.Desc = ReplaceCosmeticEULOTag(this.Desc, (Item)item);
+                    this.AutoDesc = ReplaceCosmeticEULOTag(this.AutoDesc, (Item)item);
+                    this.DescLeftAlign = ReplaceCosmeticEULOTag(this.DescLeftAlign, (Item)item);
+                }
+            }
+        }
+
         async void tsmiCopyTranslate_Click(object sender, EventArgs e)
         {
             StringBuilder sb = new StringBuilder();
+            PreProcessText();
             if (this.PreferredStringCopyMethod == 2) sb.AppendLine(this.NodeID.ToString());
             if (!String.IsNullOrEmpty(this.NodeName)) sb.AppendLine(this.NodeName);
             if (String.IsNullOrEmpty(this.Desc)) this.Desc = "";
@@ -992,6 +1006,36 @@ namespace WzComparerR2.CharaSimControl
             text = text.Replace("#E", "");
             text = text.Replace("#n", " ");
 
+            return text;
+        }
+
+        private string ReplaceCosmeticEULOTag(string text, Item item)
+        {
+            if (text.Contains("#cosmetic_EULO#"))
+            {
+                item.Specs.TryGetValue(ItemSpecType.cosmetic, out long cosmeticID);
+                var gender = Gear.GetGender((int)cosmeticID);
+                var name = "";
+                if (StringLinker == null || !StringLinker.StringEqp.TryGetValue((int)cosmeticID, out var sr))
+                {
+                    sr = new StringResult();
+                    sr.Name = "(null)";
+                }
+                name = Translator.IsKoreanStringPresent(sr.Name) ? $"#c{sr.Name}{(gender == 0 ? "(남)" : (gender == 1 ? "(여)" : ""))}#" : $"#c{sr.Name}{(gender == 0 ? "(♂)" : (gender == 1 ? "(♀)" : ""))}#";
+
+                int last = (name.LastOrDefault(c => c >= '가' && c <= '힣') - '가') % 28;
+                if (Translator.IsKoreanStringPresent(name))
+                {
+                    name += ((last == 0 || last == 8 ? "" : "으") + "로");
+                }
+
+                foreach (var color in AvatarCanvas.HairColor)
+                {
+                    name = name.Replace($"{color} ", "");
+                }
+
+                text = text.Replace("#cosmetic_EULO#", name);
+            }
             return text;
         }
 
