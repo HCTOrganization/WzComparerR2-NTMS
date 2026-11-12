@@ -20,6 +20,7 @@ namespace WzComparerR2.WzLib.Compatibility
     {
         private static readonly IWzPreReader[] readers = new IWzPreReader[]
         {
+            new Pkg2PreReader1208(),
             new Pkg2PreReader64(WzFileFormat.Pkg2Kmst1206, 353, true, true, Pkg2EntryNamePosition.AfterData),
             new Pkg2PreReader64(WzFileFormat.Pkg2Kmst1205, 163, true, true, Pkg2EntryNamePosition.AfterData),
             new Pkg2PreReader64(WzFileFormat.Pkg2Kmst1204, 200, true, true),
@@ -731,6 +732,7 @@ namespace WzComparerR2.WzLib.Compatibility
         Pkg2Kmst1204,
         Pkg2Kmst1205,
         Pkg2Kmst1206,
+        Pkg2Kmst1208,
     }
 
     public enum WzStringEncoding

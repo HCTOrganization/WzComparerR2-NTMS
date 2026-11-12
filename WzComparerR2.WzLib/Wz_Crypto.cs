@@ -389,7 +389,7 @@ namespace WzComparerR2.WzLib
                 this.Decrypt((ReadOnlySpan<byte>)data, data, keyOffset);
             }
 
-            public unsafe void Decrypt(ReadOnlySpan<byte> inputBuffer, Span<byte> outputBuffer, int keyOffset)
+            public virtual unsafe void Decrypt(ReadOnlySpan<byte> inputBuffer, Span<byte> outputBuffer, int keyOffset)
             {
                 if (inputBuffer.Length != outputBuffer.Length)
                 {
@@ -525,6 +525,47 @@ namespace WzComparerR2.WzLib
                     u16Keys[i] = (ushort)(this.baseKey >> (8 * i));
                 }
                 this.keys = keys;
+            }
+        }
+
+        // KMST1208: position-dependent state with a per-character ROR64 cipher.
+        public class Pkg2DirStringKeyV7 : Pkg2DirStringKey, IWzStatefulDecrypter
+        {
+            public Pkg2DirStringKeyV7(ulong hash1, ulong hashVersion) : base(0)
+            {
+                this.c = Pkg2Kmst1208Hash.ComputeC(hashVersion, hash1);
+                this.ApplyState(0);
+            }
+
+            private readonly ulong c;
+            private ulong nameKey;
+
+            public void ApplyState(ulong filePosition)
+            {
+                this.nameKey = Pkg2Kmst1208Hash.ComputeDirEntryNameKey(this.c, (uint)filePosition);
+            }
+
+            public override void Decrypt(ReadOnlySpan<byte> inputBuffer, Span<byte> outputBuffer, int keyOffset)
+            {
+                if (inputBuffer.Length != outputBuffer.Length)
+                {
+                    throw new ArgumentException("Input and output buffer lengths must match.");
+                }
+
+                int charCount = inputBuffer.Length / 2;
+                for (int i = 0; i < charCount; i++)
+                {
+                    ushort key = (ushort)ROR(this.nameKey, (31 + 11 * i) & 0x3F);
+                    ushort value = (ushort)(inputBuffer[2 * i] | (inputBuffer[2 * i + 1] << 8));
+                    value ^= key;
+                    outputBuffer[2 * i] = (byte)value;
+                    outputBuffer[2 * i + 1] = (byte)(value >> 8);
+                }
+
+                if ((inputBuffer.Length & 1) != 0)
+                {
+                    outputBuffer[inputBuffer.Length - 1] = inputBuffer[inputBuffer.Length - 1];
+                }
             }
         }
     }
