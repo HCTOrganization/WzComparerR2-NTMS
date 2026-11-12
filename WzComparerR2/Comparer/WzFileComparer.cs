@@ -345,7 +345,7 @@ namespace WzComparerR2.Comparer
             if (wzFile != null)
             {
                 var linkNode = node.GetLinkedSourceNode(path =>
-                    PluginBase.PluginManager.FindWz(path, wzFile));
+                    PluginBase.PluginManager.FindWz(path, wzFile), recursive: false);
 
                 //添加回收池机制...
                 if (linkNode != null)

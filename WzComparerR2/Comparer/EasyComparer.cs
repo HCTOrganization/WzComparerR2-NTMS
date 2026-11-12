@@ -4214,7 +4214,7 @@ namespace WzComparerR2.Comparer
                 return null;
 
             Wz_Node linkNode;
-            if ((linkNode = value.GetLinkedSourceNode(path => PluginBase.PluginManager.FindWz(path, value.GetNodeWzFile()))) != value)
+            if ((linkNode = value.GetLinkedSourceNode(path => PluginBase.PluginManager.FindWz(path, value.GetNodeWzFile()), recursive: false)) != value)
             {
                 return "(link) " + OutputNodeValue(fullPath, linkNode, col, outputDir);
             }
