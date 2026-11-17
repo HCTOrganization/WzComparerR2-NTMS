@@ -53,6 +53,7 @@ namespace WzComparerR2.CharaSimControl
             this.AchievementRender = new AchievementTooltipRenderer();
             this.FamiliarRender = new FamiliarTooltipRender(); // used in CMS/TMS
             this.FamiliarRender2 = new FamiliarTooltipRender2(); // used in GMS/JMS
+            this.TargetCashPackage = new CashPackage();
             this.SizeChanged += AfrmTooltip_SizeChanged;
 
             this.MouseClick += AfrmTooltip_MouseClick;
@@ -102,6 +103,7 @@ namespace WzComparerR2.CharaSimControl
         public AchievementTooltipRenderer AchievementRender { get; private set; }
         public FamiliarTooltipRender FamiliarRender { get; private set; }
         public FamiliarTooltipRender2 FamiliarRender2 { get; private set; }
+        private CashPackage TargetCashPackage;
 
         public string ImageFileName { get; set; }
         public string NodeName { get; set; }
@@ -350,6 +352,7 @@ namespace WzComparerR2.CharaSimControl
             {
                 AvatarBitmap = (this.TargetItem as Item).AvatarBitmap;
                 SampleBitmap = (this.TargetItem as Item).Sample.Bitmap;
+                TargetCashPackage = ItemRender3.TargetCashPackage ?? ItemRender.TargetCashPackage ?? new CashPackage();
                 if ((this.TargetItem as Item).DamageSkinID != null)
                 {
                     DamageSkinSampleNonCriticalBitmap = (this.TargetItem as Item).DamageSkinSampleNonCriticalBitmap;
@@ -638,6 +641,11 @@ namespace WzComparerR2.CharaSimControl
         void tsmiCopyPackageID_Click(object sender, EventArgs e)
         {
             PreProcessText();
+            foreach (var i in this.TargetCashPackage.SN)
+            {
+                Commodity commodity = CharaSimLoader.LoadedCommoditiesBySN[i];
+                if (commodity.ItemId > 0) this.PackageIDs.Add(commodity.ItemId);
+            }
             if (this.PackageIDs.Count > 0)
             {
                 string packageIdString = string.Join(",", this.PackageIDs);

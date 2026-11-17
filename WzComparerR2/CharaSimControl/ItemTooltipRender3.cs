@@ -73,6 +73,7 @@ namespace WzComparerR2.CharaSimControl
         public TooltipRender LinkDamageSkinRender { get; set; }
         public TooltipRender SetItemRender { get; set; }
         public TooltipRender CashPackageRender { get; set; }
+        public CashPackage TargetCashPackage { get; set; }
         public TooltipRender FamiliarRender { get; set; }
         private AvatarCanvasManager avatar { get; set; }
         private bool isMsnClient;
@@ -103,8 +104,8 @@ namespace WzComparerR2.CharaSimControl
             {
                 Wz_Node itemNode = PluginBase.PluginManager.FindWz(string.Format(@"Item\Special\{0:D4}.img\{1}", this.item.ItemID / 10000, this.item.ItemID), this.SourceWzFile);
                 Wz_Node cashPackageNode = PluginBase.PluginManager.FindWz(string.Format(@"Etc\CashPackage.img\{0}", this.item.ItemID), this.SourceWzFile);
-                CashPackage cashPackage = CashPackage.CreateFromNode(itemNode, cashPackageNode, PluginBase.PluginManager.FindWz);
-                return RenderCashPackage(cashPackage);
+                TargetCashPackage = CashPackage.CreateFromNode(itemNode, cashPackageNode, PluginBase.PluginManager.FindWz);
+                return RenderCashPackage(TargetCashPackage);
             }
 
             Action<int> AppendGearOrItem = (int itemID) =>
