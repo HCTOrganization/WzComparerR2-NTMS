@@ -853,9 +853,19 @@ namespace WzComparerR2.CharaSimControl
                 picH = Math.Max(picH + 7, iconY + 87);
                 if (item.Sample.Bitmap != null)
                 {
-                    g.DrawImage(item.Sample.Bitmap, (tooltip.Width - item.Sample.Bitmap.Width) / 2, picH);
-                    picH += item.Sample.Bitmap.Height;
-                    picH += 2;
+                    if (item.Sample.Bitmap.Width > 270)
+                    {
+                        Bitmap bmp = new Bitmap(item.Sample.Bitmap, new Size(270, (int)(item.Sample.Bitmap.Height * 270.0 / item.Sample.Bitmap.Width)));
+                        g.DrawImage(bmp, (tooltip.Width - bmp.Width) / 2, picH);
+                        picH += bmp.Height;
+                        picH += 4;
+                    }
+                    else
+                    {
+                        g.DrawImage(item.Sample.Bitmap, (tooltip.Width - item.Sample.Bitmap.Width) / 2, picH);
+                        picH += item.Sample.Bitmap.Height;
+                        picH += 2;
+                    }
                 }
                 else if (item.DamageSkinID != null)
                 {
