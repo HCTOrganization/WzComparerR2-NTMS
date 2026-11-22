@@ -1,0 +1,55 @@
+using System;
+
+namespace WzComparerR2.UnityLib.Classic
+{
+    /// <summary>
+    /// 一個 WZ-like 的 Canvas 節點值：代表「某個 Unity 資產路徑上的圖片」，
+    /// PNG 於第一次使用時才解碼（等同傳統 WZ 的 <c>Wz_Png</c> 角色）。
+    /// </summary>
+    public sealed class UnityCanvas
+    {
+        private readonly ClassicWzSource source;
+        private readonly object syncRoot = new object();
+        private byte[] png;
+
+        public UnityCanvas(ClassicWzSource source, string path)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+            if (path == null)
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+            this.source = source;
+            this.Path = path;
+        }
+
+        /// <summary>邏輯路徑，如 <c>Character/00002000/stand1/0/body</c>。</summary>
+        public string Path { get; private set; }
+
+        /// <summary>取得（並快取）PNG bytes；查無對應圖片時回 null。</summary>
+        public byte[] GetPng()
+        {
+            byte[] cached = this.png;
+            if (cached != null)
+            {
+                return cached;
+            }
+            lock (this.syncRoot)
+            {
+                if (this.png == null)
+                {
+                    this.png = this.source.GetImage(this.Path);
+                }
+                return this.png;
+            }
+        }
+
+        public override string ToString()
+        {
+            return "canvas " + this.Path;
+        }
+    }
+}

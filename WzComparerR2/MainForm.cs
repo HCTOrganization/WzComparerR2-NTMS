@@ -19,6 +19,7 @@ using DevComponents.DotNetBar.Controls;
 using DevComponents.AdvTree;
 using DevComponents.AdvTree.Display;
 using WzComparerR2.WzLib;
+using WzComparerR2.UnityLib.Classic;
 using WzComparerR2.Common;
 using WzComparerR2.CharaSimControl;
 using WzComparerR2.PluginBase;
@@ -60,6 +61,23 @@ namespace WzComparerR2
         }
 
         public List<Wz_Structure> openedWz;
+        private Dictionary<Node, UnityAssetDocument> openedUnitySources;
+
+        /// <summary>開啟中的 Unity 資產資料集；保留根 Wz_Node 以免 AdvTree 的 WeakReference 失效。</summary>
+        private sealed class UnityAssetDocument
+        {
+            public UnityAssetDocument(ClassicWzSource source, Wz_Node rootNode)
+            {
+                this.Source = source;
+                this.RootNode = rootNode;
+            }
+
+            public ClassicWzSource Source { get; }
+            public Wz_Node RootNode { get; }
+
+            /// <summary>String/Etc/Quest 資產整理成的類 WZ 節點，供 StringLinker 使用。</summary>
+            public ClassicStringLinkerTables StringTables { get; set; }
+        }
         StringLinker stringLinker;
         HistoryList<Node> historyNodeList;
         bool historySelecting;
@@ -82,6 +100,7 @@ namespace WzComparerR2
         private void initFields()
         {
             openedWz = new List<Wz_Structure>();
+            openedUnitySources = new Dictionary<Node, UnityAssetDocument>();
             stringLinker = new StringLinker();
             historyNodeList = new HistoryList<Node>();
 
@@ -1460,6 +1479,7 @@ namespace WzComparerR2
             {
                 btnItemOpenWz.Enabled = false;
                 btnItemOpenImg.Enabled = false;
+                btnItemOpenUnityFolder.Enabled = false;
                 buttonItemClose.Enabled = false;
                 buttonItemCloseAll.Enabled = false;
                 buttonItemSearchWz.Enabled = false;
@@ -1504,7 +1524,7 @@ namespace WzComparerR2
                 OnWzOpened(new WzStructureEventArgs(wz)); //触发事件
                 if (!this.stringLinker.HasValues)
                 {
-                    this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
+                    this.LoadStringLinker();
                 }
                 QueryPerformance.End();
                 labelItemStatus.Text = (this.stringLinker.HasValues ? "檔案已載入。時間經過：" : "檔案已載入，但字串表未能載入。時間經過：") + (Math.Round(QueryPerformance.GetLastInterval(), 4) * 1000) + "毫秒，" + wz.img_number + " IMG";
@@ -1529,6 +1549,7 @@ namespace WzComparerR2
             {
                 btnItemOpenWz.Enabled = true;
                 btnItemOpenImg.Enabled = true;
+                btnItemOpenUnityFolder.Enabled = true;
                 buttonItemClose.Enabled = true;
                 buttonItemCloseAll.Enabled = true;
                 buttonItemSearchWz.Enabled = true;
@@ -1573,6 +1594,7 @@ namespace WzComparerR2
             {
                 btnItemOpenWz.Enabled = false;
                 btnItemOpenImg.Enabled = false;
+                btnItemOpenUnityFolder.Enabled = false;
                 buttonItemClose.Enabled = false;
                 buttonItemCloseAll.Enabled = false;
                 buttonItemSearchWz.Enabled = false;
@@ -1602,6 +1624,103 @@ namespace WzComparerR2
             {
                 btnItemOpenWz.Enabled = true;
                 btnItemOpenImg.Enabled = true;
+                btnItemOpenUnityFolder.Enabled = true;
+                buttonItemClose.Enabled = true;
+                buttonItemCloseAll.Enabled = true;
+                buttonItemSearchWz.Enabled = true;
+                buttonItemSearchString.Enabled = true;
+                galleryContainerRecent.Enabled = true;
+                advTree1.EndUpdate();
+            }
+        }
+
+        private void btnItemOpenUnityFolder_Click(object sender, EventArgs e)
+        {
+            using (FolderBrowserDialog dlg = new FolderBrowserDialog())
+            {
+                dlg.Description = "請選擇 MapleStory Classic World 的 Unity 資源資料夾（包含 *.bundle 的資料夾）。";
+                dlg.ShowNewFolderButton = false;
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    Task.Run(() => openUnityFolder(dlg.SelectedPath));
+                }
+            }
+        }
+
+        private void openUnityFolder(string assetFolderPath)
+        {
+            if (this.openedUnitySources.Values.Any(document =>
+                string.Equals(document.Source.Catalog.RootPath, assetFolderPath, StringComparison.OrdinalIgnoreCase)))
+            {
+                MessageBoxEx.Show(this, "此 Unity 資源資料夾已經開啟。", LocalizedString_JP.COMMON_ERROR);
+                return;
+            }
+
+            labelItemStatus.Text = $"載入中: {assetFolderPath}";
+            advTree1.BeginUpdate();
+            ClassicWzSource unitySource = null;
+            try
+            {
+                btnItemOpenWz.Enabled = false;
+                btnItemOpenImg.Enabled = false;
+                btnItemOpenUnityFolder.Enabled = false;
+                buttonItemClose.Enabled = false;
+                buttonItemCloseAll.Enabled = false;
+                buttonItemSearchWz.Enabled = false;
+                buttonItemSearchString.Enabled = false;
+                galleryContainerRecent.Enabled = false;
+
+                var sw = Stopwatch.StartNew();
+                unitySource = ClassicWzSource.Open(assetFolderPath);
+                int entryCount = unitySource.Catalog.Entries.Count;
+                int bundleCount = unitySource.Catalog.Bundles.Count;
+
+                // String/<region>/<category> 整理成 String.wz 的節點形狀；失敗不阻擋資料集開啟。
+                ClassicStringLinkerTables stringTables = null;
+                string stringTableError = null;
+                try
+                {
+                    stringTables = ClassicStringLinkerTables.Build(unitySource);
+                }
+                catch (Exception ex)
+                {
+                    stringTableError = ex.Message;
+                }
+
+                // img 內容延後到選取時才解碼（UnityWzImage.AsWzNode），避免一次載入整個資料集。
+                Wz_Node rootNode = ClassicWzBridge.CreateCatalogNode(unitySource, false, false);
+                Node treeNode = createNode(rootNode);
+                treeNode.Expand();
+                advTree1.Nodes.Add(treeNode);
+                this.openedUnitySources.Add(treeNode, new UnityAssetDocument(unitySource, rootNode)
+                {
+                    StringTables = stringTables,
+                });
+                unitySource = null; // 所有權轉移到 openedUnitySources
+
+                if (!this.stringLinker.HasValues)
+                {
+                    this.LoadStringLinker();
+                }
+
+                sw.Stop();
+                labelItemStatus.Text = $"已開啟 Unity 資源資料夾。時間經過：{sw.ElapsedMilliseconds}毫秒，"
+                    + $"{entryCount} 個項目，{bundleCount} 個 bundle"
+                    + (stringTableError == null ? null : "，字串表載入失敗: " + stringTableError);
+            }
+            catch (Exception ex)
+            {
+                MessageBoxEx.Show(this, ex.ToString(), LocalizedString_JP.COMMON_ERROR);
+            }
+            finally
+            {
+                if (unitySource != null)
+                {
+                    unitySource.Dispose();
+                }
+                btnItemOpenWz.Enabled = true;
+                btnItemOpenImg.Enabled = true;
+                btnItemOpenUnityFolder.Enabled = true;
                 buttonItemClose.Enabled = true;
                 buttonItemCloseAll.Enabled = true;
                 buttonItemSearchWz.Enabled = true;
@@ -1621,6 +1740,17 @@ namespace WzComparerR2
             Node baseWzNode = advTree1.SelectedNode;
             while (baseWzNode.Parent != null)
                 baseWzNode = baseWzNode.Parent;
+            if (this.openedUnitySources.TryGetValue(baseWzNode, out UnityAssetDocument unityDocument))
+            {
+                advTree1.Nodes.Remove(baseWzNode);
+                advTree2.ClearAndDisposeAllNodes();
+                advTree3.ClearAndDisposeAllNodes();
+                listViewExWzDetail.Items.Clear();
+                this.openedUnitySources.Remove(baseWzNode);
+                unityDocument.Source.Dispose();
+                labelItemStatus.Text = "已關閉";
+                return;
+            }
             if (baseWzNode.Text.ToLower() == "list.wz")
             {
                 advTree1.Nodes.Remove(baseWzNode);
@@ -1678,6 +1808,11 @@ namespace WzComparerR2
                 wz.Clear();
             }
             openedWz.Clear();
+            foreach (UnityAssetDocument unityDocument in this.openedUnitySources.Values)
+            {
+                unityDocument.Source.Dispose();
+            }
+            this.openedUnitySources.Clear();
             CharaSimLoader.ClearAll();
             stringLinker.Clear();
             labelItemStatus.Text = "所有檔案已關閉";
@@ -1851,6 +1986,54 @@ namespace WzComparerR2
                     labelItemStatus.Text = "匯入失敗：" + ex.Message;
                 }
             }
+            else if (selectedNode.Value is UnityWzImage unityImage)
+            {
+                listViewExWzDetail.Items.Add(new ListViewItem(new string[] { "IMG名", unityImage.Name }));
+                autoResizeColumns(listViewExWzDetail);
+
+                advTree2.ClearAndDisposeAllNodes();
+
+                QueryPerformance.Start();
+                try
+                {
+                    // WZJS 樹在第一次選取時才解碼，UnityWzImage 會保留結果。
+                    Node imageNode = createNode(unityImage.AsWzNode());
+                    advTree2.Nodes.Add(imageNode);
+                    imageNode.Expand();
+                    QueryPerformance.End();
+                    double ms = (Math.Round(QueryPerformance.GetLastInterval(), 4) * 1000);
+
+                    labelItemStatus.Text = "已匯入。已用時間：" + ms + "毫秒";
+                }
+                catch (Exception ex)
+                {
+                    labelItemStatus.Text = "匯入失敗：" + ex.Message;
+                }
+            }
+            else if (selectedNode.Value is UnityJsonAsset jsonAsset)
+            {
+                listViewExWzDetail.Items.Add(new ListViewItem(new string[] { "JSON名", jsonAsset.Name }));
+                autoResizeColumns(listViewExWzDetail);
+
+                advTree2.ClearAndDisposeAllNodes();
+
+                QueryPerformance.Start();
+                try
+                {
+                    // JSON 於第一次選取時才解析，UnityJsonAsset 會保留結果。
+                    Node jsonNode = createNode(jsonAsset.AsWzNode());
+                    advTree2.Nodes.Add(jsonNode);
+                    jsonNode.Expand();
+                    QueryPerformance.End();
+                    double ms = (Math.Round(QueryPerformance.GetLastInterval(), 4) * 1000);
+
+                    labelItemStatus.Text = "已匯入。已用時間：" + ms + "毫秒";
+                }
+                catch (Exception ex)
+                {
+                    labelItemStatus.Text = "匯入失敗：" + ex.Message;
+                }
+            }
             listViewExWzDetail.EndUpdate();
         }
 
@@ -1913,6 +2096,18 @@ namespace WzComparerR2
                 case Wz_Png png:
                     return $"png {png.Width}*{png.Height} ({(int)png.Format}{(png.Scale > 0 ? $", {png.Scale}" : null)})";
 
+                case byte[] pngData:
+                    return $"png {pngData.Length} 位元組";
+
+                case UnityCanvas unityCanvas:
+                    return "canvas " + unityCanvas.Path;
+
+                case UnityJsonAsset jsonAsset:
+                    return "json " + jsonAsset.ImageKey;
+
+                case UnityWzImage unityImage:
+                    return $"unity img {unityImage.Name}";
+
                 case Wz_Vector vector:
                     return $"({vector.X}, {vector.Y})";
 
@@ -1951,6 +2146,8 @@ namespace WzComparerR2
                 string => "str",
                 short or int or long or float or double=> "num",
                 Wz_Png => "png",
+                byte[] => "png",
+                UnityCanvas => "png",
                 Wz_Vector => "vector",
                 Wz_Uol => "uol",
                 Wz_Sound sound => sound.SoundType == Wz_SoundType.Binary ? "rawdata" : "mp3",
@@ -2030,6 +2227,53 @@ namespace WzComparerR2
                                 "頁: " + png.Pages + "(" + png.ActualPages + ")\r\n" +
                                 "不明1: " + png.Unknown1);
                         }
+                    }
+                    break;
+
+                case UnityCanvas unityCanvas:
+                    try
+                    {
+                        byte[] canvasPng = unityCanvas.GetPng();
+                        if (canvasPng != null)
+                        {
+                            pictureBoxEx1.PictureName = GetSelectedNodeImageName();
+                            pictureBoxEx1.ShowImage(canvasPng);
+                            this.cmbItemAniNames.Items.Clear();
+                            if (this.pictureBoxEx1.IsPaused)
+                            {
+                                ResumePictureBox();
+                            }
+                            advTree3.PathSeparator = ".";
+                            textBoxX1.Text = "數據長:  " + canvasPng.Length + " 位元組\r\n" +
+                                "路徑:  " + unityCanvas.Path;
+                        }
+                        else
+                        {
+                            textBoxX1.Text = "找不到圖片。";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        textBoxX1.Text = "無法載入圖片：" + ex.Message;
+                    }
+                    break;
+
+                case byte[] pngData:
+                    try
+                    {
+                        pictureBoxEx1.PictureName = GetSelectedNodeImageName();
+                        pictureBoxEx1.ShowImage(pngData);
+                        this.cmbItemAniNames.Items.Clear();
+                        if (this.pictureBoxEx1.IsPaused)
+                        {
+                            ResumePictureBox();
+                        }
+                        advTree3.PathSeparator = ".";
+                        textBoxX1.Text = "數據長:  " + pngData.Length + " 位元組";
+                    }
+                    catch (Exception)
+                    {
+                        textBoxX1.Text = "無法載入圖片。";
                     }
                     break;
 
@@ -2969,7 +3213,16 @@ namespace WzComparerR2
             {
                 QueryPerformance.Start();
                 labelItemStatus.Text = "StringLinker更新中...";
-                r = this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz()) && stringLinker.Update(stringNode, itemNode, etcNode, questNode); //reset(needed?) and update
+                UnityAssetDocument unityDoc = this.FindUnityDocument(advTree1.SelectedNode);
+                if (unityDoc != null && unityDoc.StringTables != null)
+                {
+                    // Unity 資料集的字串表是整體重建，選取的子樹不另外 Update。
+                    r = this.LoadStringLinker();
+                }
+                else
+                {
+                    r = this.LoadStringLinker() && stringLinker.Update(stringNode, itemNode, etcNode, questNode); //reset(needed?) and update
+                }
                 QueryPerformance.End();
             });
             if (r)
@@ -3446,7 +3699,7 @@ namespace WzComparerR2
             QueryPerformance.Start();
             if (!this.stringLinker.HasValues)
             {
-                if (!this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz()))
+                if (!this.LoadStringLinker())
                 {
                     MessageBoxEx.Show("選擇 Base.wz。", LocalizedString_JP.COMMON_ERROR);
                     return;
@@ -3603,7 +3856,53 @@ namespace WzComparerR2
             return null;
         }
 
-        /// <summary>CJK 統合漢字(簡体字/繁体字・漢字)を 1 文字でも含むかを判定する。</summary>
+        /// <summary>
+        /// 依目前開啟的資料集載入字串表：優先使用 WZ，其次使用 Unity 資料集
+        /// （String/&lt;region&gt;/&lt;category&gt;）。
+        /// </summary>
+        private bool LoadStringLinker()
+        {
+            Wz_File stringWz = findStringWz();
+            Wz_File itemWz = findItemWz();
+            Wz_File etcWz = findEtcWz();
+            Wz_File questWz = findQuestWz();
+            if (stringWz != null || itemWz != null || etcWz != null || questWz != null)
+            {
+                return this.stringLinker.Load(stringWz, itemWz, etcWz, questWz);
+            }
+
+            UnityAssetDocument unityDoc = this.openedUnitySources.Values
+                .FirstOrDefault(doc => doc.StringTables != null && doc.StringTables.HasValues);
+            if (unityDoc != null)
+            {
+                this.stringLinker.Clear();
+                return this.stringLinker.Load(
+                    unityDoc.StringTables.StringNode,
+                    unityDoc.StringTables.ItemNode,
+                    unityDoc.StringTables.EtcNode,
+                    unityDoc.StringTables.QuestNode);
+            }
+
+            this.stringLinker.Clear();
+            return false;
+        }
+
+        /// <summary>找出 AdvTree 節點所屬的 Unity 資料集（往根節點找）。</summary>
+        private UnityAssetDocument FindUnityDocument(Node node)
+        {
+            while (node != null)
+            {
+                if (node.Parent == null)
+                {
+                    UnityAssetDocument document;
+                    return this.openedUnitySources.TryGetValue(node, out document) ? document : null;
+                }
+                node = node.Parent;
+            }
+            return null;
+        }
+
+        /// <summary>判斷是否至少包含一個 CJK 統合漢字(簡體字/繁體字/漢字)。</summary>
         private static bool HasCjkIdeograph(string text)
         {
             if (string.IsNullOrEmpty(text))
@@ -3620,7 +3919,7 @@ namespace WzComparerR2
 
         private IEnumerable<KeyValuePair<int, StringResult>> searchStringLinker(IEnumerable<Dictionary<int, StringResult>> dicts, string key, bool exact, bool isRegex, bool ignoreArticles)
         {
-            // 元のキーに加え、かな・全角/半角・簡体字/繁体字まで正規化したキーも用意する。
+            // 除了原始鍵之外，也準備將假名、全形/半形、簡體字/繁體字正規化後的鍵。
             string fullWidthKey = Translator.FullWidthKatakana(key);
             string cnKey = Translator.NormalizeForSearch(key);
             bool cnKeyHasHan = HasCjkIdeograph(key);
@@ -3672,12 +3971,12 @@ namespace WzComparerR2
                 {
                     if (exact)
                     {
-                        // 従来の完全一致＋かな正規化での一致。
+                        // 傳統的完全一致＋假名正規化後的一致。
                         if (kv.Key.ToString() == key || kv.Value.Name == key || Translator.FullWidthKatakana(kv.Value.Name) == fullWidthKey)
                         {
                             yield return kv;
                         }
-                        // 簡体字／繁体字の相互一致(クエリに漢字がある場合のみ)。
+                        // 簡體字／繁體字的相互一致(僅在查詢含漢字時)。
                         else if (cnKeyHasHan && !string.IsNullOrEmpty(kv.Value.Name) && Translator.NormalizeForSearch(kv.Value.Name) == cnKey)
                         {
                             yield return kv;
@@ -3691,7 +3990,7 @@ namespace WzComparerR2
                         {
                             yield return kv;
                         }
-                        // 簡体字／繁体字の相互一致。
+                        // 簡體字／繁體字的相互一致。
                         else if (cnRe != null && !string.IsNullOrEmpty(kv.Value.Name) && cnRe.IsMatch(Translator.NormalizeForSearch(kv.Value.Name)))
                         {
                             yield return kv;
@@ -3710,7 +4009,7 @@ namespace WzComparerR2
                             }
                         }
 
-                        // 簡体字／繁体字の相互一致(AND)。クエリに漢字が含まれる場合のみ判定する。
+                        // 簡體字／繁體字的相互一致(AND)。僅在查詢含漢字時判定。
                         if (!r && cnKeyHasHan && !string.IsNullOrEmpty(kv.Value.Name) && matchCn.Length > 0)
                         {
                             r = true;
@@ -3758,7 +4057,22 @@ namespace WzComparerR2
             Wz_File questWzFile = advTree1.SelectedNode?.AsWzNode()?.FindNodeByPath("Quest").GetNodeWzFile();
             if (stringWzFile == null || itemWzFile == null || etcWzFile == null)
             {
+                UnityAssetDocument unityDoc = this.FindUnityDocument(advTree1.SelectedNode);
+                if (unityDoc != null && unityDoc.StringTables != null)
+                {
+                    if (this.LoadStringLinker())
+                    {
+                        labelItemStatus.Text = "字串表連結已被重置。";
+                    }
+                    else
+                    {
+                        MessageBoxEx.Show(this, "無法重置字串表連結。", LocalizedString_JP.COMMON_ERROR);
+                    }
+                    buttonItemSearchString.Enabled = true;
+                    return;
+                }
                 MessageBoxEx.Show(this, "請選擇 Base.wz。", LocalizedString_JP.COMMON_ERROR);
+                buttonItemSearchString.Enabled = true;
                 return;
             }
             QueryPerformance.Start();
@@ -4695,7 +5009,7 @@ namespace WzComparerR2
 
             if (!this.stringLinker.HasValues)
             {
-                this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
+                this.LoadStringLinker();
             }
 
             object obj = null;
@@ -6038,7 +6352,7 @@ namespace WzComparerR2
                 {
                     sw.Start();
                     if (!this.stringLinker.HasValues)
-                        this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
+                        this.LoadStringLinker();
 
                     DBConnection conn = new DBConnection(this.stringLinker);
                     DataSet ds = conn.GenerateSkillTable();
@@ -6113,7 +6427,7 @@ namespace WzComparerR2
                 {
                     sw.Start();
                     if (!this.stringLinker.HasValues)
-                        this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
+                        this.LoadStringLinker();
 
                     CharaSimLoader.LoadPetEquipInfoIfEmpty();
 
@@ -6206,7 +6520,7 @@ namespace WzComparerR2
                         await Task.Run(() =>
                         {
                             if (!this.stringLinker.HasValues)
-                                this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
+                                this.LoadStringLinker();
 
                             // Initialize VCore Dictionary
                             Dictionary<int, List<int>> FifthJobSkillToJobID = new Dictionary<int, List<int>>();
@@ -6589,7 +6903,7 @@ namespace WzComparerR2
             if (dlg.ShowDialog() == DialogResult.OK)
             {
                 if (!this.stringLinker.HasValues)
-                    this.stringLinker.Load(findStringWz(), findItemWz(), findEtcWz(), findQuestWz());
+                    this.LoadStringLinker();
 
                 DBConnection conn = new DBConnection(this.stringLinker);
                 conn.ExportSkillOption(dlg.SelectedPath);

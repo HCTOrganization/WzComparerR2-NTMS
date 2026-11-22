@@ -86,6 +86,31 @@ namespace WzComparerR2
             this.ShowAnimation(frameData);
         }
 
+        /// <summary>
+        /// 顯示記憶體中的 PNG（Unity 資產的 Canvas 節點以此型別存放圖片）。
+        /// </summary>
+        public void ShowImage(byte[] pngData)
+        {
+            if (this.ShowOverlayAni || pngData == null || pngData.Length == 0) return;
+
+            using (var stream = new MemoryStream(pngData))
+            using (var bitmap = new System.Drawing.Bitmap(stream))
+            {
+                var frame = new Animation.Frame()
+                {
+                    Texture = bitmap.ToTexture(this.GraphicsDevice),
+                    Page = 0,
+                    Delay = 0,
+                    Origin = Point.Zero,
+                };
+
+                var frameData = new Animation.FrameAnimationData();
+                frameData.Frames.Add(frame);
+
+                this.ShowAnimation(frameData);
+            }
+        }
+
         public FrameAnimationData LoadVideo(Wz_Video wzVideo, Wz_Vector origin = null)
         {
             return new MaplestoryCanvasVideoLoader().Load(wzVideo, this.GraphicsDevice, origin);
@@ -1171,7 +1196,12 @@ namespace WzComparerR2
 
             if ((e.Item as FrameAnimator)?.Data.Frames.Count == 1)
             {
-                using (var bmp = (e.Item as FrameAnimator).Data.Frames[0].Png.ExtractPng())
+                var png = (e.Item as FrameAnimator).Data.Frames[0].Png;
+                if (png == null)
+                {
+                    return; // 記憶體中的 PNG（Unity 資產）沒有 Wz_Png 可供匯出
+                }
+                using (var bmp = png.ExtractPng())
                 {
                     bmp.Save(fileName, System.Drawing.Imaging.ImageFormat.Png);
                 }

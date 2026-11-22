@@ -10,6 +10,7 @@
 - **WzComparerR2.Common** 一些通用類
 - **WzComparerR2.PluginBase** 外掛程式管理器
 - **WzComparerR2.WzLib** wz檔案讀取相關
+- **WzComparerR2.UnityLib** 讀取 MapleStory Classic World (Unity) 客戶端資源，並轉換成類 WZ 的節點結構
 - **CharaSimResource** 用於裝備模擬的資源文件
 - **WzComparerR2.LuaConsole** (可選插件)Lua控制台
 - **WzComparerR2.MapRender** (選用外掛)地圖模擬器

@@ -309,6 +309,7 @@ namespace WzComparerR2
             this.dockContainerItem2 = new DevComponents.DotNetBar.DockContainerItem();
             this.panelDockContainer2 = new DevComponents.DotNetBar.PanelDockContainer();
             this.btnItemOpenImg = new DevComponents.DotNetBar.ButtonItem();
+            this.btnItemOpenUnityFolder = new DevComponents.DotNetBar.ButtonItem();
             this.buttonItemSaveWithOptions = new DevComponents.DotNetBar.ButtonItem();
             this.itemContainer100 = new DevComponents.DotNetBar.ItemContainer();
             this.itemContainer101 = new DevComponents.DotNetBar.ItemContainer();
@@ -1916,6 +1917,7 @@ namespace WzComparerR2
             this.itemContainer3.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
             this.btnItemOpenWz,
             this.btnItemOpenImg,
+            this.btnItemOpenUnityFolder,
             this.buttonItemClose,
             this.buttonItemCloseAll});
             // 
@@ -1936,6 +1938,12 @@ namespace WzComparerR2
             this.btnItemOpenImg.Name = "btnItemOpenImg";
             this.btnItemOpenImg.Text = "打開IMG檔案 (&M)...";
             this.btnItemOpenImg.Click += new System.EventHandler(this.btnItemOpenImg_Click);
+            // 
+            // btnItemOpenUnityFolder
+            // 
+            this.btnItemOpenUnityFolder.Name = "btnItemOpenUnityFolder";
+            this.btnItemOpenUnityFolder.Text = "打開Unity資源資料夾 (&U)...";
+            this.btnItemOpenUnityFolder.Click += new System.EventHandler(this.btnItemOpenUnityFolder_Click);
             // 
             // buttonItemClose
             // 
@@ -4198,6 +4206,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.Controls.CheckBoxX chkResolvePngLink;
         private DevComponents.DotNetBar.ComboBoxItem cmbItemSkins;
         private DevComponents.DotNetBar.ButtonItem btnItemOpenImg;
+        private DevComponents.DotNetBar.ButtonItem btnItemOpenUnityFolder;
         private DevComponents.DotNetBar.ButtonItem buttonItemSaveWithOptions;
         private DevComponents.DotNetBar.ButtonItem buttonCaptureAni;
         private DevComponents.DotNetBar.CheckBoxItem checkBoxItemRegex1;
