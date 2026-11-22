@@ -62,8 +62,10 @@ namespace WzComparerR2.CharaSim
 
         public static Npc CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, GetSpineDefaultFunc getSpineDefaultFunc = null)
         {
+            if (node == null) return null;
             int npcID;
-            Match m = Regex.Match(node.Text, @"^(\d{7})\.img$");
+            // Unity 資產的 img 節點名稱沒有 .img 後綴（如 Npc/1010100）。
+            Match m = Regex.Match(node.Text, @"^(\d{7})(?:\.img)?$");
             if (!(m.Success && Int32.TryParse(m.Result("$1"), out npcID)))
             {
                 return null;

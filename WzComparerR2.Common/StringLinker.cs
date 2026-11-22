@@ -620,7 +620,7 @@ namespace WzComparerR2.Common
                             // KMST1196, add h_ prefix strings
                             foreach (Wz_Node child in linkNode.Nodes)
                             {
-                                if (child.Text.StartsWith("h_") && int.TryParse(child.Text.Substring(2), out int level) && level > 0 && child.Value != null)
+                                if (child.Text.StartsWith("h_", StringComparison.OrdinalIgnoreCase) && int.TryParse(child.Text.Substring(2), out int level) && level > 0 && child.Value != null)
                                 {
                                     strResult.SkillExtraH.RemoveAll(x => x.Key == level);
                                     strResult.SkillExtraH.Add(new KeyValuePair<int, string>(level, child.GetValue<string>()));
@@ -1050,8 +1050,21 @@ namespace WzComparerR2.Common
 
         private string GetDefaultString(Wz_Node node, string searchNodeText)
         {
-            node = node.FindNodeByPath(searchNodeText);
-            return node == null ? null : Convert.ToString(node.Value);
+            // Classic 客戶端的字串表鍵名是首字母大寫（Name / Desc / H），
+            // 先找完全符合的鍵，找不到再不分大小寫比對。
+            Wz_Node child = node.FindNodeByPath(searchNodeText);
+            if (child == null)
+            {
+                foreach (Wz_Node candidate in node.Nodes)
+                {
+                    if (string.Equals(candidate.Text, searchNodeText, StringComparison.OrdinalIgnoreCase))
+                    {
+                        child = candidate;
+                        break;
+                    }
+                }
+            }
+            return child == null ? null : Convert.ToString(child.Value);
         }
 
         private void AddAllValue(StringResult sr, Wz_Node node)

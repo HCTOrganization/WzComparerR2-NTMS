@@ -384,6 +384,11 @@ namespace WzComparerR2.CharaSim
             LoadedGmsTucBlacklistItems.Clear();
         }
 
+        /// <summary>
+        /// WZ 以外的動作延遲來源（例如 Unity 資產）；找不到資料時回傳 null。
+        /// </summary>
+        public static Func<string, int?> ActionDelayResolver { get; set; }
+
         public static int GetActionDelay(string actionName, Wz_Node wzNode = null)
         {
             if (string.IsNullOrEmpty(actionName))
@@ -394,6 +399,15 @@ namespace WzComparerR2.CharaSim
                 PluginManager.FindWz("Character/00002000.img/" + actionName, wzNode.GetNodeWzFile());
             if (actionNode == null)
             {
+                Func<string, int?> resolver = ActionDelayResolver;
+                if (resolver != null)
+                {
+                    int? resolved = resolver(actionName);
+                    if (resolved.HasValue)
+                    {
+                        return resolved.Value;
+                    }
+                }
                 return 0;
             }
 

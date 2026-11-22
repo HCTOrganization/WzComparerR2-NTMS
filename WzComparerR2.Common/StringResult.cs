@@ -28,7 +28,7 @@ namespace WzComparerR2.Common
                 {
                     foreach (var kv in this.allValues)
                     {
-                        if (kv.Key == key)
+                        if (string.Equals(kv.Key, key, StringComparison.OrdinalIgnoreCase))
                         {
                             return kv.Value;
                         }
@@ -48,7 +48,7 @@ namespace WzComparerR2.Common
                     for (int i = 0; i < this.allValues.Count; i++)
                     {
                         var kv = this.allValues[i];
-                        if (kv.Key == key)
+                        if (string.Equals(kv.Key, key, StringComparison.OrdinalIgnoreCase))
                         {
                             this.allValues[i] = new KeyValuePair<string, string>(key, value);
                             return;

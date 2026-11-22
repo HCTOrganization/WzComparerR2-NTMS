@@ -85,9 +85,25 @@ namespace WzComparerR2
             //获取linkNode
             //var linkNode = node.GetLinkedSourceNode(findNode);
             var linkNode = node.GetLinkedSourceNode(findNode, wzf);
-            Wz_Png png = linkNode?.GetValue<Wz_Png>() ?? (Wz_Png)node.Value;
+            Wz_Png png = linkNode?.GetValue<Wz_Png>() ?? node.Value as Wz_Png;
 
-            bp.Bitmap = png?.ExtractPng();
+            if (png != null)
+            {
+                bp.Bitmap = png.ExtractPng();
+            }
+            else if (node.Value is IWzPngSource pngSource)
+            {
+                // Unity 資產等以 PNG 編碼提供的圖片來源。
+                byte[] pngData = pngSource.GetPngData();
+                if (pngData != null && pngData.Length > 0)
+                {
+                    using (var ms = new System.IO.MemoryStream(pngData))
+                    using (var image = Image.FromStream(ms))
+                    {
+                        bp.Bitmap = new Bitmap(image);
+                    }
+                }
+            }
             Wz_Node originNode = node.FindNodeByPath("origin");
             Wz_Vector vec = (originNode == null) ? null : originNode.GetValue<Wz_Vector>();
             bp.Origin = (vec == null) ? new Point() : new Point(vec.X, vec.Y);

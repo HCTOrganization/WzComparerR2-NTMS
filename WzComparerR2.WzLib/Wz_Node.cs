@@ -527,6 +527,30 @@ namespace WzComparerR2.WzLib
 
     public static class Wz_NodeExtension
     {
+        /// <summary>
+        /// 非 WZ 檔來源（例如 Unity 資料集）的型別解析器；回傳 null 表示該節點不屬於外部來源。
+        /// </summary>
+        public static Func<Wz_Node, Wz_Type?> ExternalTypeResolver { get; set; }
+
+        /// <summary>
+        /// 取得節點所屬的 WZ 型別：先找所屬的 <see cref="Wz_File"/>，
+        /// 找不到再詢問 <see cref="ExternalTypeResolver"/>（例如 Unity 資料集）。
+        /// </summary>
+        public static Wz_Type? GetNodeWzType(this Wz_Node node)
+        {
+            if (node == null)
+            {
+                return null;
+            }
+            Wz_File wzFile = node.GetNodeWzFile();
+            if (wzFile != null)
+            {
+                return wzFile.Type;
+            }
+            Func<Wz_Node, Wz_Type?> resolver = ExternalTypeResolver;
+            return resolver?.Invoke(node);
+        }
+
         public static T GetValueEx<T>(this Wz_Node node, T defaultValue)
         {
             if (node == null)

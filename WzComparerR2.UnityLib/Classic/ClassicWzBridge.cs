@@ -40,7 +40,8 @@ namespace WzComparerR2.UnityLib.Classic
         /// <summary>img 邏輯路徑，如 <c>Character/00002000</c>。</summary>
         public string Name { get; private set; }
 
-        internal ClassicWzSource Source
+        /// <summary>所屬資料集。</summary>
+        public ClassicWzSource Source
         {
             get { return this.source; }
         }
@@ -55,6 +56,12 @@ namespace WzComparerR2.UnityLib.Classic
         {
             string path = string.IsNullOrEmpty(innerPath) ? this.Name : this.Name + "/" + innerPath;
             return this.source.GetImage(path);
+        }
+
+        /// <summary>以 WZ 風格路徑查詢同一資料集內的節點（可含 <c>.img</c> 後綴）。</summary>
+        public Wz_Node FindNode(string wzPath)
+        {
+            return this.source.FindNode(wzPath);
         }
 
         /// <summary>以 WZ 節點樹形式取得內容（首次呼叫時轉換並快取）。</summary>
@@ -222,6 +229,28 @@ namespace WzComparerR2.UnityLib.Classic
                     }
                     break;
             }
+        }
+
+        /// <summary>
+        /// 動作影格延遲總和（各影格 <c>delay</c> 的絕對值相加）；
+        /// null 或沒有 delay 時回 0。
+        /// </summary>
+        public static int SumActionDelay(Wz_Node actionNode)
+        {
+            if (actionNode == null)
+            {
+                return 0;
+            }
+            int delay = 0;
+            foreach (Wz_Node frameNode in actionNode.Nodes)
+            {
+                Wz_Node delayNode = frameNode.FindNodeByPath("delay");
+                if (delayNode != null && delayNode.Value != null)
+                {
+                    delay += Math.Abs(delayNode.GetValueEx<int>(0));
+                }
+            }
+            return delay;
         }
 
         /// <summary>把 WZJS 節點值轉成 WzLib 慣用的值型別。</summary>

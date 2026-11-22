@@ -41,7 +41,8 @@ namespace WzComparerR2.CharaSim
         {
             Map map = new Map();
             int mapID;
-            Match m = Regex.Match(node.Text, @"^(\d{9})\.img$");
+            // Unity 資產的 img 節點名稱沒有 .img 後綴（如 Map/Map/Map0/100000000）。
+            Match m = Regex.Match(node.Text, @"^(\d{9})(?:\.img)?$");
             if (!(m.Success && Int32.TryParse(m.Result("$1"), out mapID)))
             {
                 return null;

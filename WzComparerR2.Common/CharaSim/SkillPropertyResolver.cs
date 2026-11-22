@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace WzComparerR2.CharaSim
@@ -36,6 +37,10 @@ namespace WzComparerR2.CharaSim
                     value = new ResolvedSkillProperty(expression, evaluationLevel);
                     return true;
                 }
+                if (TryGetRangePercent(this.skill, propertyName, evaluationLevel, out value))
+                {
+                    return true;
+                }
             }
             else
             {
@@ -48,11 +53,37 @@ namespace WzComparerR2.CharaSim
                         value = new ResolvedSkillProperty(expression, target.MaxLevel);
                         return true;
                     }
+                    if (TryGetRangePercent(target, propertyName, target.MaxLevel, out value))
+                    {
+                        return true;
+                    }
                 }
             }
 
             value = default;
             return false;
+        }
+
+        /// <summary>
+        /// <c>#rb</c>：以「該等級攻擊範圍面積 ÷ 最高等級攻擊範圍面積 × 100」計算，
+        /// 四捨五入到小數 1 位。
+        /// </summary>
+        private static bool TryGetRangePercent(Skill skill, string propertyName, int level,
+            out ResolvedSkillProperty value)
+        {
+            value = default;
+            if (!string.Equals(propertyName, "rb", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+            double? percent = skill.GetRangeAreaPercent(level);
+            if (!percent.HasValue)
+            {
+                return false;
+            }
+            value = new ResolvedSkillProperty(
+                percent.Value.ToString("0.0", CultureInfo.InvariantCulture), level);
+            return true;
         }
 
         protected virtual Skill FindSkill(int skillId)

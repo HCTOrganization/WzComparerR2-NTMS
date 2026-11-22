@@ -107,7 +107,7 @@ namespace WzComparerR2.CharaSim
             {
                 return null;
             }
-            if (node.GetNodeWzFile().Type != Wz_Type.Item) return null;
+            if (node.GetNodeWzType() is Wz_Type wzType && wzType != Wz_Type.Item) return null;
             item.ItemID = value;
 
             // in msn the node could be UOL.
@@ -127,21 +127,21 @@ namespace WzComparerR2.CharaSim
                     switch (subNode.Text)
                     {
                         case "icon":
-                            if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png)
+                            if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png || subNode.Value is IWzPngSource)
                             {
                                 item.Icon = BitmapOrigin.CreateFromNode(subNode, findNode);
                             }
                             break;
 
                         case "iconRaw":
-                            if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png)
+                            if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png || subNode.Value is IWzPngSource)
                             {
                                 item.IconRaw = BitmapOrigin.CreateFromNode(subNode, findNode);
                             }
                             break;
 
                         case "sample":
-                            if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png)
+                            if (subNode.Value is Wz_Uol || subNode.Value is Wz_Png || subNode.Value is IWzPngSource)
                             {
                                 item.Sample = BitmapOrigin.CreateFromNode(subNode, findNode);
                             }

@@ -57,7 +57,8 @@ namespace WzComparerR2.CharaSim
         public static Quest CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, GlobalFindNodeFunction2 findNode2, Wz_File wzf = null, int? fromInfoNode = null)
         {
             if (node == null) return null;
-            if (node.GetNodeWzFile().Type != Wz_Type.Quest) return null;
+            // 節點型別由 WZ 檔或外部型別解析器（Unity 資料集目錄）判斷。
+            if (node.GetNodeWzType() is Wz_Type wzType && wzType != Wz_Type.Quest) return null;
 
             int questID = -1;
             if (fromInfoNode != null)
@@ -66,7 +67,8 @@ namespace WzComparerR2.CharaSim
             }
             else
             {
-                Match m = Regex.Match(node.Text, @"^(\d+)\.img$");
+                // Unity 資產的 img 節點名稱沒有 .img 後綴（如 Quest/QuestInfo/1234）。
+                Match m = Regex.Match(node.Text, @"^(\d+)(?:\.img)?$");
                 if (!(m.Success && Int32.TryParse(m.Result("$1"), out questID)))
                 {
                     return null;
@@ -136,7 +138,8 @@ namespace WzComparerR2.CharaSim
                             var npcID = propNode.GetValueEx<int>(0);
                             Wz_Node npcNode = findNode2.Invoke(string.Format("Npc/{0:D7}.img", npcID), wzf);
                             if (npcNode == null) npcNode = findNode2.Invoke("Npc/0002007.img", wzf); // Use Maple GM or Event Guide (イベントガイド) as placeholder NPC when NPC IMG does not exist
-                            quest.Check0Npc = Npc.CreateFromNode(npcNode, findNode); break;
+                            if (npcNode != null) quest.Check0Npc = Npc.CreateFromNode(npcNode, findNode);
+                            break;
                         case "lvmin":
                             quest.Lvmin = propNode.GetValueEx<int>(0); break;
                         case "lvmax":

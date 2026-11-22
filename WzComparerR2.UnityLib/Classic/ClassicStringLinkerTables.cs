@@ -12,8 +12,9 @@ namespace WzComparerR2.UnityLib.Classic
     /// 直接使用。
     /// <para>
     /// 傳統 WZ 的 <c>String.wz/Skill.img</c> 對應這裡的 <c>String/&lt;region&gt;/Skill</c>；
-    /// 道具名稱表是單一 <c>String/&lt;region&gt;/Item</c>（id → name/desc），
-    /// 因此依 id 範圍拆成 Consume / Ins / Etc / Cash / Eqp 等 img。
+    /// Classic 把 Cash / Consume / Eqp / Etc / Ins / Pet 併成單一
+    /// <c>String/&lt;region&gt;/Item</c>（id → name/desc），因此依 id 前綴再拆回
+    /// Eqp / Consume / Ins / Etc / Pet / Cash 等 img。
     /// </para>
     /// </summary>
     public sealed class ClassicStringLinkerTables
@@ -143,8 +144,8 @@ namespace WzComparerR2.UnityLib.Classic
         }
 
         /// <summary>
-        /// <c>String/&lt;region&gt;/Item</c> 是 id → name/desc 的單一表；
-        /// 依傳統 WZ 的分類範圍拆成各 <c>*.img</c>。
+        /// <c>String/&lt;region&gt;/Item</c> 是 Cash / Consume / Eqp / Etc / Ins / Pet
+        /// 合併的單一 id 表；依 id 前綴還原成各 <c>*.img</c>。
         /// </summary>
         private static void BuildItemCategories(
             Wz_Node root, Dictionary<string, Wz_Node> categories,
@@ -169,28 +170,61 @@ namespace WzComparerR2.UnityLib.Classic
                     continue;
                 }
 
-                if (id >= 1000000 && id < 2000000)
+                string category = GetItemCategory(id);
+                if (category == null)
                 {
-                    Wz_Node eqp = GetOrCreateCategory(root, categories, "Eqp");
-                    AddEqpEntry(eqp, itemNode, id);
+                    continue;
                 }
-                else if (id >= 2000000 && id < 3000000)
+                Wz_Node imgNode = GetOrCreateCategory(root, categories, category);
+                if (string.Equals(category, "Eqp", StringComparison.Ordinal))
                 {
-                    GetOrCreateCategory(root, categories, "Consume").Nodes.Add(itemNode);
+                    // Eqp.img 需要「分類 / 子分類 / id」三層。
+                    AddEqpEntry(imgNode, itemNode, id);
                 }
-                else if (id >= 3000000 && id < 4000000)
+                else if (string.Equals(category, "Etc", StringComparison.Ordinal))
                 {
-                    GetOrCreateCategory(root, categories, "Ins").Nodes.Add(itemNode);
+                    // Etc.img 需要「Etc / id」兩層。
+                    GetOrAddChild(imgNode, "Etc").Nodes.Add(itemNode);
                 }
-                else if (id >= 4000000 && id < 5000000)
+                else
                 {
-                    GetOrCreateCategory(root, categories, "Etc").Nodes.Add(itemNode);
-                }
-                else if (id >= 5000000 && id < 6000000)
-                {
-                    GetOrCreateCategory(root, categories, "Cash").Nodes.Add(itemNode);
+                    imgNode.Nodes.Add(itemNode);
                 }
             }
+        }
+
+        /// <summary>
+        /// 依道具 id 前綴判斷它在傳統 String.wz 屬於哪個 img。
+        /// 0xxxxxx~1xxxxxx = Eqp、2xxxxxx = Consume、3xxxxxx = Ins、4xxxxxx = Etc、
+        /// 500xxxx = Pet、501xxxx 以上 = Cash。
+        /// </summary>
+        internal static string GetItemCategory(int id)
+        {
+            if (id < 0)
+            {
+                return null;
+            }
+            if (id < 2000000)
+            {
+                return "Eqp";
+            }
+            if (id < 3000000)
+            {
+                return "Consume";
+            }
+            if (id < 4000000)
+            {
+                return "Ins";
+            }
+            if (id < 5000000)
+            {
+                return "Etc";
+            }
+            if (id < 5010000)
+            {
+                return "Pet";
+            }
+            return "Cash";
         }
 
         /// <summary>

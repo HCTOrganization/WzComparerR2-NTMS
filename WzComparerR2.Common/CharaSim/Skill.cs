@@ -34,6 +34,14 @@ namespace WzComparerR2.CharaSim
         internal List<Dictionary<string, string>> levelCommon;
         internal Dictionary<string, string> common;
 
+        /// <summary>common 內的攻擊範圍（所有等級共用）。</summary>
+        private Point commonLT;
+        private Point commonRB;
+
+        /// <summary>各等級的攻擊範圍（<c>level/&lt;n&gt;/lt</c>、<c>rb</c>）。</summary>
+        private Dictionary<int, Point> levelLT;
+        private Dictionary<int, Point> levelRB;
+
         public Dictionary<string, string> Common
         {
             get
@@ -121,8 +129,142 @@ namespace WzComparerR2.CharaSim
         public int VehicleID { get; set; }
         public Dictionary<int, Dictionary<string, string>> PerJobAttackInfo { get; private set; }
 
-        public Point LT { get; set; }
-        public Point RB { get; set; }
+        /// <summary>
+        /// 攻擊範圍左上角。等級專屬的 <c>level/&lt;n&gt;/lt</c> 優先，
+        /// 否則使用 <c>common/lt</c>。
+        /// </summary>
+        public Point LT
+        {
+            get { return this.GetLevelPoint(this.levelLT, this.level) ?? this.commonLT; }
+            set { this.commonLT = value; }
+        }
+
+        /// <summary>
+        /// 攻擊範圍右下角。等級專屬的 <c>level/&lt;n&gt;/rb</c> 優先，
+        /// 否則使用 <c>common/rb</c>。
+        /// </summary>
+        public Point RB
+        {
+            get { return this.GetLevelPoint(this.levelRB, this.level) ?? this.commonRB; }
+            set { this.commonRB = value; }
+        }
+
+        /// <summary>取得指定等級的攻擊範圍（等級專屬優先，否則 common）。</summary>
+        public void GetAttackRange(int level, out Point lt, out Point rb)
+        {
+            lt = this.GetLevelPoint(this.levelLT, level) ?? this.commonLT;
+            rb = this.GetLevelPoint(this.levelRB, level) ?? this.commonRB;
+        }
+
+        /// <summary>
+        /// 指定等級的攻擊範圍面積佔最高等級的百分比（保留 1 位小數）；
+        /// 缺少範圍資料時回傳 null。
+        /// </summary>
+        public double? GetRangeAreaPercent(int level)
+        {
+            double area = this.GetRangeArea(level);
+            if (area <= 0)
+            {
+                return null;
+            }
+
+            int maxLevel = this.MaxLevel > 0 ? this.MaxLevel : level;
+            double maxArea = this.GetRangeArea(maxLevel);
+            if (maxArea <= 0)
+            {
+                return null;
+            }
+
+            return Math.Round(area / maxArea * 100d, 1, MidpointRounding.AwayFromZero);
+        }
+
+        private double GetRangeArea(int level)
+        {
+            Point lt, rb;
+            this.GetAttackRange(level, out lt, out rb);
+            return Math.Abs((double)rb.X - lt.X) * Math.Abs((double)rb.Y - lt.Y);
+        }
+
+        private Point? GetLevelPoint(Dictionary<int, Point> points, int level)
+        {
+            if (points == null || points.Count == 0)
+            {
+                return null;
+            }
+
+            Point point;
+            if (level > 0 && points.TryGetValue(level, out point))
+            {
+                return point;
+            }
+
+            // 沒有剛好對應的等級（例如 Combat Orders 超過上限、或 Level 0）時，
+            // 取不超過目前等級的最高等級，再退回最低等級。
+            int best = 0;
+            int lowest = int.MaxValue;
+            foreach (int key in points.Keys)
+            {
+                if (key <= level && key > best)
+                {
+                    best = key;
+                }
+                if (key < lowest)
+                {
+                    lowest = key;
+                }
+            }
+            if (best != 0)
+            {
+                return points[best];
+            }
+            return lowest == int.MaxValue ? (Point?)null : points[lowest];
+        }
+
+        /// <summary>
+        /// 記錄某等級的攻擊範圍（<c>level/&lt;n&gt;/lt</c>、<c>rb</c>）。
+        /// 值可能是 vector（type 14）或 2 個數值的組合（type 8）。
+        /// </summary>
+        private bool SetLevelPoint(int level, string name, object value)
+        {
+            if (level <= 0 || !TryGetPoint(value, out Point point))
+            {
+                return false;
+            }
+            switch (name.ToLowerInvariant())
+            {
+                case "lt":
+                    if (this.levelLT == null) this.levelLT = new Dictionary<int, Point>();
+                    this.levelLT[level] = point;
+                    return true;
+                case "rb":
+                    if (this.levelRB == null) this.levelRB = new Dictionary<int, Point>();
+                    this.levelRB[level] = point;
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>把節點值解讀成座標點（vector 或 2 個數值的組合）。</summary>
+        private static bool TryGetPoint(object value, out Point point)
+        {
+            switch (value)
+            {
+                case Wz_Vector vector:
+                    point = new Point(vector.X, vector.Y);
+                    return true;
+                case int[] intPair when intPair.Length == 2:
+                    point = new Point(intPair[0], intPair[1]);
+                    return true;
+                case float[] floatPair when floatPair.Length == 2:
+                    point = new Point(
+                        (int)Math.Round(floatPair[0]), (int)Math.Round(floatPair[1]));
+                    return true;
+                default:
+                    point = Point.Empty;
+                    return false;
+            }
+        }
 
         public int MaxLevel
         {
@@ -140,7 +282,9 @@ namespace WzComparerR2.CharaSim
         public static Skill CreateFromNode(Wz_Node node, GlobalFindNodeFunction findNode, GlobalFindNodeFunction2 findNode2, Wz_File wzf = null)
         {
             if (node == null) return null;
-            if (node.GetNodeWzFile().Type != Wz_Type.Skill && node.GetNodeWzFile().Type != Wz_Type.Etc) return null;
+            // 節點型別由 WZ 檔或外部型別解析器（Unity 資料集目錄）判斷。
+            if (node.GetNodeWzType() is Wz_Type wzType
+                && wzType != Wz_Type.Skill && wzType != Wz_Type.Etc) return null;
 
             Skill skill = new Skill();
             int skillID;
@@ -326,10 +470,20 @@ namespace WzComparerR2.CharaSim
 
                             foreach (Wz_Node commonNode in levelNode.Nodes)
                             {
-                                if (commonNode.Value != null && !(commonNode.Value is Wz_Vector))
+                                if (commonNode.Value == null)
                                 {
-                                    levelInfo[commonNode.Text] = commonNode.Value.ToString();
+                                    continue;
                                 }
+                                // Classic 客戶端把攻擊範圍放在各等級底下（level/<n>/lt、rb）。
+                                if (skill.SetLevelPoint(i, commonNode.Text, commonNode.Value))
+                                {
+                                    continue;
+                                }
+                                if (commonNode.Value is Wz_Vector)
+                                {
+                                    continue; // 其他 vector 屬性維持原有行為（不進 levelCommon）
+                                }
+                                levelInfo[commonNode.Text] = commonNode.Value.ToString();
                             }
 
                             skill.levelCommon.Add(levelInfo);

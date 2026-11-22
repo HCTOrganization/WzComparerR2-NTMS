@@ -34,6 +34,33 @@ namespace WzComparerR2.CharaSimControl
         private static Dictionary<string, TextureBrush> res;
         private static readonly Regex RegexTrimNewLinesAtEnd = new Regex(@"(\r\n)?$", RegexOptions.Compiled);
 
+        /// <summary>
+        /// WZ 以外的節點來源（例如 Unity 資產）；WZ 查不到時才會呼叫，回傳 null 表示沒有。
+        /// </summary>
+        public static GlobalFindNodeFunction ExternalNodeResolver { get; set; }
+
+        /// <summary>節點查找：先查 WZ，找不到再問外部來源。</summary>
+        private static Wz_Node ResolveNode(string path, Wz_File sourceWzFile = null)
+        {
+            Wz_Node node = PluginManager.FindWz(path, sourceWzFile);
+            if (node != null)
+            {
+                return node;
+            }
+            GlobalFindNodeFunction resolver = ExternalNodeResolver;
+            return resolver?.Invoke(path);
+        }
+
+        private static Wz_Node ResolveNode1(string path)
+        {
+            return ResolveNode(path);
+        }
+
+        private static Wz_Node ResolveNode2(string path, Wz_File sourceWzFile)
+        {
+            return ResolveNode(path, sourceWzFile);
+        }
+
         public QuestTooltipRenderer()
         {
             this.sourceWzFile = null;
@@ -681,7 +708,7 @@ namespace WzComparerR2.CharaSimControl
                         return "玩家";
 
                     case "o9101069f":
-                        Wz_Node stringNodeMF = PluginManager.FindWz($@"String\MobFilter.img\{info}", this.SourceWzFile);
+                        Wz_Node stringNodeMF = ResolveNode($@"String\MobFilter.img\{info}", this.SourceWzFile);
                         var retMF = stringNodeMF.GetValueEx<string>(null);
                         if (retMF != null) return $"#$o{retMF}#";
 
@@ -692,7 +719,7 @@ namespace WzComparerR2.CharaSimControl
                         return "怪物";
 
                     case "MD":
-                        Wz_Node stringNode = PluginManager.FindWz($@"String\mirrorDungeon.img\{info}\name", this.SourceWzFile);
+                        Wz_Node stringNode = ResolveNode($@"String\mirrorDungeon.img\{info}\name", this.SourceWzFile);
                         var retMD = stringNode.GetValueEx<string>(null);
                         return retMD ?? "鏡子世界";
 
@@ -718,7 +745,7 @@ namespace WzComparerR2.CharaSimControl
                         return $"#$^b#$w0# / 0#$$";
 
                     case "DL":
-                        return StringTagConverter.ConvertDateWZ2(info, PluginManager.FindWz, this.SourceWzFile);
+                        return StringTagConverter.ConvertDateWZ2(info, ResolveNode2, this.SourceWzFile);
                 }
                 return info;
             });
@@ -755,12 +782,12 @@ namespace WzComparerR2.CharaSimControl
             Wz_Node iconNode = itemNode?.FindNodeByPath($@"info\icon{(raw ? "Raw" : "")}");
             if (iconNode != null)
             {
-                return BitmapOrigin.CreateFromNode(iconNode, PluginManager.FindWz, this.SourceWzFile);
+                return BitmapOrigin.CreateFromNode(iconNode, ResolveNode1, this.SourceWzFile);
             }
             iconNode = itemNode?.FindNodeByPath($@"info\icon{(raw ? "" : "Raw")}");
             if (iconNode != null)
             {
-                return BitmapOrigin.CreateFromNode(iconNode, PluginManager.FindWz, this.SourceWzFile);
+                return BitmapOrigin.CreateFromNode(iconNode, ResolveNode1, this.SourceWzFile);
             }
 
             return new BitmapOrigin();
@@ -776,7 +803,7 @@ namespace WzComparerR2.CharaSimControl
                     : (id / 1000 == 3015) ? $@"{(id / 100):D6}.img\{id:D8}"
                     : (id / 10000 == 301) ? $@"{(id / 1000):D5}.img\{id:D8}"
                     : $@"{(id / 10000):D4}.img\{id:D8}";
-                return PluginManager.FindWz($@"Item\{itemType}\{nodePath}", this.SourceWzFile);
+                return ResolveNode($@"Item\{itemType}\{nodePath}", this.SourceWzFile);
             }
             else
             {
@@ -809,16 +836,19 @@ namespace WzComparerR2.CharaSimControl
                         return gearNode;
                     }
                 }
+
+                // Unity 資產沒有 Character.wz 根節點，改以 Character/<分類>/<id> 查找。
+                return ResolveNode($@"Character\{nodePath}", this.SourceWzFile);
             }
             return null;
         }
 
         private Bitmap GetIconByPath(string path)
         {
-            Wz_Node icon = PluginManager.FindWz(path, this.SourceWzFile);
+            Wz_Node icon = ResolveNode(path, this.SourceWzFile);
             if (icon != null)
             {
-                return BitmapOrigin.CreateFromNode(icon, PluginManager.FindWz).Bitmap;
+                return BitmapOrigin.CreateFromNode(icon, ResolveNode1).Bitmap;
             }
 
             return null;
@@ -829,12 +859,12 @@ namespace WzComparerR2.CharaSimControl
             if (id >= 2000000)
             {
                 // item
-                return Item.CreateFromNode(node, PluginManager.FindWz);
+                return Item.CreateFromNode(node, ResolveNode1);
             }
             else
             {
                 // eqp
-                return Gear.CreateFromNode(node, PluginManager.FindWz);
+                return Gear.CreateFromNode(node, ResolveNode1);
             }
 
             return null;

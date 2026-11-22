@@ -1,4 +1,5 @@
 using System;
+using WzComparerR2.WzLib;
 
 namespace WzComparerR2.UnityLib.Classic
 {
@@ -6,7 +7,7 @@ namespace WzComparerR2.UnityLib.Classic
     /// 一個 WZ-like 的 Canvas 節點值：代表「某個 Unity 資產路徑上的圖片」，
     /// PNG 於第一次使用時才解碼（等同傳統 WZ 的 <c>Wz_Png</c> 角色）。
     /// </summary>
-    public sealed class UnityCanvas
+    public sealed class UnityCanvas : IWzPngSource
     {
         private readonly ClassicWzSource source;
         private readonly object syncRoot = new object();
@@ -45,6 +46,11 @@ namespace WzComparerR2.UnityLib.Classic
                 }
                 return this.png;
             }
+        }
+
+        byte[] IWzPngSource.GetPngData()
+        {
+            return this.GetPng();
         }
 
         public override string ToString()
