@@ -1771,7 +1771,7 @@ namespace WzComparerR2
                 string stringTableError = null;
                 try
                 {
-                    stringTables = ClassicStringLinkerTables.Build(unitySource);
+                    stringTables = unitySource.StringTables;
                 }
                 catch (Exception ex)
                 {
@@ -2266,24 +2266,34 @@ namespace WzComparerR2
         {
             if (e.Node == null || e.Button != MouseButtons.Left)
                 return;
+            this.ShowNodeDetail(e.Node);
+        }
+
+        /// <summary>
+        /// 將指定節點展開顯示於第三個樹狀檢視（節點詳細）。
+        /// advTree2 雙擊與 DB2 等來源的節點選取共用。
+        /// </summary>
+        private void ShowNodeDetail(Node parentNode)
+        {
             historyNodeList.Clear();
             advTree3.Nodes.Clear();
 
-            var selectedNode = e.Node.AsWzNode();
-            if (selectedNode != null)
+            if (parentNode == null || parentNode.AsWzNode() == null)
             {
-                advTree3.BeginUpdate();
-                try
-                {
-                    var node = createNodeDetail(e.Node);
-                    node.ExpandAll();
-                    advTree3.Nodes.Add(node);
-                    advTree3.SelectedNode = node;
-                }
-                finally
-                {
-                    advTree3.EndUpdate();
-                }
+                return;
+            }
+
+            advTree3.BeginUpdate();
+            try
+            {
+                var node = createNodeDetail(parentNode);
+                node.ExpandAll();
+                advTree3.Nodes.Add(node);
+                advTree3.SelectedNode = node;
+            }
+            finally
+            {
+                advTree3.EndUpdate();
             }
         }
 
@@ -2924,7 +2934,23 @@ namespace WzComparerR2
 
             targetNode.EnsureVisible();
             advTree2.SelectedNode = targetNode;
+            this.ShowNodeDetail(targetNode);
             return true;
+        }
+
+        /// <summary>
+        /// 回傳產生該節點的 Unity 資料集（往上追溯到 img 判斷）。
+        /// </summary>
+        private static ClassicWzSource GetUnityNodeSource(Wz_Node node)
+        {
+            for (Wz_Node current = node; current != null; current = current.ParentNode)
+            {
+                if (current.GetValue<Wz_Image>() is UnityAssetImage image)
+                {
+                    return image.Source;
+                }
+            }
+            return null;
         }
 
         private static Node findUnityTreeNode(Node parent, string[] segments)
@@ -2946,12 +2972,24 @@ namespace WzComparerR2
                         next = child;
                         break;
                     }
-                    // id 節點的補零位數可能不同（02000000 / 2000000）。
-                    long childNumber;
-                    if (segmentIsNumber && long.TryParse(child.Text, out childNumber)
-                        && childNumber == segmentNumber)
+                }
+                if (next == null)
+                {
+                    // img 節點帶有 .img，而路徑端可能沒有（例如 01002000 / 01002000.img）。
+                    foreach (Node child in node.Nodes)
                     {
-                        next = child;
+                        if (string.Equals(StripImgSuffix(child.Text), StripImgSuffix(segment), StringComparison.OrdinalIgnoreCase))
+                        {
+                            next = child;
+                            break;
+                        }
+                        // id 節點的補零位數可能不同（02000000 / 2000000）。
+                        long childNumber;
+                        if (segmentIsNumber && long.TryParse(StripImgSuffix(child.Text), out childNumber)
+                            && childNumber == segmentNumber)
+                        {
+                            next = child;
+                        }
                     }
                 }
                 if (next == null)
@@ -2963,15 +3001,23 @@ namespace WzComparerR2
             return node;
         }
 
+        private static string StripImgSuffix(string name)
+        {
+            return name != null && name.EndsWith(".img", StringComparison.OrdinalIgnoreCase)
+                ? name.Substring(0, name.Length - 4)
+                : name;
+        }
+
         private bool OnSelectedWzNode(Wz_Node wzNode)
         {
             Wz_File wzFile = wzNode.GetNodeWzFile();
-            string[] path = wzNode.FullPathToFile.Split('\\');
             if (wzFile == null)
             {
-                return false;
+                // Unity 資料集的節點沒有 Wz_File，因此改由資產樹搜尋選取。
+                return this.SelectUnityWzNode(wzNode);
             }
 
+            string[] path = wzNode.FullPathToFile.Split('\\');
             Node treeNode = findWzFileTreeNode(wzFile);
             if (treeNode == null)
             {
@@ -3012,7 +3058,101 @@ namespace WzComparerR2
                 }
             }
 
+            treeNode.EnsureVisible();
             advTree2.SelectedNode = treeNode;
+            this.ShowNodeDetail(treeNode);
+            return true;
+        }
+
+        /// <summary>
+        /// 選取 Unity 資料集的節點。先在 advTree1 選取相當於 img 的節點，
+        /// 剩下的路徑在 advTree2 中走訪，再展開第三個樹狀檢視。
+        /// </summary>
+        private bool SelectUnityWzNode(Wz_Node wzNode)
+        {
+            if (this.openedUnitySources == null || this.openedUnitySources.Count == 0)
+            {
+                return false;
+            }
+
+            string[] segments = wzNode.FullPathToFile.Split(new[] { '\\' }, StringSplitOptions.RemoveEmptyEntries);
+            if (segments.Length == 0)
+            {
+                return false;
+            }
+
+            // 若同時開啟多個 Unity 客戶端，優先使用產生此節點的資料集。
+            ClassicWzSource ownerSource = GetUnityNodeSource(wzNode);
+            List<UnityAssetDocument> documents = this.openedUnitySources.Values.ToList();
+            if (ownerSource != null)
+            {
+                documents = documents.OrderBy(d => ReferenceEquals(d.Source, ownerSource) ? 0 : 1).ToList();
+            }
+
+            // 先以 catalog 索引鍵格式（Item/Consume/0200/02000000/info/icon）嘗試選取。
+            string catalogPath = string.Join("/", segments.Select(StripImgSuffix));
+            foreach (UnityAssetDocument document in documents)
+            {
+                if (this.SelectUnityNode(document, catalogPath))
+                {
+                    return true;
+                }
+            }
+
+            // catalog 中沒有的路徑（例如合成目錄）直接沿 .img 節點走訪。
+            int imageIndex = segments.Length - 1;
+            while (imageIndex > 0 && !segments[imageIndex].EndsWith(".img", StringComparison.OrdinalIgnoreCase))
+            {
+                imageIndex--;
+            }
+            if (imageIndex < 0 || !segments[imageIndex].EndsWith(".img", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            Node imageTreeNode = null;
+            foreach (UnityAssetDocument document in documents)
+            {
+                // 內容樹的根節點名稱（資料集名稱等）依環境而異，
+                // 逐一去掉開頭區段嘗試比對。
+                for (int start = 0; start <= imageIndex && imageTreeNode == null; start++)
+                {
+                    string[] imageSegments = new string[imageIndex + 1 - start];
+                    Array.Copy(segments, start, imageSegments, 0, imageSegments.Length);
+                    imageTreeNode = findUnityTreeNode(document.TreeNode, imageSegments);
+                }
+                if (imageTreeNode != null)
+                {
+                    break;
+                }
+            }
+            if (imageTreeNode == null)
+            {
+                return false;
+            }
+
+            advTree1.SelectedNode = imageTreeNode;
+            imageTreeNode.EnsureVisible();
+            if (advTree2.Nodes.Count == 0)
+            {
+                return false;
+            }
+
+            Node targetNode = advTree2.Nodes[0];
+            if (imageIndex + 1 < segments.Length)
+            {
+                string[] innerSegments = new string[segments.Length - imageIndex - 1];
+                Array.Copy(segments, imageIndex + 1, innerSegments, 0, innerSegments.Length);
+                targetNode = findUnityTreeNode(targetNode, innerSegments);
+                if (targetNode == null)
+                {
+                    return false;
+                }
+            }
+
+            targetNode.EnsureVisible();
+            advTree2.SelectedNode = targetNode;
+            this.ShowNodeDetail(targetNode);
             return true;
         }
 

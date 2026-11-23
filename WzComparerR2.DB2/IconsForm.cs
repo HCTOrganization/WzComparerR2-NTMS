@@ -37,6 +37,14 @@ namespace WzComparerR2.DB2
         {
             return Db2Host.GetNode(Path);
         }
+
+        /// <summary>即使資料集沒有該分類，列舉 <c>.Nodes</c> 也不會出錯的空節點取得方式。</summary>
+        Wz_Node GetNodeOrEmpty(string Path)
+        {
+            return GetNode(Path) ?? EmptyNode;
+        }
+
+        private static readonly Wz_Node EmptyNode = new Wz_Node(string.Empty);
         List<(Bitmap, string)> ImageList;
         private FormWindowState lastWindowState;
         bool[] HasLoaded = new bool[34];
@@ -45,7 +53,7 @@ namespace WzComparerR2.DB2
 
         void LoadItem(string ItemDir)
         {
-            foreach (var img in GetNode("Item/" + ItemDir).Nodes)
+            foreach (var img in GetNodeOrEmpty("Item/" + ItemDir).Nodes)
             {
                 if (!Char.IsNumber(img.Text[0]))
                     continue;
@@ -57,7 +65,7 @@ namespace WzComparerR2.DB2
                 }
                 else
                 {
-                    foreach (var Iter in GetNode("Item/" + ItemDir + "/" + img.Text).Nodes)
+                    foreach (var Iter in GetNodeOrEmpty("Item/" + ItemDir + "/" + img.Text).Nodes)
                     {
                         var ID = Iter.Text;
                         if (Iter.GetNode("info/icon") != null)
@@ -74,7 +82,7 @@ namespace WzComparerR2.DB2
         }
         void LoadCharacter(string Dir)
         {
-            foreach (var img in GetNode("Character/" + Dir).Nodes)
+            foreach (var img in GetNodeOrEmpty("Character/" + Dir).Nodes)
             {
                 if (LeftStr(img.Text, 1) != "0")
                     continue;
@@ -99,7 +107,7 @@ namespace WzComparerR2.DB2
         void LoadMap()
         {
             var Links = new List<(string, string)>();
-            foreach (var Dir in GetNode("Map/Map").Nodes)
+            foreach (var Dir in GetNodeOrEmpty("Map/Map").Nodes)
             {
                 if (LeftStr(Dir.Text, 3) != "Map")
                     continue;
@@ -134,7 +142,7 @@ namespace WzComparerR2.DB2
         {
             var Links = new List<(string, string)>();
             Wz_Node Child = null;
-            foreach (var Iter in GetNode("String/Mob.img").Nodes)
+            foreach (var Iter in GetNodeOrEmpty("String/Mob.img").Nodes)
             {
                 var ID = Iter.Text.PadLeft(7, '0');
                 if (GetNode("Mob/" + ID + ".img") == null)
@@ -182,7 +190,7 @@ namespace WzComparerR2.DB2
             Wz_Node Child;
             if (Db2Host.HasSkill001)
             {
-                foreach (var Iter in GetNode("String/Skill.img").Nodes)
+                foreach (var Iter in GetNodeOrEmpty("String/Skill.img").Nodes)
                 {
                     var ID = Iter.Text;
                     //  if(GetNode(GetIDPath(ID)) == null)
@@ -196,14 +204,14 @@ namespace WzComparerR2.DB2
             }
             else
             {
-                foreach (var img in GetNode("Skill").Nodes)
+                foreach (var img in GetNodeOrEmpty("Skill").Nodes)
                 {
                     if (Char.IsNumber(img.Text, 0))
                     {
                         var BookID = img.ImgID();
                         if (GetNode("Skill/" + img.Text + "/info/icon") != null)
                             ImageList.Add((GetNode("Skill/" + img.Text + "/info/icon").ExtractPng(), BookID));
-                        foreach (var Iter in GetNode("Skill/" + img.Text).Nodes)
+                        foreach (var Iter in GetNodeOrEmpty("Skill/" + img.Text).Nodes)
                         {
                             foreach (var Iter2 in Iter.Nodes)
                             {
@@ -226,7 +234,7 @@ namespace WzComparerR2.DB2
         {
             var Links = new List<(string, string)>();
             Bitmap Icon = null;
-            foreach (var Img in GetNode("Npc").Nodes)
+            foreach (var Img in GetNodeOrEmpty("Npc").Nodes)
             {
                 if (!Char.IsNumber(Img.Text[0]))
                     continue;
@@ -259,7 +267,7 @@ namespace WzComparerR2.DB2
 
         void LoadMorph()
         {
-            foreach (var Img in GetNode("Morph").Nodes)
+            foreach (var Img in GetNodeOrEmpty("Morph").Nodes)
             {
                 if (!Char.IsNumber(Img.Text[0]))
                     continue;
@@ -283,7 +291,7 @@ namespace WzComparerR2.DB2
             Wz_Node CardEntry;
             Bitmap Icon = null;
             string CardID = "";
-            foreach (var img in GetNode("Character/Familiar").Nodes)
+            foreach (var img in GetNodeOrEmpty("Character/Familiar").Nodes)
             {
                 if (!Char.IsNumber(img.Text[0]))
                     continue;
@@ -327,7 +335,7 @@ namespace WzComparerR2.DB2
         void LoadDamageSkin()
         {
             Bitmap Icon = null;
-            foreach (var Iter in GetNode("String/Consume.img").Nodes)
+            foreach (var Iter in GetNodeOrEmpty("String/Consume.img").Nodes)
             {
                 var Name = Iter.GetValue2("name", "");
                 if ((Name.Contains("字型")) || (Name.Contains("ジスキン")) || (Name.Contains("스킨")) || (Name.Contains
@@ -351,7 +359,7 @@ namespace WzComparerR2.DB2
         {
             var Links = new List<(string, string)>();
             Bitmap Icon = null;
-            foreach (var img in GetNode("Reactor").Nodes)
+            foreach (var img in GetNodeOrEmpty("Reactor").Nodes)
             {
                 if (!Char.IsNumber(img.Text[0]))
                     continue;

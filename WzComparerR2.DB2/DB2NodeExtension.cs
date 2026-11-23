@@ -63,26 +63,24 @@ namespace WzComparerR2.DB2
 
         public static string ImgName(this Wz_Node Node)
         {
-            try
-            {
-                return Node.GetNodeWzImage().Name;
-            }
-            catch
-            {
-                return "(null)";
-            }
+            return Node?.Text ?? "(null)";
         }
 
+        /// <summary>
+        /// 回傳 img 節點的識別字（資料夾下的 <c>00002000.img</c> / Unity 的 <c>00002000</c>）。
+        /// Unity 資料集中 <see cref="Wz_Image.Name"/> 會是索引鍵（<c>Character/Cap/01002000</c>），
+        /// 由節點名稱求得。
+        /// </summary>
         public static string ImgID(this Wz_Node Node)
         {
-            try
-            {
-                return Node.GetNodeWzImage().Name.Replace(".img", "");
-            }
-            catch
+            string text = Node?.Text;
+            if (string.IsNullOrEmpty(text))
             {
                 return "0";
             }
+            return text.EndsWith(".img", StringComparison.OrdinalIgnoreCase)
+                ? text.Substring(0, text.Length - 4)
+                : text;
         }
 
         public static T GetValue2<T>(this Wz_Node Node, string Path, T DefaultValue)
