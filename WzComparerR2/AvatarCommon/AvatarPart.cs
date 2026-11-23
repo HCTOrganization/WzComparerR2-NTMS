@@ -68,10 +68,11 @@ namespace WzComparerR2.AvatarCommon
 
         protected virtual void LoadInfo()
         {
-            var m = Regex.Match(Node.Text, @"^(\d+)\.img$");
+            // Unity 資料集的 img 名稱沒有 .img 後綴。
+            var m = Regex.Match(Node.Text, @"^(\d+)(?:\.img)?$");
             if (!m.Success)
             {
-                m = Regex.Match(Node.FullPath, @"^\d+\.img\\(\d+)$");
+                m = Regex.Match(Node.FullPath, @"^\d+(?:\.img)?\\(\d+)$");
             }
             if (m.Success)
             {

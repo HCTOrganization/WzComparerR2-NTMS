@@ -156,6 +156,10 @@ namespace WzComparerR2
             soundTimer.Enabled = true;
 
             PluginBase.PluginManager.WzFileFinding += new FindWzEventHandler(CharaSimLoader_WzFileFinding);
+            CharaSimLoader.ActionDelayResolver = this.ResolveUnityActionDelay;
+            QuestTooltipRenderer.ExternalNodeResolver = this.FindUnityNodeByPath;
+            Wz_NodeExtension.ExternalTypeResolver = this.ResolveUnityWzType;
+            Wz_NodeExtension.ExternalImageResolver = this.ResolveUnityImageNode;
 
             foreach (WzPngComparison comp in Enum.GetValues(typeof(WzPngComparison)))
             {
@@ -534,16 +538,18 @@ namespace WzComparerR2
 
             if (fullPath == null || fullPath.Length <= 1)
             {
-                if (e.WzType != Wz_Type.Unknown && preSearch.Count > 0) //返回wzFile
+                if (e.WzType != Wz_Type.Unknown) //返回wzFile
                 {
-                    e.WzNode = preSearch[0];
-                    e.WzFile = preSearch[0].Value as Wz_File;
+                    if (preSearch.Count > 0)
+                    {
+                        e.WzNode = preSearch[0];
+                        e.WzFile = preSearch[0].Value as Wz_File;
+                    }
+                    else
+                    {
+                        e.WzNode = this.FindUnityTypeNode(e.WzType);
+                    }
                 }
-                return;
-            }
-
-            if (preSearch.Count <= 0)
-            {
                 return;
             }
 
@@ -567,8 +573,34 @@ namespace WzComparerR2
                     return;
                 }
             }
-            //寻找失败
-            e.WzNode = null;
+            //寻找失败：改查 Unity 資料集（沒有 .img 後綴、目錄配置不同）
+            e.WzNode = this.FindUnityNodeByPath(e.FullPath);
+        }
+
+        /// <summary>Unity 資料集內對應 <paramref name="wzType"/> 的根節點（Base 代表整個資料集）。</summary>
+        private Wz_Node FindUnityTypeNode(Wz_Type wzType)
+        {
+            if (this.openedUnitySources == null || this.openedUnitySources.Count == 0)
+            {
+                return null;
+            }
+            foreach (UnityAssetDocument document in this.openedUnitySources.Values)
+            {
+                Wz_Node root = document.RootNode;
+                if (wzType == Wz_Type.Base)
+                {
+                    // Unity 資料集沒有 Base.wz；開啟中即視為可用。
+                    return root;
+                }
+                foreach (Wz_Node child in root.Nodes)
+                {
+                    if (string.Equals(child.Text, wzType.ToString(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        return child;
+                    }
+                }
+            }
+            return null;
         }
 
         #region 界面主题配置
@@ -5481,6 +5513,955 @@ namespace WzComparerR2
                     tooltipQuickView.DescLeftAlign = sr["desc_leftalign"];
                 }
             }
+        }
+
+        /// <summary>
+        /// 往上找出節點所屬的 Unity WZJS img；非 Unity 節點回傳 null。
+        /// </summary>
+        private static UnityWzImage FindUnityWzImage(Wz_Node node)        {
+            while (node != null)
+            {
+                if (node.Value is UnityWzImage unityImage)
+                {
+                    return unityImage;
+                }
+                node = node.ParentNode;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Unity 資產的快速預覽，支援道具（Item）、裝備（Character）、怪物（Mob）
+        /// 與 NPC（Npc）分類。
+        /// <para>
+        /// Classic 的 Item 資產像傳統 WZ 一樣分組：群組 img 是
+        /// <c>Item/Consume/0200</c>，道具本身則是 img 內的子節點
+        /// <c>0200/02000000</c>。因此要往上找到「父節點是群組 img」的節點，
+        /// 而不是直接用 img 根。
+        /// </para>
+        /// <para>
+        /// 裝備 / 怪物 / NPC 都是一個 id 一個 img（如 <c>Character/Cap/01002000</c>、
+        /// <c>Mob/0100100</c>、<c>Npc/1010100</c>），選到該 img 即顯示 tooltip。
+        /// </para>
+        /// <para>其他分類待補；無法顯示時直接返回，保留目前的 tooltip。</para>
+        /// </summary>
+        private void quickViewUnity(Wz_Node selectedNode, UnityWzImage unityImage)
+        {
+            UnityStringCategory category = GetUnityImageCategory(unityImage.Name);
+            if (category == UnityStringCategory.None)
+            {
+                // 尚未支援的分類，保留目前的 tooltip。
+                return;
+            }
+
+            if (category == UnityStringCategory.Skill)
+            {
+                // 技能是 img 內的 skill/<id> 節點（如 Skill/100/skill/1001002）。
+                this.quickViewUnitySkill(selectedNode);
+                return;
+            }
+
+            if (category == UnityStringCategory.Quest)
+            {
+                // 任務是 Quest/QuestInfo img 內的 <id> 節點。
+                this.quickViewUnityQuest(selectedNode, unityImage);
+                return;
+            }
+
+            if (category != UnityStringCategory.Item)
+            {
+                // img 本身就是該對象；選到 img 內的子節點時保留目前的 tooltip。
+                if (!(selectedNode.Value is UnityWzImage))
+                {
+                    return;
+                }
+
+                // advTree1 的節點是目錄索引（不含子樹），tooltip 需要展開後的 WZJS 內容。
+                Wz_Node imageNode;
+                try
+                {
+                    imageNode = unityImage.AsWzNode();
+                }
+                catch (Exception ex)
+                {
+                    labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
+                    return;
+                }
+
+                switch (category)
+                {
+                    case UnityStringCategory.Equip:
+                        this.quickViewUnityGear(imageNode);
+                        break;
+                    case UnityStringCategory.Mob:
+                        this.quickViewUnityMob(imageNode);
+                        break;
+                    case UnityStringCategory.Npc:
+                        this.quickViewUnityNpc(imageNode);
+                        break;
+                    case UnityStringCategory.Map:
+                        this.quickViewUnityMap(imageNode, unityImage);
+                        break;
+                }
+                return;
+            }
+
+            // 道具有兩種形狀：群組 img（Item/Consume/0200，道具是 img 內的子節點）與
+            // 一 id 一 img（Item/Pet/5002584，img 本身就是道具）。
+            Wz_Node itemNode;
+            if (selectedNode.Value is UnityWzImage && IsUnityPerItemImageKey(unityImage.Name))
+            {
+                try
+                {
+                    itemNode = unityImage.AsWzNode();
+                }
+                catch (Exception ex)
+                {
+                    labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
+                    return;
+                }
+            }
+            else
+            {
+                // 往上找道具節點：父節點是群組 img 的那個節點。
+                itemNode = selectedNode;
+                while (itemNode.ParentNode != null && !(itemNode.ParentNode.Value is UnityWzImage))
+                {
+                    itemNode = itemNode.ParentNode;
+                }
+                int itemId;
+                if (itemNode.ParentNode == null
+                    || !(itemNode.ParentNode.Value is UnityWzImage)
+                    || !int.TryParse(itemNode.Text, out itemId))
+                {
+                    // 選到群組 img 或目錄本身，沒有具體道具可顯示。
+                    return;
+                }
+            }
+
+            if (!this.stringLinker.HasValues)
+            {
+                this.LoadStringLinker();
+            }
+
+            Item item = null;
+            StringResult sr = null;
+            try
+            {
+                item = Item.CreateFromNode(itemNode, PluginManager.FindWz);
+                if (item != null && (stringLinker == null
+                    || !(stringLinker.StringItem.TryGetValue(item.ItemID, out sr)
+                        || stringLinker.StringEqp.TryGetValue(item.ItemID, out sr))))
+                {
+                    sr = new StringResult();
+                    sr.Name = "未知的道具";
+                }
+            }
+            catch (Exception ex)
+            {
+                labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
+            }
+
+            if (item == null)
+            {
+                return;
+            }
+
+            this.resetUnityTooltip();
+            tooltipQuickView.NodeID = item.ItemID;
+            this.applyUnityStringToTooltip(sr, null, null);
+            this.showUnityTooltip(
+                item, "item_" + item.ItemID + "_" + RemoveInvalidFileNameChars(sr.Name) + ".png");
+        }
+
+        /// <summary>
+        /// 判斷 Item 的 img 是否「一個 id 一個 img」（<c>Item/Pet/5002584</c>）。
+        /// 群組 img（<c>Item/Consume/0200</c>）的末段是 4 碼群組編號，不是道具 id。
+        /// </summary>
+        private static bool IsUnityPerItemImageKey(string imageName)
+        {
+            if (string.IsNullOrEmpty(imageName))
+            {
+                return false;
+            }
+            string[] keyParts = imageName.Split('/');
+            if (keyParts.Length != 3 || !string.Equals(keyParts[0], "Item", StringComparison.Ordinal))
+            {
+                return false;
+            }
+            string id = keyParts[2];
+            int ignore;
+            return (id.Length == 7 || id.Length == 8) && int.TryParse(id, out ignore);
+        }
+
+        /// <summary>
+        /// 判斷 img 索引鍵屬於哪個分類（供 tooltip 使用）：
+        /// <c>Item/&lt;分類&gt;/&lt;群組&gt;</c>、<c>Character/&lt;分類&gt;/&lt;8 碼 id&gt;</c>、
+        /// <c>Mob/…/&lt;7 碼 id&gt;</c>、<c>Npc/&lt;7 碼 id&gt;</c>。
+        /// </summary>
+        private static UnityStringCategory GetUnityImageCategory(string imageName)
+        {
+            if (string.IsNullOrEmpty(imageName))
+            {
+                return UnityStringCategory.None;
+            }
+            string[] keyParts = imageName.Split('/');
+            if (keyParts.Length < 2)
+            {
+                return UnityStringCategory.None;
+            }
+
+            int id;
+            switch (keyParts[0])
+            {
+                case "Item":
+                    // 群組 img（Item/Consume/0200），道具是 img 內的子節點。
+                    return keyParts.Length >= 3 ? UnityStringCategory.Item : UnityStringCategory.None;
+                case "Character":
+                    // 一個 id 一個 img；Familiar 另有專用 tooltip。
+                    return keyParts.Length == 3
+                        && !string.Equals(keyParts[1], "Familiar", StringComparison.Ordinal)
+                        && int.TryParse(keyParts[2], out id)
+                        ? UnityStringCategory.Equip : UnityStringCategory.None;
+                case "Mob":
+                    return int.TryParse(keyParts[keyParts.Length - 1], out id)
+                        ? UnityStringCategory.Mob : UnityStringCategory.None;
+                case "Npc":
+                    return int.TryParse(keyParts[keyParts.Length - 1], out id)
+                        ? UnityStringCategory.Npc : UnityStringCategory.None;
+                case "Skill":
+                    // 技能 img 是 Skill/<職業>，技能本身是 img 內的 skill/<id> 節點。
+                    return UnityStringCategory.Skill;
+                case "Map":
+                    // 地圖 img 是 Map/Map/Map<首位數字>/<9 碼 id>。
+                    return keyParts.Length >= 4
+                        && keyParts[keyParts.Length - 1].Length == 9
+                        && int.TryParse(keyParts[keyParts.Length - 1], out id)
+                        ? UnityStringCategory.Map : UnityStringCategory.None;
+                case "Quest":
+                    // 任務 img 是 Quest/QuestInfo，任務本身是 img 內的 <id> 節點。
+                    return keyParts.Length == 2
+                        && string.Equals(keyParts[1], "QuestInfo", StringComparison.OrdinalIgnoreCase)
+                        ? UnityStringCategory.Quest : UnityStringCategory.None;
+                default:
+                    return UnityStringCategory.None;
+            }
+        }
+
+        /// <summary>以字串表內容補上 tooltip 的標題與說明欄位。</summary>
+        private void applyUnityStringToTooltip(StringResult sr, StringResult monsterBook, StringResult worldArchive)
+        {
+            tooltipQuickView.NodeName = sr.Name;
+            tooltipQuickView.Desc = sr.Desc ?? monsterBook?.Desc;
+            tooltipQuickView.Pdesc = sr.Pdesc ?? worldArchive?.Desc;
+            tooltipQuickView.AutoDesc = sr.AutoDesc;
+            tooltipQuickView.Hdesc = sr["h"];
+            tooltipQuickView.DescLeftAlign = sr["desc_leftalign"];
+        }
+
+        /// <summary>清除上一個 Unity tooltip 的內容。</summary>
+        private void resetUnityTooltip()
+        {
+            tooltipQuickView.TargetItem = null;
+            tooltipQuickView.NodeName = string.Empty;
+            tooltipQuickView.NodeID = 0;
+            tooltipQuickView.Desc = string.Empty;
+            tooltipQuickView.Pdesc = string.Empty;
+            tooltipQuickView.AutoDesc = string.Empty;
+            tooltipQuickView.Hdesc = string.Empty;
+            tooltipQuickView.DescLeftAlign = string.Empty;
+        }
+
+        private void showUnityTooltip(object obj, string fileName)
+        {
+            tooltipQuickView.TargetItem = obj;
+            tooltipQuickView.ImageFileName = fileName;
+            tooltipQuickView.Refresh();
+            tooltipQuickView.HideOnHover = false;
+            tooltipQuickView.Show();
+            if (Translator.IsTranslateEnabled) tooltipQuickView.QuickRefresh();
+        }
+
+        /// <summary>
+        /// Unity 裝備（<c>Character/&lt;分類&gt;/&lt;8 碼 id&gt;</c>）的快速預覽。
+        /// </summary>
+        private void quickViewUnityGear(Wz_Node imageNode)
+        {
+            if (!this.stringLinker.HasValues)
+            {
+                this.LoadStringLinker();
+            }
+
+            CharaSimLoader.LoadSetItemsIfEmpty();
+            CharaSimLoader.LoadAstraSubWeaponsIfEmpty();
+            CharaSimLoader.LoadExclusiveEquipsIfEmpty();
+            CharaSimLoader.LoadCommoditiesIfEmpty();
+            CharaSimLoader.LoadMsnMintableItemListIfEmpty();
+            CharaSimLoader.LoadGmsTucBlacklistItemsIfEmpty();
+            if (CharaSimConfig.Default.Misc.LocatePetEquip) CharaSimLoader.LoadPetEquipInfoIfEmpty();
+
+            Gear gear = null;
+            StringResult sr = null;
+            try
+            {
+                gear = Gear.CreateFromNode(imageNode, PluginManager.FindWz);
+                if (gear != null && stringLinker != null)
+                {
+                    stringLinker.StringEqp.TryGetValue(gear.ItemID, out sr);
+                }
+            }
+            catch (Exception ex)
+            {
+                labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
+            }
+
+            if (gear == null)
+            {
+                return;
+            }
+
+            this.resetUnityTooltip();
+            tooltipQuickView.NodeID = gear.ItemID;
+            this.showUnityTooltip(
+                gear,
+                "eqp_" + gear.ItemID + "_" + RemoveInvalidFileNameChars(sr?.Name ?? "item") + ".png");
+        }
+
+        /// <summary>Unity 怪物（<c>Mob/&lt;7 碼 id&gt;</c>）的快速預覽。</summary>
+        private void quickViewUnityMob(Wz_Node imageNode)
+        {
+            if (!this.stringLinker.HasValues)
+            {
+                this.LoadStringLinker();
+            }
+
+            Mob mob = null;
+            StringResult sr = null;
+            StringResult mbSr = null;
+            StringResult waSr = null;
+            try
+            {
+                mob = Mob.CreateFromNode(imageNode, PluginManager.FindWz);
+                if (mob != null)
+                {
+                    if (stringLinker == null || !stringLinker.StringMob.TryGetValue(mob.ID, out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的怪物";
+                    }
+
+                    if (stringLinker != null && CharaSimConfig.Default.Mob.EnableMonsterBook)
+                    {
+                        stringLinker.StringMonsterBook.TryGetValue(mob.ID, out mbSr);
+                    }
+
+                    if (stringLinker != null && CharaSimConfig.Default.Misc.EnableWorldArchive)
+                    {
+                        stringLinker.StringWorldArchiveMob.TryGetValue(mob.ID, out waSr);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
+            }
+
+            if (mob == null)
+            {
+                return;
+            }
+
+            this.resetUnityTooltip();
+            tooltipQuickView.NodeID = mob.ID;
+            this.applyUnityStringToTooltip(sr, mbSr, waSr);
+            this.showUnityTooltip(
+                mob, "mob_" + mob.ID + "_" + RemoveInvalidFileNameChars(sr.Name) + ".png");
+        }
+
+        /// <summary>Unity NPC（<c>Npc/&lt;7 碼 id&gt;</c>）的快速預覽。</summary>
+        private void quickViewUnityNpc(Wz_Node imageNode)
+        {
+            if (!this.stringLinker.HasValues)
+            {
+                this.LoadStringLinker();
+            }
+
+            Npc npc = null;
+            StringResult sr = null;
+            StringResult waSr = null;
+            try
+            {
+                npc = Npc.CreateFromNode(
+                    imageNode, PluginManager.FindWz,
+                    getSpineDefaultFunc: this.pictureBoxEx1.GetSpineDefault);
+                if (npc != null)
+                {
+                    if (stringLinker == null || !stringLinker.StringNpc.TryGetValue(npc.ID, out sr))
+                    {
+                        sr = new StringResult();
+                        sr.Name = "未知的 NPC";
+                    }
+
+                    if (stringLinker != null && CharaSimConfig.Default.Misc.EnableWorldArchive)
+                    {
+                        stringLinker.StringWorldArchiveNpc.TryGetValue(npc.ID, out waSr);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
+            }
+
+            if (npc == null)
+            {
+                return;
+            }
+
+            this.resetUnityTooltip();
+            tooltipQuickView.NodeID = npc.ID;
+            this.applyUnityStringToTooltip(sr, null, waSr);
+            this.showUnityTooltip(
+                npc, "npc_" + npc.ID + "_" + RemoveInvalidFileNameChars(sr.Name) + ".png");
+        }
+
+        /// <summary>
+        /// Unity 資料集節點對應的 <see cref="Wz_Type"/>（目錄 → 型別）；非 Unity 節點回 null。
+        /// </summary>
+        private Wz_Type? ResolveUnityWzType(Wz_Node node)
+        {
+            if (node == null)
+            {
+                return null;
+            }
+
+            // img 展開樹內的節點：以所屬 img 的索引鍵（Character/Cap/01002000）判斷。
+            for (Wz_Node cursor = node; cursor != null; cursor = cursor.ParentNode)
+            {
+                if (cursor.Value is UnityWzImage image)
+                {
+                    return ClassicWzTypeMap.TryGetWzType(image.Name);
+                }
+                if (cursor.Value is UnityJsonAsset json)
+                {
+                    return ClassicWzTypeMap.TryGetWzType(json.ImageKey);
+                }
+            }
+
+            // 目錄索引樹：以資料集根節點下一層的目錄名稱判斷。
+            if (this.openedUnitySources == null || this.openedUnitySources.Count == 0)
+            {
+                return null;
+            }
+            Wz_Node root = node;
+            while (root.ParentNode != null)
+            {
+                root = root.ParentNode;
+            }
+            foreach (UnityAssetDocument document in this.openedUnitySources.Values)
+            {
+                if (!ReferenceEquals(document.RootNode, root))
+                {
+                    continue;
+                }
+                Wz_Node category = node;
+                while (category.ParentNode != null && !ReferenceEquals(category.ParentNode, root))
+                {
+                    category = category.ParentNode;
+                }
+                return ClassicWzTypeMap.TryGetWzType(category.Text);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Unity 資產 img 節點的內容根節點（WZ 的 <see cref="Wz_Image"/> 對應物）。
+        /// </summary>
+        private Wz_Node ResolveUnityImageNode(Wz_Node node)
+        {
+            if (!(node?.Value is UnityWzImage image))
+            {
+                return null;
+            }
+            try
+            {
+                return image.GetRootedNode();
+            }
+            catch (Exception ex) when (ex is UnityException || ex is ClassicAssetException || ex is WzjsException)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 以 WZ 風格路徑在已開啟的 Unity 資料集內找節點（WZ 查不到時的備援）。
+        /// </summary>
+        private Wz_Node FindUnityNodeByPath(string wzPath)        {
+            if (this.openedUnitySources == null || this.openedUnitySources.Count == 0
+                || string.IsNullOrEmpty(wzPath))
+            {
+                return null;
+            }
+            foreach (UnityAssetDocument document in this.openedUnitySources.Values)
+            {
+                try
+                {
+                    Wz_Node node = document.Source.FindNode(wzPath);
+                    if (node != null)
+                    {
+                        return RootUnityNode(node);
+                    }
+                    node = FindUnityNodeBySegments(document.RootNode, wzPath);
+                    if (node != null)
+                    {
+                        return RootUnityNode(node);
+                    }
+                }
+                catch (Exception ex) when (ex is UnityException || ex is ClassicAssetException || ex is WzjsException)
+                {
+                    // 單一資產解碼失敗不影響其他資料集。
+                }
+            }
+            return null;
+        }
+
+        /// <summary>img 內容節點補上層節點鏈，讓 WZ 風格的路徑判斷可用。</summary>
+        private static Wz_Node RootUnityNode(Wz_Node node)
+        {
+            if (node?.Value is UnityWzImage image)
+            {
+                return image.GetRootedNode();
+            }
+            return node;
+        }
+
+        /// <summary>
+        /// 從 Unity 目錄索引樹逐段走訪（名稱容許缺少 <c>.img</c>），
+        /// 遇到 img 節點就展開內容後繼續。
+        /// </summary>
+        private static Wz_Node FindUnityNodeBySegments(Wz_Node root, string wzPath)
+        {
+            if (root == null)
+            {
+                return null;
+            }
+            Wz_Node node = root;
+            foreach (string rawSegment in wzPath.Split('/', '\\'))
+            {
+                if (rawSegment.Length == 0)
+                {
+                    continue;
+                }
+                string segment = rawSegment.EndsWith(".img", StringComparison.OrdinalIgnoreCase)
+                    ? rawSegment.Substring(0, rawSegment.Length - 4)
+                    : rawSegment;
+                node = FindUnityChildByName(node, segment);
+                if (node == null)
+                {
+                    return null;
+                }
+                if (node.Value is UnityWzImage image)
+                {
+                    node = image.GetRootedNode();
+                }
+            }
+            return node;
+        }
+
+        private static Wz_Node FindUnityChildByName(Wz_Node parent, string name)
+        {
+            foreach (Wz_Node child in parent.Nodes)
+            {
+                if (string.Equals(child.Text, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return child;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>Unity 角色動作 img 的索引鍵（各動作的影格延遲來源）。</summary>
+        private const string UnityCharacterImageKey = "Character/00002000";
+
+        /// <summary>
+        /// Unity 資產的動作延遲：<c>Character/00002000/&lt;action&gt;/&lt;frame&gt;/delay</c>
+        /// 的絕對值加總；沒有對應資料時回傳 null（讓 tooltip 顯示 0）。
+        /// </summary>
+        private int? ResolveUnityActionDelay(string actionName)
+        {
+            if (this.openedUnitySources == null || string.IsNullOrEmpty(actionName))
+            {
+                return null;
+            }
+
+            foreach (UnityAssetDocument document in this.openedUnitySources.Values)
+            {
+                int? delay;
+                try
+                {
+                    delay = document.Source.GetActionDelay(UnityCharacterImageKey, actionName);
+                }
+                catch (Exception ex) when (ex is UnityException || ex is ClassicAssetException)
+                {
+                    continue;
+                }
+                if (delay.HasValue)
+                {
+                    return delay;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Unity 地圖（<c>Map/Map/Map&lt;N&gt;/&lt;9 碼 id&gt;</c>）的快速預覽（含 miniMap 縮圖）。
+        /// </summary>
+        private void quickViewUnityMap(Wz_Node imageNode, UnityWzImage unityImage)
+        {
+            if (!this.stringLinker.HasValues)
+            {
+                this.LoadStringLinker();
+            }
+
+            Map map = null;
+            StringResult sr = null;
+            try
+            {
+                // Map.CreateFromNode 以 WZ 風格路徑查 link / NPC / 怪物等關聯節點，
+                // 這裡先查 Unity 資料集，找不到才退回 WZ。
+                GlobalFindNodeFunction finder = path =>
+                    unityImage.FindNode(path) ?? PluginManager.FindWz(path);
+                map = Map.CreateFromNode(imageNode, finder);
+                if (map != null && (stringLinker == null
+                    || !stringLinker.StringMap.TryGetValue(map.MapID, out sr)))
+                {
+                    sr = new StringResult();
+                    sr.Name = "未知的地圖";
+                }
+            }
+            catch (Exception ex)
+            {
+                labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
+            }
+
+            if (map == null)
+            {
+                return;
+            }
+
+            this.resetUnityTooltip();
+            tooltipQuickView.NodeID = map.MapID;
+            this.applyUnityStringToTooltip(sr, null, null);
+            this.showUnityTooltip(
+                map, "map_" + map.MapID + "_"
+                    + RemoveInvalidFileNameChars((sr.Name ?? "unknown").Replace(" : ", ":")) + ".png");
+        }
+
+        /// <summary>
+        /// Unity 任務（<c>Quest/QuestInfo/&lt;id&gt;</c>）的快速預覽。
+        /// <para>
+        /// Classic 把任務資料拆成 <c>Quest/QuestInfo</c>、<c>Quest/Check</c>、
+        /// <c>Quest/Act</c>、<c>Quest/Say</c> 四個 img，文字放在
+        /// <c>String/&lt;locale&gt;/QuestData</c>。這裡把它們組成傳統 WZ 的
+        /// <c>Quest/QuestInfo.img/&lt;id&gt;</c> 形狀後交給 <see cref="Quest.CreateFromNode"/>。
+        /// </para>
+        /// </summary>
+        private void quickViewUnityQuest(Wz_Node questIdNode, UnityWzImage unityImage)
+        {
+            int questId;
+            if (questIdNode.ParentNode == null
+                || !(questIdNode.ParentNode.Value is UnityWzImage)
+                || !int.TryParse(questIdNode.Text, out questId))
+            {
+                // 選到 QuestInfo img 本身時沒有任務可顯示。
+                return;
+            }
+
+            if (!this.stringLinker.HasValues)
+            {
+                this.LoadStringLinker();
+            }
+
+            Quest quest = null;
+            try
+            {
+                Wz_Node questImg = this.BuildUnityQuestImage(questIdNode, questId, unityImage);
+                GlobalFindNodeFunction finder = path =>
+                    unityImage.FindNode(path) ?? PluginManager.FindWz(path);
+                GlobalFindNodeFunction2 finder2 = (path, wzf) => finder(path);
+                quest = Quest.CreateFromNode(questImg, finder, finder2);
+            }
+            catch (Exception ex)
+            {
+                labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
+            }
+
+            if (quest == null)
+            {
+                return;
+            }
+
+            this.resetUnityTooltip();
+            tooltipQuickView.NodeName = quest.Name;
+            tooltipQuickView.Desc = string.Join("\r\n", quest.Desc);
+            tooltipQuickView.QuestLvmin = quest.Lvmin;
+            if (quest.Desc.Count() == 3)
+            {
+                tooltipQuickView.QuestAvailable = quest.Desc[0];
+                tooltipQuickView.QuestProgress = quest.Desc[1];
+                tooltipQuickView.QuestComplete = quest.Desc[2];
+            }
+            else
+            {
+                tooltipQuickView.QuestAvailable = "";
+                tooltipQuickView.QuestProgress = "";
+                tooltipQuickView.QuestComplete = "";
+            }
+            tooltipQuickView.QuestCategory = quest.Category.Count() == 2
+                ? "" + quest.Category[0] + "-" + quest.Category[1]
+                : "0-0";
+            tooltipQuickView.Pdesc = quest.DemandBase;
+            tooltipQuickView.Hdesc = quest.DemandSummary;
+            tooltipQuickView.AutoDesc = quest.PlaceSummary;
+            tooltipQuickView.DescLeftAlign = quest.Summary;
+            tooltipQuickView.NodeID = quest.ID;
+            quest.State = tooltipQuickView.QuestRender.DefaultState;
+            this.showUnityTooltip(
+                quest, "quest_" + quest.ID + "_" + RemoveInvalidFileNameChars(quest.Name) + ".png");
+        }
+
+        /// <summary>
+        /// 把 Classic 拆開的任務資產組成 WZ 形狀的 img 節點：
+        /// <c>&lt;id&gt;/QuestInfo</c>（QuestInfo img）與 <c>&lt;id&gt;/Check</c>（Check img）。
+        /// </summary>
+        private Wz_Node BuildUnityQuestImage(Wz_Node questInfoNode, int questId, UnityWzImage unityImage)
+        {
+            Wz_Node img = new Wz_Node(questId.ToString());
+
+            // QuestInfo/訊息：先帶入資料集內的欄位，再以字串表覆寫（字串表才是顯示文字）。
+            Wz_Node info = img.Nodes.Add("QuestInfo");
+            CopyWzNodeChildren(questInfoNode, info);
+
+            // 資料集內的 name 可能只是佔位節點（值為空），先移除避免顯示成字面上的 "name"。
+            RemoveChildByName(info, "name");
+
+            Wz_Node check = unityImage.FindNode("Quest/Check/" + questId);
+            if (check != null)
+            {
+                Wz_Node checkImg = img.Nodes.Add("Check");
+                CopyWzNodeChildren(check, checkImg);
+            }
+
+            string name = this.ApplyQuestStrings(info, questId, unityImage);
+            SetOrAddChildValue(info, "name", string.IsNullOrEmpty(name) ? "未知的任務" : name);
+            return img;
+        }
+
+        /// <summary>
+        /// 以 <c>String/&lt;locale&gt;/QuestData/&lt;id&gt;</c> 補上任務的顯示文字
+        /// （name → name、Info/&lt;n&gt; → 0/1/2、demandSummary/rewardSummary）；回傳任務名稱。
+        /// </summary>
+        private string ApplyQuestStrings(Wz_Node info, int questId, UnityWzImage unityImage)
+        {
+            UnityAssetDocument document = this.openedUnitySources == null ? null
+                : this.openedUnitySources.Values.FirstOrDefault(
+                    doc => ReferenceEquals(doc.Source, unityImage.Source));
+            Wz_Node questNode = document?.StringTables?.QuestNode;
+            if (questNode == null)
+            {
+                return null;
+            }
+
+            string id = questId.ToString();
+            Wz_Node questInfo = null;
+            Wz_Node dataNode = FindChildByName(questNode, "QuestData");
+            foreach (Wz_Node node in dataNode?.Nodes ?? Enumerable.Empty<Wz_Node>())
+            {
+                if (string.Equals(node.Text.Replace(".img", ""), id, StringComparison.Ordinal))
+                {
+                    questInfo = FindChildByName(node, "QuestInfo") ?? node;
+                    break;
+                }
+            }
+            if (questInfo == null)
+            {
+                return null;
+            }
+
+            // String/<region>/QuestData/<id>/name
+            string name = FindChildByName(questInfo, "name")?.GetValueEx<string>(null);
+
+            Wz_Node stringInfo = FindChildByName(questInfo, "Info");
+            foreach (Wz_Node node in stringInfo?.Nodes ?? Enumerable.Empty<Wz_Node>())
+            {
+                if (node.Value == null)
+                {
+                    continue;
+                }
+                string value = node.GetValueEx<string>(null);
+                int stage;
+                if (int.TryParse(node.Text, out stage))
+                {
+                    // 階段說明 → WZ 的 QuestInfo/0、1、2…
+                    SetOrAddChildValue(info, stage.ToString(), value);
+                    continue;
+                }
+                switch (node.Text.ToLowerInvariant())
+                {
+                    case "demandsummary":
+                        SetOrAddChildValue(info, "demandSummary", value);
+                        break;
+                    case "rewardsummary":
+                        SetOrAddChildValue(info, "rewardSummary", value);
+                        break;
+                }
+            }
+            return name;
+        }
+
+        /// <summary>以名稱尋找子節點（先精確比對，再不分大小寫）。</summary>
+        private static Wz_Node FindChildByName(Wz_Node parent, string name)
+        {
+            if (parent == null || name == null)
+            {
+                return null;
+            }
+            Wz_Node child = parent.Nodes[name];
+            if (child != null)
+            {
+                return child;
+            }
+            foreach (Wz_Node candidate in parent.Nodes)
+            {
+                if (string.Equals(candidate.Text, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return candidate;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>移除指定名稱的子節點（不分大小寫）。</summary>
+        private static void RemoveChildByName(Wz_Node parent, string name)
+        {
+            List<Wz_Node> keep = new List<Wz_Node>();
+            bool removed = false;
+            foreach (Wz_Node child in parent.Nodes)
+            {
+                if (string.Equals(child.Text, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    removed = true;
+                }
+                else
+                {
+                    keep.Add(child);
+                }
+            }
+            if (!removed)
+            {
+                return;
+            }
+            parent.Nodes.Clear();
+            foreach (Wz_Node child in keep)
+            {
+                parent.Nodes.Add(child);
+            }
+        }
+
+        /// <summary>把來源節點的子樹複製到目標節點底下（不共用父子關係）。</summary>
+        private static void CopyWzNodeChildren(Wz_Node source, Wz_Node target)
+        {
+            foreach (Wz_Node child in source.Nodes)
+            {
+                target.Nodes.Add(CloneWzNode(child));
+            }
+        }
+
+        private static Wz_Node CloneWzNode(Wz_Node source)
+        {
+            Wz_Node clone = new Wz_Node(source.Text);
+            clone.Value = source.Value;
+            CopyWzNodeChildren(source, clone);
+            return clone;
+        }
+
+        /// <summary>設定子節點字串值；節點不存在時新增，值為 null 時不變更。</summary>
+        private static void SetOrAddChildValue(Wz_Node parent, string name, string value)
+        {
+            if (value == null)
+            {
+                return;
+            }
+            Wz_Node child = parent.Nodes[name];
+            if (child == null)
+            {
+                child = parent.Nodes.Add(name);
+            }
+            child.Value = value;
+        }
+
+        /// <summary>判斷節點是否為 Unity 技能節點（img 內的 <c>skill/&lt;id&gt;</c>）。</summary>
+        private static bool IsUnitySkillNode(Wz_Node node)        {
+            return node != null
+                && node.ParentNode != null
+                && string.Equals(node.ParentNode.Text, "skill", StringComparison.OrdinalIgnoreCase)
+                && node.ParentNode.ParentNode != null
+                && node.ParentNode.ParentNode.Value is UnityWzImage;
+        }
+
+        /// <summary>
+        /// Unity 技能（<c>Skill/&lt;職業&gt;</c> img 內的 <c>skill/&lt;id&gt;</c> 節點）的快速預覽。
+        /// </summary>
+        private void quickViewUnitySkill(Wz_Node skillNode)
+        {
+            // 對應 WZ 的 Skill.wz\&lt;職業&gt;.img\skill\&lt;id&gt;，只有選到技能節點才顯示。
+            if (!IsUnitySkillNode(skillNode))
+            {
+                return;
+            }
+
+            if (!this.stringLinker.HasValues)
+            {
+                this.LoadStringLinker();
+            }
+
+            Skill skill = null;
+            StringResult sr = null;
+            try
+            {
+                skill = Skill.CreateFromNode(skillNode, PluginManager.FindWz, PluginManager.FindWz);
+                if (skill != null)
+                {
+                    switch (this.skillDefaultLevel)
+                    {
+                        case DefaultLevel.Level0: skill.Level = 0; break;
+                        case DefaultLevel.Level1: skill.Level = 1; break;
+                        case DefaultLevel.LevelMax: skill.Level = skill.MaxLevel; break;
+                        case DefaultLevel.LevelMaxWithCO: skill.Level = skill.MaxLevel + 2; break;
+                    }
+
+                    if (stringLinker == null || !stringLinker.StringSkill.TryGetValue(skill.SkillID, out sr))
+                    {
+                        sr = new StringResultSkill();
+                        sr.Name = "未知的技能";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
+            }
+
+            if (skill == null)
+            {
+                return;
+            }
+
+            this.resetUnityTooltip();
+            tooltipQuickView.NodeID = skill.SkillID;
+            this.applyUnityStringToTooltip(sr, null, null);
+            this.showUnityTooltip(
+                skill, "skill_" + skill.SkillID + "_" + RemoveInvalidFileNameChars(sr.Name) + ".png");
         }
 
         private void comboBoxItemLanguage_SelectedIndexChanged(object sender, EventArgs e)

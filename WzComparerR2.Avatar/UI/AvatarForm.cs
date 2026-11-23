@@ -110,20 +110,20 @@ namespace WzComparerR2.Avatar.UI
                 return;
             }
 
-            Wz_File file = e.Node.GetNodeWzFile();
-            if (file == null)
+            Wz_Type? nodeType = e.Node.GetNodeWzType();
+            if (nodeType == null)
             {
                 return;
             }
 
-            switch (file.Type)
+            switch (nodeType.Value)
             {
                 case Wz_Type.Character: //读取装备
-                    Wz_Image wzImg = e.Node.GetValue<Wz_Image>();
-                    if (wzImg != null && wzImg.TryExtract())
+                    Wz_Node imgContent = e.Node.GetImageContentNode();
+                    if (imgContent != null)
                     {
                         this.SuspendUpdateDisplay();
-                        LoadPart(wzImg.Node);
+                        LoadPart(imgContent);
                         this.ResumeUpdateDisplay();
                     }
                     break;
@@ -141,13 +141,13 @@ namespace WzComparerR2.Avatar.UI
                 return;
             }
 
-            Wz_File file = e.Node.GetNodeWzFile();
-            if (file == null)
+            Wz_Type? nodeType = e.Node.GetNodeWzType();
+            if (nodeType == null)
             {
                 return;
             }
 
-            switch (file.Type)
+            switch (nodeType.Value)
             {
                 case Wz_Type.Skill:
                     Wz_Node skillNode = e.Node;
@@ -3774,7 +3774,11 @@ namespace WzComparerR2.Avatar.UI
 
         private Wz_Node FindNodeByGearID(Wz_Node characWz, int id)
         {
-            string imgName = id.ToString("D8") + ".img";
+            if (characWz == null)
+            {
+                return null;
+            }
+            string imgName = id.ToString("D8");
             Wz_Node imgNode = null;
 
             foreach (var node1 in characWz.Nodes)
@@ -3784,7 +3788,7 @@ namespace WzComparerR2.Avatar.UI
                     continue;
                 }
 
-                if (node1.Text == imgName)
+                if (IsImgNodeName(node1.Text, imgName))
                 {
                     imgNode = node1;
                     break;
@@ -3793,7 +3797,7 @@ namespace WzComparerR2.Avatar.UI
                 {
                     foreach (var node2 in node1.Nodes)
                     {
-                        if (node2.Text == imgName)
+                        if (IsImgNodeName(node2.Text, imgName))
                         {
                             imgNode = node2;
                             break;
@@ -3806,32 +3810,27 @@ namespace WzComparerR2.Avatar.UI
                 }
             }
 
-            if (imgNode != null)
-            {
-                Wz_Image img = imgNode.GetValue<Wz_Image>();
-                if (img != null && img.TryExtract())
-                {
-                    return img.Node;
-                }
-            }
-
-            return null;
+            return imgNode?.GetImageContentNode();
         }
 
         private Wz_Node FindNodeBySkillID(Wz_Node skillWz, int id)
         {
+            if (skillWz == null)
+            {
+                return null;
+            }
             string idName = id.ToString();
 
             foreach (var node1 in skillWz.Nodes)
             {
                 if (idName.StartsWith(node1.Text.Replace(".img", "")))
                 {
-                    Wz_Image img = node1.GetValue<Wz_Image>();
-                    if (img != null && img.TryExtract())
+                    Wz_Node imgNode = node1.GetImageContentNode();
+                    if (imgNode != null)
                     {
-                        if (img.Node.Nodes["skill"].Nodes.Count > 0)
+                        if (imgNode.Nodes["skill"].Nodes.Count > 0)
                         {
-                            foreach (var skillNode in img.Node.Nodes["skill"].Nodes)
+                            foreach (var skillNode in imgNode.Nodes["skill"].Nodes)
                             {
                                 if (skillNode.Text == idName)
                                 {
@@ -3849,6 +3848,10 @@ namespace WzComparerR2.Avatar.UI
 
         private Wz_Node FindNodeByItemID(Wz_Node itemWz, int id)
         {
+            if (itemWz == null)
+            {
+                return null;
+            }
             string idName = id.ToString("D8");
             Wz_Node imgNode = null;
 
@@ -3873,23 +3876,27 @@ namespace WzComparerR2.Avatar.UI
 
             if (imgNode != null)
             {
-                Wz_Image img = imgNode.GetValue<Wz_Image>();
-                if (img != null && img.TryExtract())
+                Wz_Node imgContent = imgNode.GetImageContentNode();
+                if (imgContent != null && imgContent.Nodes.Count > 0)
                 {
-                    if (img.Node.Nodes.Count > 0)
+                    foreach (var itemNode in imgContent.Nodes)
                     {
-                        foreach (var itemNode in img.Node.Nodes)
+                        if (itemNode.Text == idName)
                         {
-                            if (itemNode.Text == idName)
-                            {
-                                return itemNode;
-                            }
+                            return itemNode;
                         }
                     }
                 }
             }
 
             return null;
+        }
+
+        /// <summary>名稱比對容許缺少 <c>.img</c> 後綴（Unity 資料集沒有這個後綴）。</summary>
+        private static bool IsImgNodeName(string nodeName, string name)
+        {
+            return string.Equals(nodeName, name, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(nodeName, name + ".img", StringComparison.OrdinalIgnoreCase);
         }
 
         private string FindIDFromString(string name, int gender = 2)
