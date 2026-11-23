@@ -71,6 +71,8 @@ namespace WzComparerR2.UnityLib.Classic
             this.Entries = new SortedDictionary<string, UnityEntryLocation>(StringComparer.Ordinal);
             this.Image = new UnityImageIndex();
             this.spritesetEntryKeys = new HashSet<string>(StringComparer.Ordinal);
+            this.SoundEntries = new SortedDictionary<string, UnityEntryLocation>(StringComparer.Ordinal);
+            this.SoundKeysByImage = new SortedDictionary<string, List<string>>(StringComparer.Ordinal);
         }
 
         public string RootPath { get; private set; }
@@ -81,6 +83,16 @@ namespace WzComparerR2.UnityLib.Classic
         public SortedDictionary<string, UnityEntryLocation> Entries { get; private set; }
 
         public UnityImageIndex Image { get; private set; }
+
+        /// <summary>
+        /// 音效路徑（如 <c>Sound/Bgm00/FloralLife</c>）→ AudioClip 位置。
+        /// 這些條目不會放進 <see cref="Entries"/>：WZ 的音效是 img 底下的節點，
+        /// 由 <see cref="SoundKeysByImage"/> 組成 img 內容。
+        /// </summary>
+        public SortedDictionary<string, UnityEntryLocation> SoundEntries { get; private set; }
+
+        /// <summary>音效 img（如 <c>Sound/Bgm00</c>）→ 其下的音效路徑。</summary>
+        public SortedDictionary<string, List<string>> SoundKeysByImage { get; private set; }
 
         /// <summary>由 <see cref="RebuildSpritesetEntries"/> 補上的索引鍵（換語系時可整批撤銷）。</summary>
         private readonly HashSet<string> spritesetEntryKeys;
@@ -122,7 +134,72 @@ namespace WzComparerR2.UnityLib.Classic
                     catalog.IndexBundle(bundle, bundleIndex, catalog.Bundles[bundleIndex].Name);
                 }
             }
+            catalog.GroupSoundEntries();
             return catalog;
+        }
+
+        /// <summary>
+        /// 把音效條目整理成 WZ 的 img 形狀：<c>Sound/&lt;img&gt;/&lt;子目錄…&gt;/&lt;名稱&gt;</c>
+        /// 收進 <see cref="SoundEntries"/>，並在 <see cref="Entries"/> 只留下 img 本身
+        /// （<c>Sound/&lt;img&gt;</c>），讓樹上出現「Sound &gt; Bgm00 &gt; FloralLife」而不是把每個音效都攤在根目錄。
+        /// </summary>
+        private void GroupSoundEntries()
+        {
+            List<KeyValuePair<string, UnityEntryLocation>> sounds = new List<KeyValuePair<string, UnityEntryLocation>>();
+            foreach (KeyValuePair<string, UnityEntryLocation> entry in this.Entries)
+            {
+                if (entry.Value.ClassId == UnityClassIds.AudioClip)
+                {
+                    sounds.Add(entry);
+                }
+            }
+
+            foreach (KeyValuePair<string, UnityEntryLocation> entry in sounds)
+            {
+                int firstSlash = entry.Key.IndexOf('/');
+                int secondSlash = firstSlash < 0 ? -1 : entry.Key.IndexOf('/', firstSlash + 1);
+                if (secondSlash <= firstSlash + 1 || secondSlash == entry.Key.Length - 1)
+                {
+                    continue; // 形狀不符（例如 Sound/<name>）：維持原樣
+                }
+
+                string imageKey = entry.Key.Substring(0, secondSlash);
+                List<string> keys;
+                if (!this.SoundKeysByImage.TryGetValue(imageKey, out keys))
+                {
+                    keys = new List<string>();
+                    this.SoundKeysByImage[imageKey] = keys;
+                }
+                keys.Add(entry.Key);
+                this.SoundEntries[entry.Key] = entry.Value;
+                this.Entries.Remove(entry.Key);
+            }
+
+            foreach (KeyValuePair<string, List<string>> group in this.SoundKeysByImage)
+            {
+                group.Value.Sort(StringComparer.Ordinal);
+                if (!this.Entries.ContainsKey(group.Key))
+                {
+                    this.Entries[group.Key] = this.SoundEntries[group.Value[0]];
+                }
+            }
+        }
+
+        /// <summary>該索引鍵是否為音效 img（如 <c>Sound/Bgm00</c>）。</summary>
+        public bool IsSoundImage(string key)
+        {
+            return key != null && this.SoundKeysByImage.ContainsKey(key);
+        }
+
+        /// <summary>音效 img 底下的音效路徑（如 <c>Sound/Bgm00/FloralLife</c>），已排序。</summary>
+        public IReadOnlyList<string> GetSoundKeys(string imageKey)
+        {
+            List<string> keys;
+            if (imageKey != null && this.SoundKeysByImage.TryGetValue(imageKey, out keys))
+            {
+                return keys;
+            }
+            return new string[0];
         }
 
         /// <summary>

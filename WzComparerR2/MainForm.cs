@@ -1750,6 +1750,7 @@ namespace WzComparerR2
                 }
                 string loadedLocale = unitySource.Locale;
                 int entryCount = unitySource.Catalog.Entries.Count;
+                UnityClientInfo clientInfo = unitySource.ClientInfo;
 
                 // String/<region>/<category> 整理成 String.wz 的節點形狀；失敗不阻擋資料集開啟。
                 ClassicStringLinkerTables stringTables = null;
@@ -1781,8 +1782,15 @@ namespace WzComparerR2
                 }
 
                 sw.Stop();
+                string clientText = clientInfo == null ? null : clientInfo.DisplayName;
+                if (!string.IsNullOrEmpty(clientInfo?.EngineVersion))
+                {
+                    clientText = (clientText == null ? null : clientText + "、")
+                        + "Unity " + clientInfo.EngineVersion;
+                }
                 labelItemStatus.Text = $"已開啟 Unity 資源資料夾。時間經過：{sw.ElapsedMilliseconds}毫秒，"
                     + $"{entryCount} 個項目，{bundleCount} 個 bundle，區域: {loadedLocale}"
+                    + (string.IsNullOrEmpty(clientText) ? null : "、客戶端: " + clientText)
                     + (stringTableError == null ? null : "，字串表載入失敗: " + stringTableError);
             }
             catch (Exception ex)
@@ -2027,7 +2035,7 @@ namespace WzComparerR2
 
                 autoResizeColumns(listViewExWzDetail);
             }
-            else if (selectedNode.Value is UnityWzImage unityImage)
+            else if (selectedNode.Value is UnityAssetImage unityImage)
             {
                 listViewExWzDetail.Items.Add(new ListViewItem(new string[] { "IMG名", unityImage.Name }));
                 listViewExWzDetail.Items.Add(new ListViewItem(new string[] {
@@ -2039,7 +2047,7 @@ namespace WzComparerR2
                 QueryPerformance.Start();
                 try
                 {
-                    // WZJS 樹在第一次選取時才解碼，UnityWzImage 會保留結果。
+                    // 內容（WZJS 樹／音效清單）在第一次選取時才建立，UnityAssetImage 會保留結果。
                     Node imageNode = createNode(unityImage.AsWzNode());
                     advTree2.Nodes.Add(imageNode);
                     imageNode.Expand();
@@ -3580,7 +3588,11 @@ namespace WzComparerR2
                 progressBarItem1.Visible = true;
                 await Task.Run(() =>
                 {
-                    BatchExportSound(soundNode.GetValue<Wz_Image>().Node, exportedFolder);
+                    Wz_Image soundImage = soundNode.GetValue<Wz_Image>();
+                    if (soundImage.TryExtract())
+                    {
+                        BatchExportSound(soundImage.Node, exportedFolder);
+                    }
                 });
                 progressBarItem1.Visible = false;
                 labelItemStatus.Text = "匯出完成至: " + exportedFolder;
@@ -3649,6 +3661,7 @@ namespace WzComparerR2
                     {
                         case Wz_SoundType.Mp3: soundName += ".mp3"; break;
                         case Wz_SoundType.Pcm: soundName += ".wav"; break;
+                        case Wz_SoundType.Ogg: soundName += ".ogg"; break;
                     }
 
                     FileStream fs = null;
@@ -4789,6 +4802,7 @@ namespace WzComparerR2
             {
                 case Wz_SoundType.Mp3: soundName += ".mp3"; break;
                 case Wz_SoundType.Pcm: soundName += ".wav"; break;
+                case Wz_SoundType.Ogg: soundName += ".ogg"; break;
             }
             soundPlayer.PlayingSoundName = soundName;
             labelItemSoundTitle.Tooltip = soundName;
@@ -4985,6 +4999,7 @@ namespace WzComparerR2
                     {
                         case Wz_SoundType.Mp3: dlg.FileName += ".mp3"; break;
                         case Wz_SoundType.Pcm: dlg.FileName += ".pcm"; break;
+                        case Wz_SoundType.Ogg: dlg.FileName += ".ogg"; break;
                     }
                 }
                 dlg.Filter = "全部格式 (*.*)|*.*";
@@ -6188,7 +6203,7 @@ namespace WzComparerR2
             // img 展開樹內的節點：以所屬 img 的索引鍵（Character/Cap/01002000）判斷。
             for (Wz_Node cursor = node; cursor != null; cursor = cursor.ParentNode)
             {
-                if (cursor.Value is UnityWzImage image)
+                if (cursor.Value is UnityAssetImage image)
                 {
                     return ClassicWzTypeMap.TryGetWzType(image.Name);
                 }
@@ -6229,7 +6244,7 @@ namespace WzComparerR2
         /// </summary>
         private Wz_Node ResolveUnityImageNode(Wz_Node node)
         {
-            if (!(node?.Value is UnityWzImage image))
+            if (!(node?.Value is UnityAssetImage image))
             {
                 return null;
             }
@@ -6278,9 +6293,15 @@ namespace WzComparerR2
         /// <summary>img 內容節點補上層節點鏈，讓 WZ 風格的路徑判斷可用。</summary>
         private static Wz_Node RootUnityNode(Wz_Node node)
         {
-            if (node?.Value is UnityWzImage image)
+            if (node == null)
             {
-                return image.GetRootedNode();
+                return null;
+            }
+            UnityAssetImage image = node.Value as UnityAssetImage
+                ?? node.GetNodeWzImage() as UnityAssetImage;
+            if (image != null)
+            {
+                image.GetRootedNode();
             }
             return node;
         }
@@ -6310,7 +6331,7 @@ namespace WzComparerR2
                 {
                     return null;
                 }
-                if (node.Value is UnityWzImage image)
+                if (node.Value is UnityAssetImage image)
                 {
                     node = image.GetRootedNode();
                 }

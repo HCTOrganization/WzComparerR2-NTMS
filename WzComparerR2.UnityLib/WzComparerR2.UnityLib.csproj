@@ -17,6 +17,9 @@
   <ItemGroup>
     <ProjectReference Include="..\WzComparerR2.WzLib\WzComparerR2.WzLib.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Audio\vorbis_setups.bin" LogicalName="WzComparerR2.UnityLib.Audio.vorbis_setups.bin" />
+  </ItemGroup>
   <ItemGroup Condition="Exists('..\Build\CommonAssemblyInfo.cs')">
     <Compile Include="..\Build\CommonAssemblyInfo.cs">
       <Link>Properties\CommonAssemblyInfo.cs</Link>

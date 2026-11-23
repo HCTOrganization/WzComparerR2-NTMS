@@ -8,69 +8,47 @@ using WzComparerR2.WzLib;
 namespace WzComparerR2.UnityLib.Classic
 {
     /// <summary>
-    /// 以傳統 WZ 的 <see cref="Wz_Node"/> 形式表示一個 WZJS img。
+    /// 非 WZ 檔來源（Unity 資產）的 img 基底：繼承 <see cref="Wz_Image"/> 讓只認得
+    /// <c>Wz_Image</c> 的既有程式（例如 MapRender）可以直接取用。
     /// <para>
-    /// 繼承 <see cref="Wz_Image"/> 讓只認得 <c>Wz_Image</c> 的既有程式（例如 MapRender）
-    /// 可以直接取用：<see cref="Wz_Image.TryExtract(out Exception)"/> 會即時把 WZJS 樹
-    /// 轉成 WZ 節點（<see cref="Wz_Image.Node"/>），節點顯示名稱沿用
-    /// <c>&lt;名稱&gt;.img</c> 的傳統慣例。Canvas 值為 <see cref="UnityCanvas"/>，
-    /// 它同時是 <see cref="Wz_Png"/>，需要圖片時才解碼。
+    /// <see cref="Wz_Image.TryExtract(out Exception)"/> 會即時把資產內容轉成 WZ 節點
+    /// （<see cref="Wz_Image.Node"/>），節點顯示名稱沿用 <c>&lt;名稱&gt;.img</c> 的傳統慣例。
     /// </para>
     /// </summary>
-    public sealed class UnityWzImage : Wz_Image
+    public abstract class UnityAssetImage : Wz_Image
     {
-        private readonly ClassicWzSource source;
         private readonly object extractLock = new object();
         private Wz_Node rootedNode;
         private readonly object rootedLock = new object();
         private bool extracted;
 
-        public UnityWzImage(ClassicWzSource source, string name)
-            : base(name, GetTrailingName(name) + ".img")
+        protected UnityAssetImage(ClassicWzSource source, string imageKey)
+            : base(imageKey, GetTrailingName(imageKey) + ".img")
         {
             if (source == null)
             {
                 throw new ArgumentNullException(nameof(source));
             }
-            if (name == null)
+            if (imageKey == null)
             {
-                throw new ArgumentNullException(nameof(name));
+                throw new ArgumentNullException(nameof(imageKey));
             }
-            this.source = source;
-            this.Node.Value = this;
+            this.Source = source;
         }
 
-        /// <summary>img 邏輯路徑，如 <c>Character/00002000</c>。</summary>
+        /// <summary>img 邏輯路徑，如 <c>Character/00002000</c>、<c>Sound/Bgm00</c>。</summary>
         public string ImageKey
         {
             get { return this.Name; }
         }
 
         /// <summary>所屬資料集。</summary>
-        public ClassicWzSource Source
-        {
-            get { return this.source; }
-        }
+        public ClassicWzSource Source { get; private set; }
 
-        public WzjsNode Root
-        {
-            get { return this.source.GetTree(this.Name); }
-        }
+        /// <summary>把資產內容填入 <see cref="Wz_Image.Node"/>（只會被呼叫一次）。</summary>
+        protected abstract void PopulateContent();
 
-        /// <summary>取 img 內某節點的 PNG bytes；查無圖時回 null。</summary>
-        public byte[] GetPng(string innerPath)
-        {
-            string path = string.IsNullOrEmpty(innerPath) ? this.Name : this.Name + "/" + innerPath;
-            return this.source.GetImage(path);
-        }
-
-        /// <summary>以 WZ 風格路徑查詢同一資料集內的節點（可含 <c>.img</c> 後綴）。</summary>
-        public Wz_Node FindNode(string wzPath)
-        {
-            return this.source.FindNode(wzPath);
-        }
-
-        /// <summary>把 WZJS 樹展開成 WZ 節點（可重複呼叫）。</summary>
+        /// <summary>把資產內容展開成 WZ 節點（可重複呼叫）。</summary>
         public override bool TryExtract(out Exception e)
         {
             try
@@ -98,12 +76,7 @@ namespace WzComparerR2.UnityLib.Classic
                 {
                     return;
                 }
-                WzjsNode tree = this.source.GetTree(this.Name);
-                foreach (WzjsNode child in tree.Children)
-                {
-                    this.Node.Nodes.Add(ClassicWzBridge.ConvertNode(
-                        child, this.Name, this.source));
-                }
+                this.PopulateContent();
                 this.extracted = true;
             }
         }
@@ -131,26 +104,92 @@ namespace WzComparerR2.UnityLib.Classic
             {
                 if (this.rootedNode == null)
                 {
-                    string[] segments = this.Name.Split('/');
-                    Wz_Node root = new Wz_Node(segments[0]);
-                    Wz_Node parent = root;
-                    for (int i = 1; i < segments.Length - 1; i++)
+                    this.rootedNode = CreateRootedTree(this.Node, this.Name);
+                    if (this.rootedNode != null)
                     {
-                        Wz_Node folder = new Wz_Node(segments[i]);
-                        parent.Nodes.Add(folder);
-                        parent = folder;
+                        this.OwnerNode = this.Node.ParentNode;
                     }
-                    parent.Nodes.Add(content);
-                    this.rootedNode = root;
                 }
             }
             return content;
+        }
+
+        /// <summary>
+        /// 為內容節點建立與傳統 WZ 相同的上層鏈：目錄節點 + 一個同名 <c>&lt;img&gt;.img</c> 節點
+        /// （內容節點掛在它底下），讓 <see cref="Wz_Node.FullPathToFile"/> 能組出
+        /// <c>Sound\Bgm00.img\FloralLife</c> 這種路徑。
+        /// </summary>
+        private static Wz_Node CreateRootedTree(Wz_Node content, string imageKey)
+        {
+            string[] segments = imageKey.Split('/');
+            if (segments.Length < 2)
+            {
+                return null;
+            }
+
+            Wz_Node root = new Wz_Node(segments[0]);
+            Wz_Node parent = root;
+            for (int i = 1; i < segments.Length - 1; i++)
+            {
+                Wz_Node folder = new Wz_Node(segments[i]);
+                parent.Nodes.Add(folder);
+                parent = folder;
+            }
+
+            Wz_Node imageNode = new Wz_Node(content.Text);
+            imageNode.Value = content.GetValue<Wz_Image>();
+            parent.Nodes.Add(imageNode);
+            imageNode.Nodes.Add(content);
+            return root;
         }
 
         private static string GetTrailingName(string name)
         {
             int slash = name.LastIndexOf('/');
             return slash < 0 ? name : name.Substring(slash + 1);
+        }
+    }
+
+    /// <summary>
+    /// 以傳統 WZ 的 <see cref="Wz_Node"/> 形式表示一個 WZJS img。
+    /// <para>
+    /// Canvas 值為 <see cref="UnityCanvas"/>，它同時是 <see cref="Wz_Png"/>，
+    /// 需要圖片時才解碼。
+    /// </para>
+    /// </summary>
+    public sealed class UnityWzImage : UnityAssetImage
+    {
+        public UnityWzImage(ClassicWzSource source, string name)
+            : base(source, name)
+        {
+        }
+
+        public WzjsNode Root
+        {
+            get { return this.Source.GetTree(this.Name); }
+        }
+
+        /// <summary>取 img 內某節點的 PNG bytes；查無圖時回 null。</summary>
+        public byte[] GetPng(string innerPath)
+        {
+            string path = string.IsNullOrEmpty(innerPath) ? this.Name : this.Name + "/" + innerPath;
+            return this.Source.GetImage(path);
+        }
+
+        /// <summary>以 WZ 風格路徑查詢同一資料集內的節點（可含 <c>.img</c> 後綴）。</summary>
+        public Wz_Node FindNode(string wzPath)
+        {
+            return this.Source.FindNode(wzPath);
+        }
+
+        protected override void PopulateContent()
+        {
+            WzjsNode tree = this.Source.GetTree(this.Name);
+            foreach (WzjsNode child in tree.Children)
+            {
+                this.Node.Nodes.Add(ClassicWzBridge.ConvertNode(
+                    child, this.Name, this.Source));
+            }
         }
     }
 
@@ -196,8 +235,12 @@ namespace WzComparerR2.UnityLib.Classic
             {
                 throw new ArgumentNullException(nameof(source));
             }
-            string rootName = Path.GetFileName(
-                source.Catalog.RootPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            string rootName = source.ClientInfo?.DisplayName;
+            if (string.IsNullOrEmpty(rootName))
+            {
+                rootName = Path.GetFileName(
+                    source.Catalog.RootPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            }
             if (string.IsNullOrEmpty(rootName))
             {
                 rootName = "MapleStory Classic";
@@ -242,13 +285,21 @@ namespace WzComparerR2.UnityLib.Classic
                         break;
 
                     case UnityClassIds.AudioClip:
-                        try
+                        if (source.Catalog.IsSoundImage(entry.Key))
                         {
-                            current.Value = source.GetAudioClip(entry.Key);
+                            // WZ 的音效是 img（Sound/Bgm00.img）底下的節點，這裡以同樣形狀呈現。
+                            current.Value = source.GetSoundImage(entry.Key);
                         }
-                        catch (Exception ex) when (ex is UnityException || ex is ClassicAssetException)
+                        else
                         {
-                            current.Value = null;
+                            try
+                            {
+                                current.Value = source.GetAudioClip(entry.Key);
+                            }
+                            catch (Exception ex) when (ex is UnityException || ex is ClassicAssetException)
+                            {
+                                current.Value = null;
+                            }
                         }
                         break;
 
@@ -310,6 +361,17 @@ namespace WzComparerR2.UnityLib.Classic
                     foreach (WzjsNode child in source.GetTree(imageKey).Children)
                     {
                         target.Nodes.Add(ConvertNode(child, imageKey, source));
+                    }
+                    break;
+
+                case UnityClassIds.AudioClip:
+                    if (source.Catalog.IsSoundImage(imageKey))
+                    {
+                        UnitySoundImage soundImage = source.GetSoundImage(imageKey);
+                        foreach (Wz_Node child in soundImage.AsWzNode().Nodes)
+                        {
+                            target.Nodes.Add(child);
+                        }
                     }
                     break;
             }

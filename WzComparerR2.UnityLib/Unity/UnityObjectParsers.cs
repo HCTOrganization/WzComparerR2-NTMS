@@ -13,6 +13,8 @@ namespace WzComparerR2.UnityLib.Unity
         public const int AudioClip = 83;
         public const int MonoBehaviour = 114;
         public const int MonoScript = 115;
+        public const int PlayerSettings = 129;
+        public const int BuildSettings = 141;
         public const int AssetBundle = 142;
         public const int Sprite = 213;
         public const int SpriteAtlas = 687078895;
