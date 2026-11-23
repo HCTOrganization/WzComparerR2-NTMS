@@ -18,6 +18,7 @@ namespace WzComparerR2.UnityLib.Classic
     {
         private const int ImageCacheCapacity = 64;
         private const long ImageCacheBytes = 64L * 1024 * 1024;
+        private const long PagePixelCacheBytes = 128L * 1024 * 1024;
 
         private readonly ClassicCatalog catalog;
         private readonly IReadOnlyList<UnityFsBundle> bundles;
@@ -26,6 +27,12 @@ namespace WzComparerR2.UnityLib.Classic
         private readonly Dictionary<string, byte[]> imageCache = new Dictionary<string, byte[]>(StringComparer.Ordinal);
         private readonly List<string> imageCacheOrder = new List<string>();
         private long imageCacheBytes;
+        private readonly Dictionary<string, byte[]> pagePixelCache = new Dictionary<string, byte[]>(StringComparer.Ordinal);
+        private readonly List<string> pagePixelCacheOrder = new List<string>();
+        private long pagePixelCacheBytes;
+        private const int SheetCacheCapacity = 48;
+        private readonly Dictionary<string, object> sheetCache = new Dictionary<string, object>(StringComparer.Ordinal);
+        private readonly List<string> sheetCacheOrder = new List<string>();
 
         public UnityImageRenderer(
             ClassicCatalog catalog, IReadOnlyList<UnityFsBundle> bundles,
@@ -60,6 +67,110 @@ namespace WzComparerR2.UnityLib.Classic
                 this.imageCacheOrder.Clear();
                 this.imageCacheBytes = 0;
             }
+            lock (this.pagePixelCache)
+            {
+                this.pagePixelCache.Clear();
+                this.pagePixelCacheOrder.Clear();
+                this.pagePixelCacheBytes = 0;
+            }
+            lock (this.sheetCache)
+            {
+                this.sheetCache.Clear();
+                this.sheetCacheOrder.Clear();
+            }
+        }
+
+        /// <summary>
+        /// 解析（或從快取取）spritesheet 索引資料。同一個 spritesheet 通常包含大量 sprite，
+        /// 每個 canvas 都重新解析會讓批次處理變得非常慢。
+        /// </summary>
+        private T GetParsedSheet<T>(UnityEntryLocation location, Func<byte[], T> parser) where T : class
+        {
+            string key = string.Format("{0}:{1}:{2}:{3}",
+                location.BundleIndex, location.NodeIndex, location.AbsoluteOffset, location.ByteSize);
+            lock (this.sheetCache)
+            {
+                object cached;
+                if (this.sheetCache.TryGetValue(key, out cached))
+                {
+                    this.sheetCacheOrder.Remove(key);
+                    this.sheetCacheOrder.Add(key);
+                    return cached as T;
+                }
+            }
+
+            byte[] payload = this.ReadEntry(location);
+            UnityMonoBehaviourInfo mono = UnityObjectParsers.ParseMonoBehaviour(payload, true);
+            if (mono.HeaderLength > payload.Length)
+            {
+                throw new UnityException("SpriteSheet MonoBehaviour header 越界");
+            }
+            T parsed = parser(Slice(payload, mono.HeaderLength));
+
+            lock (this.sheetCache)
+            {
+                this.sheetCache[key] = parsed;
+                this.sheetCacheOrder.Add(key);
+                while (this.sheetCacheOrder.Count > SheetCacheCapacity)
+                {
+                    string evict = this.sheetCacheOrder[0];
+                    this.sheetCacheOrder.RemoveAt(0);
+                    this.sheetCache.Remove(evict);
+                }
+            }
+            return parsed;
+        }
+
+        /// <summary>
+        /// 解碼（或從快取取）atlas 頁的 RGBA 像素。同一頁通常會被多個 canvas 共用，
+        /// 沒有快取時每個 canvas 都要重新解碼整頁，批次處理（例如比較工具）會非常慢。
+        /// </summary>
+        private byte[] GetAtlasPixels(UnityEntryLocation location, UnityTexture2DInfo texture, byte[] data)
+        {
+            string key = string.Format("{0}:{1}:{2}:{3}",
+                location.BundleIndex, location.NodeIndex, location.AbsoluteOffset, location.ByteSize);
+            lock (this.pagePixelCache)
+            {
+                byte[] cached;
+                if (this.pagePixelCache.TryGetValue(key, out cached))
+                {
+                    this.pagePixelCacheOrder.Remove(key);
+                    this.pagePixelCacheOrder.Add(key);
+                    return cached;
+                }
+            }
+
+            UnityFsBundle bundle = this.bundles[location.BundleIndex];
+            byte[] rgba = UnityTexture.FetchPixels(bundle, texture, data);
+            if (rgba == null || rgba.Length > PagePixelCacheBytes)
+            {
+                return rgba;
+            }
+
+            lock (this.pagePixelCache)
+            {
+                byte[] existing;
+                if (this.pagePixelCache.TryGetValue(key, out existing))
+                {
+                    return existing;
+                }
+                while (this.pagePixelCacheOrder.Count > 0
+                    && this.pagePixelCacheBytes + rgba.Length > PagePixelCacheBytes)
+                {
+                    string evict = this.pagePixelCacheOrder[0];
+                    this.pagePixelCacheOrder.RemoveAt(0);
+                    byte[] removed;
+                    if (this.pagePixelCache.TryGetValue(evict, out removed))
+                    {
+                        this.pagePixelCacheBytes -= removed.Length;
+                        this.pagePixelCache.Remove(evict);
+                    }
+                }
+                this.pagePixelCache[key] = rgba;
+                this.pagePixelCacheOrder.Add(key);
+                this.pagePixelCacheBytes += rgba.Length;
+            }
+            return rgba;
         }
 
         /// <summary>讀取 <see cref="UnityEntryLocation"/> 指向的物件 bytes。</summary>
@@ -372,17 +483,11 @@ namespace WzComparerR2.UnityLib.Classic
             {
                 throw new UnityException("spritesheet 缺少圖片索引");
             }
-            byte[] payload = this.ReadEntry(entry.IndexLocation);
-            UnityMonoBehaviourInfo mono = UnityObjectParsers.ParseMonoBehaviour(payload, true);
-            if (mono.HeaderLength > payload.Length)
-            {
-                throw new UnityException("SpriteSheet MonoBehaviour header 越界");
-            }
 
             WzssSprite? sprite;
             if (entry.IndexIsAsset)
             {
-                SpriteSheetAsset asset = SpriteSheetAsset.Parse(Slice(payload, mono.HeaderLength));
+                SpriteSheetAsset asset = this.GetParsedSheet(entry.IndexLocation, SpriteSheetAsset.Parse);
                 if (!string.Equals(asset.Path, sheetKey, StringComparison.Ordinal))
                 {
                     throw new UnityException(string.Format(
@@ -416,7 +521,7 @@ namespace WzComparerR2.UnityLib.Classic
             }
             else
             {
-                WzssIndex wzss = WzssIndex.Parse(Slice(payload, mono.HeaderLength));
+                WzssIndex wzss = this.GetParsedSheet(entry.IndexLocation, WzssIndex.Parse);
                 // 舊版 WZSS 用節點鍵定位，少數 UOL 需要反推。
                 int frame = -1;
                 bool hasFrame = false;
@@ -467,10 +572,8 @@ namespace WzComparerR2.UnityLib.Classic
                 }
                 byte[] data = this.ReadEntry(page.Value);
                 UnityTexture2DInfo texture = UnityObjectParsers.ParseTexture2D(data, true);
-                UnityFsBundle bundle = this.bundles[page.Value.BundleIndex];
-                pages.Add(new AtlasPage(
-                    page.Key, texture.Width, texture.Height,
-                    UnityTexture.FetchPixels(bundle, texture, data)));
+                byte[] rgba = this.GetAtlasPixels(page.Value, texture, data);
+                pages.Add(new AtlasPage(page.Key, texture.Width, texture.Height, rgba));
             }
 
             if (sprite.HasValue)
@@ -484,8 +587,10 @@ namespace WzComparerR2.UnityLib.Classic
                     throw new UnityException("spritesheet 無 atlas 頁");
                 }
                 AtlasPage page = pages[0];
-                UnityTexture.FlipVertical(page.Rgba, page.Width, page.Height);
-                return UnityTexture.ToPng(page.Width, page.Height, page.Rgba);
+                // 快取中的像素不可就地翻轉，複製一份再處理。
+                byte[] pixels = (byte[])page.Rgba.Clone();
+                UnityTexture.FlipVertical(pixels, page.Width, page.Height);
+                return UnityTexture.ToPng(page.Width, page.Height, pixels);
             }
             return null;
         }
@@ -494,8 +599,7 @@ namespace WzComparerR2.UnityLib.Classic
         {
             byte[] data = this.ReadEntry(location);
             UnityTexture2DInfo texture = UnityObjectParsers.ParseTexture2D(data, true);
-            UnityFsBundle bundle = this.bundles[location.BundleIndex];
-            byte[] rgba = UnityTexture.FetchPixels(bundle, texture, data);
+            byte[] rgba = (byte[])this.GetAtlasPixels(location, texture, data).Clone();
             UnityTexture.FlipVertical(rgba, texture.Width, texture.Height);
             return UnityTexture.ToPng(texture.Width, texture.Height, rgba);
         }
@@ -508,14 +612,13 @@ namespace WzComparerR2.UnityLib.Classic
             UnityEntryLocation location = entry.TextureLocation;
             byte[] data = this.ReadEntry(location);
             UnityTexture2DInfo texture = UnityObjectParsers.ParseTexture2D(data, true);
-            UnityFsBundle bundle = this.bundles[location.BundleIndex];
 
             int x;
             int y;
             int width;
             int height;
             SpriteRectToPixels(sprite.Rect, out x, out y, out width, out height);
-            byte[] rgba = UnityTexture.FetchPixels(bundle, texture, data);
+            byte[] rgba = this.GetAtlasPixels(location, texture, data);
             byte[] cropped = UnityTexture.CropRgba(texture.Width, texture.Height, rgba, x, y, width, height);
             UnityTexture.FlipVertical(cropped, width, height);
             return UnityTexture.ToPng(width, height, cropped);

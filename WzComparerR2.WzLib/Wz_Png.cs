@@ -92,6 +92,34 @@ namespace WzComparerR2.WzLib
 
         public int GetRawDataSize() => this.GetRawDataSizePerPage() * this.ActualPages;
 
+        /// <summary>
+        /// 補上外部 PNG（<see cref="PngDataProvider"/>）的尺寸與資料長度。
+        /// 這些資訊只要讀取 PNG 標頭就能取得，不需要解碼整張圖；
+        /// WZ 來源的圖片本來就有這些值，呼叫此方法不會有作用。
+        /// </summary>
+        public void EnsureExternalPngInfo()
+        {
+            Func<byte[]> provider = this.PngDataProvider;
+            if (provider == null)
+            {
+                return;
+            }
+
+            byte[] data = provider();
+            if (data == null || data.Length < 24)
+            {
+                return;
+            }
+
+            this.DataLength = data.Length;
+            if (data[0] == 0x89 && data[1] == 0x50 && data[2] == 0x4E && data[3] == 0x47
+                && data[12] == 'I' && data[13] == 'H' && data[14] == 'D' && data[15] == 'R')
+            {
+                this.Width = (int)(((uint)data[16] << 24) | ((uint)data[17] << 16) | ((uint)data[18] << 8) | data[19]);
+                this.Height = (int)(((uint)data[20] << 24) | ((uint)data[21] << 16) | ((uint)data[22] << 8) | data[23]);
+            }
+        }
+
         public int GetRawDataSizePerPage() => GetUncompressedDataSize(this.Format, this.ActualScale, this.Width, this.Height);
 
         public byte[] GetRawData()
@@ -340,6 +368,7 @@ namespace WzComparerR2.WzLib
             {
                 return null;
             }
+            this.DataLength = data.Length;
             using (var stream = new MemoryStream(data))
             using (var decoded = new Bitmap(stream))
             {
