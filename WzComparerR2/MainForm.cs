@@ -65,17 +65,24 @@ namespace WzComparerR2
         public List<Wz_Structure> openedWz;
         private Dictionary<Node, UnityAssetDocument> openedUnitySources;
 
+        /// <summary>最近使用項目中代表 Unity 資源資料夾的前置字串。</summary>
+        private const string UnityRecentPrefix = "unity:";
+
         /// <summary>開啟中的 Unity 資產資料集；保留根 Wz_Node 以免 AdvTree 的 WeakReference 失效。</summary>
         private sealed class UnityAssetDocument
         {
-            public UnityAssetDocument(ClassicWzSource source, Wz_Node rootNode)
+            public UnityAssetDocument(ClassicWzSource source, Wz_Node rootNode, string sourcePath)
             {
                 this.Source = source;
                 this.RootNode = rootNode;
+                this.SourcePath = sourcePath;
             }
 
             public ClassicWzSource Source { get; }
             public Wz_Node RootNode { get; }
+
+            /// <summary>使用者選擇的資料夾（不一定是 bundle 資料夾）。</summary>
+            public string SourcePath { get; }
 
             /// <summary>advTree1 中對應 <see cref="RootNode"/> 的節點。</summary>
             public Node TreeNode { get; set; }
@@ -1577,15 +1584,12 @@ namespace WzComparerR2
                 labelItemStatus.Text = (this.stringLinker.HasValues ? "檔案已載入。時間經過：" : "檔案已載入，但字串表未能載入。時間經過：") + (Math.Round(QueryPerformance.GetLastInterval(), 4) * 1000) + "毫秒，" + wz.img_number + " IMG";
 
                 ConfigManager.Reload();
-                WcR2Config.Default.RecentDocuments.Remove(wzFilePath);
-                WcR2Config.Default.RecentDocuments.Insert(0, wzFilePath);
-                ConfigManager.Save();
-                refreshRecentDocItems();
+                this.AddRecentDocument(wzFilePath);
             }
             catch (FileNotFoundException)
             {
                 MessageBoxEx.Show(this, LocalizedString_JP.MAINFORM_COMMON_FILENOTFOUND, LocalizedString_JP.COMMON_ERROR);
-                WcR2Config.Default.RecentDocuments.Remove(wzFilePath);
+                this.RemoveRecentDocument(wzFilePath);
             }
             catch (Exception ex)
             {
@@ -1685,7 +1689,7 @@ namespace WzComparerR2
         {
             using (FolderBrowserDialog dlg = new FolderBrowserDialog())
             {
-                dlg.Description = "請選擇 MapleStory Classic World 的 Unity 資源資料夾（包含 *.bundle 的資料夾）。";
+                dlg.Description = "請選擇 MapleStory Classic World 的客戶端資料夾，或包含 *.bundle 的資料夾（例如 StreamingAssets/aa）。";
                 dlg.ShowNewFolderButton = false;
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
@@ -1696,8 +1700,10 @@ namespace WzComparerR2
 
         private void openUnityFolder(string assetFolderPath)
         {
+            string sourcePath = NormalizeRecentPath(assetFolderPath);
             if (this.openedUnitySources.Values.Any(document =>
-                string.Equals(document.Source.Catalog.RootPath, assetFolderPath, StringComparison.OrdinalIgnoreCase)))
+                string.Equals(NormalizeRecentPath(document.SourcePath), sourcePath, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(NormalizeRecentPath(document.Source.Catalog.RootPath), sourcePath, StringComparison.OrdinalIgnoreCase)))
             {
                 MessageBoxEx.Show(this, "此 Unity 資源資料夾已經開啟。", LocalizedString_JP.COMMON_ERROR);
                 return;
@@ -1777,7 +1783,7 @@ namespace WzComparerR2
                 Node treeNode = createNode(rootNode);
                 treeNode.Expand();
                 advTree1.Nodes.Add(treeNode);
-                this.openedUnitySources.Add(treeNode, new UnityAssetDocument(unitySource, rootNode)
+                this.openedUnitySources.Add(treeNode, new UnityAssetDocument(unitySource, rootNode, assetFolderPath)
                 {
                     TreeNode = treeNode,
                     StringTables = stringTables,
@@ -1788,6 +1794,8 @@ namespace WzComparerR2
                 {
                     this.LoadStringLinker();
                 }
+
+                this.AddRecentDocument(UnityRecentPrefix + assetFolderPath);
 
                 sw.Stop();
                 string clientText = clientInfo == null ? null : clientInfo.DisplayName;
@@ -1815,6 +1823,11 @@ namespace WzComparerR2
             }
             catch (Exception ex)
             {
+                if (ex is DirectoryNotFoundException || ex is ClassicAssetException)
+                {
+                    // 資料夾已移動或刪除時，從最近使用項目中移除。
+                    this.RemoveRecentDocument(UnityRecentPrefix + assetFolderPath);
+                }
                 MessageBoxEx.Show(this, ex.ToString(), LocalizedString_JP.COMMON_ERROR);
             }
             finally
@@ -1939,7 +1952,20 @@ namespace WzComparerR2
 
             foreach (var doc in WcR2Config.Default.RecentDocuments)
             {
-                ButtonItem item = new ButtonItem() { Text = "&" + (items.Count + 1) + ". " + Path.GetFileName(doc), Tooltip = doc, Tag = doc };
+                string unityFolder;
+                bool isUnity = TryGetUnityRecentPath(doc, out unityFolder);
+                string displayPath = isUnity ? unityFolder : doc;
+                string displayName = Path.GetFileName(displayPath);
+                if (string.IsNullOrEmpty(displayName))
+                {
+                    displayName = displayPath;
+                }
+                ButtonItem item = new ButtonItem()
+                {
+                    Text = "&" + (items.Count + 1) + ". " + displayName,
+                    Tooltip = doc,
+                    Tag = doc,
+                };
                 item.Click += new EventHandler(buttonItemRecentDocument_Click);
                 items.Add(item);
             }
@@ -1949,10 +1975,91 @@ namespace WzComparerR2
         void buttonItemRecentDocument_Click(object sender, EventArgs e)
         {
             ButtonItem btnItem = sender as ButtonItem;
-            string path;
-            if (btnItem == null || (path = btnItem.Tag as string) == null)
+            string document;
+            if (btnItem == null || (document = btnItem.Tag as string) == null)
                 return;
-            Task.Run(() => openWz(path));
+            string unityFolder;
+            if (TryGetUnityRecentPath(document, out unityFolder))
+            {
+                Task.Run(() => openUnityFolder(unityFolder));
+                return;
+            }
+            Task.Run(() => openWz(document));
+        }
+
+        /// <summary>將 Unity 資源資料夾加入最近使用項目（<c>unity:&lt;資料夾&gt;</c> 形式）。</summary>
+        private void AddRecentDocument(string document)
+        {
+            if (this.InvokeRequired)
+            {
+                try
+                {
+                    this.BeginInvoke(new Action(() => this.AddRecentDocument(document)));
+                }
+                catch (InvalidOperationException)
+                {
+                    // 表單已關閉時不做任何事。
+                }
+                return;
+            }
+            WcR2Config.Default.RecentDocuments.Remove(document);
+            WcR2Config.Default.RecentDocuments.Insert(0, document);
+            ConfigManager.Save();
+            refreshRecentDocItems();
+        }
+
+        /// <summary>從最近使用項目中移除已無法開啟的項目。</summary>
+        private void RemoveRecentDocument(string document)
+        {
+            if (this.InvokeRequired)
+            {
+                try
+                {
+                    this.BeginInvoke(new Action(() => this.RemoveRecentDocument(document)));
+                }
+                catch (InvalidOperationException)
+                {
+                }
+                return;
+            }
+            if (WcR2Config.Default.RecentDocuments.Remove(document))
+            {
+                ConfigManager.Save();
+                refreshRecentDocItems();
+            }
+        }
+
+        private static bool TryGetUnityRecentPath(string document, out string folderPath)
+        {
+            folderPath = null;
+            if (document == null
+                || !document.StartsWith(UnityRecentPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+            string path = document.Substring(UnityRecentPrefix.Length);
+            if (path.Length == 0)
+            {
+                return false;
+            }
+            folderPath = path;
+            return true;
+        }
+
+        private static string NormalizeRecentPath(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return path;
+            }
+            try
+            {
+                return Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            }
+            catch (Exception)
+            {
+                return path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            }
         }
         #endregion
 

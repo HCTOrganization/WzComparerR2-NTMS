@@ -147,7 +147,6 @@ namespace WzComparerR2.UnityLib.Classic
         }
 
         /// <summary>
-        /// <summary>
         /// 找出實際存放 .bundle 的目錄。
         /// Addressables 1.x 的本機配置是 <c>&lt;aa&gt;/StandaloneWindows64</c>，
         /// 2.x 的遠端 catalog 配置是 <c>&lt;aa&gt;/w</c>，
@@ -166,24 +165,31 @@ namespace WzComparerR2.UnityLib.Classic
             }
 
             List<string> candidates = new List<string>();
-            string aaDirectory = Path.Combine(rootDirectory, "StreamingAssets", "aa");
-            string buildTarget = ReadBuildTarget(Path.Combine(aaDirectory, "settings.json"));
+            // 無論選擇客戶端根目錄、StreamingAssets 或 aa 都能開啟。
+            List<string> aaDirectories = new List<string>();
+            aaDirectories.Add(rootDirectory);
+            aaDirectories.Add(Path.Combine(rootDirectory, "StreamingAssets", "aa"));
+            aaDirectories.Add(Path.Combine(rootDirectory, "aa"));
+            aaDirectories.Add(Path.Combine(rootDirectory, "StreamingAssets"));
 
-            // Addressables 的兩種配置（遠端 catalog w／本機 StandaloneWindows64）。
-            candidates.Add(Path.Combine(aaDirectory, "w"));
-            if (buildTarget != null)
+            foreach (string aaDirectory in aaDirectories)
             {
-                candidates.Add(Path.Combine(aaDirectory, buildTarget));
-                candidates.Add(Path.Combine(rootDirectory, buildTarget));
-            }
-            candidates.Add(Path.Combine(aaDirectory, "StandaloneWindows64"));
-            candidates.Add(Path.Combine(rootDirectory, "w"));
-            candidates.Add(Path.Combine(rootDirectory, "StandaloneWindows64"));
+                // Addressables 的兩種配置（遠端 catalog w／本機 StandaloneWindows64）。
+                candidates.Add(Path.Combine(aaDirectory, "w"));
+                string buildTarget = ReadBuildTarget(Path.Combine(aaDirectory, "settings.json"));
+                if (buildTarget != null)
+                {
+                    candidates.Add(Path.Combine(aaDirectory, buildTarget));
+                }
+                candidates.Add(Path.Combine(aaDirectory, "StandaloneWindows64"));
 
-            // 依序檢查 aa 直下、客戶端直下的子目錄。
-            candidates.AddRange(SafeGetDirectories(aaDirectory));
+                // 依序檢查 aa 直下的子目錄。
+                candidates.AddRange(SafeGetDirectories(aaDirectory));
+                candidates.Add(aaDirectory);
+            }
+
+            // 也檢查客戶端直下的子目錄。
             candidates.AddRange(SafeGetDirectories(rootDirectory));
-            candidates.Add(aaDirectory);
 
             foreach (string candidate in candidates)
             {
