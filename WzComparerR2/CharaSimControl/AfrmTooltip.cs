@@ -643,7 +643,12 @@ namespace WzComparerR2.CharaSimControl
             PreProcessText();
             foreach (var i in this.TargetCashPackage.SN)
             {
-                Commodity commodity = CharaSimLoader.LoadedCommoditiesBySN[i];
+                Commodity commodity;
+                if (!CharaSimLoader.LoadedCommoditiesBySN.TryGetValue(i, out commodity) || commodity == null)
+                {
+                    // Commodity 表中沒有的 SN（已刪除或其他版本的資料等）直接忽略。
+                    continue;
+                }
                 if (commodity.ItemId > 0) this.PackageIDs.Add(commodity.ItemId);
             }
             if (this.PackageIDs.Count > 0)

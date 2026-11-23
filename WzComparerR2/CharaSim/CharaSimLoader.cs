@@ -30,6 +30,34 @@ namespace WzComparerR2.CharaSim
         public static Dictionary<int, SetItem> LoadedSetItems { get; private set; }
         public static Dictionary<int, AstraSubWeaponInfo> LoadedAstraSubWeapons { get; private set; }
 
+        /// <summary>
+        /// 以 <c>*.img</c> 名稱尋找節點。Unity 資料集的樹沒有 <c>.img</c> 副檔名，
+        /// 找不到時再以不含副檔名的名稱尋找（img 會回傳展開後的內容）。
+        /// </summary>
+        private static Wz_Node FindImgNode(Wz_Node root, string imgName, string innerPath = null)
+        {
+            if (root == null || string.IsNullOrEmpty(imgName))
+            {
+                return null;
+            }
+            string name = imgName.EndsWith(".img", StringComparison.OrdinalIgnoreCase)
+                ? imgName.Substring(0, imgName.Length - 4)
+                : imgName;
+            foreach (string candidate in new[]
+            {
+                innerPath == null ? imgName : imgName + "\\" + innerPath,
+                innerPath == null ? name : name + "\\" + innerPath,
+            })
+            {
+                Wz_Node node = root.FindNodeByPath(candidate, true);
+                if (node != null)
+                {
+                    return node;
+                }
+            }
+            return null;
+        }
+
         public static Dictionary<int, ExclusiveEquip> LoadedExclusiveEquips { get; private set; }
         public static Dictionary<int, Commodity> LoadedCommoditiesBySN { get; private set; }
         public static Dictionary<int, Commodity> LoadedCommoditiesByItemId { get; private set; }
@@ -54,7 +82,7 @@ namespace WzComparerR2.CharaSim
             Wz_Node etcWz = PluginManager.FindWz(Wz_Type.Etc, sourceWzFile, true);
             if (etcWz == null)
                 return;
-            Wz_Node setItemNode = etcWz.FindNodeByPath("SetItemInfo.img", true);
+            Wz_Node setItemNode = FindImgNode(etcWz, "SetItemInfo.img");
             if (setItemNode == null)
                 return;
 
@@ -62,7 +90,7 @@ namespace WzComparerR2.CharaSim
             Wz_Node itemWz = PluginManager.FindWz(Wz_Type.Item, sourceWzFile, true);
             if (itemWz == null)
                 return;
-            Wz_Node optionNode = itemWz.FindNodeByPath("ItemOption.img", true);
+            Wz_Node optionNode = FindImgNode(itemWz, "ItemOption.img");
             if (optionNode == null)
                 return;
 
@@ -74,7 +102,10 @@ namespace WzComparerR2.CharaSim
                 {
                     SetItem setItem = SetItem.CreateFromNode(node, optionNode);
                     if (setItem != null)
+                    {
+                        ResolveSetItemName(setItem);
                         LoadedSetItems[setItemIndex] = setItem;
+                    }
                 }
             }
         }
@@ -93,7 +124,7 @@ namespace WzComparerR2.CharaSim
             Wz_Node etcWz = PluginManager.FindWz(Wz_Type.Etc, sourceWzFile);
             if (etcWz == null)
                 return;
-            Wz_Node astraNode = etcWz.FindNodeByPath("SubWeaponTransferData.img\\Job", true);
+            Wz_Node astraNode = FindImgNode(etcWz, "SubWeaponTransferData.img", "Job");
             if (astraNode == null)
                 return;
 
@@ -151,7 +182,7 @@ namespace WzComparerR2.CharaSim
             Wz_Node itemWz = PluginManager.FindWz(Wz_Type.Item, sourceWzFile);
             if (itemWz == null)
                 return;
-            Wz_Node mintableListNode = itemWz.FindNodeByPath("MintableList.img", true);
+            Wz_Node mintableListNode = FindImgNode(itemWz, "MintableList.img");
             if (mintableListNode == null)
                 return;
 
@@ -205,7 +236,7 @@ namespace WzComparerR2.CharaSim
             Wz_Node etcWz = PluginManager.FindWz(Wz_Type.Etc, sourceWzFile);
             if (etcWz == null)
                 return;
-            Wz_Node gmsTucBlacklistNode = etcWz.FindNodeByPath("TUC_Blacklist_GL.img\\ItemList", true);
+            Wz_Node gmsTucBlacklistNode = FindImgNode(etcWz, "TUC_Blacklist_GL.img", "ItemList");
             if (gmsTucBlacklistNode == null)
                 return;
             foreach (var i in gmsTucBlacklistNode.Nodes)
@@ -266,7 +297,7 @@ namespace WzComparerR2.CharaSim
             Wz_Node etcWz = PluginManager.FindWz(Wz_Type.Etc, sourceWzFile);
             if (etcWz == null)
                 return null;
-            Wz_Node setItemNode = etcWz.FindNodeByPath("SetItemInfo.img", true);
+            Wz_Node setItemNode = FindImgNode(etcWz, "SetItemInfo.img");
             if (setItemNode == null)
                 return null;
 
@@ -274,7 +305,7 @@ namespace WzComparerR2.CharaSim
             Wz_Node itemWz = PluginManager.FindWz(Wz_Type.Item, sourceWzFile);
             if (itemWz == null)
                 return null;
-            Wz_Node optionNode = itemWz.FindNodeByPath("ItemOption.img", true);
+            Wz_Node optionNode = FindImgNode(itemWz, "ItemOption.img");
             if (optionNode == null)
                 return null;
 
@@ -285,12 +316,32 @@ namespace WzComparerR2.CharaSim
                 {
                     SetItem setItem = SetItem.CreateFromNode(node, optionNode);
                     if (setItem != null)
+                    {
+                        ResolveSetItemName(setItem);
                         return setItem;
+                    }
                     else
                         return null;
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// 套裝名稱為腳本字串索引鍵（例如 <c>SID_WONDERPET_...</c>）時，從字串表解析。
+        /// Classic（Unity）客戶端以索引鍵形式儲存套裝名稱。
+        /// </summary>
+        private static void ResolveSetItemName(SetItem setItem)
+        {
+            if (setItem == null)
+            {
+                return;
+            }
+            string resolved = ResolveScriptString(setItem.SetItemName);
+            if (!string.IsNullOrEmpty(resolved))
+            {
+                setItem.SetItemName = resolved;
+            }
         }
 
         public static void LoadExclusiveEquipsIfEmpty(Wz_File sourceWzFile = null)

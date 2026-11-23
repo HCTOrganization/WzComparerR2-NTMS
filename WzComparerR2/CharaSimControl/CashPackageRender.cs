@@ -56,6 +56,64 @@ namespace WzComparerR2.CharaSimControl
             return tooltip;
         }
 
+        /// <summary>
+        /// 沒有套裝名稱／說明時（Unity 客戶端的 <c>Item/Special</c> 沒有 <c>name</c>），
+        /// 從字串表補上。
+        /// </summary>
+        private void FillMissingPackageText()
+        {
+            if (!string.IsNullOrEmpty(CashPackage.name) && !string.IsNullOrEmpty(CashPackage.desc))
+            {
+                return;
+            }
+            StringResult sr;
+            if (StringLinker == null || !StringLinker.StringItem.TryGetValue(CashPackage.ItemID, out sr) || sr == null)
+            {
+                return;
+            }
+            if (string.IsNullOrEmpty(CashPackage.name))
+            {
+                CashPackage.name = sr.Name;
+            }
+            if (string.IsNullOrEmpty(CashPackage.desc))
+            {
+                CashPackage.desc = sr.Desc;
+            }
+        }
+
+        /// <summary>
+        /// 以型別根 + id 尋找商品 id 的圖示（<c>info/iconRaw</c> 或 <c>info/icon</c>）。
+        /// 為了讓目錄結構與 WZ 不同的資料集（Unity 客戶端）也能解析，
+        /// 此為後備做法，僅在 WZ 無法由字串路徑解析時使用。
+        /// </summary>
+        private static Wz_Node FindItemIconNode(int itemId)
+        {
+            foreach (Wz_Type type in new[] { Wz_Type.Character, Wz_Type.Item })
+            {
+                Wz_Node imgNode = PluginBase.PluginManager.FindWz(type + "/" + itemId);
+                if (imgNode == null)
+                {
+                    continue;
+                }
+                Wz_Node iconNode = imgNode.FindNodeByPath("info\\iconRaw", true) ?? imgNode.FindNodeByPath("info\\icon", true);
+                if (iconNode != null)
+                {
+                    return iconNode;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 由套裝的 SN 取得商品資訊。已載入的 Commodity 表若不存在該 SN，
+        /// （客戶端已刪除、其他版本資料等）回傳 null。
+        /// </summary>
+        private static Commodity GetCommodity(int sn)
+        {
+            Commodity commodity;
+            return CharaSimLoader.LoadedCommoditiesBySN.TryGetValue(sn, out commodity) ? commodity : null;
+        }
+
         private Bitmap RenderCashPackage(out int picH)
         {
             Bitmap cashBitmap = new Bitmap(260, DefaultPicHeight);
@@ -68,6 +126,8 @@ namespace WzComparerR2.CharaSimControl
             if (CharaSimLoader.LoadedCommoditiesByItemId.ContainsKey(CashPackage.ItemID))
                 commodityPackage = CharaSimLoader.LoadedCommoditiesByItemId[CashPackage.ItemID];
 
+            FillMissingPackageText();
+
             // We have to hardcode VIP Package ID for now, since there's no method to know if it's VIP Package
             isTMSVIPPackage = new int[] { 9106024, 9106025, 9106026, 9106027 }.Contains<int>(CashPackage.ItemID);
 
@@ -76,7 +136,12 @@ namespace WzComparerR2.CharaSimControl
 
             for (int i = 0; i < CashPackage.SN.Count; ++i)
             {
-                Commodity commodity = CharaSimLoader.LoadedCommoditiesBySN[CashPackage.SN[i]];
+                Commodity commodity = GetCommodity(CashPackage.SN[i]);
+                if (commodity == null)
+                {
+                    // 客戶端 Commodity 表沒有的 SN（已刪除或其他版本的資料等）不輸出。
+                    continue;
+                }
                 string name = null;
 
                 StringResult sr = null;
@@ -383,13 +448,19 @@ namespace WzComparerR2.CharaSimControl
                     }
                 }
 
+                Commodity commodity = GetCommodity(CashPackage.SN[i]);
+                if (commodity == null)
+                {
+                    // 客戶端 Commodity 表沒有的 SN 不輸出（仍保留欄位分隔）。
+                    continue;
+                }
+
                 if (hasLine)
                 {
                     g.DrawImage(Resource.CSDiscount_Line, columnLeft + 13, picH);
                     picH += 1;
                 }
 
-                Commodity commodity = CharaSimLoader.LoadedCommoditiesBySN[CashPackage.SN[i]];
                 string name = null, info = null, time = null;
                 BitmapOrigin IconRaw = new BitmapOrigin();
 
@@ -434,6 +505,11 @@ namespace WzComparerR2.CharaSimControl
                     else
                     {
                         name = "(null)";
+                    }
+                    if (iconNode == null)
+                    {
+                        // Unity 客戶端的字串表路徑結構與 WZ 不同，因此從型別根以 id 搜尋。
+                        iconNode = FindItemIconNode(commodity.ItemId);
                     }
                     if (iconNode != null)
                     {

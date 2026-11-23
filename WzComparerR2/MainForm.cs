@@ -6161,6 +6161,12 @@ namespace WzComparerR2
                 return;
             }
 
+            if (category == UnityStringCategory.Item || category == UnityStringCategory.Equip)
+            {
+                // 先載入與 WZ 預覽相同的輔助資料（套裝道具、點數道具等）。
+                this.ensureUnityTooltipData();
+            }
+
             if (category == UnityStringCategory.Skill)
             {
                 // 技能是 img 內的 skill/<id> 節點（如 Skill/100/skill/1001002）。
@@ -6279,6 +6285,24 @@ namespace WzComparerR2
             this.applyUnityStringToTooltip(sr, null, null);
             this.showUnityTooltip(
                 item, "item_" + item.ItemID + "_" + RemoveInvalidFileNameChars(sr.Name) + ".png");
+        }
+
+        /// <summary>
+        /// 在 Unity 快速預覽繪製 tooltip 前，先載入與 WZ 預覽相同的輔助資料
+        /// （套裝道具、套裝效果選項、點數道具等）。
+        /// </summary>
+        private void ensureUnityTooltipData()
+        {
+            CharaSimLoader.LoadSetItemsIfEmpty();
+            CharaSimLoader.LoadAstraSubWeaponsIfEmpty();
+            CharaSimLoader.LoadExclusiveEquipsIfEmpty();
+            CharaSimLoader.LoadCommoditiesIfEmpty();
+            CharaSimLoader.LoadMsnMintableItemListIfEmpty();
+            CharaSimLoader.LoadGmsTucBlacklistItemsIfEmpty();
+            if (CharaSimConfig.Default.Misc.LocatePetEquip)
+            {
+                CharaSimLoader.LoadPetEquipInfoIfEmpty();
+            }
         }
 
         /// <summary>

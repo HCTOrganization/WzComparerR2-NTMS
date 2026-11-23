@@ -1097,7 +1097,7 @@ namespace WzComparerR2.Comparer
                 CharaSimLoader.LoadPetEquipInfoIfEmpty();
             }
 
-            if (this.OutputItemTooltip || this.OutputGearTooltip)
+            if (this.OutputItemTooltip || this.OutputGearTooltip || this.OutputCashTooltip)
             {
                 SetUnityResolveSlot(1);
                 CharaSimLoader.LoadCommodities(null, slotIdx: 1);

@@ -344,7 +344,7 @@ namespace WzComparerR2.Comparer
                         }
                     }
                 }
-                if (OutputItemTooltip || OutputGearTooltip) // Check commodity differences
+                if (OutputItemTooltip || OutputGearTooltip || OutputCashTooltip) // Check commodity differences
                 {
                     StateInfo = "道具資訊初始化中";
                     CharaSimLoader.ClearAll();
