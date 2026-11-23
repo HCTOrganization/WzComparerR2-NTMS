@@ -6603,31 +6603,52 @@ namespace WzComparerR2
         /// <summary>
         /// 以 WZ 風格路徑在已開啟的 Unity 資料集內找節點（WZ 查不到時的備援）。
         /// </summary>
-        private Wz_Node FindUnityNodeByPath(string wzPath)        {
+        private Wz_Node FindUnityNodeByPath(string wzPath)
+        {
             if (this.openedUnitySources == null || this.openedUnitySources.Count == 0
                 || string.IsNullOrEmpty(wzPath))
             {
                 return null;
             }
+
+            // Unity 客戶端比對期間只參照比對對象的資料集（不混入新舊內容）。
+            ClassicWzSource preferredSource = Comparer.EasyComparer.PreferredUnitySource;
+            if (preferredSource != null)
+            {
+                UnityAssetDocument preferredDoc = this.openedUnitySources.Values
+                    .FirstOrDefault(doc => doc.Source == preferredSource);
+                return preferredDoc == null ? null : FindUnityNodeInDocument(preferredDoc, wzPath);
+            }
+
             foreach (UnityAssetDocument document in this.openedUnitySources.Values)
             {
-                try
+                Wz_Node node = FindUnityNodeInDocument(document, wzPath);
+                if (node != null)
                 {
-                    Wz_Node node = document.Source.FindNode(wzPath);
-                    if (node != null)
-                    {
-                        return RootUnityNode(node);
-                    }
-                    node = FindUnityNodeBySegments(document.RootNode, wzPath);
-                    if (node != null)
-                    {
-                        return RootUnityNode(node);
-                    }
+                    return node;
                 }
-                catch (Exception ex) when (ex is UnityException || ex is ClassicAssetException || ex is WzjsException)
+            }
+            return null;
+        }
+
+        private static Wz_Node FindUnityNodeInDocument(UnityAssetDocument document, string wzPath)
+        {
+            try
+            {
+                Wz_Node node = document.Source.FindNode(wzPath);
+                if (node != null)
                 {
-                    // 單一資產解碼失敗不影響其他資料集。
+                    return RootUnityNode(node);
                 }
+                node = FindUnityNodeBySegments(document.RootNode, wzPath);
+                if (node != null)
+                {
+                    return RootUnityNode(node);
+                }
+            }
+            catch (Exception ex) when (ex is UnityException || ex is ClassicAssetException || ex is WzjsException)
+            {
+                // 單一資產解碼失敗不影響其他搜尋。
             }
             return null;
         }
@@ -7648,16 +7669,8 @@ namespace WzComparerR2
                     comparer.AvatarCode = GetEasyCompareAvatarCode();
                     if (compareUnity)
                     {
-                        // Unity 客戶端沒有產生 Tooltip 所需的 WZ 結構，因此只進行節點比對。
-                        comparer.OutputSkillTooltip = false;
-                        comparer.OutputItemTooltip = false;
-                        comparer.OutputGearTooltip = false;
-                        comparer.OutputMapTooltip = false;
-                        comparer.OutputMobTooltip = false;
-                        comparer.OutputNpcTooltip = false;
-                        comparer.OutputCashTooltip = false;
-                        comparer.OutputQuestTooltip = false;
-                        comparer.OutputAchvTooltip = false;
+                        // Unity 客戶端沒有 WZ 的 Base.wz，因此只停用以往以 WZ 為前提的選項。
+                        // tooltip 輸出改由 Unity 資料集的結構產生。
                         comparer.SkipKMSContent = false;
                         comparer.SkipGodChangseopDuplicatedNodes = false;
                         comparer.OutputChairAndRidingMount = false;

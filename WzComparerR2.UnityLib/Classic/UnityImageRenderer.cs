@@ -34,6 +34,12 @@ namespace WzComparerR2.UnityLib.Classic
         private readonly Dictionary<string, object> sheetCache = new Dictionary<string, object>(StringComparer.Ordinal);
         private readonly List<string> sheetCacheOrder = new List<string>();
 
+        /// <summary>跨兄弟 img 的 sheet 搜尋上限（避免在龐大目錄建立索引）。</summary>
+        private const int MaxCrossSheetSiblings = 256;
+        private readonly object crossSheetLock = new object();
+        private readonly Dictionary<string, Dictionary<string, string>> crossSheetIndex =
+            new Dictionary<string, Dictionary<string, string>>(StringComparer.Ordinal);
+
         public UnityImageRenderer(
             ClassicCatalog catalog, IReadOnlyList<UnityFsBundle> bundles,
             Func<string, WzjsNode> treeProvider, string locale)
@@ -77,6 +83,10 @@ namespace WzComparerR2.UnityLib.Classic
             {
                 this.sheetCache.Clear();
                 this.sheetCacheOrder.Clear();
+            }
+            lock (this.crossSheetLock)
+            {
+                this.crossSheetIndex.Clear();
             }
         }
 
@@ -305,7 +315,12 @@ namespace WzComparerR2.UnityLib.Classic
                     fallback = common;
                 }
                 bool perImage = string.Equals(candidate, imageKey, StringComparison.Ordinal);
-                return this.RenderSheet(entry, fallback, candidate, imageKey, inner, perImage);
+                byte[] sheetImage = this.RenderSheet(entry, fallback, candidate, imageKey, inner, perImage);
+                if (sheetImage != null)
+                {
+                    return sheetImage;
+                }
+                // 此 img 的 sheet 沒有該 sprite 時，嘗試其他候選或兄弟 sheet。
             }
 
             Dictionary<string, UnitySetSpriteEntry> setAsset;
@@ -317,7 +332,117 @@ namespace WzComparerR2.UnityLib.Classic
                     return this.RenderSetSprite(spriteEntry);
                 }
             }
-            return null;
+
+            // Classic World 客戶端有時只把 img 的部分 sprite 放在其他 img 的 atlas 中
+            // （例如 Character/PetEquip/01802000.img/5000036/angry/0 只存在於 01802006 的 sheet 中）。
+            // 若在自身的 sheet 找不到，則從同一父目錄的兄弟 sheet 解析。
+            return this.TryRenderFromSiblingSheet(imageKey, inner);
+        }
+
+        /// <summary>
+        /// 從兄弟 img 的 spritesheet 解析 sprite（找不到時回傳 null）。
+        /// </summary>
+        private byte[] TryRenderFromSiblingSheet(string imageKey, string inner)
+        {
+            if (string.IsNullOrEmpty(imageKey) || string.IsNullOrEmpty(inner))
+            {
+                return null;
+            }
+            int slash = imageKey.LastIndexOf('/');
+            if (slash <= 0)
+            {
+                return null;
+            }
+            string sheetKey;
+            if (!this.GetSiblingSheetIndex(imageKey.Substring(0, slash)).TryGetValue(inner, out sheetKey)
+                || string.Equals(sheetKey, imageKey, StringComparison.Ordinal))
+            {
+                return null;
+            }
+            Dictionary<string, UnitySheetEntry> variants;
+            if (!this.catalog.Image.SheetsByPath.TryGetValue(sheetKey, out variants))
+            {
+                return null;
+            }
+            UnitySheetEntry entry = UnityImageIndex.SelectLocalized(variants, this.Locale);
+            if (entry == null)
+            {
+                return null;
+            }
+            try
+            {
+                return this.RenderSheetEntry(entry, sheetKey, imageKey, inner, perImage: true);
+            }
+            catch (Exception ex) when (ex is UnityException || ex is ClassicAssetException)
+            {
+                // 損壞的 sheet 不影響其他兄弟 sheet 的搜尋。
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 回傳跨父目錄直下兄弟 img sheet 的「sprite 名稱 → sheet key」索引（僅首次建立）。
+        /// </summary>
+        private Dictionary<string, string> GetSiblingSheetIndex(string parentPath)
+        {
+            lock (this.crossSheetLock)
+            {
+                Dictionary<string, string> index;
+                if (this.crossSheetIndex.TryGetValue(parentPath, out index))
+                {
+                    return index;
+                }
+
+                index = new Dictionary<string, string>(StringComparer.Ordinal);
+                string prefix = parentPath + "/";
+                List<string> sheetKeys = new List<string>();
+                foreach (string key in this.catalog.Image.SheetsByPath.Keys)
+                {
+                    if (key.Length <= prefix.Length || !key.StartsWith(prefix, StringComparison.Ordinal)
+                        || key.IndexOf('/', prefix.Length) >= 0)
+                    {
+                        continue; // 只處理直下子節點
+                    }
+                    sheetKeys.Add(key);
+                }
+
+                if (sheetKeys.Count <= MaxCrossSheetSiblings)
+                {
+                    sheetKeys.Sort(StringComparer.Ordinal);
+                    foreach (string sheetKey in sheetKeys)
+                    {
+                        UnitySheetEntry entry = UnityImageIndex.SelectLocalized(
+                            this.catalog.Image.SheetsByPath[sheetKey], this.Locale);
+                        if (entry == null || entry.IndexLocation == null || !entry.IndexIsAsset)
+                        {
+                            continue;
+                        }
+                        SpriteSheetAsset asset;
+                        try
+                        {
+                            asset = this.GetParsedSheet(entry.IndexLocation, SpriteSheetAsset.Parse);
+                        }
+                        catch (Exception ex) when (ex is UnityException || ex is ClassicAssetException)
+                        {
+                            continue;
+                        }
+                        if (asset == null)
+                        {
+                            continue;
+                        }
+                        foreach (string name in asset.EnumerateNames())
+                        {
+                            if (!index.ContainsKey(name))
+                            {
+                                index[name] = sheetKey;
+                            }
+                        }
+                    }
+                }
+
+                this.crossSheetIndex[parentPath] = index;
+                return index;
+            }
         }
 
         /// <summary>spriteset 的一組查詢：(asset 索引鍵, sprite 名稱)。</summary>
