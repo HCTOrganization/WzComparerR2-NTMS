@@ -70,8 +70,12 @@ namespace WzComparerR2.UnityLib.Images
             UnitySerializedFile serializedFile, IReadOnlyList<UnityContainerEntry> container,
             Dictionary<long, UnityObjectInfo> objectsByPathId)
         {
-            bool isSheet = bundleStem.StartsWith("spritesheet_", StringComparison.Ordinal);
-            bool isSet = bundleStem.StartsWith("spriteset_", StringComparison.Ordinal);
+            // 早期 beta 的 bundle 名稱是 spritesheetgroup_*/spritesetgroup_*（Addressables
+            // 群組前綴），因此不能只看檔名前綴，改以 container 路徑判斷。
+            bool isSheet = bundleStem.StartsWith("spritesheet", StringComparison.Ordinal)
+                || ContainsPathPrefix(container, SheetPrefix);
+            bool isSet = bundleStem.StartsWith("spriteset", StringComparison.Ordinal)
+                || ContainsPathPrefix(container, SetPrefix);
             if (!isSheet && !isSet)
             {
                 return;
@@ -97,13 +101,29 @@ namespace WzComparerR2.UnityLib.Images
             {
                 this.CollectSheet(container, locationOf);
             }
-            else
+            if (isSet)
             {
                 this.CollectSet(bundle, nodeIndex, serializedFile, container, locationOf);
             }
         }
 
-        /// <summary>優先使用目前語系，再使用共用圖集。只有一份的素材可供各語系共用。</summary>
+        /// <summary>container 內是否有路徑以前綴開頭（不分大小寫；索引鍵為小寫）。</summary>
+        private static bool ContainsPathPrefix(
+            IReadOnlyList<UnityContainerEntry> container, string prefix)
+        {
+            foreach (UnityContainerEntry entry in container)
+            {
+                string path = entry.Path;
+                if (path != null && path.Length >= prefix.Length
+                    && path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>優先使用目前語系，再使用共用圖集；仍找不到時取任一份，避免選錯地域導致圖片全數消失。</summary>
         public static UnitySheetEntry SelectLocalized(
             Dictionary<string, UnitySheetEntry> variants, string locale)
         {
@@ -127,7 +147,15 @@ namespace WzComparerR2.UnityLib.Images
             {
                 return found;
             }
-            return null;
+            string firstKey = null;
+            foreach (string key in variants.Keys)
+            {
+                if (firstKey == null || string.CompareOrdinal(key, firstKey) < 0)
+                {
+                    firstKey = key;
+                }
+            }
+            return firstKey == null ? null : variants[firstKey];
         }
 
         private void CollectSheet(

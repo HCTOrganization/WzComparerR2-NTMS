@@ -99,6 +99,9 @@ namespace WzComparerR2
         DefaultLevel skillDefaultLevel = DefaultLevel.Level0;
         int skillInterval = 32;
 
+        /// <summary>前一次開啟 Unity 資料集時選擇的地域コード。多地域資料集再次開啟時作為預設值。</summary>
+        string lastUnityLocale;
+
         //compare
         Thread compareThread;
 
@@ -1683,6 +1686,42 @@ namespace WzComparerR2
                 int entryCount = unitySource.Catalog.Entries.Count;
                 int bundleCount = unitySource.Catalog.Bundles.Count;
 
+                // 多地域資料集：讓使用者選擇偏好的地域コード（字串表與圖集的語系）。
+                // openUnityFolder 執行於背景執行緒，對話方塊必須回到 UI 執行緒顯示。
+                if (unitySource.Locales.Count > 1)
+                {
+                    string selectedLocale = null;
+                    bool cancelled = false;
+                    this.Invoke(new Action(() =>
+                    {
+                        using (FrmSelectUnityLocale dialog = new FrmSelectUnityLocale(
+                            unitySource.Locales,
+                            this.lastUnityLocale ?? unitySource.Locale,
+                            assetFolderPath,
+                            styleManager1.ManagerStyle == eStyle.VisualStudio2012Dark))
+                        {
+                            if (dialog.ShowDialog(this) == DialogResult.OK)
+                            {
+                                selectedLocale = dialog.SelectedLocale;
+                            }
+                            else
+                            {
+                                cancelled = true;
+                            }
+                        }
+                    }));
+                    if (cancelled || selectedLocale == null)
+                    {
+                        unitySource.Dispose();
+                        unitySource = null;
+                        labelItemStatus.Text = "読み込みをキャンセルしました。";
+                        return;
+                    }
+                    this.lastUnityLocale = selectedLocale;
+                    unitySource.Locale = selectedLocale;
+                }
+                string loadedLocale = unitySource.Locale;
+
                 // String/<region>/<category> 整理成 String.wz 的節點形狀；失敗不阻擋資料集開啟。
                 ClassicStringLinkerTables stringTables = null;
                 string stringTableError = null;
@@ -1714,7 +1753,7 @@ namespace WzComparerR2
 
                 sw.Stop();
                 labelItemStatus.Text = $"已開啟 Unity 資源資料夾。時間經過：{sw.ElapsedMilliseconds}毫秒，"
-                    + $"{entryCount} 個項目，{bundleCount} 個 bundle"
+                    + $"{entryCount} 個項目，{bundleCount} 個 bundle，區域: {loadedLocale}"
                     + (stringTableError == null ? null : "，字串表載入失敗: " + stringTableError);
             }
             catch (Exception ex)
