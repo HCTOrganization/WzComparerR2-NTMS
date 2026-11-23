@@ -96,7 +96,7 @@ namespace WzComparerR2.Comparer
                 OutputUnityFile(labelNew, labelOld, type, entries, outputDir, index);
             }
 
-            StateInfo = "比較完了";
+            StateInfo = "比對完成";
             StateDetail = "";
             GC.Collect();
         }
