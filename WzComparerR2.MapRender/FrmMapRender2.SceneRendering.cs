@@ -1292,7 +1292,17 @@ namespace WzComparerR2.MapRender
             var renderObj = GetRenderObject(portal.View.IsEditorMode ? portal.View.EditorAnimator : portal.View.Animator);
             if (renderObj == null)
             {
-                return null;
+                // Classic（Unity）資料集沒有 MapHelper.img/portal 的圖片。
+                // 為避免完全不顯示，改在傳送點所在位置繪製替代標記
+                // （編輯模式顯示全部型別，一般顯示則只顯示 WZ 有提供圖片的型別）。
+                if (portal.View.IsEditorMode || IsVisiblePortalType(portal.Type))
+                {
+                    renderObj = PortalMarker.GetFrame(this.batcher.GraphicsDevice);
+                }
+                if (renderObj == null)
+                {
+                    return null;
+                }
             }
             var mesh = batcher.MeshPop();
             mesh.RenderObject = renderObj;
@@ -1300,6 +1310,16 @@ namespace WzComparerR2.MapRender
             mesh.Z0 = ((renderObj as Frame)?.Z ?? 0);
             mesh.Z1 = portal.Index;
             return mesh;
+        }
+
+        /// <summary>
+        /// 是否為遊戲內會繪製圖片的傳送點型別（<c>pv</c> / <c>ph</c> / <c>psh</c>）。
+        /// <c>pgi</c>（7）會以 <c>pv</c> 的圖片繪製。出現點（<c>sp</c>）與
+        /// 不可視傳送點（<c>pi</c>）本來就看不到。
+        /// </summary>
+        private static bool IsVisiblePortalType(int portalType)
+        {
+            return portalType == 2 || portalType == 7 || portalType == 10 || portalType == 11;
         }
 
         private MeshItem[] GetMeshesIlluminantCluster(IlluminantClusterItem illuminantCluster)

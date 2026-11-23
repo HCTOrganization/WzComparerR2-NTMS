@@ -878,6 +878,16 @@ namespace WzComparerR2.MapRender
             }
         }
 
+        /// <summary>
+        /// 回傳傳送點型別（<c>pt</c>）對應的圖片名稱。即使是範圍外的型別（新客戶端的擴充值）
+        /// 不視為例外，而是當作預設的 <c>sp</c>。
+        /// </summary>
+        private static string GetPortalTypeName(int portalType)
+        {
+            string[] typeNames = PortalItem.PortalTypes;
+            return portalType >= 0 && portalType < typeNames.Length ? typeNames[portalType] : typeNames[0];
+        }
+
         private void PreloadResource(ResourceLoader resLoader, PortalItem portal)
         {
             string path;
@@ -885,7 +895,7 @@ namespace WzComparerR2.MapRender
             var view = new PortalItem.ItemView();
             //加载editor
             {
-                var typeName = PortalItem.PortalTypes[portal.Type];
+                var typeName = GetPortalTypeName(portal.Type);
                 path = $@"Map\MapHelper.img\portal\editor\{typeName}";
                 var aniData = resLoader.LoadAnimationData(path);
                 if (aniData != null)
@@ -902,7 +912,7 @@ namespace WzComparerR2.MapRender
                     case 7:
                         typeName = PortalItem.PortalTypes[2]; break;
                     default:
-                        typeName = PortalItem.PortalTypes[portal.Type]; break;
+                        typeName = GetPortalTypeName(portal.Type); break;
                 }
 
                 switch (portal.Image)
@@ -941,6 +951,9 @@ namespace WzComparerR2.MapRender
                     }
                 }
             }
+
+            // Classic（Unity）資料集未收錄 MapHelper.img/portal 的圖片。
+            // 此時由繪製端（GetMeshPortal）顯示替代標記。
 
             portal.View = view;
         }
