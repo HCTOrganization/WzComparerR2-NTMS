@@ -86,6 +86,12 @@ namespace WzComparerR2.UnityLib.Unity
             get { return this.nodes; }
         }
 
+        /// <summary>build 這個 bundle 的 Unity 引擎版本（UnityFS header 的 unityVersion）。</summary>
+        public string UnityVersion { get; private set; }
+
+        /// <summary>build 這個 bundle 的 Unity 修訂版號（UnityFS header 的 unityRevision）。</summary>
+        public string UnityRevision { get; private set; }
+
         /// <summary>解壓後資料區的總大小。</summary>
         public long DecompressedSize
         {
@@ -256,9 +262,8 @@ namespace WzComparerR2.UnityLib.Unity
             {
                 throw new UnityException("不支援的 UnityFS 版本: " + fileVersion);
             }
-            reader.CString(); // unityVersion
-            reader.CString(); // unityRevision
-            long bundleSize = reader.I64();
+            this.UnityVersion = reader.CString();
+            this.UnityRevision = reader.CString();            long bundleSize = reader.I64();
             if (bundleSize < 0 || bundleSize > fileLength)
             {
                 throw new UnityException(string.Format(

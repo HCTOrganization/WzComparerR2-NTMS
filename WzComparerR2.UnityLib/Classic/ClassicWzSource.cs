@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using WzComparerR2.UnityLib.Audio;
 using WzComparerR2.UnityLib.Images;
 using WzComparerR2.UnityLib.Unity;
 using WzComparerR2.UnityLib.Wzjs;
@@ -113,6 +114,11 @@ namespace WzComparerR2.UnityLib.Classic
         private readonly Dictionary<string, WzjsNode> treeCache = new Dictionary<string, WzjsNode>(StringComparer.Ordinal);
         private readonly List<string> treeCacheOrder = new List<string>();
         private readonly Dictionary<string, UnityWzImage> imageCache = new Dictionary<string, UnityWzImage>(StringComparer.Ordinal);
+        private readonly Dictionary<string, UnitySoundImage> soundImageCache = new Dictionary<string, UnitySoundImage>(StringComparer.Ordinal);
+        private readonly Dictionary<string, byte[]> soundCache = new Dictionary<string, byte[]>(StringComparer.Ordinal);
+        private readonly List<string> soundCacheOrder = new List<string>();
+        private long soundCacheBytes;
+        private const long SoundCacheByteLimit = 32L * 1024 * 1024;
         private readonly UnityImageRenderer renderer;
         private string locale;
         private long localeGeneration;
@@ -136,6 +142,9 @@ namespace WzComparerR2.UnityLib.Classic
 
         /// <summary>資料集內偵測到的語系代碼（TW/CN/JP/KR…），偏好順序在前。</summary>
         public IReadOnlyList<string> Locales { get; private set; }
+
+        /// <summary>客戶端資訊（名稱／版本／引擎版本）；無法解析時各欄位為 null。</summary>
+        public UnityClientInfo ClientInfo { get; private set; }
 
         /// <summary>目前作用中的語系代碼（字串／Etc 資產路徑的第二段）。</summary>
         public string Locale
@@ -191,7 +200,11 @@ namespace WzComparerR2.UnityLib.Classic
             }
 
             List<string> locales = DetectLocales(catalog);
-            return new ClassicWzSource(catalog, bundles, locales[0], locales);
+            ClassicWzSource source = new ClassicWzSource(catalog, bundles, locales[0], locales);
+            source.ClientInfo = UnityClientInfo.Resolve(
+                catalog.RootPath,
+                bundles.Count > 0 ? bundles[0].UnityRevision : null);
+            return source;
         }
 
         public void Dispose()
@@ -275,6 +288,23 @@ namespace WzComparerR2.UnityLib.Classic
                 }
                 return output;
             }
+            if (this.Catalog.IsSoundImage(imageKey))
+            {
+                UnitySoundImage soundImage = this.GetSoundImage(imageKey);
+                WzLib.Wz_Node soundNode = soundImage == null ? null : this.FindSoundNode(soundImage.AsWzNode(), inner);
+                if (soundNode == null)
+                {
+                    throw new ClassicAssetException("路徑不存在或無法解析: " + path);
+                }
+                string soundBase = inner.Length == 0 ? imageKey : imageKey + "/" + inner;
+                foreach (WzLib.Wz_Node child in soundNode.Nodes)
+                {
+                    output.Add(new ClassicChildEntry(
+                        ClassicChildKind.Node, child.Text, soundBase + "/" + child.Text,
+                        0, UnityClassIds.AudioClip, 0, child.Nodes.Count > 0));
+                }
+                return output;
+            }
             UnityEntryLocation imageLocation2;
             if (this.Catalog.Entries.TryGetValue(imageKey, out imageLocation2)
                 && (imageLocation2.ClassId == UnityClassIds.TextAsset || imageLocation2.ClassId == UnityClassIds.AudioClip))
@@ -332,6 +362,23 @@ namespace WzComparerR2.UnityLib.Classic
 
             if (location.ClassId == UnityClassIds.AudioClip)
             {
+                // 音效 img：inner 走 WZ 節點樹（Sound/Bgm00/FloralLife）。
+                if (this.Catalog.IsSoundImage(imageKey))
+                {
+                    WzLib.Wz_Node soundNode = this.FindSoundNode(this.GetSoundImage(imageKey).AsWzNode(), inner);
+                    if (soundNode == null)
+                    {
+                        throw new ClassicAssetException("路徑不存在或無法解析: " + path);
+                    }
+                    List<ClassicNodeChild> soundChildren = new List<ClassicNodeChild>(soundNode.Nodes.Count);
+                    foreach (WzLib.Wz_Node child in soundNode.Nodes)
+                    {
+                        soundChildren.Add(new ClassicNodeChild(child.Text, 0, child.Nodes.Count > 0));
+                    }
+                    return new ClassicNodeDetail(
+                        path, soundNode.Text, 0, WzjsValue.SubTree, null, soundChildren, null);
+                }
+
                 if (inner.Length > 0)
                 {
                     throw new ClassicAssetException("路徑不存在或無法解析: " + path);
@@ -378,13 +425,151 @@ namespace WzComparerR2.UnityLib.Classic
             {
                 throw new ClassicAssetException("路徑不存在或無法解析: " + path);
             }
+
             UnityEntryLocation location;
-            if (!this.Catalog.Entries.TryGetValue(imageKey, out location))
+            if (this.Catalog.IsSoundImage(imageKey))
+            {
+                // 音效 img：取其中第一個音效的 AudioClip（img 本身沒有實體物件）。
+                IReadOnlyList<string> keys = this.Catalog.GetSoundKeys(imageKey);
+                if (keys.Count == 0 || !this.Catalog.SoundEntries.TryGetValue(keys[0], out location))
+                {
+                    throw new ClassicAssetException("路徑不存在或無法解析: " + imageKey);
+                }
+            }
+            else if (!this.Catalog.SoundEntries.TryGetValue(imageKey, out location)
+                && !this.Catalog.Entries.TryGetValue(imageKey, out location))
             {
                 throw new ClassicAssetException("路徑不存在或無法解析: " + imageKey);
             }
+
             byte[] data = this.ReadEntry(location);
             return UnityObjectParsers.ParseAudioClip(data, true);
+        }
+
+        /// <summary>
+        /// 取得音效資料（Ogg Vorbis）。Unity 的 AudioClip 內部是 FSB5，
+        /// 這裡轉封裝成可播放／匯出的 Ogg；結果會快取。
+        /// </summary>
+        public byte[] GetSoundData(string soundKey)
+        {
+            if (string.IsNullOrEmpty(soundKey))
+            {
+                throw new ArgumentNullException(nameof(soundKey));
+            }
+            lock (this.soundCache)
+            {
+                byte[] cached;
+                if (this.soundCache.TryGetValue(soundKey, out cached))
+                {
+                    return cached;
+                }
+            }
+
+            byte[] ogg = this.DecodeSound(soundKey);
+            lock (this.soundCache)
+            {
+                if (!this.soundCache.ContainsKey(soundKey))
+                {
+                    this.soundCache[soundKey] = ogg;
+                    this.soundCacheOrder.Add(soundKey);
+                    this.soundCacheBytes += ogg.Length;
+                    // 音效動輒數百 KB：只保留最近用到的，避免長時間瀏覽後累積過多記憶體。
+                    while (this.soundCacheBytes > SoundCacheByteLimit && this.soundCacheOrder.Count > 1)
+                    {
+                        string evict = this.soundCacheOrder[0];
+                        this.soundCacheOrder.RemoveAt(0);
+                        byte[] removed;
+                        if (this.soundCache.TryGetValue(evict, out removed))
+                        {
+                            this.soundCacheBytes -= removed.Length;
+                            this.soundCache.Remove(evict);
+                        }
+                    }
+                }
+            }
+            return ogg;
+        }
+
+        private byte[] DecodeSound(string soundKey)
+        {
+            UnityEntryLocation location;
+            if (!this.Catalog.SoundEntries.TryGetValue(soundKey, out location))
+            {
+                throw new ClassicAssetException("找不到音效: " + soundKey);
+            }
+
+            byte[] data = this.ReadEntry(location);
+            UnityAudioClipInfo clip = UnityObjectParsers.ParseAudioClip(data, true);
+            UnityFsBundle bundle = this.bundles[location.BundleIndex];
+            int resourceNode = bundle.FindNode(clip.ResourceNode);
+            if (resourceNode < 0)
+            {
+                throw new UnityException(string.Format(
+                    "音效 {0} 的資源 node 不存在: {1}", soundKey, clip.ResourceNode));
+            }
+            if (clip.ResourceSize <= 0 || clip.ResourceSize > int.MaxValue)
+            {
+                throw new UnityException("音效資源大小異常: " + clip.ResourceSize);
+            }
+            byte[] fsb = bundle.ReadNodeRange(
+                resourceNode, (long)clip.ResourceOffset, (int)clip.ResourceSize);
+            return Fsb5ToOgg.ToOgg(fsb);
+        }
+
+        /// <summary>建立對應某個音效路徑的 <see cref="WzLib.Wz_Sound"/>。</summary>
+        public WzLib.Wz_Sound CreateSound(string soundKey)
+        {
+            UnityEntryLocation location;
+            if (!this.Catalog.SoundEntries.TryGetValue(soundKey, out location))
+            {
+                throw new ClassicAssetException("找不到音效: " + soundKey);
+            }
+
+            UnityAudioClipInfo clip = UnityObjectParsers.ParseAudioClip(this.ReadEntry(location), true);
+            string imageKey = soundKey.Substring(0, soundKey.LastIndexOf('/'));
+            int ms = (int)Math.Round(clip.Length * 1000);
+            return new WzLib.Wz_Sound(0, 0, ms, null, this.GetSoundImage(imageKey))
+            {
+                ExternalChannels = clip.Channels,
+                ExternalFrequency = clip.Frequency,
+                ExternalMs = ms,
+                ExternalSoundType = WzLib.Wz_SoundType.Ogg,
+                DataProvider = () => this.GetSoundData(soundKey),
+            };
+        }
+
+        /// <summary>取得（並快取）音效 img。</summary>
+        public UnitySoundImage GetSoundImage(string imageKey)
+        {
+            if (string.IsNullOrEmpty(imageKey))
+            {
+                return null;
+            }
+            lock (this.soundImageCache)
+            {
+                UnitySoundImage cached;
+                if (this.soundImageCache.TryGetValue(imageKey, out cached))
+                {
+                    return cached;
+                }
+            }
+
+            if (!this.Catalog.IsSoundImage(imageKey))
+            {
+                return null;
+            }
+
+            UnitySoundImage image = new UnitySoundImage(this, imageKey);
+            lock (this.soundImageCache)
+            {
+                UnitySoundImage existing;
+                if (this.soundImageCache.TryGetValue(imageKey, out existing))
+                {
+                    return existing;
+                }
+                this.soundImageCache[imageKey] = image;
+            }
+            return image;
         }
 
         /// <summary>讀 TextAsset（class 49）：直接回傳 JSON 明文。</summary>
@@ -581,6 +766,15 @@ namespace WzComparerR2.UnityLib.Classic
                 }
                 return CreateSpriteNode(imageKey);
             }
+            if (this.Catalog.IsSoundImage(imageKey))
+            {
+                UnitySoundImage soundImage = this.GetSoundImage(imageKey);
+                if (soundImage == null)
+                {
+                    return null;
+                }
+                return RootAssetNode(this.FindSoundNode(soundImage.AsWzNode(), inner), soundImage);
+            }
             UnityWzImage image = this.GetWzImage(imageKey);
             if (image == null)
             {
@@ -590,8 +784,44 @@ namespace WzComparerR2.UnityLib.Classic
             WzLib.Wz_Node node = image.AsWzNode();
             if (string.IsNullOrEmpty(inner))
             {
+                return RootAssetNode(node, image);
+            }
+            foreach (string segment in inner.Split('/'))
+            {
+                if (segment.Length == 0)
+                {
+                    continue;
+                }
+                node = FindChildByName(node, segment);
+                if (node == null)
+                {
+                    return null;
+                }
+            }
+            return RootAssetNode(node, image);
+        }
+
+        /// <summary>
+        /// img 內容節點補上與目錄同名的上層節點鏈，讓 <c>FullPathToFile</c> 之類的
+        /// WZ 路徑判斷（例如 MapRender 的資源快取鍵）可沿用 WZ 邏輯。
+        /// </summary>
+        private static WzLib.Wz_Node RootAssetNode(WzLib.Wz_Node node, UnityAssetImage image)
+        {
+            if (node == null || image == null)
+            {
                 return node;
             }
+            image.GetRootedNode(); // 冪等：已補上層鏈時直接回傳
+            return node;
+        }
+
+        private WzLib.Wz_Node FindSoundNode(WzLib.Wz_Node root, string inner)
+        {
+            if (root == null || string.IsNullOrEmpty(inner))
+            {
+                return root;
+            }
+            WzLib.Wz_Node node = root;
             foreach (string segment in inner.Split('/'))
             {
                 if (segment.Length == 0)
