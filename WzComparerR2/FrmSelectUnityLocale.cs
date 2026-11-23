@@ -32,7 +32,7 @@ namespace WzComparerR2
             this.SelectLocale(defaultLocale);
         }
 
-        /// <summary>使用者選擇的地域コード（TW/CN/JP/KR…）。</summary>
+        /// <summary>使用者選擇的區域代碼（TW/CN/JP/KR…）。</summary>
         public string SelectedLocale
         {
             get
