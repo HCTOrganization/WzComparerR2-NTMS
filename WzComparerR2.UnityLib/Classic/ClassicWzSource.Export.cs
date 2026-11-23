@@ -75,6 +75,23 @@ namespace WzComparerR2.UnityLib.Classic
                 return new ClassicExportStats(outRoot, 1, 0, 1);
             }
 
+            if (location.ClassId == UnityClassIds.Sprite)
+            {
+                if (inner.Length > 0)
+                {
+                    throw new ClassicAssetException("路徑不存在或無法解析: " + path);
+                }
+                byte[] png = this.GetImage(imageKey);
+                if (png == null)
+                {
+                    throw new ClassicAssetException(path + " 沒有可匯出的圖片");
+                }
+                string pngPath = AppendExtension(Path.Combine(outRoot, SafeRelativePath(path)), "png");
+                EnsureParentDirectory(pngPath);
+                File.WriteAllBytes(pngPath, png);
+                return new ClassicExportStats(outRoot, 0, 1, 1);
+            }
+
             WzjsNode root = this.GetTree(imageKey);
             WzjsNode node = inner.Length == 0 ? root : root.Find(inner);
             if (node == null)
@@ -150,6 +167,30 @@ namespace WzComparerR2.UnityLib.Classic
                     output = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
                         + "<text-asset path=\"" + EscapeXmlAttribute(path) + "\">"
                         + EscapeXmlText(text) + "</text-asset>\n";
+                }
+                else
+                {
+                    throw new ClassicAssetException("不支援的匯出格式: " + format);
+                }
+                File.WriteAllBytes(outputPath, Encoding.UTF8.GetBytes(output));
+                return new ClassicFileExportResult(outputPath, 1);
+            }
+
+            if (location.ClassId == UnityClassIds.Sprite)
+            {
+                if (inner.Length > 0)
+                {
+                    throw new ClassicAssetException("路徑不存在或無法解析: " + path);
+                }
+                string output;
+                if (string.Equals(format, "json", StringComparison.OrdinalIgnoreCase))
+                {
+                    output = "{\"$type\":\"canvas\"}\n";
+                }
+                else if (string.Equals(format, "xml", StringComparison.OrdinalIgnoreCase))
+                {
+                    output = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+                        + "<canvas path=\"" + EscapeXmlAttribute(path) + "\"/>\n";
                 }
                 else
                 {

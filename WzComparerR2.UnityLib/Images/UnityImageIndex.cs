@@ -54,6 +54,7 @@ namespace WzComparerR2.UnityLib.Images
         {
             this.SheetsByPath = new Dictionary<string, Dictionary<string, UnitySheetEntry>>(StringComparer.Ordinal);
             this.SetAssets = new Dictionary<string, Dictionary<string, UnitySetSpriteEntry>>(StringComparer.Ordinal);
+            this.SetPrefixes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>邏輯路徑 → 語系 → 該語系的一組索引與圖頁。</summary>
@@ -61,6 +62,12 @@ namespace WzComparerR2.UnityLib.Images
 
         /// <summary>asset 路徑（去前綴去副檔名）→ sprite 清單（名稱 → sprite）。</summary>
         public Dictionary<string, Dictionary<string, UnitySetSpriteEntry>> SetAssets { get; private set; }
+
+        /// <summary>
+        /// spriteset 鍵的第一段（地域代碼，如 <c>Common</c>、<c>CN</c>、<c>TW</c>）；
+        /// 對應 WZ 資產的 <c>SpriteSet/&lt;region&gt;/…</c> 目錄。
+        /// </summary>
+        public HashSet<string> SetPrefixes { get; private set; }
 
         /// <summary>
         /// 使用 Catalog 已解析的 SerializedFile 與 AssetBundle container 收錄圖片來源。
@@ -316,6 +323,11 @@ namespace WzComparerR2.UnityLib.Images
                 if (output.Count > 0)
                 {
                     this.SetAssets[asset.Key] = output;
+                    int slash = asset.Key.IndexOf('/');
+                    if (slash > 0)
+                    {
+                        this.SetPrefixes.Add(asset.Key.Substring(0, slash));
+                    }
                 }
             }
         }

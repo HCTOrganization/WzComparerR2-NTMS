@@ -12,6 +12,7 @@ namespace WzComparerR2.UnityLib.Classic
         private readonly ClassicWzSource source;
         private readonly object syncRoot = new object();
         private byte[] png;
+        private long pngGeneration = -1;
 
         public UnityCanvas(ClassicWzSource source, string path)
         {
@@ -33,16 +34,19 @@ namespace WzComparerR2.UnityLib.Classic
         /// <summary>取得（並快取）PNG bytes；查無對應圖片時回 null。</summary>
         public byte[] GetPng()
         {
+            long generation = this.source.LocaleGeneration;
             byte[] cached = this.png;
-            if (cached != null)
+            if (cached != null && this.pngGeneration == generation)
             {
                 return cached;
             }
             lock (this.syncRoot)
             {
-                if (this.png == null)
+                if (this.png == null || this.pngGeneration != generation)
                 {
+                    // 語系切換後同一個 Canvas 可能對應到不同地域的圖，必須重新解碼。
                     this.png = this.source.GetImage(this.Path);
+                    this.pngGeneration = generation;
                 }
                 return this.png;
             }
