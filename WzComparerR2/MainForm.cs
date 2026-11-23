@@ -5336,9 +5336,22 @@ namespace WzComparerR2
                 return;
             }
 
+            if (IsUnityNode(selectedNode))
+            {
+                // Unity 資產（音效 img／JSON／sprite／目錄）沒有 Wz_File；
+                // 沒有對應的 tooltip 時維持現狀。
+                return;
+            }
+
             Wz_File wzf = selectedNode.GetNodeWzFile();
             if (wzf == null)
             {
+                if (this.openedWz == null || this.openedWz.Count == 0)
+                {
+                    // Unity 資料集的節點（沒有 Wz_File），或比對時被切離的內容節點；
+                    // 尚未支援 tooltip 時維持現狀。
+                    return;
+                }
                 labelItemStatus.Text = "找不到該節點所屬的WZ檔案。";
                 return;
             }
@@ -5783,16 +5796,75 @@ namespace WzComparerR2
         /// <summary>
         /// 往上找出節點所屬的 Unity WZJS img；非 Unity 節點回傳 null。
         /// </summary>
-        private static UnityWzImage FindUnityWzImage(Wz_Node node)        {
-            while (node != null)
-            {
-                if (node.Value is UnityWzImage unityImage)
-                {
-                    return unityImage;
-                }
-                node = node.ParentNode;
-            }
-            return null;
+        private static UnityWzImage FindUnityWzImage(Wz_Node node)
+        {
+           // img 內的節點位於巢狀的 Wz_ImageNode（Value 為 null）之下，
+           // 因此除了 Value，也要用 GetNodeWzImage（讀取 Wz_ImageNode.Image）判斷。
+           return node == null ? null : node.GetNodeWzImage() as UnityWzImage;
+        }
+
+        /// <summary>
+        /// 是否為 Unity 資料集來源的節點（沒有 Wz_File，用於避免顯示 WZ 的錯誤訊息）。
+        /// </summary>
+        private bool IsUnityNode(Wz_Node node)
+        {
+           if (node == null)
+           {
+               return false;
+           }
+
+           for (Wz_Node cursor = node; cursor != null; cursor = cursor.ParentNode)
+           {
+               if (cursor.Value is UnityAssetImage
+                   || cursor.Value is UnityJsonAsset
+                   || cursor.Value is UnityCanvas
+                   || cursor.GetValue<Wz_Image>(null) is UnityAssetImage)
+               {
+                   return true;
+               }
+           }
+
+           // 目錄節點：根節點是否與已開啟的 Unity 資料集相同。
+           if (this.openedUnitySources == null || this.openedUnitySources.Count == 0)
+           {
+               return false;
+           }
+           Wz_Node root = node;
+           while (root.ParentNode != null)
+           {
+               root = root.ParentNode;
+           }
+           foreach (UnityAssetDocument document in this.openedUnitySources.Values)
+           {
+               if (ReferenceEquals(document.RootNode, root))
+               {
+                   return true;
+               }
+           }
+           return false;
+        }
+
+        /// <summary>
+        /// 選取節點位於 img 內容樹「img 直下」時，回傳其第一層節點。
+        /// 選到 img 本身或內容樹外側時回傳 null。
+        /// </summary>
+        private static Wz_Node GetUnityImageChildNode(Wz_Node node, Wz_Node imageContent)
+        {
+           if (node == null || imageContent == null)
+           {
+               return null;
+           }
+
+           Wz_Node result = null;
+           for (Wz_Node cursor = node; cursor != null; cursor = cursor.ParentNode)
+           {
+               if (ReferenceEquals(cursor, imageContent))
+               {
+                   return result;
+               }
+               result = cursor;
+           }
+           return null;
         }
 
         /// <summary>
@@ -5835,12 +5907,7 @@ namespace WzComparerR2
 
             if (category != UnityStringCategory.Item)
             {
-                // img 本身就是該對象；選到 img 內的子節點時保留目前的 tooltip。
-                if (!(selectedNode.Value is UnityWzImage))
-                {
-                    return;
-                }
-
+                // img 本身就是該對象；選到 img 內的節點時也顯示相同的 tooltip（與 WZ 行為一致）。
                 // advTree1 的節點是目錄索引（不含子樹），tooltip 需要展開後的 WZJS 內容。
                 Wz_Node imageNode;
                 try
@@ -5849,7 +5916,7 @@ namespace WzComparerR2
                 }
                 catch (Exception ex)
                 {
-                    labelItemStatus.Text = "ツールチップの生成に失敗しました：" + ex.Message;
+                    labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
                     return;
                 }
 
@@ -5882,22 +5949,27 @@ namespace WzComparerR2
                 }
                 catch (Exception ex)
                 {
-                    labelItemStatus.Text = "ツールチップの生成に失敗しました：" + ex.Message;
+                    labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
                     return;
                 }
             }
             else
             {
-                // 往上找道具節點：父節點是群組 img 的那個節點。
-                itemNode = selectedNode;
-                while (itemNode.ParentNode != null && !(itemNode.ParentNode.Value is UnityWzImage))
+                // 道具節點 = img 內容樹直下的 <itemId> 節點。
+                Wz_Node imageContent;
+                try
                 {
-                    itemNode = itemNode.ParentNode;
+                    imageContent = unityImage.AsWzNode();
                 }
+                catch (Exception ex)
+                {
+                    labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
+                    return;
+                }
+
+                itemNode = GetUnityImageChildNode(selectedNode, imageContent);
                 int itemId;
-                if (itemNode.ParentNode == null
-                    || !(itemNode.ParentNode.Value is UnityWzImage)
-                    || !int.TryParse(itemNode.Text, out itemId))
+                if (itemNode == null || !int.TryParse(itemNode.Text, out itemId))
                 {
                     // 選到群組 img 或目錄本身，沒有具體道具可顯示。
                     return;
@@ -5924,7 +5996,7 @@ namespace WzComparerR2
             }
             catch (Exception ex)
             {
-                labelItemStatus.Text = "ツールチップの生成に失敗しました：" + ex.Message;
+                labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
             }
 
             if (item == null)
@@ -6077,7 +6149,7 @@ namespace WzComparerR2
             }
             catch (Exception ex)
             {
-                labelItemStatus.Text = "ツールチップの生成に失敗しました：" + ex.Message;
+                labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
             }
 
             if (gear == null)
@@ -6128,7 +6200,7 @@ namespace WzComparerR2
             }
             catch (Exception ex)
             {
-                labelItemStatus.Text = "ツールチップの生成に失敗しました：" + ex.Message;
+                labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
             }
 
             if (mob == null)
@@ -6175,7 +6247,7 @@ namespace WzComparerR2
             }
             catch (Exception ex)
             {
-                labelItemStatus.Text = "ツールチップの生成に失敗しました：" + ex.Message;
+                labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
             }
 
             if (npc == null)
@@ -6412,7 +6484,7 @@ namespace WzComparerR2
             }
             catch (Exception ex)
             {
-                labelItemStatus.Text = "ツールチップの生成に失敗しました：" + ex.Message;
+                labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
             }
 
             if (map == null)
@@ -6437,12 +6509,28 @@ namespace WzComparerR2
         /// <c>Quest/QuestInfo.img/&lt;id&gt;</c> 形狀後交給 <see cref="Quest.CreateFromNode"/>。
         /// </para>
         /// </summary>
-        private void quickViewUnityQuest(Wz_Node questIdNode, UnityWzImage unityImage)
+        private void quickViewUnityQuest(Wz_Node selectedNode, UnityWzImage unityImage)
         {
+            Wz_Node questIdNode;
+            if (selectedNode.Value is UnityWzImage)
+            {
+                questIdNode = selectedNode;
+            }
+            else
+            {
+                try
+                {
+                    questIdNode = GetUnityImageChildNode(selectedNode, unityImage.AsWzNode());
+                }
+                catch (Exception ex)
+                {
+                    labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
+                    return;
+                }
+            }
+
             int questId;
-            if (questIdNode.ParentNode == null
-                || !(questIdNode.ParentNode.Value is UnityWzImage)
-                || !int.TryParse(questIdNode.Text, out questId))
+            if (questIdNode == null || !int.TryParse(questIdNode.Text, out questId))
             {
                 // 選到 QuestInfo img 本身時沒有任務可顯示。
                 return;
@@ -6464,7 +6552,7 @@ namespace WzComparerR2
             }
             catch (Exception ex)
             {
-                labelItemStatus.Text = "ツールチップの生成に失敗しました：" + ex.Message;
+                labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
             }
 
             if (quest == null)
@@ -6672,21 +6760,36 @@ namespace WzComparerR2
         }
 
         /// <summary>判斷節點是否為 Unity 技能節點（img 內的 <c>skill/&lt;id&gt;</c>）。</summary>
-        private static bool IsUnitySkillNode(Wz_Node node)        {
-            return node != null
-                && node.ParentNode != null
-                && string.Equals(node.ParentNode.Text, "skill", StringComparison.OrdinalIgnoreCase)
-                && node.ParentNode.ParentNode != null
-                && node.ParentNode.ParentNode.Value is UnityWzImage;
+        private static bool IsUnitySkillNode(Wz_Node node)
+        {
+           return node != null
+               && node.ParentNode != null
+               && string.Equals(node.ParentNode.Text, "skill", StringComparison.OrdinalIgnoreCase)
+               && node.ParentNode.GetNodeWzImage() is UnityWzImage;
+        }
+
+        /// <summary>從選取節點往上尋找最接近的 <c>skill/&lt;id&gt;</c> 節點。</summary>
+        private static Wz_Node FindUnitySkillNode(Wz_Node node)
+        {
+           for (Wz_Node cursor = node; cursor != null; cursor = cursor.ParentNode)
+           {
+               if (IsUnitySkillNode(cursor))
+               {
+                   return cursor;
+               }
+           }
+           return null;
         }
 
         /// <summary>
         /// Unity 技能（<c>Skill/&lt;職業&gt;</c> img 內的 <c>skill/&lt;id&gt;</c> 節點）的快速預覽。
         /// </summary>
-        private void quickViewUnitySkill(Wz_Node skillNode)
+        private void quickViewUnitySkill(Wz_Node selectedNode)
         {
-            // 對應 WZ 的 Skill.wz\&lt;職業&gt;.img\skill\&lt;id&gt;，只有選到技能節點才顯示。
-            if (!IsUnitySkillNode(skillNode))
+            // 對應 WZ 的 Skill.wz\<職業>.img\skill\<id>。選到 img 內的子節點時，也
+            // 以最接近的 skill/<id> 節點顯示 tooltip。
+            Wz_Node skillNode = FindUnitySkillNode(selectedNode);
+            if (skillNode == null)
             {
                 return;
             }
@@ -6720,7 +6823,7 @@ namespace WzComparerR2
             }
             catch (Exception ex)
             {
-                labelItemStatus.Text = "ツールチップの生成に失敗しました：" + ex.Message;
+                labelItemStatus.Text = "Tooltip 產生失敗：" + ex.Message;
             }
 
             if (skill == null)
