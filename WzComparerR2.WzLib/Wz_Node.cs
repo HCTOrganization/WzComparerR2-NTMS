@@ -551,6 +551,17 @@ namespace WzComparerR2.WzLib
             Wz_Image image = imageNode.GetValue<Wz_Image>();
             if (image != null)
             {
+                if (image.WzFile == null)
+                {
+                    // 非 WZ 檔來源（例如 Unity 資產）：交由外部解析器補上層節點鏈，
+                    // 讓 FullPathToFile 之類的路徑判斷可沿用 WZ 邏輯。
+                    Func<Wz_Node, Wz_Node> externalResolver = ExternalImageResolver;
+                    Wz_Node external = externalResolver?.Invoke(imageNode);
+                    if (external != null)
+                    {
+                        return external;
+                    }
+                }
                 return image.TryExtract() ? image.Node : null;
             }
             Func<Wz_Node, Wz_Node> resolver = ExternalImageResolver;

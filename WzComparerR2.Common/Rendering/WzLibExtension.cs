@@ -34,6 +34,15 @@ namespace WzComparerR2.Rendering
 
         public static Texture2D ToTexture(this Wz_Png png, int page, GraphicsDevice graphicsDevice)
         {
+            if (png.PngDataProvider != null)
+            {
+                // 非 WZ 來源（Unity canvas）：直接解碼 PNG，不經過 WZ 的像素格式管線。
+                using (var bitmap = png.ExtractPng(page))
+                {
+                    return bitmap?.ToTexture(graphicsDevice);
+                }
+            }
+
             var format = GetTextureFormatOfPng(png.Format);
             if (format == SurfaceFormat.Bgra4444)
             {
@@ -72,6 +81,18 @@ namespace WzComparerR2.Rendering
 
         public static void ToTexture(this Wz_Png png, int page, Texture2D texture, Point origin)
         {
+            if (png.PngDataProvider != null)
+            {
+                using (var bitmap = png.ExtractPng(page))
+                {
+                    if (bitmap != null)
+                    {
+                        bitmap.ToTexture(texture, origin);
+                    }
+                }
+                return;
+            }
+
             Rectangle rect = new Rectangle(origin, new Point(png.Width, png.Height));
             if (png.Format == Wz_TextureFormat.BC7)
             {

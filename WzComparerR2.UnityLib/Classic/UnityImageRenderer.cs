@@ -297,16 +297,71 @@ namespace WzComparerR2.UnityLib.Classic
                 // 地域變體只收錄該地域改動過的 sprite：缺少的節點改從 COMMON 變體取圖。
                 image = this.RenderSheetEntry(fallback, sheetKey, imageKey, inner, perImage);
             }
-            if (image != null)
-            {
-                return image;
-            }
+            // 圖集中沒有這個節點的 sprite 時回 null（資料集本身缺少該圖，不是錯誤）。
+            return image;
+        }
+
+        /// <summary>
+        /// 節點路徑的 frame 候選。WZJS 樹可能出現 <c>…/CN/0</c> 這種地域標記子樹，
+        /// 但圖集的節點鍵不含地域段；另外部分節點是單一影格的目錄（<c>…/3</c> ↔ <c>…/3/0</c>）。
+        /// </summary>
+        private static List<string> GetFrameInnerCandidates(string inner)
+        {
+            List<string> candidates = new List<string>(4);
             if (inner.Length == 0)
             {
-                throw new UnityException("spritesheet 無 atlas 頁");
+                candidates.Add(inner);
+                return candidates;
             }
-            throw new UnityException(string.Format(
-                "找不到 Canvas {0}/{1} 可驗證的 spritesheet frame", imageKey, inner));
+
+            candidates.Add(inner);
+            candidates.Add(inner + "/0");
+            if (inner.EndsWith("/0", StringComparison.Ordinal))
+            {
+                candidates.Add(inner.Substring(0, inner.Length - 2));
+            }
+
+            // 加入去掉地域段（CN/TW/KR/JP/COMMON）的變體。
+            int count = candidates.Count;
+            for (int i = 0; i < count; i++)
+            {
+                string stripped = StripRegionSegments(candidates[i]);
+                if (stripped != null && !candidates.Contains(stripped))
+                {
+                    candidates.Add(stripped);
+                }
+            }
+            return candidates;
+        }
+
+        private static string StripRegionSegments(string inner)
+        {
+            string[] segments = inner.Split('/');
+            List<string> kept = new List<string>(segments.Length);
+            bool changed = false;
+            foreach (string segment in segments)
+            {
+                if (IsRegionSegment(segment))
+                {
+                    changed = true;
+                    continue;
+                }
+                kept.Add(segment);
+            }
+            if (!changed || kept.Count == 0)
+            {
+                return null;
+            }
+            return string.Join("/", kept);
+        }
+
+        private static bool IsRegionSegment(string segment)
+        {
+            return string.Equals(segment, "CN", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(segment, "TW", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(segment, "KR", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(segment, "JP", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(segment, "COMMON", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>以單一圖集變體輸出 PNG；該變體沒有對應 frame 時回 null。</summary>
@@ -333,8 +388,20 @@ namespace WzComparerR2.UnityLib.Classic
                     throw new UnityException(string.Format(
                         "SpriteSheet asset 路徑不符: {0} != {1}", asset.Path, sheetKey));
                 }
-                WzssSprite found;
-                if (inner.Length > 0 && asset.TryGetSpriteForNode(inner, out found))
+                WzssSprite found = default(WzssSprite);
+                bool foundSprite = false;
+                if (inner.Length > 0)
+                {
+                    foreach (string candidateInner in GetFrameInnerCandidates(inner))
+                    {
+                        if (asset.TryGetSpriteForNode(candidateInner, out found))
+                        {
+                            foundSprite = true;
+                            break;
+                        }
+                    }
+                }
+                if (foundSprite)
                 {
                     sprite = found;
                 }
@@ -355,7 +422,14 @@ namespace WzComparerR2.UnityLib.Classic
                 bool hasFrame = false;
                 if (inner.Length > 0)
                 {
-                    hasFrame = wzss.TryGetFrameIndexForNode(inner, out frame);
+                    foreach (string candidateInner in GetFrameInnerCandidates(inner))
+                    {
+                        if (wzss.TryGetFrameIndexForNode(candidateInner, out frame))
+                        {
+                            hasFrame = true;
+                            break;
+                        }
+                    }
                 }
                 if (!hasFrame)
                 {

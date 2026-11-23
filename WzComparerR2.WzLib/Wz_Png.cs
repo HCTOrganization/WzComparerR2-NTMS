@@ -84,6 +84,12 @@ namespace WzComparerR2.WzLib
         /// </summary>
         public Wz_Image WzImage { get; set; }
 
+        /// <summary>
+        /// 非 WZ 檔來源（例如 Unity 資產的 Canvas）的 PNG 位元組提供者。
+        /// 設定後 <see cref="ExtractPng(int)"/> 直接解碼這份 PNG，不再讀取 WZ 資料流。
+        /// </summary>
+        public Func<byte[]> PngDataProvider { get; set; }
+
         public int GetRawDataSize() => this.GetRawDataSizePerPage() * this.ActualPages;
 
         public int GetRawDataSizePerPage() => GetUncompressedDataSize(this.Format, this.ActualScale, this.Width, this.Height);
@@ -140,6 +146,11 @@ namespace WzComparerR2.WzLib
 
         public Stream UnsafeOpenRead()
         {
+            if (this.WzImage == null)
+            {
+                // 非 WZ 檔來源（例如 Unity canvas）沒有 WZ 資料流，改用 PngDataProvider。
+                throw new NotSupportedException("此圖片並非來自 WZ 檔案，無法讀取原始資料。");
+            }
             DeflateStream zlib;
 
             var stream = this.WzImage.OpenRead();
@@ -174,6 +185,12 @@ namespace WzComparerR2.WzLib
 
         public Bitmap ExtractPng(int page)
         {
+            Func<byte[]> provider = this.PngDataProvider;
+            if (provider != null)
+            {
+                return ExtractExternalPng(provider);
+            }
+
             if (this.Pages > 0)
             {
                 if (page < 0 || page >= this.Pages)
@@ -316,8 +333,23 @@ namespace WzComparerR2.WzLib
             return pngDecoded;
         }
 
-        private static void CopyBmpDataWithStride(byte[] source, int stride, BitmapData bmpData)
+        private Bitmap ExtractExternalPng(Func<byte[]> provider)
         {
+            byte[] data = provider();
+            if (data == null || data.Length == 0)
+            {
+                return null;
+            }
+            using (var stream = new MemoryStream(data))
+            using (var decoded = new Bitmap(stream))
+            {
+                this.Width = decoded.Width;
+                this.Height = decoded.Height;
+                return new Bitmap(decoded);
+            }
+        }
+
+        private static void CopyBmpDataWithStride(byte[] source, int stride, BitmapData bmpData)        {
             if (bmpData.Stride == stride)
             {
                 Marshal.Copy(source, 0, bmpData.Scan0, source.Length);

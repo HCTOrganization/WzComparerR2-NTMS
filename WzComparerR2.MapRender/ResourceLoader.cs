@@ -298,7 +298,7 @@ namespace WzComparerR2.MapRender
                 var png = node.GetValue<Wz_Png>();
                 if (png != null)
                 {
-                    return new TextureAtlas(png.ToTexture(this.GraphicsDevice));
+                    return new TextureAtlas(this.LoadTexture(png, node, 1, 1));
                 }
             }
             else if (assetType == typeof(Texture2D))
@@ -306,7 +306,7 @@ namespace WzComparerR2.MapRender
                 var png = node.GetValue<Wz_Png>();
                 if (png != null)
                 {
-                    return png.ToTexture(this.GraphicsDevice);
+                    return this.LoadTexture(png, node, 1, 1);
                 }
             }
             else if (assetType == typeof(Music))
@@ -507,6 +507,30 @@ namespace WzComparerR2.MapRender
 
             //特殊处理
             return (Texture2D)holder.Resource;
+        }
+
+        /// <summary>
+        /// 取得節點圖片貼圖；缺少圖片（例如 Unity 資料集未收錄該 sprite）時以空貼圖代替，
+        /// 讓地圖仍能載入，而不是整個繪製流程失敗。
+        /// </summary>
+        private Texture2D LoadTexture(Wz_Png png, Wz_Node node, int fallbackWidth, int fallbackHeight)
+        {
+            Texture2D texture = null;
+            try
+            {
+                texture = png.ToTexture(this.GraphicsDevice);
+            }
+            catch (Exception ex)
+            {
+                PluginManager.LogError("MapRender", ex, "貼圖載入失敗: " + node.FullPathToFile);
+            }
+
+            if (texture == null)
+            {
+                texture = this.CreateEmptyTexture(
+                    node.FullPathToFile + "#empty", Math.Max(fallbackWidth, 1), Math.Max(fallbackHeight, 1));
+            }
+            return texture;
         }
 
         private MsCustomSpriteData LoadMsSpriteData(Wz_Node node)
