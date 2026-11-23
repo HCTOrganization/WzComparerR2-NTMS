@@ -12,6 +12,7 @@ namespace WzComparerR2.UnityLib.Classic
         private readonly ClassicWzSource source;
         private readonly object syncRoot = new object();
         private Wz_Node node;
+        private Wz_Node rootedNode;
         private string text;
 
         public UnityJsonAsset(ClassicWzSource source, string imageKey)
@@ -69,6 +70,54 @@ namespace WzComparerR2.UnityLib.Classic
                 }
             }
             return this.node;
+        }
+
+        /// <summary>
+        /// 內容根節點。必要時補上與目錄同名的上層節點鏈
+        /// （例如 <c>String\CN\Skill.img\…</c>），讓 <see cref="Wz_Node.FullPathToFile"/> 等路徑判斷
+        /// 能沿用 WZ 的邏輯。<see cref="UnityAssetImage.GetRootedNode"/> 的作用相同。
+        /// </summary>
+        public Wz_Node GetRootedNode()
+        {
+            Wz_Node content = this.AsWzNode();
+            if (content.ParentNode != null)
+            {
+                return content;
+            }
+            lock (this.syncRoot)
+            {
+                if (this.rootedNode == null)
+                {
+                    this.rootedNode = CreateRootedTree(content, this.ImageKey);
+                }
+            }
+            return content;
+        }
+
+        private Wz_Node CreateRootedTree(Wz_Node content, string imageKey)
+        {
+            string[] segments = imageKey.Split('/');
+            if (segments.Length < 2)
+            {
+                return null;
+            }
+
+            Wz_Node root = new Wz_Node(segments[0]);
+            Wz_Node parent = root;
+            for (int i = 1; i < segments.Length - 1; i++)
+            {
+                Wz_Node folder = new Wz_Node(segments[i]);
+                parent.Nodes.Add(folder);
+                parent = folder;
+            }
+
+            string imageName = segments[segments.Length - 1];
+            Wz_Node imageNode = new Wz_Node(
+                imageName.EndsWith(".img", StringComparison.OrdinalIgnoreCase) ? imageName : imageName + ".img");
+            imageNode.Value = this;
+            parent.Nodes.Add(imageNode);
+            imageNode.Nodes.Add(content);
+            return root;
         }
 
         public override string ToString()

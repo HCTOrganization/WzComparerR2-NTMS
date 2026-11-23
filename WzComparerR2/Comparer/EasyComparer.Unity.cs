@@ -1331,6 +1331,15 @@ namespace WzComparerR2.Comparer
                 this.OutputItemTooltipIDs.Add(id);
                 this.DiffItemTags[id] = new List<string>();
             }
+            if (this.OutputChairAndRidingMount)
+            {
+                // 椅子會以頭像範例（ChairExamples）輸出。
+                if (id.StartsWith("0301", StringComparison.Ordinal))
+                {
+                    this.OutputChairIDs.Add(id);
+                }
+                this.DiffItemIDs.Add(id);
+            }
         }
 
         private void AddUnityGearID(string id, string tag)

@@ -979,6 +979,12 @@ namespace WzComparerR2.Comparer
         private StringLinker CreateChairStringLinker()
         {
             var stringLinker = new StringLinker();
+            if (this.TryLoadUnityStringLinker(0, stringLinker))
+            {
+                // Unity 資料集沒有 String.wz，因此從字串表讀取。
+                return stringLinker;
+            }
+
             for (int i = 0; i < 2; i++)
             {
                 Wz_File stringWz = this.StringWzNewOld[i];
@@ -1052,6 +1058,7 @@ namespace WzComparerR2.Comparer
 
         /// <summary>
         /// Resolves a path such as "Item\Install\03019.img\03019829" only when it actually exists.
+        /// 也容許 img 節點名有無 <c>.img</c>（Unity 資產樹）。
         /// </summary>
         private Wz_Node ResolveWzNode(string fullPath)
         {
@@ -1069,7 +1076,7 @@ namespace WzComparerR2.Comparer
                     return null;
                 }
 
-                node = node.Nodes[parts[i]];
+                node = FindChildNode(node, parts[i]);
                 if (node == null)
                 {
                     return null;
@@ -1406,6 +1413,28 @@ namespace WzComparerR2.Comparer
             }
         }
 
+        /// <summary>
+        /// 依名稱取得子節點。同時支援 WZ 的 img 節點名（<c>0301.img</c>）與
+        /// Unity 資產樹的 img 節點名（<c>0301</c>）。
+        /// </summary>
+        private static Wz_Node FindChildNode(Wz_Node parent, string name)
+        {
+            if (parent == null || string.IsNullOrEmpty(name))
+            {
+                return null;
+            }
+            Wz_Node node = parent.Nodes[name];
+            if (node != null)
+            {
+                return node;
+            }
+            if (name.EndsWith(".img", StringComparison.OrdinalIgnoreCase))
+            {
+                return parent.Nodes[name.Substring(0, name.Length - 4)];
+            }
+            return parent.Nodes[name + ".img"];
+        }
+
         private Wz_Node FindGearNode(int id)
         {
             string imgName = id.ToString("D8") + ".img";
@@ -1432,7 +1461,7 @@ namespace WzComparerR2.Comparer
                     continue;
                 }
 
-                Wz_Node imgNode = node1.Text == imgName ? node1 : node1.Nodes[imgName];
+                Wz_Node imgNode = node1.Text == imgName ? node1 : FindChildNode(node1, imgName);
                 if (imgNode == null)
                 {
                     continue;

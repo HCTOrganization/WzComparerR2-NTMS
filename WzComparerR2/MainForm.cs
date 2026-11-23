@@ -2175,7 +2175,8 @@ namespace WzComparerR2
                 try
                 {
                     // 內容（WZJS 樹／音效清單）在第一次選取時才建立，UnityAssetImage 會保留結果。
-                    Node imageNode = createNode(unityImage.AsWzNode());
+                    // 補上上層節點鏈，讓外掛（頭像等）能沿用與 WZ 相同的型別與路徑判斷。
+                    Node imageNode = createNode(unityImage.GetRootedNode());
                     advTree2.Nodes.Add(imageNode);
                     imageNode.Expand();
                     QueryPerformance.End();
@@ -2237,7 +2238,8 @@ namespace WzComparerR2
                 try
                 {
                     // JSON 於第一次選取時才解析，UnityJsonAsset 會保留結果。
-                    Node jsonNode = createNode(jsonAsset.AsWzNode());
+                    // 補上上層節點鏈，讓外掛能沿用與 WZ 相同的型別與路徑判斷。
+                    Node jsonNode = createNode(jsonAsset.GetRootedNode());
                     advTree2.Nodes.Add(jsonNode);
                     jsonNode.Expand();
                     QueryPerformance.End();
@@ -6188,7 +6190,7 @@ namespace WzComparerR2
                 Wz_Node imageNode;
                 try
                 {
-                    imageNode = unityImage.AsWzNode();
+                    imageNode = unityImage.GetRootedNode();
                 }
                 catch (Exception ex)
                 {
@@ -6221,7 +6223,7 @@ namespace WzComparerR2
             {
                 try
                 {
-                    itemNode = unityImage.AsWzNode();
+                    itemNode = unityImage.GetRootedNode();
                 }
                 catch (Exception ex)
                 {
@@ -6235,7 +6237,7 @@ namespace WzComparerR2
                 Wz_Node imageContent;
                 try
                 {
-                    imageContent = unityImage.AsWzNode();
+                    imageContent = unityImage.GetRootedNode();
                 }
                 catch (Exception ex)
                 {
@@ -6835,7 +6837,7 @@ namespace WzComparerR2
             {
                 try
                 {
-                    questIdNode = GetUnityImageChildNode(selectedNode, unityImage.AsWzNode());
+                    questIdNode = GetUnityImageChildNode(selectedNode, unityImage.GetRootedNode());
                 }
                 catch (Exception ex)
                 {
@@ -7694,10 +7696,9 @@ namespace WzComparerR2
                     if (compareUnity)
                     {
                         // Unity 客戶端沒有 WZ 的 Base.wz，因此只停用以往以 WZ 為前提的選項。
-                        // tooltip 輸出改由 Unity 資料集的結構產生。
+                        // tooltip 輸出與椅子頭像範例改由 Unity 資料集的結構產生。
                         comparer.SkipKMSContent = false;
                         comparer.SkipGodChangseopDuplicatedNodes = false;
-                        comparer.OutputChairAndRidingMount = false;
                     }
                     comparer.StateInfoChanged += new EventHandler(comparer_StateInfoChanged);
                     comparer.StateDetailChanged += new EventHandler(comparer_StateDetailChanged);
