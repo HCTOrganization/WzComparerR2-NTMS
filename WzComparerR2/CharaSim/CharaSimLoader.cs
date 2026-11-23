@@ -389,6 +389,51 @@ namespace WzComparerR2.CharaSim
         /// </summary>
         public static Func<string, int?> ActionDelayResolver { get; set; }
 
+        /// <summary>
+        /// 將客戶端腳本字串索引鍵（例如 <c>SID_EXCLUSIVE_EQUIP_ADMIN_INFO</c>）
+        /// 從 <c>String/&lt;region&gt;/StringTable</c> 解析。非索引鍵格式或無法解析時回傳 null。
+        /// </summary>
+        public static string ResolveScriptString(string key)
+        {
+            if (!IsScriptStringKey(key))
+            {
+                return null;
+            }
+            Wz_Node node = PluginManager.FindWz("String/StringTable/" + key);
+            string text = node == null ? null : node.Value as string;
+            return string.IsNullOrEmpty(text) ? null : text;
+        }
+
+        /// <summary>是否為不含空白與符號的 <c>AAA_BBB</c> 格式索引鍵。</summary>
+        private static bool IsScriptStringKey(string key)
+        {
+            if (string.IsNullOrEmpty(key) || key.Length > 128)
+            {
+                return false;
+            }
+            bool hasUnderscore = false;
+            bool hasLetter = false;
+            foreach (char c in key)
+            {
+                if (c == '_')
+                {
+                    hasUnderscore = true;
+                }
+                else if (c >= '0' && c <= '9')
+                {
+                }
+                else if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+                {
+                    hasLetter = true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return hasUnderscore && hasLetter;
+        }
+
         public static int GetActionDelay(string actionName, Wz_Node wzNode = null)
         {
             if (string.IsNullOrEmpty(actionName))

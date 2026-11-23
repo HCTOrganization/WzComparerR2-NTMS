@@ -827,11 +827,9 @@ namespace WzComparerR2.UnityLib.Classic
                 return null;
             }
 
-            WzLib.Wz_Node node = this.FindNodeCore(normalized);
-            if (node == null)
-            {
-                node = this.FindStringTableNode(normalized);
-            }
+           WzLib.Wz_Node node = this.FindNodeCore(normalized)
+               ?? this.FindStringTableNode(normalized)
+               ?? this.FindScriptStringNode(normalized);
             if (node == null)
             {
                 // 索引樹的節點會回傳以根節點名稱（客戶端名）開頭的路徑，
@@ -840,15 +838,57 @@ namespace WzComparerR2.UnityLib.Classic
                 if (slash > 0)
                 {
                     string stripped = normalized.Substring(slash + 1);
-                    node = this.FindNodeCore(stripped) ?? this.FindStringTableNode(stripped);
+                   node = this.FindNodeCore(stripped)
+                       ?? this.FindStringTableNode(stripped)
+                       ?? this.FindScriptStringNode(stripped);
                 }
             }
             return node;
         }
 
         /// <summary>
+        /// 解析客戶端腳本字串（<c>String/&lt;region&gt;/StringTable/SID_...</c>），
+        /// 也能處理省略區域代碼的路徑（<c>String/StringTable/SID_...</c>）。
+        /// 優先使用目前語系，找不到再嘗試其他語系；都沒有時回傳 null。
+        /// </summary>
+        private WzLib.Wz_Node FindScriptStringNode(string normalized)
+        {
+           string[] segments = normalized.Split('/');
+           if (segments.Length != 3
+               || !string.Equals(segments[0], "String", StringComparison.OrdinalIgnoreCase)
+               || !string.Equals(segments[1], "StringTable", StringComparison.OrdinalIgnoreCase))
+           {
+               return null;
+           }
+
+           string key = segments[2];
+           WzLib.Wz_Node node = this.FindNodeCore($"{segments[0]}/{this.locale}/{segments[1]}/{key}");
+           if (node != null)
+           {
+               return node;
+           }
+           if (this.Locales == null)
+           {
+               return null;
+           }
+           foreach (string locale in this.Locales)
+           {
+               if (string.Equals(locale, this.locale, StringComparison.Ordinal))
+               {
+                   continue;
+               }
+               node = this.FindNodeCore($"{segments[0]}/{locale}/{segments[1]}/{key}");
+               if (node != null)
+               {
+                   return node;
+               }
+           }
+           return null;
+        }
+
+        /// <summary>
         /// 將相當於 WZ <c>String.wz</c> / <c>Etc.wz</c> / <c>Quest.wz</c> 的路徑，
-        /// Unity 字串表（<see cref="StringTables"/>）解析。找不到時回傳 null。
+        /// 由 Unity 字串表（<see cref="StringTables"/>）解析。找不到時回傳 null。
         /// </summary>
         private WzLib.Wz_Node FindStringTableNode(string normalized)
         {

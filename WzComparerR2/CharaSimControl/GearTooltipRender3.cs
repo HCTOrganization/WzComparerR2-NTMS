@@ -2352,15 +2352,20 @@ namespace WzComparerR2.CharaSimControl
                         string exclusiveEquip;
                         if (!string.IsNullOrEmpty(kv.Value.Info))
                         {
-                            var itemGroup = kv.Value.Info;
-                            var delStr = "無法重複裝備。";
-                            if (kv.Value.Info.Contains(delStr))
+                            // Classic World（Unity 客戶端）的 info 有時是腳本字串索引鍵。
+                            var itemGroup = CharaSimLoader.ResolveScriptString(kv.Value.Info);
+                            if (itemGroup == null)
                             {
-                                itemGroup = itemGroup.Replace(delStr, "");
-                            }
-                            else if (!itemGroup.EndsWith(".") && !itemGroup.EndsWith("。"))
-                            {
-                                itemGroup += "道具";
+                                itemGroup = kv.Value.Info;
+                                var delStr = "無法重複裝備。";
+                                if (kv.Value.Info.Contains(delStr))
+                                {
+                                    itemGroup = itemGroup.Replace(delStr, "");
+                                }
+                                else if (!itemGroup.EndsWith(".") && !itemGroup.EndsWith("。"))
+                                {
+                                    itemGroup += "道具";
+                                }
                             }
                             exclusiveEquip = $"#$r無法裝備同一道具組中的多個道具# ({itemGroup})";
                         }

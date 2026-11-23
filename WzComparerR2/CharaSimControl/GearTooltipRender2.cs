@@ -1562,13 +1562,15 @@ namespace WzComparerR2.CharaSimControl
                     string exclusiveEquip;
                     if (!string.IsNullOrEmpty(kv.Value.Info))
                     {
-                        if (kv.Value.Info.EndsWith("。") || kv.Value.Info.EndsWith("."))
+                        // Classic World（Unity 客戶端）的 info 有時是腳本字串索引鍵。
+                        string infoText = CharaSimLoader.ResolveScriptString(kv.Value.Info) ?? kv.Value.Info;
+                        if (infoText.EndsWith("。") || infoText.EndsWith("."))
                         {
-                            exclusiveEquip = "#c" + kv.Value.Info + "#";
+                            exclusiveEquip = "#c" + infoText + "#";
                         }
                         else
                         {
-                            exclusiveEquip = "#c無法重複穿戴" + kv.Value.Info + "。#";
+                            exclusiveEquip = "#c無法重複穿戴" + infoText + "。#";
                         }
                     }
                     else
