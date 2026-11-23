@@ -41,13 +41,13 @@ namespace WzComparerR2.Comparer
 
             ReportVersionToDiscord(string.Format("{0} -> {1}", labelOld, labelNew));
             StateInfo = "比較中...";
-            StateDetail = "新しいバージョンの構成を読み込んでいます...";
+            StateDetail = "正在載入新版本的結構...";
 
             CreateStyleSheet(outputDir);
 
             UnityCompareSide sideNew = new UnityCompareSide(
                 sourceNew, ClassicWzBridge.CreateCatalogNode(sourceNew, false, false));
-            StateDetail = "古いバージョンの構成を読み込んでいます...";
+            StateDetail = "正在載入舊版本的結構...";
             UnityCompareSide sideOld = new UnityCompareSide(
                 sourceOld, ClassicWzBridge.CreateCatalogNode(sourceOld, false, false));
 
@@ -68,7 +68,7 @@ namespace WzComparerR2.Comparer
                     continue;
                 }
 
-                // 型別ごとの走査は時間がかかるため、こまめに進捗を出す。
+                // 逐型別掃描相當耗時，因此需要頻繁更新進度。
                 this.unityCompareCount = 0;
                 this.unityCompareNotify = 0;
 
@@ -96,7 +96,7 @@ namespace WzComparerR2.Comparer
                 OutputUnityFile(labelNew, labelOld, type, entries, outputDir, index);
             }
 
-            StateInfo = "比較完了";
+            StateInfo = "比對完成";
             StateDetail = "";
             GC.Collect();
         }
@@ -108,7 +108,7 @@ namespace WzComparerR2.Comparer
         private Wz_Node unityContentNew;
         private Wz_Node unityContentOld;
 
-        /// <summary>走査の進捗を一定間隔で表示する（UI スレッドへの通知回数を抑える）。</summary>
+        /// <summary>以固定間隔顯示掃描進度（減少對 UI 執行緒的通知次數）。</summary>
         private void ReportUnityProgress(string path)
         {
             this.unityCompareCount++;
@@ -121,7 +121,7 @@ namespace WzComparerR2.Comparer
         }
 
         /// <summary>
-        /// 比較中のノードパスを表示する（WZ 比較と同じ粒度）。ノード数が多いので間引く。
+        /// 顯示比對中的節點路徑（與 WZ 比對相同粒度）。節點數量大，因此抽樣顯示。
         /// </summary>
         private void ReportUnityNodeProgress(Wz_Node nodeNew, Wz_Node nodeOld)
         {
@@ -282,7 +282,7 @@ namespace WzComparerR2.Comparer
             }
             catch (Exception ex)
             {
-                // 解析できない資産があっても比較全体は続行する。
+                // 即使有無法解析的資產，仍繼續整份比對。
                 this.FailToExportNodes[displayPath] = ex.Message;
                 change = UnityEntryChange.Value;
             }
@@ -390,8 +390,8 @@ namespace WzComparerR2.Comparer
         }
 
         /// <summary>
-        /// 內容比較：最初の差異が見つかった時点で打ち切る。
-        /// 比較中のノードパスを表示するため、比較フックを一時的に購読する。
+        /// 內容比對：發現第一處差異時即中止。
+        /// 為了顯示比對中的節點路徑，暫時訂閱比對鉤子。
         /// </summary>
         private bool CompareUnityContent(Wz_Node contentNew, Wz_Node contentOld)
         {
@@ -423,7 +423,7 @@ namespace WzComparerR2.Comparer
             ownedByUs = false;
             if (image != null)
             {
-                // 既に展開済み（ツリー表示などで使用中）の場合は、こちらの都合で破棄しない。
+                // 若已展開（例如正用於樹狀顯示），不因自身需求而丟棄。
                 UnityAssetImage unityImage = image as UnityAssetImage;
                 ownedByUs = unityImage == null || !unityImage.IsExtracted;
                 return image.TryExtract() ? image.Node : null;
@@ -511,8 +511,8 @@ namespace WzComparerR2.Comparer
             }
 
             StreamWriter sw = null;
-            StateInfo = type + "を作成しています...";
-            StateDetail = "出力ファイルを作成しています...";
+            StateInfo = type + " 建立中...";
+            StateDetail = "輸出檔案建立中...";
             try
             {
                 sw = new StreamWriter(new FileStream(htmlFilePath, FileMode.Create, FileAccess.Write), Encoding.UTF8);
@@ -526,14 +526,14 @@ namespace WzComparerR2.Comparer
                 sw.WriteLine("<body>");
                 sw.WriteLine("<p class=\"wzf\">");
                 sw.WriteLine("<table>");
-                sw.WriteLine("<tr><th>&nbsp;</th><th>クライアント</th><th>バージョン</th></tr>");
-                sw.WriteLine("<tr><td>新しいバージョン</td><td colspan=\"2\">{0}</td></tr>", EncodeUnityHtml(labelNew));
-                sw.WriteLine("<tr><td>古いバージョン</td><td colspan=\"2\">{0}</td></tr>", EncodeUnityHtml(labelOld));
-                sw.WriteLine("<tr><td>現在の時刻</td><td colspan='2'>{0:yyyy年 M月 d日 HH:mm:ss.fff}</td></tr>", DateTime.Now);
-                sw.WriteLine("<tr><td>オプション</td><td colspan='2'>{0}</td></tr>", string.Join("<br/>", new[] {
-                    this.OutputPng ? "- PNGファイルを出力" : null,
-                    this.OutputAddedImg ? "- 追加ファイル" : null,
-                    this.OutputRemovedImg ? "- 削除済みファイル" : null,
+                sw.WriteLine("<tr><th>&nbsp;</th><th>客戶端</th><th>版本</th></tr>");
+                sw.WriteLine("<tr><td>新版本</td><td colspan=\"2\">{0}</td></tr>", EncodeUnityHtml(labelNew));
+                sw.WriteLine("<tr><td>舊版本</td><td colspan=\"2\">{0}</td></tr>", EncodeUnityHtml(labelOld));
+                sw.WriteLine("<tr><td>目前時間</td><td colspan='2'>{0:yyyy年 M月 d日 HH:mm:ss.fff}</td></tr>", DateTime.Now);
+                sw.WriteLine("<tr><td>選項</td><td colspan='2'>{0}</td></tr>", string.Join("<br/>", new[] {
+                    this.OutputPng ? "- 輸出PNG檔案" : null,
+                    this.OutputAddedImg ? "- 新增的檔案" : null,
+                    this.OutputRemovedImg ? "- 已刪除的檔案" : null,
                     "- Compare " + this.Comparer.PngComparison,
                 }.Where(option => option != null)));
                 sw.WriteLine("</table>");
@@ -555,7 +555,7 @@ namespace WzComparerR2.Comparer
                     menuCount[idx]++;
                 }
 
-                string[] diffStr = { "変更", "追加", "削除" };
+                string[] diffStr = { "變更", "新增", "刪除" };
                 for (int i = 0; i < menus.Length; i++)
                 {
                     sw.WriteLine("<table class=\"lst{0}\">", i);
@@ -608,7 +608,7 @@ namespace WzComparerR2.Comparer
                 index.Flush();
             }
 
-            StateDetail = fileName + " を作成しました。";
+            StateDetail = fileName + " 已建立。";
         }
 
         private void OutputUnityEntry(
@@ -619,9 +619,9 @@ namespace WzComparerR2.Comparer
             string anchorName = string.Format("a_{0}_{1}", idx, anchorIndex);
             string menuAnchorName = string.Format("m_{0}_{1}", idx, anchorIndex);
 
-            StateDetail = string.Format("{0} を比較中...", entry.DisplayPath);
+            StateDetail = string.Format("正在比對 {0}...", entry.DisplayPath);
             List<UnityCompareRow> rows = BuildUnityRows(entry, outputDir);
-            StateDetail = string.Format("合計{0}件の変更", rows.Count);
+            StateDetail = string.Format("共 {0} 項變更", rows.Count);
 
             int changed = 0, added = 0, removed = 0;
             foreach (UnityCompareRow row in rows)
@@ -648,12 +648,12 @@ namespace WzComparerR2.Comparer
             }
 
             sw.WriteLine("<table class=\"img\">");
-            sw.WriteLine("<tr><th colspan=\"3\"><a name=\"{1}\">{0}</a>: 変更: {2}; 追加: {3}; 削除: {4}</th></tr>",
+            sw.WriteLine("<tr><th colspan=\"3\"><a name=\"{1}\">{0}</a>: 變更: {2}; 新增: {3}; 刪除: {4}</th></tr>",
                 EncodeUnityHtml(entry.DisplayPath), anchorName, changed, added, removed);
-            sw.WriteLine("<tr><th>パス</th><th>旧バージョン ({0})</th><th>新バージョン ({1})</th></tr>",
+            sw.WriteLine("<tr><th>路徑</th><th>舊版本 ({0})</th><th>新版本 ({1})</th></tr>",
                 EncodeUnityHtml(labelOld), EncodeUnityHtml(labelNew));
             sw.Write(sb.ToString());
-            sw.WriteLine("<tr><td colspan=\"3\"><a href=\"#{1}\">{0}</a></td></tr>", "トップに戻る", menuAnchorName);
+            sw.WriteLine("<tr><td colspan=\"3\"><a href=\"#{1}\">{0}</a></td></tr>", "回到頂端", menuAnchorName);
             sw.WriteLine("</table>");
         }
 

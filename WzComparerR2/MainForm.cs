@@ -99,7 +99,7 @@ namespace WzComparerR2
         DefaultLevel skillDefaultLevel = DefaultLevel.Level0;
         int skillInterval = 32;
 
-        /// <summary>前一次開啟 Unity 資料集時選擇的地域コード。多地域資料集再次開啟時作為預設值。</summary>
+        /// <summary>前一次開啟 Unity 資料集時選擇的區域代碼。多區域資料集再次開啟時作為預設值。</summary>
         string lastUnityLocale;
 
         //compare
@@ -1714,7 +1714,7 @@ namespace WzComparerR2
                 unitySource = ClassicWzSource.Open(assetFolderPath);
                 int bundleCount = unitySource.Catalog.Bundles.Count;
 
-                // 多地域資料集：讓使用者選擇偏好的地域コード（字串表與圖集的語系）。
+                // 多區域資料集：讓使用者選擇偏好的區域代碼（字串表與圖集的語系）。
                 // openUnityFolder 執行於背景執行緒，對話方塊必須回到 UI 執行緒顯示。
                 if (unitySource.Locales.Count > 1)
                 {
@@ -1742,7 +1742,7 @@ namespace WzComparerR2
                     {
                         unitySource.Dispose();
                         unitySource = null;
-                        labelItemStatus.Text = "読み込みをキャンセルしました。";
+                        labelItemStatus.Text = "已取消載入。";
                         return;
                     }
                     this.lastUnityLocale = selectedLocale;
@@ -5991,7 +5991,7 @@ namespace WzComparerR2
                         || stringLinker.StringEqp.TryGetValue(item.ItemID, out sr))))
                 {
                     sr = new StringResult();
-                    sr.Name = "未知のアイテム";
+                    sr.Name = "未知的道具";
                 }
             }
             catch (Exception ex)
@@ -6184,7 +6184,7 @@ namespace WzComparerR2
                     if (stringLinker == null || !stringLinker.StringMob.TryGetValue(mob.ID, out sr))
                     {
                         sr = new StringResult();
-                        sr.Name = "未知のモンスター";
+                        sr.Name = "未知的怪物";
                     }
 
                     if (stringLinker != null && CharaSimConfig.Default.Mob.EnableMonsterBook)
@@ -6236,7 +6236,7 @@ namespace WzComparerR2
                     if (stringLinker == null || !stringLinker.StringNpc.TryGetValue(npc.ID, out sr))
                     {
                         sr = new StringResult();
-                        sr.Name = "未知のNPC";
+                        sr.Name = "未知的 NPC";
                     }
 
                     if (stringLinker != null && CharaSimConfig.Default.Misc.EnableWorldArchive)
@@ -6479,7 +6479,7 @@ namespace WzComparerR2
                     || !stringLinker.StringMap.TryGetValue(map.MapID, out sr)))
                 {
                     sr = new StringResult();
-                    sr.Name = "未知のマップ";
+                    sr.Name = "未知的地圖";
                 }
             }
             catch (Exception ex)
@@ -6612,7 +6612,7 @@ namespace WzComparerR2
             }
 
             string name = this.ApplyQuestStrings(info, questId, unityImage);
-            SetOrAddChildValue(info, "name", string.IsNullOrEmpty(name) ? "未知のクエスト" : name);
+            SetOrAddChildValue(info, "name", string.IsNullOrEmpty(name) ? "未知的任務" : name);
             return img;
         }
 
@@ -6817,7 +6817,7 @@ namespace WzComparerR2
                     if (stringLinker == null || !stringLinker.StringSkill.TryGetValue(skill.SkillID, out sr))
                     {
                         sr = new StringResultSkill();
-                        sr.Name = "未知のスキル";
+                        sr.Name = "未知的技能";
                     }
                 }
             }
@@ -7308,7 +7308,7 @@ namespace WzComparerR2
                 : this.openedUnitySources.Values.ToList();
             if (this.openedWz.Count > 0 && unityDocuments.Count > 0)
             {
-                MessageBoxEx.Show("WZベースのクライアントとUnityクライアントの比較はできません。\r\n同じ種類のクライアントを2つ以上開いてください。", LocalizedString_JP.COMMON_ERROR);
+                MessageBoxEx.Show("無法比較以 WZ 為基礎的客戶端與 Unity 客戶端。\r\n請開啟兩個以上相同類型的客戶端。", LocalizedString_JP.COMMON_ERROR);
                 return;
             }
 
@@ -7378,7 +7378,7 @@ namespace WzComparerR2
                     comparer.AvatarCode = GetEasyCompareAvatarCode();
                     if (compareUnity)
                     {
-                        // Unity クライアントにはツールチップ生成に必要な WZ 構成が無いため、ノード比較のみを行う。
+                        // Unity 客戶端沒有產生 Tooltip 所需的 WZ 結構，因此只進行節點比對。
                         comparer.OutputSkillTooltip = false;
                         comparer.OutputItemTooltip = false;
                         comparer.OutputGearTooltip = false;
@@ -7496,7 +7496,7 @@ namespace WzComparerR2
             }
         }
 
-        /// <summary>比較中のオプション操作を一括で切り替える。</summary>
+        /// <summary>一次切換比對期間的選項操作。</summary>
         private void SetEasyCompareControlsEnabled(bool enabled)
         {
             btnEasyCompare.Enabled = enabled;
@@ -7530,7 +7530,7 @@ namespace WzComparerR2
             btnAvatarCode.Enabled = enabled && chkOutputChairAndRidingMount.Checked;
         }
 
-        /// <summary>2 つの Unity クライアントを比較する（新旧の入れ替え確認を含む）。</summary>
+        /// <summary>比對兩個 Unity 客戶端（包含新舊版本交換確認）。</summary>
         private void EasyCompareUnityClients(EasyComparer comparer, List<UnityAssetDocument> documents, string outputDir)
         {
             int indexNew = 0;
@@ -7542,7 +7542,7 @@ namespace WzComparerR2
                 string labelNew = GetUnityClientLabel(docNew);
                 string labelOld = GetUnityClientLabel(docOld);
 
-                string txt = string.Format("Unityクライアント:\r\n\r\n  新バージョン: {0}\r\n  旧バージョン: {1}\r\n\r\n「Yes」をクリックして比較を開始します。 旧バージョンと新しいバージョンを交換するには、「No」をクリックします。",
+                string txt = string.Format("Unity 客戶端:\r\n\r\n  新版本: {0}\r\n  舊版本: {1}\r\n\r\n按「是」開始比對。若要交換舊版本與新版本，請按「否」。",
                     labelNew,
                     labelOld
                     );

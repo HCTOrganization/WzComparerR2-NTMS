@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using WzComparerR2.WzLib;
 
 namespace WzComparerR2.UnityLib.Classic

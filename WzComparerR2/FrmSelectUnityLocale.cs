@@ -19,11 +19,11 @@ namespace WzComparerR2
             }
 #if NET6_0_OR_GREATER
             // https://learn.microsoft.com/en-us/dotnet/core/compatibility/fx-core#controldefaultfont-changed-to-segoe-ui-9pt
-            this.Font = new Font(new FontFamily("MS Gothic"), 9f);
+            this.Font = new Font(new FontFamily("SimSun"), 9f);
 #endif
-            this.labelX1.Text = "読み込む地域コードを選択してください。\r\n"
-                + "（共通データは常に合成されます）\r\n"
-                + "対象フォルダー: " + GetFolderName(datasetPath);
+            this.labelX1.Text = "請選擇要載入的區域代碼。\r\n"
+                + "（共通資料會自動合併）\r\n"
+                + "目標資料夾: " + GetFolderName(datasetPath);
 
             foreach (var locale in locales)
             {
@@ -32,7 +32,7 @@ namespace WzComparerR2
             this.SelectLocale(defaultLocale);
         }
 
-        /// <summary>使用者選擇的地域コード（TW/CN/JP/KR…）。</summary>
+        /// <summary>使用者選擇的區域代碼（TW/CN/JP/KR…）。</summary>
         public string SelectedLocale
         {
             get
@@ -95,10 +95,10 @@ namespace WzComparerR2
             {
                 switch ((code ?? string.Empty).ToUpperInvariant())
                 {
-                    case "TW": return "（繁体字中国語）";
-                    case "CN": return "（簡体字中国語）";
-                    case "JP": return "（日本語）";
-                    case "KR": return "（韓国語）";
+                    case "TW": return "（繁體中文）";
+                    case "CN": return "（簡體中文）";
+                    case "JP": return "（日文）";
+                    case "KR": return "（韓文）";
                     case "COMMON": return "（共通）";
                     default: return string.Empty;
                 }

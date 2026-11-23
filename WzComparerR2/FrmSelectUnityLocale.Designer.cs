@@ -1,4 +1,4 @@
-namespace WzComparerR2
+﻿namespace WzComparerR2
 {
     partial class FrmSelectUnityLocale
     {
@@ -47,7 +47,7 @@ namespace WzComparerR2
             this.labelX1.Name = "labelX1";
             this.labelX1.Size = new System.Drawing.Size(188, 48);
             this.labelX1.TabIndex = 0;
-            this.labelX1.Text = "読み込む地域コードを選択してください。";
+            this.labelX1.Text = "請選擇要載入的區域代碼。";
             // 
             // listBoxLocale
             // 
@@ -122,7 +122,7 @@ namespace WzComparerR2
             this.buttonCancel.Symbol = "";
             this.buttonCancel.SymbolSize = 1F;
             this.buttonCancel.TabIndex = 1;
-            this.buttonCancel.Text = "キャンセル";
+            this.buttonCancel.Text = "取消";
             // 
             // FrmSelectUnityLocale
             // 
@@ -134,7 +134,7 @@ namespace WzComparerR2
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.tableLayoutPanel2);
             this.DoubleBuffered = true;
-            this.Font = new System.Drawing.Font("MS Gothic", 9F);
+            this.Font = new System.Drawing.Font("SimSun", 9F);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.MaximizeBox = false;
@@ -142,7 +142,7 @@ namespace WzComparerR2
             this.Name = "FrmSelectUnityLocale";
             this.Padding = new System.Windows.Forms.Padding(9, 8, 9, 8);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "地域コードの選択";
+            this.Text = "選擇區域代碼";
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.tableLayoutPanel2.ResumeLayout(false);
