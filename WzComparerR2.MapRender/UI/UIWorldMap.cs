@@ -246,6 +246,9 @@ namespace WzComparerR2.MapRender.UI
             this.worldMaps.Clear();
             this.CurrentWorldMap = null;
 
+            // Classic（Unity）只有一張 spot 圖片，因此記錄實際使用的型別。
+            var spotTypes = new HashSet<int>();
+
             foreach (var imgNode in worldmapNode.Nodes)
             {
                 var img = imgNode.GetNodeWzImage();
@@ -266,8 +269,11 @@ namespace WzComparerR2.MapRender.UI
                     }
                     if (string.IsNullOrEmpty(worldMapInfo.Name))
                     {
-                        var m = Regex.Match(img.Name, @"^(.*)\.img$");
-                        worldMapInfo.Name = m.Success ? m.Result("$1") : img.Name;
+                        // WZ 的 img 名是 "WorldMap000.img"，Unity 資產的 img 名則是索引鍵
+                        // （Map/WorldMap/WorldMap000），因此改由節點名稱取得以支援兩者。
+                        string imageText = string.IsNullOrEmpty(img.Node?.Text) ? img.Name : img.Node.Text;
+                        var m = Regex.Match(imageText, @"^(.*)\.img$");
+                        worldMapInfo.Name = m.Success ? m.Result("$1") : imageText;
                     }
 
                     //加载地图名称
@@ -287,11 +293,12 @@ namespace WzComparerR2.MapRender.UI
 
                     //加载baseImg
                     node = img.Node.Nodes["BaseImg"]?.Nodes["0"];
-                    if (node == null)
+                    if (node != null)
                     {
-                        continue;
+                        worldMapInfo.BaseImg = LoadTextureItem(node);
                     }
-                    worldMapInfo.BaseImg = LoadTextureItem(node);
+                    // Classic（Unity）資料集中只有部分世界地圖含有 BaseImg。
+                    // 即使沒有圖片仍列入清單，只顯示 spot（WZ 每個 img 都有 BaseImg，不受影響）。
 
                     //加载地图列表
                     node = img.Node.Nodes["MapList"];
@@ -320,6 +327,7 @@ namespace WzComparerR2.MapRender.UI
                                     spotNode.Nodes["y"].GetValueEx<int>(0));
                             }
                             spot.Type = spotNode.Nodes["type"].GetValueEx<int>(0);
+                            spotTypes.Add(spot.Type);
                             spot.Title = spotNode.Nodes["title"].GetValueEx<string>(null);
                             spot.Desc = spotNode.Nodes["desc"].GetValueEx<string>(null);
                             spot.NoTooltip = spotNode.Nodes["noToolTip"].GetValueEx<int>(0) != 0;
@@ -409,11 +417,24 @@ namespace WzComparerR2.MapRender.UI
             var mapImageNode = worldMapResNode?.Nodes["mapImage"];
             if (mapImageNode != null)
             {
-                foreach (var imgNode in mapImageNode.Nodes)
+                if (mapImageNode.Nodes.Count > 0)
                 {
-                    var texture = this.LoadTextureItem(imgNode);
-                    var key = "mapImage/" + imgNode.Text;
-                    this.Resources[key] = texture;
+                    foreach (var imgNode in mapImageNode.Nodes)
+                    {
+                        var texture = this.LoadTextureItem(imgNode);
+                        var key = "mapImage/" + imgNode.Text;
+                        this.Resources[key] = texture;
+                    }
+                }
+                else if (mapImageNode.Value is Wz_Png)
+                {
+                    // Classic（Unity）資料集的 spot 圖片只有單一 canvas，
+                    // 因此將同一張圖片指定給所有世界地圖出現的 spot 型別。
+                    var texture = this.LoadTextureItem(mapImageNode);
+                    foreach (int spotType in spotTypes)
+                    {
+                        this.Resources["mapImage/" + spotType] = texture;
+                    }
                 }
             }
 

@@ -494,6 +494,22 @@ namespace WzComparerR2.UnityLib.Classic
                 string fullPath = innerPath.Length == 0 ? imageKey : imageKey + "/" + innerPath;
                 return new UnityCanvas(imageSource, fullPath);
             }
+
+            // Classic 中放在 spriteset 的圖片（例如 Map/MapHelper/worldMap/mapImage）
+            // 在 WZJS 中會以沒有值也沒有子節點的葉節點出現。
+            // 若 catalog 的 sprite 索引有相同路徑，就視為 Canvas，使其形狀與 WZ 相同。
+            if (node.Value.Kind == WzjsValueKind.SubTree && node.Children.Count == 0
+                && imageSource != null && innerPath.Length > 0)
+            {
+                string spritePath = imageKey + "/" + innerPath;
+                UnityEntryLocation location;
+                if (imageSource.Catalog.Entries.TryGetValue(spritePath, out location)
+                    && location.ClassId == UnityClassIds.Sprite)
+                {
+                    return new UnityCanvas(imageSource, spritePath);
+                }
+            }
+
             return ConvertValue(node.Value);
         }
     }
