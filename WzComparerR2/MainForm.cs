@@ -1757,6 +1757,7 @@ namespace WzComparerR2
                 }
                 string loadedLocale = unitySource.Locale;
                 int entryCount = unitySource.Catalog.Entries.Count;
+                string unitySourceRootPath = unitySource.Catalog.RootPath;
                 UnityClientInfo clientInfo = unitySource.ClientInfo;
 
                 // String/<region>/<category> 整理成 String.wz 的節點形狀；失敗不阻擋資料集開啟。
@@ -1795,8 +1796,20 @@ namespace WzComparerR2
                     clientText = (clientText == null ? null : clientText + "、")
                         + "Unity " + clientInfo.EngineVersion;
                 }
+                // 選擇的資料夾與實際 bundle 資料夾不同時（選擇 aa 直下或客戶端直下）明確顯示。
+                string bundleFolderText = null;
+                string resolvedBundleFolder = unitySourceRootPath;
+                if (!string.IsNullOrEmpty(resolvedBundleFolder)
+                    && !string.Equals(
+                        System.IO.Path.GetFullPath(resolvedBundleFolder).TrimEnd('\\'),
+                        System.IO.Path.GetFullPath(assetFolderPath).TrimEnd('\\'),
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    bundleFolderText = System.IO.Path.GetFileName(resolvedBundleFolder);
+                }
                 labelItemStatus.Text = $"已開啟 Unity 資源資料夾。時間經過：{sw.ElapsedMilliseconds}毫秒，"
                     + $"{entryCount} 個項目，{bundleCount} 個 bundle，區域: {loadedLocale}"
+                    + (bundleFolderText == null ? null : "、bundle: " + bundleFolderText)
                     + (string.IsNullOrEmpty(clientText) ? null : "、客戶端: " + clientText)
                     + (stringTableError == null ? null : "，字串表載入失敗: " + stringTableError);
             }

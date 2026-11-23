@@ -341,7 +341,12 @@ namespace WzComparerR2.MapRender.UI
                             {
                                 foreach (var subNode in mapNoNode.Nodes)
                                 {
-                                    spot.MapNo.Add(subNode.GetValue<int>());
+                                    // 非數值節點（例如 Classic 資料的空節點）直接略過，繼續載入。
+                                    int? mapNo = subNode.GetValueEx<int?>(null);
+                                    if (mapNo != null)
+                                    {
+                                        spot.MapNo.Add(mapNo.Value);
+                                    }
                                 }
                             }
                             worldMapInfo.MapList.Add(spot);
@@ -354,8 +359,14 @@ namespace WzComparerR2.MapRender.UI
                     {
                         foreach (var mapLinkNode in node.Nodes)
                         {
+                            int linkIndex;
+                            if (!int.TryParse(mapLinkNode.Text, out linkIndex))
+                            {
+                                continue;
+                            }
+
                             var link = new MapLink();
-                            link.Index = int.Parse(mapLinkNode.Text);
+                            link.Index = linkIndex;
                             link.Tooltip = mapLinkNode.Nodes["toolTip"].GetValueEx<string>(null);
                             link.Desc = mapLinkNode.Nodes["desc"].GetValueEx<string>(null);
                             var linkNode = mapLinkNode.Nodes["link"];
@@ -560,14 +571,22 @@ namespace WzComparerR2.MapRender.UI
         private TextureItem LoadTextureItem(Wz_Node node, bool loadHitMap = false)
         {
             var item = new TextureItem();
-            var linkNode = node.GetLinkedSourceNode(PluginBase.PluginManager.FindWz);
-            item.Texture = UIHelper.LoadTexture(linkNode);
-            item.Z = node.Nodes["z"].GetValueEx<int>(0);
-            var origin = node.Nodes["origin"]?.GetValueEx<Wz_Vector>(null);
-            item.Origin = origin.ToPointF();
-            if (item.Texture != null && loadHitMap)
+            try
             {
-                item.HitMap = UIHelper.CreateHitMap(item.Texture.GetNativeTexture() as Microsoft.Xna.Framework.Graphics.Texture2D);
+                var linkNode = node.GetLinkedSourceNode(PluginBase.PluginManager.FindWz);
+                item.Texture = UIHelper.LoadTexture(linkNode);
+                item.Z = node.Nodes["z"].GetValueEx<int>(0);
+                var origin = node.Nodes["origin"]?.GetValueEx<Wz_Vector>(null);
+                item.Origin = origin.ToPointF();
+                if (item.Texture != null && loadHitMap)
+                {
+                    item.HitMap = UIHelper.CreateHitMap(item.Texture.GetNativeTexture() as Microsoft.Xna.Framework.Graphics.Texture2D);
+                }
+            }
+            catch (Exception ex)
+            {
+                // 避免單張圖片失敗導致整個世界地圖載入中斷。
+                PluginBase.PluginManager.LogError("MapRender", ex, "無法載入世界地圖圖片: " + node?.FullPathToFile);
             }
             return item;
         }

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
 using WzComparerR2.UnityLib.Images;
 using WzComparerR2.UnityLib.Unity;
 
@@ -98,6 +100,10 @@ namespace WzComparerR2.UnityLib.Classic
         private readonly HashSet<string> spritesetEntryKeys;
 
         /// <summary>掃描目錄下所有 .bundle，用每個 AssetBundle 物件的 m_Container 建索引。</summary>
+        /// <param name="rootDirectory">
+        /// 含有 bundle 的目錄。無論指定 bundle 目錄本身、StreamingAssets/aa 或客戶端根目錄，
+        /// 都會自動解析出實際位置。
+        /// </param>
         public static ClassicCatalog Build(string rootDirectory)
         {
             if (rootDirectory == null)
@@ -109,8 +115,10 @@ namespace WzComparerR2.UnityLib.Classic
                 throw new DirectoryNotFoundException("資料集目錄不存在: " + rootDirectory);
             }
 
+            string bundleDirectory = ResolveBundleDirectory(rootDirectory);
+
             List<string> files = new List<string>();
-            foreach (string path in Directory.GetFiles(rootDirectory))
+            foreach (string path in Directory.GetFiles(bundleDirectory))
             {
                 if (string.Equals(Path.GetExtension(path), ".bundle", StringComparison.OrdinalIgnoreCase))
                 {
@@ -119,7 +127,7 @@ namespace WzComparerR2.UnityLib.Classic
             }
             files.Sort(StringComparer.Ordinal);
 
-            ClassicCatalog catalog = new ClassicCatalog(rootDirectory);
+            ClassicCatalog catalog = new ClassicCatalog(bundleDirectory);
             foreach (string path in files)
             {
                 FileInfo info = new FileInfo(path);
@@ -139,9 +147,101 @@ namespace WzComparerR2.UnityLib.Classic
         }
 
         /// <summary>
+        /// <summary>
+        /// 找出實際存放 .bundle 的目錄。
+        /// Addressables 1.x 的本機配置是 <c>&lt;aa&gt;/StandaloneWindows64</c>，
+        /// 2.x 的遠端 catalog 配置是 <c>&lt;aa&gt;/w</c>，
+        /// 因此無論選擇客戶端根目錄、<see cref="System.IO.Path"/> 的 <c>StreamingAssets/aa</c>
+        /// 或其下任一目錄都能開啟。
+        /// </summary>
+        public static string ResolveBundleDirectory(string rootDirectory)
+        {
+            if (rootDirectory == null)
+            {
+                throw new ArgumentNullException(nameof(rootDirectory));
+            }
+            if (HasBundles(rootDirectory))
+            {
+                return rootDirectory;
+            }
+
+            List<string> candidates = new List<string>();
+            string aaDirectory = Path.Combine(rootDirectory, "StreamingAssets", "aa");
+            string buildTarget = ReadBuildTarget(Path.Combine(aaDirectory, "settings.json"));
+
+            // Addressables 的兩種配置（遠端 catalog w／本機 StandaloneWindows64）。
+            candidates.Add(Path.Combine(aaDirectory, "w"));
+            if (buildTarget != null)
+            {
+                candidates.Add(Path.Combine(aaDirectory, buildTarget));
+                candidates.Add(Path.Combine(rootDirectory, buildTarget));
+            }
+            candidates.Add(Path.Combine(aaDirectory, "StandaloneWindows64"));
+            candidates.Add(Path.Combine(rootDirectory, "w"));
+            candidates.Add(Path.Combine(rootDirectory, "StandaloneWindows64"));
+
+            // 依序檢查 aa 直下、客戶端直下的子目錄。
+            candidates.AddRange(SafeGetDirectories(aaDirectory));
+            candidates.AddRange(SafeGetDirectories(rootDirectory));
+            candidates.Add(aaDirectory);
+
+            foreach (string candidate in candidates)
+            {
+                if (Directory.Exists(candidate) && HasBundles(candidate))
+                {
+                    return candidate;
+                }
+            }
+
+            throw new ClassicAssetException(
+                "找不到 AssetBundle (.bundle): " + rootDirectory + "\r\n"
+                + "請選擇客戶端的 StreamingAssets/aa 資料夾，或含有 bundle 的子資料夾。");
+        }
+
+        private static bool HasBundles(string directory)
+        {
+            return Directory.Exists(directory)
+                && Directory.GetFiles(directory, "*.bundle").Length > 0;
+        }
+
+        private static IEnumerable<string> SafeGetDirectories(string directory)
+        {
+            try
+            {
+                return Directory.Exists(directory)
+                    ? Directory.GetDirectories(directory)
+                    : Enumerable.Empty<string>();
+            }
+            catch (IOException)
+            {
+                return Enumerable.Empty<string>();
+            }
+        }
+
+        /// <summary>從 aa/settings.json 讀取建置目標名稱（例如 <c>StandaloneWindows64</c>）。</summary>
+        private static string ReadBuildTarget(string settingsPath)
+        {
+            try
+            {
+                if (!File.Exists(settingsPath))
+                {
+                    return null;
+                }
+                string text = File.ReadAllText(settingsPath);
+                Match match = Regex.Match(text, "\"m_BuildTarget\"\\s*:\\s*\"([^\"]+)\"", RegexOptions.CultureInvariant);
+                return match.Success ? match.Groups[1].Value : null;
+            }
+            catch (IOException)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
         /// 把音效條目整理成 WZ 的 img 形狀：<c>Sound/&lt;img&gt;/&lt;子目錄…&gt;/&lt;名稱&gt;</c>
         /// 收進 <see cref="SoundEntries"/>，並在 <see cref="Entries"/> 只留下 img 本身
         /// （<c>Sound/&lt;img&gt;</c>），讓樹上出現「Sound &gt; Bgm00 &gt; FloralLife」而不是把每個音效都攤在根目錄。
+        /// </summary>
         /// </summary>
         private void GroupSoundEntries()
         {

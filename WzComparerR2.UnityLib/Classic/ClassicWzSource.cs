@@ -727,9 +727,20 @@ namespace WzComparerR2.UnityLib.Classic
 
         private WzLib.Wz_Node CreateSpriteNode(string key)
         {
-            WzLib.Wz_Node node = new WzLib.Wz_Node(GetLeafName(key));
-            node.Value = new UnityCanvas(this, key);
-            return node;
+            string[] segments = key.Split('/');
+            WzLib.Wz_Node sprite = new WzLib.Wz_Node(segments[segments.Length - 1]);
+            sprite.Value = new UnityCanvas(this, key);
+
+            // 補上上層目錄，讓 Wz_Node.FullPathToFile 能以 WZ 形式的路徑重新查詢
+            // （供 MapRender 等透過 PluginManager.FindWz 取得貼圖的程式使用）。
+            WzLib.Wz_Node node = sprite;
+            for (int i = segments.Length - 2; i >= 0; i--)
+            {
+                WzLib.Wz_Node parent = new WzLib.Wz_Node(segments[i]);
+                parent.Nodes.Add(node);
+                node = parent;
+            }
+            return sprite;
         }
 
         private static string GetLeafName(string path)
@@ -750,6 +761,22 @@ namespace WzComparerR2.UnityLib.Classic
                 return null;
             }
 
+            WzLib.Wz_Node node = this.FindNodeCore(normalized);
+            if (node == null)
+            {
+                // 索引樹的節點會回傳以根節點名稱（客戶端名）開頭的路徑，
+                // 因此再嘗試去掉第一個區段後搜尋。
+                int slash = normalized.IndexOf('/');
+                if (slash > 0)
+                {
+                    node = this.FindNodeCore(normalized.Substring(slash + 1));
+                }
+            }
+            return node;
+        }
+
+        private WzLib.Wz_Node FindNodeCore(string normalized)
+        {
             string imageKey, inner;
             if (!this.Catalog.TrySplitImagePrefix(normalized, out imageKey, out inner))
             {

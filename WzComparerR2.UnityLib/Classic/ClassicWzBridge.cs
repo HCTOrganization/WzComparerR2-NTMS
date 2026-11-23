@@ -60,6 +60,10 @@ namespace WzComparerR2.UnityLib.Classic
             try
             {
                 this.EnsureExtracted();
+                // 與 WZ 的 img 一樣，讓內容節點能往上追溯到目錄與 img 節點。
+                // 否則 FullPathToFile 會變成 "WorldMap.img\BaseImg\0" 這種不含目錄名的
+                // 路徑，PluginManager.FindWz 的資源搜尋就無法解析。
+                this.GetRootedNode();
                 e = null;
                 return true;
             }
