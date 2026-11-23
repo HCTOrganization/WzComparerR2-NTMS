@@ -57,7 +57,8 @@ namespace WzComparerR2.MapRender
 
                 if (img != null && img.TryExtract())
                 {
-                    if (wzFile == null || wzFile.Type != Wz_Type.Map)
+                    // Unity 資料集等非 WZ 來源的 img（WzFile == null）視同地圖 img，不需要提醒。
+                    if (wzFile != null && wzFile.Type != Wz_Type.Map)
                     {
                         if (MessageBoxEx.Show("您沒有從 Map.wz 中選擇 IMG 檔案。 \r\n您想繼續嗎？", "警告", MessageBoxButtons.OKCancel) != DialogResult.OK)
                         {

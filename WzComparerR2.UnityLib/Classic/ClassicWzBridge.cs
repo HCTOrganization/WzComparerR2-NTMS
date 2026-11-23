@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using WzComparerR2.UnityLib.Unity;
@@ -10,22 +10,23 @@ namespace WzComparerR2.UnityLib.Classic
     /// <summary>
     /// 以傳統 WZ 的 <see cref="Wz_Node"/> 形式表示一個 WZJS img。
     /// <para>
-    /// 舊版 WZ 的 Canvas 值型別（<c>Wz_Png</c>）需要綁定 <c>Wz_Image</c> 與檔案資料流，
-    /// 無法從記憶體憑空建立；因此這裡的 Canvas 節點以 <see cref="UnityCanvas"/>
-    /// 作為 <see cref="Wz_Node.Value"/>，需要圖片時再呼叫其
-    /// <see cref="UnityCanvas.GetPng"/> 解碼。其餘型別沿用 WzLib 既有表示：
-    /// 整數 → <see cref="int"/>、長整數 → <see cref="long"/>、浮點 → <see cref="float"/>/
-    /// <see cref="double"/>、向量 → <see cref="Wz_Vector"/>、UOL → <see cref="Wz_Uol"/>。
+    /// 繼承 <see cref="Wz_Image"/> 讓只認得 <c>Wz_Image</c> 的既有程式（例如 MapRender）
+    /// 可以直接取用：<see cref="Wz_Image.TryExtract(out Exception)"/> 會即時把 WZJS 樹
+    /// 轉成 WZ 節點（<see cref="Wz_Image.Node"/>），節點顯示名稱沿用
+    /// <c>&lt;名稱&gt;.img</c> 的傳統慣例。Canvas 值為 <see cref="UnityCanvas"/>，
+    /// 它同時是 <see cref="Wz_Png"/>，需要圖片時才解碼。
     /// </para>
     /// </summary>
-    public sealed class UnityWzImage
+    public sealed class UnityWzImage : Wz_Image
     {
         private readonly ClassicWzSource source;
-        private Wz_Node node;
+        private readonly object extractLock = new object();
         private Wz_Node rootedNode;
         private readonly object rootedLock = new object();
+        private bool extracted;
 
         public UnityWzImage(ClassicWzSource source, string name)
+            : base(name, GetTrailingName(name) + ".img")
         {
             if (source == null)
             {
@@ -36,11 +37,14 @@ namespace WzComparerR2.UnityLib.Classic
                 throw new ArgumentNullException(nameof(name));
             }
             this.source = source;
-            this.Name = name;
+            this.Node.Value = this;
         }
 
         /// <summary>img 邏輯路徑，如 <c>Character/00002000</c>。</summary>
-        public string Name { get; private set; }
+        public string ImageKey
+        {
+            get { return this.Name; }
+        }
 
         internal ClassicWzSource Source
         {
@@ -59,14 +63,55 @@ namespace WzComparerR2.UnityLib.Classic
             return this.source.GetImage(path);
         }
 
+        /// <summary>以 WZ 風格路徑查詢同一資料集內的節點（可含 <c>.img</c> 後綴）。</summary>
+        public Wz_Node FindNode(string wzPath)
+        {
+            return this.source.FindNode(wzPath);
+        }
+
+        /// <summary>把 WZJS 樹展開成 WZ 節點（可重複呼叫）。</summary>
+        public override bool TryExtract(out Exception e)
+        {
+            try
+            {
+                this.EnsureExtracted();
+                e = null;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                e = ex;
+                return false;
+            }
+        }
+
+        private void EnsureExtracted()
+        {
+            if (this.extracted)
+            {
+                return;
+            }
+            lock (this.extractLock)
+            {
+                if (this.extracted)
+                {
+                    return;
+                }
+                WzjsNode tree = this.source.GetTree(this.Name);
+                foreach (WzjsNode child in tree.Children)
+                {
+                    this.Node.Nodes.Add(ClassicWzBridge.ConvertNode(
+                        child, this.Name, this.source));
+                }
+                this.extracted = true;
+            }
+        }
+
         /// <summary>以 WZ 節點樹形式取得內容（首次呼叫時轉換並快取）。</summary>
         public Wz_Node AsWzNode()
         {
-            if (this.node == null)
-            {
-                this.node = ClassicWzBridge.CreateImageNode(this);
-            }
-            return this.node;
+            this.EnsureExtracted();
+            return this.Node;
         }
 
         /// <summary>
@@ -99,6 +144,12 @@ namespace WzComparerR2.UnityLib.Classic
                 }
             }
             return content;
+        }
+
+        private static string GetTrailingName(string name)
+        {
+            int slash = name.LastIndexOf('/');
+            return slash < 0 ? name : name.Substring(slash + 1);
         }
     }
 
@@ -303,7 +354,7 @@ namespace WzComparerR2.UnityLib.Classic
             return root;
         }
 
-        private static Wz_Node ConvertNode(WzjsNode node, string imageKey, ClassicWzSource imageSource)
+        internal static Wz_Node ConvertNode(WzjsNode node, string imageKey, ClassicWzSource imageSource)
         {
             return ConvertNode(node, imageKey, string.Empty, imageSource);
         }

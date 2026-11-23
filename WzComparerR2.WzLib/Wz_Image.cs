@@ -27,6 +27,22 @@ namespace WzComparerR2.WzLib
             this.checEnc = false;
         }
 
+        /// <summary>
+        /// 建立不是來自 WZ 檔的 img（例如 Unity 資產）。內容由子類別提供，
+        /// <see cref="TryExtract(out Exception)"/> 必須由子類別覆寫。
+        /// </summary>
+        /// <param name="name">img 的邏輯名稱。</param>
+        /// <param name="nodeText">節點顯示名稱（傳統 WZ 為 <c>&lt;id&gt;.img</c>）。</param>
+        protected Wz_Image(string name, string nodeText)
+        {
+            this.Name = name;
+            this.Node = new Wz_ImageNode(nodeText ?? name, this);
+
+            this.extr = false;
+            this.chec = true;
+            this.checEnc = true;
+        }
+
         private bool extr;
         private bool chec;
         private bool checEnc;
@@ -41,7 +57,7 @@ namespace WzComparerR2.WzLib
         public uint HashedOffsetPosition { get; set; }
         public long Offset { get; set; }
         
-        public Wz_Node Node { get; private set; }
+        public Wz_Node Node { get; protected set; }
 
         public Wz_Node OwnerNode { get; set; }
 
@@ -75,7 +91,7 @@ namespace WzComparerR2.WzLib
             return TryExtract(out ex);
         }
 
-        public bool TryExtract(out Exception e)
+        public virtual bool TryExtract(out Exception e)
         {
             if (!this.extr)
             {
@@ -231,6 +247,11 @@ namespace WzComparerR2.WzLib
 
         public virtual Stream OpenRead()
         {
+            if (this.WzFile == null)
+            {
+                // 非 WZ 檔來源的 img（例如 Unity 資產）沒有資料流可讀。
+                throw new NotSupportedException("此 img 並非來自 WZ 檔案，無法開啟資料流: " + this.Name);
+            }
             if (this.stream == null)
             {
                 this.stream = new PartialStream(this.WzFile.FileStream, this.Offset, this.Size, true);

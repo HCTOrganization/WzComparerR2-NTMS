@@ -2021,6 +2021,32 @@ namespace WzComparerR2
 
                 autoResizeColumns(listViewExWzDetail);
             }
+            else if (selectedNode.Value is UnityWzImage unityImage)
+            {
+                listViewExWzDetail.Items.Add(new ListViewItem(new string[] { "IMG名", unityImage.Name }));
+                listViewExWzDetail.Items.Add(new ListViewItem(new string[] {
+                    "WZ類型", ClassicWzTypeMap.GetWzType(unityImage.Name).ToString() }));
+                autoResizeColumns(listViewExWzDetail);
+
+                advTree2.ClearAndDisposeAllNodes();
+
+                QueryPerformance.Start();
+                try
+                {
+                    // WZJS 樹在第一次選取時才解碼，UnityWzImage 會保留結果。
+                    Node imageNode = createNode(unityImage.AsWzNode());
+                    advTree2.Nodes.Add(imageNode);
+                    imageNode.Expand();
+                    QueryPerformance.End();
+                    double ms = (Math.Round(QueryPerformance.GetLastInterval(), 4) * 1000);
+
+                    labelItemStatus.Text = "已匯入。已用時間：" + ms + "毫秒";
+                }
+                catch (Exception ex)
+                {
+                    labelItemStatus.Text = "匯入失敗：" + ex.Message;
+                }
+            }
             else if (selectedNode.Value is Wz_Image wzImage)
             {
                 listViewExWzDetail.Items.Add(new ListViewItem(new string[] { "IMG名", wzImage.Name }));
@@ -2051,30 +2077,6 @@ namespace WzComparerR2
 
                         labelItemStatus.Text = "匯入失敗：" + ex.Message;
                     }
-                }
-                catch (Exception ex)
-                {
-                    labelItemStatus.Text = "匯入失敗：" + ex.Message;
-                }
-            }
-            else if (selectedNode.Value is UnityWzImage unityImage)
-            {
-                listViewExWzDetail.Items.Add(new ListViewItem(new string[] { "IMG名", unityImage.Name }));
-                autoResizeColumns(listViewExWzDetail);
-
-                advTree2.ClearAndDisposeAllNodes();
-
-                QueryPerformance.Start();
-                try
-                {
-                    // WZJS 樹在第一次選取時才解碼，UnityWzImage 會保留結果。
-                    Node imageNode = createNode(unityImage.AsWzNode());
-                    advTree2.Nodes.Add(imageNode);
-                    imageNode.Expand();
-                    QueryPerformance.End();
-                    double ms = (Math.Round(QueryPerformance.GetLastInterval(), 4) * 1000);
-
-                    labelItemStatus.Text = "已匯入。已用時間：" + ms + "毫秒";
                 }
                 catch (Exception ex)
                 {
@@ -2164,14 +2166,14 @@ namespace WzComparerR2
         {
             switch (value)
             {
+                case UnityCanvas unityCanvas:
+                    return "canvas " + unityCanvas.Path;
+
                 case Wz_Png png:
                     return $"png {png.Width}*{png.Height} ({(int)png.Format}{(png.Scale > 0 ? $", {png.Scale}" : null)})";
 
                 case byte[] pngData:
                     return $"png {pngData.Length} 位元組";
-
-                case UnityCanvas unityCanvas:
-                    return "canvas " + unityCanvas.Path;
 
                 case UnityJsonAsset jsonAsset:
                     return "json " + jsonAsset.ImageKey;
@@ -2216,9 +2218,10 @@ namespace WzComparerR2
             {
                 string => "str",
                 short or int or long or float or double=> "num",
+                UnityCanvas => "png",
+                UnityWzImage => "img",
                 Wz_Png => "png",
                 byte[] => "png",
-                UnityCanvas => "png",
                 Wz_Vector => "vector",
                 Wz_Uol => "uol",
                 Wz_Sound sound => sound.SoundType == Wz_SoundType.Binary ? "rawdata" : "mp3",
@@ -2250,6 +2253,34 @@ namespace WzComparerR2
 
             switch (selectedNode.Value)
             {
+                case UnityCanvas unityCanvas:
+                    try
+                    {
+                        byte[] canvasPng = unityCanvas.GetPng();
+                        if (canvasPng != null)
+                        {
+                            pictureBoxEx1.PictureName = GetSelectedNodeImageName();
+                            pictureBoxEx1.ShowImage(canvasPng);
+                            this.cmbItemAniNames.Items.Clear();
+                            if (this.pictureBoxEx1.IsPaused)
+                            {
+                                ResumePictureBox();
+                            }
+                            advTree3.PathSeparator = ".";
+                            textBoxX1.Text = "數據長:  " + canvasPng.Length + " 位元組\r\n" +
+                                "路徑:  " + unityCanvas.Path;
+                        }
+                        else
+                        {
+                            textBoxX1.Text = "找不到圖片。";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        textBoxX1.Text = "無法載入圖片：" + ex.Message;
+                    }
+                    break;
+
                 case Wz_Png png:
                     pictureBoxEx1.PictureName = GetSelectedNodeImageName();
                     pictureBoxEx1.ShowImage(png);
@@ -2298,34 +2329,6 @@ namespace WzComparerR2
                                 "頁: " + png.Pages + "(" + png.ActualPages + ")\r\n" +
                                 "不明1: " + png.Unknown1);
                         }
-                    }
-                    break;
-
-                case UnityCanvas unityCanvas:
-                    try
-                    {
-                        byte[] canvasPng = unityCanvas.GetPng();
-                        if (canvasPng != null)
-                        {
-                            pictureBoxEx1.PictureName = GetSelectedNodeImageName();
-                            pictureBoxEx1.ShowImage(canvasPng);
-                            this.cmbItemAniNames.Items.Clear();
-                            if (this.pictureBoxEx1.IsPaused)
-                            {
-                                ResumePictureBox();
-                            }
-                            advTree3.PathSeparator = ".";
-                            textBoxX1.Text = "數據長:  " + canvasPng.Length + " 位元組\r\n" +
-                                "路徑:  " + unityCanvas.Path;
-                        }
-                        else
-                        {
-                            textBoxX1.Text = "找不到圖片。";
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        textBoxX1.Text = "無法載入圖片：" + ex.Message;
                     }
                     break;
 
