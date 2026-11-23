@@ -20,6 +20,8 @@ using DevComponents.AdvTree;
 using DevComponents.AdvTree.Display;
 using WzComparerR2.WzLib;
 using WzComparerR2.UnityLib.Classic;
+using WzComparerR2.UnityLib.Unity;
+using WzComparerR2.UnityLib.Wzjs;
 using WzComparerR2.Common;
 using WzComparerR2.CharaSimControl;
 using WzComparerR2.PluginBase;
@@ -5695,6 +5697,19 @@ namespace WzComparerR2
             string id = keyParts[2];
             int ignore;
             return (id.Length == 7 || id.Length == 8) && int.TryParse(id, out ignore);
+        }
+
+        /// <summary>字串結果所屬的分類；Unity 資產的節點名稱沒有 <c>.img</c> 後綴。</summary>
+        private enum UnityStringCategory
+        {
+            None,
+            Item,
+            Equip,
+            Mob,
+            Npc,
+            Skill,
+            Map,
+            Quest,
         }
 
         /// <summary>

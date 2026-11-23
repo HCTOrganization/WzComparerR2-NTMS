@@ -46,7 +46,8 @@ namespace WzComparerR2.UnityLib.Classic
             get { return this.Name; }
         }
 
-        internal ClassicWzSource Source
+        /// <summary>所屬資料集。</summary>
+        public ClassicWzSource Source
         {
             get { return this.source; }
         }
@@ -312,6 +313,28 @@ namespace WzComparerR2.UnityLib.Classic
                     }
                     break;
             }
+        }
+
+        /// <summary>
+        /// 動作影格延遲總和（各影格 <c>delay</c> 的絕對值相加）；
+        /// null 或沒有 delay 時回 0。
+        /// </summary>
+        public static int SumActionDelay(Wz_Node actionNode)
+        {
+            if (actionNode == null)
+            {
+                return 0;
+            }
+            int delay = 0;
+            foreach (Wz_Node frameNode in actionNode.Nodes)
+            {
+                Wz_Node delayNode = frameNode.FindNodeByPath("delay");
+                if (delayNode != null && delayNode.Value != null)
+                {
+                    delay += Math.Abs(delayNode.GetValueEx<int>(0));
+                }
+            }
+            return delay;
         }
 
         /// <summary>把 WZJS 節點值轉成 WzLib 慣用的值型別。</summary>

@@ -112,6 +112,7 @@ namespace WzComparerR2.UnityLib.Classic
         private readonly object treeCacheLock = new object();
         private readonly Dictionary<string, WzjsNode> treeCache = new Dictionary<string, WzjsNode>(StringComparer.Ordinal);
         private readonly List<string> treeCacheOrder = new List<string>();
+        private readonly Dictionary<string, UnityWzImage> imageCache = new Dictionary<string, UnityWzImage>(StringComparer.Ordinal);
         private readonly UnityImageRenderer renderer;
         private string locale;
         private long localeGeneration;

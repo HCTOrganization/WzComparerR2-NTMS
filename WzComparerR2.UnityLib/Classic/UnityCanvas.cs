@@ -1,4 +1,5 @@
 ﻿using System;
+using WzComparerR2.WzLib;
 
 namespace WzComparerR2.UnityLib.Classic
 {
@@ -56,6 +57,11 @@ namespace WzComparerR2.UnityLib.Classic
                 }
                 return this.png;
             }
+        }
+
+        byte[] IWzPngSource.GetPngData()
+        {
+            return this.GetPng();
         }
 
         public override string ToString()

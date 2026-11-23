@@ -245,6 +245,222 @@ namespace WzComparerR2.UnityLib.Classic
         }
 
         /// <summary>
+        /// 依道具 id 推出 <c>Item</c> 目錄下可能的路徑，依優先順序排列；路徑最後一段是
+        /// img，之後的段落是 img 內的節點（與參考實作的 item_path_candidates 一致）。
+        /// </summary>
+        public List<string> GetItemPathCandidates(int itemId)
+        {
+            List<string> candidates = new List<string>();
+            if (itemId < 0)
+            {
+                return candidates;
+            }
+            string id = itemId.ToString("D8", CultureInfo.InvariantCulture);
+            string group = (itemId / 10000).ToString("D4", CultureInfo.InvariantCulture);
+            switch (itemId / 1000000)
+            {
+                case 2:
+                    candidates.Add("Item/Consume/" + group + "/" + id);
+                    break;
+                case 3:
+                    candidates.Add("Item/Install/" + group + "/" + id);
+                    break;
+                case 4:
+                    candidates.Add("Item/Etc/" + group + "/" + id);
+                    break;
+                case 5:
+                    // 寵物是一個 id 一個 img；其餘 5 開頭道具落在 Cash 分區 img。
+                    string pet = "Item/Pet/" + itemId.ToString(CultureInfo.InvariantCulture);
+                    if (this.Entries.ContainsKey(pet))
+                    {
+                        candidates.Add(pet);
+                    }
+                    candidates.Add("Item/Cash/" + group + "/" + id);
+                    break;
+                case 9:
+                    // 套裝組、欄位擴充等：Special img 內的節點是 7 碼 id。
+                    candidates.Add("Item/Special/0"
+                        + (itemId / 10000).ToString(CultureInfo.InvariantCulture)
+                        + "/" + itemId.ToString("D7", CultureInfo.InvariantCulture));
+                    break;
+            }
+            return candidates;
+        }
+
+        /// <summary>
+        /// 依裝備 id 推出 <c>Character</c> 目錄下可能的路徑，依優先順序排列。
+        /// </summary>
+        public List<string> GetEquipPathCandidates(int itemId)
+        {
+            List<string> candidates = new List<string>();
+            if (itemId / 1000000 != 1)
+            {
+                return candidates;
+            }
+            string directory = GetEquipDirectory(itemId / 10000);
+            if (directory != null)
+            {
+                candidates.Add("Character/" + directory + "/"
+                    + itemId.ToString("D8", CultureInfo.InvariantCulture));
+            }
+            return candidates;
+        }
+
+        /// <summary>
+        /// 依怪物 id 推出 <c>Mob</c> 目錄下可能的路徑，依優先順序排列
+        /// （對應傳統 WZ 的 <c>Mob/&lt;id&gt;.img</c> 與特殊分類）。
+        /// </summary>
+        public List<string> GetMobPathCandidates(int mobId)
+        {
+            List<string> candidates = new List<string>();
+            if (mobId <= 0)
+            {
+                return candidates;
+            }
+            string id = mobId.ToString("D7", CultureInfo.InvariantCulture);
+            candidates.Add("Mob/" + id);
+            foreach (string group in new[]
+            {
+                "AbyssExpeditionMob", "MExplorerMob", "QuestCountGroup", "RoguelikeMob",
+            })
+            {
+                candidates.Add("Mob/" + group + "/" + id);
+            }
+            candidates.Add("Mob/RoguelikeMob/Redmoon/" + id);
+            return candidates;
+        }
+
+        /// <summary>依 NPC id 推出 <c>Npc</c> 目錄下的路徑。</summary>
+        public List<string> GetNpcPathCandidates(int npcId)
+        {
+            List<string> candidates = new List<string>();
+            if (npcId <= 0)
+            {
+                return candidates;
+            }
+            candidates.Add("Npc/" + npcId.ToString("D7", CultureInfo.InvariantCulture));
+            return candidates;
+        }
+
+        /// <summary>
+        /// 依技能 id 推出 <c>Skill</c> 目錄下的路徑：
+        /// img 是職業（<c>Skill/&lt;id/10000&gt;</c>），技能本身是 img 內的
+        /// <c>skill/&lt;id&gt;</c>。
+        /// </summary>
+        public List<string> GetSkillPathCandidates(int skillId)
+        {
+            List<string> candidates = new List<string>();
+            if (skillId <= 0)
+            {
+                return candidates;
+            }
+            candidates.Add("Skill/" + (skillId / 10000).ToString(CultureInfo.InvariantCulture)
+                + "/skill/" + skillId.ToString(CultureInfo.InvariantCulture));
+            return candidates;
+        }
+
+        /// <summary>
+        /// 依地圖 id 推出 <c>Map</c> 目錄下的路徑：
+        /// <c>Map/Map/Map&lt;首位數字&gt;/&lt;9 碼 id&gt;</c>（與 WZ 的 <c>Map/Map/MapN/&lt;id&gt;.img</c> 對應）。
+        /// </summary>
+        public List<string> GetMapPathCandidates(int mapId)
+        {
+            List<string> candidates = new List<string>();
+            if (mapId <= 0)
+            {
+                return candidates;
+            }
+            string id = mapId.ToString("D9", CultureInfo.InvariantCulture);
+            candidates.Add("Map/Map/Map" + id[0] + "/" + id);
+            return candidates;
+        }
+
+        /// <summary>
+        /// 依任務 id 推出 <c>Quest</c> 目錄下的路徑：
+        /// <c>Quest/QuestInfo/&lt;id&gt;</c>（對應 WZ 的 <c>Quest/QuestInfo.img/&lt;id&gt;</c>）。
+        /// </summary>
+        public List<string> GetQuestPathCandidates(int questId)
+        {
+            List<string> candidates = new List<string>();
+            if (questId <= 0)
+            {
+                return candidates;
+            }
+            candidates.Add("Quest/QuestInfo/" + questId.ToString(CultureInfo.InvariantCulture));
+            return candidates;
+        }
+
+        /// <summary>
+        /// 在指定目錄（含下一層子目錄）內找出「節點名數值等於 <paramref name="id"/>」的 img 索引鍵，
+        /// 忽略補零差異；找不到回 null。用於 WZ 分類目錄與資產樹目錄不一致的情況。
+        /// </summary>
+        public string FindImageKeyByNumericName(string directory, int id)
+        {
+            if (string.IsNullOrEmpty(directory) || id < 0)
+            {
+                return null;
+            }
+            string prefix = directory + "/";
+            foreach (string key in this.Entries.Keys)
+            {
+                if (!key.StartsWith(prefix, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+                string rest = key.Substring(prefix.Length);
+                int slash = rest.LastIndexOf('/');
+                if (slash >= 0 && rest.IndexOf('/') != slash)
+                {
+                    continue; // 超過兩層不視為分類 img
+                }
+                string leaf = slash < 0 ? rest : rest.Substring(slash + 1);
+                long value;
+                if (TryParseNumericName(leaf, out value) && value == id)
+                {
+                    return key;
+                }
+            }
+            return null;
+        }
+
+        private static string GetEquipDirectory(int group)
+        {
+            switch (group)
+            {
+                case 100:
+                    return "Cap";
+                case 101:
+                case 102:
+                case 103:
+                case 112:
+                case 113:
+                case 114:
+                case 115:
+                    return "Accessory";
+                case 104:
+                    return "Coat";
+                case 105:
+                    return "Longcoat";
+                case 106:
+                    return "Pants";
+                case 107:
+                    return "Shoes";
+                case 108:
+                    return "Glove";
+                case 109:
+                    return "Shield";
+                case 110:
+                    return "Cape";
+                case 111:
+                    return "Ring";
+                case 180:
+                    return "PetEquip";
+                default:
+                    return group >= 121 && group <= 179 ? "Weapon" : null;
+            }
+        }
+
+        /// <summary>
         /// 節點名比較：純數字名依數值排最前，其餘不分大小寫依字母。
         /// </summary>
         public static int CompareNodeNames(string left, string right)
