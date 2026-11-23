@@ -184,14 +184,14 @@ namespace WzComparerR2.UnityLib.Classic
     /// 需要圖片時才解碼。
     /// </para>
     /// </summary>
-    public sealed class UnityWzImage : UnityAssetImage
+    public class UnityWzImage : UnityAssetImage
     {
         public UnityWzImage(ClassicWzSource source, string name)
             : base(source, name)
         {
         }
 
-        public WzjsNode Root
+        public virtual WzjsNode Root
         {
             get { return this.Source.GetTree(this.Name); }
         }
@@ -217,6 +217,29 @@ namespace WzComparerR2.UnityLib.Classic
                 this.Node.Nodes.Add(ClassicWzBridge.ConvertNode(
                     child, this.Name, this.Source));
             }
+        }
+    }
+
+    /// <summary>
+    /// 在 WZ 中以單一 img（例如 <c>Map.wz/MapHelper.img</c>）提供的目錄，
+    /// 這裡從 Unity 資料集中個別 sprite 的集合組成一個 img。
+    /// </summary>
+    public sealed class UnityDirectoryImage : UnityWzImage
+    {
+        public UnityDirectoryImage(ClassicWzSource source, string directoryPath)
+            : base(source, directoryPath)
+        {
+        }
+
+        /// <summary>沒有 WZJS 實體，因此不能使用 <see cref="UnityWzImage.Root"/>。</summary>
+        public override WzjsNode Root
+        {
+            get { return null; }
+        }
+
+        protected override void PopulateContent()
+        {
+            ClassicWzBridge.BuildDirectoryNodes(this.Source, this.Node, this.Name);
         }
     }
 
@@ -274,12 +297,56 @@ namespace WzComparerR2.UnityLib.Classic
             }
 
             Wz_Node root = new Wz_Node(rootName);
+            BuildEntryNodes(source, root, string.Empty, includeTrees, includeImages);
+            CollapseWzImagedDirectories(root, source);
+            return root;
+        }
+
+        /// <summary>
+        /// 在 WZ 中以單一 img 提供的目錄（例如 <c>Map.wz/MapHelper.img</c>）。
+        /// Unity 資料集中是以個別 sprite 的目錄索引，因此將其整合為一個 img。
+        /// </summary>
+        internal static readonly string[] WzImagedDirectories = { "Map/MapHelper" };
+
+        /// <summary><paramref name="key"/> 是否為要整合成 img 的目錄。</summary>
+        public static bool IsWzImagedDirectory(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                return false;
+            }
+            foreach (string directory in WzImagedDirectories)
+            {
+                if (string.Equals(key, directory, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 將 <paramref name="directoryPath"/> 下的 catalog 條目建立在 <paramref name="root"/> 之下，
+        /// 成為 WZ 形式的節點（即 <see cref="UnityDirectoryImage"/> 的內容）。
+        /// </summary>
+        internal static void BuildDirectoryNodes(ClassicWzSource source, Wz_Node root, string directoryPath)
+        {
+            BuildEntryNodes(source, root, directoryPath + "/", false, false);
+        }
+
+        private static void BuildEntryNodes(
+            ClassicWzSource source, Wz_Node root, string prefix, bool includeTrees, bool includeImages)
+        {
             Dictionary<string, Wz_Node> nodes = new Dictionary<string, Wz_Node>(StringComparer.Ordinal);
             nodes[string.Empty] = root;
 
             foreach (KeyValuePair<string, UnityEntryLocation> entry in source.Catalog.Entries)
             {
-                string[] segments = entry.Key.Split('/');
+                if (!entry.Key.StartsWith(prefix, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+                string[] segments = entry.Key.Substring(prefix.Length).Split('/');
                 string currentPath = string.Empty;
                 Wz_Node current = root;
                 for (int i = 0; i < segments.Length; i++)
@@ -356,7 +423,33 @@ namespace WzComparerR2.UnityLib.Classic
                         break;
                 }
             }
-            return root;
+        }
+
+        /// <summary>
+        /// 把 <see cref="WzImagedDirectories"/> 的目錄整合成單一 img 節點。
+        /// 資料集中若存在相同索引鍵的實體（WZJS），則不做任何處理。
+        /// </summary>
+        private static void CollapseWzImagedDirectories(Wz_Node root, ClassicWzSource source)
+        {
+            foreach (string directoryPath in WzImagedDirectories)
+            {
+                Wz_Node node = root;
+                foreach (string segment in directoryPath.Split('/'))
+                {
+                    node = node?.Nodes[segment];
+                    if (node == null)
+                    {
+                        break;
+                    }
+                }
+                if (node == null || node.Value != null || node.Nodes.Count == 0)
+                {
+                    continue;
+                }
+                node.Nodes.Clear();
+                node.Text = node.Text + ".img";
+                node.Value = source.GetDirectoryImage(directoryPath);
+            }
         }
 
         /// <summary>
