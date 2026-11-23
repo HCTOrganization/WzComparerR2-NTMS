@@ -161,12 +161,7 @@ namespace WzComparerR2.UnityLib.Unity
             UnityByteReader reader = new UnityByteReader(head, HeaderSize, (int)metadataSize, file.IsLittleEndian);
             file.UnityVersion = reader.CString();
             file.TargetPlatform = reader.I32();
-            if (reader.Bool())
-            {
-                // 本專案面對的 bundle 全部 enableTypeTree = false；
-                // type tree 佈局（含 typeDependencies）不在支援範圍內。
-                throw new UnityException("enableTypeTree = true 不在支援範圍");
-            }
+            bool enableTypeTree = reader.Bool();
 
             int typeCount = ReadTableCount(reader, "types", 23);
             for (int i = 0; i < typeCount; i++)
@@ -179,6 +174,12 @@ namespace WzComparerR2.UnityLib.Unity
                     reader.Skip(16); // scriptID hash（MonoBehaviour）
                 }
                 reader.Skip(16); // oldTypeHash
+                if (enableTypeTree)
+                {
+                    // 舊版用戶端（如最早期的 Classic beta）保留完整 type tree；
+                    // 內容本專案用不到，只需正確跳過。
+                    SkipTypeTree(reader, version);
+                }
                 file.types.Add(new UnitySerializedType(classId, isStripped, scriptTypeIndex));
             }
 
@@ -247,8 +248,7 @@ namespace WzComparerR2.UnityLib.Unity
             }
         }
 
-        private static int ReadTableCount(UnityByteReader reader, string label, int minEntrySize)
-        {
+        private static int ReadTableCount(UnityByteReader reader, string label, int minEntrySize)        {
             int count = reader.I32();
             if (count < 0 || count > MaxTableEntries)
             {
@@ -261,6 +261,50 @@ namespace WzComparerR2.UnityLib.Unity
                     label, count, reader.Remaining));
             }
             return count;
+        }
+
+        /// <summary>
+        /// 跳過一個 type tree blob（SerializedFile v13+ 的佈局）：
+        /// nodeCount u32 | stringBufferSize u32 | nodes[nodeCount × 32] | stringBuffer |
+        /// (v21+) refTypes[refCount × 12]。
+        /// </summary>
+        private static void SkipTypeTree(UnityByteReader reader, uint version)
+        {
+            const int TypeTreeNodeSize = 32;
+            const int MaxTypeTreeNodes = 200000;
+
+            int nodeCount = reader.I32();
+            if (nodeCount < 0 || nodeCount > MaxTypeTreeNodes)
+            {
+                throw new UnityException("type tree node 數量異常: " + nodeCount);
+            }
+            int stringBufferSize = reader.I32();
+            if (stringBufferSize < 0)
+            {
+                throw new UnityException("type tree 字串緩衝區大小異常: " + stringBufferSize);
+            }
+            long blobSize = (long)nodeCount * TypeTreeNodeSize + stringBufferSize;
+            if (blobSize > reader.Remaining)
+            {
+                throw new UnityException(string.Format(
+                    "type tree 超出 metadata 剩餘空間: {0} > {1}", blobSize, reader.Remaining));
+            }
+            reader.Skip((int)blobSize);
+
+            if (version >= 21)
+            {
+                int refCount = reader.I32();
+                if (refCount < 0 || refCount > MaxTableEntries)
+                {
+                    throw new UnityException("type tree refType 數量異常: " + refCount);
+                }
+                long refBytes = (long)refCount * 12;
+                if (refBytes > reader.Remaining)
+                {
+                    throw new UnityException("type tree refType 超出 metadata 剩餘空間");
+                }
+                reader.Skip((int)refBytes);
+            }
         }
     }
 

@@ -10,9 +10,12 @@ namespace WzComparerR2.UnityLib.Wzjs
     /// <para>
     /// 檔案佈局（全部 little-endian）：
     /// [0..4) nodeCount u32；[4..8) 常數 8；[8..144) 12 個 section 描述
-    /// （各 count u32 + offset u32）；[144..148) magic "WZJS"；[148..152) version = 5；
+    /// （各 count u32 + offset u32）；[144..148) magic "WZJS"；[148..152) version（4 或 5）；
     /// [152..) 節點記錄 nodeCount × 32 bytes，之後是各 section 資料、child order table
     /// 與字串池 A/B/C（所有 offset 一律以 magic 位置 144 為基準）。
+    /// </para>
+    /// <para>
+    /// 最早期的 Classic beta 是 version 4，欄位佈局與 5 相同，只有版本號不同。
     /// </para>
     /// <para>
     /// section slot：slot0 = child order table（u32 陣列）、slot1 = type 3 的 u8、
@@ -74,7 +77,7 @@ namespace WzComparerR2.UnityLib.Wzjs
                     Encoding.ASCII.GetString(data, MagicOffset, 4)));
             }
             uint version = U32At(data, 148);
-            if (version != 5)
+            if (version != 4 && version != 5)
             {
                 throw new WzjsException("不支援的 version: " + version);
             }
