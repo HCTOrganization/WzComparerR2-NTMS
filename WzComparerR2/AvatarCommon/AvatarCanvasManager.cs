@@ -177,10 +177,14 @@ namespace WzComparerR2.AvatarCommon
 
         private Wz_Node FindNodeByGearID(int id)
         {
-            string imgName = id.ToString("D8") + ".img";
+            string imgName = id.ToString("D8");
             Wz_Node imgNode = null;
 
             var characWz = PluginManager.FindWz(Wz_Type.Character);
+            if (characWz == null)
+            {
+                return null;
+            }
             foreach (var node1 in characWz.Nodes)
             {
                 if (node1.Text.Contains("_Canvas"))
@@ -188,7 +192,7 @@ namespace WzComparerR2.AvatarCommon
                     continue;
                 }
 
-                if (node1.Text == imgName)
+                if (IsImgNodeName(node1.Text, imgName))
                 {
                     imgNode = node1;
                     break;
@@ -197,7 +201,7 @@ namespace WzComparerR2.AvatarCommon
                 {
                     foreach (var node2 in node1.Nodes)
                     {
-                        if (node2.Text == imgName)
+                        if (IsImgNodeName(node2.Text, imgName))
                         {
                             imgNode = node2;
                             break;
@@ -210,16 +214,14 @@ namespace WzComparerR2.AvatarCommon
                 }
             }
 
-            if (imgNode != null)
-            {
-                Wz_Image img = imgNode.GetValue<Wz_Image>();
-                if (img != null && img.TryExtract())
-                {
-                    return img.Node;
-                }
-            }
+            return imgNode?.GetImageContentNode();
+        }
 
-            return null;
+        /// <summary>名稱比對容許缺少 <c>.img</c> 後綴（Unity 資料集沒有這個後綴）。</summary>
+        private static bool IsImgNodeName(string nodeName, string name)
+        {
+            return string.Equals(nodeName, name, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(nodeName, name + ".img", StringComparison.OrdinalIgnoreCase);
         }
 
         public int GetActionFrameCount(string actionName)

@@ -533,6 +533,31 @@ namespace WzComparerR2.WzLib
         public static Func<Wz_Node, Wz_Type?> ExternalTypeResolver { get; set; }
 
         /// <summary>
+        /// 非 WZ 檔來源的 img 內容展開器：傳入 img 節點，回傳其內容根節點
+        /// （例如 Unity 資產的 <c>UnityWzImage</c>）。找不到時回傳 null。
+        /// </summary>
+        public static Func<Wz_Node, Wz_Node> ExternalImageResolver { get; set; }
+
+        /// <summary>
+        /// 取得 img 節點的內容根節點：傳統 WZ 走 <see cref="Wz_Image"/> 解壓縮，
+        /// 其他來源（例如 Unity 資料集）交給 <see cref="ExternalImageResolver"/>。
+        /// </summary>
+        public static Wz_Node GetImageContentNode(this Wz_Node imageNode)
+        {
+            if (imageNode == null)
+            {
+                return null;
+            }
+            Wz_Image image = imageNode.GetValue<Wz_Image>();
+            if (image != null)
+            {
+                return image.TryExtract() ? image.Node : null;
+            }
+            Func<Wz_Node, Wz_Node> resolver = ExternalImageResolver;
+            return resolver?.Invoke(imageNode);
+        }
+
+        /// <summary>
         /// 取得節點所屬的 WZ 型別：先找所屬的 <see cref="Wz_File"/>，
         /// 找不到再詢問 <see cref="ExternalTypeResolver"/>（例如 Unity 資料集）。
         /// </summary>

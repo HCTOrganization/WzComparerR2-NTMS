@@ -164,6 +164,7 @@ namespace WzComparerR2
             CharaSimLoader.ActionDelayResolver = this.ResolveUnityActionDelay;
             QuestTooltipRenderer.ExternalNodeResolver = this.FindUnityNodeByPath;
             Wz_NodeExtension.ExternalTypeResolver = this.ResolveUnityWzType;
+            Wz_NodeExtension.ExternalImageResolver = this.ResolveUnityImageNode;
 
             foreach (WzPngComparison comp in Enum.GetValues(typeof(WzPngComparison)))
             {
@@ -542,16 +543,18 @@ namespace WzComparerR2
 
             if (fullPath == null || fullPath.Length <= 1)
             {
-                if (e.WzType != Wz_Type.Unknown && preSearch.Count > 0) //返回wzFile
+                if (e.WzType != Wz_Type.Unknown) //返回wzFile
                 {
-                    e.WzNode = preSearch[0];
-                    e.WzFile = preSearch[0].Value as Wz_File;
+                    if (preSearch.Count > 0)
+                    {
+                        e.WzNode = preSearch[0];
+                        e.WzFile = preSearch[0].Value as Wz_File;
+                    }
+                    else
+                    {
+                        e.WzNode = this.FindUnityTypeNode(e.WzType);
+                    }
                 }
-                return;
-            }
-
-            if (preSearch.Count <= 0)
-            {
                 return;
             }
 
@@ -575,8 +578,34 @@ namespace WzComparerR2
                     return;
                 }
             }
-            //寻找失败
-            e.WzNode = null;
+            //寻找失败：改查 Unity 資料集（沒有 .img 後綴、目錄配置不同）
+            e.WzNode = this.FindUnityNodeByPath(e.FullPath);
+        }
+
+        /// <summary>Unity 資料集內對應 <paramref name="wzType"/> 的根節點（Base 代表整個資料集）。</summary>
+        private Wz_Node FindUnityTypeNode(Wz_Type wzType)
+        {
+            if (this.openedUnitySources == null || this.openedUnitySources.Count == 0)
+            {
+                return null;
+            }
+            foreach (UnityAssetDocument document in this.openedUnitySources.Values)
+            {
+                Wz_Node root = document.RootNode;
+                if (wzType == Wz_Type.Base)
+                {
+                    // Unity 資料集沒有 Base.wz；開啟中即視為可用。
+                    return root;
+                }
+                foreach (Wz_Node child in root.Nodes)
+                {
+                    if (string.Equals(child.Text, wzType.ToString(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        return child;
+                    }
+                }
+            }
+            return null;
         }
 
         #region 界面主题配置
@@ -6195,6 +6224,25 @@ namespace WzComparerR2
         }
 
         /// <summary>
+        /// Unity 資產 img 節點的內容根節點（WZ 的 <see cref="Wz_Image"/> 對應物）。
+        /// </summary>
+        private Wz_Node ResolveUnityImageNode(Wz_Node node)
+        {
+            if (!(node?.Value is UnityWzImage image))
+            {
+                return null;
+            }
+            try
+            {
+                return image.GetRootedNode();
+            }
+            catch (Exception ex) when (ex is UnityException || ex is ClassicAssetException || ex is WzjsException)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
         /// 以 WZ 風格路徑在已開啟的 Unity 資料集內找節點（WZ 查不到時的備援）。
         /// </summary>
         private Wz_Node FindUnityNodeByPath(string wzPath)        {
@@ -6210,12 +6258,72 @@ namespace WzComparerR2
                     Wz_Node node = document.Source.FindNode(wzPath);
                     if (node != null)
                     {
-                        return node;
+                        return RootUnityNode(node);
+                    }
+                    node = FindUnityNodeBySegments(document.RootNode, wzPath);
+                    if (node != null)
+                    {
+                        return RootUnityNode(node);
                     }
                 }
-                catch (Exception ex) when (ex is UnityException || ex is ClassicAssetException)
+                catch (Exception ex) when (ex is UnityException || ex is ClassicAssetException || ex is WzjsException)
                 {
                     // 單一資產解碼失敗不影響其他資料集。
+                }
+            }
+            return null;
+        }
+
+        /// <summary>img 內容節點補上層節點鏈，讓 WZ 風格的路徑判斷可用。</summary>
+        private static Wz_Node RootUnityNode(Wz_Node node)
+        {
+            if (node?.Value is UnityWzImage image)
+            {
+                return image.GetRootedNode();
+            }
+            return node;
+        }
+
+        /// <summary>
+        /// 從 Unity 目錄索引樹逐段走訪（名稱容許缺少 <c>.img</c>），
+        /// 遇到 img 節點就展開內容後繼續。
+        /// </summary>
+        private static Wz_Node FindUnityNodeBySegments(Wz_Node root, string wzPath)
+        {
+            if (root == null)
+            {
+                return null;
+            }
+            Wz_Node node = root;
+            foreach (string rawSegment in wzPath.Split('/', '\\'))
+            {
+                if (rawSegment.Length == 0)
+                {
+                    continue;
+                }
+                string segment = rawSegment.EndsWith(".img", StringComparison.OrdinalIgnoreCase)
+                    ? rawSegment.Substring(0, rawSegment.Length - 4)
+                    : rawSegment;
+                node = FindUnityChildByName(node, segment);
+                if (node == null)
+                {
+                    return null;
+                }
+                if (node.Value is UnityWzImage image)
+                {
+                    node = image.GetRootedNode();
+                }
+            }
+            return node;
+        }
+
+        private static Wz_Node FindUnityChildByName(Wz_Node parent, string name)
+        {
+            foreach (Wz_Node child in parent.Nodes)
+            {
+                if (string.Equals(child.Text, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return child;
                 }
             }
             return null;
