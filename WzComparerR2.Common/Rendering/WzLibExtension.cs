@@ -14,6 +14,24 @@ namespace WzComparerR2.Rendering
             return ToTexture(png, 0, graphicsDevice);
         }
 
+        /// <summary>
+        /// 由 <see cref="IWzPngSource"/>（例如 Unity 資產的 Canvas 節點）建立貼圖。
+        /// 沒有圖片時回傳 null。
+        /// </summary>
+        public static Texture2D ToTexture(this IWzPngSource pngSource, GraphicsDevice graphicsDevice)
+        {
+            byte[] pngData = pngSource?.GetPngData();
+            if (pngData == null || pngData.Length == 0)
+            {
+                return null;
+            }
+            using (var stream = new System.IO.MemoryStream(pngData))
+            using (var bitmap = new System.Drawing.Bitmap(stream))
+            {
+                return bitmap.ToTexture(graphicsDevice);
+            }
+        }
+
         public static Texture2D ToTexture(this Wz_Png png, int page, GraphicsDevice graphicsDevice)
         {
             var format = GetTextureFormatOfPng(png.Format);

@@ -108,7 +108,7 @@ namespace WzComparerR2.Animation
 
                 foreach (Wz_Node aniNode in frameNode.Nodes)
                 {
-                    if (!anime.Contains(aniNode.Text) && aniNode.Value is Wz_Png)
+                    if (!anime.Contains(aniNode.Text) && (aniNode.Value is Wz_Png || aniNode.Value is IWzPngSource))
                     {
                         if (i != 0)
                         {

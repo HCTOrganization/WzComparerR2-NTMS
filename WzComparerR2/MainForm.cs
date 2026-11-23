@@ -890,7 +890,7 @@ namespace WzComparerR2
                 ResumePictureBox();
             }
 
-            if (node.Value is Wz_Png)
+            if (node.Value is Wz_Png || node.Value is IWzPngSource)
             {
                 var pngFrameData = this.pictureBoxEx1.LoadPngFrameAnimation(node);
 
