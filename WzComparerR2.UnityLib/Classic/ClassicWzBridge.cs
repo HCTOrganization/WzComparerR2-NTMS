@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using WzComparerR2.UnityLib.Unity;
@@ -308,6 +308,11 @@ namespace WzComparerR2.UnityLib.Classic
         /// </summary>
         internal static readonly string[] WzImagedDirectories = { "Map/MapHelper" };
 
+        /// <summary>
+        /// 直下子目錄各自視為 img 的目錄（例如 <c>UI.wz/UIWindow.img</c>）。
+        /// </summary>
+        internal static readonly string[] WzImagedDirectoryParents = { "UI" };
+
         /// <summary><paramref name="key"/> 是否為要整合成 img 的目錄。</summary>
         public static bool IsWzImagedDirectory(string key)
         {
@@ -318,6 +323,16 @@ namespace WzComparerR2.UnityLib.Classic
             foreach (string directory in WzImagedDirectories)
             {
                 if (string.Equals(key, directory, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+            foreach (string parent in WzImagedDirectoryParents)
+            {
+                // 只把父目錄直下一層視為 img（例如 UI/UIWindow）。
+                if (key.Length > parent.Length + 1
+                    && key.StartsWith(parent + "/", StringComparison.Ordinal)
+                    && key.IndexOf('/', parent.Length + 1) < 0)
                 {
                     return true;
                 }
@@ -426,30 +441,55 @@ namespace WzComparerR2.UnityLib.Classic
         }
 
         /// <summary>
-        /// 把 <see cref="WzImagedDirectories"/> 的目錄整合成單一 img 節點。
+        /// 把 <see cref="WzImagedDirectories"/> / <see cref="WzImagedDirectoryParents"/> 的目錄
+        /// 各自整合成單一 img 節點。
         /// 資料集中若存在相同索引鍵的實體（WZJS），則不做任何處理。
         /// </summary>
         private static void CollapseWzImagedDirectories(Wz_Node root, ClassicWzSource source)
         {
             foreach (string directoryPath in WzImagedDirectories)
             {
-                Wz_Node node = root;
-                foreach (string segment in directoryPath.Split('/'))
-                {
-                    node = node?.Nodes[segment];
-                    if (node == null)
-                    {
-                        break;
-                    }
-                }
-                if (node == null || node.Value != null || node.Nodes.Count == 0)
+                CollapseWzImagedDirectory(root, directoryPath, source);
+            }
+            foreach (string parentPath in WzImagedDirectoryParents)
+            {
+                Wz_Node parent = FindNodeByPath(root, parentPath);
+                if (parent == null)
                 {
                     continue;
                 }
-                node.Nodes.Clear();
-                node.Text = node.Text + ".img";
-                node.Value = source.GetDirectoryImage(directoryPath);
+                List<Wz_Node> children = new List<Wz_Node>(parent.Nodes);
+                foreach (Wz_Node child in children)
+                {
+                    CollapseWzImagedDirectory(root, parentPath + "/" + child.Text, source);
+                }
             }
+        }
+
+        private static void CollapseWzImagedDirectory(Wz_Node root, string directoryPath, ClassicWzSource source)
+        {
+            Wz_Node node = FindNodeByPath(root, directoryPath);
+            if (node == null || node.Value != null || node.Nodes.Count == 0)
+            {
+                return;
+            }
+            node.Nodes.Clear();
+            node.Text = node.Text + ".img";
+            node.Value = source.GetDirectoryImage(directoryPath);
+        }
+
+        private static Wz_Node FindNodeByPath(Wz_Node root, string path)
+        {
+            Wz_Node node = root;
+            foreach (string segment in path.Split('/'))
+            {
+                node = node?.Nodes[segment];
+                if (node == null)
+                {
+                    return null;
+                }
+            }
+            return node;
         }
 
         /// <summary>
