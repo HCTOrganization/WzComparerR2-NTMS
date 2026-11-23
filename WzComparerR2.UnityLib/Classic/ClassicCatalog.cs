@@ -70,6 +70,7 @@ namespace WzComparerR2.UnityLib.Classic
             this.Bundles = new List<ClassicBundleMeta>();
             this.Entries = new SortedDictionary<string, UnityEntryLocation>(StringComparer.Ordinal);
             this.Image = new UnityImageIndex();
+            this.spritesetEntryKeys = new HashSet<string>(StringComparer.Ordinal);
         }
 
         public string RootPath { get; private set; }
@@ -80,6 +81,9 @@ namespace WzComparerR2.UnityLib.Classic
         public SortedDictionary<string, UnityEntryLocation> Entries { get; private set; }
 
         public UnityImageIndex Image { get; private set; }
+
+        /// <summary>由 <see cref="RebuildSpritesetEntries"/> 補上的索引鍵（換語系時可整批撤銷）。</summary>
+        private readonly HashSet<string> spritesetEntryKeys;
 
         /// <summary>掃描目錄下所有 .bundle，用每個 AssetBundle 物件的 m_Container 建索引。</summary>
         public static ClassicCatalog Build(string rootDirectory)
@@ -119,6 +123,61 @@ namespace WzComparerR2.UnityLib.Classic
                 }
             }
             return catalog;
+        }
+
+        /// <summary>
+        /// 重建 spriteset 索引：只收錄 <paramref name="locale"/> 與 <c>Common</c> 提供的路徑。
+        /// <para>
+        /// spriteset（<c>SpriteSet/&lt;region&gt;/UI/…</c>）不是 WZJS/JSON 資產，原本不會出現在索引裡，
+        /// 導致 <c>UI/UIWindow</c>、<c>UI/Login</c> 這類只以 spriteset 提供的目錄在樹上整個消失。
+        /// 與傳統 WZ 一致，這裡只索引目前地域實際存在的節點：其他地域獨有的資產
+        /// （例如只在 TW/KR 提供的 <c>UI/Login/GameLogo</c>）不會出現在樹上。
+        /// </para>
+        /// <para>Value 由 <see cref="UnityCanvas"/> 於渲染時依語系解析。</para>
+        /// </summary>
+        public void RebuildSpritesetEntries(string locale)
+        {
+            foreach (string key in this.spritesetEntryKeys)
+            {
+                this.Entries.Remove(key);
+            }
+            this.spritesetEntryKeys.Clear();
+
+            if (!string.IsNullOrEmpty(locale))
+            {
+                this.AddSpritesetEntries(locale);
+            }
+            this.AddSpritesetEntries("Common");
+        }
+
+        private void AddSpritesetEntries(string region)
+        {
+            foreach (KeyValuePair<string, Dictionary<string, UnitySetSpriteEntry>> asset in this.Image.SetAssets)
+            {
+                int slash = asset.Key.IndexOf('/');
+                if (slash <= 0 || slash == asset.Key.Length - 1)
+                {
+                    continue;
+                }
+                if (!string.Equals(asset.Key.Substring(0, slash), region, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                string logicalPath = asset.Key.Substring(slash + 1);
+                foreach (KeyValuePair<string, UnitySetSpriteEntry> sprite in asset.Value)
+                {
+                    string path = string.IsNullOrEmpty(sprite.Key)
+                        ? logicalPath
+                        : logicalPath + "/" + sprite.Key;
+                    if (this.Entries.ContainsKey(path) && !this.spritesetEntryKeys.Contains(path))
+                    {
+                        continue; // WZJS / JSON 資產優先
+                    }
+                    this.Entries[path] = sprite.Value.SpriteLocation;
+                    this.spritesetEntryKeys.Add(path);
+                }
+            }
         }
 
         /// <summary>頂層（或某目錄節點下）的下一層。</summary>

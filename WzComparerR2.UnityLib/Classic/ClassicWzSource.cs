@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using WzComparerR2.UnityLib.Images;
@@ -114,10 +114,12 @@ namespace WzComparerR2.UnityLib.Classic
         private readonly List<string> treeCacheOrder = new List<string>();
         private readonly UnityImageRenderer renderer;
         private string locale;
+        private long localeGeneration;
 
         private ClassicWzSource(ClassicCatalog catalog, List<UnityFsBundle> bundles, string locale, IReadOnlyList<string> locales)
         {
             this.Catalog = catalog;
+            catalog.RebuildSpritesetEntries(locale);
             this.bundles = bundles;
             this.locale = locale;
             this.Locales = locales;
@@ -149,9 +151,20 @@ namespace WzComparerR2.UnityLib.Classic
                     return;
                 }
                 this.locale = value;
+                this.localeGeneration++;
                 this.renderer.Locale = value;
                 this.renderer.ClearCache();
+                this.Catalog.RebuildSpritesetEntries(value);
             }
+        }
+
+        /// <summary>
+        /// 語系切換次數。節點層級的快取（例如 <see cref="UnityCanvas"/> 已解碼的 PNG）
+        /// 以此判斷是否需要重新解碼。
+        /// </summary>
+        public long LocaleGeneration
+        {
+            get { return this.localeGeneration; }
         }
 
         /// <summary>開啟資料目錄：掃描所有 .bundle 建索引，再逐一開啟。</summary>
@@ -252,6 +265,15 @@ namespace WzComparerR2.UnityLib.Classic
             {
                 throw new ClassicAssetException("路徑不存在或無法解析: " + path);
             }
+            if (this.IsSpriteEntry(imageKey))
+            {
+                // spriteset 的 sprite 等同 WZ 的 canvas：葉節點，沒有子節點。
+                if (inner.Length > 0)
+                {
+                    throw new ClassicAssetException("路徑不存在或無法解析: " + path);
+                }
+                return output;
+            }
             UnityEntryLocation imageLocation2;
             if (this.Catalog.Entries.TryGetValue(imageKey, out imageLocation2)
                 && (imageLocation2.ClassId == UnityClassIds.TextAsset || imageLocation2.ClassId == UnityClassIds.AudioClip))
@@ -316,6 +338,18 @@ namespace WzComparerR2.UnityLib.Classic
                 UnityAudioClipInfo clip = this.GetAudioClip(imageKey);
                 return new ClassicNodeDetail(
                     path, clip.Name, UnityClassIds.AudioClip, WzjsValue.SubTree, null,
+                    new ClassicNodeChild[0], null);
+            }
+
+            if (location.ClassId == UnityClassIds.Sprite)
+            {
+                // spriteset 的 sprite 等同 WZ 的 canvas 節點。
+                if (inner.Length > 0)
+                {
+                    throw new ClassicAssetException("路徑不存在或無法解析: " + path);
+                }
+                return new ClassicNodeDetail(
+                    path, GetLeafName(imageKey), WzjsImage.TypeCanvas, WzjsValue.Canvas, null,
                     new ClassicNodeChild[0], null);
             }
 
@@ -432,6 +466,273 @@ namespace WzComparerR2.UnityLib.Classic
                 this.treeCache[imageKey] = tree;
             }
             return tree;
+        }
+
+        /// <summary>
+        /// 動作影格延遲總和：<c>&lt;imgKey&gt;/&lt;actionName&gt;/&lt;frame&gt;/delay</c>
+        /// 的絕對值加總；查無 img 或動作時回傳 null。
+        /// </summary>
+        public int? GetActionDelay(string imageKey, string actionName)
+        {
+            if (string.IsNullOrEmpty(imageKey) || string.IsNullOrEmpty(actionName))
+            {
+                return null;
+            }
+            UnityEntryLocation location;
+            if (!this.Catalog.Entries.TryGetValue(imageKey, out location)
+                || location.ClassId != UnityClassIds.MonoBehaviour)
+            {
+                return null;
+            }
+
+            WzjsNode actionNode = this.GetTree(imageKey).FindChild(actionName);
+            if (actionNode == null)
+            {
+                return null;
+            }
+            return ClassicWzBridge.SumActionDelay(ClassicWzBridge.ConvertNode(actionNode));
+        }
+
+        /// <summary>
+        /// 取得 img 的 <see cref="UnityWzImage"/>（內部快取；非 WZJS img 回 null）。
+        /// </summary>
+        public UnityWzImage GetWzImage(string imageKey)
+        {
+            if (string.IsNullOrEmpty(imageKey))
+            {
+                return null;
+            }
+            lock (this.imageCache)
+            {
+                UnityWzImage cached;
+                if (this.imageCache.TryGetValue(imageKey, out cached))
+                {
+                    return cached;
+                }
+            }
+
+            UnityEntryLocation location;
+            if (!this.Catalog.Entries.TryGetValue(imageKey, out location)
+                || location.ClassId != UnityClassIds.MonoBehaviour)
+            {
+                return null;
+            }
+
+            UnityWzImage image = new UnityWzImage(this, imageKey);
+            lock (this.imageCache)
+            {
+                UnityWzImage existing;
+                if (this.imageCache.TryGetValue(imageKey, out existing))
+                {
+                    return existing;
+                }
+                this.imageCache[imageKey] = image;
+            }
+            return image;
+        }
+
+        /// <summary>該 catalog 索引鍵是否為 spriteset 的單一 sprite。</summary>
+        private bool IsSpriteEntry(string key)
+        {
+            UnityEntryLocation location;
+            return this.Catalog.Entries.TryGetValue(key, out location)
+                && location.ClassId == UnityClassIds.Sprite;
+        }
+
+        private WzLib.Wz_Node CreateSpriteNode(string key)
+        {
+            WzLib.Wz_Node node = new WzLib.Wz_Node(GetLeafName(key));
+            node.Value = new UnityCanvas(this, key);
+            return node;
+        }
+
+        private static string GetLeafName(string path)
+        {
+            int slash = path.LastIndexOf('/');
+            return slash < 0 ? path : path.Substring(slash + 1);
+        }
+
+        /// <summary>
+        /// 以 WZ 風格路徑查詢節點（可含 <c>.img</c> 後綴、可用 <c>\</c> 分隔），
+        /// 例如 <c>Map\Map\Map0\100000000.img\miniMap</c>；查無回 null。
+        /// </summary>
+        public WzLib.Wz_Node FindNode(string wzPath)
+        {
+            string normalized = NormalizeWzPath(wzPath);
+            if (normalized == null)
+            {
+                return null;
+            }
+
+            string imageKey, inner;
+            if (!this.Catalog.TrySplitImagePrefix(normalized, out imageKey, out inner))
+            {
+                // 目錄配置與 WZ 不同（如 Character/<id>、Item/<type>/<group>/<id>）：
+                // 改以 id 產生 catalog 路徑候選。
+                return this.FindNodeByCandidates(normalized);
+            }
+            if (this.IsSpriteEntry(imageKey))
+            {
+                // spriteset 的單一 sprite：節點值為 UnityCanvas，解碼時才依語系取圖。
+                if (!string.IsNullOrEmpty(inner))
+                {
+                    return null;
+                }
+                return CreateSpriteNode(imageKey);
+            }
+            UnityWzImage image = this.GetWzImage(imageKey);
+            if (image == null)
+            {
+                return null;
+            }
+
+            WzLib.Wz_Node node = image.AsWzNode();
+            if (string.IsNullOrEmpty(inner))
+            {
+                return node;
+            }
+            foreach (string segment in inner.Split('/'))
+            {
+                if (segment.Length == 0)
+                {
+                    continue;
+                }
+                node = FindChildByName(node, segment);
+                if (node == null)
+                {
+                    return null;
+                }
+            }
+            return node;
+        }
+
+        /// <summary>
+        /// 以路徑末段（道具／裝備／技能…的 id）產生 catalog 路徑候選再查找，
+        /// 用於 WZ 與 Unity 目錄配置不同的情況。
+        /// </summary>
+        private WzLib.Wz_Node FindNodeByCandidates(string normalized)
+        {
+            int slash = normalized.LastIndexOf('/');
+            if (slash <= 0)
+            {
+                return null;
+            }
+            int id;
+            if (!int.TryParse(normalized.Substring(slash + 1), out id))
+            {
+                return null;
+            }
+
+            int rootEnd = normalized.IndexOf('/');
+            List<string> candidates = new List<string>();
+            switch (normalized.Substring(0, rootEnd))
+            {
+                case "Item":
+                    candidates.AddRange(this.Catalog.GetItemPathCandidates(id));
+                    candidates.AddRange(this.Catalog.GetEquipPathCandidates(id)); // 裝備在 Character，但少數呼叫端會組出 Item 路徑
+                    break;
+                case "Character":
+                    candidates.AddRange(this.Catalog.GetEquipPathCandidates(id));
+                    break;
+                case "Mob":
+                    candidates.AddRange(this.Catalog.GetMobPathCandidates(id));
+                    break;
+                case "Npc":
+                    candidates.AddRange(this.Catalog.GetNpcPathCandidates(id));
+                    break;
+                case "Map":
+                    candidates.AddRange(this.Catalog.GetMapPathCandidates(id));
+                    break;
+                case "Quest":
+                    candidates.AddRange(this.Catalog.GetQuestPathCandidates(id));
+                    break;
+                case "Skill":
+                    candidates.AddRange(this.Catalog.GetSkillPathCandidates(id));
+                    break;
+            }
+
+            foreach (string candidate in candidates)
+            {
+                string imageKey, inner;
+                if (!this.Catalog.TrySplitImagePrefix(candidate, out imageKey, out inner))
+                {
+                    continue;
+                }
+                UnityWzImage image = this.GetWzImage(imageKey);
+                if (image == null)
+                {
+                    continue;
+                }
+                WzLib.Wz_Node node = image.AsWzNode();
+                foreach (string segment in inner.Split('/'))
+                {
+                    if (segment.Length == 0)
+                    {
+                        continue;
+                    }
+                    node = FindChildByName(node, segment);
+                    if (node == null)
+                    {
+                        break;
+                    }
+                }
+                if (node != null)
+                {
+                    return node;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>把 WZ 風格路徑正規化成 catalog 索引鍵風格（去 <c>.img</c>、統一斜線）。</summary>
+        private static string NormalizeWzPath(string wzPath)
+        {
+            if (string.IsNullOrEmpty(wzPath))
+            {
+                return null;
+            }
+            string[] segments = wzPath.Replace('\\', '/').Split('/');
+            List<string> output = new List<string>(segments.Length);
+            foreach (string segment in segments)
+            {
+                string name = segment;
+                if (name.Length == 0)
+                {
+                    continue;
+                }
+                if (name.EndsWith(".img", StringComparison.OrdinalIgnoreCase))
+                {
+                    name = name.Substring(0, name.Length - 4);
+                }
+                output.Add(name);
+            }
+            return output.Count == 0 ? null : string.Join("/", output);
+        }
+
+        private static WzLib.Wz_Node FindChildByName(WzLib.Wz_Node parent, string name)
+        {
+            WzLib.Wz_Node found = parent.FindNodeByPath(name);
+            if (found != null)
+            {
+                return found;
+            }
+
+            // id 節點的補零位數可能不同（02000000 / 2000000）。
+            long number;
+            bool nameIsNumber = long.TryParse(name, out number);
+            foreach (WzLib.Wz_Node child in parent.Nodes)
+            {
+                if (string.Equals(child.Text, name, StringComparison.OrdinalIgnoreCase))
+                {
+                    return child;
+                }
+                long childNumber;
+                if (nameIsNumber && long.TryParse(child.Text, out childNumber) && childNumber == number)
+                {
+                    return child;
+                }
+            }
+            return null;
         }
 
         private static List<string> DetectLocales(ClassicCatalog catalog)

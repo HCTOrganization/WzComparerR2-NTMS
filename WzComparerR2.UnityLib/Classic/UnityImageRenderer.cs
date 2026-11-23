@@ -128,18 +128,19 @@ namespace WzComparerR2.UnityLib.Classic
         private byte[] GetImageUncached(string path)
         {
             // spriteset 素材（TW/UI/...、Common/UI/...）：不在 catalog.Entries，
-            // 用 SetAssets 的鍵做前綴比對，命中就以 m_Rect 切圖渲染。
-            string setKey;
-            string setInner;
-            if (TrySplitSetAssetPrefix(this.catalog, path, out setKey, out setInner))
+            // 用 SetAssets 的鍵做「地域前綴 + 前綴比對」；語系優先，其次 Common。
+            foreach (SetAssetLookup lookup in this.GetSetAssetLookups(path))
             {
                 Dictionary<string, UnitySetSpriteEntry> asset;
-                if (!this.catalog.Image.SetAssets.TryGetValue(setKey, out asset))
+                if (!this.catalog.Image.SetAssets.TryGetValue(lookup.Key, out asset))
                 {
-                    return null;
+                    continue;
                 }
-                UnitySetSpriteEntry spriteEntry = PickSetSprite(asset, setInner);
-                return spriteEntry != null ? this.RenderSetSprite(spriteEntry) : null;
+                UnitySetSpriteEntry spriteEntry = PickSetSprite(asset, lookup.Inner);
+                if (spriteEntry != null)
+                {
+                    return this.RenderSetSprite(spriteEntry);
+                }
             }
 
             string imageKey;
@@ -174,12 +175,26 @@ namespace WzComparerR2.UnityLib.Classic
 
             foreach (string candidate in candidates)
             {
-                UnitySheetEntry entry = this.GetSheet(candidate);
-                if (entry != null)
+                Dictionary<string, UnitySheetEntry> variants;
+                if (!this.catalog.Image.SheetsByPath.TryGetValue(candidate, out variants))
                 {
-                    bool perImage = string.Equals(candidate, imageKey, StringComparison.Ordinal);
-                    return this.RenderSheet(entry, candidate, imageKey, inner, perImage);
+                    continue;
                 }
+                UnitySheetEntry entry = UnityImageIndex.SelectLocalized(variants, this.Locale);
+                if (entry == null)
+                {
+                    continue;
+                }
+                // 地域變體（如 Map/Back/blueCave2 的 CN）只收錄該地域改動過的 sprite；
+                // 其餘節點要回退到 COMMON 的索引。
+                UnitySheetEntry fallback = null;
+                UnitySheetEntry common;
+                if (variants.TryGetValue("COMMON", out common) && !ReferenceEquals(common, entry))
+                {
+                    fallback = common;
+                }
+                bool perImage = string.Equals(candidate, imageKey, StringComparison.Ordinal);
+                return this.RenderSheet(entry, fallback, candidate, imageKey, inner, perImage);
             }
 
             Dictionary<string, UnitySetSpriteEntry> setAsset;
@@ -194,6 +209,73 @@ namespace WzComparerR2.UnityLib.Classic
             return null;
         }
 
+        /// <summary>spriteset 的一組查詢：(asset 索引鍵, sprite 名稱)。</summary>
+        private struct SetAssetLookup
+        {
+            public SetAssetLookup(string key, string inner)
+            {
+                this.Key = key;
+                this.Inner = inner;
+            }
+
+            public string Key { get; private set; }
+            public string Inner { get; private set; }
+        }
+
+        /// <summary>
+        /// 列出 spriteset 的候選索引鍵：先試路徑本身（已含 <c>Common/…</c>、<c>TW/…</c> 前綴），
+        /// 再依「目前語系 → Common」補上前綴。地域前綴不跨語系回退，避免顯示錯誤地域的圖。
+        /// </summary>
+        private List<SetAssetLookup> GetSetAssetLookups(string path)
+        {
+            List<SetAssetLookup> lookups = new List<SetAssetLookup>();
+            HashSet<string> seen = new HashSet<string>(StringComparer.Ordinal);
+            CollectSetAssetLookups(lookups, seen, path);
+
+            string localePrefix = FindSetPrefix(this.Locale);
+            if (localePrefix != null)
+            {
+                CollectSetAssetLookups(lookups, seen, localePrefix + "/" + path);
+            }
+            string commonPrefix = FindSetPrefix("Common");
+            if (commonPrefix != null)
+            {
+                CollectSetAssetLookups(lookups, seen, commonPrefix + "/" + path);
+            }
+            return lookups;
+        }
+
+        private string FindSetPrefix(string locale)
+        {
+            if (string.IsNullOrEmpty(locale))
+            {
+                return null;
+            }
+            foreach (string prefix in this.catalog.Image.SetPrefixes)
+            {
+                if (string.Equals(prefix, locale, StringComparison.OrdinalIgnoreCase))
+                {
+                    return prefix;
+                }
+            }
+            return null;
+        }
+
+        private void CollectSetAssetLookups(
+            List<SetAssetLookup> lookups, HashSet<string> seen, string candidatePath)
+        {
+            string key;
+            string inner;
+            if (!TrySplitSetAssetPrefix(this.catalog, candidatePath, out key, out inner))
+            {
+                return;
+            }
+            if (seen.Add(key + "\n" + inner))
+            {
+                lookups.Add(new SetAssetLookup(key, inner));
+            }
+        }
+
         private UnitySheetEntry GetSheet(string key)
         {
             Dictionary<string, UnitySheetEntry> variants;
@@ -206,6 +288,29 @@ namespace WzComparerR2.UnityLib.Classic
 
         /// <summary>spritesheet → PNG（frame 切圖；映射未知時只有 img 根可輸出整頁）。</summary>
         private byte[] RenderSheet(
+            UnitySheetEntry entry, UnitySheetEntry fallback, string sheetKey,
+            string imageKey, string inner, bool perImage)
+        {
+            byte[] image = this.RenderSheetEntry(entry, sheetKey, imageKey, inner, perImage);
+            if (image == null && fallback != null && inner.Length > 0)
+            {
+                // 地域變體只收錄該地域改動過的 sprite：缺少的節點改從 COMMON 變體取圖。
+                image = this.RenderSheetEntry(fallback, sheetKey, imageKey, inner, perImage);
+            }
+            if (image != null)
+            {
+                return image;
+            }
+            if (inner.Length == 0)
+            {
+                throw new UnityException("spritesheet 無 atlas 頁");
+            }
+            throw new UnityException(string.Format(
+                "找不到 Canvas {0}/{1} 可驗證的 spritesheet frame", imageKey, inner));
+        }
+
+        /// <summary>以單一圖集變體輸出 PNG；該變體沒有對應 frame 時回 null。</summary>
+        private byte[] RenderSheetEntry(
             UnitySheetEntry entry, string sheetKey, string imageKey, string inner, bool perImage)
         {
             if (entry.IndexLocation == null)
@@ -308,8 +413,7 @@ namespace WzComparerR2.UnityLib.Classic
                 UnityTexture.FlipVertical(page.Rgba, page.Width, page.Height);
                 return UnityTexture.ToPng(page.Width, page.Height, page.Rgba);
             }
-            throw new UnityException(string.Format(
-                "找不到 Canvas {0}/{1} 可驗證的 spritesheet frame", imageKey, inner));
+            return null;
         }
 
         private byte[] RenderAtlasPage(UnityEntryLocation location)

@@ -1707,7 +1707,6 @@ namespace WzComparerR2
 
                 var sw = Stopwatch.StartNew();
                 unitySource = ClassicWzSource.Open(assetFolderPath);
-                int entryCount = unitySource.Catalog.Entries.Count;
                 int bundleCount = unitySource.Catalog.Bundles.Count;
 
                 // 多地域資料集：讓使用者選擇偏好的地域コード（字串表與圖集的語系）。
@@ -1745,6 +1744,7 @@ namespace WzComparerR2
                     unitySource.Locale = selectedLocale;
                 }
                 string loadedLocale = unitySource.Locale;
+                int entryCount = unitySource.Catalog.Entries.Count;
 
                 // String/<region>/<category> 整理成 String.wz 的節點形狀；失敗不阻擋資料集開啟。
                 ClassicStringLinkerTables stringTables = null;
