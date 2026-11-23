@@ -20,6 +20,21 @@ namespace WzComparerR2.Comparer
         public bool IgnoreWzFile { get; set; }
         public bool ResolvePngLink { get; set; }
 
+        /// <summary>
+        /// 節點成對比較する直前に呼ばれるフック（進捗表示用）。
+        /// 購読しない場合、比較処理の挙動は変わらない。
+        /// </summary>
+        public event Action<Wz_Node, Wz_Node> ComparingNode;
+
+        protected virtual void OnComparingNode(Wz_Node nodeNew, Wz_Node nodeOld)
+        {
+            Action<Wz_Node, Wz_Node> handler = this.ComparingNode;
+            if (handler != null)
+            {
+                handler(nodeNew, nodeOld);
+            }
+        }
+
         private DisposeQueue _disposeQueue;
         private List<Wz_Image> _currentWzImg = new List<Wz_Image>();
 
@@ -163,6 +178,7 @@ namespace WzComparerR2.Comparer
                         l++;
                         break;
                     case 0:
+                        this.OnComparingNode(arrayNew[l].LinkNode, arrayOld[r].LinkNode);
                         //TODO: 试着比较多linkNode的场合。。
                         if ((arrayNew[l].HasMultiValues || arrayOld[r].HasMultiValues)
                             && !(arrayNew[l].Value is Wz_File wzf1 && !wzf1.IsSubDir || arrayOld[r].Value is Wz_File wzf2 && !wzf2.IsSubDir) //file跳过

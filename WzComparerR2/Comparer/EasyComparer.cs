@@ -4222,6 +4222,7 @@ namespace WzComparerR2.Comparer
             switch (value.Value)
             {
                 case Wz_Png png:
+                    png.EnsureExternalPngInfo();
                     if (OutputPng)
                     {
                         char[] invalidChars = Path.GetInvalidFileNameChars();
@@ -4295,7 +4296,8 @@ namespace WzComparerR2.Comparer
                     {
                         char[] invalidChars = Path.GetInvalidFileNameChars();
                         string colName = col == 0 ? "new" : (col == 1 ? "old" : col.ToString());
-                        string filePath = fullPath.Replace('\\', '.') + "_" + colName + ".mp3";
+                        bool isOgg = sound.SoundType == Wz_SoundType.Ogg;
+                        string filePath = fullPath.Replace('\\', '.') + "_" + colName + (isOgg ? ".ogg" : ".mp3");
 
                         for (int i = 0; i < invalidChars.Length; i++)
                         {
@@ -4324,7 +4326,7 @@ namespace WzComparerR2.Comparer
                             }
                             return string.Format("無法解析的音訊數據 {0} bytes", sound.DataLength);
                         }
-                        return string.Format("<audio controls src=\"{0}\" type=\"audio/mpeg\">audio {1} ms\n</audio>", Path.Combine(new DirectoryInfo(outputDir).Name, filePath), sound.Ms);
+                        return string.Format("<audio controls src=\"{0}\" type=\"{2}\">audio {1} ms\n</audio>", Path.Combine(new DirectoryInfo(outputDir).Name, filePath), sound.Ms, isOgg ? "audio/ogg" : "audio/mpeg");
                     }
                     else
                     {

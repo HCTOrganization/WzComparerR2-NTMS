@@ -203,7 +203,7 @@ namespace WzComparerR2.WzLib
             return true;
         }
 
-        public void Unextract()
+        public virtual void Unextract()
         {
             this.extr = false;
             if (this.stream != null)

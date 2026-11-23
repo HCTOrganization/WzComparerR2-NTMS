@@ -48,6 +48,12 @@ namespace WzComparerR2.UnityLib.Classic
         /// <summary>把資產內容填入 <see cref="Wz_Image.Node"/>（只會被呼叫一次）。</summary>
         protected abstract void PopulateContent();
 
+        /// <summary>內容是否已展開（供比較工具判斷是否需要自行釋放）。</summary>
+        public bool IsExtracted
+        {
+            get { return this.extracted; }
+        }
+
         /// <summary>把資產內容展開成 WZ 節點（可重複呼叫）。</summary>
         public override bool TryExtract(out Exception e)
         {
@@ -86,6 +92,23 @@ namespace WzComparerR2.UnityLib.Classic
         {
             this.EnsureExtracted();
             return this.Node;
+        }
+
+        /// <summary>
+        /// 釋放已展開的內容（比較工具會在每次比對後呼叫）；下次 <see cref="TryExtract(out Exception)"/>
+        /// 會重新由資產轉換一次。資產本身仍保有資料，因此可重複展開。
+        /// </summary>
+        public override void Unextract()
+        {
+            lock (this.extractLock)
+            {
+                if (!this.extracted)
+                {
+                    return;
+                }
+                this.extracted = false;
+                this.Node.Nodes.Clear();
+            }
         }
 
         /// <summary>

@@ -7200,7 +7200,17 @@ namespace WzComparerR2
                 return;
             }
 
-            if (openedWz.Count < 2)
+            List<UnityAssetDocument> unityDocuments = this.openedUnitySources == null
+                ? new List<UnityAssetDocument>()
+                : this.openedUnitySources.Values.ToList();
+            if (this.openedWz.Count > 0 && unityDocuments.Count > 0)
+            {
+                MessageBoxEx.Show("WZベースのクライアントとUnityクライアントの比較はできません。\r\n同じ種類のクライアントを2つ以上開いてください。", LocalizedString_JP.COMMON_ERROR);
+                return;
+            }
+
+            bool compareUnity = unityDocuments.Count > 0;
+            if (compareUnity ? unityDocuments.Count < 2 : this.openedWz.Count < 2)
             {
                 MessageBoxEx.Show("若要開始比較，請開啟兩個 WZ 檔案。", LocalizedString_JP.COMMON_ERROR);
                 return;
@@ -7263,6 +7273,22 @@ namespace WzComparerR2
                     comparer.LocatePetEquip = CharaSimConfig.Default.Misc.LocatePetEquip;
                     comparer.OutputChairAndRidingMount = chkOutputChairAndRidingMount.Checked;
                     comparer.AvatarCode = GetEasyCompareAvatarCode();
+                    if (compareUnity)
+                    {
+                        // Unity クライアントにはツールチップ生成に必要な WZ 構成が無いため、ノード比較のみを行う。
+                        comparer.OutputSkillTooltip = false;
+                        comparer.OutputItemTooltip = false;
+                        comparer.OutputGearTooltip = false;
+                        comparer.OutputMapTooltip = false;
+                        comparer.OutputMobTooltip = false;
+                        comparer.OutputNpcTooltip = false;
+                        comparer.OutputCashTooltip = false;
+                        comparer.OutputQuestTooltip = false;
+                        comparer.OutputAchvTooltip = false;
+                        comparer.SkipKMSContent = false;
+                        comparer.SkipGodChangseopDuplicatedNodes = false;
+                        comparer.OutputChairAndRidingMount = false;
+                    }
                     comparer.StateInfoChanged += new EventHandler(comparer_StateInfoChanged);
                     comparer.StateDetailChanged += new EventHandler(comparer_StateDetailChanged);
                     comparer.ColorTable = new List<System.Drawing.Color>()
@@ -7279,6 +7305,12 @@ namespace WzComparerR2
                     };
                     try
                     {
+                        if (compareUnity)
+                        {
+                            EasyCompareUnityClients(comparer, unityDocuments, dlg.SelectedPath);
+                            return;
+                        }
+
                         Wz_File fileNew = openedWz[0].wz_files[0];
                         Wz_File fileOld = openedWz[1].wz_files[0];
 
@@ -7293,35 +7325,7 @@ namespace WzComparerR2
                             switch (MessageBoxEx.Show(txt, "WZ比較", MessageBoxButtons.YesNoCancel))
                             {
                                 case DialogResult.Yes:
-                                    btnEasyCompare.Enabled = false;
-                                    btnPreset.Enabled = false;
-                                    clbRootNode.Enabled = false;
-                                    btnSelectDeselectAllNode.Enabled = false;
-                                    btnReverseNodeSelection.Enabled = false;
-                                    btnCustomCSS.Enabled = false;
-                                    cmbComparePng.Enabled = false;
-                                    chkOutputPng.Enabled = false;
-                                    chkResolvePngLink.Enabled = false;
-                                    chkOutputAddedImg.Enabled = false;
-                                    chkOutputRemovedImg.Enabled = false;
-                                    chkOutputSkillTooltip.Enabled = false;
-                                    chkOutputItemTooltip.Enabled = false;
-                                    chkOutputEqpTooltip.Enabled = false;
-                                    chkOutputMapTooltip.Enabled = false;
-                                    chkOutputMobTooltip.Enabled = false;
-                                    chkOutputNpcTooltip.Enabled = false;
-                                    chkOutputQuestTooltip.Enabled = false;
-                                    chkOutputAchvTooltip.Enabled = false;
-                                    // chkOutputCashTooltip.Enabled = false;
-                                    chkShowObjectID.Enabled = false;
-                                    chkShowChangeType.Enabled = false;
-                                    chkShowPrice.Enabled = false;
-                                    chkShowLinkedTamingMob.Enabled = false;
-                                    chkSkipKMSContent.Enabled = false;
-                                    chkSkipGodChangseopDuplicatedNodes.Enabled = false;
-                                    chkPostChangesToDiscord.Enabled = false;
-                                    chkOutputChairAndRidingMount.Enabled = false;
-                                    btnAvatarCode.Enabled = false;
+                                    SetEasyCompareControlsEnabled(false);
                                     if (chkSkipKMSContent.Checked)
                                     {
                                         switch (MessageBoxEx.Show(this, "是否要下載 KMS 內容資料庫？ \r\n\r\n如果選擇“No”，則只跳過 KMS 技能。", "WZ比較", MessageBoxButtons.YesNo))
@@ -7366,35 +7370,7 @@ namespace WzComparerR2
                         compareThread = null;
                         labelXComp1.Text = "比較已完成。時間經過：" + sw.Elapsed.ToString();
                         labelXComp2.Text = "";
-                        btnEasyCompare.Enabled = true;
-                        btnPreset.Enabled = true;
-                        clbRootNode.Enabled = true;
-                        btnSelectDeselectAllNode.Enabled = true;
-                        btnReverseNodeSelection.Enabled = true;
-                        btnCustomCSS.Enabled = true;
-                        cmbComparePng.Enabled = true;
-                        chkOutputPng.Enabled = true;
-                        chkResolvePngLink.Enabled = true;
-                        chkOutputAddedImg.Enabled = true;
-                        chkOutputRemovedImg.Enabled = true;
-                        chkOutputSkillTooltip.Enabled = true;
-                        chkOutputItemTooltip.Enabled = true;
-                        chkOutputEqpTooltip.Enabled = true;
-                        chkOutputMapTooltip.Enabled = true;
-                        chkOutputMobTooltip.Enabled = true;
-                        chkOutputNpcTooltip.Enabled = true;
-                        chkOutputQuestTooltip.Enabled = true;
-                        chkOutputAchvTooltip.Enabled = true;
-                        // chkOutputCashTooltip.Enabled = true;
-                        chkShowObjectID.Enabled = true;
-                        chkShowChangeType.Enabled = true;
-                        chkShowPrice.Enabled = true;
-                        chkShowLinkedTamingMob.Enabled = true;
-                        chkSkipKMSContent.Enabled = true;
-                        chkSkipGodChangseopDuplicatedNodes.Enabled = true;
-                        chkPostChangesToDiscord.Enabled = true;
-                        chkOutputChairAndRidingMount.Enabled = true;
-                        btnAvatarCode.Enabled = chkOutputChairAndRidingMount.Checked;
+                        SetEasyCompareControlsEnabled(true);
                         if (comparer.FailToExportNodes.Count > 0 || comparer.FailToExportTooltips.Count > 0)
                         {
                             string failData = Newtonsoft.Json.JsonConvert.SerializeObject(comparer.FailToExportNodes, Newtonsoft.Json.Formatting.Indented) + "\r\n" + Newtonsoft.Json.JsonConvert.SerializeObject(comparer.FailToExportTooltips, Newtonsoft.Json.Formatting.Indented);
@@ -7415,6 +7391,83 @@ namespace WzComparerR2
                 compareThread.Priority = ThreadPriority.Highest;
                 compareThread.Start();
             }
+        }
+
+        /// <summary>比較中のオプション操作を一括で切り替える。</summary>
+        private void SetEasyCompareControlsEnabled(bool enabled)
+        {
+            btnEasyCompare.Enabled = enabled;
+            btnPreset.Enabled = enabled;
+            clbRootNode.Enabled = enabled;
+            btnSelectDeselectAllNode.Enabled = enabled;
+            btnReverseNodeSelection.Enabled = enabled;
+            btnCustomCSS.Enabled = enabled;
+            cmbComparePng.Enabled = enabled;
+            chkOutputPng.Enabled = enabled;
+            chkResolvePngLink.Enabled = enabled;
+            chkOutputAddedImg.Enabled = enabled;
+            chkOutputRemovedImg.Enabled = enabled;
+            chkOutputSkillTooltip.Enabled = enabled;
+            chkOutputItemTooltip.Enabled = enabled;
+            chkOutputEqpTooltip.Enabled = enabled;
+            chkOutputMapTooltip.Enabled = enabled;
+            chkOutputMobTooltip.Enabled = enabled;
+            chkOutputNpcTooltip.Enabled = enabled;
+            chkOutputQuestTooltip.Enabled = enabled;
+            chkOutputAchvTooltip.Enabled = enabled;
+            // chkOutputCashTooltip.Enabled = enabled;
+            chkShowObjectID.Enabled = enabled;
+            chkShowChangeType.Enabled = enabled;
+            chkShowPrice.Enabled = enabled;
+            chkShowLinkedTamingMob.Enabled = enabled;
+            chkSkipKMSContent.Enabled = enabled;
+            chkSkipGodChangseopDuplicatedNodes.Enabled = enabled;
+            chkPostChangesToDiscord.Enabled = enabled;
+            chkOutputChairAndRidingMount.Enabled = enabled;
+            btnAvatarCode.Enabled = enabled && chkOutputChairAndRidingMount.Checked;
+        }
+
+        /// <summary>2 つの Unity クライアントを比較する（新旧の入れ替え確認を含む）。</summary>
+        private void EasyCompareUnityClients(EasyComparer comparer, List<UnityAssetDocument> documents, string outputDir)
+        {
+            int indexNew = 0;
+            int indexOld = 1;
+            while (true)
+            {
+                UnityAssetDocument docNew = documents[indexNew];
+                UnityAssetDocument docOld = documents[indexOld];
+                string labelNew = GetUnityClientLabel(docNew);
+                string labelOld = GetUnityClientLabel(docOld);
+
+                string txt = string.Format("Unityクライアント:\r\n\r\n  新バージョン: {0}\r\n  旧バージョン: {1}\r\n\r\n「Yes」をクリックして比較を開始します。 旧バージョンと新しいバージョンを交換するには、「No」をクリックします。",
+                    labelNew,
+                    labelOld
+                    );
+                switch (MessageBoxEx.Show(txt, "Unity比較", MessageBoxButtons.YesNoCancel))
+                {
+                    case DialogResult.Yes:
+                        SetEasyCompareControlsEnabled(false);
+                        comparer.EasyCompareUnity(labelNew, docNew.Source, labelOld, docOld.Source, outputDir);
+                        return;
+
+                    case DialogResult.No:
+                        int tmp = indexNew;
+                        indexNew = indexOld;
+                        indexOld = tmp;
+                        break;
+
+                    case DialogResult.Cancel:
+                    default:
+                        return;
+                }
+            }
+        }
+
+        private static string GetUnityClientLabel(UnityAssetDocument document)
+        {
+            string displayName = document == null || document.Source == null ? null
+                : document.Source.ClientInfo == null ? null : document.Source.ClientInfo.DisplayName;
+            return string.IsNullOrEmpty(displayName) ? document?.RootNode?.Text : displayName;
         }
 
         void comparer_StateDetailChanged(object sender, EventArgs e)
