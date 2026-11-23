@@ -80,5 +80,17 @@ namespace WzComparerR2.UnityLib.Classic
             Wz_Type type = GetWzType(assetPath);
             return type == Wz_Type.Unknown ? (Wz_Type?)null : type;
         }
+
+        /// <summary>
+        /// 與 <see cref="GetWzType(string)"/> 相同，但傳統 WZ 沒有對應型別的目錄
+        /// （例如 <c>CashShopPreviewNew</c>、<c>Feature</c>、<c>GlobalMarketPreview</c>、<c>MapLogin</c>、
+        /// <c>MonsterBook</c>、<c>StandardPDD</c>）視為 <see cref="Wz_Type.Base"/>。
+        /// 用於依型別歸類根目錄（例如比對頁面的分類）。
+        /// </summary>
+        public static Wz_Type GetWzTypeOrBase(string assetPath)
+        {
+            Wz_Type type = GetWzType(assetPath);
+            return type == Wz_Type.Unknown ? Wz_Type.Base : type;
+        }
     }
 }

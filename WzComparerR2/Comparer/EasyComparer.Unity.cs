@@ -96,7 +96,8 @@ namespace WzComparerR2.Comparer
                     {
                         if (pair.NodeNew != null && pair.NodeOld != null)
                         {
-                            CompareUnityDirectory(sideNew, pair.NodeNew, sideOld, pair.NodeOld, pair.Name, entries);
+                            // 為了對應單一資產根節點（如 MonsterBook），先判斷階層再比對。
+                            CompareUnityNode(sideNew, pair.NodeNew, sideOld, pair.NodeOld, pair.Name, entries);
                         }
                         else if (pair.NodeNew != null)
                         {
@@ -219,18 +220,17 @@ namespace WzComparerR2.Comparer
             }
         }
 
-        /// <summary>將 <paramref name="root"/> 的頂層目錄依 <see cref="Wz_Type"/> 分類。</summary>
+        /// <summary>
+        /// 將 <paramref name="root"/> 的頂層目錄依 <see cref="Wz_Type"/> 分類。
+        /// 傳統 WZ 沒有對應型別的目錄（如 <c>MonsterBook</c>）視為 <see cref="Wz_Type.Base"/>。
+        /// </summary>
         private static Dictionary<Wz_Type, Dictionary<string, Wz_Node>> BuildUnityTypeIndex(Wz_Node root)
         {
             Dictionary<Wz_Type, Dictionary<string, Wz_Node>> index =
                 new Dictionary<Wz_Type, Dictionary<string, Wz_Node>>();
             foreach (Wz_Node child in root.Nodes)
             {
-                Wz_Type type = ClassicWzTypeMap.GetWzType(child.Text);
-                if (type == Wz_Type.Unknown)
-                {
-                    continue;
-                }
+                Wz_Type type = ClassicWzTypeMap.GetWzTypeOrBase(child.Text);
 
                 Dictionary<string, Wz_Node> dirs;
                 if (!index.TryGetValue(type, out dirs))

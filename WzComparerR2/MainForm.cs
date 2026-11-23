@@ -2166,7 +2166,7 @@ namespace WzComparerR2
             {
                 listViewExWzDetail.Items.Add(new ListViewItem(new string[] { "IMG名", unityImage.Name }));
                 listViewExWzDetail.Items.Add(new ListViewItem(new string[] {
-                    "WZ類型", ClassicWzTypeMap.GetWzType(unityImage.Name).ToString() }));
+                    "WZ類型", ClassicWzTypeMap.GetWzTypeOrBase(unityImage.Name).ToString() }));
                 autoResizeColumns(listViewExWzDetail);
 
                 advTree2.ClearAndDisposeAllNodes();
@@ -2228,7 +2228,7 @@ namespace WzComparerR2
             {
                 listViewExWzDetail.Items.Add(new ListViewItem(new string[] { "JSON名", jsonAsset.Name }));
                 listViewExWzDetail.Items.Add(new ListViewItem(new string[] {
-                    "WZ類型", ClassicWzTypeMap.GetWzType(jsonAsset.ImageKey).ToString() }));
+                    "WZ類型", ClassicWzTypeMap.GetWzTypeOrBase(jsonAsset.ImageKey).ToString() }));
                 autoResizeColumns(listViewExWzDetail);
 
                 advTree2.ClearAndDisposeAllNodes();
