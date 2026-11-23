@@ -1360,11 +1360,18 @@ namespace WzComparerR2
 
                 using (var bmp = frame.Png.ExtractPng(page))
                 {
+                    if (bmp == null)
+                    {
+                        // 沒有圖片的 canvas（例如資料集未收錄該 sprite）無法儲存。
+                        labelItemStatus.Text = "圖片儲存失敗。";
+                        return;
+                    }
                     bmp.Save(pngFileName, System.Drawing.Imaging.ImageFormat.Png);
                 }
                 labelItemStatus.Text = "已保存為: " + pngFileName;
             }
-            else if ((pictureBoxEx1.ShowOverlayAni || !string.IsNullOrEmpty(captureTime)) && frame.Texture != null) // 애니메이션 중첩
+            else if (frame.Texture != null
+                && (pictureBoxEx1.ShowOverlayAni || !string.IsNullOrEmpty(captureTime) || frame.Png == null)) // 動畫疊加（或沒有 Wz_Png 的圖片）
             {
                 var config = ImageHandlerConfig.Default;
                 string pngFileName = string.IsNullOrEmpty(captureTime) ? pictureBoxEx1.PictureName + ".png" : $"{pictureBoxEx1.PictureName}_{captureTime}.png";
@@ -2275,8 +2282,10 @@ namespace WzComparerR2
                         byte[] canvasPng = unityCanvas.GetPng();
                         if (canvasPng != null)
                         {
+                            unityCanvas.EnsureExternalPngInfo();
                             pictureBoxEx1.PictureName = GetSelectedNodeImageName();
-                            pictureBoxEx1.ShowImage(canvasPng);
+                            // 以 Wz_Png 形式顯示：儲存時才能直接寫出原始 PNG。
+                            pictureBoxEx1.ShowImage(unityCanvas);
                             this.cmbItemAniNames.Items.Clear();
                             if (this.pictureBoxEx1.IsPaused)
                             {
@@ -2284,6 +2293,7 @@ namespace WzComparerR2
                             }
                             advTree3.PathSeparator = ".";
                             textBoxX1.Text = "數據長:  " + canvasPng.Length + " 位元組\r\n" +
+                                "大小:  " + unityCanvas.Width + "*" + unityCanvas.Height + "\r\n" +
                                 "路徑:  " + unityCanvas.Path;
                         }
                         else
