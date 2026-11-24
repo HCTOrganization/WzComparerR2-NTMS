@@ -13,6 +13,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using DevComponents.DotNetBar;
 using Newtonsoft.Json.Linq;
+using WzComparerR2.Common;
 using WzComparerR2.Config;
 
 namespace WzComparerR2.CharaSim
@@ -502,10 +503,11 @@ namespace WzComparerR2.CharaSim
 
         /// <summary>
         /// Normalizes text for fuzzy searching: kana is unified to full-width katakana,
-        /// full-width alphanumerics to half-width, and Traditional Chinese to Simplified
-        /// Chinese. Both the search keyword and the candidate text should be passed through
-        /// this method before comparing, so hiragana/katakana and simplified/traditional
-        /// spellings of the same text can match each other.
+        /// full-width alphanumerics to half-width, Traditional Chinese to Simplified
+        /// Chinese, and hangul syllables to 두벌식 keyboard letters. Both the search keyword
+        /// and the candidate text should be passed through this method before comparing, so
+        /// hiragana/katakana, simplified/traditional spellings, and Korean text typed on a
+        /// two-set keyboard (e.g. "apdlvmftmxhfl") all match each other.
         /// </summary>
         public static string NormalizeForSearch(string text)
         {
@@ -514,7 +516,10 @@ namespace WzComparerR2.CharaSim
             // FullWidthKatakana already handles hiragana→katakana and NFKC
             // (half-width kana → full-width, full-width alnum → half-width).
             string normalized = FullWidthKatakana(text);
-            return ToSimplifiedChinese(normalized);
+            normalized = ToSimplifiedChinese(normalized);
+            // Keystroke normalization of hangul makes two-set keyboard input match hangul
+            // text, and keeps mixed hangul/latin text comparable on both sides.
+            return HangulConverter.ToDubeolsik(normalized);
         }
 
         /// <summary>
