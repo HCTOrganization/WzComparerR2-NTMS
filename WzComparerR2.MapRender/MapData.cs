@@ -749,7 +749,10 @@ namespace WzComparerR2.MapRender
                 case 2: aniDir = $"spine{back.SpineNo}"; break;
                 default: throw new Exception($"Unknown back ani value: {back.Ani}.");
             }
-            string path = $@"Map\Back\{back.BS}.img\{aniDir}\{back.No}";
+            // no 若留空，組出的路徑會指向 img\back 這類目錄，
+            // 顯示的就不是原本的單張圖，而是依序顯示目錄內所有圖片，因此補為 0。
+            string no = string.IsNullOrEmpty(back.No) ? "0" : back.No;
+            string path = $@"Map\Back\{back.BS}.img\{aniDir}\{no}";
             var aniItem = resLoader.LoadAnimationData(path);
 
             back.View = new BackItem.ItemView()
