@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using WzComparerR2.UnityLib.Images;
 using WzComparerR2.UnityLib.Unity;
@@ -253,7 +253,8 @@ namespace WzComparerR2.UnityLib.Classic
             foreach (SetAssetLookup lookup in this.GetSetAssetLookups(path))
             {
                 Dictionary<string, UnitySetSpriteEntry> asset;
-                if (!this.catalog.Image.SetAssets.TryGetValue(lookup.Key, out asset))
+                asset = this.catalog.Image.FindSpriteAsset(lookup.Key);
+                if (asset == null)
                 {
                     continue;
                 }
@@ -323,8 +324,8 @@ namespace WzComparerR2.UnityLib.Classic
                 // 此 img 的 sheet 沒有該 sprite 時，嘗試其他候選或兄弟 sheet。
             }
 
-            Dictionary<string, UnitySetSpriteEntry> setAsset;
-            if (this.catalog.Image.SetAssets.TryGetValue(imageKey, out setAsset))
+            Dictionary<string, UnitySetSpriteEntry> setAsset = this.catalog.Image.FindSpriteAsset(imageKey);
+            if (setAsset != null)
             {
                 UnitySetSpriteEntry spriteEntry = PickSetSprite(setAsset, inner);
                 if (spriteEntry != null)
@@ -848,7 +849,7 @@ namespace WzComparerR2.UnityLib.Classic
             string current = path;
             while (true)
             {
-                if (catalog.Image.SetAssets.ContainsKey(current))
+                if (catalog.Image.FindSpriteAsset(current) != null)
                 {
                     key = current;
                     string rest = path.Substring(current.Length);
@@ -1040,3 +1041,4 @@ namespace WzComparerR2.UnityLib.Classic
         }
     }
 }
+

@@ -73,6 +73,7 @@ namespace WzComparerR2.UnityLib.Classic
             this.Entries = new SortedDictionary<string, UnityEntryLocation>(StringComparer.Ordinal);
             this.Image = new UnityImageIndex();
             this.spritesetEntryKeys = new HashSet<string>(StringComparer.Ordinal);
+            this.atlasEntryKeys = new HashSet<string>(StringComparer.Ordinal);
             this.SpritesetOrigins = new Dictionary<string, UnitySpriteOrigin>(StringComparer.Ordinal);
             this.SoundEntries = new SortedDictionary<string, UnityEntryLocation>(StringComparer.Ordinal);
             this.SoundKeysByImage = new SortedDictionary<string, List<string>>(StringComparer.Ordinal);
@@ -99,6 +100,9 @@ namespace WzComparerR2.UnityLib.Classic
 
         /// <summary>由 <see cref="RebuildSpritesetEntries"/> 補上的索引鍵（換語系時可整批撤銷）。</summary>
         private readonly HashSet<string> spritesetEntryKeys;
+
+        /// <summary><see cref="AddAtlasEntries"/> 加入的索引鍵（與語系無關，因此只需重建一次）。</summary>
+        private readonly HashSet<string> atlasEntryKeys;
 
         /// <summary>
         /// spriteset sprite 的邏輯路徑 → WZ 的 <c>origin</c>。
@@ -405,6 +409,29 @@ namespace WzComparerR2.UnityLib.Classic
                 this.AddSpritesetEntries(locale);
             }
             this.AddSpritesetEntries("Common");
+            this.AddAtlasEntries();
+        }
+
+        /// <summary>
+        /// 將 SpriteAtlas（<c>Assets/WzAssets/Atlas/&lt;name&gt;.spriteatlasv2</c>）以 <c>UI/&lt;atlas 名&gt;.img</c> 索引。
+        /// 目前語系 spriteset 沒有的 sprite 也能由此追溯（atlas 不隨語系變動，只需重建一次）。
+        /// </summary>
+        private void AddAtlasEntries()
+        {
+            foreach (KeyValuePair<string, Dictionary<string, UnitySetSpriteEntry>> asset in this.Image.AtlasAssets)
+            {
+                foreach (KeyValuePair<string, UnitySetSpriteEntry> sprite in asset.Value)
+                {
+                    string path = asset.Key + "/" + sprite.Key;
+                    if (this.Entries.ContainsKey(path) && !this.atlasEntryKeys.Contains(path))
+                    {
+                        continue; // 優先採用 WZJS / JSON / spriteset 端的定義
+                    }
+                    this.Entries[path] = sprite.Value.SpriteLocation;
+                    this.SpritesetOrigins[path] = sprite.Value.Origin;
+                    this.atlasEntryKeys.Add(path);
+                }
+            }
         }
 
         private void AddSpritesetEntries(string region)

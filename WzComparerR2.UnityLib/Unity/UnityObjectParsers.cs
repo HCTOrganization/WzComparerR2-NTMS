@@ -506,18 +506,27 @@ namespace WzComparerR2.UnityLib.Unity
 
         private readonly byte[] data;
         private readonly bool littleEndian;
+        private readonly List<UnityPPtr> sprites;
 
-        private UnitySpriteAtlasInfo(string name, byte[] data, bool littleEndian)
+        private UnitySpriteAtlasInfo(string name, byte[] data, bool littleEndian, List<UnityPPtr> sprites)
         {
             this.Name = name;
             this.data = data;
             this.littleEndian = littleEndian;
+            this.sprites = sprites;
         }
 
         public string Name { get; private set; }
 
+        /// <summary>m_PackedSprites（打包進 atlas 的 Sprite 清單，依打包順序）。</summary>
+        public IReadOnlyList<UnityPPtr> Sprites
+        {
+            get { return this.sprites; }
+        }
+
         /// <summary>
-        /// 只從 atlas 物件的位元組讀取名稱（渲染資料延後查詢）。
+        /// 從 atlas 物件的位元組讀取名稱與 <c>m_PackedSprites</c>
+        /// （渲染資料交由 <see cref="TryGetRenderData"/> 延後查詢）。
         /// </summary>
         public static UnitySpriteAtlasInfo Parse(byte[] data, bool littleEndian)
         {
@@ -526,16 +535,33 @@ namespace WzComparerR2.UnityLib.Unity
                 return null;
             }
             UnityByteReader reader = new UnityByteReader(data, littleEndian);
-            string name;
+            string name = null;
+            List<UnityPPtr> sprites = new List<UnityPPtr>();
             try
             {
                 name = reader.AlignedString();
+                if (reader.Remaining >= 4)
+                {
+                    int count = reader.I32();
+                    if (count > 0 && count <= 100000)
+                    {
+                        for (int i = 0; i < count && reader.Remaining >= 12; i++)
+                        {
+                            int fileId = reader.I32();
+                            long pathId = reader.I64();
+                            if (pathId != 0)
+                            {
+                                sprites.Add(new UnityPPtr(fileId, pathId));
+                            }
+                        }
+                    }
+                }
             }
             catch (UnityException)
             {
-                name = null;
+                // 損壞的 payload 只取名稱或視為空清單
             }
-            return new UnitySpriteAtlasInfo(name, data, littleEndian);
+            return new UnitySpriteAtlasInfo(name, data, littleEndian, sprites);
         }
 
         /// <summary>

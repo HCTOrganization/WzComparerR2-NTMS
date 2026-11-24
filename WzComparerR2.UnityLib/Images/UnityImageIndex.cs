@@ -101,11 +101,13 @@ namespace WzComparerR2.UnityLib.Images
     {
         private const string SheetPrefix = "assets/wzassets/spritesheet/";
         private const string SetPrefix = "assets/wzassets/spriteset/";
+        private const string AtlasPrefix = "assets/wzassets/atlas/";
 
         public UnityImageIndex()
         {
             this.SheetsByPath = new Dictionary<string, Dictionary<string, UnitySheetEntry>>(StringComparer.Ordinal);
             this.SetAssets = new Dictionary<string, Dictionary<string, UnitySetSpriteEntry>>(StringComparer.Ordinal);
+            this.AtlasAssets = new Dictionary<string, Dictionary<string, UnitySetSpriteEntry>>(StringComparer.Ordinal);
             this.SetPrefixes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
 
@@ -114,6 +116,31 @@ namespace WzComparerR2.UnityLib.Images
 
         /// <summary>asset 路徑（去前綴去副檔名）→ sprite 清單（名稱 → sprite）。</summary>
         public Dictionary<string, Dictionary<string, UnitySetSpriteEntry>> SetAssets { get; private set; }
+
+        /// <summary>
+        /// SpriteAtlas（<c>Assets/WzAssets/Atlas/&lt;name&gt;.spriteatlasv2</c>）→ sprite 清單。
+        /// 索引鍵為 WZ 形式的 <c>UI/&lt;atlas 名&gt;</c>，樹上會顯示為 <c>UI/&lt;atlas 名&gt;.img</c>。
+        /// </summary>
+        public Dictionary<string, Dictionary<string, UnitySetSpriteEntry>> AtlasAssets { get; private set; }
+
+        /// <summary>讓 spriteset / atlas 兩種 sprite 都能查到。</summary>
+        public Dictionary<string, UnitySetSpriteEntry> FindSpriteAsset(string key)
+        {
+            if (key == null)
+            {
+                return null;
+            }
+            Dictionary<string, UnitySetSpriteEntry> asset;
+            if (this.SetAssets.TryGetValue(key, out asset))
+            {
+                return asset;
+            }
+            if (this.AtlasAssets.TryGetValue(key, out asset))
+            {
+                return asset;
+            }
+            return null;
+        }
 
         /// <summary>
         /// spriteset 鍵的第一段（地域代碼，如 <c>Common</c>、<c>CN</c>、<c>TW</c>）；
@@ -138,7 +165,9 @@ namespace WzComparerR2.UnityLib.Images
                 || ContainsPathPrefix(container, SheetPrefix);
             bool isSet = bundleStem.StartsWith("spriteset", StringComparison.Ordinal)
                 || ContainsPathPrefix(container, SetPrefix);
-            if (!isSheet && !isSet)
+            bool isAtlas = bundleStem.StartsWith("atlas", StringComparison.Ordinal)
+                || ContainsPathPrefix(container, AtlasPrefix);
+            if (!isSheet && !isSet && !isAtlas)
             {
                 return;
             }
@@ -166,6 +195,12 @@ namespace WzComparerR2.UnityLib.Images
             if (isSet)
             {
                 this.CollectSet(
+                    bundle, bundleIndex, nodeIndex, serializedFile, container, locationOf,
+                    objectLocations, readEntryBytes);
+            }
+            if (isAtlas)
+            {
+                this.CollectAtlas(
                     bundle, bundleIndex, nodeIndex, serializedFile, container, locationOf,
                     objectLocations, readEntryBytes);
             }
@@ -344,19 +379,10 @@ namespace WzComparerR2.UnityLib.Images
 
             // 優先使用同一檔案，找不到再以跨所有 bundle 的索引解析
             // （spriteset 的 .asset 有時會參照其他檔案（如 atlas bundle）中的 Sprite）。
-            Func<long, UnityEntryLocation> resolve = pathId =>
-                locationOf(pathId) ?? (objectLocations != null && objectLocations.TryGetValue(pathId, out UnityEntryLocation global)
-                    ? global
-                    : null);
-
-            Func<UnityEntryLocation, byte[]> readBytes = location =>
-            {
-                if (location.BundleIndex == bundleIndex && location.NodeIndex == nodeIndex)
-                {
-                    return bundle.ReadNodeRange(nodeIndex, location.AbsoluteOffset, (int)location.ByteSize);
-                }
-                return readEntryBytes != null ? readEntryBytes(location) : null;
-            };
+            Func<long, UnityEntryLocation> resolve =
+                pathId => this.ResolveLocation(pathId, locationOf, objectLocations);
+            Func<UnityEntryLocation, byte[]> readBytes =
+                location => this.ReadLocationBytes(location, bundle, bundleIndex, nodeIndex, readEntryBytes);
 
             // atlas 打包 sprite 用的快取（SpriteAtlas 的位元組只讀一次）
             Dictionary<long, UnitySpriteAtlasInfo> atlasCache = new Dictionary<long, UnitySpriteAtlasInfo>();
@@ -481,6 +507,155 @@ namespace WzComparerR2.UnityLib.Images
             }
             cache[atlasPathId] = atlas;
             return atlas;
+        }
+
+        /// <summary>
+        /// 將 SpriteAtlas（<c>Assets/WzAssets/Atlas/&lt;name&gt;.spriteatlasv2</c>）以 <c>UI/&lt;atlas 名&gt;</c> 收錄。
+        /// 子節點為打包進 atlas 的 sprite，名稱為 sprite 名（重複時以 <c>_N</c> 區分）。
+        /// </summary>
+        private void CollectAtlas(
+            UnityFsBundle bundle, int bundleIndex, int nodeIndex, UnitySerializedFile serializedFile,
+            IReadOnlyList<UnityContainerEntry> container, Func<long, UnityEntryLocation> locationOf,
+            Dictionary<long, UnityEntryLocation> objectLocations,
+            Func<UnityEntryLocation, byte[]> readEntryBytes)
+        {
+            Func<long, UnityEntryLocation> resolve =
+                pathId => this.ResolveLocation(pathId, locationOf, objectLocations);
+            Func<UnityEntryLocation, byte[]> readBytes =
+                location => this.ReadLocationBytes(location, bundle, bundleIndex, nodeIndex, readEntryBytes);
+
+            foreach (UnityContainerEntry entry in container)
+            {
+                string lower = entry.Path.ToLowerInvariant();
+                if (!lower.StartsWith(AtlasPrefix, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+                if (!lower.EndsWith(".spriteatlasv2", StringComparison.Ordinal)
+                    && !lower.EndsWith(".spriteatlas", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                string fileName = entry.Path.Substring(entry.Path.LastIndexOf('/') + 1);
+                int dot = fileName.IndexOf('.');
+                string atlasName = dot > 0 ? fileName.Substring(0, dot) : fileName;
+                if (string.IsNullOrEmpty(atlasName))
+                {
+                    continue;
+                }
+
+                UnityEntryLocation atlasLocation = resolve(entry.Asset.PathId);
+                if (atlasLocation == null)
+                {
+                    continue;
+                }
+
+                UnitySpriteAtlasInfo atlas;
+                try
+                {
+                    byte[] atlasData = readBytes(atlasLocation);
+                    atlas = atlasData != null ? UnitySpriteAtlasInfo.Parse(atlasData, true) : null;
+                }
+                catch (Exception ex) when (ex is UnityException || ex is IOException || ex is ArgumentException)
+                {
+                    atlas = null;
+                }
+                if (atlas == null || atlas.Sprites.Count == 0)
+                {
+                    continue;
+                }
+
+                Dictionary<string, UnitySetSpriteEntry> output =
+                    new Dictionary<string, UnitySetSpriteEntry>(StringComparer.Ordinal);
+                for (int i = 0; i < atlas.Sprites.Count; i++)
+                {
+                    UnityPPtr spritePtr = atlas.Sprites[i];
+                    UnityEntryLocation spriteLocation = resolve(spritePtr.PathId);
+                    if (spriteLocation == null || spriteLocation.ClassId != UnityClassIds.Sprite)
+                    {
+                        continue;
+                    }
+                    bool sameFile = spriteLocation.BundleIndex == bundleIndex && spriteLocation.NodeIndex == nodeIndex;
+                    byte[] data;
+                    UnitySpriteInfo sprite;
+                    try
+                    {
+                        data = readBytes(spriteLocation);
+                        if (data == null)
+                        {
+                            continue;
+                        }
+                        sprite = UnityObjectParsers.ParseSprite(data, sameFile ? serializedFile.IsLittleEndian : true);
+                    }
+                    catch (Exception ex) when (ex is UnityException || ex is IOException)
+                    {
+                        continue;
+                    }
+
+                    UnityPPtr texturePtr = sprite.Texture;
+                    UnityRectF? cropRect = null;
+                    if (texturePtr.PathId == 0)
+                    {
+                        if (!atlas.TryGetRenderData(sprite.RenderDataKeyGuid, out texturePtr, out UnityRectF atlasRect))
+                        {
+                            continue;
+                        }
+                        cropRect = atlasRect;
+                    }
+                    if (texturePtr.PathId == 0)
+                    {
+                        continue;
+                    }
+                    UnityEntryLocation textureLocation = resolve(texturePtr.PathId);
+                    if (textureLocation == null || textureLocation.ClassId != UnityClassIds.Texture2D)
+                    {
+                        continue;
+                    }
+
+                    string spriteName = sprite.Name;
+                    if (string.IsNullOrEmpty(spriteName))
+                    {
+                        spriteName = i.ToString();
+                    }
+                    if (output.ContainsKey(spriteName))
+                    {
+                        spriteName = spriteName + "_" + output.Count.ToString();
+                    }
+                    int originX, originY;
+                    sprite.GetWzOrigin(cropRect ?? sprite.Rect, out originX, out originY);
+                    output[spriteName] = new UnitySetSpriteEntry(
+                        spriteLocation, textureLocation, new UnitySpriteOrigin(originX, originY), cropRect);
+                }
+
+                if (output.Count > 0)
+                {
+                    this.AtlasAssets["UI/" + atlasName] = output;
+                }
+            }
+        }
+
+        private UnityEntryLocation ResolveLocation(
+            long pathId, Func<long, UnityEntryLocation> locationOf,
+            Dictionary<long, UnityEntryLocation> objectLocations)
+        {
+            UnityEntryLocation location = locationOf(pathId);
+            if (location != null || objectLocations == null)
+            {
+                return location;
+            }
+            return objectLocations.TryGetValue(pathId, out location) ? location : null;
+        }
+
+        private byte[] ReadLocationBytes(
+            UnityEntryLocation location, UnityFsBundle bundle, int bundleIndex, int nodeIndex,
+            Func<UnityEntryLocation, byte[]> readEntryBytes)
+        {
+            if (location.BundleIndex == bundleIndex && location.NodeIndex == nodeIndex)
+            {
+                return bundle.ReadNodeRange(nodeIndex, location.AbsoluteOffset, (int)location.ByteSize);
+            }
+            return readEntryBytes != null ? readEntryBytes(location) : null;
         }
 
         private UnitySheetEntry GetOrCreateSheet(string key, string locale)
