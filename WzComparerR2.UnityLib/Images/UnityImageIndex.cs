@@ -23,17 +23,34 @@ namespace WzComparerR2.UnityLib.Images
         public List<KeyValuePair<int, UnityEntryLocation>> AtlasPages { get; private set; }
     }
 
-    /// <summary>spriteset 的一個 sprite：Sprite 物件位置 + 其 Texture2D 物件位置。</summary>
+    /// <summary>相當於 WZ <c>origin</c> 的基準點（以圖片左上角為原點）。</summary>
+    public struct UnitySpriteOrigin
+    {
+        public UnitySpriteOrigin(int x, int y)
+        {
+            this.X = x;
+            this.Y = y;
+        }
+
+        public int X { get; private set; }
+        public int Y { get; private set; }
+    }
+
+    /// <summary>spriteset 的一個 sprite：Sprite 物件位置 + 其 Texture2D 物件位置 + origin。</summary>
     public sealed class UnitySetSpriteEntry
     {
-        public UnitySetSpriteEntry(UnityEntryLocation spriteLocation, UnityEntryLocation textureLocation)
+        public UnitySetSpriteEntry(UnityEntryLocation spriteLocation, UnityEntryLocation textureLocation, UnitySpriteOrigin origin)
         {
             this.SpriteLocation = spriteLocation;
             this.TextureLocation = textureLocation;
+            this.Origin = origin;
         }
 
         public UnityEntryLocation SpriteLocation { get; private set; }
         public UnityEntryLocation TextureLocation { get; private set; }
+
+        /// <summary>由 Sprite 的 m_Pivot 求得的 WZ 相容 origin。</summary>
+        public UnitySpriteOrigin Origin { get; private set; }
     }
 
     /// <summary>
@@ -274,7 +291,12 @@ namespace WzComparerR2.UnityLib.Images
                 }
                 foreach (KeyValuePair<string, long> item in ParseSetAssetPayload(payload))
                 {
-                    sprites[item.Key] = item.Value;
+                    // 無名稱影格清單的所有條目名稱都是空的，因此以 pid 作為暫用索引鍵，
+                    // 避免被覆蓋消失（最終名稱由 sprite 端補上）。
+                    string entryKey = string.IsNullOrEmpty(item.Key)
+                        ? UnnamedEntryKeyPrefix + item.Value.ToString()
+                        : item.Key;
+                    sprites[entryKey] = item.Value;
                 }
             }
 
@@ -318,7 +340,25 @@ namespace WzComparerR2.UnityLib.Images
                     {
                         continue;
                     }
-                    output[item.Key] = new UnitySetSpriteEntry(spriteLocation, textureLocation);
+
+                    // 無名稱影格清單（如 portal）改以 sprite 名稱（"0"、"1"…）補上。
+                    string spriteName = item.Key;
+                    if (string.IsNullOrEmpty(spriteName) || spriteName.StartsWith(UnnamedEntryKeyPrefix, StringComparison.Ordinal))
+                    {
+                        spriteName = sprite.Name;
+                    }
+                    if (string.IsNullOrEmpty(spriteName))
+                    {
+                        spriteName = output.Count.ToString();
+                    }
+                    if (output.ContainsKey(spriteName))
+                    {
+                        spriteName = spriteName + "_" + output.Count.ToString();
+                    }
+                    int originX, originY;
+                    sprite.GetWzOrigin(out originX, out originY);
+                    output[spriteName] = new UnitySetSpriteEntry(
+                        spriteLocation, textureLocation, new UnitySpriteOrigin(originX, originY));
                 }
                 if (output.Count > 0)
                 {
@@ -415,6 +455,16 @@ namespace WzComparerR2.UnityLib.Images
         internal static List<KeyValuePair<string, long>> ParseSetAssetPayload(byte[] payload)
         {
             List<KeyValuePair<string, long>> output = new List<KeyValuePair<string, long>>();
+
+            // 較新的影格清單（例如 Map/MapHelper/portal/game/pv）配置為
+            // [名稱數 i64 = 0][件數 i64][(pathId i64 + 16 位元組) × 件數]。
+            // 因為沒有名稱，sprite 端的名稱由 CollectSet 補上。
+            List<KeyValuePair<string, long>> framedEntries;
+            if (TryParseFramedEntries(payload, out framedEntries))
+            {
+                return framedEntries;
+            }
+
             uint count = U32At(payload, 0);
             if (count > 100000)
             {
@@ -460,6 +510,58 @@ namespace WzComparerR2.UnityLib.Images
             }
             return output;
         }
+
+        /// <summary>
+        /// 讀取無名稱影格清單的配置（<c>[名稱數 i64 = 0][件數 i64][(pathId i64 + 16 位元組) × 件數]</c>）。
+        /// 不符合時（舊式 PPTR 連續排列、具名條目）回傳 false。
+        /// </summary>
+        private static bool TryParseFramedEntries(byte[] payload, out List<KeyValuePair<string, long>> entries)
+        {
+            entries = null;
+            if (payload == null || payload.Length < FramedHeaderLength + FramedEntryStride)
+            {
+                return false;
+            }
+            if (I64At(payload, 0) != 0)
+            {
+                return false; // 具名條目是另一種格式
+            }
+            long count = I64At(payload, 8);
+            if (count <= 0 || count > 100000)
+            {
+                return false;
+            }
+            if (FramedHeaderLength + count * FramedEntryStride != payload.Length)
+            {
+                return false;
+            }
+
+            List<KeyValuePair<string, long>> output = new List<KeyValuePair<string, long>>((int)count);
+            for (int i = 0; i < count; i++)
+            {
+                long pathId = I64At(payload, FramedHeaderLength + i * FramedEntryStride);
+                if (pathId == 0)
+                {
+                    continue;
+                }
+                output.Add(new KeyValuePair<string, long>(string.Empty, pathId));
+            }
+            if (output.Count == 0)
+            {
+                return false;
+            }
+            entries = output;
+            return true;
+        }
+
+        /// <summary>具名條目的標頭長度（名稱數 i64 + 件數 i64）。</summary>
+        private const int FramedHeaderLength = 16;
+
+        /// <summary>無名稱條目的暫用索引鍵前置字串（僅用於 <see cref="CollectSet"/>）。</summary>
+        private const string UnnamedEntryKeyPrefix = "#pid:";
+
+        /// <summary>無名稱影格清單每個條目的長度（pathId i64 + 附加資訊 16 位元組）。</summary>
+        private const int FramedEntryStride = 24;
 
         /// <summary>payload 是否為「名稱長度 + 名稱」格式的條目。</summary>
         private static bool IsNamedEntries(byte[] payload)

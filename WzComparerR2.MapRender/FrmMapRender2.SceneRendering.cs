@@ -1292,10 +1292,10 @@ namespace WzComparerR2.MapRender
             var renderObj = GetRenderObject(portal.View.IsEditorMode ? portal.View.EditorAnimator : portal.View.Animator);
             if (renderObj == null)
             {
-                // Classic（Unity）資料集沒有 MapHelper.img/portal 的圖片。
-                // 為避免完全不顯示，改在傳送點所在位置繪製替代標記
+                // Classic（Unity）資料集中 MapHelper.img/portal 的圖片也以 spriteset 收錄。
+                // 找不到圖片時，只有在設定啟用時才繪製替代標記
                 // （編輯模式顯示全部型別，一般顯示則只顯示 WZ 有提供圖片的型別）。
-                if (portal.View.IsEditorMode || IsVisiblePortalType(portal.Type))
+                if (this.showPortalMarker && (portal.View.IsEditorMode || IsVisiblePortalType(portal.Type)))
                 {
                     renderObj = PortalMarker.GetFrame(this.batcher.GraphicsDevice);
                 }

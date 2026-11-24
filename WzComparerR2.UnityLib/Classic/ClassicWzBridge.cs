@@ -435,6 +435,7 @@ namespace WzComparerR2.UnityLib.Classic
                     case UnityClassIds.Sprite:
                         // spriteset（SpriteSet/<region>/UI/…）的單一 sprite：解碼時才依語系取圖。
                         current.Value = new UnityCanvas(source, entry.Key);
+                        ClassicWzSource.AttachSpriteOrigin(current, source, entry.Key);
                         break;
                 }
             }

@@ -6,8 +6,8 @@ using WzComparerR2.Animation;
 namespace WzComparerR2.MapRender
 {
     /// <summary>
-    /// Classic World（Unity）客戶端未收錄 <c>Map/MapHelper.img/portal</c> 的圖片，
-    /// 因此產生用來標示傳送點位置的替代標記。
+    /// 為找不到傳送點圖片的資料集產生替代標記（藍色光柱）。
+    /// 只有在設定 <c>showPortalMarker</c> 啟用時才會繪製。
     /// </summary>
     internal static class PortalMarker
     {

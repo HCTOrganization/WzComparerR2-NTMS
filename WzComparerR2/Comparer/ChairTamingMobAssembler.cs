@@ -67,6 +67,8 @@ namespace WzComparerR2.Comparer
             string chairExamplePath = Path.Combine(outputDir, ChairExampleFolderName);
             Directory.CreateDirectory(chairExamplePath);
 
+            // 椅子與頭像的各張圖片都從「新版本」的資料集解析。
+            SetUnityResolveSlot(0);
             var config = ImageHandlerConfig.Default;
             var stringLinker = this.CreateChairStringLinker();
             var log = new StringBuilder();
@@ -128,6 +130,8 @@ namespace WzComparerR2.Comparer
             string tamingMobExamplePath = Path.Combine(outputDir, TamingMobExampleFolderName);
             Directory.CreateDirectory(tamingMobExamplePath);
 
+            // 騎寵與頭像的各張圖片都從「新版本」的資料集解析。
+            SetUnityResolveSlot(0);
             var config = ImageHandlerConfig.Default;
             var stringLinker = this.CreateChairStringLinker();
             var log = new StringBuilder();

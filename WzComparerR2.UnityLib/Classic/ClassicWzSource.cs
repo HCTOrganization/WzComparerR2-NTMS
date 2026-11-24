@@ -796,6 +796,7 @@ namespace WzComparerR2.UnityLib.Classic
             string[] segments = key.Split('/');
             WzLib.Wz_Node sprite = new WzLib.Wz_Node(segments[segments.Length - 1]);
             sprite.Value = new UnityCanvas(this, key);
+            AttachSpriteOrigin(sprite, this, key);
 
             // 補上上層目錄，讓 Wz_Node.FullPathToFile 能以 WZ 形式的路徑重新查詢
             // （供 MapRender 等透過 PluginManager.FindWz 取得貼圖的程式使用）。
@@ -807,6 +808,30 @@ namespace WzComparerR2.UnityLib.Classic
                 node = parent;
             }
             return sprite;
+        }
+
+        /// <summary>
+        /// 為 spriteset 的 sprite 節點加上 WZ 的 <c>origin</c> 子節點。
+        /// MapRender 等會從此子節點取得影格的基準點。
+        /// </summary>
+        public static void AttachSpriteOrigin(WzLib.Wz_Node node, ClassicWzSource source, string key)
+        {
+            if (node == null || source == null || string.IsNullOrEmpty(key))
+            {
+                return;
+            }
+            UnitySpriteOrigin origin;
+            if (!source.Catalog.SpritesetOrigins.TryGetValue(key, out origin))
+            {
+                return;
+            }
+            if (node.Nodes["origin"] != null)
+            {
+                return;
+            }
+            WzLib.Wz_Node originNode = new WzLib.Wz_Node("origin");
+            originNode.Value = new WzLib.Wz_Vector(origin.X, origin.Y);
+            node.Nodes.Add(originNode);
         }
 
         private static string GetLeafName(string path)

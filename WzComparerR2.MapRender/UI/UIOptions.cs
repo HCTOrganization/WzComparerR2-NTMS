@@ -152,8 +152,9 @@ namespace WzComparerR2.MapRender.UI
         private UIElement GetTabContent1()
         {
             Grid grid = new Grid();
-            for (int i = 0; i < 13; i++)
-                grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(24, GridUnitType.Pixel) });
+            // 增加列數也維持整體高度不變，因此每列高度設為 22px。
+            for (int i = 0; i < 14; i++)
+                grid.RowDefinitions.Add(new RowDefinition() { Height = new GridLength(22, GridUnitType.Pixel) });
             for (int i = 0; i < 2; i++)
                 grid.ColumnDefinitions.Add(new ColumnDefinition());
 
@@ -294,7 +295,7 @@ namespace WzComparerR2.MapRender.UI
             lbl6.VerticalAlignment = VerticalAlignment.Center;
             lbl6.Text = "模擬";
             lbl6.Foreground = Brushes.Yellow;
-            Grid.SetRow(lbl6, 11);
+            Grid.SetRow(lbl6, 12);
             Grid.SetColumn(lbl6, 0);
             grid.Children.Add(lbl6);
 
@@ -303,10 +304,20 @@ namespace WzComparerR2.MapRender.UI
             chk7.Margin = new Thickness(18, 0, 0, 0);
             chk7.Background = Brushes.Gray;
             chk7.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.EnableMobMovement)));
-            Grid.SetRow(chk7, 12);
+            Grid.SetRow(chk7, 13);
             Grid.SetColumn(chk7, 0);
             Grid.SetColumnSpan(chk7, 2);
             grid.Children.Add(chk7);
+
+            CheckBox chk8 = new CheckBox();
+            chk8.Content = "顯示傳送點標記（沒有圖片時）";
+            chk8.Margin = new Thickness(18, 0, 0, 0);
+            chk8.Background = Brushes.Gray;
+            chk8.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(UIOptionsDataModel.ShowPortalMarker)));
+            Grid.SetRow(chk8, 11);
+            Grid.SetColumn(chk8, 0);
+            Grid.SetColumnSpan(chk8, 2);
+            grid.Children.Add(chk8);
 
             /*TextBlock lbl6 = new TextBlock();
             lbl6.VerticalAlignment = VerticalAlignment.Center;
@@ -659,6 +670,7 @@ namespace WzComparerR2.MapRender.UI
         private bool _forceCaptureWithResolution;
         private bool _showFootholdBoundary;
         private bool _enableMobMovement;
+        private bool _showPortalMarker;
         private string _screenshotBackgroundColor;
         private string _scLeft;
         private string _scTop;
@@ -717,6 +729,12 @@ namespace WzComparerR2.MapRender.UI
         {
             get { return this._enableMobMovement; }
             set { base.SetProperty(ref this._enableMobMovement, value); }
+        }
+
+        public bool ShowPortalMarker
+        {
+            get { return this._showPortalMarker; }
+            set { base.SetProperty(ref this._showPortalMarker, value); }
         }
 
         public string ScreenshotBackgroundColor

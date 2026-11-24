@@ -101,5 +101,13 @@ namespace WzComparerR2.MapRender.Config
             get { return (ConfigItem<bool>)this["enableMobMovement"]; }
             set { this["enableMobMovement"] = value; }
         }
+
+        /// <summary>沒有傳送點圖片時所顯示替代標記（藍色圓柱）的顯示設定。</summary>
+        [ConfigurationProperty("showPortalMarker")]
+        public ConfigItem<bool> ShowPortalMarker
+        {
+            get { return (ConfigItem<bool>)this["showPortalMarker"]; }
+            set { this["showPortalMarker"] = value; }
+        }
     }
 }

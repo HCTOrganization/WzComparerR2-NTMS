@@ -73,6 +73,7 @@ namespace WzComparerR2.UnityLib.Classic
             this.Entries = new SortedDictionary<string, UnityEntryLocation>(StringComparer.Ordinal);
             this.Image = new UnityImageIndex();
             this.spritesetEntryKeys = new HashSet<string>(StringComparer.Ordinal);
+            this.SpritesetOrigins = new Dictionary<string, UnitySpriteOrigin>(StringComparer.Ordinal);
             this.SoundEntries = new SortedDictionary<string, UnityEntryLocation>(StringComparer.Ordinal);
             this.SoundKeysByImage = new SortedDictionary<string, List<string>>(StringComparer.Ordinal);
         }
@@ -98,6 +99,12 @@ namespace WzComparerR2.UnityLib.Classic
 
         /// <summary>由 <see cref="RebuildSpritesetEntries"/> 補上的索引鍵（換語系時可整批撤銷）。</summary>
         private readonly HashSet<string> spritesetEntryKeys;
+
+        /// <summary>
+        /// spriteset sprite 的邏輯路徑 → WZ 的 <c>origin</c>。
+        /// 由 sprite 的 m_Pivot 求得，用於動畫基準點對齊。
+        /// </summary>
+        public Dictionary<string, UnitySpriteOrigin> SpritesetOrigins { get; private set; }
 
         /// <summary>掃描目錄下所有 .bundle，用每個 AssetBundle 物件的 m_Container 建索引。</summary>
         /// <param name="rootDirectory">
@@ -323,6 +330,7 @@ namespace WzComparerR2.UnityLib.Classic
             foreach (string key in this.spritesetEntryKeys)
             {
                 this.Entries.Remove(key);
+                this.SpritesetOrigins.Remove(key);
             }
             this.spritesetEntryKeys.Clear();
 
@@ -358,6 +366,7 @@ namespace WzComparerR2.UnityLib.Classic
                         continue; // WZJS / JSON 資產優先
                     }
                     this.Entries[path] = sprite.Value.SpriteLocation;
+                    this.SpritesetOrigins[path] = sprite.Value.Origin;
                     this.spritesetEntryKeys.Add(path);
                 }
             }

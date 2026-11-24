@@ -952,8 +952,8 @@ namespace WzComparerR2.MapRender
                 }
             }
 
-            // Classic（Unity）資料集未收錄 MapHelper.img/portal 的圖片。
-            // 此時由繪製端（GetMeshPortal）顯示替代標記。
+            // Classic（Unity）資料集中 MapHelper.img/portal 的圖片也以 spriteset 收錄。
+            // 沒有圖片的資料集則由繪製端（GetMeshPortal）顯示替代標記。
 
             portal.View = view;
         }
