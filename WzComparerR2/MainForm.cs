@@ -7245,6 +7245,139 @@ namespace WzComparerR2
             frmWorldArchiveBrowser.Show();
         }
 
+        private void btnMonsterBookBrowser_Click(object sender, EventArgs e)
+        {
+            int clientCount = this.openedWz.Count
+                + (this.openedUnitySources == null ? 0 : this.openedUnitySources.Count);
+            if (clientCount == 0)
+            {
+                ToastNotification.Show(this, "錯誤：尚未開啟客戶端資料。", null, 2000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                return;
+            }
+            if (clientCount > 1)
+            {
+                ToastNotification.Show(this, "錯誤：使用此功能前，請只開啟一個客戶端。", null, 4000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                return;
+            }
+
+            Wz_Node monsterBookNode = this.FindMonsterBookNode();
+            if (monsterBookNode == null)
+            {
+                ToastNotification.Show(this, "錯誤：此客戶端未實作怪物手冊。", null, 3000, eToastGlowColor.Red, eToastPosition.TopCenter);
+                return;
+            }
+            Wz_Node monsterBookStringNode = this.FindMonsterBookStringNode();
+            if (!this.stringLinker.HasValues)
+            {
+                this.LoadStringLinker();
+            }
+            foreach (Form form in Application.OpenForms)
+            {
+                if (form is FrmMonsterBookBrowser && !form.IsDisposed)
+                {
+                    FrmMonsterBookBrowser openedForm = (FrmMonsterBookBrowser)form;
+                    openedForm.stringLinker = this.stringLinker;
+                    openedForm.MonsterBookNode = monsterBookNode;
+                    openedForm.MonsterBookStringNode = monsterBookStringNode;
+                    openedForm._mainForm = this;
+                    form.Show();
+                    form.BringToFront();
+                    openedForm.BeginLoadMobList();
+                    return;
+                }
+            }
+            FrmMonsterBookBrowser frmMonsterBookBrowser = new FrmMonsterBookBrowser();
+            frmMonsterBookBrowser.stringLinker = this.stringLinker;
+            frmMonsterBookBrowser.MonsterBookNode = monsterBookNode;
+            frmMonsterBookBrowser.MonsterBookStringNode = monsterBookStringNode;
+            frmMonsterBookBrowser._mainForm = this;
+            frmMonsterBookBrowser.Show();
+            frmMonsterBookBrowser.BeginLoadMobList();
+        }
+
+        /// <summary>
+        /// 尋找 MonsterBook 的內容節點。怪物 ID 會排在此節點的子節點。
+        /// 優先使用 Unity 客戶端資料（<c>/MonsterBook</c>），也支援 WZ 的
+        /// <c>String.wz/MonsterBook.img</c>，以及單獨開啟的 <c>MonsterBook.img</c>。
+        /// </summary>
+        private Wz_Node FindMonsterBookNode()
+        {
+            foreach (UnityAssetDocument document in this.openedUnitySources.Values)
+            {
+                UnityWzImage unityImage = document.Source.GetWzImage("MonsterBook");
+                if (unityImage != null && unityImage.TryExtract())
+                {
+                    return unityImage.Node;
+                }
+            }
+
+            // WZ 會傳回已展開的內容節點，因此確認是否為 img 節點。
+            Wz_Node wzBookNode = PluginManager.FindWz(@"String\MonsterBook.img");
+            if (wzBookNode != null && !(wzBookNode.Value is Wz_Image))
+            {
+                return wzBookNode;
+            }
+
+            foreach (Wz_Structure wzs in this.openedWz)
+            {
+                Wz_Image image = FindMonsterBookImage(wzs.WzNode, 3);
+                if (image != null && image.TryExtract())
+                {
+                    return image.Node;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 傳回 Unity 資料集的字串表（<c>String/&lt;region&gt;/MonsterBook</c>）。
+        /// 子節點名稱為怪物 ID，節點值為說明文字（MonsterBook 資產側的
+        /// <c>episode</c> 只有話數編號，因此說明文字從這裡取得）。
+        /// </summary>
+        private Wz_Node FindMonsterBookStringNode()
+        {
+            if (this.openedUnitySources == null)
+            {
+                return null;
+            }
+
+            foreach (UnityAssetDocument document in this.openedUnitySources.Values)
+            {
+                Wz_Node node = document.StringTables?.StringNode?.FindNodeByPath("MonsterBook.img");
+                if (node != null && node.Nodes.Count > 0)
+                {
+                    return node;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>從已開啟的 WZ 尋找 <c>MonsterBook.img</c> 的 image 節點。</summary>
+        private static Wz_Image FindMonsterBookImage(Wz_Node node, int depth)
+        {
+            if (node == null || depth < 0)
+            {
+                return null;
+            }
+
+            if (string.Equals(node.Text, "MonsterBook.img", StringComparison.OrdinalIgnoreCase)
+                && node.Value is Wz_Image image)
+            {
+                return image;
+            }
+
+            foreach (Wz_Node child in node.Nodes)
+            {
+                Wz_Image found = FindMonsterBookImage(child, depth - 1);
+                if (found != null)
+                {
+                    return found;
+                }
+            }
+            return null;
+        }
+
         public void RedirectToNode(Wz_Node node)
         {
             if (OnSelectedWzNode(node))

@@ -327,6 +327,7 @@ namespace WzComparerR2
             this.btnPetEquipExport = new DevComponents.DotNetBar.ButtonX();
             this.btnSkillTooltipExport = new DevComponents.DotNetBar.ButtonX();
             this.btnWorldArchiveBrowser = new DevComponents.DotNetBar.ButtonItem();
+            this.btnMonsterBookBrowser = new DevComponents.DotNetBar.ButtonItem();
             this.btnPreset = new DevComponents.DotNetBar.ButtonX();
             this.btnMusicChannel = new DevComponents.DotNetBar.ButtonItem();
             this.btnSkillChangeInfo = new DevComponents.DotNetBar.ButtonItem();
@@ -843,6 +844,12 @@ namespace WzComparerR2
             this.btnWorldArchiveBrowser.Text = "世界檔案";
             this.btnWorldArchiveBrowser.Click += new System.EventHandler(this.btnWorldArchiveBrowser_Click);
             // 
+            // btnMonsterBookBrowser
+            // 
+            this.btnMonsterBookBrowser.Name = "btnMonsterBookBrowser";
+            this.btnMonsterBookBrowser.Text = "怪物手冊";
+            this.btnMonsterBookBrowser.Click += new System.EventHandler(this.btnMonsterBookBrowser_Click);
+            // 
             // itemContainer32
             // 
             // 
@@ -865,9 +872,11 @@ namespace WzComparerR2
             // 
             // 
             this.itemContainer33.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.itemContainer33.LayoutOrientation = DevComponents.DotNetBar.eOrientation.Vertical;
             this.itemContainer33.Name = "itemContainer33";
             this.itemContainer33.SubItems.AddRange(new DevComponents.DotNetBar.BaseItem[] {
-            this.btnWorldArchiveBrowser});
+            this.btnWorldArchiveBrowser,
+            this.btnMonsterBookBrowser});
             // 
             // 
             // 
@@ -4252,6 +4261,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.ButtonX btnPetEquipExport;
         private DevComponents.DotNetBar.ButtonX btnSkillTooltipExport;
         private DevComponents.DotNetBar.ButtonItem btnWorldArchiveBrowser;
+        private DevComponents.DotNetBar.ButtonItem btnMonsterBookBrowser;
         private DevComponents.DotNetBar.ButtonX btnPreset;
         private DevComponents.DotNetBar.ButtonItem btnMusicChannel;
         private DevComponents.DotNetBar.ButtonItem btnSkillChangeInfo;
