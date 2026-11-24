@@ -1,5 +1,6 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using WzComparerR2.UnityLib.Classic;
 using WzComparerR2.UnityLib.Unity;
 
@@ -40,10 +41,18 @@ namespace WzComparerR2.UnityLib.Images
     public sealed class UnitySetSpriteEntry
     {
         public UnitySetSpriteEntry(UnityEntryLocation spriteLocation, UnityEntryLocation textureLocation, UnitySpriteOrigin origin)
+            : this(spriteLocation, textureLocation, origin, null)
+        {
+        }
+
+        public UnitySetSpriteEntry(
+            UnityEntryLocation spriteLocation, UnityEntryLocation textureLocation, UnitySpriteOrigin origin,
+            UnityRectF? cropRect)
         {
             this.SpriteLocation = spriteLocation;
             this.TextureLocation = textureLocation;
             this.Origin = origin;
+            this.CropRect = cropRect;
         }
 
         public UnityEntryLocation SpriteLocation { get; private set; }
@@ -51,6 +60,32 @@ namespace WzComparerR2.UnityLib.Images
 
         /// <summary>由 Sprite 的 m_Pivot 求得的 WZ 相容 origin。</summary>
         public UnitySpriteOrigin Origin { get; private set; }
+
+        /// <summary>
+        /// atlas 打包的 sprite（沒有 <c>m_RD.texture</c>，改參照 SpriteAtlas）的裁切矩形。
+        /// 一般 sprite 為 null（使用 Sprite 自身的 m_Rect）。
+        /// </summary>
+        public UnityRectF? CropRect { get; private set; }
+    }
+
+    /// <summary>spriteset .asset payload 的單一條目（名稱 + 指向 Sprite 的 PPtr）。</summary>
+    public struct UnitySetAssetEntry
+    {
+        public UnitySetAssetEntry(string name, int fileId, long pathId)
+        {
+            this.Name = name;
+            this.FileId = fileId;
+            this.PathId = pathId;
+        }
+
+        /// <summary>名稱（無名稱清單時為空字串）。</summary>
+        public string Name { get; private set; }
+
+        /// <summary>PPtr 的 fileID（指向其他 SerializedFile 時非 0）。</summary>
+        public int FileId { get; private set; }
+
+        /// <summary>Sprite 的 pathID。</summary>
+        public long PathId { get; private set; }
     }
 
     /// <summary>
@@ -88,11 +123,14 @@ namespace WzComparerR2.UnityLib.Images
 
         /// <summary>
         /// 使用 Catalog 已解析的 SerializedFile 與 AssetBundle container 收錄圖片來源。
+        /// <paramref name="objectLocations"/> 為跨所有 bundle 的 pathID → 位置（用於解析 atlas 參照等其他檔案的物件）。
         /// </summary>
         internal void CollectFromContainer(
             UnityFsBundle bundle, int bundleIndex, string bundleStem, int nodeIndex,
             UnitySerializedFile serializedFile, IReadOnlyList<UnityContainerEntry> container,
-            Dictionary<long, UnityObjectInfo> objectsByPathId)
+            Dictionary<long, UnityObjectInfo> objectsByPathId,
+            Dictionary<long, UnityEntryLocation> objectLocations,
+            Func<UnityEntryLocation, byte[]> readEntryBytes)
         {
             // 早期 beta 的 bundle 名稱是 spritesheetgroup_*/spritesetgroup_*（Addressables
             // 群組前綴），因此不能只看檔名前綴，改以 container 路徑判斷。
@@ -127,7 +165,9 @@ namespace WzComparerR2.UnityLib.Images
             }
             if (isSet)
             {
-                this.CollectSet(bundle, nodeIndex, serializedFile, container, locationOf);
+                this.CollectSet(
+                    bundle, bundleIndex, nodeIndex, serializedFile, container, locationOf,
+                    objectLocations, readEntryBytes);
             }
         }
 
@@ -246,12 +286,14 @@ namespace WzComparerR2.UnityLib.Images
         }
 
         private void CollectSet(
-            UnityFsBundle bundle, int nodeIndex, UnitySerializedFile serializedFile,
-            IReadOnlyList<UnityContainerEntry> container, Func<long, UnityEntryLocation> locationOf)
+            UnityFsBundle bundle, int bundleIndex, int nodeIndex, UnitySerializedFile serializedFile,
+            IReadOnlyList<UnityContainerEntry> container, Func<long, UnityEntryLocation> locationOf,
+            Dictionary<long, UnityEntryLocation> objectLocations,
+            Func<UnityEntryLocation, byte[]> readEntryBytes)
         {
-            // .asset path → (名稱 → sprite pid)
-            Dictionary<string, Dictionary<string, long>> assetMap =
-                new Dictionary<string, Dictionary<string, long>>(StringComparer.Ordinal);
+            // .asset path → (名稱 → sprite PPtr)
+            Dictionary<string, Dictionary<string, UnitySetAssetEntry>> assetMap =
+                new Dictionary<string, Dictionary<string, UnitySetAssetEntry>>(StringComparer.Ordinal);
             foreach (UnityContainerEntry entry in container)
             {
                 string lower = entry.Path.ToLowerInvariant();
@@ -283,60 +325,98 @@ namespace WzComparerR2.UnityLib.Images
                 byte[] payload = new byte[data.Length - mono.HeaderLength];
                 Buffer.BlockCopy(data, mono.HeaderLength, payload, 0, payload.Length);
 
-                Dictionary<string, long> sprites;
+                Dictionary<string, UnitySetAssetEntry> sprites;
                 if (!assetMap.TryGetValue(key, out sprites))
                 {
-                    sprites = new Dictionary<string, long>(StringComparer.Ordinal);
+                    sprites = new Dictionary<string, UnitySetAssetEntry>(StringComparer.Ordinal);
                     assetMap[key] = sprites;
                 }
-                foreach (KeyValuePair<string, long> item in ParseSetAssetPayload(payload))
+                foreach (UnitySetAssetEntry item in ParseSetAssetPayload(payload))
                 {
                     // 無名稱影格清單的所有條目名稱都是空的，因此以 pid 作為暫用索引鍵，
                     // 避免被覆蓋消失（最終名稱由 sprite 端補上）。
-                    string entryKey = string.IsNullOrEmpty(item.Key)
-                        ? UnnamedEntryKeyPrefix + item.Value.ToString()
-                        : item.Key;
-                    sprites[entryKey] = item.Value;
+                    string entryKey = string.IsNullOrEmpty(item.Name)
+                        ? UnnamedEntryKeyPrefix + item.PathId.ToString()
+                        : item.Name;
+                    sprites[entryKey] = item;
                 }
             }
 
+            // 優先使用同一檔案，找不到再以跨所有 bundle 的索引解析
+            // （spriteset 的 .asset 有時會參照其他檔案（如 atlas bundle）中的 Sprite）。
+            Func<long, UnityEntryLocation> resolve = pathId =>
+                locationOf(pathId) ?? (objectLocations != null && objectLocations.TryGetValue(pathId, out UnityEntryLocation global)
+                    ? global
+                    : null);
+
+            Func<UnityEntryLocation, byte[]> readBytes = location =>
+            {
+                if (location.BundleIndex == bundleIndex && location.NodeIndex == nodeIndex)
+                {
+                    return bundle.ReadNodeRange(nodeIndex, location.AbsoluteOffset, (int)location.ByteSize);
+                }
+                return readEntryBytes != null ? readEntryBytes(location) : null;
+            };
+
+            // atlas 打包 sprite 用的快取（SpriteAtlas 的位元組只讀一次）
+            Dictionary<long, UnitySpriteAtlasInfo> atlasCache = new Dictionary<long, UnitySpriteAtlasInfo>();
+
             // sprite pid → UnitySetSpriteEntry（解析 Sprite 拿 texture pid）
-            foreach (KeyValuePair<string, Dictionary<string, long>> asset in assetMap)
+            foreach (KeyValuePair<string, Dictionary<string, UnitySetAssetEntry>> asset in assetMap)
             {
                 Dictionary<string, UnitySetSpriteEntry> output =
                     new Dictionary<string, UnitySetSpriteEntry>(StringComparer.Ordinal);
-                foreach (KeyValuePair<string, long> item in asset.Value)
+                foreach (KeyValuePair<string, UnitySetAssetEntry> item in asset.Value)
                 {
-                    UnityEntryLocation spriteLocation = locationOf(item.Value);
+                    UnityEntryLocation spriteLocation = resolve(item.Value.PathId);
                     if (spriteLocation == null || spriteLocation.ClassId != UnityClassIds.Sprite)
                     {
                         continue;
                     }
+                    bool sameFile = spriteLocation.BundleIndex == bundleIndex && spriteLocation.NodeIndex == nodeIndex;
+                    bool littleEndian = sameFile ? serializedFile.IsLittleEndian : true;
                     byte[] data;
                     try
                     {
-                        data = bundle.ReadNodeRange(
-                            spriteLocation.NodeIndex, spriteLocation.AbsoluteOffset, (int)spriteLocation.ByteSize);
+                        data = readBytes(spriteLocation);
                     }
-                    catch (UnityException)
+                    catch (Exception ex) when (ex is UnityException || ex is IOException)
+                    {
+                        continue;
+                    }
+                    if (data == null)
                     {
                         continue;
                     }
                     UnitySpriteInfo sprite;
                     try
                     {
-                        sprite = UnityObjectParsers.ParseSprite(data, serializedFile.IsLittleEndian);
+                        sprite = UnityObjectParsers.ParseSprite(data, littleEndian);
                     }
                     catch (UnityException)
                     {
                         continue;
                     }
-                    if (sprite.Texture.FileId != 0)
+
+                    UnityPPtr texturePtr = sprite.Texture;
+                    UnityRectF? cropRect = null;
+                    if (texturePtr.PathId == 0 && sprite.SpriteAtlas.PathId != 0)
+                    {
+                        // atlas 打包 sprite：從 SpriteAtlas 的渲染資料取得實際貼圖與裁切矩形。
+                        UnitySpriteAtlasInfo atlas = this.GetSpriteAtlas(sprite.SpriteAtlas.PathId, resolve, readBytes, atlasCache);
+                        if (atlas == null
+                            || !atlas.TryGetRenderData(sprite.RenderDataKeyGuid, out texturePtr, out UnityRectF atlasRect))
+                        {
+                            continue;
+                        }
+                        cropRect = atlasRect;
+                    }
+                    if (texturePtr.PathId == 0)
                     {
                         continue;
                     }
-                    UnityEntryLocation textureLocation = locationOf(sprite.Texture.PathId);
-                    if (textureLocation == null)
+                    UnityEntryLocation textureLocation = resolve(texturePtr.PathId);
+                    if (textureLocation == null || textureLocation.ClassId != UnityClassIds.Texture2D)
                     {
                         continue;
                     }
@@ -356,9 +436,9 @@ namespace WzComparerR2.UnityLib.Images
                         spriteName = spriteName + "_" + output.Count.ToString();
                     }
                     int originX, originY;
-                    sprite.GetWzOrigin(out originX, out originY);
+                    sprite.GetWzOrigin(cropRect ?? sprite.Rect, out originX, out originY);
                     output[spriteName] = new UnitySetSpriteEntry(
-                        spriteLocation, textureLocation, new UnitySpriteOrigin(originX, originY));
+                        spriteLocation, textureLocation, new UnitySpriteOrigin(originX, originY), cropRect);
                 }
                 if (output.Count > 0)
                 {
@@ -370,6 +450,37 @@ namespace WzComparerR2.UnityLib.Images
                     }
                 }
             }
+        }
+
+        /// <summary>讀取 SpriteAtlas(687078895) 的位元組並快取 <see cref="UnitySpriteAtlasInfo"/>。</summary>
+        private UnitySpriteAtlasInfo GetSpriteAtlas(
+            long atlasPathId, Func<long, UnityEntryLocation> resolve,
+            Func<UnityEntryLocation, byte[]> readBytes, Dictionary<long, UnitySpriteAtlasInfo> cache)
+        {
+            UnitySpriteAtlasInfo atlas;
+            if (cache.TryGetValue(atlasPathId, out atlas))
+            {
+                return atlas;
+            }
+            atlas = null;
+            UnityEntryLocation location = resolve(atlasPathId);
+            if (location != null && location.ClassId == UnityClassIds.SpriteAtlas && readBytes != null)
+            {
+                try
+                {
+                    byte[] data = readBytes(location);
+                    if (data != null)
+                    {
+                        atlas = UnitySpriteAtlasInfo.Parse(data, true);
+                    }
+                }
+                catch (Exception ex) when (ex is UnityException || ex is IOException || ex is ArgumentException)
+                {
+                    atlas = null;
+                }
+            }
+            cache[atlasPathId] = atlas;
+            return atlas;
         }
 
         private UnitySheetEntry GetOrCreateSheet(string key, string locale)
@@ -449,17 +560,17 @@ namespace WzComparerR2.UnityLib.Images
 
         /// <summary>
         /// spriteset .asset payload：(count, (string, pathID)×n) 或 (count, PPtr×n)；
-        /// 另有無 count 前綴、直接連排 PPtr 的佈局。回傳 (名稱, sprite pathID)；
+        /// 另有無 count 前綴、直接連排 PPtr 的佈局。回傳 (名稱, sprite pathID, fileID)；
         /// 未命名條目名稱給 ""。
         /// </summary>
-        internal static List<KeyValuePair<string, long>> ParseSetAssetPayload(byte[] payload)
+        internal static List<UnitySetAssetEntry> ParseSetAssetPayload(byte[] payload)
         {
-            List<KeyValuePair<string, long>> output = new List<KeyValuePair<string, long>>();
+            List<UnitySetAssetEntry> output = new List<UnitySetAssetEntry>();
 
             // 較新的影格清單（例如 Map/MapHelper/portal/game/pv）配置為
             // [名稱數 i64 = 0][件數 i64][(pathId i64 + 16 位元組) × 件數]。
             // 因為沒有名稱，sprite 端的名稱由 CollectSet 補上。
-            List<KeyValuePair<string, long>> framedEntries;
+            List<UnitySetAssetEntry> framedEntries;
             if (TryParseFramedEntries(payload, out framedEntries))
             {
                 return framedEntries;
@@ -470,52 +581,71 @@ namespace WzComparerR2.UnityLib.Images
             {
                 return output;
             }
-            // count 為 0 有兩種可能：真的是空集合，或根本沒有 count 前綴、
-            // 開頭就是 PPtr（fileID = 0）。後者直接連排解析。
-            if (count == 0)
-            {
-                return ParseBarePPtrs(payload);
-            }
 
             if (IsNamedEntries(payload))
             {
                 // 具名條目的配置有新舊兩種：舊配置的 PPtr 不含 fileID，
                 // 有些較新的配置會帶 (fileID i32, pathID i64)（例如 2.0.6 的 Map/MapHelper/mark）。
-                // 先以新配置讀取，數量不符時再回退到舊配置。
-                List<KeyValuePair<string, long>> withFileId = ParseNamedEntries(payload, count, true);
-                if (withFileId.Count == count)
+                // 先以新配置讀取，數量或結束位置不符時再回退到舊配置。
+                List<UnitySetAssetEntry> withFileId = ParseNamedEntries(payload, count, true, out int endWithFileId);
+                if (withFileId.Count == count && endWithFileId == payload.Length)
                 {
                     return withFileId;
                 }
-                List<KeyValuePair<string, long>> withoutFileId = ParseNamedEntries(payload, count, false);
+                List<UnitySetAssetEntry> withoutFileId = ParseNamedEntries(payload, count, false, out int endWithoutFileId);
+                if (withoutFileId.Count == count && endWithoutFileId == payload.Length)
+                {
+                    return withoutFileId;
+                }
                 return withoutFileId.Count > withFileId.Count ? withoutFileId : withFileId;
+            }
+
+            // count 為 0 有兩種可能：真的是空集合，或根本沒有 count 前綴、
+            // 開頭就是 PPtr。後者（以及開頭 i32 為 fileID 者）改用直接連續排列解析。
+            if (count == 0 || IsBarePPtrLayout(payload))
+            {
+                return ParseBarePPtrs(payload);
             }
 
             int position = 4;
             for (uint i = 0; i < count; i++)
             {
-                // PPtr: fileID i32 + pathID i64
+                // PPtr: fileID i32 + pathID i64（null 條目會跳過並繼續）
                 if (position > payload.Length - 12)
                 {
                     break;
                 }
                 int fileId = I32At(payload, position);
-                if (fileId != 0)
-                {
-                    break;
-                }
                 long pathId = I64At(payload, position + 4);
                 position += 12;
-                output.Add(new KeyValuePair<string, long>(string.Empty, pathId));
+                if (pathId == 0)
+                {
+                    continue;
+                }
+                output.Add(new UnitySetAssetEntry(string.Empty, fileId, pathId));
             }
             return output;
         }
 
         /// <summary>
-        /// 讀取無名稱影格清單的配置（<c>[名稱數 i64 = 0][件數 i64][(pathId i64 + 16 位元組) × 件數]</c>）。
-        /// 不符合時（舊式 PPTR 連續排列、具名條目）回傳 false。
+        /// 開頭是否為連續排列的 PPtr（沒有 count 前綴，或 count 其實是 PPtr 的 fileID）。
+        /// 參照 atlas 內 Sprite 的 spriteset 開頭 i32 會是 fileID（≠ 0）。
         /// </summary>
-        private static bool TryParseFramedEntries(byte[] payload, out List<KeyValuePair<string, long>> entries)
+        private static bool IsBarePPtrLayout(byte[] payload)
+        {
+            if (payload == null || payload.Length < 12)
+            {
+                return false;
+            }
+            long firstPathId = I64At(payload, 4);
+            return firstPathId != 0 && (uint)firstPathId > 100000;
+        }
+
+        /// <summary>
+        /// 讀取無名稱影格清單的配置（<c>[名稱數 i64 = 0][件數 i64][(pathId i64 + 16 位元組) × 件數]</c>）。
+        /// 不符合時（舊式 PPtr 連續排列、具名條目）回傳 false。
+        /// </summary>
+        private static bool TryParseFramedEntries(byte[] payload, out List<UnitySetAssetEntry> entries)
         {
             entries = null;
             if (payload == null || payload.Length < FramedHeaderLength + FramedEntryStride)
@@ -536,7 +666,7 @@ namespace WzComparerR2.UnityLib.Images
                 return false;
             }
 
-            List<KeyValuePair<string, long>> output = new List<KeyValuePair<string, long>>((int)count);
+            List<UnitySetAssetEntry> output = new List<UnitySetAssetEntry>((int)count);
             for (int i = 0; i < count; i++)
             {
                 long pathId = I64At(payload, FramedHeaderLength + i * FramedEntryStride);
@@ -544,7 +674,7 @@ namespace WzComparerR2.UnityLib.Images
                 {
                     continue;
                 }
-                output.Add(new KeyValuePair<string, long>(string.Empty, pathId));
+                output.Add(new UnitySetAssetEntry(string.Empty, 0, pathId));
             }
             if (output.Count == 0)
             {
@@ -589,10 +719,11 @@ namespace WzComparerR2.UnityLib.Images
 
         /// <summary>
         /// 讀取具名條目。<paramref name="includeFileId"/> 表示 PPtr 之前是否夾有 fileID (i32)。
+        /// <paramref name="end"/> 為讀取結束位置（供配置判定使用）。
         /// </summary>
-        private static List<KeyValuePair<string, long>> ParseNamedEntries(byte[] payload, uint count, bool includeFileId)
+        private static List<UnitySetAssetEntry> ParseNamedEntries(byte[] payload, uint count, bool includeFileId, out int end)
         {
-            List<KeyValuePair<string, long>> output = new List<KeyValuePair<string, long>>();
+            List<UnitySetAssetEntry> output = new List<UnitySetAssetEntry>();
             int stride = includeFileId ? 12 : 8;
             int position = 4;
             for (uint i = 0; i < count; i++)
@@ -613,12 +744,10 @@ namespace WzComparerR2.UnityLib.Images
                 {
                     break;
                 }
+                int fileId = 0;
                 if (includeFileId)
                 {
-                    if (I32At(payload, position) != 0)
-                    {
-                        break;
-                    }
+                    fileId = I32At(payload, position);
                     position += 4;
                 }
                 long pathId = I64At(payload, position);
@@ -627,28 +756,29 @@ namespace WzComparerR2.UnityLib.Images
                 {
                     break;
                 }
-                output.Add(new KeyValuePair<string, long>(name, pathId));
+                output.Add(new UnitySetAssetEntry(name, fileId, pathId));
             }
+            end = position;
             return output;
         }
 
         /// <summary>
-        /// 無 count 前綴的 PPtr 連排：(fileID i32, pathID i64)×n，
-        /// fileID 非 0 或 pathID 為 0 時結束。
+        /// 無 count 前綴的 PPtr 連排：(fileID i32, pathID i64)×n。
+        /// pathID 為 0（或已到尾端）時結束。
         /// </summary>
-        private static List<KeyValuePair<string, long>> ParseBarePPtrs(byte[] payload)
+        private static List<UnitySetAssetEntry> ParseBarePPtrs(byte[] payload)
         {
-            List<KeyValuePair<string, long>> output = new List<KeyValuePair<string, long>>();
+            List<UnitySetAssetEntry> output = new List<UnitySetAssetEntry>();
             int position = 0;
             while (position <= payload.Length - 12)
             {
                 int fileId = I32At(payload, position);
                 long pathId = I64At(payload, position + 4);
-                if (fileId != 0 || pathId == 0)
+                if (pathId == 0)
                 {
                     break;
                 }
-                output.Add(new KeyValuePair<string, long>(string.Empty, pathId));
+                output.Add(new UnitySetAssetEntry(string.Empty, fileId, pathId));
                 position += 12;
             }
             return output;
@@ -688,3 +818,4 @@ namespace WzComparerR2.UnityLib.Images
         }
     }
 }
+

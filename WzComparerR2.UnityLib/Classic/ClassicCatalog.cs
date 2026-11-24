@@ -142,15 +142,81 @@ namespace WzComparerR2.UnityLib.Classic
                     Path.GetFileNameWithoutExtension(path), info.Length, info.LastWriteTimeUtc.Ticks));
             }
 
+            // 第一階段：跨所有 bundle 的 pathID → 位置索引。spriteset 的 .asset 會參照其他 bundle
+            // （例如 atlas_*）中的 Sprite / Texture2D，因此需要用來解析外部參照。
+            Dictionary<long, UnityEntryLocation> objectLocations =
+                new Dictionary<long, UnityEntryLocation>(65536);
             for (int bundleIndex = 0; bundleIndex < files.Count; bundleIndex++)
             {
                 using (UnityFsBundle bundle = UnityFsBundle.Open(files[bundleIndex]))
                 {
-                    catalog.IndexBundle(bundle, bundleIndex, catalog.Bundles[bundleIndex].Name);
+                    catalog.CollectObjectLocations(bundle, bundleIndex, objectLocations);
+                }
+            }
+
+            for (int bundleIndex = 0; bundleIndex < files.Count; bundleIndex++)
+            {
+                using (UnityFsBundle bundle = UnityFsBundle.Open(files[bundleIndex]))
+                {
+                    catalog.IndexBundle(
+                        bundle, bundleIndex, catalog.Bundles[bundleIndex].Name, objectLocations);
                 }
             }
             catalog.GroupSoundEntries();
             return catalog;
+        }
+
+        /// <summary>
+        /// 掃描所有 bundle 的 SerializedFile，建立 pathID → <see cref="UnityEntryLocation"/>（優先採用最先找到者）。
+        /// </summary>
+        private void CollectObjectLocations(
+            UnityFsBundle bundle, int bundleIndex, Dictionary<long, UnityEntryLocation> objectLocations)
+        {
+            for (int nodeIndex = 0; nodeIndex < bundle.Nodes.Count; nodeIndex++)
+            {
+                if (!bundle.Nodes[nodeIndex].IsSerializedFile)
+                {
+                    continue;
+                }
+                UnitySerializedFile serializedFile;
+                try
+                {
+                    int metadataLength = UnitySerializedFile.GetMetadataLength(
+                        bundle.ReadNodeRange(nodeIndex, 0, UnitySerializedFile.HeaderSize));
+                    serializedFile = UnitySerializedFile.Parse(
+                        bundle.ReadNodeRange(nodeIndex, 0, metadataLength));
+                }
+                catch (Exception ex) when (ex is UnityException || ex is ArgumentException || ex is OverflowException)
+                {
+                    continue;
+                }
+
+                foreach (UnityObjectInfo obj in serializedFile.Objects)
+                {
+                    if (obj.PathId == 0 || objectLocations.ContainsKey(obj.PathId))
+                    {
+                        continue;
+                    }
+                    long absolute = serializedFile.DataOffset + obj.ByteStart;
+                    if (absolute < serializedFile.DataOffset)
+                    {
+                        continue;
+                    }
+                    objectLocations[obj.PathId] = new UnityEntryLocation(
+                        bundleIndex, nodeIndex, absolute, obj.ByteSize, obj.ClassId);
+                }
+            }
+        }
+
+        /// <summary>由任意 <see cref="UnityEntryLocation"/> 讀取物件位元組（其他 bundle 每次重新開啟）。</summary>
+        internal byte[] ReadEntryBytes(UnityEntryLocation location)
+        {
+            string bundlePath = Path.Combine(this.RootPath, this.Bundles[location.BundleIndex].Name + ".bundle");
+            using (UnityFsBundle bundle = UnityFsBundle.Open(bundlePath))
+            {
+                return bundle.ReadNodeRange(
+                    location.NodeIndex, location.AbsoluteOffset, (int)location.ByteSize);
+            }
         }
 
         /// <summary>
@@ -730,7 +796,9 @@ namespace WzComparerR2.UnityLib.Classic
             return long.TryParse(name, NumberStyles.None, CultureInfo.InvariantCulture, out value);
         }
 
-        private void IndexBundle(UnityFsBundle bundle, int bundleIndex, string bundleStem)
+        private void IndexBundle(
+            UnityFsBundle bundle, int bundleIndex, string bundleStem,
+            Dictionary<long, UnityEntryLocation> objectLocations)
         {
             IReadOnlyList<UnityFsBundle.BundleNode> nodes = bundle.Nodes;
             for (int nodeIndex = 0; nodeIndex < nodes.Count; nodeIndex++)
@@ -795,7 +863,8 @@ namespace WzComparerR2.UnityLib.Classic
 
                     this.Image.CollectFromContainer(
                         bundle, bundleIndex, bundleStem, nodeIndex,
-                        serializedFile, assetBundle.Container, objectsByPathId);
+                        serializedFile, assetBundle.Container, objectsByPathId,
+                        objectLocations, this.ReadEntryBytes);
 
                     foreach (UnityContainerEntry containerEntry in assetBundle.Container)
                     {

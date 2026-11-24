@@ -729,7 +729,7 @@ namespace WzComparerR2.UnityLib.Classic
             return UnityTexture.ToPng(texture.Width, texture.Height, rgba);
         }
 
-        /// <summary>spriteset sprite → PNG（m_Rect 切圖）。</summary>
+        /// <summary>spriteset sprite → PNG（依 m_Rect，或 atlas 打包的裁切矩形切圖）。</summary>
         private byte[] RenderSetSprite(UnitySetSpriteEntry entry)
         {
             byte[] spriteData = this.ReadEntry(entry.SpriteLocation);
@@ -742,7 +742,7 @@ namespace WzComparerR2.UnityLib.Classic
             int y;
             int width;
             int height;
-            SpriteRectToPixels(sprite.Rect, out x, out y, out width, out height);
+            SpriteRectToPixels(entry.CropRect ?? sprite.Rect, out x, out y, out width, out height);
             byte[] rgba = this.GetAtlasPixels(location, texture, data);
             byte[] cropped = UnityTexture.CropRgba(texture.Width, texture.Height, rgba, x, y, width, height);
             UnityTexture.FlipVertical(cropped, width, height);
