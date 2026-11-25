@@ -8,8 +8,10 @@ namespace WzComparerR2.UnityLib.Images
     /// <summary>
     /// 新版 SpriteSheet <c>.asset</c> 的 MonoBehaviour payload。
     /// <para>
-    /// 依序為 img 路徑、atlas 頁 GUID 清單、實際 sprite（路徑 / 頁 / rect / pivot），
-    /// 以及別名（路徑 → sprite 序號）。字串採 Unity 的 4-byte 對齊格式。
+    /// 依序為 img 路徑、atlas 頁 GUID 清單、實際 sprite（路徑 / 頁 / rect / pivot）、
+    /// 別名（路徑 → sprite 序號，像素完全相同）與覆寫（路徑 → sprite 序號 + pivot，
+    /// 共用像素但基準點不同，例如 Mob 的 <c>jump/0</c> 重用 <c>move/…</c> 的圖）。
+    /// 字串採 Unity 的 4-byte 對齊格式。
     /// </para>
     /// </summary>
     public sealed class SpriteSheetAsset
@@ -112,6 +114,25 @@ namespace WzComparerR2.UnityLib.Images
                 paths[name] = index != spriteCount ? index : (int?)null;
             }
 
+            // 別名の後ろに「pivot だけ差し替える」上書き一覧が続きます。
+            // 残りが無いデータでは読み飛ばします。
+            if (cursor.Remaining >= 4)
+            {
+                int overrideCount = cursor.ReadCount();
+                for (int i = 0; i < overrideCount; i++)
+                {
+                    string name = cursor.ReadString();
+                    int index = cursor.ReadInt32();
+                    cursor.Take(8); // pivot (2 × f32)；描画では WZJS 側の origin を使うため未使用
+                    if (index < 0 || index > spriteCount)
+                    {
+                        throw new UnityException(string.Format(
+                            "SpriteSheet asset 覆寫序號越界: {0}/{1}", index, spriteCount));
+                    }
+                    paths[name] = index != spriteCount ? index : (int?)null;
+                }
+            }
+
             return new SpriteSheetAsset(path, sprites, paths);
         }
 
@@ -123,6 +144,11 @@ namespace WzComparerR2.UnityLib.Images
             public Cursor(byte[] bytes)
             {
                 this.bytes = bytes;
+            }
+
+            public int Remaining
+            {
+                get { return this.bytes.Length - this.position; }
             }
 
             public byte[] Take(int count)
