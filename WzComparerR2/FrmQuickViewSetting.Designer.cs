@@ -135,6 +135,7 @@ namespace WzComparerR2
             this.chkShowQuestObjectID = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkQAS = new DevComponents.DotNetBar.Controls.CheckBoxX();
             this.chkUseAssembleUI = new DevComponents.DotNetBar.Controls.CheckBoxX();
+            this.chkEnableLegacyUnityUI = new DevComponents.DotNetBar.Controls.CheckBoxX();
             ((System.ComponentModel.ISupportInitialize)(this.superTabControl1)).BeginInit();
             this.superTabControl1.SuspendLayout();
             this.superTabControlPanel1.SuspendLayout();
@@ -182,7 +183,7 @@ namespace WzComparerR2
             this.superTabControl1.ReorderTabsEnabled = true;
             this.superTabControl1.SelectedTabFont = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Bold);
             this.superTabControl1.SelectedTabIndex = 0;
-            this.superTabControl1.Size = new System.Drawing.Size(344, 271);
+            this.superTabControl1.Size = new System.Drawing.Size(344, 295);
             this.superTabControl1.TabAlignment = DevComponents.DotNetBar.eTabStripAlignment.Left;
             this.superTabControl1.TabFont = new System.Drawing.Font("SimSun", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.superTabControl1.TabIndex = 0;
@@ -849,7 +850,7 @@ namespace WzComparerR2
             this.panelEx1.Controls.Add(this.buttonX1);
             this.panelEx1.DisabledBackColor = System.Drawing.Color.Empty;
             this.panelEx1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelEx1.Location = new System.Drawing.Point(0, 251);
+            this.panelEx1.Location = new System.Drawing.Point(0, 295);
             this.panelEx1.Name = "panelEx1";
             this.panelEx1.Size = new System.Drawing.Size(344, 30);
             this.panelEx1.Style.Alignment = System.Drawing.StringAlignment.Center;
@@ -1307,6 +1308,7 @@ namespace WzComparerR2
             // 
             this.superTabControlPanel5.Controls.Add(this.chkShowAllSubMobAtOnce);
             this.superTabControlPanel5.Controls.Add(this.chkShowAllIllustAtOnce);
+            this.superTabControlPanel5.Controls.Add(this.chkEnableLegacyUnityUI);
             this.superTabControlPanel5.Controls.Add(this.chkEnable22AniStyle);
             this.superTabControlPanel5.Controls.Add(this.chkLocatePetEquip);
             this.superTabControlPanel5.Controls.Add(this.chkShowNpcQuotes);
@@ -1318,7 +1320,7 @@ namespace WzComparerR2
             this.superTabControlPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
             this.superTabControlPanel5.Location = new System.Drawing.Point(62, 0);
             this.superTabControlPanel5.Name = "superTabControlPanel5";
-            this.superTabControlPanel5.Size = new System.Drawing.Size(242, 211);
+            this.superTabControlPanel5.Size = new System.Drawing.Size(242, 235);
             this.superTabControlPanel5.TabIndex = 0;
             this.superTabControlPanel5.TabItem = this.superTabItem5;
             this.superTabControlPanel5.Visible = false;
@@ -1389,6 +1391,21 @@ namespace WzComparerR2
             this.chkEnable22AniStyle.TabIndex = 4;
             this.chkEnable22AniStyle.Text = "套用22周年主題";
             // 
+            // chkEnableLegacyUnityUI
+            // 
+            this.chkEnableLegacyUnityUI.AutoSize = true;
+            this.chkEnableLegacyUnityUI.BackColor = System.Drawing.Color.Transparent;
+            // 
+            // 
+            // 
+            this.chkEnableLegacyUnityUI.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
+            this.chkEnableLegacyUnityUI.Location = new System.Drawing.Point(13, 84);
+            this.chkEnableLegacyUnityUI.Name = "chkEnableLegacyUnityUI";
+            this.chkEnableLegacyUnityUI.Size = new System.Drawing.Size(190, 16);
+            this.chkEnableLegacyUnityUI.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
+            this.chkEnableLegacyUnityUI.TabIndex = 5;
+            this.chkEnableLegacyUnityUI.Text = "在Unity客戶端啟用舊版UI";
+            // 
             // chkShowAllIllustAtOnce
             // 
             this.chkShowAllIllustAtOnce.AutoSize = true;
@@ -1397,11 +1414,11 @@ namespace WzComparerR2
             // 
             // 
             this.chkShowAllIllustAtOnce.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowAllIllustAtOnce.Location = new System.Drawing.Point(13, 84);
+            this.chkShowAllIllustAtOnce.Location = new System.Drawing.Point(13, 108);
             this.chkShowAllIllustAtOnce.Name = "chkShowAllIllustAtOnce";
             this.chkShowAllIllustAtOnce.Size = new System.Drawing.Size(145, 16);
             this.chkShowAllIllustAtOnce.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkShowAllIllustAtOnce.TabIndex = 5;
+            this.chkShowAllIllustAtOnce.TabIndex = 6;
             this.chkShowAllIllustAtOnce.Text = "顯示全部NPC立繪";
             // 
             // chkShowAllSubMobAtOnce
@@ -1412,11 +1429,11 @@ namespace WzComparerR2
             // 
             // 
             this.chkShowAllSubMobAtOnce.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowAllSubMobAtOnce.Location = new System.Drawing.Point(13, 108);
+            this.chkShowAllSubMobAtOnce.Location = new System.Drawing.Point(13, 132);
             this.chkShowAllSubMobAtOnce.Name = "chkShowAllSubMobAtOnce";
             this.chkShowAllSubMobAtOnce.Size = new System.Drawing.Size(145, 16);
             this.chkShowAllSubMobAtOnce.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkShowAllSubMobAtOnce.TabIndex = 6;
+            this.chkShowAllSubMobAtOnce.TabIndex = 7;
             this.chkShowAllSubMobAtOnce.Text = "顯示全部任務怪物組的怪物";
             // 
             // chkEnableWorldArchive
@@ -1427,11 +1444,11 @@ namespace WzComparerR2
             // 
             // 
             this.chkEnableWorldArchive.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkEnableWorldArchive.Location = new System.Drawing.Point(13, 132);
+            this.chkEnableWorldArchive.Location = new System.Drawing.Point(13, 156);
             this.chkEnableWorldArchive.Name = "chkEnableWorldArchive";
             this.chkEnableWorldArchive.Size = new System.Drawing.Size(145, 16);
             this.chkEnableWorldArchive.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkEnableWorldArchive.TabIndex = 7;
+            this.chkEnableWorldArchive.TabIndex = 8;
             this.chkEnableWorldArchive.Text = "啟用世界檔案";
             this.chkEnableWorldArchive.CheckedChanged += chkEnableWorldArchive_CheckedChanged;
             // 
@@ -1443,11 +1460,11 @@ namespace WzComparerR2
             // 
             // 
             this.chkEnableMonsterBook.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkEnableMonsterBook.Location = new System.Drawing.Point(13, 156);
+            this.chkEnableMonsterBook.Location = new System.Drawing.Point(13, 180);
             this.chkEnableMonsterBook.Name = "chkEnableMonsterBook";
             this.chkEnableMonsterBook.Size = new System.Drawing.Size(145, 16);
             this.chkEnableMonsterBook.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkEnableMonsterBook.TabIndex = 8;
+            this.chkEnableMonsterBook.TabIndex = 9;
             this.chkEnableMonsterBook.Text = "啟用怪物圖鑒説明";
             this.chkEnableMonsterBook.Click += chkEnableMonsterBook_Click;
             this.chkEnableMonsterBook.CheckedChanged += chkEnableMonsterBook_CheckedChanged;
@@ -1460,11 +1477,11 @@ namespace WzComparerR2
             // 
             // 
             this.chkShowNpcQuotes.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkShowNpcQuotes.Location = new System.Drawing.Point(13, 180);
+            this.chkShowNpcQuotes.Location = new System.Drawing.Point(13, 204);
             this.chkShowNpcQuotes.Name = "chkShowNpcQuotes";
             this.chkShowNpcQuotes.Size = new System.Drawing.Size(145, 16);
             this.chkShowNpcQuotes.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkShowNpcQuotes.TabIndex = 9;
+            this.chkShowNpcQuotes.TabIndex = 10;
             this.chkShowNpcQuotes.Text = "顯示NPC對話內容";
             // 
             // chkLocatePetEquip
@@ -1475,11 +1492,11 @@ namespace WzComparerR2
             // 
             // 
             this.chkLocatePetEquip.BackgroundStyle.CornerType = DevComponents.DotNetBar.eCornerType.Square;
-            this.chkLocatePetEquip.Location = new System.Drawing.Point(13, 204);
+            this.chkLocatePetEquip.Location = new System.Drawing.Point(13, 228);
             this.chkLocatePetEquip.Name = "chkLocatePetEquip";
             this.chkLocatePetEquip.Size = new System.Drawing.Size(145, 16);
             this.chkLocatePetEquip.Style = DevComponents.DotNetBar.eDotNetBarStyle.StyleManagerControlled;
-            this.chkLocatePetEquip.TabIndex = 10;
+            this.chkLocatePetEquip.TabIndex = 11;
             this.chkLocatePetEquip.Text = "嘗試匹配寵物和配套裝備";
             // 
             // buttonX2
@@ -1510,7 +1527,7 @@ namespace WzComparerR2
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(344, 301);
+            this.ClientSize = new System.Drawing.Size(344, 325);
             this.Controls.Add(this.superTabControl1);
             this.Controls.Add(this.panelEx1);
             this.DoubleBuffered = true;
@@ -1645,6 +1662,7 @@ namespace WzComparerR2
         private DevComponents.DotNetBar.LabelX labelXQSHint;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkShowQuestObjectID;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkQAS;
+        private DevComponents.DotNetBar.Controls.CheckBoxX chkEnableLegacyUnityUI;
         private DevComponents.DotNetBar.Controls.CheckBoxX chkUseAssembleUI;
     }
 }

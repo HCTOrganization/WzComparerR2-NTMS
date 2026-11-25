@@ -21,5 +21,15 @@ namespace WzComparerR2.Config
             get { return (bool)this["locatePetEquip"]; }
             set { this["locatePetEquip"] = value; }
         }
+
+        /// <summary>
+        /// Unity ベースのクライアントの装備ツールチップに旧来のレンダラーを使用するかどうか。
+        /// </summary>
+        [ConfigurationProperty("enableLegacyUnityUI", DefaultValue = true)]
+        public bool EnableLegacyUnityUI
+        {
+            get { return (bool)this["enableLegacyUnityUI"]; }
+            set { this["enableLegacyUnityUI"] = value; }
+        }
     }
 }

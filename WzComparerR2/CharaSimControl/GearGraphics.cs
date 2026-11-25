@@ -646,7 +646,7 @@ namespace WzComparerR2.CharaSimControl
                         break;
                     case '%':
                         bitmap = can ? Resource.ToolTip_Equip_GrowthEnabled_percent : Resource.ToolTip_Equip_GrowthEnabled_percent;
-                        g.DrawImage(bitmap, x + 7, y - 4);
+                        g.DrawImage(bitmap, x, y);
                         x += bitmap.Width + 1;
                         break;
                     case 'm':

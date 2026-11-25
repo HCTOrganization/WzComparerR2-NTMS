@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -85,6 +85,18 @@ namespace WzComparerR2.Comparer
         public bool OutputSkillTooltip { get; set; }
         public bool HashPngFileName { get; set; }
         public bool Enable22AniStyle { get; set; }
+
+        /// <summary>
+        /// 比較対象が Unity ベースのクライアントかどうか。
+        /// <see cref="EnableLegacyUnityUI"/> と併せて装備ツールチップのレンダラーを決めます。
+        /// </summary>
+        public bool IsUnityClient { get; set; }
+
+        /// <summary>
+        /// Unity クライアントの装備ツールチップに旧来のレンダラーを使用するかどうか。
+        /// </summary>
+        public bool EnableLegacyUnityUI { get; set; }
+
         public bool ShowObjectID { get; set; }
         public bool ShowChangeType { get; set; }
         public bool ShowPrice { get; set; }
@@ -202,6 +214,7 @@ namespace WzComparerR2.Comparer
 
         public void EasyCompareWzFiles(Wz_File fileNew, Wz_File fileOld, string outputDir, StreamWriter index = null)
         {
+            this.IsUnityClient = false;
             ReportVersionToDiscord(string.Format("{0} -> {1}", fileOld.Header.WzVersion, fileNew.Header.WzVersion));
 
             StateInfo = "比較中...";
@@ -949,7 +962,11 @@ namespace WzComparerR2.Comparer
                 {
                     Directory.CreateDirectory(gearTooltipPath);
                 }
-                if (this.Enable22AniStyle)
+                if (this.IsUnityClient && this.EnableLegacyUnityUI)
+                {
+                    SaveLegacyGearTooltip(gearTooltipPath);
+                }
+                else if (this.Enable22AniStyle)
                 {
                     SaveGearTooltip3(gearTooltipPath);
                 }
@@ -2116,22 +2133,44 @@ namespace WzComparerR2.Comparer
         // 變更された装備ツールチップ出力
         private void SaveGearTooltip(string gearTooltipPath)
         {
-            GearTooltipRender2[] gearRenderNewOld = new GearTooltipRender2[2];
+            this.SaveGearTooltipCore(gearTooltipPath, i =>
+            {
+                GearTooltipRender2 gearRender = new GearTooltipRender2();
+                gearRender.ShowSoldPrice = this.ShowPrice;
+                gearRender.ShowCashPurchasePrice = this.ShowPrice;
+                gearRender.ShowCombatPower = true;
+                gearRender.ShowApplicablePet = this.LocatePetEquip;
+                gearRender.LoadedCommoditiesSlot = i;
+                gearRender.CompareMode = true;
+                return gearRender;
+            });
+        }
+
+        // 変更された装備ツールチップ出力（Unity クライアント向けの旧来レンダラー）
+        private void SaveLegacyGearTooltip(string gearTooltipPath)
+        {
+            this.SaveGearTooltipCore(gearTooltipPath, i =>
+            {
+                GearTooltipRender gearRender = new GearTooltipRender();
+                gearRender.ShowSoldPrice = this.ShowPrice;
+                gearRender.ShowCashPurchasePrice = this.ShowPrice;
+                gearRender.LoadedCommoditiesSlot = i;
+                return gearRender;
+            });
+        }
+
+        private void SaveGearTooltipCore(string gearTooltipPath, Func<int, TooltipRender> createRender)
+        {
+            TooltipRender[] gearRenderNewOld = new TooltipRender[2];
             int count = 0;
             int allCount = OutputGearTooltipIDs.Count;
             var gearTypeFont = new Font("PMingLiU", 11f, GraphicsUnit.Pixel);
 
             for (int i = 0; i < 2; i++) // 0: New, 1: Old
             {
-                gearRenderNewOld[i] = new GearTooltipRender2();
+                gearRenderNewOld[i] = createRender(i);
                 gearRenderNewOld[i].StringLinker = this.LoadCompareStringLinker(i);
                 gearRenderNewOld[i].ShowObjectID = this.ShowObjectID;
-                gearRenderNewOld[i].ShowSoldPrice = this.ShowPrice;
-                gearRenderNewOld[i].ShowCashPurchasePrice = this.ShowPrice;
-                gearRenderNewOld[i].ShowCombatPower = true;
-                gearRenderNewOld[i].ShowApplicablePet = this.LocatePetEquip;
-                gearRenderNewOld[i].LoadedCommoditiesSlot = i;
-                gearRenderNewOld[i].CompareMode = true;
             }
 
             foreach (var gearID in OutputGearTooltipIDs)
@@ -2312,7 +2351,14 @@ namespace WzComparerR2.Comparer
 
                         if (gear != null)
                         {
-                            gearRenderNewOld[i].Gear = gear;
+                            if (gearRenderNewOld[i] is GearTooltipRender legacyRender)
+                            {
+                                legacyRender.Gear = gear;
+                            }
+                            else if (gearRenderNewOld[i] is GearTooltipRender2 gearRender)
+                            {
+                                gearRender.Gear = gear;
+                            }
                         }
                         else
                         {

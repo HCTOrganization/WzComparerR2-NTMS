@@ -43,6 +43,7 @@ namespace WzComparerR2.Comparer
                 ResolvePngLink = false,
                 IgnoreWzFile = true,
             };
+            this.IsUnityClient = true;
 
             ReportVersionToDiscord(string.Format("{0} -> {1}", labelOld, labelNew));
             StateInfo = "比較中...";

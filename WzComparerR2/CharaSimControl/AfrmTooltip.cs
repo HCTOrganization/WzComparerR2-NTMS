@@ -39,6 +39,7 @@ namespace WzComparerR2.CharaSimControl
             this.HideOnHover = true;
             this.GearRender = new GearTooltipRender2();
             this.GearRender3 = new GearTooltipRender3();
+            this.GearRenderLegacy = new GearTooltipRender();
             this.ItemRender = new ItemTooltipRender2();
             this.ItemRender3 = new ItemTooltipRender3();
             this.SkillRender = new SkillTooltipRender2();
@@ -69,6 +70,17 @@ namespace WzComparerR2.CharaSimControl
         public bool EnableAssembleTooltip { get; set; }
         public bool UseCTFamiliarUI { get; set; }
 
+        /// <summary>
+        /// プレビュー対象が Unity ベースのクライアント由来かどうか。
+        /// <see cref="EnableLegacyUnityUI"/> と併せて旧来の <see cref="GearTooltipRender"/> を使用するかを決めます。
+        /// </summary>
+        public bool IsUnityClient { get; set; }
+
+        /// <summary>
+        /// Unity クライアントの装備ツールチップに旧来のレンダラーを使用するかどうか。
+        /// </summary>
+        public bool EnableLegacyUnityUI { get; set; }
+
         private Bitmap AvatarBitmap;
         private Bitmap SampleBitmap;
         private Bitmap DamageSkinSampleNonCriticalBitmap;
@@ -89,6 +101,7 @@ namespace WzComparerR2.CharaSimControl
 
         public GearTooltipRender2 GearRender { get; private set; }
         public GearTooltipRender3 GearRender3 { get; private set; }
+        public GearTooltipRender GearRenderLegacy { get; private set; }
         public ItemTooltipRender2 ItemRender { get; private set; }
         public ItemTooltipRender3 ItemRender3 { get; private set; }
         public SkillTooltipRender2 SkillRender { get; private set; }
@@ -133,6 +146,7 @@ namespace WzComparerR2.CharaSimControl
                 this.showID = value;
                 this.GearRender.ShowObjectID = value;
                 this.GearRender3.ShowObjectID = value;
+                this.GearRenderLegacy.ShowObjectID = value;
                 this.MapRender.ShowObjectID = value;
                 this.ItemRender.ShowObjectID = value;
                 this.ItemRender3.ShowObjectID = value;
@@ -204,7 +218,12 @@ namespace WzComparerR2.CharaSimControl
             }
             else if (item is Gear)
             {
-                if (Enable22AniStyle)
+                if (IsUnityClient && EnableLegacyUnityUI)
+                {
+                    renderer = GearRenderLegacy;
+                    GearRenderLegacy.Gear = this.TargetItem as Gear;
+                }
+                else if (Enable22AniStyle)
                 {
                     renderer = GearRender3;
                     GearRender3.Gear = this.TargetItem as Gear;

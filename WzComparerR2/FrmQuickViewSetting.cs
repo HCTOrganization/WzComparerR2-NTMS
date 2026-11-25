@@ -260,6 +260,13 @@ namespace WzComparerR2
         }
 
         [Link]
+        public bool Misc_EnableLegacyUnityUI
+        {
+            get { return chkEnableLegacyUnityUI.Checked; }
+            set { chkEnableLegacyUnityUI.Checked = value; }
+        }
+
+        [Link]
         public bool DamageSkin_ShowDamageSkinID
         {
             get { return chkShowDamageSkinID.Checked; }
