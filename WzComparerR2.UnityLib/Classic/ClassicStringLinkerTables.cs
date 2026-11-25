@@ -129,6 +129,7 @@ namespace WzComparerR2.UnityLib.Classic
             BuildItemCategories(root, categories, source, prefix, equipTypes);
             BuildEqpImage(root, categories, source, prefix, equipTypes);
             BuildMapImage(root, categories, source, prefix);
+            BuildWorldMapImage(root, categories, source, prefix);
             return root;
         }
 
@@ -302,6 +303,40 @@ namespace WzComparerR2.UnityLib.Classic
                 }
                 string groupName = (id / 10000000).ToString(CultureInfo.InvariantCulture);
                 GetOrAddChild(mapImg, groupName).Nodes.Add(node);
+            }
+        }
+
+        /// <summary>
+        /// <c>String/&lt;region&gt;/WorldMap</c> はワールドマップ id をキーにした単一テーブルで、
+        /// 値は <c>&lt;index&gt;_toolTip</c> / <c>&lt;index&gt;_title</c> / <c>&lt;index&gt;_desc</c> です。
+        /// WZ の <c>String.wz/WorldMap.img</c> と同じ形（ルートは <c>0</c>、それ以外は 3 桁ゼロ埋め）に揃えます。
+        /// </summary>
+        private static void BuildWorldMapImage(
+            Wz_Node root, Dictionary<string, Wz_Node> categories,
+            ClassicWzSource source, string prefix)
+        {
+            string worldMapKey = prefix + "WorldMap";
+            if (!source.Catalog.Entries.ContainsKey(worldMapKey))
+            {
+                return;
+            }
+
+            Wz_Node table = new Wz_Node("WorldMap");
+            TryAppendEntryContents(table, source, worldMapKey);
+
+            // WorldMap は <id>/values だけを持ち、WZ の <id>/name はありません。
+            Wz_Node worldMapImg = GetOrCreateCategory(root, categories, "WorldMap");
+            foreach (Wz_Node node in new List<Wz_Node>(table.Nodes))
+            {
+                int id;
+                if (!int.TryParse(node.Text, NumberStyles.None, CultureInfo.InvariantCulture, out id))
+                {
+                    continue;
+                }
+                node.Text = id == 0
+                    ? "0"
+                    : id.ToString("000", CultureInfo.InvariantCulture);
+                worldMapImg.Nodes.Add(node);
             }
         }
 
