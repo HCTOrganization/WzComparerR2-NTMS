@@ -230,18 +230,18 @@ namespace WzComparerR2.CharaSimControl
             if (gear.Props.TryGetValue(GearPropType.level, out value))
             {
                 g.DrawImage(Resource.ToolTip_Equip_GrowthEnabled_itemLEV, 96, picHeight);
-                GearGraphics.DrawGearGrowthNumber(g, 148, picHeight, (value == -1) ? "m" : value.ToString(), true);
+                GearGraphics.DrawGearGrowthNumber(g, 157, picHeight, (value == -1) ? "m" : value.ToString(), true);
                 picHeight += 12;
                 g.DrawImage(Resource.ToolTip_Equip_GrowthEnabled_itemEXP, 96, picHeight);
-                GearGraphics.DrawGearGrowthNumber(g, 148, picHeight, (value == -1) ? "m" : "0%", true);
+                GearGraphics.DrawGearGrowthNumber(g, 157, picHeight, (value == -1) ? "m" : "0%", true);
             }
             else
             {
                 g.DrawImage(Resource.ToolTip_Equip_GrowthDisabled_itemLEV, 96, picHeight);
-                g.DrawImage(Resource.ToolTip_Equip_GrowthDisabled_none, 148, picHeight + 3);
+                g.DrawImage(Resource.ToolTip_Equip_GrowthDisabled_none, 157, picHeight + 3);
                 picHeight += 12;
                 g.DrawImage(Resource.ToolTip_Equip_GrowthDisabled_itemEXP, 96, picHeight);
-                g.DrawImage(Resource.ToolTip_Equip_GrowthDisabled_none, 148, picHeight + 3);
+                g.DrawImage(Resource.ToolTip_Equip_GrowthDisabled_none, 157, picHeight + 3);
             }
             picHeight += 12;
             if (gear.Props.TryGetValue(GearPropType.durability, out value))
@@ -696,42 +696,42 @@ namespace WzComparerR2.CharaSimControl
             isGetProp = gear.Props.TryGetValue(GearPropType.reqLevel, out value);
             can = (charStat == null || charStat.Level >= value);
             g.DrawImage(can ? Resource.ToolTip_Equip_Can_reqLEV : Resource.ToolTip_Equip_Cannot_reqLEV, 96, picHeight);
-            GearGraphics.DrawGearDetailNumber(g, 144, picHeight, isGetProp ? value.ToString() : "-", can);
+            GearGraphics.DrawGearDetailNumber(g, 153, picHeight, isGetProp ? value.ToString() : "-", can);
             picHeight += 12;
 
             //力量要求
             isGetProp = gear.Props.TryGetValue(GearPropType.reqSTR, out value);
             can = (charStat == null || charStat.Strength.GetSum() >= value);
             g.DrawImage(can ? Resource.ToolTip_Equip_Can_reqSTR : Resource.ToolTip_Equip_Cannot_reqSTR, 96, picHeight);
-            GearGraphics.DrawGearDetailNumber(g, 144, picHeight, isGetProp ? value.ToString() : "-", can);
+            GearGraphics.DrawGearDetailNumber(g, 153, picHeight, isGetProp ? value.ToString() : "-", can);
             picHeight += 12;
 
             //敏捷要求
             isGetProp = gear.Props.TryGetValue(GearPropType.reqDEX, out value);
             can = (charStat == null || charStat.Dexterity.GetSum() >= value);
             g.DrawImage(can ? Resource.ToolTip_Equip_Can_reqDEX : Resource.ToolTip_Equip_Cannot_reqDEX, 96, picHeight);
-            GearGraphics.DrawGearDetailNumber(g, 144, picHeight, isGetProp ? value.ToString() : "-", can);
+            GearGraphics.DrawGearDetailNumber(g, 153, picHeight, isGetProp ? value.ToString() : "-", can);
             picHeight += 12;
 
             //智力要求
             isGetProp = gear.Props.TryGetValue(GearPropType.reqINT, out value);
             can = (charStat == null || charStat.Intelligence.GetSum() >= value);
             g.DrawImage(can ? Resource.ToolTip_Equip_Can_reqINT : Resource.ToolTip_Equip_Cannot_reqINT, 96, picHeight);
-            GearGraphics.DrawGearDetailNumber(g, 144, picHeight, isGetProp ? value.ToString() : "-", can);
+            GearGraphics.DrawGearDetailNumber(g, 153, picHeight, isGetProp ? value.ToString() : "-", can);
             picHeight += 12;
 
             //运气要求
             isGetProp = gear.Props.TryGetValue(GearPropType.reqLUK, out value);
             can = (charStat == null || charStat.Luck.GetSum() >= value);
             g.DrawImage(can ? Resource.ToolTip_Equip_Can_reqLUK : Resource.ToolTip_Equip_Cannot_reqLUK, 96, picHeight);
-            GearGraphics.DrawGearDetailNumber(g, 144, picHeight, isGetProp ? value.ToString() : "-", can);
+            GearGraphics.DrawGearDetailNumber(g, 153, picHeight, isGetProp ? value.ToString() : "-", can);
             picHeight += 12;
 
             //人气要求
             isGetProp = gear.Props.TryGetValue(GearPropType.reqPOP, out value);
             can = (charStat == null || charStat.Pop >= value);
             g.DrawImage(can ? Resource.ToolTip_Equip_Can_reqPOP : Resource.ToolTip_Equip_Cannot_reqPOP, 96, picHeight);
-            GearGraphics.DrawGearDetailNumber(g, 144, picHeight, isGetProp ? value.ToString() : "-", can);
+            GearGraphics.DrawGearDetailNumber(g, 153, picHeight, isGetProp ? value.ToString() : "-", can);
             picHeight += 12;
         }
 
