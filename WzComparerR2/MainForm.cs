@@ -1693,7 +1693,7 @@ namespace WzComparerR2
         {
             using (FolderBrowserDialog dlg = new FolderBrowserDialog())
             {
-                dlg.Description = "請選擇 MapleStory Classic World 的客戶端資料夾，或包含 *.bundle 的資料夾（例如 StreamingAssets/aa）。";
+                dlg.Description = "請選擇「Maplestory_Classic_Data」資料夾，或包含 *.bundle 的資料夾（例如 StreamingAssets/aa）。";
                 dlg.ShowNewFolderButton = false;
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
