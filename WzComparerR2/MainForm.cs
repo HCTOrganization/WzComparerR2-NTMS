@@ -320,6 +320,7 @@ namespace WzComparerR2
             tooltipQuickView.GearRenderLegacy.ShowObjectID = Setting.Gear.ShowID;
             tooltipQuickView.GearRenderLegacy.ShowSoldPrice = Setting.Gear.ShowSoldPrice;
             tooltipQuickView.GearRenderLegacy.ShowCashPurchasePrice = Setting.Gear.ShowCashPurchasePrice;
+            tooltipQuickView.GearRenderLegacy.ShowMedalTag = Setting.Gear.ShowMedalTag;
             tooltipQuickView.GearRender3.ShowObjectID = Setting.Gear.ShowID;
             tooltipQuickView.GearRender3.ShowSpeed = Setting.Gear.ShowWeaponSpeed;
             tooltipQuickView.GearRender3.ShowLevelOrSealed = Setting.Gear.ShowLevelOrSealed;
@@ -7812,6 +7813,7 @@ namespace WzComparerR2
                     comparer.ShowObjectID = chkShowObjectID.Checked;
                     comparer.ShowChangeType = chkShowChangeType.Checked;
                     comparer.ShowPrice = chkShowPrice.Checked;
+                    comparer.ShowMedalTag = CharaSimConfig.Default.Gear.ShowMedalTag;
                     comparer.ShowLinkedTamingMob = chkShowLinkedTamingMob.Checked;
                     comparer.SkipKMSContent = chkSkipKMSContent.Checked;
                     comparer.SkipGodChangseopDuplicatedNodes = chkSkipGodChangseopDuplicatedNodes.Checked;

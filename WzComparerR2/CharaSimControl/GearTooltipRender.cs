@@ -6,6 +6,7 @@ using System.Text;
 using CharaSimResource;
 using WzComparerR2.Common;
 using WzComparerR2.CharaSim;
+using WzComparerR2.WzLib;
 
 namespace WzComparerR2.CharaSimControl
 {
@@ -38,6 +39,9 @@ namespace WzComparerR2.CharaSimControl
 
         /// <summary>查詢購買價格時使用的 Commodity 價格欄位。</summary>
         public int LoadedCommoditiesSlot { get; set; }
+
+        /// <summary>勲章（メダル）のプレビューを表示するかどうか。</summary>
+        public bool ShowMedalTag { get; set; } = true;
 
         public override Bitmap Render()
         {
@@ -429,11 +433,25 @@ namespace WzComparerR2.CharaSimControl
                 picHeight += 5;
             }
 
+            //徽章プレビュー
+            Wz_Node medalResNode = null;
+            bool willDrawMedalTag = ShowMedalTag
+                && gear.Sample.Bitmap == null
+                && gear.Props.TryGetValue(GearPropType.medalTag, out value)
+                && TryGetMedalResource(value, 0, out medalResNode);
+            if (willDrawMedalTag)
+            {
+                picHeight += 4;
+                string medalName = GearGraphics.GetNameTagString(sr);
+                GearGraphics.DrawNameTag(g, medalResNode, medalName.Replace("의 훈장", "").Replace("の勲章", ""), 252, ref picHeight);
+                picHeight += 4;
+            }
+
             //绘制desc
             if (!string.IsNullOrEmpty(sr.Desc))
             {
                 if (optionCount > 0) picHeight -= 2;
-                picHeight -= 3;
+                if (!willDrawMedalTag) picHeight -= 3;
                 GearGraphics.DrawString(g, sr.Desc, GearGraphics.ItemDetailFont, 8, 236, ref picHeight, 16);
                 picHeight += 5;
             }
@@ -750,6 +768,26 @@ namespace WzComparerR2.CharaSimControl
                 .Replace("防禦力 : ", "物理防禦力: ")
                 .Replace("最大HP : ", "MaxHP : ")
                 .Replace("最大MP : ", "MaxMP : ");
+        }
+
+        private bool TryGetMedalResource(int medalTag, int type, out Wz_Node resNode)
+        {
+            switch (type)
+            {
+                case 0:
+                    resNode = PluginBase.PluginManager.FindWz("UI/NameTag.img/medal/" + medalTag);
+                    break;
+                case 1:
+                    resNode = PluginBase.PluginManager.FindWz("UI/ChatBalloon.img/" + medalTag);
+                    break;
+                case 2:
+                    resNode = PluginBase.PluginManager.FindWz("UI/NameTag.img/" + medalTag);
+                    break;
+                default:
+                    resNode = null;
+                    break;
+            }
+            return resNode != null;
         }
 
         private Image GetAdditionalOptionIcon(GearGrade grade)

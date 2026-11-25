@@ -100,6 +100,9 @@ namespace WzComparerR2.Comparer
         public bool ShowObjectID { get; set; }
         public bool ShowChangeType { get; set; }
         public bool ShowPrice { get; set; }
+
+        /// <summary>装備ツールチップに勲章プレビューを表示するかどうか。</summary>
+        public bool ShowMedalTag { get; set; } = true;
         public bool ShowLinkedTamingMob { get; set; }
         public bool SkipKMSContent { get; set; }
         public bool DownloadKMSContentDB { get; set; }
@@ -2154,6 +2157,7 @@ namespace WzComparerR2.Comparer
                 GearTooltipRender gearRender = new GearTooltipRender();
                 gearRender.ShowSoldPrice = this.ShowPrice;
                 gearRender.ShowCashPurchasePrice = this.ShowPrice;
+                gearRender.ShowMedalTag = this.ShowMedalTag;
                 gearRender.LoadedCommoditiesSlot = i;
                 return gearRender;
             });
